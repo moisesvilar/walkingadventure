@@ -1,0 +1,5 @@
+# Datos pesados locales (no van al repo)
+data/
+overpass-db/
+.cache/
+.DS_Store

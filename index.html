@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walking Adventure — Generador de mundo v0.1</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Walking Adventure · Generador de mundo</h1>
+  <span class="subtitle">v0.1 — mapa de fantasía a partir del mundo real</span>
+</header>
+
+<!-- FASE 1: elegir ubicación y duración -->
+<section id="phase-pick">
+  <div class="pick-toolbar">
+    <button id="btn-geolocate">📍 Usar mi ubicación</button>
+    <span class="hint">…o arrastra el marcador / haz clic en el mapa</span>
+    <div class="preset-group" title="¿Cuánto quieres que dure tu aventura?">
+      <button class="preset-btn" data-preset="paseo">🚶 Paseo <small>~1 h</small></button>
+      <button class="preset-btn" data-preset="aventura">⚔️ Aventura <small>~2 h</small></button>
+      <button class="preset-btn" data-preset="jornada">🏕️ Jornada <small>~3 h</small></button>
+    </div>
+    <details class="advanced">
+      <summary>Avanzado</summary>
+      <label class="radius-label">Radio
+        <input id="radius-input" type="number" min="0.1" max="30" step="0.1" value="1.2"> km
+      </label>
+    </details>
+    <span id="coords-label" class="coords"></span>
+    <button id="btn-generate" class="primary">⚔️ Generar mundo aquí</button>
+  </div>
+  <div id="picker-map"></div>
+</section>
+
+<!-- FASE 2: mapa generado -->
+<section id="phase-map" hidden>
+  <div class="map-toolbar">
+    <button id="btn-back">← Cambiar ubicación</button>
+    <button id="btn-reseed">🎲 Otra variante</button>
+    <button id="btn-world" hidden>🗺️ Mundo completo</button>
+    <span id="world-title" class="world-title"></span>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loading-status">Preparando…</p>
+  </div>
+
+  <div id="map-layout" hidden>
+    <div id="canvas-wrap">
+      <canvas id="fantasy-map" width="1300" height="1300"></canvas>
+    </div>
+    <aside id="sidebar">
+      <div id="detail-card" hidden></div>
+      <div id="settlement-list"></div>
+      <div id="stats" class="stats"></div>
+    </aside>
+  </div>
+
+  <div id="error-box" hidden>
+    <p id="error-msg"></p>
+    <button id="btn-retry">Reintentar</button>
+  </div>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

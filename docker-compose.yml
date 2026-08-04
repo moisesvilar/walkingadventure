@@ -1,0 +1,38 @@
+# Overpass API local con el extracto de España (Geofabrik).
+#
+#   docker compose up -d      # primera vez: descarga ~1,2 GB + importación (horas)
+#   docker compose logs -f    # seguir el progreso de la importación
+#
+# Cuando termine, responde en http://localhost:12345/api/interpreter y el proxy
+# (server.mjs) lo usa automáticamente como primer upstream. Mientras se importa,
+# el proxy simplemente cae a los mirrors públicos.
+#
+# La base de datos vive en ./overpass-db (decenas de GB). Para empezar de cero:
+# docker compose down && rm -rf overpass-db
+
+services:
+  overpass:
+    image: wiktorn/overpass-api
+    container_name: overpass-spain
+    environment:
+      OVERPASS_META: "no"
+      OVERPASS_MODE: init
+      # El extracto se descarga fuera del contenedor (curl -C - reanudable) y se
+      # monta como fichero: la descarga directa desde Geofabrik se cortaba y el
+      # contenedor la reiniciaba desde cero en bucle.
+      OVERPASS_PLANET_URL: file:///data/spain-latest.osm.pbf
+      # La importación exige XML .bz2; este paso convierte el PBF con osmium
+      # (receta documentada de la propia imagen).
+      OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
+      OVERPASS_DIFF_URL: https://download.geofabrik.de/europe/spain-updates/
+      OVERPASS_RULES_LOAD: "10"
+      # flush-size bajo: menos RAM durante la importación (con 16, el OOM killer
+      # mató update_database en una VM de 6 GB)
+      OVERPASS_FLUSH_SIZE: "4"
+      OVERPASS_STOP_AFTER_INIT: "false"
+    ports:
+      - "12345:80"
+    volumes:
+      - ./overpass-db:/db
+      - ./data:/data:ro
+    restart: unless-stopped
