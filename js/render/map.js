@@ -181,7 +181,7 @@ function drawRouteLabel(ctx, r, px, T) {
       ctx.translate(mx, my);
       ctx.rotate(ang);
       if (T.routeLabel.mode === 'ribbon') drawRibbon(ctx, r.name, 0, -14, T);
-      else drawTextLabel(ctx, T, r.name, 0, -6, LABEL_SIZE.ruta, { baseline: 'bottom' });
+      else drawTextLabel(ctx, T, r.name, 0, -6, LABEL_SIZE.ruta, { baseline: 'bottom', rol: 'ruta' });
       ctx.restore();
       return;
     }
@@ -218,7 +218,7 @@ function drawParajes(ctx, parajes, px, focusParaje, hits, T) {
   for (const p of parajes) {
     const q = px(p);
     drawParajeGlyph(ctx, p.type, q, p === focusParaje, T);
-    drawTextLabel(ctx, T, p.name, q.x, q.y + 12, LABEL_SIZE.paraje);
+    drawTextLabel(ctx, T, p.name, q.x, q.y + 12, LABEL_SIZE.paraje, { rol: 'paraje' });
     hits.push({ x: q.x, y: q.y, r: 16, paraje: p });
   }
 }
@@ -416,7 +416,7 @@ function drawServiceMarkers(ctx, settlement, px, T) {
     ctx.fillStyle = T.glyph.stroke;
     ctx.fill();
 
-    drawTextLabel(ctx, T, p.name, q.x, q.y + 6, LABEL_SIZE.servicio);
+    drawTextLabel(ctx, T, p.name, q.x, q.y + 6, LABEL_SIZE.servicio, { rol: 'servicio' });
   }
 }
 
@@ -430,6 +430,10 @@ function labelFont(T, size, opts = {}) {
 
 function drawTextLabel(ctx, T, text, x, y, size, opts = {}) {
   const t = T.label.upper ? text.toUpperCase() : text;
+  if (T.placa && opts.rol && T.label.placa.includes(opts.rol)) {
+    drawPlacaLabel(ctx, T, t, x, y, size, opts);
+    return;
+  }
   ctx.save();
   ctx.font = labelFont(T, size, opts);
   if ('letterSpacing' in ctx) ctx.letterSpacing = `${T.label.tracking}px`;
@@ -439,10 +443,48 @@ function drawTextLabel(ctx, T, text, x, y, size, opts = {}) {
   if (opts.halo !== false && T.label.haloW > 0) {
     ctx.strokeStyle = T.label.halo;
     ctx.lineWidth = T.label.haloW;
-    ctx.strokeText(t, x, y);
+    for (let i = 0; i < T.label.haloPasadas; i++) ctx.strokeText(t, x, y);
   }
   ctx.fillStyle = opts.color ?? T.label.color;
   ctx.fillText(t, x, y);
+  ctx.restore();
+}
+
+// Placa de pergamino: la cartela del título reducida al tamaño de un nombre.
+// `x, y` mantienen el contrato de drawTextLabel —centro horizontal y el borde que
+// diga `baseline`—, así que la caja cuelga del punto donde antes iba el texto.
+function drawPlacaLabel(ctx, T, t, x, y, size, opts) {
+  const P = T.placa;
+  ctx.save();
+  ctx.font = labelFont(T, size, opts);
+  if ('letterSpacing' in ctx) ctx.letterSpacing = `${T.label.tracking}px`;
+  // measureText incluye el tracking que sobra tras la última letra: descontarlo o
+  // la caja sale descentrada hacia la derecha.
+  const w = ctx.measureText(t).width - ('letterSpacing' in ctx ? T.label.tracking : 0);
+  const h = Math.round(size * T.label.scale) + P.padY * 2;
+  const bx = x - w / 2 - P.padX, bw = w + P.padX * 2;
+  const baseline = opts.baseline ?? 'top';
+  const by = baseline === 'bottom' ? y - h : baseline === 'middle' ? y - h / 2 : y;
+
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(bx, by, bw, h, P.radio);
+  else ctx.rect(bx, by, bw, h);
+  if (P.sombra) {
+    ctx.shadowColor = P.sombra;
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 1.5;
+  }
+  ctx.fillStyle = P.fill;
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = P.border;
+  ctx.lineWidth = P.lw;
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = opts.color ?? P.color ?? T.label.color;
+  ctx.fillText(t, x, by + h / 2 + 0.5);
   ctx.restore();
 }
 
@@ -1150,7 +1192,7 @@ const LABEL_OPTS = {
 
 function drawLabel(ctx, s, q, size, T) {
   if (s.type === 'granja') return; // demasiado ruido; se ven en el panel lateral
-  drawTextLabel(ctx, T, s.name, q.x, q.y + size * 0.75 + 3, LABEL_SIZE[s.type], LABEL_OPTS[s.type]);
+  drawTextLabel(ctx, T, s.name, q.x, q.y + size * 0.75 + 3, LABEL_SIZE[s.type], { ...LABEL_OPTS[s.type], rol: 'nucleo' });
 }
 
 // --- marco ---

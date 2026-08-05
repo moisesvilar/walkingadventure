@@ -33,7 +33,11 @@ const DEFAULTS = {
   route: { casing: '#4a3a22', casingW: 5, fill: '#c9a86a', fillW: 2.6, fallback: 'rgba(74,58,34,0.7)' },
   street: { major: 'rgba(122,94,58,0.5)', minor: 'rgba(122,94,58,0.45)' },
   glyph: { fill: '#d9c896', stroke: '#4a3a22', lw: 1.4, roof: null, tower: null, wall: 'rgba(217,200,150,0.9)' },
-  label: { family: FELL, italic: true, weight: '', upper: false, tracking: 0, scale: 1, color: '#4a3a22', halo: 'rgba(233,220,182,0.9)', haloW: 4 },
+  // `placa` lista los roles de rótulo que van sobre caja ('nucleo', 'paraje',
+  // 'servicio', 'ruta'); vacía, todos se resuelven con halo. `haloPasadas` repite el
+  // trazo: con halo opaco una sola pasada deja el borde lavado por el antialiasing.
+  label: { family: FELL, italic: true, weight: '', upper: false, tracking: 0, scale: 1, color: '#4a3a22', halo: 'rgba(233,220,182,0.9)', haloW: 4, haloPasadas: 1, placa: [] },
+  placa: null,          // caja bajo el rótulo: { fill, border, lw, padX, padY, radio, color, sombra }
   routeLabel: { mode: 'plain' },                       // 'plain' | 'ribbon'
   cartouche: { mode: 'roundrect', pos: 'top', family: MEDIEVAL, size: 30, fill: '#e9dcb6', color: null, border: null, tracking: 0 },
   frame: { mode: 'ticks', color: null, gold: '#8a6d34' },
@@ -188,7 +192,11 @@ const reino = merge({
   street: { major: 'rgba(60,50,35,0.5)', minor: 'rgba(60,50,35,0.3)' },
   // marcadores provisionales: un punto rojo por núcleo, del tamaño de su rango
   glyph: { mode: 'punto', fill: '#c62828', stroke: '#7d1414', lw: 1.6 },
-  label: { family: CINZEL, italic: false, upper: true, tracking: 1.4, scale: 0.92, color: '#1e2b18', halo: 'rgba(255,255,255,0.85)', haloW: 5 },
+  // Jerarquía de rótulo: el núcleo va sobre placa de pergamino —la misma cartela del
+  // título en pequeño—, el paraje solo con halo. Además de legibilidad da lo que el
+  // halo blanco no daba: pueblo y paraje se distinguen sin leer el nombre.
+  label: { family: CINZEL, italic: false, upper: true, tracking: 1.4, scale: 0.92, color: '#14200f', halo: '#efe3c0', haloW: 6, haloPasadas: 2, placa: ['nucleo'] },
+  placa: { fill: '#efe3c0', border: '#8a6d34', lw: 1.2, padX: 9, padY: 5, radio: 3, color: '#1e2b18', sombra: 'rgba(18,30,14,0.32)' },
   cartouche: { mode: 'banner', pos: 'top', family: CINZEL, size: 28, fill: '#efe3c0', border: '#8a6d34', tracking: 3 },
   frame: { mode: 'ornate', color: '#8a6d34', gold: '#c8a24a' },
   compass: { mode: 'rose', corner: 'se', scale: 1.25, letters: true },
