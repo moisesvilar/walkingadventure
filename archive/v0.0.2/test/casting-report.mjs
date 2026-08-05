@@ -1,19 +1,19 @@
 // Informe de casting (pendiente 6 de game-design/quests.md): mide qué
 // plantillas castean poco y por qué, sobre una batería de mundos sintéticos y
-// de mundos REALES construidos con la misma tubería que la app (app/js/world/build.js).
+// de mundos REALES construidos con la misma tubería que la app (js/world/build.js).
 //
 //   node test/casting-report.mjs        (los mundos reales requieren `node server.mjs` corriendo)
 
 globalThis.__WA_PROXY__ = process.env.WA_PROXY ?? 'http://localhost:8137/api/overpass';
 
-const { buildWorld } = await import('../app/js/world/build.js');
-const { fetchGeoFeatures, fetchPois } = await import('../app/js/data/overpass.js');
-const { generateSettlements } = await import('../app/js/world/settlements.js');
-const { buildRoutes } = await import('../app/js/world/routes.js');
-const { generateParajes } = await import('../app/js/world/parajes.js');
-const { castAll } = await import('../app/js/quests/casting.js');
-const { TEMPLATES } = await import('../app/js/quests/templates.js');
-const { namesFor } = await import('../app/js/names/index.js');
+const { buildWorld } = await import('../js/world/build.js');
+const { fetchGeoFeatures, fetchPois } = await import('../js/data/overpass.js');
+const { generateSettlements } = await import('../js/world/settlements.js');
+const { buildRoutes } = await import('../js/world/routes.js');
+const { generateParajes } = await import('../js/world/parajes.js');
+const { castAll } = await import('../js/quests/casting.js');
+const { TEMPLATES } = await import('../js/quests/templates.js');
+const { namesFor } = await import('../js/names/index.js');
 
 const es = namesFor('es');
 const stats = new Map(TEMPLATES.map((t) => [t.id, { ok: 0, total: 0, motivos: new Map() }]));

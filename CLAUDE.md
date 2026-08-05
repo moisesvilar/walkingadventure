@@ -6,7 +6,7 @@ Guía para trabajar en este repositorio. Complementa al `README.md` (que describ
 
 Prototipo del generador de mundo de **Walking Adventure**: un RPG que se juega caminando físicamente por el mundo real. A partir de unas coordenadas reales y datos de OpenStreetMap (vía Overpass), genera un mapa de fantasía determinista — núcleos de población, servicios, parajes, rutas nombradas y quests casteadas — donde cada elemento ficticio está **anclado a un lugar real**.
 
-Estado: v0.1, prototipo del generador. No hay aún juego, cuentas, personajes ni NPCs; la visión completa está en `starting.md` (bitácora de iteraciones, orden cronológico) y las decisiones de diseño cerradas en `game-design/`.
+Estado: v0.1, prototipo del generador. No hay aún juego, cuentas, personajes ni NPCs; la visión completa está en `docs/starting.md` (bitácora de iteraciones, orden cronológico) y las decisiones de diseño cerradas en `game-design/`.
 
 ## Comandos
 
@@ -17,13 +17,15 @@ node test/casting-report.mjs # informe de casting sobre mundos sintéticos + rea
 scripts/overpass-setup.sh    # deja el Overpass local listo; idempotente, comprueba y sale si ya sirve
 ```
 
-No hay `package.json`, ni build, ni dependencias, ni linter, ni formateador: JavaScript ESM puro sobre Node nativo y navegador. Leaflet y las fuentes se cargan por CDN en `index.html`. No introduzcas un toolchain sin que el usuario lo pida.
+No hay `package.json`, ni build, ni dependencias, ni linter, ni formateador: JavaScript ESM puro sobre Node nativo y navegador. Leaflet y las fuentes se cargan por CDN en `app/index.html`. No introduzcas un toolchain sin que el usuario lo pida.
 
 Hooks de depuración en la consola del navegador: `__wa.go(lat, lon)` genera un mundo en coordenadas exactas, `__wa.preset('paseo'|'aventura'|'jornada'|'custom')` cambia el modo, `__wa.demo()` genera un mundo sintético con terreno sin tocar Overpass (útil cuando Overpass está saturado o para probar el render), `__wa.style('clasico'|'pergamino'|'cuento'|'atlas'|'reino')` cambia el estilo de pintado y `__wa.world()` devuelve el mundo actual.
 
 ## Arquitectura
 
-Tubería de generación, en orden. `js/world/build.js` es la orquestación canónica y la comparten la app y las herramientas headless: **misma tubería, mismos mundos**. Si añades una fase, va ahí, no en `main.js`.
+Estructura del repo: `app/` es la aplicación (`index.html`, `style.css`, `js/`) y lo único que sirve `server.mjs`, que se queda en la raíz porque además es el proxy de Overpass y eso no es front. `docs/` es el material escrito no normativo (bitácora, ideas, notas), `game-design/` son las decisiones cerradas y sigue arriba a propósito —el diseño manda sobre el código y lo citan los comentarios de varios módulos—, y `test/`, `scripts/` y `archive/` mantienen su sitio.
+
+Tubería de generación, en orden. `app/js/world/build.js` es la orquestación canónica y la comparten la app y las herramientas headless: **misma tubería, mismos mundos**. Si añades una fase, va ahí, no en `main.js`.
 
 ```
 fetchData (Overpass) → parseGeo/parsePois → [costa: seaMask + radio dinámico]
@@ -31,14 +33,14 @@ fetchData (Overpass) → parseGeo/parsePois → [costa: seaMask + radio dinámic
   → pegarAViario + linkParajes → castAll → renderMap
 ```
 
-- `js/core/` — `rng.js` (RNG determinista mulberry32 con semilla de texto), `geo.js` (proyección local a metros, distancias punto-polilínea, intersección de segmentos).
-- `js/data/overpass.js` — consultas Overpass (terreno, POIs, callejero) y parseo a features en metros. **Ver "El fichero que falta" más abajo.**
-- `js/world/` — `seamask.js` (máscara tierra/mar por lado de costa + radio dinámico costero), `settlements.js` (cupos exactos por radio, anclajes únicos, servicios), `routes.js` (grafo viario cosido, Dijkstra + MST, ramales a parajes, nombres), `parajes.js` (8 tipos de hito no habitado con escenas ponderadas), `build.js` (orquestación).
-- `js/names/` — paquetes de idioma `es` y `gl` con **interfaz común** (`townName`, `farmName`, `poiName`, `roadName`, `directionWord`, `parajeName`, `worldTitle`). El idioma sale de la ubicación del mundo (`localeFor`: bounding box aproximado de Galicia → gallego). Añadir un idioma = añadir un fichero que implemente la interfaz completa.
-- `js/quests/` — `templates.js` (plantillas-arquetipo con roles abstractos y textos de fallback), `casting.js` (backtracking determinista que resuelve roles contra el mundo concreto; si falla, explica el motivo).
-- `js/render/map.js` — todo el dibujo en canvas, por capas (papel, mar, bosques, lagos, ríos, costa, callejero, calzadas, picos, parajes, núcleos, marcadores, marco/brújula/cartela/escala). No contiene ni un color ni un grosor propios: todo sale del estilo.
-- `js/render/styles.js` — los cinco estilos de pintado, cada uno un objeto de datos fusionado sobre `DEFAULTS`. El de por defecto es `reino`, que **ya no es el mapa ilustrado**: es el mapa base — verde y azul planos, costa y ríos gruesos, calzadas y puntos rojos —; `clasico`, `pergamino`, `cuento` y `atlas` conservan su estética. El estilo es **solo** pintado: cambiarlo repinta el mundo que ya está en pantalla y nunca resiembra. Añadir uno = añadir un objeto aquí (el selector de la UI se construye desde `STYLES`). Dos trampas al fusionar: `label` es la tipografía de los rótulos y el nombre visible del estilo es `title`; y `capas` decide qué se dibuja (bosques, picos, carreteras, lagos, rótulos de camino), que es cómo el mapa base se queda limpio sin borrar el código que usan los demás. Los rótulos se resuelven de dos maneras y lo decide el estilo, no `map.js`: `label.placa` lista los roles que van sobre caja de pergamino (`'nucleo'`, `'paraje'`, `'servicio'`, `'ruta'`) y el grupo `placa` describe esa caja; el resto se resuelve con halo (`label.halo`, `haloW`, `haloPasadas`). Reino usa la jerarquía placa-en-núcleos + halo-en-parajes, que además de legibilidad es lo que distingue de un vistazo un pueblo de un paraje.
-- `js/main.js` — solo UI y orquestación: fases, presets, panel lateral, zoom, caché en memoria por consulta.
+- `app/js/core/` — `rng.js` (RNG determinista mulberry32 con semilla de texto), `geo.js` (proyección local a metros, distancias punto-polilínea, intersección de segmentos).
+- `app/js/data/overpass.js` — consultas Overpass (terreno, POIs, callejero) y parseo a features en metros. **Ver "El fichero que falta" más abajo.**
+- `app/js/world/` — `seamask.js` (máscara tierra/mar por lado de costa + radio dinámico costero), `settlements.js` (cupos exactos por radio, anclajes únicos, servicios), `routes.js` (grafo viario cosido, Dijkstra + MST, ramales a parajes, nombres), `parajes.js` (8 tipos de hito no habitado con escenas ponderadas), `build.js` (orquestación).
+- `app/js/names/` — paquetes de idioma `es` y `gl` con **interfaz común** (`townName`, `farmName`, `poiName`, `roadName`, `directionWord`, `parajeName`, `worldTitle`). El idioma sale de la ubicación del mundo (`localeFor`: bounding box aproximado de Galicia → gallego). Añadir un idioma = añadir un fichero que implemente la interfaz completa.
+- `app/js/quests/` — `templates.js` (plantillas-arquetipo con roles abstractos y textos de fallback), `casting.js` (backtracking determinista que resuelve roles contra el mundo concreto; si falla, explica el motivo).
+- `app/js/render/map.js` — todo el dibujo en canvas, por capas (papel, mar, bosques, lagos, ríos, costa, callejero, calzadas, picos, parajes, núcleos, marcadores, marco/brújula/cartela/escala). No contiene ni un color ni un grosor propios: todo sale del estilo.
+- `app/js/render/styles.js` — los cinco estilos de pintado, cada uno un objeto de datos fusionado sobre `DEFAULTS`. El de por defecto es `reino`, que **ya no es el mapa ilustrado**: es el mapa base — verde y azul planos, costa y ríos gruesos, calzadas y puntos rojos —; `clasico`, `pergamino`, `cuento` y `atlas` conservan su estética. El estilo es **solo** pintado: cambiarlo repinta el mundo que ya está en pantalla y nunca resiembra. Añadir uno = añadir un objeto aquí (el selector de la UI se construye desde `STYLES`). Dos trampas al fusionar: `label` es la tipografía de los rótulos y el nombre visible del estilo es `title`; y `capas` decide qué se dibuja (bosques, picos, carreteras, lagos, rótulos de camino), que es cómo el mapa base se queda limpio sin borrar el código que usan los demás. Los rótulos se resuelven de dos maneras y lo decide el estilo, no `map.js`: `label.placa` lista los roles que van sobre caja de pergamino (`'nucleo'`, `'paraje'`, `'servicio'`, `'ruta'`) y el grupo `placa` describe esa caja; el resto se resuelve con halo (`label.halo`, `haloW`, `haloPasadas`). Reino usa la jerarquía placa-en-núcleos + halo-en-parajes, que además de legibilidad es lo que distingue de un vistazo un pueblo de un paraje.
+- `app/js/main.js` — solo UI y orquestación: fases, presets, panel lateral, zoom, caché en memoria por consulta.
 - `server.mjs` — estáticos + proxy `/api/overpass` con caché en disco permanente, cadena de upstreams: Overpass local en Docker → 3 mirrors públicos.
 
 ## Estado compartido entre worktrees
@@ -55,13 +57,13 @@ Corolario: no metas el `.pbf`, la base de datos ni la caché en el repo "para te
 
 ## Reglas del proyecto
 
-**Determinismo por encima de todo.** Mismo `seed` (`"lat,lon#n"`) + mismos datos OSM → mundo idéntico, byte a byte. Nunca uses `Math.random()`, `Date.now()` ni iteración sobre `Set`/`Map` con orden dependiente de inserción no controlada dentro de la generación: usa siempre `makeRng(seed + ':sufijo')` de `js/core/rng.js`, con un sufijo distinto por fase para que tocar una fase no desplace el azar de las demás. `test/headless.mjs` verifica esto y es la red de seguridad más importante del repo.
+**Determinismo por encima de todo.** Mismo `seed` (`"lat,lon#n"`) + mismos datos OSM → mundo idéntico, byte a byte. Nunca uses `Math.random()`, `Date.now()` ni iteración sobre `Set`/`Map` con orden dependiente de inserción no controlada dentro de la generación: usa siempre `makeRng(seed + ':sufijo')` de `app/js/core/rng.js`, con un sufijo distinto por fase para que tocar una fase no desplace el azar de las demás. `test/headless.mjs` verifica esto y es la red de seguridad más importante del repo.
 
 **Todo elemento de fantasía se ancla a un lugar real.** Los anclajes son de uso único (mecanismo `taken`): un POI real alimenta un núcleo, un servicio o un paraje, nunca dos. `generateSettlements` devuelve `freeAnchors` precisamente para que `generateParajes` reparta lo que sobra.
 
 **El tipo de fantasía está desacoplado del anclaje real** (`game-design/parajes.md`): una "ruina" puede ser un chiringuito. Hay un sesgo suave cuando el lugar real pega con el tipo, pero no es una regla dura. No lo conviertas en un mapeo 1:1 de tags de OSM.
 
-**El diseño manda sobre el código.** `game-design/parametros-mundo.md`, `parajes.md` y `quests.md` contienen decisiones cerradas (cupos por radio, presets de duración, taxonomía de 8 parajes con pesos de escena, arquetipos de quest). Antes de cambiar un cupo, un peso o una constante de dimensionado, lee el documento correspondiente: casi siempre hay una justificación de ritmo de juego detrás. Si el cambio contradice el diseño, actualiza también el documento — y anota la iteración en `starting.md`.
+**El diseño manda sobre el código.** `game-design/parametros-mundo.md`, `parajes.md` y `quests.md` contienen decisiones cerradas (cupos por radio, presets de duración, taxonomía de 8 parajes con pesos de escena, arquetipos de quest). Antes de cambiar un cupo, un peso o una constante de dimensionado, lee el documento correspondiente: casi siempre hay una justificación de ritmo de juego detrás. Si el cambio contradice el diseño, actualiza también el documento — y anota la iteración en `docs/starting.md`.
 
 **Contenido apto para menores.** Es un principio de la especificación, no un detalle. Afecta a la selección de POIs (nada de bares de copas ni locales de adultos como anclaje), a los textos generados y al futuro contrato con el LLM.
 
@@ -79,13 +81,13 @@ Indentación de 2 espacios, comillas simples, punto y coma, `const`/`let`, funci
 
 `.gitignore` excluye `data/`, `overpass-db/` y `.cache/` — son gigas de datos locales que nunca van al repo. La caché de Overpass es permanente por diseño (los datos de OSM cambian despacio); para forzar una consulta nueva, borra el fichero concreto de `.cache/overpass/`.
 
-`archive/v0.0.1/` es la implementación anterior, congelada como referencia. No la modifiques ni la uses como fuente: la v0.1 es una reescritura desde cero.
+`archive/` guarda instantáneas congeladas: `v0.0.1/` es la implementación anterior a la reescritura, y `v0.0.2/` una copia del estado de la app tomada antes de reorganizar el repo. **No las modifiques ni las uses como fuente, y ten presente que cualquier búsqueda global devolverá resultados duplicados desde ahí**: la fuente viva es `app/`.
 
 ## Trampas conocidas
 
-**Cuidado con `.gitignore` y las rutas sin anclar.** La regla `data/` (sin barra inicial) hacía match también con `js/data/` y se tragó silenciosamente `js/data/overpass.js`: el módulo nunca llegó a commitearse y la app estuvo rota sin que ningún test lo detectara (`test/headless.mjs` pasa porque no importa esa capa). Está reconstruido y las reglas ahora van ancladas (`/data/`, `/overpass-db/`, `/.cache/`). Al añadir una regla nueva, ánclala.
+**Cuidado con `.gitignore` y las rutas sin anclar.** La regla `data/` (sin barra inicial) hacía match también con `app/js/data/` y se tragó silenciosamente `app/js/data/overpass.js`: el módulo nunca llegó a commitearse y la app estuvo rota sin que ningún test lo detectara (`test/headless.mjs` pasa porque no importa esa capa). Está reconstruido y las reglas ahora van ancladas (`/data/`, `/overpass-db/`, `/.cache/`). Al añadir una regla nueva, ánclala.
 
-**Un test verde no significa app viva.** `test/headless.mjs` solo ejercita el generador con mundos sintéticos: no toca `js/data/` ni `js/render/`. Para verificar de verdad un cambio, ejecuta también `node test/casting-report.mjs` (tubería completa contra mundos reales) o abre la app.
+**Un test verde no significa app viva.** `test/headless.mjs` solo ejercita el generador con mundos sintéticos: no toca `app/js/data/` ni `app/js/render/`. Para verificar de verdad un cambio, ejecuta también `node test/casting-report.mjs` (tubería completa contra mundos reales) o abre la app.
 
 **Overpass público se satura** (429/503/504, colas de minutos). Por eso existen el proxy con caché y el Overpass local en Docker. Cualquier cambio en el texto de una consulta invalida la caché entera (la clave es el hash del QL), así que la siguiente ejecución pagará minutos contra los mirrors públicos: espéralo, no es un cuelgue. Si iteras sobre el render y no sobre los datos, usa `__wa.demo()`.
 
@@ -106,4 +108,6 @@ Indentación de 2 espacios, comillas simples, punto y coma, `const`/`let`, funci
 
 ## Al terminar una iteración
 
-`starting.md` es la bitácora del proyecto: cada iteración significativa se anota al final con fecha, qué se decidió, qué se implementó y con qué se verificó (mundos reales concretos, no "funciona"). Mantén ese hábito. Si la iteración cierra un pendiente de `game-design/`, táchalo con `~~...~~ → hecho` y explica el resultado, como está hecho en el resto del documento.
+`docs/starting.md` es la bitácora del proyecto: cada iteración significativa se anota al final con fecha, qué se decidió, qué se implementó y con qué se verificó (mundos reales concretos, no "funciona"). Mantén ese hábito. Si la iteración cierra un pendiente de `game-design/`, táchalo con `~~...~~ → hecho` y explica el resultado, como está hecho en el resto del documento.
+
+`docs/checklist.md` es el índice de trabajo pendiente, ordenado por lo que se puede hacer ya y lo que está bloqueado. Es lista viva, no bitácora: al cerrar algo se tacha allí con una línea de resultado y el relato completo va a `starting.md`.

@@ -1,0 +1,207 @@
+// Parajes: hitos no habitados para quests (game-design/parajes.md).
+//
+// Principios: el tipo fantástico está DESACOPLADO del anclaje real (un
+// chiringuito puede ser una ruina); el anclaje solo aporta coordenadas y tierra
+// firme. Asignación de tipo con sesgo suave, escenas como etiquetas con pesos,
+// selección puntuando cerca-de-ruta y lejos-de-núcleos, y cruces/puentes del
+// grafo viario como colchón garantizado en zonas pobres de datos.
+
+import { dist, pointPolylineDist, segIntersect, polygonBBox } from '../core/geo.js';
+import { isSea } from './seamask.js';
+import { makeRng, pick, shuffle } from '../core/rng.js';
+import { footprintRadius } from './settlements.js';
+
+// Tipos cuyo emplazamiento sale de un anclaje real; cruce y puente se derivan del grafo.
+export const ANCHORED_TYPES = ['ruina', 'piedra', 'ermita', 'fuente', 'atalaya', 'monasterio'];
+
+export const PARAJE_INFO = {
+  ruina: { label: 'Ruina', scenes: { guarida: 0.4, emboscada: 0.2, misterio: 0.2, refugio: 0.2 } },
+  piedra: { label: 'Piedra antigua', scenes: { ritual: 0.4, misterio: 0.4, revelación: 0.2 } },
+  ermita: { label: 'Ermita', scenes: { refugio: 0.4, encuentro: 0.4, ritual: 0.2 } },
+  fuente: { label: 'Fuente', scenes: { encuentro: 0.5, refugio: 0.3, misterio: 0.2 } },
+  atalaya: { label: 'Atalaya', scenes: { revelación: 0.5, vigilancia: 0.3, encuentro: 0.2 } },
+  cruce: { label: 'Cruce de caminos', scenes: { emboscada: 0.35, encuentro: 0.25, vigilancia: 0.2, peaje: 0.2 } },
+  puente: { label: 'Puente', scenes: { peaje: 0.25, guarida: 0.2, emboscada: 0.2, encuentro: 0.2, duelo: 0.15 } },
+  monasterio: { label: 'Monasterio', scenes: { refugio: 0.4, saber: 0.4, ritual: 0.2 } },
+};
+
+// Sesgo suave: si el lugar real "pega" con un tipo, ese tipo gana peso en el
+// sorteo (probabilidad BIAS_P); el resto de veces manda el azar con diversidad.
+const BIAS = {
+  castillo: 'ruina', ruinas: 'ruina', monumento: 'ruina',
+  'piedra antigua': 'piedra',
+  iglesia: 'ermita', crucero: 'ermita',
+  fuente: 'fuente', manantial: 'fuente',
+  torre: 'atalaya', faro: 'atalaya', mirador: 'atalaya',
+  monasterio: 'monasterio',
+};
+const BIAS_P = 0.65;
+
+// Cupo por radio (interpolación lineal, saturado en 8: más parajes no añaden
+// beats a una aventura de 3 h).
+const COUNT_TIERS = [[250, 1], [500, 2], [1000, 4], [2000, 7], [5000, 8]];
+
+export function parajeCountForRadius(r) {
+  if (r <= COUNT_TIERS[0][0]) return COUNT_TIERS[0][1];
+  const last = COUNT_TIERS[COUNT_TIERS.length - 1];
+  if (r >= last[0]) return last[1];
+  for (let i = 0; i < COUNT_TIERS.length - 1; i++) {
+    const [r0, c0] = COUNT_TIERS[i];
+    const [r1, c1] = COUNT_TIERS[i + 1];
+    if (r >= r0 && r < r1) return Math.round(c0 + ((r - r0) / (r1 - r0)) * (c1 - c0));
+  }
+  return last[1];
+}
+
+// --- candidatos derivados del grafo viario (existen en cualquier mundo con carreteras) ---
+
+const key = (p) => `${Math.round(p.x)},${Math.round(p.y)}`;
+
+// Cruces: puntos compartidos por 2+ rutas nombradas. Dentro del tramo común de
+// cada par se elige el punto más alejado de todo núcleo ("en despoblado").
+function crossingCandidates(routes, settlements, radius) {
+  const real = routes.filter((r) => !r.fallback);
+  const byKey = new Map();
+  real.forEach((r, ri) => {
+    // se excluyen los extremos: son las posiciones de los glifos de los núcleos
+    for (const p of r.pts.slice(1, -1)) {
+      const k = key(p);
+      if (!byKey.has(k)) byKey.set(k, { p, routes: new Set() });
+      byKey.get(k).routes.add(ri);
+    }
+  });
+
+  const minSettDist = (p) => Math.min(Infinity, ...settlements.map((s) => dist(p, s)));
+  const byPair = new Map();
+  for (const { p, routes: rs } of byKey.values()) {
+    if (rs.size < 2) continue;
+    const ids = [...rs].sort((a, b) => a - b);
+    for (let i = 0; i < ids.length - 1; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const pk = `${ids[i]}-${ids[j]}`;
+        const d = minSettDist(p);
+        const cur = byPair.get(pk);
+        if (!cur || d > cur.d) byPair.set(pk, { p, d });
+      }
+    }
+  }
+
+  const sep = Math.max(150, radius * 0.1);
+  const out = [];
+  for (const { p, d } of [...byPair.values()].sort((a, b) => b.d - a.d)) {
+    if (d < 80) continue; // pegado a un núcleo: no es un cruce "en despoblado"
+    if (out.every((c) => dist(c, p) >= sep)) out.push({ x: p.x, y: p.y, type: 'cruce' });
+  }
+  return out;
+}
+
+// Puentes: segmentos de ruta que cruzan un río.
+function bridgeCandidates(routes, rivers, settlements, radius) {
+  const sep = Math.max(150, radius * 0.1);
+  const out = [];
+  for (const r of routes) {
+    if (r.fallback) continue;
+    const pts = r.pts.slice(1, -1); // sin los conectores a los glifos
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      const bb = { minX: Math.min(a.x, b.x), maxX: Math.max(a.x, b.x), minY: Math.min(a.y, b.y), maxY: Math.max(a.y, b.y) };
+      for (const river of rivers) {
+        const rb = polygonBBox(river);
+        if (rb.minX > bb.maxX || rb.maxX < bb.minX || rb.minY > bb.maxY || rb.maxY < bb.minY) continue;
+        for (let j = 0; j < river.length - 1; j++) {
+          const hit = segIntersect(a, b, river[j], river[j + 1]);
+          if (!hit) continue;
+          if (settlements.some((s) => dist(hit, s) < 80)) continue;
+          if (out.every((c) => dist(c, hit) >= sep)) out.push({ x: hit.x, y: hit.y, type: 'puente' });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * freeAnchors: POIs reales no consumidos por núcleos/servicios.
+ * settlements, routes, geo, radius, seaMask: mundo ya generado.
+ * names: paquete de nombres del idioma del mundo.
+ */
+export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names) {
+  const rng = makeRng(seedStr + ':parajes');
+  const target = parajeCountForRadius(radius);
+  const routePls = routes.filter((r) => !r.fallback).map((r) => r.pts);
+
+  // Elegibilidad de anclajes: en tierra, dentro del mundo y FUERA del radio
+  // urbano de todo núcleo (un paraje pegado a la ciudad no se siente paraje).
+  const outsideTowns = (p) => settlements.every((s) => dist(p, s) > footprintRadius(s.type, radius) * 1.05);
+  const eligible = freeAnchors.filter((a) => Math.hypot(a.x, a.y) < radius * 0.95 && !isSea(seaMask, a) && outsideTowns(a));
+
+  // Puntuación: cerca de una ruta (+2/<100 m, +1/<300 m) — un paraje al que no
+  // lleva ningún camino no se usará —, con algo de azar de desempate.
+  const scored = eligible
+    .map((a) => {
+      const dRoute = routePls.length ? Math.min(...routePls.map((pts) => pointPolylineDist(a, pts))) : Infinity;
+      return { a, score: (dRoute < 100 ? 2 : dRoute < 300 ? 1 : 0) + rng() * 0.8 };
+    })
+    .sort((x, y) => y.score - x.score);
+
+  // Candidatos del grafo (colchón garantizado sin Overpass).
+  const graphCands = shuffle(rng, [
+    ...crossingCandidates(routes, settlements, radius),
+    ...bridgeCandidates(routes, geo.rivers ?? [], settlements, radius),
+  ]).filter((c) => outsideTowns(c) && !isSea(seaMask, c));
+
+  // Reparto: se reservan hasta 2 huecos para cruces/puentes; el resto, anclajes.
+  // Si faltan anclajes, el grafo rellena; si falta todo, se acepta el déficit.
+  const graphFloor = Math.min(2, graphCands.length, target);
+  const sep = Math.max(120, radius * 0.1);
+  const placed = [];
+
+  const tryPlace = (cand, type, real, origin) => {
+    if (!placed.every((p) => dist(p, cand) >= sep)) return false;
+    placed.push({ type, x: cand.x, y: cand.y, real, origin });
+    return true;
+  };
+
+  // 1) anclajes hasta (target - graphFloor), con tipo por sesgo suave + diversidad
+  let cycle = shuffle(rng, ANCHORED_TYPES);
+  const nextType = (biasType) => {
+    if (biasType && rng() < BIAS_P) {
+      cycle = cycle.filter((t) => t !== biasType);
+      if (!cycle.length) cycle = shuffle(rng, ANCHORED_TYPES.filter((t) => t !== biasType));
+      return biasType;
+    }
+    if (!cycle.length) cycle = shuffle(rng, ANCHORED_TYPES);
+    return cycle.shift();
+  };
+  for (const { a } of scored) {
+    if (placed.length >= target - graphFloor) break;
+    const type = nextType(BIAS[a.kind]);
+    tryPlace(a, type, { name: a.name, kind: a.kind }, 'anclaje');
+  }
+
+  // 2) cruces/puentes del grafo hasta completar el cupo
+  for (const c of graphCands) {
+    if (placed.length >= target) break;
+    tryPlace(c, c.type, null, 'grafo');
+  }
+
+  // 3) si el grafo no dio y quedan anclajes, seguir con anclajes
+  for (const { a } of scored) {
+    if (placed.length >= target) break;
+    if (placed.some((p) => p.real && p.x === a.x && p.y === a.y)) continue;
+    tryPlace(a, nextType(BIAS[a.kind]), { name: a.name, kind: a.kind }, 'anclaje');
+  }
+
+  // nombres únicos y ficha final
+  const used = new Set();
+  return placed.map((p) => {
+    let name = '';
+    for (let t = 0; t < 8; t++) {
+      name = names.parajeName(rng, p.type);
+      if (!used.has(name)) break;
+    }
+    used.add(name);
+    const info = PARAJE_INFO[p.type];
+    return { ...p, name, label: info.label, scenes: info.scenes };
+  });
+}
