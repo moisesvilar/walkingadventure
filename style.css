@@ -99,6 +99,39 @@ button.primary:hover { background: #8f3a24; }
   margin-left: auto;
 }
 
+/* Selector de estilo: repinta el mundo que ya está en pantalla, no regenera nada. */
+.style-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px 10px;
+  flex-wrap: wrap;
+}
+.style-label { font-size: 13px; opacity: .6; }
+.style-group { display: flex; }
+.style-btn {
+  border-radius: 0;
+  border-right-width: 0;
+  padding: 5px 13px;
+  font-size: 13px;
+}
+.style-btn:first-child { border-radius: 4px 0 0 4px; }
+.style-btn:last-child { border-radius: 0 4px 4px 0; border-right-width: 1px; }
+.style-btn.selected { background: #7a2e1d; border-color: #a5502f; }
+.style-hint { font-size: 12px; opacity: .5; font-style: italic; }
+
+/* Zoom: rueda y arrastre sobre el canvas, más estos botones para quien prefiera pulsar. */
+.zoom-group { display: flex; }
+.zoom-group button {
+  border-radius: 0;
+  border-right-width: 0;
+  width: 34px;
+  padding: 6px 0;
+  font-size: 17px;
+  line-height: 1;
+}
+.zoom-group button:first-child { border-radius: 4px 0 0 4px; }
+.zoom-group button:last-child { border-radius: 0 4px 4px 0; border-right-width: 1px; }
 #loading { text-align: center; padding: 80px 0; }
 #loading p { font-style: italic; opacity: .8; }
 .spinner {
@@ -119,14 +152,18 @@ button.primary:hover { background: #8f3a24; }
 }
 #canvas-wrap { flex: 1; min-width: 0; }
 #fantasy-map {
-  width: 100%;
+  /* el canvas es cuadrado: aspect-ratio evita que max-height lo aplaste */
+  width: auto;
   height: auto;
-  max-height: calc(100vh - 120px);
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+  max-height: calc(100vh - 170px);
   display: block;
   margin: 0 auto;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: grab;
 }
+#fantasy-map:active { cursor: grabbing; }
 
 #sidebar {
   width: 320px;
