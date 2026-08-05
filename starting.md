@@ -374,3 +374,61 @@ Sigue la regla de la casa: **el estilo son datos, `map.js` no decide nada**.
 
 - **El declutter deja de ser opcional.** Ninguno de los cuatro tratamientos arregla el racimo denso, y la placa lo empeora *visualmente*: dos cajas opacas que chocan cantan mucho más que dos textos que se rozan.
 - Los otros cuatro estilos podrían querer su propia placa (`placa: ['nucleo']` más un grupo `placa`), pero no se ha tocado ninguno.
+
+---
+
+# Iteración 5-ago-2026 — el mundo vive: pasos, rumores y la frontera del LLM
+
+Iteración de **diseño, sin código**: no se toca ni un módulo. Nace de analizar diez vídeos de **El Hacedor de Mundos** (`@elhacedordemundos`), un RPG narrativo dirigido íntegramente por LLM que un desarrollador está construyendo en abierto con Claude Code. El análisis completo está en `el-hacedor-de-mundos.md`; aquí queda lo que de ahí se convirtió en decisión.
+
+La conclusión de partida es que **no es competencia**: su mundo es ilimitado y alucinado, el nuestro está anclado y es determinista. Pero su capa de simulación social —rumores que se deforman, NPCs que viven entre turnos, facciones que avanzan solas— ataca justo lo que a Walking Adventure le falta: el mundo es precioso y está muerto. De sus ideas se han cerrado tres en `game-design/quests.md`, y ninguna tal cual.
+
+## Los kilómetros son el reloj del mundo (decisión 4 reescrita)
+
+Su mundo avanza con el calendario. Se descartó por FOMO: en un juego que se progresa **caminando**, penalizar la ausencia castiga a quien trabaja, se lesiona o tiene críos, y choca de frente con las secciones 4 y 8 del propio documento. La alternativa elegida es que el mundo avance por **pasos** al ritmo de los kilómetros del jugador. Un paso = un tramo (~2 km, ~30 min), constante que ya existía y no hubo que inventar.
+
+Consecuencias que salieron solas: caminar vale incluso fuera de una quest; ya no hace falta techo (las piernas lo son); y desaparece el reloj real de la generación, coherente con la prohibición de `Date.now()`. El determinismo se salva con un detalle que quedó escrito: **el contenido del paso *n* lo decide el número, no la fecha** (`makeRng(seed + ':tick:' + n)`); el reloj solo decide cuántos pasos hay.
+
+Qué kilómetros cuentan es **configurable**: los de sesión por defecto, ampliable a los pasos del día a día como opt-in explícito. Ese segundo modo sí acumula —el usuario levantó el caso de tres meses sin jugar y 457 km, que serían 228 pasos y un tocho ilegible—, así que lleva **reserva con tope de 5 pasos**, y el tope lo fija *lo que cabe en un resumen legible*, no lo que se puede simular. Regla asociada: un paso **solo añade**, y nunca resta por no haber salido.
+
+## El rumor viaja por el árbol de calzadas (sección 6 reescrita)
+
+La mejor pieza, y donde su idea se vuelve más nuestra que suya. Ellos deforman los rumores con una constante inventada y limitan a 15 activos. Nosotros ya tenemos, gratis, lo que hace falta: `buildRoutes` construye un **árbol de expansión mínima** sobre los núcleos con caminos reales, así que entre dos núcleos hay un único camino, con saltos y metros bien definidos.
+
+De ahí las dos variables, deliberadamente separadas: **la distancia manda el tiempo** (un tramo por paso, la misma velocidad a la que anda el jugador — se puede adelantar a la propia fama) y **los saltos mandan la fidelidad**, porque deformar es un acto social, no geográfico. Dos pueblos a la misma distancia reciben la noticia con distinta fidelidad según cuántas aldeas haya en medio: **la forma del mapa se vuelve legible en la narrativa**. Los tramos `fallback` —los que `buildRoutes` traza en recta porque no hay camino real— suman un nivel extra: la noticia que cruza el monte llega peor.
+
+Escalera de cuatro niveles (fiel · abultado · trastocado · leyenda) y una regla de tono decidida por el usuario: **la deformación nunca invierte el signo moral**. Lo bueno llega como bueno; cambian la escala, el protagonista y el detalle. Y no hace falta cap de rumores: el árbol es finito, así que **el rumor se agota solo**.
+
+Efecto sobre el diseño: la reputación deja de ser un número que sube donde actuaste. **La reputación es lo que llegó, no lo que hiciste.**
+
+## El árbitro es el código (decisión 1 ampliada)
+
+Su juego tiene dos LLM, Narrador y Árbitro, y dos de los diez vídeos son él depurando con Claude por qué la moralidad y el oro no cuadran entre sistemas. Esa es la factura de no tener frontera. La nuestra queda escrita: **el árbitro es el código** —casting, geofence, máquina de beats— y el LLM solo narra.
+
+La línea fina no es "nombres sí, cantidades no", sino **datos vivos** (los que el código lee para decidir) contra **datos inertes** (los que solo se muestran). La prueba: *si alguna regla bifurca por él, no lo escribe el modelo*. Con corolario testeable —con LLM y sin LLM, misma estructura, solo cambia la piel— y una aclaración que faltaba: el determinismo se aplica al esqueleto; la prosa se genera una vez, se cachea y se guarda con la partida.
+
+Sobre nombres se decidió que el LLM **propone y el código valida**, con un matiz que salva dos invariantes: `js/names/` es el **suelo** —el mundo está completo y con nombres únicos antes de que exista una sola llamada, y por eso `test/headless.mjs` sigue afirmando unicidad sin red— y la propuesta del modelo es una capa opcional encima. El idioma no se valida (no hay forma razonable de comprobar en código que un nombre es gallego legítimo): **se dirige**, pasando el locale y ejemplos del propio paquete como anclaje de estilo. `js/names/` pasa a ser también referencia estilística.
+
+## Y algo que no estaba en su juego (decisión 3 reescrita)
+
+Al encajar lo anterior apareció un sistema propio. Los micro-encuentros oportunistas eran hasta ahora azar decorativo sin origen declarado; ahora son el **canal de entrega** de lo que produce el mundo, con tres vías (en ruta, el estado del núcleo al llegar, y el resumen de apertura solo en modo pasos de fondo) y una regla de aparición que mata el relleno aleatorio: **solo salta si hay algo que entregar**.
+
+Dos reglas duras: **coste cero de desvío** (ocurre en el camino, nunca manda fuera del lazo ni consume presupuesto) e **ignorarlo es gratis**. El aviso es de tres capas —marca, háptico y notificación al entrar en el geofence—, diseñado explícitamente para que el jugador **no** mire la pantalla en marcha: el móvil avisa desde el bolsillo. La notificación se reserva a las oportunidades para que no se devalúe.
+
+Y el ciclo de abandono, que el usuario pidió cerrar: las **noticias** sedimentan al momento en lo que se cuenta en el núcleo; las **oportunidades** se ofrecen una segunda vez —otra salida, otro sitio— y luego sedimentan. Dos ofertas porque una es frágil y infinitas son acoso. Sedimentar no se reprocha: nadie comenta que el jugador no fuese.
+
+De todo esto sale un tipo de beat nuevo en la sección 2, el de **lugar diferido**: el contenido es determinista (sale del paso), la colocación depende de por dónde ande el jugador, y los tests afirman lo primero y no lo segundo.
+
+## Los dos flecos que quedaban
+
+**Cómo se entera el jugador de lo que se cuenta de él.** Aflora al llegar al núcleo y se anota en el diario, que **registra lo oído y no lo cierto**: guarda la versión deformada, nunca enseña el nivel de deformación —dato vivo, interno— y no sobrescribe una entrada con otra más veraz. Se descartó el panel consultable por núcleo, que habría convertido la consecuencia social en estadísticas y encima invitaría a mirar el móvil en marcha. A cambio aparece la mejor propiedad emergente de todo el sistema: como el árbol define un único camino, cada núcleo oye **una sola versión**, pero el jugador visita varios — y **descubre por su cuenta que las noticias se deforman comparando su propio diario**, sin tutorial que se lo explique y sin una línea de código dedicada a enseñárselo.
+
+**Cómo se redacta el resumen del zurrón.** Marco propio con fallback, entradas prestadas de las plantillas que las generaron: el resumen es un contenedor, no una unidad narrativa nueva que duplique la lógica de fallback. Al pensarlo apareció un problema que el documento no contemplaba: **los pasos de fondo ocurren con la app cerrada**, así que sus textos no se han generado nunca y alguien tiene que escribirlos. Se resuelve con una única llamada agrupada **al abrir la salida** — segundo y último punto de invocación del LLM, y el espíritu de la decisión 1 sigue intacto: se llama antes de andar, jamás mientras se anda. Si falla, todo cae a fallbacks y el resumen se lee igual.
+
+## Pendientes tocados
+
+- **3** deja de estar abierto salvo el catálogo: la regla de aparición y el ciclo de abandono ya están decididos.
+- **4** pasa de lista de deberes a casi especificación, e incorpora el **registro de tópicos** usados como restricción negativa en el prompt —la versión barata de su crítico anti-cliché, sin llamadas extra—, con ventana por categoría y precargado con los tics genéricos del modelo. Limitación asumida: los textos de fallback se repiten por definición.
+- **8, nuevo**: motor de pasos y propagación. Con una advertencia arquitectónica: **no es una fase de `build.js`**. `build.js` crea el mundo, esto evoluciona el estado de una partida encima; meterlo en la tubería rompería "misma tubería, mismos mundos". Puede implementarse **antes que la capa de NPCs**, a granularidad de núcleo.
+
+**Verificado**: nada que ejecutar, es diseño. Lo que sí se comprobó contra el código antes de escribir es que la mecánica se apoya en lo que existe — `buildRoutes` como árbol de expansión mínima con `pts`, `nodos` y la marca `fallback`, y `js/names/` como fuente única de nombres propios.
