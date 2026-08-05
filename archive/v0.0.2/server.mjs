@@ -11,9 +11,7 @@ import { homedir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 
 const PORT = process.env.PORT || 8137;
-// Los estáticos viven en app/, no en la raíz: el servidor se queda arriba porque
-// además es el proxy de Overpass, que no es parte del front.
-const ROOT = new URL('./app/', import.meta.url).pathname;
+const ROOT = new URL('.', import.meta.url).pathname;
 // Caché COMPARTIDA por todas las sesiones y worktrees: fuera del repo, igual que
 // la base de datos de Overpass. Dentro del repo, cada worktree arrancaba con la
 // caché fría y volvía a castigar a los mirrors públicos por las mismas consultas.

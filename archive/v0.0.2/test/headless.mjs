@@ -3,13 +3,13 @@
 // Mundo sintético con anclajes, carreteras y un río; comprueba cupos, servicios,
 // rutas, parajes, idiomas y determinismo.
 
-import { generateSettlements, countsForRadius } from '../app/js/world/settlements.js';
-import { buildRoutes } from '../app/js/world/routes.js';
-import { generateParajes, parajeCountForRadius, PARAJE_INFO } from '../app/js/world/parajes.js';
-import { localeFor, namesFor } from '../app/js/names/index.js';
-import { makeRng } from '../app/js/core/rng.js';
-import { castAll, castTemplate } from '../app/js/quests/casting.js';
-import { TEMPLATES } from '../app/js/quests/templates.js';
+import { generateSettlements, countsForRadius } from '../js/world/settlements.js';
+import { buildRoutes } from '../js/world/routes.js';
+import { generateParajes, parajeCountForRadius, PARAJE_INFO } from '../js/world/parajes.js';
+import { localeFor, namesFor } from '../js/names/index.js';
+import { makeRng } from '../js/core/rng.js';
+import { castAll, castTemplate } from '../js/quests/casting.js';
+import { TEMPLATES } from '../js/quests/templates.js';
 
 let failures = 0;
 function check(name, cond, extra = '') {

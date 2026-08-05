@@ -20,7 +20,7 @@ Tests sin navegador ni red: `node test/headless.mjs`.
 2. **Generación**: consulta a Overpass (terreno + POIs), máscara tierra/mar y radio dinámico en costa, núcleos con cupos exactos por radio, servicios anclados a POIs reales únicos, red vertebral con routing y nombres, parajes, callejero local bajo demanda al hacer zoom.
 3. **Mapa**: canvas con cinco estilos intercambiables (Reino, el mapa base, por defecto; Clásico, Pergamino, Cuento y Atlas) que se alternan sobre el mundo ya generado sin resembrarlo, y zoom libre con rueda, botones y arrastre; clic en núcleo → ficha + zoom con marcadores de servicios y callejero; clic en paraje → ficha con escenas propicias + zoom.
 
-## Arquitectura (`app/js/`)
+## Arquitectura (`js/`)
 
 - `core/` — rng determinista (semilla `lat,lon#n`), geometría (proyección local, distancias punto-polilínea, intersección de segmentos).
 - `data/overpass.js` — consultas (terreno, POIs, callejero) y parseo a features en metros.
