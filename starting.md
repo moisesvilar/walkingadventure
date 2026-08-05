@@ -228,3 +228,116 @@ Cierre del pendiente 6 de quests.md con datos, tras decidir ampliar "emboscada" 
 - Refactor: la construcción del mundo se extrae a `js/world/build.js`, compartida por la app y las herramientas headless — misma tubería, mismos mundos (el proxy es configurable en Node vía `globalThis.__WA_PROXY__`).
 - Nuevo `test/casting-report.mjs`: castea el catálogo sobre 18 mundos sintéticos (700/1200/1900 m × 6 semillas) y 4 reales (Sanxenxo, Toledo, Madrid, A Coruña) vía el proxy con caché, y agrega casteabilidad por plantilla con histograma de motivos de fallo.
 - Resultado: los 4 mundos reales castean 6/6 plantillas. En sintéticos: entrega sospechosa 77→95%, ronda del vigía 41→77%, cita y tres-pistas 100%, resto ≥86%. Los fallos restantes son mundos de paseo con 2-3 parajes donde no caben todas las escenas — aceptable: el catálogo siempre ofrece varias quests por mundo.
+
+
+---
+
+# Iteración 4-ago-2026 — CLAUDE.md y rescate de `js/data/overpass.js`
+
+Se añade `CLAUDE.md` (guía de trabajo para agentes: comandos, tubería de generación, reglas del proyecto — determinismo, anclaje único, primacía de `game-design/` —, estilo y trampas). Al escribirlo se destapó que **la app estaba rota**: `js/data/overpass.js` no existía ni en el working tree ni en ningún commit.
+
+- **Causa**: la regla `data/` de `.gitignore` (pensada para el extracto de OSM de la raíz, montado en `docker-compose.yml`) hacía match también con `js/data/`. El módulo nunca se commiteó y nadie lo notó porque `test/headless.mjs` no importa esa capa: los tests seguían en verde con la app muerta (`Cannot find module .../js/data/overpass.js` en `js/main.js` y `test/casting-report.mjs`). Arreglado anclando las reglas: `/data/`, `/overpass-db/`, `/.cache/`.
+- **Reconstrucción** a partir de la interfaz que exigen los llamantes y de `archive/v0.0.1/js/overpass.js`, con la ampliación de POIs que la v0.1 daba por hecha: manantiales, fuentes, torres, faros, cruceiros, monasterios, y `ruins`/`archaeological_site`/`wayside_cross` separados de `monumento` para que alimenten el sesgo suave de tipo de paraje.
+- **Decisión con datos: fuera `amenity=drinking_water`**, aunque `game-design/parajes.md` lo lista para el tipo Fuente. Medido sobre los 4 mundos de referencia es mobiliario urbano sin nombre (A Coruña 186 anclajes, 3 con nombre; Toledo 16, ninguno): no da reconocimiento —el sentido del anclaje es el guiño de identificar el lugar real— y su volumen monopolizaba el sesgo `fuente`, matando la diversidad de tipos que pide el propio documento ("mejor uno de cada que cinco fuentes"). Con él dentro, A Coruña se quedaba sin ningún paraje de vigilancia/revelación (5/6) y las fuentes de Toledo eran 25; fuera, A Coruña vuelve a 6/6 y Toledo baja a 9 fuentes con reparto diverso. Reflejado en `parajes.md` como nota con los datos, del que se deriva una regla general: un tag solo entra si aporta reconocimiento.
+- **Verificado**: `test/headless.mjs` en verde; `test/casting-report.mjs` reproduce **exactamente** las cifras documentadas en la iteración de las 14:40 para los 18 mundos sintéticos (entrega 95%, cita 100%, tres-pistas 100%, peregrinaje 86%, rescate 95%), lo que confirma que no hay regresión fuera de la capa de datos. Mundos reales: Sanxenxo, Madrid y A Coruña 6/6; Toledo 5/6 (le falta vigilancia/revelación). Sanxenxo reproduce el mundo documentado en la iteración de las 13:15 — "Terras do Abrente Gris" con "O Torreón Esquecido" (ruina) anclado al chiringuito Mardivino Asador.
+- La divergencia de Toledo es azar de esa semilla, no un sesgo de datos: su mezcla de anclajes tiene 23 miradores, 11 piedras y 4 torres disponibles, pero los 5 huecos cayeron en ruina/ermita/fuente/puente/puente. No se afina la consulta para forzar 6/6: sería sobreajustar la capa de datos a una semilla, y el propio informe da esos fallos por aceptables.
+
+
+---
+
+# Iteración 4-ago-2026 — Overpass local compartido entre worktrees
+
+El Overpass local se reimportaba (o simplemente no funcionaba) en cada worktree nuevo. Al investigarlo apareció algo peor: **el contenedor llevaba 7 h "Up" y completamente vacío**. Su base de datos era un bind mount relativo (`./overpass-db`) dentro de un worktree de Orca que se borró; el contenedor sobrevivió apuntando a una ruta inexistente y respondía **200 con una página de error XML** a cada consulta. El proxy la descartaba y caía a los mirrors públicos, así que todo "funcionaba", solo que lentísimo y castigando a un servicio comunitario. Nadie se enteró porque el síntoma en el log era un críptico `Unexpected token '<'`.
+
+Rediseño para que el estado pesado no dependa de ninguna ruta ni de ningún worktree:
+
+- **Base de datos → volumen Docker con nombre** `walkingadventure-overpass-db`, en vez de bind mount relativo. Independiente del directorio de lanzamiento; ningún worktree se la lleva por delante al borrarse. En macOS, además, va dentro del disco de la VM: mucho más rápido que un bind mount para una importación pesada. `name: walkingadventure` fija el nombre del proyecto Compose (si no, cada worktree crearía su propio stack).
+- **Extracto `.pbf` y caché HTTP → `~/.walkingadventure/`** (`WA_HOME` para moverlo, `WA_CACHE_DIR` para la caché sola). La caché dentro del repo hacía que cada worktree arrancase en frío y repitiese las mismas consultas contra los mirrors públicos. Migradas las 24 respuestas ya cacheadas; verificado: los 4 mundos reales del informe se reconstruyen en 4,9 s con 12 HITs y cero red.
+- **Arranque automático**: `restart: unless-stopped`, así que en una sesión nueva no hay que hacer nada.
+- **`scripts/overpass-setup.sh`**, idempotente y de un solo uso por máquina. Su comprobación de "listo" es una consulta real buscando `"elements"`, no `docker ps`: precisamente el fallo anterior era un contenedor sano a ojos de Docker.
+- **Mirror del extracto: OSM France en vez de Geofabrik.** Medido: Geofabrik limita por IP a ~100 KB/s (una segunda conexión cae a 750 B/s) → ~3h45 para 1,4 GB; OSM France arranca en varios MB/s y se estabiliza más arriba. Ambos son el extracto completo del país. Como las secuencias de diffs no son intercambiables entre proveedores, `OVERPASS_DIFF_URL` pasa también a la replicación de OSM France. El script recuerda el mirror usado (`.pbf-source`) porque reanudar contra otro corrompería el fichero.
+- **`server.mjs`** distingue ahora la página de error XML del "no es JSON" genérico y lo dice claro (`sin datos servibles (...)`), porque el arreglo es distinto: revisar el contenedor, no reintentar.
+
+
+---
+
+# Iteración 4-ago-2026 — cinco estilos de mapa intercambiables
+
+A partir de cuatro plantillas de referencia (`temp/ideas-mapas/`), el pintado deja de ser una sola estética fijada en el código: ahora es un parámetro que se puede cambiar sobre el mapa ya generado, para comparar estilos sobre el mismo mundo sin resembrarlo.
+
+- **Nuevo `js/render/styles.js`**: cada estilo es un objeto de datos (papel, tierra, agua, costa, bosque, picos, calzadas, glifos, tipografía, cartela, marco, brújula) que se fusiona sobre unos `DEFAULTS`, así que un estilo solo declara lo que le distingue. `js/render/map.js` no tiene ya ni un color ni un grosor propios: todo sale del tema.
+- **Los cinco**: `reino` (**el elegido como estilo por defecto**), `clasico` (el disco de v0.1, intacto como referencia de comparación), `pergamino` (carta antigua manchada con filacterias en las calzadas y cartela de rollo), `cuento` (prado verde, casitas de tejado rojo, marco de zarza en flor, rótulos manuscritos en Caveat), `atlas` (pastel a sangre sin marco, halos concéntricos de costa, versalitas espaciadas en Cinzel, rosa de los vientos gigante detrás del mapa) y —de nuevo— `reino` (mar azul, montañas nevadas, marco dorado, banderola superior), que es el que queda por defecto: la referencia `b03241c5` es la que mejor sostiene un mapa denso de núcleos y parajes, porque separa mar, tierra y bosque por color y no solo por línea.
+- **La forma del mapa pasa a ser del estilo** (`shape: 'disc' | 'rect'`): los cuatro nuevos son rectangulares como sus referencias; el disco se conserva en `clasico`.
+- **Selector en la barra del mapa**, construido desde `STYLES` (añadir un estilo no toca el HTML) y recordado en `localStorage`; hook `__wa.style(id)`. El cambio solo repinta: la generación no depende del estilo, y el determinismo no se toca.
+- **`__wa.demo()` gana terreno sintético** (bosques, picos, lago, costa con máscara de mar): sin él no se podían comparar estilos, que se juegan casi todo en el terreno.
+- Arreglado de paso: `#fantasy-map` se aplastaba porque `max-height` con `height:auto` no conserva la proporción del canvas cuadrado (`aspect-ratio: 1/1`).
+- Verificado en Chrome sobre Muros (42.7762, -9.0596, jornada — mundo costero con ría, bosques y picos): los cinco estilos pintan el mismo mundo "Comarcas de Nharem" y se alternan al instante. Ajustes hechos a la vista del resultado: contraste mar/tierra en `atlas` (el mar de menta se confundía con la tierra), manchas de humedad de `pergamino` reescritas como racimos de círculos pequeños (una circunferencia grande se leía como un círculo, no como una mancha) y viñeteo bajado de 0.5 a 0.34, y la escala se aparta a la esquina inferior libre cuando la brújula ocupa la izquierda.
+
+
+---
+
+# Iteración 4-ago-2026 — del mapa ilustrado al mapa base: qué se probó y qué quedó
+
+Sesión larga de exploración visual sobre el estilo `reino` que terminó **abandonando la ilustración y dejando un mapa base plano**. Se anota entera, incluidos los callejones sin salida, porque lo caro fue descubrirlos y sin esto se repetirían.
+
+**Nota sobre la entrada anterior**: la descripción de `reino` ahí ("mar azul, montañas nevadas, marco dorado") ya no vale. Los otros cuatro estilos siguen como estaban.
+
+## Lo que se probó y se abandonó
+
+**1. Montañas procedurales encadenadas en sierras.** El primer intento dibujaba un glifo por pico de OSM y se leía como pegotes sueltos. El enfoque correcto resultó ser que **la unidad de dibujo es la sierra, no el pico**: agrupar picos por cercanía, encadenarlos con un árbol de recubrimiento mínimo, sembrar cumbres a lo largo de esa cordal hundiéndolas hacia el collado, añadir una segunda fila por delante y pintar de norte a sur para que las de delante tapen las bases. También se aprendió que **la altura no puede depender de la cota real**: con picos gallegos de 100-200 m salían de 30 px, invisibles. El código sigue en `js/render/map.js` (`drawSierras`) pero **ningún estilo lo usa**.
+
+**2. Biblioteca de sprites generados por IA (Magnific).** Se montó la tubería entera —generación, sondeo de tarea, quitafondos, normalizado, encuadre por `meta.json`— y se eligieron 6 cumbres de 24 candidatas. **Retirado a petición del usuario.** El aprendizaje que sí sobrevive, por si se vuelve a intentar:
+
+- La lámina entera como referencia de estilo hace que el modelo copie la **composición**: devuelve otro mapa, con marco y rosa incluidos. La referencia tiene que ser un recorte del elemento.
+- "Game icon asset" invoca maqueta isométrica con peana y sombra.
+- Negar el 3D no basta. Lo único que rompió el sesgo de loseta de terreno fue **invocar un medio 2D por naturaleza**: "pen and ink line drawing on parchment", "line art", "no perspective".
+- Nombrar algo aunque sea para negarlo lo invoca: pedir "no sticker border" pinta el borde blanco de pegatina.
+- Mystic ignora la composición; Flux obedece bastante mejor.
+- Y lo decisivo: **con el mismo prompt, la semilla decidía la composición**. Una cumbre salía perfecta y las cinco siguientes eran losetas isométricas. Un generador así no da consistencia entre piezas sin descartar a mano.
+
+**3. Generar el mapa entero por image-to-image.** La hipótesis era buena — en la referencia todo parece dibujado *porque lo dibujó una sola mano*, y nosotros componíamos un collage — y se falsó con una medida, no con una opinión. Se exportó la capa de terreno vectorial y se pasó por Mystic con `structure_reference` y **`structure_strength: 100`** (parámetro no documentado; se descubrió mandando valores fuera de rango y leyendo qué campos protestaban). Comparando la costa vectorial con la generada sobre rejilla de 256 px:
+
+| | desplazamiento | sobre el ancho | metros |
+|---|---|---|---|
+| mediana | 3 px | 1,17 % | ~58 |
+| p90 | 16 px | 6,25 % | ~309 |
+| peor | 53 px | 20,7 % | ~1.023 |
+
+Superficie de mar: **31,9 % en el vectorial contra 26,2 % en el generado** — el modelo rellena calas y engorda la tierra. **Descartado**: una de cada diez zonas de costa se mueve más de 300 m, y esto es un mapa con el que se camina. Como se midió con la fidelidad al máximo, no hay ajuste que lo salve. Segundo fallo independiente: con la estructura al máximo el `style_reference` apenas influye, así que el estilo tampoco llegó. Sigue siendo válido como lámina de recuerdo, donde la exactitud ya no importa.
+
+**4. Texturas de relleno generadas.** Papel, prado y bosque, hechas mosaico por espejado y aplanadas dividiéndolas por su propio desenfoque (sin eso, al repetirlas aparecía una cuadrícula clarísima). Funcionaban, pero **retiradas** con el resto.
+
+## Lo que quedó
+
+**Mapa base plano**, que es lo que pidió el usuario tras ver el resultado acumulado: tierra verde y mar azul sólidos, costa de 9 px, ríos principales de 7 px, la red de calzadas, y puntos rojos como marcadores provisionales de núcleos y parajes. Sin relieve, sin vegetación, sin texturas, sin sprites.
+
+- **Capas apagables por estilo** (`capas: { bosques, picos, carreteras, rotulosCamino, lagos, soloRiosPrincipales }`). Es la forma de tener un mapa base limpio sin borrar el código que los otros cuatro estilos siguen usando.
+- **Sobre el agua no se pinta nada.** Dos medidas: los bosques y picos que caen en el mar se descartan por máscara, y el mar se pinta **después** del terreno para que lo que se derrame quede tapado.
+- **Limpieza de la máscara al pintar** (`despeca`): filtro de mayoría más análisis de componentes conexas. Las manchas de tierra que no llegan al 4 % del continente se hunden (islotes y errores en bloque) y las de mar que no llegan al 4 % del océano se rellenan (charcos azules tierra adentro). Una ría de verdad sobrevive porque está conectada al mar abierto. **Solo afecta al pintado**: la máscara original no se toca porque de ella dependen la colocación de núcleos y el radio dinámico. También se descarta la línea de costa de los islotes, que seguía dibujándose sin su relleno.
+- **Ríos principales**: `js/data/overpass.js` conserva ahora el tag (`river` / `stream` / `canal`). En el mundo de prueba, 3 de 39 tramos son río; el resto, regatos.
+- **Zoom libre**: rueda del ratón hacia el punto bajo el cursor, botones − / + y arrastre para desplazar, con umbral de 4 px para no confundirlo con un clic. De 40 m de radio al mundo entero.
+
+## Regla nueva: todo lo marcado tiene que ser andable
+
+Dos reglas que puso el usuario y que son de diseño, no de pintado: **ningún camino que no una puntos del mapa**, y **todo punto marcado conectado por camino**.
+
+- Se quitó la capa de red viaria cruda de OSM (la había metido esta misma sesión): el mapa pinta solo `world.routes`.
+- **Nuevo `linkParajes`**: engancha cada paraje a la red con un ramal, buscando el punto de la red más próximo *por carretera* — no el núcleo más cercano en línea recta, que daba rodeos absurdos. Los parajes nacidos del grafo (cruces, puentes) se saltan porque ya están sobre una calzada. Los ramales van sin nombre y más finos: son sendas de acceso, no calzadas con historia.
+- **Nuevo `coserHuecos`**, y es el hallazgo importante: el callejero de OSM **llega troceado**. En el mundo de prueba salían **109 componentes**, muchas a 9-50 m unas de otras y la red entera del norte a 157 m del resto. No son carreteras distintas: a los ways les faltan nodos compartidos, o el corte del bounding box parte la conexión. Se cosen por orden de menor a mayor hueco (Kruskal) hasta 180 m.
+- **Nuevo `pegarAViario`**: lo que aun así quedaría unido por una recta se mueve al nodo más cercano de la red principal, con tope de 1.200 m para no arrastrar a tierra firme un núcleo que está en una isla.
+
+**Medido en A Coruña (43.3891, -8.3276, jornada)**: antes, 6 de 15 caminos eran rectas punteadas. Con solo mover elementos, bajaban a 3 y había que desplazar cuatro cosas, dos de ellas más de 1,1 km. **Cosiendo primero los huecos del grafo: 0 rectas y un único elemento movido, 350 m.** Es la diferencia entre arreglar el síntoma y arreglar el dato.
+
+## Pendiente
+
+- `drawSierras` y el resto del dibujo de relieve están vivos pero sin usar por ningún estilo.
+- Los marcadores son puntos rojos provisionales, a la espera de decidir su forma.
+- Los otros cuatro estilos no se han revisado desde todos estos cambios.
+- La detección de "río principal" depende del tag de OSM, que no siempre está bien puesto.
+
+Cierre de la iteración, con dos sorpresas que solo aparecieron al terminar la importación (~1 h, 11 GB):
+
+- **El volumen con nombre destapó un problema de permisos que el bind mount ocultaba.** `/db` viene del image como `700 overpass:overpass` y nginx/fcgiwrap corren como uid 101: no podían atravesarlo para alcanzar el socket del dispatcher (que sí era 666). En macOS los bind mounts ignoran los permisos, así que esto nunca se había visto. Lo peor es que el síntoma —200 con página de error XML— es **idéntico** al de "no hay base de datos"; solo las distingue el texto del error (`Permission denied` vs `No such file or directory`). `chmod 755 /db`, ya incorporado a `scripts/overpass-setup.sh`.
+- **Las actualizaciones por diffs quedan desactivadas.** Tras importar el extracto de OSM France, el updater no encontraba su secuencia de replicación (404 en los `.state.txt`), bajaba osmChange vacíos y repetía "Error while downloading diffs" cada pocos minutos indefinidamente. Basta con no definir `OVERPASS_DIFF_URL`. Para el prototipo la frescura es irrelevante, la misma razón por la que la caché del proxy es permanente.
+- Verificado que recrear el contenedor **no** repite la importación: el entrypoint salta todo el bloque si existe `/db/init_done`.
+- **Resultado medido**: los 4 mundos reales del informe se reconstruyen desde caché vacía en **8,4 s**, íntegramente contra el Overpass local y sin un solo fallo de upstream (antes, minutos y 504 contra los mirrors públicos). Los recuentos de anclajes salen idénticos a los obtenidos vía mirrors (Sanxenxo 106, Toledo 332, Madrid 2559, A Coruña 1371): cambiar de Geofabrik a OSM France no alteró los datos.

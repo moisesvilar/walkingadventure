@@ -6,7 +6,7 @@
 <title>Walking Adventure — Generador de mundo v0.1</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -44,7 +44,17 @@
     <button id="btn-back">← Cambiar ubicación</button>
     <button id="btn-reseed">🎲 Otra variante</button>
     <button id="btn-world" hidden>🗺️ Mundo completo</button>
+    <div class="zoom-group" title="Rueda del ratón para ampliar, arrastrar para desplazar">
+      <button id="btn-zoom-out" aria-label="Alejar">−</button>
+      <button id="btn-zoom-in" aria-label="Acercar">+</button>
+    </div>
     <span id="world-title" class="world-title"></span>
+  </div>
+
+  <div id="style-toolbar" class="style-toolbar" hidden>
+    <span class="style-label">Estilo</span>
+    <div id="style-group" class="style-group"></div>
+    <span id="style-hint" class="style-hint"></span>
   </div>
 
   <div id="loading">

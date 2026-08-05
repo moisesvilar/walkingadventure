@@ -7,11 +7,16 @@
 import http from 'node:http';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { homedir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 
 const PORT = process.env.PORT || 8137;
 const ROOT = new URL('.', import.meta.url).pathname;
-const CACHE_DIR = join(ROOT, '.cache', 'overpass');
+// Caché COMPARTIDA por todas las sesiones y worktrees: fuera del repo, igual que
+// la base de datos de Overpass. Dentro del repo, cada worktree arrancaba con la
+// caché fría y volvía a castigar a los mirrors públicos por las mismas consultas.
+const WA_HOME = process.env.WA_HOME || join(homedir(), '.walkingadventure');
+const CACHE_DIR = process.env.WA_CACHE_DIR || join(WA_HOME, 'cache', 'overpass');
 
 const UPSTREAMS = [
   'http://localhost:12345/api/interpreter', // Overpass local (docker-compose.yml); si no está, cae a los públicos
@@ -62,6 +67,14 @@ async function fetchUpstream(ql) {
         });
         if (!res.ok) throw new Error(`HTTP ${res.status} en ${new URL(url).host}`);
         const text = await res.text();
+        // Overpass responde 200 con una página de error XML cuando su base de
+        // datos no está (volumen vacío, importación a medias). Se distingue del
+        // "no es JSON" genérico porque el arreglo es muy distinto: no reintentar,
+        // sino revisar el contenedor.
+        if (text.startsWith('<')) {
+          const motivo = text.match(/Error<\/strong>:\s*([^<]+)/)?.[1]?.trim() ?? 'respuesta XML';
+          throw new Error(`${new URL(url).host} sin datos servibles (${motivo})`);
+        }
         JSON.parse(text); // valida que es JSON completo antes de cachear
         return text;
       } catch (e) {
@@ -133,4 +146,4 @@ http
       res.end();
     }
   })
-  .listen(PORT, () => console.log(`Walking Adventure dev server → http://localhost:${PORT} (caché Overpass en .cache/overpass/)`));
+  .listen(PORT, () => console.log(`Walking Adventure dev server → http://localhost:${PORT} (caché Overpass compartida en ${CACHE_DIR})`));

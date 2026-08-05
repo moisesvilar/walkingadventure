@@ -1,5 +1,15 @@
-# Datos pesados locales (no van al repo)
-data/
-overpass-db/
-.cache/
+# Datos pesados locales (no van al repo).
+# Rutas ANCLADAS con "/": sin la barra inicial, "data/" también hacía match con
+# js/data/ y se tragó silenciosamente js/data/overpass.js (nunca se commiteó).
+/data/
+/overpass-db/
+/.cache/
 .DS_Store
+
+# Credenciales locales (clave de Magnific). Ya no se usa —los scripts de generación
+# de sprites se borraron—, pero la regla se queda: nunca al repo.
+/.env
+
+# Material de referencia y pruebas sueltas. Son imágenes de terceros usadas como
+# inspiración de estilo, no fuente del proyecto.
+/temp/

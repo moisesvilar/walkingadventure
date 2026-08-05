@@ -2,11 +2,13 @@
 
 import { fetchGeoFeatures, fetchPois, fetchStreets, parseStreets } from './data/overpass.js';
 import { generateSettlements, footprintRadius } from './world/settlements.js';
-import { buildRoutes } from './world/routes.js';
+import { buildRoutes, linkParajes } from './world/routes.js';
 import { generateParajes } from './world/parajes.js';
+import { buildSeaMask } from './world/seamask.js';
 import { buildWorld } from './world/build.js';
 import { castAll } from './quests/casting.js';
 import { renderMap } from './render/map.js';
+import { STYLES, DEFAULT_STYLE, getStyle, styleFonts } from './render/styles.js';
 import { namesFor } from './names/index.js';
 
 // Presets de duración (game-design/parametros-mundo.md): el jugador elige cuánto
@@ -33,6 +35,7 @@ const phasePick = $('phase-pick');
 const phaseMap = $('phase-map');
 const loading = $('loading');
 const mapLayout = $('map-layout');
+const styleToolbar = $('style-toolbar');
 const errorBox = $('error-box');
 const canvas = $('fantasy-map');
 
@@ -42,6 +45,15 @@ let hits = [];
 let world = null;
 let view = null; // vista con zoom (núcleo o paraje), o null = mundo completo
 const overpassCache = new Map();
+
+// El estilo es puro pintado: cambiarlo repinta el mundo que ya está en pantalla,
+// nunca regenera. Se recuerda entre sesiones porque es una preferencia, no un estado.
+let styleId = localStorage.getItem('wa-style') ?? DEFAULT_STYLE;
+if (!STYLES.some((s) => s.id === styleId)) styleId = DEFAULT_STYLE;
+
+function repaint() {
+  if (world) hits = renderMap(canvas, world, view, styleId);
+}
 
 // --- fase 1: selector de ubicación y duración ---
 
@@ -108,13 +120,84 @@ $('btn-reseed').addEventListener('click', () => {
 });
 $('btn-retry').addEventListener('click', () => generate());
 $('btn-world').addEventListener('click', () => zoomOut());
+$('btn-zoom-in').addEventListener('click', () => zoomPor(1.4));
+$('btn-zoom-out').addEventListener('click', () => zoomPor(1 / 1.4));
+
+// --- selector de estilo ---
+
+// Los botones se construyen desde STYLES: añadir un estilo no toca el HTML.
+const styleBar = $('style-group');
+for (const s of STYLES) {
+  const b = document.createElement('button');
+  b.className = 'style-btn';
+  b.dataset.style = s.id;
+  b.textContent = s.title;
+  b.title = s.hint;
+  b.addEventListener('click', () => setStyle(s.id));
+  styleBar.appendChild(b);
+}
+
+function refreshStyleUI() {
+  document.querySelectorAll('.style-btn').forEach((b) => b.classList.toggle('selected', b.dataset.style === styleId));
+  $('style-hint').textContent = getStyle(styleId).hint;
+}
+
+function setStyle(id) {
+  styleId = id;
+  localStorage.setItem('wa-style', id);
+  refreshStyleUI();
+  repaint();
+}
+refreshStyleUI();
 
 // --- zoom ---
+
+// El renderer ya dibuja cualquier ventana {cx, cy, r} en metros, así que el zoom libre
+// es solo cuestión de mover esa ventana: rueda del ratón, botones y arrastre para
+// desplazar. El mínimo son 40 m de radio (una plaza) y el máximo, el mundo entero.
+const R_MIN = 40;
+
+function vistaActual() {
+  return view ?? { cx: 0, cy: 0, r: world.radius, focus: null, paraje: null };
+}
+
+// Escala de la vista: los mismos metros→píxeles que usa renderMap.
+function escala(v) {
+  return (canvas.width / 2 - getStyle(styleId).margin) / v.r;
+}
+
+function aMetros(sx, sy, v = vistaActual()) {
+  const S = escala(v);
+  return { x: v.cx + (sx - canvas.width / 2) / S, y: v.cy - (sy - canvas.height / 2) / S };
+}
+
+// Zoom manteniendo fijo el punto del mundo que hay bajo (sx, sy); sin punto, el centro.
+function zoomPor(factor, sx = canvas.width / 2, sy = canvas.height / 2) {
+  if (!world) return;
+  const v = vistaActual();
+  const p = aMetros(sx, sy, v);
+  const r = Math.max(R_MIN, Math.min(world.radius, v.r / factor));
+  if (r === v.r) return;
+  const nueva = { cx: 0, cy: 0, r, focus: null, paraje: null };
+  const S = escala(nueva);
+  nueva.cx = p.x - (sx - canvas.width / 2) / S;
+  nueva.cy = p.y + (sy - canvas.height / 2) / S;
+  view = r >= world.radius ? null : nueva;
+  $('btn-world').hidden = !view;
+  repaint();
+}
+
+function desplazar(dx, dy) {
+  if (!world || !view) return;
+  const S = escala(view);
+  view = { ...view, cx: view.cx - dx / S, cy: view.cy + dy / S, focus: null, paraje: null };
+  repaint();
+}
 
 function zoomOut() {
   view = null;
   $('btn-world').hidden = true;
-  if (world) hits = renderMap(canvas, world);
+  repaint();
 }
 
 function zoomToSettlement(s) {
@@ -122,14 +205,14 @@ function zoomToSettlement(s) {
   const maxD = Math.max(60, ...dists);
   view = { cx: s.x, cy: s.y, r: Math.min(world.radius, maxD * 1.7 + 60), focus: s, paraje: null };
   $('btn-world').hidden = false;
-  hits = renderMap(canvas, world, view);
+  repaint();
   ensureStreets(s); // el callejero local llega en asíncrono y re-pinta
 }
 
 function zoomToParaje(p) {
   view = { cx: p.x, cy: p.y, r: Math.max(180, world.radius * 0.15), focus: null, paraje: p };
   $('btn-world').hidden = false;
-  hits = renderMap(canvas, world, view);
+  repaint();
 }
 
 // Callejero local bajo demanda (cacheado); al llegar se re-pinta si sigue enfocado.
@@ -146,7 +229,7 @@ async function ensureStreets(s) {
   } catch {
     s.streets = []; // sin callejero no se bloquea nada
   }
-  if (view?.focus === s) hits = renderMap(canvas, world, view);
+  if (view?.focus === s) repaint();
 }
 
 // --- fase 2: generación ---
@@ -160,6 +243,7 @@ async function generate() {
   phaseMap.hidden = false;
   loading.hidden = false;
   mapLayout.hidden = true;
+  styleToolbar.hidden = true;
   errorBox.hidden = true;
   $('detail-card').hidden = true;
 
@@ -192,16 +276,16 @@ async function generate() {
 
     setStatus('Dibujando el mapa…');
     await tick();
-    await document.fonts.load('30px "MedievalSharp"');
-    await document.fonts.load('16px "IM Fell English"');
+    await loadFonts();
     view = null;
     $('btn-world').hidden = true;
-    hits = renderMap(canvas, world);
+    repaint();
 
     $('world-title').textContent = world.title;
     buildSidebar(world);
     loading.hidden = true;
     mapLayout.hidden = false;
+    styleToolbar.hidden = false;
   } catch (e) {
     console.error(e);
     loading.hidden = true;
@@ -211,6 +295,12 @@ async function generate() {
 }
 
 const tick = () => new Promise((r) => setTimeout(r, 30));
+
+// Canvas no espera a las webfonts: si no están cargadas, el primer pintado sale con la
+// tipografía de reserva. Se cargan todas las de todos los estilos, para que cambiar de
+// estilo repinte al instante y con la fuente correcta.
+const loadFonts = () => Promise.all(styleFonts().map((f) => document.fonts.load(f).catch(() => {})));
+
 
 // Caché por consulta individual: si geo tuvo éxito y POIs falló, el reintento
 // solo repite la que falta.
@@ -368,14 +458,52 @@ function showQuestDetail(c, itemEl) {
 
   view = { cx: 0, cy: 0, r: world.radius, focus: null, paraje: null, quest: c };
   $('btn-world').hidden = false;
-  hits = renderMap(canvas, world, view);
+  repaint();
 }
+
+// Coordenadas del ratón en píxeles de canvas (el canvas se muestra escalado por CSS).
+function enCanvas(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: ((e.clientX - rect.left) / rect.width) * canvas.width,
+    y: ((e.clientY - rect.top) / rect.height) * canvas.height,
+  };
+}
+
+// Rueda: zoom hacia el punto bajo el cursor.
+canvas.addEventListener('wheel', (e) => {
+  if (!world) return;
+  e.preventDefault();
+  const { x, y } = enCanvas(e);
+  zoomPor(e.deltaY < 0 ? 1.2 : 1 / 1.2, x, y);
+}, { passive: false });
+
+// Arrastre: desplaza la vista. Se distingue del clic por un umbral de 4 px, para no
+// deseleccionar un núcleo al temblar el ratón.
+let arrastre = null;
+let huboArrastre = false; // el evento click llega DESPUÉS de pointerup, así que hay que recordarlo
+canvas.addEventListener('pointerdown', (e) => {
+  if (!view) return; // en el mundo completo no hay a dónde desplazarse
+  arrastre = { ...enCanvas(e), movido: false };
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!arrastre) return;
+  const p = enCanvas(e);
+  const dx = p.x - arrastre.x, dy = p.y - arrastre.y;
+  if (!arrastre.movido && Math.hypot(dx, dy) < 4) return;
+  arrastre.movido = true;
+  arrastre.x = p.x;
+  arrastre.y = p.y;
+  desplazar(dx, dy);
+});
+canvas.addEventListener('pointerup', () => { huboArrastre = !!arrastre?.movido; arrastre = null; });
+canvas.addEventListener('pointercancel', () => { arrastre = null; });
 
 // clic en el canvas → seleccionar núcleo o paraje
 canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-  const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+  if (huboArrastre) { huboArrastre = false; return; } // fue un desplazamiento, no un clic
+  const { x, y } = enCanvas(e);
   let best = null, bestD = Infinity;
   for (const h of hits) {
     const d = Math.hypot(h.x - x, h.y - y);
@@ -400,10 +528,14 @@ canvas.addEventListener('click', (e) => {
 //   __wa.go(lat, lon) genera el mundo en unas coordenadas exactas
 //   __wa.preset('paseo'|'aventura'|'jornada'|'custom') cambia el modo
 //   __wa.demo() genera un mundo sintético sin tocar Overpass
+//   __wa.style('clasico'|'pergamino'|'cuento'|'atlas'|'reino') cambia el estilo de pintado
 window.__wa = {
   go: (lat, lon) => { setPicked(lat, lon); seedExtra = 0; generate(); },
   preset: (m) => { mode = m; refreshPresetUI(); },
-  demo: () => {
+  style: (id) => setStyle(id),
+  styles: () => STYLES.map((s) => s.id),
+  world: () => world, // para repintar a mano con un estilo recién editado, sin regenerar
+  demo: async () => {
     const names = namesFor('es');
     const anchors = [];
     const KINDS = [
@@ -423,22 +555,42 @@ window.__wa = {
       { pts: mkLine((k) => k * 50, (k) => k * 50), nodes: null, level: 'pista', name: null },
     ];
     const rivers = [mkLine((k) => k * 50 + 25, (k) => -k * 50 + 300)];
-    const geo = { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads };
+    // terreno sintético: sin él no se pueden comparar los estilos, que se juegan casi
+    // todo en bosques, montañas, costa y agua
+    const blob = (cx, cy, rx, ry, n = 24) =>
+      Array.from({ length: n }, (_, i) => {
+        const a = (i / n) * Math.PI * 2;
+        const w = 0.75 + 0.25 * Math.abs(Math.sin(a * 3));
+        return { x: cx + Math.cos(a) * rx * w, y: cy + Math.sin(a) * ry * w };
+      });
+    const forests = [blob(-430, 330, 300, 210), blob(360, -420, 260, 240), blob(-250, -480, 200, 150)];
+    const lakes = [blob(430, 300, 110, 85, 18)];
+    const peaks = [
+      { x: -620, y: -170, ele: 900 }, { x: -500, y: -260, ele: 1400 }, { x: -700, y: -330, ele: 700 },
+      { x: 620, y: 90, ele: 1100 }, { x: 700, y: -60, ele: 600 },
+    ];
+    // costa: agua a la derecha del sentido de dibujo → mar en la esquina suroeste
+    const coastlines = [Array.from({ length: 30 }, (_, i) => ({ x: -800 + i * 55, y: -560 - Math.sin(i / 4) * 70 }))];
+    const geo = { coastlines, lakes, rivers, forests, peaks, roads };
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, 'demo#0', null, names);
     settlements.forEach((s) => { s.streets = []; });
     const routes = buildRoutes(settlements, roads, 'demo#0', names);
     const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names);
-    world = { seed: 'demo', radius, baseRadius: radius, origin: { lat: 0, lon: 0 }, locale: 'es', geo, anchors, settlements, routes, parajes, seaMask: null, title: 'Tierras de Prueba' };
+    routes.push(...linkParajes(parajes, routes, settlements, roads));
+    const seaMask = buildSeaMask(coastlines, radius * 1.5, 60);
+    world = { seed: 'demo', radius, baseRadius: radius, origin: { lat: 0, lon: 0 }, locale: 'es', geo, anchors, settlements, routes, parajes, seaMask, title: 'Tierras de Prueba' };
     world.casting = castAll(world);
     phasePick.hidden = true;
     phaseMap.hidden = false;
     loading.hidden = true;
     errorBox.hidden = true;
     mapLayout.hidden = false;
+    styleToolbar.hidden = false;
     view = null;
     $('btn-world').hidden = true;
     $('world-title').textContent = world.title;
-    hits = renderMap(canvas, world);
+    await loadFonts();
+    repaint();
     buildSidebar(world);
   },
 };
