@@ -18,7 +18,7 @@ Tests sin navegador ni red: `node test/headless.mjs`.
 
 1. **Selector**: ubicación (mapa Leaflet, geolocalización) y duración de la aventura con presets — Paseo ~1 h (700 m), Aventura ~2 h (1,2 km), Jornada ~3 h (1,9 km) — o radio libre en "Avanzado" (0,1-30 km, para testing).
 2. **Generación**: consulta a Overpass (terreno + POIs), máscara tierra/mar y radio dinámico en costa, núcleos con cupos exactos por radio, servicios anclados a POIs reales únicos, red vertebral con routing y nombres, parajes, callejero local bajo demanda al hacer zoom.
-3. **Mapa**: canvas estilo pergamino; clic en núcleo → ficha + zoom con marcadores de servicios y callejero; clic en paraje → ficha con escenas propicias + zoom.
+3. **Mapa**: canvas con cinco estilos intercambiables (Reino, el mapa base, por defecto; Clásico, Pergamino, Cuento y Atlas) que se alternan sobre el mundo ya generado sin resembrarlo, y zoom libre con rueda, botones y arrastre; clic en núcleo → ficha + zoom con marcadores de servicios y callejero; clic en paraje → ficha con escenas propicias + zoom.
 
 ## Arquitectura (`js/`)
 
@@ -27,8 +27,9 @@ Tests sin navegador ni red: `node test/headless.mjs`.
 - `world/` — `seamask.js` (máscara tierra/mar por lado de costa + radio dinámico), `settlements.js` (cupos exactos, anclajes, servicios), `routes.js` (grafo viario, Dijkstra + MST, nombres), `parajes.js` (hitos no habitados según `game-design/parajes.md`).
 - `names/` — paquetes de idioma `es` y `gl`; el idioma se elige por la ubicación del mundo (Galicia → gallego). Interfaz común: townName, farmName, poiName, roadName, directionWord, parajeName, worldTitle.
 - `quests/` — simulador de casting (`game-design/quests.md`): `templates.js` (6 plantillas-arquetipo con roles abstractos y textos de fallback) y `casting.js` (resolución determinista de roles contra el mundo, con tramos andables y estimación de km/min). El panel lista qué plantillas castean en cada mundo y dibuja el lazo de la quest sobre el mapa.
-- `render/map.js` — capas: pergamino, mar, bosques, lagos, ríos, costa con olas, callejero (focus), calzadas con nombre, picos, parajes, núcleos, marcadores de servicios, marco/brújula/cartela/escala.
-- `main.js` — orquestación, presets, panel lateral, zoom, hooks de consola (`__wa.go(lat,lon)`, `__wa.preset(m)`, `__wa.demo()`).
+- `render/map.js` — capas: papel, mar, bosques, lagos, ríos, costa, callejero (focus), calzadas con nombre, picos, parajes, núcleos, marcadores de servicios, marco/brújula/cartela/escala. Ningún color ni grosor vive aquí: todo sale del estilo.
+- `render/styles.js` — los cinco estilos de pintado, cada uno un objeto de datos (papel, tierra, agua, costa, bosque, picos, glifos, tipografía, cartela, marco, brújula, forma disco/rectángulo y qué capas se dibujan). Solo afectan al pintado, nunca a la generación. El de por defecto, `reino`, es un mapa base plano: verde y azul sólidos, costa y ríos marcados, calzadas y puntos rojos.
+- `main.js` — orquestación, presets, panel lateral, zoom, selector de estilo, hooks de consola (`__wa.go(lat,lon)`, `__wa.preset(m)`, `__wa.demo()`, `__wa.style(id)`, `__wa.world()`).
 
 ## Parajes (nuevo en v0.1)
 
