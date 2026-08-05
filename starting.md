@@ -341,3 +341,36 @@ Cierre de la iteración, con dos sorpresas que solo aparecieron al terminar la i
 - **Las actualizaciones por diffs quedan desactivadas.** Tras importar el extracto de OSM France, el updater no encontraba su secuencia de replicación (404 en los `.state.txt`), bajaba osmChange vacíos y repetía "Error while downloading diffs" cada pocos minutos indefinidamente. Basta con no definir `OVERPASS_DIFF_URL`. Para el prototipo la frescura es irrelevante, la misma razón por la que la caché del proxy es permanente.
 - Verificado que recrear el contenedor **no** repite la importación: el entrypoint salta todo el bloque si existe `/db/init_done`.
 - **Resultado medido**: los 4 mundos reales del informe se reconstruyen desde caché vacía en **8,4 s**, íntegramente contra el Overpass local y sin un solo fallo de upstream (antes, minutos y 504 contra los mirrors públicos). Los recuentos de anclajes salen idénticos a los obtenidos vía mirrors (Sanxenxo 106, Toledo 332, Madrid 2559, A Coruña 1371): cambiar de Geofabrik a OSM France no alteró los datos.
+
+# Iteración 5-ago-2026 — rótulos legibles en el mapa base
+
+El usuario mandó una captura del estilo Reino: **los nombres no se leían**. El diagnóstico tenía tres capas y solo una era obvia.
+
+- **El halo era blanco translúcido** (`rgba(255,255,255,0.85)` a 5 px) sobre el prado `#7fae5a`. Ese blanco no separa la letra del fondo: la aclara. El halo estaba puesto pensando en los estilos de papel claro, donde sí funciona; heredado sin revisar al nacer el mapa base.
+- **Cinzel es de trazo fino** y con `scale: 0.92` un paraje sale a 12 px reales, en versalitas y con tracking. Trazo fino + letra pequeña + espaciada es la peor combinación posible contra un color plano.
+- **No hay declutter**: la calzada crema `#f2e7c8` cruza el rótulo. En la captura, «La Atalaya del Ocaso» estaba partido en dos por su propio camino.
+
+## Lo que se decidió: jerarquía, no un tratamiento único
+
+Se maquetaron cuatro tratamientos en canvas —con el mismo código de pintado, sobre tres escenarios de fondo (prado limpio, sobre la calzada, racimo denso)— y se comparó pintado contra pintado. El escenario decisivo no es el prado limpio, donde todo vale, sino los otros dos:
+
+- **Solo halo, en crema opaco** (cambio de tres valores, cero código) se cae justo donde hacía falta: el halo crema y la calzada crema son casi el mismo color, así que sobre el camino desaparece.
+- **Placa en todos los rótulos** es lo más legible en absoluto, pero veinte rectángulos claros convierten el prado en un tablero.
+- **Elegido: placa solo en núcleos, halo crema en parajes.** Resuelve la legibilidad donde el fondo es peor y, de propina, arregla algo que no se había pedido: hasta ahora un pueblo y un paraje se rotulaban casi igual, y en un juego que se camina esa distinción importa. La placa no es vocabulario nuevo — es la cartela del título (`cartouche: banner`, mismo `fill` crema y mismo filete dorado) reducida al tamaño de un nombre.
+
+## Implementación
+
+Sigue la regla de la casa: **el estilo son datos, `map.js` no decide nada**.
+
+- `label.placa` es la **lista de roles** que van sobre caja (`'nucleo'`, `'paraje'`, `'servicio'`, `'ruta'`); vacía en `DEFAULTS`, `['nucleo']` en Reino. Los cuatro puntos de llamada de `drawTextLabel` declaran su rol.
+- `placa` es el grupo nuevo con la geometría y el color de la caja (`fill`, `border`, `lw`, `padX`, `padY`, `radio`, `color`, `sombra`); `null` en `DEFAULTS`, así que ningún otro estilo cambia.
+- `label.haloPasadas` repite el `strokeText`. Con halo opaco una sola pasada deja el borde lavado por el antialiasing; Reino usa 2.
+- `drawPlacaLabel` respeta el contrato de `drawTextLabel` (centro horizontal, y el borde que diga `baseline`), para que la caja cuelgue del punto donde antes empezaba el texto y ningún desplazamiento cambie.
+- Detalle que costaba un rótulo descentrado: `measureText` **incluye el tracking sobrante tras la última letra**, así que hay que descontarlo al calcular el ancho de la caja.
+
+**Verificado** con `node test/headless.mjs` (verde, pero no toca `render/` — no prueba nada de esto) y sobre todo abriendo la app: mundo sintético con `__wa.demo()` y mundo real en **42.8782, -8.5448 (Santiago de Compostela, «Dominios da Pedra Antiga», 7 núcleos y 5 parajes)**, donde los nueve rótulos se leen a la primera. Comprobado también que Pergamino sigue idéntico (filacterias, halo, ninguna placa).
+
+## Pendiente
+
+- **El declutter deja de ser opcional.** Ninguno de los cuatro tratamientos arregla el racimo denso, y la placa lo empeora *visualmente*: dos cajas opacas que chocan cantan mucho más que dos textos que se rozan.
+- Los otros cuatro estilos podrían querer su propia placa (`placa: ['nucleo']` más un grupo `placa`), pero no se ha tocado ninguno.
