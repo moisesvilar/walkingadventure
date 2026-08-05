@@ -5,3 +5,11 @@
 /overpass-db/
 /.cache/
 .DS_Store
+
+# Credenciales locales (clave de Magnific). Ya no se usa —los scripts de generación
+# de sprites se borraron—, pero la regla se queda: nunca al repo.
+/.env
+
+# Material de referencia y pruebas sueltas. Son imágenes de terceros usadas como
+# inspiración de estilo, no fuente del proyecto.
+/temp/
