@@ -1,14 +1,31 @@
-# Overpass API local con el extracto de España (Geofabrik).
+# Overpass API local con el extracto de España (Geofabrik), COMPARTIDO por todas
+# las sesiones y worktrees de la máquina.
 #
-#   docker compose up -d      # primera vez: descarga ~1,2 GB + importación (horas)
-#   docker compose logs -f    # seguir el progreso de la importación
+#   scripts/overpass-setup.sh   # primera vez en la máquina: descarga + importa (horas)
+#   docker compose up -d        # arrancarlo si estuviera parado (desde cualquier worktree)
+#   docker compose logs -f      # seguir el progreso de la importación
 #
-# Cuando termine, responde en http://localhost:12345/api/interpreter y el proxy
-# (server.mjs) lo usa automáticamente como primer upstream. Mientras se importa,
-# el proxy simplemente cae a los mirrors públicos.
+# Nada de esto vive dentro del repo, a propósito. La base de datos está en un
+# VOLUMEN DOCKER CON NOMBRE (walkingadventure-overpass-db), no en un bind mount
+# relativo: así no depende del directorio desde el que se lanzó y ningún worktree
+# se lleva la importación por delante al borrarse. Precedente: la primera
+# importación vivía en ./overpass-db de un worktree de Orca; al borrarse el
+# worktree el contenedor se quedó corriendo, "Up" pero vacío, respondiendo una
+# página de error XML a cada consulta (y el proxy cayendo a los mirrors públicos
+# sin que nadie se enterase). En macOS el volumen con nombre además va dentro del
+# disco de la VM: mucho más rápido que un bind mount para una importación pesada.
 #
-# La base de datos vive en ./overpass-db (decenas de GB). Para empezar de cero:
-# docker compose down && rm -rf overpass-db
+# `name:` fija el nombre del proyecto: sin él, Compose lo deriva del nombre del
+# directorio y cada worktree crearía su propio stack.
+#
+# El extracto .pbf sí es un bind mount, desde ~/.walkingadventure/data (WA_HOME
+# para moverlo). Es un fichero grande y de un solo uso: se descarga fuera del
+# contenedor con curl -C - (reanudable) porque la descarga directa desde Geofabrik
+# se cortaba y el contenedor la reiniciaba desde cero en bucle.
+#
+# Para empezar de cero: docker compose down && docker volume rm walkingadventure-overpass-db
+
+name: walkingadventure
 
 services:
   overpass:
@@ -17,14 +34,21 @@ services:
     environment:
       OVERPASS_META: "no"
       OVERPASS_MODE: init
-      # El extracto se descarga fuera del contenedor (curl -C - reanudable) y se
-      # monta como fichero: la descarga directa desde Geofabrik se cortaba y el
-      # contenedor la reiniciaba desde cero en bucle.
       OVERPASS_PLANET_URL: file:///data/spain-latest.osm.pbf
       # La importación exige XML .bz2; este paso convierte el PBF con osmium
       # (receta documentada de la propia imagen).
       OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
-      OVERPASS_DIFF_URL: https://download.geofabrik.de/europe/spain-updates/
+      # SIN actualizaciones por diffs, a propósito. Para este prototipo la
+      # frescura es irrelevante (la caché del proxy es permanente por la misma
+      # razón) y el bucle de updates solo daba problemas: las secuencias de
+      # replicación de Geofabrik y OSM France no son intercambiables, así que
+      # tras importar el extracto de OSM France el updater no encontraba su
+      # estado (404 en …/NNN.state.txt), bajaba osmChange vacíos y repetía
+      # "Error while downloading diffs" cada pocos minutos para siempre.
+      # Basta con no definir OVERPASS_DIFF_URL: update_overpass_loop.sh solo
+      # actualiza `if [ -n "$OVERPASS_DIFF_URL" ]`. Si algún día hace falta,
+      # poner aquí la replicación del MISMO proveedor del que salió el extracto
+      # y comprobar que el updater encuentra su secuencia inicial.
       OVERPASS_RULES_LOAD: "10"
       # flush-size bajo: menos RAM durante la importación (con 16, el OOM killer
       # mató update_database en una VM de 6 GB)
@@ -33,6 +57,12 @@ services:
     ports:
       - "12345:80"
     volumes:
-      - ./overpass-db:/db
-      - ./data:/data:ro
+      - overpass-db:/db
+      - ${WA_HOME:-${HOME}/.walkingadventure}/data:/data:ro
+    # unless-stopped: vuelve solo al arrancar Docker, así está ya levantado en
+    # cualquier sesión posterior sin hacer nada.
     restart: unless-stopped
+
+volumes:
+  overpass-db:
+    name: walkingadventure-overpass-db

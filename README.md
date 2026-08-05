@@ -8,7 +8,9 @@ Prototipo del generador de mapas de fantasía a partir del mundo real (OSM), ree
 node server.mjs   →  http://localhost:8137
 ```
 
-El servidor sirve los estáticos y hace de proxy de Overpass con caché en disco (`.cache/overpass/`), con esta cadena de upstreams: Overpass local en Docker (`docker-compose.yml`, España completa) → mirrors públicos.
+El servidor sirve los estáticos y hace de proxy de Overpass con caché en disco, con esta cadena de upstreams: Overpass local en Docker (`docker-compose.yml`, España completa) → mirrors públicos.
+
+El Overpass local y la caché se comparten entre todas las sesiones y worktrees de la máquina: la base de datos vive en el volumen Docker `walkingadventure-overpass-db` y el extracto y la caché en `~/.walkingadventure/`. La primera vez en cada máquina, `scripts/overpass-setup.sh` (descarga el extracto e inicia la importación, que tarda horas); después el contenedor arranca solo con Docker y no hay que volver a ejecutarlo. El script es idempotente: si ya sirve datos, sale.
 
 Tests sin navegador ni red: `node test/headless.mjs`.
 

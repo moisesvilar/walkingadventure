@@ -13,13 +13,22 @@ El anclaje real solo aporta coordenadas y tierra firme; el tipo fantástico lo a
 | Ruina | guarida 0.4 · emboscada 0.2 · misterio 0.2 · refugio 0.2 | `historic=ruins/castle/city_gate`, `abandoned:*` |
 | Piedra antigua | ritual 0.4 · misterio 0.4 · revelación 0.2 | `historic=archaeological_site/wayside_cross`, dólmenes, petroglifos, cruceiros |
 | Ermita | refugio 0.4 · encuentro 0.4 · ritual 0.2 | `historic=wayside_shrine`, capillas aisladas |
-| Fuente | encuentro 0.5 · refugio 0.3 · misterio 0.2 | `natural=spring`, `amenity=fountain/drinking_water` |
+| Fuente | encuentro 0.5 · refugio 0.3 · misterio 0.2 | `natural=spring`, `amenity=fountain` (ver nota) |
 | Atalaya | revelación 0.5 · vigilancia 0.3 · encuentro 0.2 | `man_made=tower/lighthouse`, `tourism=viewpoint`, picos |
 | Cruce | emboscada 0.35 · encuentro 0.25 · vigilancia 0.2 · peaje 0.2 | intersección de 2+ rutas nombradas del grafo (sin Overpass) |
 | Puente | peaje 0.25 · guarida 0.2 · emboscada 0.2 · encuentro 0.2 · duelo 0.15 | arista del grafo que cruza un `waterway` (o `bridge=yes`) |
 | Monasterio | refugio 0.4 · saber 0.4 · ritual 0.2 | `amenity=monastery`, conventos, iglesias grandes aisladas |
 
 Vocabulario de escenas: emboscada, encuentro, misterio, refugio, revelación, ritual, guarida, peaje, duelo, vigilancia, saber. El generador de quests elegirá escena según trama, ponderando por estas afinidades (decisión: etiquetas múltiples con pesos, no afinidad fija ni libre).
+
+### Nota (4-ago-2026): `amenity=drinking_water` queda excluido
+
+La versión inicial de esta tabla listaba `amenity=fountain/drinking_water` para Fuente. `drinking_water` se retira de la consulta de anclajes por dos motivos medidos sobre los 4 mundos de referencia (Sanxenxo, Toledo, Madrid, A Coruña):
+
+- **No da reconocimiento.** Es mobiliario urbano sin nombre: A Coruña 186 anclajes con 3 nombrados, Toledo 16 con ninguno. El sentido del anclaje es el guiño de identificar el lugar real, y un caño sin nombre no lo permite. `amenity=fountain` sí: en Madrid, 27 de 78 tienen nombre.
+- **Rompe la diversidad que pide este mismo documento.** Por volumen monopolizaba el sesgo hacia el tipo Fuente — literalmente "cinco fuentes" en vez de "uno de cada". Con él dentro, A Coruña se quedaba sin ningún paraje con escena de vigilancia o revelación y la plantilla "ronda del vigía" no casteaba (5/6); fuera, vuelve a 6/6, y Toledo pasa de 25 fuentes candidatas a 9 con reparto diverso.
+
+Regla general que se deriva: **un tag solo entra si aporta reconocimiento**. Al ampliar la consulta de anclajes hay que vigilar que un tag masivo no inunde el pool, porque el sesgo de tipo es por `kind` y el volumen se traduce en monotonía.
 
 ## Asignación de tipo: sesgo suave
 

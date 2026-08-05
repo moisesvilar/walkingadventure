@@ -1,5 +1,7 @@
-# Datos pesados locales (no van al repo)
-data/
-overpass-db/
-.cache/
+# Datos pesados locales (no van al repo).
+# Rutas ANCLADAS con "/": sin la barra inicial, "data/" también hacía match con
+# js/data/ y se tragó silenciosamente js/data/overpass.js (nunca se commiteó).
+/data/
+/overpass-db/
+/.cache/
 .DS_Store
