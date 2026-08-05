@@ -5,7 +5,7 @@
 import { parseGeo, parsePois } from '../data/overpass.js';
 import { buildSeaMask, computeDisplayRadius } from './seamask.js';
 import { generateSettlements } from './settlements.js';
-import { buildRoutes } from './routes.js';
+import { buildRoutes, linkParajes, pegarAViario } from './routes.js';
 import { generateParajes } from './parajes.js';
 import { castAll } from '../quests/casting.js';
 import { localeFor, namesFor } from '../names/index.js';
@@ -52,9 +52,16 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, onStatus = 
   await onStatus('settlements');
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, seaMask, names);
   await onStatus('routes');
+  // pegar al viario ANTES de trazar: si un núcleo no cuelga de la red principal, el
+  // trazado no tendría más remedio que unirlo con una recta por la que no se puede andar
+  const movidos = pegarAViario(settlements, geo.roads);
   const routes = buildRoutes(settlements, geo.roads, seed, names);
   await onStatus('parajes');
   const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names);
+  // los parajes se enganchan a la red DESPUÉS de existir: hasta aquí no se sabe dónde
+  // están, y algunos nacen precisamente de los cruces de las calzadas
+  movidos.push(...pegarAViario(parajes.filter((p) => p.origin !== 'grafo'), geo.roads));
+  routes.push(...linkParajes(parajes, routes, settlements, geo.roads));
 
   const world = {
     seed,
@@ -67,6 +74,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, onStatus = 
     settlements,
     routes,
     parajes,
+    movidos, // núcleos y parajes desplazados hasta el viario, para poder auditarlo
     seaMask,
     title: names.worldTitle(makeRng(seed + ':title')),
   };
