@@ -9,10 +9,47 @@
     "git": "limpio",
     "maestro": "AUSENTE — las pruebas @app no se pueden ejecutar en esta maquina"
   },
-  "spec_actual": null,
-  "fase": "preflight",
+  "spec_actual": "SPEC-002",
+  "fase": "dev",
   "iteracion": 0,
-  "historial": [],
+  "historial": [
+    {
+      "spec": "SPEC-001",
+      "slug": "andamiaje-pruebas",
+      "resultado": "verde",
+      "iteraciones": 1,
+      "report": "test/reports/SPEC-001-iter-1-run-20260807T230718Z.md",
+      "casos": "100/100 @nucleo",
+      "app": "no ejecutado: Maestro ausente",
+      "merge": "b483e4e"
+    }
+  ],
   "bloqueos": [],
-  "escenarios_anadidos": []
+  "escenarios_anadidos": [],
+  "specs_escritas": [
+    "SPEC-001-andamiaje-pruebas",
+    "SPEC-002-paquete-compartido",
+    "SPEC-003-rejilla-celdas-semilla",
+    "SPEC-004-tramo-personal",
+    "SPEC-005-pool-anclajes-filtros",
+    "SPEC-006-parajes-cobertura-escenas",
+    "SPEC-007-grafo-cosido-ramales",
+    "SPEC-008-filtro-accesibilidad-grafo"
+  ],
+  "veredictos": [
+    {
+      "spec": "SPEC-001",
+      "iteracion": 0,
+      "report": "test/reports/SPEC-001-run-20260807T223412Z.md",
+      "resultado": "FAIL (11 de 73)",
+      "veredicto": "defecto de codigo (2) + defecto de prueba (1)",
+      "defectos_de_codigo": [
+        "scripts/valida-spec-test-map.mjs: el guardian de ejecucion directa compara process.argv[1] con fileURLToPath(import.meta.url); con la ruta pasando por un symlink (macOS /var -> /private/var, /tmp -> /private/tmp) son distintos, el bloque no se ejecuta y el script sale 0 sin validar nada ni imprimir nada. Reproducido a mano fuera de las pruebas.",
+        "scripts/qa-tester-run.sh: no limpia NODE_TEST_CONTEXT (ni NODE_OPTIONS) antes de lanzar node --test. Heredado de un proceso de pruebas padre, la salida del runner anidado cambia de forma, el parseo falla y el runner devuelve 0 con una prueba en rojo. Reproducido a mano: NODE_TEST_CONTEXT=child-v8 bash scripts/qa-tester-run.sh -> rc=0 con un caso fallando."
+      ],
+      "defecto_de_prueba": [
+        "test/nucleo/andamiaje-gps.test.mjs, caso 'Un recorrido emite posiciones a cadencia fija y sin saltos entre puntos consecutivos': tolerancia absoluta de 1e-6 m sobre distancias medidas con una formula distinta a la del productor. El exceso real medido es de 2.0e-5 m sobre 1.389 m (0.0015%), puro desajuste de proyeccion. El criterio de aceptacion se cumple; la tolerancia no es afirmable."
+      ]
+    }
+  ]
 }
