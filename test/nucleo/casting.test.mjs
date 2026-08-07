@@ -1,8 +1,19 @@
 // SPEC-002 · El casting sobre el mundo que genera el paquete compartido.
 //
 // El porte no cambia ni una decisión de casting: lo que se afirma aquí es que
-// sigue siendo determinista y que el mundo mínimo —el suelo de 250 m, que es
-// donde el diseño se pelea— sigue componiendo un lazo jugable.
+// sigue siendo determinista.
+//
+// Aquí faltaba un segundo caso, «El mundo mínimo todavía compone un lazo», y se
+// ha retirado de esta suite —no ablandado, no marcado como pendiente— porque no
+// le toca a SPEC-002 verificarlo: afirma cupos y cobertura de escenas, que
+// docs/specs/SPEC-002-paquete-compartido.md excluye por escrito de su alcance.
+// Una prueba que afirma lo que su spec no promete es defecto de prueba.
+//
+// El escenario sigue vivo en docs/testing.md y lo hereda SPEC-006
+// (docs/specs/SPEC-006-parajes-cobertura-escenas.md), que es la que hace que el
+// suelo de parajes salga del catálogo en vez de salir de lo que sobre. La medida
+// que lo justifica: en el fixture `suelo-250m` no nace ningún paraje y las seis
+// plantillas fallan con «sin candidatos».
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
@@ -24,28 +35,5 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
     assert.deepEqual(reparto(castAll(world)), reparto(castAll(world)), 'dos casteos del mismo catálogo dan repartos distintos');
     // Y el que trae el mundo generado es el mismo: la tubería no castea aparte.
     assert.deepEqual(reparto(world.casting), reparto(castAll(world)));
-  });
-
-  test('El mundo mínimo todavía compone un lazo', async () => {
-    const world = await generaMundo('suelo-250m', semillaDe('suelo-250m', '1'));
-    assert.equal(world.radius, 250, 'el mundo mínimo tiene que ser el del suelo de 250 m');
-
-    const casteadas = world.casting.filter((c) => c.ok);
-    const motivos = world.casting.filter((c) => !c.ok).map((c) => `${c.tpl.id}: ${c.motivo}`);
-    assert.ok(
-      casteadas.length >= 1,
-      `ninguna plantilla castea en el mundo mínimo, así que no hay lazo que cerrar:\n${motivos.join('\n')}`,
-    );
-
-    // Lazo cerrado: empieza y termina cerca del punto de partida del jugador, que
-    // en un mundo generado es su centro.
-    const lazo = casteadas[0];
-    const primero = lazo.beats[0].lugar;
-    const ultimo = lazo.beats[lazo.beats.length - 1].lugar;
-    const alCentro = (p) => Math.hypot(p.x, p.y);
-    assert.ok(
-      Math.abs(alCentro(primero) - alCentro(ultimo)) <= world.radius,
-      `${lazo.tpl.id}: el lazo no vuelve cerca de donde empezó`,
-    );
   });
 });

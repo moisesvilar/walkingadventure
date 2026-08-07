@@ -1377,16 +1377,7 @@
       "fichero": "test/nucleo/casting.test.mjs",
       "caso": "El casting es determinista",
       "escenario": "El casting es determinista",
-      "nota": "Dos casteos del mismo catálogo sobre el mismo mundo dan el mismo reparto, beat a beat, y el casting que trae el mundo generado es ese mismo."
-    },
-    {
-      "spec": "SPEC-002",
-      "criterio": "Escenarios de la batería que este porte tiene que dejar en pie — Casting → «El casting es determinista», «El mundo mínimo todavía compone un lazo».",
-      "nivel": "@nucleo",
-      "fichero": "test/nucleo/casting.test.mjs",
-      "caso": "El mundo mínimo todavía compone un lazo",
-      "escenario": "El mundo mínimo todavía compone un lazo",
-      "nota": "ROJO ESPERADO, y no por el porte: en el mundo de 250 m no se genera ningún paraje, así que las seis plantillas fallan con «sin candidatos para un paraje con escena X». Lo cierra la fila 4 del checklist, el suelo de parajes derivado del catálogo; esta spec no cambia ninguna decisión de generación."
+      "nota": "Dos casteos del mismo catálogo sobre el mismo mundo dan el mismo reparto, beat a beat, y el casting que trae el mundo generado es ese mismo. De los dos escenarios que cita el criterio, este mapa solo cubre este: «El mundo mínimo todavía compone un lazo» estaba aquí y se ha retirado —afirma cupos y cobertura de escenas, que SPEC-002 excluye por escrito—, lo hereda SPEC-006 (docs/specs/SPEC-006-parajes-cobertura-escenas.md) y hoy no tiene ninguna prueba viva. El esquema no admite entrada sin prueba implementada, así que el hueco se ve por ausencia y no disfrazado de cobertura."
     }
   ]
 }
