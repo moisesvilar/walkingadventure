@@ -1,0 +1,619 @@
+{
+  "entradas": [
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un clon limpio del repositorio, cuando se ejecuta `node --test test/nucleo/`, entonces el comando arranca sin instalar ninguna dependencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "node --test test/nucleo/ arranca sin instalar ninguna dependencia",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma la propiedad, no la invocación: ejecutar `node --test test/nucleo/` desde test/nucleo/ sería ejecutar este mismo fichero sin fondo. Se comprueba que no hay package.json ni node_modules y que ningún módulo de test/nucleo/ ni de test/dobles/ importa nada que no sea node: o una ruta relativa."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el andamiaje entregado, cuando se listan los ficheros versionados con `git ls-files`, entonces aparecen los cuatro fixtures, los cinco dobles, el esquema del mapa y el runner.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "Los cuatro fixtures, los cinco dobles, el esquema y el runner están versionados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado cualquier módulo de `test/fixtures/` o de `test/dobles/`, cuando se inspeccionan sus imports, entonces ninguno importa de `packages/nucleo/`, de `app/`, de React Native ni de Expo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "Ningún módulo de fixtures ni de dobles importa del paquete, de la app, de React Native ni de Expo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado cualquier módulo del andamiaje, cuando se ejecuta, entonces no lee ninguna variable de entorno ni ningún fichero `.env`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "Ningún módulo del andamiaje lee variables de entorno ni ficheros .env",
+      "hueco_de_bateria": true,
+      "nota": "Se buscan patrones de código (process.env, dotenv, source de un .env, nombres de credencial), no la palabra: estos ficheros hablan de «.env» en sus comentarios a propósito. La comprobación dinámica está en el caso «El runner no lee ningún .env, no exige credenciales y no necesita conexión»."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el andamiaje entregado, cuando se listan los directorios de pruebas, entonces existen `test/nucleo/`, `test/app/` y `test/reports/` aunque estén vacíos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "Existen test/nucleo/, test/app/ y test/reports/ aunque estén vacíos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/fixtures/osm/`, cuando se enumeran los mundos disponibles, entonces están los cuatro: costero, urbano denso, barrio de tres calles y suelo de 250 m.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Están los cuatro mundos: costero, urbano denso, barrio de tres calles y suelo de 250 m",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el nombre de un mundo, cuando se pide `mundoCongelado(nombre)` dos veces, entonces las dos llamadas devuelven datos idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Dos llamadas al mismo mundo congelado devuelven datos idénticos byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Dos generaciones con la misma semilla dan el mismo mundo» y «Cambiar la semilla cambia el mundo» de docs/testing.md: si el fixture no fuese idéntico entre llamadas, esos escenarios medirían el ruido del dato en vez del determinismo del generador."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el resultado de `mundoCongelado(nombre)`, cuando quien lo recibe lo modifica, entonces una llamada posterior con el mismo nombre sigue devolviendo los datos originales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Modificar un mundo congelado no toca lo que devuelve la llamada siguiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un nombre que no corresponde a ningún fixture, cuando se llama a `mundoCongelado`, entonces falla con un error que nombra lo pedido y enumera los mundos disponibles.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Pedir un mundo que no existe falla nombrando lo pedido y enumerando los disponibles",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un mundo congelado, cuando se pide con la opción de orden invertido, entonces devuelve exactamente los mismos elementos en otro orden de llegada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "El orden invertido devuelve exactamente los mismos elementos en otro orden de llegada",
+      "hueco_de_bateria": true,
+      "nota": "Es lo que hace escribible «El orden de iteración no depende del orden de inserción» de docs/testing.md, que no se puede implementar hasta que exista packages/nucleo/."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado cada fixture, cuando se lee su manifiesto, entonces declara coordenada, radio, fecha de captura, la consulta Overpass literal con la que se capturó y el inventario de etiquetas relevantes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Cada manifiesto declara coordenada, radio, fecha de captura, la consulta literal y el inventario",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el fixture del suelo de 250 m, cuando se lee su manifiesto, entonces su radio declarado es de 250 m.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "El fixture del suelo de 250 m declara un radio de 250 m",
+      "hueco_de_bateria": true,
+      "nota": "Es el mundo de «El mundo mínimo todavía compone un lazo» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el fixture urbano denso, cuando se lee su inventario, entonces contiene al menos un local de adultos o bar de copas y al menos una fuente de agua potable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "El fixture urbano denso trae locales de adultos y agua potable",
+      "hueco_de_bateria": true,
+      "nota": "Es el mundo de «Los anclajes de adultos se excluyen del pool» y «Un tag masivo no monopoliza un tipo de paraje» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el fixture del barrio de tres calles, cuando se lee su inventario, entonces declara cuántas componentes conexas trae su callejero y a qué distancia están entre sí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "El fixture del barrio de tres calles declara sus componentes conexas y a qué distancia están",
+      "hueco_de_bateria": true,
+      "nota": "Es el mundo de «Los huecos cortos se cosen» y «Los huecos largos no se cosen» de docs/testing.md: la prueba afirma que trae las dos clases de hueco, sin las cuales solo se podría escribir uno de los dos escenarios."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado cualquier fixture, cuando se sirve, entonces no se abre ninguna conexión de red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Servir un fixture no abre ninguna conexión de red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un fixture ya capturado, cuando se vuelve a lanzar la captura, entonces se rechaza sin sobrescribir nada y se explica que un fixture que cambia deja de ser un fixture.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-fixtures.test.mjs",
+      "caso": "Recapturar un fixture que ya existe se rechaza sin sobrescribir nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una polilínea y la velocidad de un tramo declarado, cuando se simula el recorrido, entonces se emiten posiciones a cadencia fija a lo largo de la polilínea, sin saltos entre puntos consecutivos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "Un recorrido emite posiciones a cadencia fija y sin saltos entre puntos consecutivos",
+      "hueco_de_bateria": true,
+      "nota": "La distancia entre posiciones consecutivas se mide con una cinta métrica propia de la prueba, no con la del doble: midiendo con la misma función un error de proyección se cancelaría consigo mismo."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el mismo recorrido con los mismos parámetros, cuando se simula dos veces, entonces las dos secuencias son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "El mismo recorrido con los mismos parámetros da dos secuencias idénticas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un recorrido con una parada declarada, cuando se simula, entonces durante la parada la posición no cambia y el tiempo sí avanza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "Durante una parada declarada la posición no cambia y el tiempo sí avanza",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Las paradas no cuentan para medir el ritmo» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un tramo declarado a velocidad de vehículo, cuando se simula, entonces sus posiciones llegan marcadas como de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "Un tramo declarado a velocidad de vehículo llega marcado como de vehículo",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Un viaje en tren no hace avanzar el mundo», «Pasar en coche por delante de un beat no lo valida» y «Volver a casa en autobús echa el telón igual» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un tramo declarado a velocidad ambigua, cuando se simula, entonces sus posiciones llegan marcadas como ambiguas, distinguibles tanto de andar como de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "Un tramo declarado a velocidad ambigua llega marcado como ambiguo, distinguible de andar y de vehículo",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «En la duda, cuenta» y «La medición del tramo sí excluye la velocidad ambigua» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una secuencia simulada, cuando se pide en formato de flujo de Maestro, entonces se obtiene la lista de pasos `setLocation` equivalente, con las mismas posiciones y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "La misma secuencia en formato de flujo de Maestro trae las mismas posiciones en el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una polilínea de un solo punto, cuando se simula, entonces falla con un error explícito en lugar de emitir una secuencia vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "Una polilínea de un solo punto falla con un error explícito en lugar de dar una secuencia vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una velocidad de cero o negativa, cuando se simula, entonces falla nombrando el parámetro inválido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "Una velocidad de cero o negativa falla nombrando el parámetro inválido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el GPS simulado, cuando se ejecuta, entonces el instante de cada posición sale del origen de tiempo recibido y no del reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-gps.test.mjs",
+      "caso": "El instante de cada posición sale del origen de tiempo recibido y no del reloj del sistema",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un reloj de mundo recién creado, cuando se consulta, entonces marca cero pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "Un reloj de mundo recién creado marca cero pasos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un reloj de mundo con el motor de pasos inyectado, cuando se le pide avanzar siete pasos, entonces el motor recibe siete avances consecutivos numerados del uno al siete.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "Pedirle avanzar siete pasos da al motor siete avances consecutivos numerados del uno al siete",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «El contenido de un paso lo decide su número» y «Un paso solo añade» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un reloj de mundo con el motor de pasos inyectado, cuando se le pide avanzar siete pasos, entonces el motor recibe siete avances consecutivos numerados del uno al siete.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "Un objeto con paso(n) sirve igual que una función como motor de pasos",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso del mismo criterio: el contrato declarado del reloj acepta las dos formas y el motor real de SPEC-011 será la segunda. Si solo valiese una, las pruebas tendrían que envolver el motor, y envolver un motor es una manera silenciosa de perder pasos."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un reloj de mundo que ha avanzado, cuando pasa tiempo real sin pedirle nada, entonces sigue marcando los mismos pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "Pasar tiempo real sin pedirle nada deja el reloj de mundo donde estaba",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Estar un mes sin salir no acumula mundo pendiente» de docs/testing.md. La espera real es de 25 ms: es lo único de toda la batería que mira el reloj de verdad, y mira que no pasa nada."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un reloj de mundo sin motor inyectado, cuando se le pide avanzar, entonces falla con un error que nombra la dependencia que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "Un reloj de mundo sin motor inyectado falla nombrando la dependencia que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un número de pasos que no es un entero positivo, cuando se pide avanzar, entonces falla con un error explícito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "Pedir avanzar un número de pasos que no es un entero positivo falla con un error explícito",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el reloj de mundo, cuando se inspecciona su implementación, entonces no usa temporizadores ni ninguna lectura del reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-reloj.test.mjs",
+      "caso": "El reloj de mundo no usa temporizadores ni ninguna lectura del reloj del sistema",
+      "hueco_de_bateria": true,
+      "nota": "Es el hermano por el lado del andamiaje de «No se usa ninguna fuente de azar ni de tiempo del sistema» de docs/testing.md, que habla del paquete compartido y no se puede implementar hasta SPEC-002."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el doble en modo responde, cuando se le pide un texto de LLM, una imagen o una ficha de Places, entonces devuelve la respuesta fija que declara su fixture.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "En modo responde devuelve la respuesta fija que declara su fixture para texto, imagen y Places",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Con LLM y sin LLM la estructura es idéntica» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el doble en modo responde, cuando se le pide dos veces lo mismo, entonces devuelve exactamente lo mismo.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "En modo responde, pedir dos veces lo mismo devuelve exactamente lo mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el doble en modo falla siempre, cuando se le hace cualquier petición de LLM, de imágenes o de Places, entonces todas fallan sin devolver ninguna respuesta parcial.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "En modo falla siempre, todas las peticiones fallan sin devolver ninguna respuesta parcial",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Sin red, la aventura funciona entera» y «Una salida entera se juega sin red» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el doble en modo responde mal, cuando se le pide una respuesta, entonces devuelve una del catálogo de respuestas defectuosas de su fixture.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "En modo responde mal devuelve una respuesta del catálogo de respuestas defectuosas",
+      "hueco_de_bateria": true,
+      "nota": "El catálogo no tiene ninguna entrada de tipo «imagen»: pedirle una imagen en este modo falla en lugar de devolver un defecto. Queda anotado como hallazgo del fixture, no afirmado como comportamiento correcto."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el catálogo de respuestas defectuosas, cuando se enumera, entonces incluye al menos una con un campo desconocido, una con un dato vivo que el código debe ignorar, una con contenido no apto para menores y una con un nombre que choca con el índice del mundo.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "El catálogo de respuestas defectuosas cubre campo desconocido, dato vivo, contenido no apto y nombre que choca",
+      "hueco_de_bateria": true,
+      "nota": "Es el doble que sirve a «Lo que llega fuera del esquema se descarta», «El modelo no escribe ningún dato vivo», «Un texto que no pasa el filtro cae al fallback» y «Un nombre propuesto por el LLM solo se adopta si pasa validación» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un modo que no es ninguno de los tres, cuando se crea el doble, entonces falla enumerando los modos válidos.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "Crear el doble con un modo que no es ninguno de los tres falla enumerando los modos válidos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el doble en cualquiera de sus modos, cuando se le hace una petición, entonces no abre ninguna conexión de red real.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "El doble del proxy no abre ninguna conexión de red real en ninguno de sus modos",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma con el inspector en modo estricto, no leyendo el código: es la única manera de afirmar una ausencia de tráfico."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el doble, cuando se le pregunta qué peticiones ha recibido, entonces devuelve el registro en el orden en que llegaron.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-proxy.test.mjs",
+      "caso": "El doble del proxy devuelve el registro de peticiones en el orden en que llegaron",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un inspector envolviendo una dependencia de red, cuando se hacen tres peticiones, entonces las registra las tres en orden con su destino, su método, sus cabeceras y su cuerpo.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-inspector.test.mjs",
+      "caso": "Tres peticiones quedan registradas en orden con su destino, su método, sus cabeceras y su cuerpo",
+      "hueco_de_bateria": true,
+      "nota": "Es el instrumento de «Las coordenadas salen una sola vez, al generar el mapa» y «Las fotos de Places se piden al crear el mapa» de docs/testing.md."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un inspector con peticiones registradas, cuando se le pregunta si algo contiene un texto dado, entonces responde mirando todos los destinos, todas las cabeceras y todos los cuerpos.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-inspector.test.mjs",
+      "caso": "Preguntar si algo contiene un texto mira todos los destinos, todas las cabeceras y todos los cuerpos",
+      "hueco_de_bateria": true,
+      "nota": "Es el instrumento de «El prompt del LLM no lleva ningún dato real» y «El proxy no identifica a nadie» de docs/testing.md: mirar solo el cuerpo dejaría pasar una coordenada en la query string o en una cabecera."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un inspector que no ha visto ninguna petición, cuando se consulta su registro, entonces devuelve una lista vacía y no un error.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-inspector.test.mjs",
+      "caso": "Un inspector que no ha visto ninguna petición devuelve una lista vacía y no un error",
+      "hueco_de_bateria": true,
+      "nota": "Es lo que permite que «No se reporta a ningún sitio» y «El rastro de ubicación no se guarda nunca» de docs/testing.md se afirmen sobre un registro vacío en vez de sobre una excepción."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el inspector en modo estricto, cuando algo intenta salir a la red por un camino que el inspector no envuelve, entonces la salida se corta con un error que nombra el destino.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-inspector.test.mjs",
+      "caso": "En modo estricto, una salida a red por un camino no envuelto se corta con un error que nombra el destino",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un inspector en modo estricto, cuando se le pide soltar la frontera al terminar, entonces la deja exactamente como estaba antes de envolverla.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-inspector.test.mjs",
+      "caso": "En modo estricto, soltar la frontera la deja exactamente como estaba antes de envolverla",
+      "hueco_de_bateria": true,
+      "nota": "Se compara el descriptor de propiedad entero, no el valor: restaurar el valor pero perder enumerable o configurable dejaría la frontera parecida y no igual, y el fallo aparecería en otra prueba cualquiera."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el inspector, cuando registra una petición, entonces guarda el cuerpo tal cual llegó, sin recortarlo ni normalizarlo.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/andamiaje-inspector.test.mjs",
+      "caso": "El inspector guarda el cuerpo tal cual llegó, sin recortarlo ni normalizarlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/nucleo/` con pruebas que pasan, cuando se ejecuta `scripts/qa-tester-run.sh SPEC-001`, entonces termina con código 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con pruebas que pasan, el runner termina con código 0",
+      "hueco_de_bateria": true,
+      "nota": "Todas las pruebas del runner corren sobre un sandbox (test/nucleo/andamiaje-sandbox.mjs): es el runner de verdad sobre un repo de mentira, porque invocarlo contra este árbol sería invocarse a sí mismo sin fondo."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una ejecución cualquiera, cuando el runner termina, entonces ha escrito `test/reports/<ETIQUETA>-run-<sello>.md` con el sello en formato `YYYYMMDDTHHMMSSZ`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "El runner escribe test/reports/<ETIQUETA>-run-<sello>.md con el sello en formato YYYYMMDDTHHMMSSZ",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una ejecución cualquiera, cuando el runner termina, entonces su salida estándar contiene la ruta del report y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Por la salida estándar del runner sale la ruta del report y nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/nucleo/` con una prueba que falla, cuando se ejecuta el runner, entonces termina con código 1.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con una prueba que falla, el runner termina con código 1",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una prueba que falla, cuando se lee el report, entonces contiene el nombre literal del caso y la salida literal del fallo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "El report de un fallo trae el nombre literal del caso y la salida literal del fallo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado, cuando se ejecuta el runner, entonces el report registra la ausencia en la sección de infraestructura, separada de los resultados de las pruebas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con Maestro ausente, el report registra la ausencia en infraestructura y no entre los resultados",
+      "hueco_de_bateria": true,
+      "nota": "El caso se salta solo si Maestro estuviera instalado, porque el criterio lo presupone ausente. En esta máquina no lo está."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado y las pruebas de `@nucleo` pasan, cuando se ejecuta el runner sin acotar nivel, entonces termina con código 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con Maestro ausente y las pruebas de @nucleo en verde, el runner sin acotar nivel termina con código 0",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado, cuando se ejecuta el runner con `--app-only`, entonces termina con un código distinto de 0 porque no se ha ejecutado ninguna prueba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con Maestro ausente, el runner con --app-only termina con un código distinto de 0",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/nucleo/` sin ninguna prueba, cuando se ejecuta el runner, entonces termina con un código distinto de 0 y el report dice que no había pruebas que ejecutar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Sin ninguna prueba en test/nucleo/, el runner termina con código distinto de 0 y lo dice en el report",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/app/` sin ningún flujo, cuando se ejecuta el runner sin acotar nivel, entonces el report registra que no había flujos y las de `@nucleo` se ejecutan igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Sin ningún flujo en test/app/, el report lo registra y las de @nucleo se ejecutan igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un import que falla en `packages/nucleo/` mencionando React Native o Expo, cuando se ejecuta el runner, entonces ese hallazgo encabeza el report por delante de cualquier otro resultado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Un import que falla en packages/nucleo/ mencionando React Native encabeza el report",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por posición en el texto del report, no solo por presencia: el criterio es sobre el orden de lectura de quien orquesta."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una etiqueta que no es `SPEC-NNN`, `SPEC-NNN-iter-M` ni `SUITE`, cuando se ejecuta el runner, entonces falla antes de ejecutar nada con un código que no es ni 0 ni 1.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Una etiqueta que no es SPEC-NNN, SPEC-NNN-iter-M ni SUITE falla antes de ejecutar nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el runner sin argumento de etiqueta, cuando se ejecuta, entonces falla mostrando el modo de empleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "El runner sin argumento de etiqueta falla mostrando el modo de empleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una versión de Node anterior a la 20, cuando se ejecuta el runner, entonces falla antes de ejecutar nada nombrando la versión mínima.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con una versión de Node anterior a la 20, el runner falla antes de ejecutar nada nombrando la versión mínima",
+      "hueco_de_bateria": true,
+      "nota": "Se planta un `node` de mentira delante en el PATH del subproceso: es la única manera de afirmar la comprobación sin tener instalado un Node viejo."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/reports/` inexistente, cuando se ejecuta el runner, entonces lo crea y escribe el report igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con test/reports/ inexistente, el runner lo crea y escribe el report igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado un árbol de trabajo sin cambios, cuando se ejecuta el runner dos veces seguidas, entonces los dos reports difieren solo en el sello de tiempo y en las duraciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Dos ejecuciones seguidas sobre el mismo árbol dan reports que solo difieren en el sello y las duraciones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado el runner, cuando se ejecuta, entonces no lee ningún `.env`, no exige ninguna credencial y no necesita conexión.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "El runner no lee ningún .env, no exige credenciales y no necesita conexión",
+      "hueco_de_bateria": true,
+      "nota": "Comprobación dinámica: se planta un .env envenenado en la raíz del sandbox y se ejecuta con un entorno pelado (solo PATH, HOME y TMPDIR). El veredicto no cambia y el valor no aparece en el report."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado ficheros sin commitear en el árbol de trabajo, cuando se ejecuta el runner, entonces el report lo registra como aviso y la ejecución continúa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Con ficheros sin commitear, el report lo registra como aviso y la ejecución continúa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado cualquier ejecución, cuando se lee el report, entonces su primera línea de contenido dice PASS o FAIL y coincide con el código de salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "La primera línea de contenido del report dice PASS o FAIL y coincide con el código de salida",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren los cuatro desenlaces: verde, prueba en rojo, nada que ejecutar y regresión de núcleo."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/spec-test-map.schema.json`, cuando se lee, entonces declara los campos de una entrada: spec, criterio, nivel, fichero, nombre del caso y escenario de la batería que lo respalda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "El esquema declara spec, criterio, nivel, fichero, nombre del caso y escenario que lo respalda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado `test/spec-test-map.schema.json`, cuando se lee, entonces declara los campos de una entrada: spec, criterio, nivel, fichero, nombre del caso y escenario de la batería que lo respalda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "El mapa de cobertura de verdad del repo es válido contra su esquema",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso del mismo criterio: un esquema bien escrito no sirve de nada si el mapa que lo acompaña no valida contra él. Este caso corre el validador contra el árbol de verdad."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una entrada cuyo nivel no es `@nucleo`, `@app`, `@red` ni `@manual`, cuando se valida el mapa, entonces la validación falla nombrando la entrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "Una entrada con un nivel que no es de los cuatro rompe la validación nombrando la entrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una entrada que apunta a un fichero de pruebas que no existe, cuando se valida el mapa, entonces la validación falla nombrando el fichero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "Una entrada que apunta a un fichero de pruebas que no existe rompe la validación nombrando el fichero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una entrada que cita un escenario que no aparece en `docs/testing.md`, cuando se valida el mapa, entonces la validación falla nombrando el escenario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "Una entrada que cita un escenario que no está en docs/testing.md rompe la validación nombrando el escenario",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado una entrada sin escenario que la respalde, cuando se valida el mapa, entonces se acepta solo si viene marcada como hueco de la batería.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "Una entrada sin escenario se acepta solo si viene marcada como hueco de la batería",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que `test/spec-test-map.json` todavía no existe, cuando se valida el mapa, entonces se informa de que aún no hay mapa y no se trata como error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "Si test/spec-test-map.json todavía no existe, la validación lo informa y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado cualquier ejecución del runner, cuando se lee el report, entonces el resultado de validar el mapa aparece como aviso de infraestructura y nunca como una prueba en rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
+      "caso": "El resultado de validar el mapa sale en el report como aviso de infraestructura y nunca como prueba en rojo",
+      "hueco_de_bateria": true
+    }
+  ]
+}
