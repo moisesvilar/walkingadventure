@@ -5,7 +5,7 @@
 **Aquí ya no se anotan tareas de implementación.** El camino es otro, y tiene cuatro pasos por delante:
 
 1. ~~La arquitectura de la app~~ → **hecha**: `game-design/arquitectura.md` (React Native con Expo, generador en un paquete compartido que sigue corriendo en Node, y un proxy ciego que guarda las claves sin identificar a nadie).
-2. ~~El diseño de las pantallas, al menos las principales, documentado en artefactos.~~ → **hecho** el 6-ago-2026: seis artefactos, treinta y nueve pantallas, ningún momento del bucle sin dibujar. Índice, resúmenes y enlaces en `docs/pantallas.md`.
+2. ~~El diseño de las pantallas, al menos las principales, documentado en artefactos.~~ → **hecho** el 6-ago-2026: seis artefactos, cuarenta pantallas, ningún momento del bucle sin dibujar. Índice, resúmenes y enlaces en `docs/pantallas.md`.
 3. ~~El PRD completo, a partir de `game-design/` y del paso anterior.~~ → **hecho** el 7-ago-2026: `docs/prd.md` (116 RF, 16 RNF, exclusiones y supuestos declarados) y `docs/checklist.md` (42 specs en 6 bloques). Relato en `docs/starting.md` (XX).
 4. **Las tareas de implementación**, que salen del PRD y se ejecutan con el bucle `/somo-spec-fable` → `/somo-dev-fable` → `/somo-qa-dev-fable` → `/somo-qa-tester-fable`, repitiendo hasta tener las pruebas en verde y las tareas cerradas. El backlog ya existe: `docs/checklist.md`.
 
@@ -23,7 +23,7 @@ Tres sí conviene mirarlos antes de tocar lo que dependa de ellos: **el tamaño 
 
 **El paso 2 está cerrado** (6-ago-2026). Los seis artefactos están en `docs/pantallas.md` con enlace y resumen. Dejó catorce decisiones nuevas, tres pendientes cerrados —el 2 de `bucle-jugable.md`, el 1 de `arquitectura.md` y medio del 1 de `accesibilidad.md`— y un documento que no existía, `game-design/lenguaje.md`. Conviene tenerlo anotado porque es el argumento de que el paso no era un adorno: ninguna de esas decisiones habría salido leyendo los documentos.
 
-**El paso 3 está cerrado** (7-ago-2026): `docs/prd.md` y `docs/checklist.md`. **Lo siguiente es el paso 4, ejecutar el checklist con el pipeline.** El PRD dejó marcados quince huecos de cobertura en `docs/testing.md` (RF con ⚠ sin escenario) que conviene rellenar antes o durante sus specs.
+**El paso 3 está cerrado** (7-ago-2026): `docs/prd.md` y `docs/checklist.md`. **Lo siguiente es el paso 4, ejecutar el checklist con el pipeline**, y a partir de ahí la columna `Estado` del checklist es de quien orquesta el bucle: nadie la toca a mano. El PRD dejó marcados quince huecos de cobertura en `docs/testing.md` (RF con ⚠ sin escenario) que conviene rellenar antes o durante sus specs.
 
 ## Ideas sin cerrar
 
