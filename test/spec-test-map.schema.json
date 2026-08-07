@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://walkingadventure.local/test/spec-test-map.schema.json",
+  "title": "Mapa de cobertura de specs y pruebas",
+  "description": "Documento normativo de test/spec-test-map.json, que escribe wa-qa-dev. No se valida con un motor genérico de JSON Schema: el repo no tiene dependencias de runtime y el validador es scripts/valida-spec-test-map.mjs, que además comprueba dos cosas que un esquema no puede (que el fichero de pruebas exista y que el escenario esté en docs/testing.md).",
+  "type": "object",
+  "required": ["entradas"],
+  "additionalProperties": false,
+  "properties": {
+    "entradas": {
+      "type": "array",
+      "description": "Una entrada por criterio de aceptación cubierto.",
+      "items": { "$ref": "#/$defs/entrada" }
+    }
+  },
+  "$defs": {
+    "entrada": {
+      "type": "object",
+      "required": ["spec", "criterio", "nivel", "fichero", "caso"],
+      "additionalProperties": false,
+      "properties": {
+        "spec": {
+          "type": "string",
+          "description": "Identificador de la spec o de su iteración.",
+          "pattern": "^SPEC-[0-9]{3}(-iter-[0-9]+)?$"
+        },
+        "criterio": {
+          "type": "string",
+          "description": "El criterio de aceptación que cubre esta entrada, en el texto de la spec.",
+          "minLength": 1
+        },
+        "nivel": {
+          "type": "string",
+          "description": "Nivel de ejecución de docs/testing.md, que decide dónde vive y con qué se corre.",
+          "enum": ["@nucleo", "@app", "@red", "@manual"]
+        },
+        "fichero": {
+          "type": "string",
+          "description": "Ruta del fichero de pruebas desde la raíz del repo. Para @manual, docs/testing.md.",
+          "minLength": 1
+        },
+        "caso": {
+          "type": "string",
+          "description": "Nombre del caso, literalmente el nombre del escenario de docs/testing.md. Es lo que permite cruzar batería e implementación con un grep.",
+          "minLength": 1
+        },
+        "escenario": {
+          "type": "string",
+          "description": "Nombre del escenario de docs/testing.md que respalda esta entrada. Se omite solo si la entrada viene marcada como hueco de la batería."
+        },
+        "hueco_de_bateria": {
+          "type": "boolean",
+          "default": false,
+          "description": "La spec pide algo que la batería todavía no cubre. Se acepta, pero declarado: un hueco silencioso es indistinguible de un olvido."
+        },
+        "nota": {
+          "type": "string",
+          "description": "Aclaración libre. Por ejemplo, por qué un criterio se cubre con dos casos."
+        }
+      }
+    }
+  }
+}

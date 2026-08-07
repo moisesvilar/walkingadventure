@@ -1,0 +1,54 @@
+{
+  "_nota": "Catálogo de respuestas defectuosas del doble del proxy en modo 'responde-mal'. Cada entrada existe porque hay una manera concreta de que el modelo estropee una partida, y el código tiene que sobrevivir a las cuatro: campo desconocido, dato vivo, contenido no apto para menores y nombre que choca con el índice del mundo.",
+  "catalogo": [
+    {
+      "id": "campo-desconocido",
+      "tipo": "texto",
+      "motivo": "campo-desconocido",
+      "descripcion": "Trae un campo que el esquema no declara. Lo que llega fuera del esquema se descarta, y el resto de la respuesta se usa igual.",
+      "respuesta": {
+        "texto": "El puente viejo cruje bajo tus botas.",
+        "prioridad_render": 9,
+        "continuacion_sugerida": "capitulo-2"
+      }
+    },
+    {
+      "id": "dato-vivo",
+      "tipo": "places",
+      "motivo": "dato-vivo",
+      "descripcion": "Trae horario, teléfono y valoración del negocio real. El modelo no escribe ningún dato vivo: esto se ignora entero, no se pinta y no se guarda.",
+      "respuesta": {
+        "foto": {
+          "referencia": "fixture-places-0002",
+          "atribucion": "Fotografía de ejemplo del andamiaje de pruebas",
+          "ancho": 800,
+          "alto": 600
+        },
+        "horario": "Abre hoy de 9:00 a 14:00",
+        "telefono": "+34 900 000 000",
+        "valoracion": 4.2,
+        "precio_medio_eur": 18
+      }
+    },
+    {
+      "id": "no-apto",
+      "tipo": "texto",
+      "motivo": "no-apto",
+      "descripcion": "Texto que no pasa el filtro de aptitud para menores: manda a beber en el anclaje real y suelta un exabrupto. Un texto así cae al fallback, nunca a la pantalla.",
+      "respuesta": {
+        "texto": "El tabernero te sirve una ronda de aguardiente y te suelta que el camino de al lado es una puta ruina."
+      }
+    },
+    {
+      "id": "nombre-que-choca",
+      "tipo": "texto",
+      "motivo": "nombre-que-choca",
+      "descripcion": "Bautiza un lugar con un nombre que ya está en el índice del mundo. El caso se monta sembrando el índice con este mismo nombre; el generador tiene que resolver el choque en lugar de duplicar la entrada.",
+      "nombre_propuesto": "A Ponte Vella",
+      "respuesta": {
+        "texto": "Llegas a A Ponte Vella, que no es la que conoces.",
+        "nombre": "A Ponte Vella"
+      }
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "nombre": "suelo-250m",
+  "descripcion": "Sanxenxo con el radio mínimo de 250 m: el mundo más pequeño que el generador debe seguir componiendo.",
+  "coordenada": {
+    "lat": 42.402,
+    "lon": -8.809
+  },
+  "radio_m": 250,
+  "capturado": "2026-08-07",
+  "fuente": "Overpass local del proyecto sobre el extracto spain-latest (scripts/overpass-setup.sh)",
+  "consultas": {
+    "geo": "\n[out:json][timeout:180];\nway[\"natural\"=\"coastline\"](around:250,42.402,-8.809);\nout geom;\n(\n  way[\"natural\"=\"water\"](around:250,42.402,-8.809);\n  way[\"waterway\"~\"^(river|stream|canal)$\"](around:250,42.402,-8.809);\n  way[\"landuse\"=\"forest\"](around:250,42.402,-8.809);\n  way[\"natural\"=\"wood\"](around:250,42.402,-8.809);\n  way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary|unclassified|track)$\"](around:250,42.402,-8.809);\n  node[\"natural\"=\"peak\"](around:250,42.402,-8.809);\n);\nout geom 8000;",
+    "pois": "\n[out:json][timeout:180];\n(\n  nwr[\"amenity\"=\"place_of_worship\"](around:250,42.402,-8.809);\n  nwr[\"amenity\"=\"monastery\"](around:250,42.402,-8.809);\n  nwr[\"historic\"~\"^(monument|memorial|castle|ruins|city_gate|archaeological_site|wayside_cross|wayside_shrine|monastery)$\"](around:250,42.402,-8.809);\n  nwr[\"tourism\"=\"viewpoint\"](around:250,42.402,-8.809);\n  nwr[\"man_made\"~\"^(tower|lighthouse)$\"](around:250,42.402,-8.809);\n  nwr[\"natural\"=\"spring\"](around:250,42.402,-8.809);\n  nwr[\"amenity\"=\"fountain\"](around:250,42.402,-8.809);\n  nwr[\"leisure\"=\"park\"](around:250,42.402,-8.809);\n  nwr[\"shop\"=\"mall\"](around:250,42.402,-8.809);\n  nwr[\"amenity\"~\"^(cafe|restaurant|ice_cream|fast_food|library)$\"](around:250,42.402,-8.809);\n  nwr[\"amenity\"=\"drinking_water\"](around:250,42.402,-8.809);\n  nwr[\"amenity\"~\"^(bar|pub|nightclub|stripclub|casino|gambling|brothel)$\"](around:250,42.402,-8.809);\n  nwr[\"shop\"~\"^(erotic|alcohol|tobacco|bookmaker)$\"](around:250,42.402,-8.809);\n);\nout center 12000;",
+    "callejero": "\n[out:json][timeout:120];\nway[\"highway\"~\"^(residential|living_street|pedestrian|service|unclassified|track|path|footway|cycleway|steps)$\"](around:250,42.402,-8.809);\nout geom 3000;"
+  },
+  "inventario": {
+    "geo": {
+      "total": 20
+    },
+    "pois": {
+      "total": 14,
+      "locales_adultos": {
+        "total": 4,
+        "ejemplos": [
+          {
+            "tipo": "node",
+            "id": 3648044328,
+            "amenity": "bar",
+            "shop": null,
+            "nombre": "El Paseo"
+          },
+          {
+            "tipo": "node",
+            "id": 3648044337,
+            "amenity": "pub",
+            "shop": null,
+            "nombre": "Tapería Bar Sanse Bulevar"
+          },
+          {
+            "tipo": "node",
+            "id": 3689211483,
+            "amenity": "bar",
+            "shop": null,
+            "nombre": null
+          },
+          {
+            "tipo": "node",
+            "id": 4997963277,
+            "amenity": "bar",
+            "shop": null,
+            "nombre": null
+          }
+        ]
+      },
+      "agua_potable": {
+        "total": 0
+      },
+      "por_etiqueta": {
+        "amenity=bar": 3,
+        "amenity=cafe": 1,
+        "amenity=fast_food": 1,
+        "amenity=ice_cream": 2,
+        "amenity=pub": 1,
+        "amenity=restaurant": 4,
+        "historic=memorial": 1,
+        "leisure=park": 1,
+        "tourism=artwork": 1
+      }
+    },
+    "callejero": {
+      "total_vias": 77,
+      "componentes": 9,
+      "vias_por_componente": [
+        66,
+        3,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "distancia_al_vecino_mas_cercano_m": [
+        6,
+        19,
+        12,
+        6,
+        7,
+        7,
+        18,
+        18,
+        12
+      ],
+      "distancia_minima_entre_componentes_m": 6,
+      "distancia_maxima_al_vecino_mas_cercano_m": 19
+    }
+  }
+}

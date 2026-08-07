@@ -1,0 +1,20 @@
+{
+  "_nota": "Respuestas fijas del doble del proxy en modo 'responde'. La forma del sobre es convención del andamiaje hasta que la spec del proxy la cierre: lo que importa aquí es que sea siempre la misma, para que una prueba pueda afirmar que con LLM y sin LLM la estructura del resultado es idéntica.",
+  "texto": {
+    "texto": "El puente viejo cruje bajo tus botas, y alguien ha dejado una flor seca en la barandilla."
+  },
+  "imagen": {
+    "formato": "png",
+    "ancho": 512,
+    "alto": 512,
+    "datos_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+  },
+  "places": {
+    "foto": {
+      "referencia": "fixture-places-0001",
+      "atribucion": "Fotografía de ejemplo del andamiaje de pruebas",
+      "ancho": 800,
+      "alto": 600
+    }
+  }
+}

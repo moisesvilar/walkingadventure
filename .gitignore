@@ -14,5 +14,8 @@
 # inspiración de estilo, no fuente del proyecto.
 /temp/
 
-# Reports de ejecución de pruebas: se regeneran, no se versionan.
-/test/reports/
+# Reports de ejecución de pruebas: se regeneran, no se versionan. El .gitkeep sí,
+# porque el runner debe encontrar el directorio en un clon limpio (y lo crea si no
+# está, pero un clon donde ya existe es una cosa menos que explicar).
+/test/reports/*
+!/test/reports/.gitkeep

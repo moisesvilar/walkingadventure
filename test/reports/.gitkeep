@@ -1,0 +1,1 @@
+Los reports los escribe solo el runner (scripts/qa-tester-run.sh) y no se versionan.

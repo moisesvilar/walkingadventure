@@ -1,0 +1,50 @@
+{
+  "nombre": "barrio-tres-calles",
+  "descripcion": "Aldea de Allariz con el callejero troceado: cuatro componentes conexas separadas por huecos cortos y uno largo.",
+  "coordenada": {
+    "lat": 42.18,
+    "lon": -7.82
+  },
+  "radio_m": 500,
+  "capturado": "2026-08-07",
+  "fuente": "Overpass local del proyecto sobre el extracto spain-latest (scripts/overpass-setup.sh)",
+  "consultas": {
+    "geo": "\n[out:json][timeout:180];\nway[\"natural\"=\"coastline\"](around:500,42.18,-7.82);\nout geom;\n(\n  way[\"natural\"=\"water\"](around:500,42.18,-7.82);\n  way[\"waterway\"~\"^(river|stream|canal)$\"](around:500,42.18,-7.82);\n  way[\"landuse\"=\"forest\"](around:500,42.18,-7.82);\n  way[\"natural\"=\"wood\"](around:500,42.18,-7.82);\n  way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary|unclassified|track)$\"](around:500,42.18,-7.82);\n  node[\"natural\"=\"peak\"](around:500,42.18,-7.82);\n);\nout geom 8000;",
+    "pois": "\n[out:json][timeout:180];\n(\n  nwr[\"amenity\"=\"place_of_worship\"](around:500,42.18,-7.82);\n  nwr[\"amenity\"=\"monastery\"](around:500,42.18,-7.82);\n  nwr[\"historic\"~\"^(monument|memorial|castle|ruins|city_gate|archaeological_site|wayside_cross|wayside_shrine|monastery)$\"](around:500,42.18,-7.82);\n  nwr[\"tourism\"=\"viewpoint\"](around:500,42.18,-7.82);\n  nwr[\"man_made\"~\"^(tower|lighthouse)$\"](around:500,42.18,-7.82);\n  nwr[\"natural\"=\"spring\"](around:500,42.18,-7.82);\n  nwr[\"amenity\"=\"fountain\"](around:500,42.18,-7.82);\n  nwr[\"leisure\"=\"park\"](around:500,42.18,-7.82);\n  nwr[\"shop\"=\"mall\"](around:500,42.18,-7.82);\n  nwr[\"amenity\"~\"^(cafe|restaurant|ice_cream|fast_food|library)$\"](around:500,42.18,-7.82);\n  nwr[\"amenity\"=\"drinking_water\"](around:500,42.18,-7.82);\n  nwr[\"amenity\"~\"^(bar|pub|nightclub|stripclub|casino|gambling|brothel)$\"](around:500,42.18,-7.82);\n  nwr[\"shop\"~\"^(erotic|alcohol|tobacco|bookmaker)$\"](around:500,42.18,-7.82);\n);\nout center 12000;",
+    "callejero": "\n[out:json][timeout:120];\nway[\"highway\"~\"^(residential|living_street|pedestrian|service|unclassified|track|path|footway|cycleway|steps)$\"](around:500,42.18,-7.82);\nout geom 3000;"
+  },
+  "inventario": {
+    "geo": {
+      "total": 8
+    },
+    "pois": {
+      "total": 0,
+      "locales_adultos": {
+        "total": 0,
+        "ejemplos": []
+      },
+      "agua_potable": {
+        "total": 0
+      },
+      "por_etiqueta": {}
+    },
+    "callejero": {
+      "total_vias": 19,
+      "componentes": 4,
+      "vias_por_componente": [
+        9,
+        8,
+        1,
+        1
+      ],
+      "distancia_al_vecino_mas_cercano_m": [
+        239,
+        22,
+        104,
+        22
+      ],
+      "distancia_minima_entre_componentes_m": 22,
+      "distancia_maxima_al_vecino_mas_cercano_m": 239
+    }
+  }
+}
