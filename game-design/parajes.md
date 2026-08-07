@@ -34,6 +34,14 @@ Regla general que se deriva: **un tag solo entra si aporta reconocimiento**. Al 
 
 El tipo se asigna con la semilla, garantizando diversidad (mejor uno de cada que cinco fuentes), pero si el lugar real "pega" con un tipo (una torre real, un manantial real, una capilla real), ese tipo recibe más peso en el sorteo. Resultado: sorpresa casi siempre, y de vez en cuando el guiño de reconocer el lugar real en su versión fantástica. Cruce y Puente son la excepción: su posición sale del grafo viario, así que su tipo viene dado.
 
+### Desempate (5-ago-2026): la cobertura manda sobre la afinidad
+
+Este documento decía que el sesgo es suave y que el tipo está desacoplado del anclaje, pero no decía qué pasa cuando el sesgo y la necesidad de la historia se estorban. Queda resuelto: **cuando chocan, gana la cobertura de escenas**.
+
+Es decir, el orden se invierte respecto a como se había implementado. Primero se eligen los **tipos** necesarios para que el mundo cubra el vocabulario de escenas que piden las plantillas; después se les asigna anclaje real, con el sesgo suave de siempre si hay uno afín y **sacrificándolo sin drama si no lo hay**. Que una atalaya sea un bar es infinitamente mejor que quedarse sin ningún sitio desde el que vigilar: el jugador le echa imaginación —es el principio de este documento— pero de un mundo sin escena de vigilancia no se puede echar mano.
+
+Consecuencia medida: los fallos del informe de casting son siempre de la forma *"sin candidatos para X: un paraje con escena Y"*, y se dan **incluso en mundos sintéticos con 90 anclajes disponibles**. No es escasez de lugares reales; es que el sorteo de tipos no cubría el vocabulario.
+
 ## Selección cuando hay exceso de candidatos
 
 Con más candidatos que huecos se puntúa cada anclaje con dos criterios (decisión: sin reparto espacial explícito, sin azar puro):
@@ -48,6 +56,28 @@ Sobre los mejor puntuados se sortea con la semilla (el azar desempata, no manda)
 Cupo orientativo por radio: 250 m → 1, 500 m → 2, 1 km → 4, 2 km → 6-8 (interpolando como los núcleos; por encima, saturar en ~8: más parajes no añaden beats a una aventura de 3 h).
 
 En páramos OSM sin anclajes suficientes, el colchón son **Cruce y Puente**: salen del grafo viario ya calculado, sin Overpass, y existen en cualquier mundo con carreteras. Garantizan un mínimo de 2-3 parajes siempre; los demás tipos solo aparecen si hay anclajes reales (no se inventan posiciones sintéticas).
+
+### El suelo del cupo se deriva, no se intuye (5-ago-2026)
+
+El cupo de arriba está calibrado por ritmo —cuántos hitos caben en una aventura sin que dejen de ser hitos— y por eso da 2 parajes a los 500 m. Pero eso deja mundos pequeños que no pueden montar una quest, y el motivo no es el ritmo sino la aritmética. **El mínimo tiene que salir del catálogo, no del gusto:**
+
+```
+parajes mínimos = escenas distintas que piden las plantillas ÷ escenas por paraje
+```
+
+Hoy las seis plantillas piden siete escenas distintas —guarida, encuentro, misterio, vigilancia, revelación, emboscada, ritual— y cada paraje lleva dos o más, así que el suelo son **cuatro parajes**, no dos. Y es una regla viva: si el catálogo crece a 20-30 plantillas y el vocabulario de escenas se ensancha, el suelo sube solo.
+
+Esto zanja de paso la discusión de "cuánta densidad" en radios pequeños, que se estaba planteando a ojo y con miedo a convertir el barrio en un parque temático. **No hacen falta trece parajes en 500 m: hacen falta cuatro.** Uno cada ~125 m de recorrido real, que sigue siendo un hito. El cupo por ritmo sigue mandando como techo; esto solo pone un suelo por debajo del cual el mundo no es jugable.
+
+## Fuente de anclajes: OSM de base, Google Places de relleno (5-ago-2026)
+
+OSM sigue siendo la tubería —terreno, costa, ríos, callejero y la mayoría de los POIs—, pero **va flojo de negocio pequeño en España**: la asesoría, la clínica dental, la barbería, el taller. Google Places sí los tiene, así que entra **solo a rellenar el pool de anclajes** donde OSM no llega. No sustituye ninguna fase: enriquece el pool y ya.
+
+Tres cautelas que hay que resolver antes de conectarlo, no después:
+
+- **Los términos de Places restringen lo que se puede almacenar.** El campo pensado para guardarse indefinidamente es el `place_id`; el resto del contenido —nombre y coordenadas incluidos— hay que refrescarlo periódicamente. Y hay una segunda cláusula que nos toca de lleno: mostrar datos de Places sobre un mapa que no es de Google, que es exactamente lo que hacemos con nuestro canvas. Hay que leerlo antes de construir encima.
+- **El determinismo ya está cubierto**, y por una decisión anterior: `bucle-jugable.md` §5 dice que lo generado no se resiembra jamás. Con el mundo congelado al crearse, da igual que la fuente cambie por debajo — tu mapa ya es tuyo. La solución estaba puesta antes de que existiera el problema.
+- **Sigue en pie la regla del reconocimiento**: un tag —o un tipo de lugar de Places— solo entra si aporta reconocimiento, y hay que vigilar que ninguno inunde el pool. Más anclajes no es más diversidad de escenas: trece locales comerciales son todos la misma categoría y alimentan los mismos tipos de paraje. Lo que ensancha el vocabulario de escenas son torres, miradores, capillas, molinos y cruceiros, no barberías.
 
 ## Nombres: idioma según ubicación del mundo
 

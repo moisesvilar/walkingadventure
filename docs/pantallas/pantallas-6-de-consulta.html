@@ -1,0 +1,449 @@
+<title>Pantallas 6 · De consulta — Walking Adventure</title>
+
+<style>
+  :root {
+    --tierra: #7fae5a; --mar: #3f7fa8; --tinta: #1e2b18; --marca: #c62828;
+    --placa: #efe3c0; --filete: #8a6d34;
+    --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16); --bisel: #2a3324;
+    --serif: Georgia, "IM Fell English", "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+      --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  }
+  :root[data-theme="dark"] { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+    --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  :root[data-theme="light"] { --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30,43,24,0.16); --filete: #8a6d34; --marca: #c62828; }
+
+  body { margin: 0; background: var(--fondo); color: var(--texto); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .envoltorio { max-width: 1120px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .cabecera { border-bottom: 2px solid var(--filete); padding-bottom: 28px; }
+  .migas { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-2); margin: 0 0 14px; }
+  .cabecera h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; }
+  .cabecera h1 em { font-style: italic; color: var(--filete); }
+  .entradilla { max-width: 62ch; color: var(--texto-2); margin: 0; font-size: 1.02rem; }
+
+  .reglas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 36px 0 8px; }
+  .regla { border-left: 3px solid var(--filete); padding: 4px 0 4px 14px; }
+  .regla b { display: block; font-family: var(--serif); font-size: 1.02rem; font-weight: 400; margin-bottom: 3px; }
+  .regla span { font-size: 0.86rem; color: var(--texto-2); }
+
+  .aviso-voces { margin: 34px 0 8px; padding: 14px 18px; background: var(--fondo-2); border-radius: 2px; font-size: 0.88rem; color: var(--texto-2); }
+  .aviso-voces b { color: var(--texto); font-weight: 600; }
+
+  .secuencia { margin: 40px 0 8px; border: 1px solid var(--linea); border-radius: 3px; padding: 22px 24px; background: var(--fondo-2); }
+  .secuencia h3 { font-family: var(--serif); font-weight: 400; font-size: 1.28rem; margin: 0 0 6px; }
+  .secuencia > p { margin: 0 0 18px; font-size: 0.92rem; color: var(--texto-2); max-width: 68ch; }
+  .secuencia ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: seq; }
+  .secuencia li { position: relative; padding-left: 34px; font-size: 0.94rem; max-width: 68ch; counter-increment: seq; }
+  .secuencia li::before { content: counter(seq); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--filete); color: var(--filete); font-family: var(--mono); font-size: 0.74rem; display: grid; place-items: center; }
+  .secuencia li em { color: var(--texto-2); font-style: normal; }
+
+  .pantalla { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; padding: 52px 0; border-top: 1px solid var(--linea); }
+  .pantalla:first-of-type { border-top: 2px solid var(--filete); }
+  @media (max-width: 760px) { .pantalla { grid-template-columns: 1fr; gap: 30px; } }
+
+  .notas h2 { font-family: var(--serif); font-weight: 400; font-size: 1.62rem; margin: 0 0 4px; line-height: 1.2; text-wrap: balance; }
+  .paso { font-family: var(--mono); font-size: 0.78rem; color: var(--filete); letter-spacing: 0.1em; margin: 0 0 10px; }
+  .notas > p { margin: 0 0 18px; max-width: 60ch; color: var(--texto-2); }
+  .notas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .notas li { max-width: 62ch; font-size: 0.94rem; padding-left: 16px; position: relative; }
+  .notas li::before { content: "—"; position: absolute; left: 0; color: var(--filete); }
+  .notas li b { font-weight: 600; }
+  code { font-family: var(--mono); font-size: 0.86em; background: var(--fondo-2); border-radius: 2px; padding: 0 4px; }
+  .fuente { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--marca); border: 1px solid currentColor; border-radius: 2px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  .nuevo { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--fondo); background: var(--filete); border-radius: 2px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.06em; }
+
+  .movil { background: var(--bisel); border-radius: 26px; padding: 9px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); position: sticky; top: 28px; }
+  @media (max-width: 760px) { .movil { position: static; max-width: 300px; } }
+  .lienzo { background: var(--placa); border-radius: 18px; overflow: hidden; aspect-ratio: 9 / 17.4; display: flex; flex-direction: column; font-family: var(--serif); color: var(--tinta); position: relative; }
+  .barra { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 9px; padding: 8px 14px 2px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+  .cuerpo { flex: 1; display: flex; flex-direction: column; padding: 12px 18px 14px; gap: 10px; overflow: hidden; }
+
+  .rotulo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0; }
+  .titular { font-size: 19px; line-height: 1.18; margin: 0; font-weight: 400; }
+  .titular.chico { font-size: 15.5px; }
+  .parrafo { font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .parrafo.tenue { color: rgba(30,43,24,0.62); }
+  .italica { font-style: italic; }
+  .empuja { margin-top: auto; }
+  .atras { font-family: var(--sans); font-size: 10px; color: rgba(30,43,24,0.55); margin: 0; letter-spacing: 0.04em; }
+
+  .boton { text-align: center; background: var(--tinta); color: var(--placa); padding: 10px; border-radius: 3px; font-size: 12.5px; letter-spacing: 0.04em; }
+  .boton.hueco { background: transparent; color: rgba(30,43,24,0.6); border: 1px solid rgba(30,43,24,0.3); }
+
+  .miniatura { border-radius: 3px; overflow: hidden; border: 1.5px solid var(--filete); }
+  .miniatura svg { display: block; width: 100%; height: auto; }
+
+  /* La casa: las puertas de la portada */
+  .puertas { border-top: 1px solid rgba(30,43,24,0.22); padding-top: 9px; display: grid; gap: 7px; }
+  .puerta { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+  .puerta span:last-child { font-family: var(--sans); font-size: 10px; color: rgba(30,43,24,0.5); }
+
+  /* El diario */
+  .capitulo { border-left: 3px solid var(--filete); padding: 2px 0 2px 10px; }
+  .capitulo h4 { margin: 0; font-size: 13.5px; font-weight: 400; }
+  .capitulo p { margin: 1px 0 0; font-family: var(--sans); font-size: 10px; color: rgba(30,43,24,0.55); }
+  .capitulo.otro { border-left-color: rgba(30,43,24,0.3); }
+
+  .hoja { border-bottom: 1px dotted rgba(30,43,24,0.28); padding-bottom: 7px; }
+  .hoja .dia { font-family: var(--sans); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(30,43,24,0.5); margin: 0 0 3px; }
+  .hoja p { margin: 0; font-size: 11.5px; line-height: 1.45; }
+  .oido { border-left: 2px solid rgba(30,43,24,0.28); padding-left: 8px; font-style: italic; color: rgba(30,43,24,0.72); }
+
+  .version { border: 1px solid rgba(30,43,24,0.26); border-radius: 2px; padding: 8px 10px; background: rgba(255,255,255,0.38); }
+  .version .donde { font-family: var(--sans); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(30,43,24,0.5); margin: 0 0 3px; }
+  .version p { margin: 0; font-size: 11.5px; line-height: 1.45; font-style: italic; }
+  .hilo { text-align: center; font-family: var(--sans); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--marca); }
+
+  .objeto { display: flex; gap: 9px; align-items: baseline; border-bottom: 1px dotted rgba(30,43,24,0.26); padding-bottom: 6px; }
+  .objeto b { font-weight: 400; font-size: 12.5px; flex: 1; }
+  .objeto span { font-family: var(--sans); font-size: 9.5px; color: rgba(30,43,24,0.55); text-align: right; }
+
+  .mote { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; gap: 8px; }
+  .mote b { font-weight: 400; font-style: italic; }
+  .mote span { font-family: var(--sans); font-size: 9.5px; color: rgba(30,43,24,0.55); white-space: nowrap; }
+
+  .ajuste { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-bottom: 1px dotted rgba(30,43,24,0.24); padding-bottom: 6px; font-size: 12.5px; }
+  .ajuste span { font-family: var(--sans); font-size: 10px; color: rgba(30,43,24,0.55); white-space: nowrap; }
+  .grupo-ajustes { display: grid; gap: 7px; }
+  .titulo-grupo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--filete); margin: 4px 0 0; }
+
+  .pareja { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0 4px; }
+  .capa { border: 1px solid var(--linea); border-radius: 3px; padding: 10px 12px; }
+  .capa b { display: block; font-family: var(--serif); font-weight: 400; font-size: 0.98rem; margin-bottom: 2px; }
+  .capa span { font-size: 0.84rem; color: var(--texto-2); }
+
+  .pie { border-top: 2px solid var(--filete); margin-top: 40px; padding-top: 28px; }
+  .pie h3 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0 0 14px; }
+  .pie ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 70ch; color: var(--texto-2); font-size: 0.94rem; }
+  .pie li { padding-left: 22px; position: relative; }
+  .pie li b { color: var(--texto); }
+  .pie .cerrado::before { content: "✓"; position: absolute; left: 0; color: var(--filete); font-weight: 700; }
+  .pie .abierto::before { content: "?"; position: absolute; left: 2px; color: var(--marca); font-weight: 700; }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <p class="migas">Walking Adventure · Diseño de pantallas · 6 de 6</p>
+    <h1>De consulta<br><em>lo que hay en casa cuando no estás andando</em></h1>
+    <p class="entradilla">El diario, la repisa y los ajustes. No son un momento del bucle: son las cosas que tienes guardadas y que miras cuando te apetece. Aquí se cierran las dos preguntas que los artefactos anteriores aplazaron a propósito, y se decide qué es de verdad el diario.</p>
+  </header>
+
+  <div class="reglas">
+    <div class="regla"><b>La portada es la casa</b><span>No hay barra de pestañas. Se entra desde la portada y se vuelve a ella al salir.</span></div>
+    <div class="regla"><b>El diario registra lo oído</b><span>No lo cierto. Y no corrige nunca, ni siquiera cuando te enteras de la verdad.</span></div>
+    <div class="regla"><b>Nada de esto es un panel del mundo</b><span>Es lo que tú sabes, no lo que pasa. La diferencia sostiene el juego entero.</span></div>
+    <div class="regla"><b>Los ajustes hablan como aplicación</b><span>Es el único sitio dentro del juego donde eso está permitido, y por eso están apartados.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Aquí se mezclan las dos voces, y es el único sitio donde pasa.</b> El diario y la repisa hablan como mundo; los ajustes hablan como aplicación, porque un ajuste disfrazado de acertijo es peor que un ajuste. Lo que va en <span style="font-family:var(--serif)">serif</span> es lo que el juego dice; lo que va en sans somos nosotros hablando de él.</p>
+
+  <div class="secuencia">
+    <h3>Cómo se llega a cada sitio</h3>
+    <p>Sin barra de pestañas: la portada es un lugar y lo demás cuelga de ella. Todo está a dos toques en lugar de a uno, y a cambio el mapa nunca lleva cuatro pestañas encima mientras juegas.</p>
+    <ol>
+      <li><b>La portada</b> es lo que ves al abrir, con el mapa, quién eres y por dónde se sale. <em>Debajo, tres puertas: el diario, la repisa y los ajustes.</em></li>
+      <li><b>El diario</b> se abre por el capítulo del mapa donde estás, con sus días. <em>Los otros mapas son otros capítulos, y ahí es donde se leen los sitios donde ya no vives.</em></li>
+      <li><b>Y desde cualquiera se vuelve a la portada</b>, que es la única pantalla que siempre está debajo. <em>En marcha nada de esto existe: la regla del artefacto 3 no tiene excepciones.</em></li>
+    </ol>
+  </div>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>10:04</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Tu mapa · día 31</p>
+        <h2 class="titular chico" style="margin-bottom:1px">As Terras de Vilanova</h2>
+        <p class="parrafo tenue" style="font-size:11.5px">Xoana, buhonera</p>
+        <div class="miniatura">
+          <svg viewBox="0 0 300 128" role="img" aria-label="Miniatura del mapa con la zona conocida entintada">
+            <rect width="300" height="128" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V94 C250 106 210 88 166 100 C120 112 70 98 0 114 Z" fill="#7fae5a"/>
+            <path d="M0 114 C70 98 120 112 166 100 C210 88 250 106 300 94" fill="none" stroke="#12321f" stroke-width="5"/>
+            <g stroke="rgba(30,43,24,0.7)" stroke-width="4" fill="none" stroke-linecap="round">
+              <path d="M70 46 C112 34 150 58 190 42"/><path d="M190 42 C206 74 182 92 196 106"/>
+            </g>
+            <g stroke="#f2e7c8" stroke-width="1.8" fill="none" stroke-linecap="round">
+              <path d="M70 46 C112 34 150 58 190 42"/><path d="M190 42 C206 74 182 92 196 106"/>
+            </g>
+            <g stroke="rgba(30,43,24,0.28)" stroke-width="2.2" stroke-dasharray="4 4" fill="none">
+              <path d="M240 52 C254 80 236 96 246 116"/>
+            </g>
+            <circle cx="70" cy="46" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <circle cx="190" cy="42" r="5" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+          </svg>
+        </div>
+        <div class="boton">Ver qué se cuenta hoy</div>
+        <div class="boton hueco">Salir a andar sin más</div>
+        <div class="puertas empuja">
+          <div class="puerta"><span>El diario</span><span>31 días</span></div>
+          <div class="puerta"><span>La repisa</span><span>4 cosas</span></div>
+          <div class="puerta"><span>Ajustes</span><span></span></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1</p>
+      <h2>La portada, sin barra</h2>
+      <p>La corrección al artefacto 2, donde la barra de abajo iba dibujada como propuesta. Ya no hay barra: la portada es la casa y lo demás son puertas.</p>
+      <ul>
+        <li><b>Cuatro pestañas de igual peso convierten el juego en una aplicación con secciones</b>, y dejan los ajustes con el mismo rango que el mapa. Tres puertas en el suelo de la portada dicen lo mismo sin decir eso. <span class="nuevo">decidido</span></li>
+        <li><b>Y el mapa se queda limpio</b>, que importa porque el mapa es el producto visible del proyecto y llevaba una barra encima en todas las pantallas. <span class="fuente">artefacto 2</span></li>
+        <li><b>Las puertas llevan su cuenta</b> —31 días, 4 cosas— y eso sí es un número admisible: dice cuánto hay dentro, no cuánto has andado. <span class="fuente">bucle §3</span></li>
+        <li><b>En marcha nada de esto existe.</b> La portada solo aparece con la app abierta y parada; la regla de que en marcha no hay controles no tiene excepciones. <span class="fuente">bucle, momento 2</span></li>
+        <li>Sigue sin haber <b>panel del estado del mundo ni marcador de reputación</b>, que era el argumento de la portada desde el principio. <span class="fuente">quests, decisión 3</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>10:05</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="atras">‹ Volver</p>
+        <h2 class="titular chico">Tu diario</h2>
+        <div class="capitulo">
+          <h4>As Terras de Vilanova</h4>
+          <p>31 días · donde vives</p>
+        </div>
+        <div class="capitulo otro">
+          <h4>O Areal de Fóra</h4>
+          <p>6 días · el verano pasado</p>
+        </div>
+        <p class="titulo-grupo">Los últimos días</p>
+        <div class="hoja">
+          <p class="dia">Jueves · día 23</p>
+          <p>Sabela me dio una caja en O Torreón y me dijo que no la abriera. No la abrí.</p>
+        </div>
+        <div class="hoja">
+          <p class="dia">Miércoles · día 22</p>
+          <p class="oido">En Monfrida se cuenta que se llevaron tres campanas de la ermita.</p>
+        </div>
+        <div class="hoja" style="border-bottom:none">
+          <p class="dia">Domingo · día 19</p>
+          <p>Encontré A Pedra Torta sin buscarla.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2</p>
+      <h2>El diario, por días</h2>
+      <p>Una bitácora, y al principio solo eso. Arriba los capítulos —uno por mapa—, debajo los días del capítulo abierto.</p>
+      <ul>
+        <li><b>Cada mapa es un capítulo, y ahí viven los mapas antiguos.</b> Cierra la segunda pregunta que el artefacto 2 aplazó: no hay cajón de láminas ni selector, que ya se descartó; hay tramos de tu vida, con sus días y su mapa dentro. <span class="fuente">alcance §3</span><span class="nuevo">decidido</span></li>
+        <li><b>Lo tuyo en primera persona y lo oído entrecomillado aparte</b>, porque tienen distinta autoridad: lo que hiciste lo sabes, lo que te contaron no. <span class="fuente">artefacto 5</span></li>
+        <li><b>Registra lo oído, no lo cierto.</b> Eran dos campanas. El diario nunca corrige, y si mañana oyes la buena, conviven las dos. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Y nunca dice cuánto se deformó nada.</b> El nivel es dato vivo interno y no sale a pantalla en ningún sitio del juego. <span class="fuente">quests, decisión 3</span></li>
+        <li>Hay <b>una asimetría con la que hay que contar</b>: el capítulo de casa tiene cientos de días y el de unas vacaciones seis. No se resuelve igualándolos, sino aceptando que uno es un tomo y el otro un cuadernillo.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>19:58</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">En Vilanova se habla de</p>
+        <h2 class="titular chico">La campana del carro</h2>
+        <div class="version">
+          <p class="donde">Aquí, hoy</p>
+          <p>«Se llevaron la campana de la ermita, una, y el que la llevaba se arrepintió a mitad de camino y la dejó en un carro.»</p>
+        </div>
+        <p class="hilo">— esto ya lo habías oído —</p>
+        <div class="version" style="border-color:var(--marca)">
+          <p class="donde">En Monfrida, hace cuatro días</p>
+          <p>«Se llevaron tres campanas de la ermita para fundirlas, y los bueyes se plantaron a mitad de camino.»</p>
+        </div>
+        <p class="parrafo tenue italica" style="font-size:11.5px">No así.</p>
+        <div class="boton empuja">Apuntarlo</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 3</p>
+      <h2>La primera vez que triangulas</h2>
+      <p>Ocurre una sola vez, en el sitio, al oír una segunda versión de algo que ya tenías apuntado. Es la escena que le enseña al jugador que las noticias se tuercen, sin explicárselo.</p>
+      <ul>
+        <li><b>Se pone en escena, no se explica.</b> Ninguna pantalla dice «las noticias se deforman»: se ponen las dos versiones juntas y ya está. Es la misma manera de hacer las cosas que el prólogo del arranque. <span class="fuente">arranque.md</span></li>
+        <li><b>El juego puede detectarlo porque el rumor tiene identidad interna</b>, y hasta ahora esa identidad no había salido nunca a pantalla. Aquí sale una vez, y con eso basta. <span class="fuente">quests §6</span></li>
+        <li><b>Sigue sin decir cuál es la buena.</b> Enseña que son la misma historia contada distinta, no cuál es verdad: eso lo decides tú, y el testigo directo es la única fuente fiel que existe. <span class="fuente">npcs.md</span></li>
+        <li><b>Y a partir de aquí se abre leer el diario por historias.</b> El descubrimiento es tuyo y la comodidad viene después — al revés se lo regalaríamos. <span class="nuevo">decidido</span></li>
+        <li>Esto ocurre <b>al parar en un núcleo</b>, dentro de «lo que aquí se cuenta» del artefacto 4. La pantalla vive en este artefacto porque es lo que cambia el diario, no porque se consulte. <span class="fuente">artefacto 4</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>10:07</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="atras">‹ Tu diario</p>
+        <h2 class="titular chico">Lo que se cuenta</h2>
+        <p class="rotulo">La campana del carro</p>
+        <div class="version">
+          <p class="donde">Monfrida · día 22</p>
+          <p>«Tres campanas, y los bueyes se plantaron.»</p>
+        </div>
+        <div class="version">
+          <p class="donde">Vilanova · día 23</p>
+          <p>«Una campana, y el que la llevaba se arrepintió.»</p>
+        </div>
+        <div class="version">
+          <p class="donde">A Ponte · día 29</p>
+          <p>«Que fue el herrero, y que la campana no era de la ermita sino del barco aquel.»</p>
+        </div>
+        <p class="parrafo tenue italica" style="font-size:11px">Tres sitios, tres campanas distintas.</p>
+        <div class="boton hueco empuja">Ver por días</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 4</p>
+      <h2>El diario, por historias</h2>
+      <p>La segunda manera de leerlo, disponible a partir de la pantalla anterior. Agrupa las versiones de un mismo suceso por el orden en que las oíste.</p>
+      <ul>
+        <li><b>Esto es el sistema de rumores hecho objeto.</b> Sin esta vista, medio juego —la propagación, la deformación, la escalera de cuatro niveles— se queda en algo que ocurre y que casi nadie llega a ver. <span class="fuente">quests §6</span></li>
+        <li><b>Ordenado por cuándo lo oíste, no por fidelidad.</b> Ordenarlas de más fiel a más torcida sería enseñar el nivel de deformación por la puerta de atrás. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Ni una etiqueta, ni un porcentaje, ni una marca de cuál es la buena.</b> La tercera versión es leyenda pura —ya se le atribuye a otro— y el juego no lo dice: se ve. <span class="fuente">quests §6</span></li>
+        <li><b>Se puede volver a por días</b>, y las dos vistas conviven. La cronológica es la bitácora de tu vida; esta es la del mundo. <span class="nuevo">decidido</span></li>
+        <li>Y aquí acaba de aparecer <b>lo que se cuenta de ti</b>, con el mismo formato, porque es el mismo canal: la reputación es lo que llegó. <span class="fuente">quests §6</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>10:09</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="atras">‹ Volver</p>
+        <h2 class="titular chico">La repisa</h2>
+        <div class="objeto"><b>La llave del molino viejo</b><span>de Sabela<br>día 23</span></div>
+        <div class="objeto"><b>Media moneda partida</b><span>hallada<br>día 11</span></div>
+        <div class="objeto"><b>Un mapa mal dibujado</b><span>comprado<br>día 18</span></div>
+        <div class="objeto" style="border-bottom:none"><b>La bota que colgaba del mojón</b><span>por qué no<br>día 26</span></div>
+        <p class="titulo-grupo">Y cómo te llaman</p>
+        <div class="mote"><b>la de la caja</b><span>en Monfrida</span></div>
+        <div class="mote"><b>la forastera del norte</b><span>en A Ponte</span></div>
+        <p class="parrafo tenue italica empuja" style="font-size:11px">Once monedas.</p>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 5</p>
+      <h2>La repisa</h2>
+      <p>Lo que llevas encima y lo que te ha quedado. Y, abajo, lo único que se parece a una ficha de personaje en todo el juego.</p>
+      <ul>
+        <li><b>Los objetos son llaves, no requisitos</b>, así que la repisa no es un inventario que gestionar: no hay peso, ni huecos, ni nada que tirar. Cada cosa tiene de quién y de qué día. <span class="fuente">progresion §3</span></li>
+        <li><b>Los motes son por núcleo y nacen del rumor</b>, no del hecho. Verlos juntos es ver que en cada pueblo eres otra, que es la simetría que ordena el juego: tú conoces al pueblo por ir, el pueblo te conoce por lo que le llega. <span class="fuente">personaje §3 · progresion §1</span></li>
+        <li><b>Y no hay barra de reputación ni lista de escalones por pueblo.</b> Los motes hacen ese trabajo con palabras, que es lo que se decidió al dibujar el telón. <span class="fuente">progresion §1</span></li>
+        <li><b>El oro va abajo y en pequeño</b>, porque es una moneda que se gasta y no un marcador. <span class="fuente">progresion §2</span></li>
+        <li>Nombre y oficio <b>no se pueden cambiar aquí</b>: se eligieron en el arranque y son de tu personaje. Lo que cambia es lo que la gente dice de ella. <span class="fuente">personaje §1</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>10:11</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="atras">‹ Volver</p>
+        <h2 class="titular chico" style="font-family:var(--sans);font-size:14px;font-weight:600">Ajustes</h2>
+        <div class="grupo-ajustes">
+          <p class="titulo-grupo">Cómo andas</p>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">En media hora llegas a…</span><span>la playa</span></div>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Caminos que evitar</span><span>escaleras</span></div>
+          <p class="titulo-grupo">Tu personaje</p>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Cómo te llamas</span><span>Xoana</span></div>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Cómo se dirigen a ti</span><span>en femenino</span></div>
+          <p class="titulo-grupo">El mapa</p>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Cómo se pinta</span><span>Reino</span></div>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Tamaño de la letra</span><span>mediana</span></div>
+          <p class="titulo-grupo">El mundo</p>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Contar los pasos del día a día</span><span>no</span></div>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Solo de día</span><span>sí</span></div>
+          <p class="titulo-grupo">Tus cosas</p>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Sitios que marcaste</span><span>2</span></div>
+          <div class="ajuste"><span style="font-family:var(--serif);font-size:12.5px;color:var(--tinta)">Guardar una copia</span><span>›</span></div>
+          <div class="ajuste" style="border-bottom:none;margin-top:6px"><span style="font-family:var(--serif);font-size:12.5px;color:var(--marca)">Empezar de nuevo</span><span>›</span></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 6</p>
+      <h2>Los ajustes</h2>
+      <p>El único sitio dentro del juego donde se puede hablar como aplicación. Por eso están apartados y por eso el título va en sans: entrar aquí es salir un momento del mundo.</p>
+      <ul>
+        <li><b>El nombre y el género gramatical sí se cambian aquí; el oficio no está.</b> Los dos primeros no tienen consecuencia mecánica y encerrar a alguien en un nombre que no le gusta no protege nada; el oficio es la única palanca mecánica del personaje, y si se cambiase en un toque dejaría de ser una decisión. <span class="fuente">personaje §3 · lenguaje.md</span><span class="nuevo">decidido</span></li>
+        <li><b>El tramo se pregunta en lenguaje de sitios y no de distancias</b> —«en media hora llegas a…»—, igual que en el arranque. Se puede recalibrar, pero el ajuste automático que ocurre por detrás <b>no se comenta jamás</b>: aquí no hay ningún «últimamente andas menos». <span class="fuente">accesibilidad §1</span></li>
+        <li><b>«Caminos que evitar» no dice accesibilidad en ningún sitio.</b> No es un modo, es la unidad de medida del juego, y ponerle etiqueta sería inventarse la categoría que el documento entero evita. <span class="fuente">accesibilidad, encuadre</span></li>
+        <li><b>Contar los pasos del día a día viene apagado</b>, exige permisos de salud y el juego es completo sin activarlo. Es opt-in explícito y no una casilla que llega marcada. <span class="fuente">quests §8</span></li>
+        <li><b>«Solo de día» viene encendido</b> y cualquiera puede quitarlo. Protege a un crío sin distinguir a un crío, que es como está resuelto todo lo de menores. <span class="fuente">seguridad §4</span></li>
+        <li><b>«Sitios que marcaste» es donde se deshace un descarte</b>, que tenía que ser reversible y no tenía dónde. <span class="fuente">seguridad §3</span></li>
+        <li><b>«Guardar una copia» es el fichero exportable</b>, que va aparte de la copia del sistema porque la copia del sistema ya funciona sola. Aquí se guarda tu mundo entero congelado, no una semilla. <span class="fuente">partida-guardada §3</span></li>
+        <li>Y los <b>cinco estilos de pintado</b> están aquí como lo que son: un ajuste de mapa que repinta lo que ya hay en pantalla y <b>nunca resiembra</b>. <span class="fuente">CLAUDE.md · styles.js</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>10:12</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="atras">‹ Ajustes</p>
+        <h2 class="titular chico" style="font-family:var(--sans);font-size:14px;font-weight:600">Empezar de nuevo</h2>
+        <p class="parrafo" style="font-size:12px">Se borran tu personaje, tus dos mapas, los 31 días de diario y todo lo que la gente sabe de ti. Después vuelves a la primera pantalla.</p>
+        <p class="parrafo" style="font-size:12px"><b style="font-weight:600">As Terras de Vilanova no se puede volver a generar.</b> Se dibujó con los datos de aquel día y esos datos ya han cambiado: aunque empieces otra vez en la misma calle, saldría otro sitio con otros nombres.</p>
+        <p class="parrafo tenue" style="font-size:11.5px">Si guardas una copia, el fichero se puede volver a abrir cuando quieras.</p>
+        <div class="empuja" style="display:grid;gap:7px">
+          <div class="boton">Guardar una copia primero</div>
+          <div class="boton hueco" style="border-color:var(--marca);color:var(--marca)">Borrar sin guardar nada</div>
+          <div class="boton hueco">Dejarlo como está</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 7</p>
+      <h2>Empezar de nuevo</h2>
+      <p>El botón que faltaba. No es «volver a empezar»: es destruir algo que no se puede reconstruir, y la pantalla tiene que decirlo con esas palabras.</p>
+      <ul>
+        <li><b>El mundo está congelado y por eso no se puede rehacer.</b> Se guarda entero porque los datos de OpenStreetMap cambian; la semilla sola daría otro mapa. Esta pantalla es el único sitio donde esa decisión técnica se le explica al jugador, y hay que explicarla porque cambia lo que está a punto de hacer. <span class="fuente">partida-guardada §1</span><span class="nuevo">decidido</span></li>
+        <li><b>La copia se ofrece, no se hace sola.</b> Quien quiere irse limpio se va limpio y no le dejamos megas en el disco sin pedirlos. El precio es que hay que escribir el aviso para que se lea de verdad. <span class="nuevo">decidido</span></li>
+        <li><b>Y el fichero se puede volver a abrir</b>, porque es el mismo que sirve para compartir un mundo con otra persona. Eso convierte «guardar una copia» en una salida de verdad y no en un consuelo. <span class="fuente">partida-guardada §3</span></li>
+        <li><b>Se enumera lo que se pierde en cosas, no en datos</b>: el personaje, los mapas por su nombre, los días de diario y lo que la gente sabe de ti. «Esta acción no se puede deshacer» no dice nada que nadie lea. <span class="fuente">lenguaje.md</span></li>
+        <li><b>Lo destructivo no es el botón principal.</b> Guardar copia va arriba y a la vista; borrar sin nada es una elección explícita, en rojo y con el borde hueco. Y salir sin hacer nada siempre está. <span class="nuevo">decidido</span></li>
+        <li>Aquí <b>se habla como aplicación sin disfraz</b>, y es el caso que mejor justifica que los ajustes tengan permiso para hacerlo: disfrazar esto de mundo sería una trampa. <span class="fuente">lenguaje.md</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="pareja">
+    <div class="capa"><b>Habla como mundo</b><span>El diario y la repisa. Son cosas tuyas dentro de la ficción, y ninguna enseña un número que no sea una cuenta.</span></div>
+    <div class="capa"><b>Habla como aplicación</b><span>Los ajustes, y solo ellos. Un ajuste disfrazado de acertijo es peor que un ajuste.</span></div>
+  </div>
+
+  <div class="pie">
+    <h3>Lo que este artefacto cierra</h3>
+    <ul>
+      <li class="cerrado"><b>No hay barra de pestañas: la portada es la casa</b> y el diario, la repisa y los ajustes cuelgan de ella. Cuatro destinos de igual peso convierten el juego en una aplicación con secciones y dejan los ajustes con el mismo rango que el mapa. Corrige el artefacto 2, donde la barra iba dibujada como propuesta.</li>
+      <li class="cerrado"><b>El diario tiene un capítulo por mapa</b>, y ahí es donde se leen los sitios donde ya no estás. Ni cajón de láminas ni selector: tramos de tu vida, con sus días y su mapa dentro.</li>
+      <li class="cerrado"><b>Leer el diario por historias no está desde el principio: se abre al triangular una vez.</b> El descubrimiento es tuyo y la comodidad viene después. Agrupar las versiones desde el primer día habría regalado el mejor truco del juego, y no agruparlas nunca lo habría dejado en algo que casi nadie llega a ver.</li>
+      <li class="cerrado"><b>La primera triangulación se pone en escena y no se explica</b>: las dos versiones juntas y «no así». Ninguna pantalla dice que las noticias se deforman, ni cuál es la buena.</li>
+      <li class="cerrado"><b>Las versiones se ordenan por cuándo las oíste</b>, nunca de más fiel a más torcida, que sería enseñar el nivel de deformación por la puerta de atrás.</li>
+      <li class="cerrado"><b>La repisa no es un inventario</b>: sin peso, sin huecos, sin nada que tirar. Cada objeto con de quién y de qué día, porque son llaves y recuerdos, no equipo.</li>
+      <li class="cerrado"><b>Los motes por núcleo hacen de ficha de personaje</b>, y son lo único parecido a una reputación que se ve en todo el juego.</li>
+      <li class="cerrado"><b>Los ajustes son el único sitio del juego que habla como aplicación</b>, y se nota en la tipografía. Dentro: el tramo en lenguaje de sitios, «caminos que evitar» sin la palabra accesibilidad, los pasos de fondo apagados, el horario diurno encendido, los sitios marcados y la copia exportable.</li>
+      <li class="cerrado"><b>Y existe «empezar de nuevo», que borra todo y ofrece guardar una copia antes.</b> La pantalla explica que el mundo está congelado y no se puede rehacer, enumera lo que se pierde en cosas y no en datos, y deja lo destructivo como elección explícita y no como botón principal. La copia se ofrece y no se hace sola: quien quiere irse limpio se va limpio.</li>
+    </ul>
+    <h3>Con esto se cierra el paso 2</h3>
+    <ul>
+      <li class="cerrado">Seis artefactos, cuarenta pantallas y ningún momento del bucle sin dibujar. Lo siguiente es el PRD, que sale de <code>game-design/</code> y de aquí.</li>
+    </ul>
+  </div>
+
+</div>

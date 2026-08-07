@@ -20,6 +20,14 @@ Una quest es la unidad de aventura del juego: una cadena de escenas que el jugad
 
    **El estado del núcleo aflora al llegar y se anota en el diario.** No hay panel consultable con la verdad del mundo: el jugador se entera porque allí se lo cuentan, y lo oído queda registrado en su diario con el lugar y el momento. El diario **registra lo oído, no lo cierto** —si el rumor llegó deformado, guarda la versión deformada— y por tanto **nunca muestra el nivel de deformación**, que es dato vivo interno. Una entrada **no se sobrescribe** con una versión más veraz: si el jugador oye la buena después de la torcida, conviven las dos. De ahí sale sin tutorial el descubrimiento de que las noticias se deforman: como el árbol define un único camino, cada núcleo oye una sola versión, pero el jugador visita varios y puede **triangular** comparando su propio diario. A granularidad de núcleo esto no necesita la capa de NPCs: "aquí se habla de..." puede aflorar al llegar sin que exista un NPC con nombre.
 
+   **El diario se lee de dos maneras, y la segunda se gana** (6-ago-2026, al dibujar las pantallas de consulta). Empieza siendo cronológico y nada más. **La primera vez que oyes una segunda versión de algo que ya tenías apuntado**, el juego pone las dos juntas en el sitio, sin explicar nada —«esto ya lo habías oído. No así»— y a partir de ahí el diario también se puede leer **por historias**, agrupando las versiones de un mismo suceso.
+
+   El punto de la decisión es el orden. Agrupar desde el primer día habría regalado el mejor truco del juego: que dos relatos sean el mismo dejaría de ser algo que descubres para ser algo que te dicen. No agrupar nunca lo habría dejado en algo que ocurre y que casi nadie llega a ver, y de ese sistema cuelga medio juego. Así que **el descubrimiento es del jugador y la comodidad viene después**, que es exactamente cómo `arranque.md` pone en escena la deformación en vez de explicarla.
+
+   Dos restricciones para que la vista por historias no deshaga lo que este párrafo protege: **se ordena por cuándo lo oíste, nunca de más fiel a más torcida** —eso sería enseñar el nivel de deformación por la puerta de atrás— y **no se marca cuál es la buena**. Enseña que son la misma historia contada distinta, no cuál es verdad; para eso está el testigo directo, que es la única fuente fiel que existe (`npcs.md`).
+
+   Y el mecanismo sale gratis en el código: el rumor ya tiene identidad interna porque la propagación la necesita. Lo que se decide aquí es **cuándo esa identidad se hace visible**, que hasta este momento no lo era nunca.
+
    **El resumen de apertura: marco propio, entradas prestadas.** El único texto nuevo es el envoltorio ("mientras hacías tu vida, el mundo anduvo..."), con su fallback; cada entrada trae el suyo de la plantilla que la generó, de modo que el resumen es un contenedor y no una unidad narrativa que duplique la lógica de fallback. Su longitud queda acotada por el tope de 5 de la reserva. Punto de invocación: los pasos de fondo ocurren con la app cerrada, así que sus textos no existen todavía; se generan en **una única llamada agrupada al abrir la salida, nunca durante la caminata**. Es la única excepción a "el LLM se invoca al crear la quest", y sigue cumpliendo el espíritu: se llama antes de andar, no mientras se anda. Si la llamada falla, todo cae a fallbacks y el resumen se lee igual.
 
    Si el jugador no atiende, hay dos tipos de entrega y no se comportan igual. Las **noticias** (un rumor que llega) son informativas: sedimentan de inmediato en lo que se cuenta en el núcleo y siguen consultables. Las **oportunidades** (hallazgo, entrega rápida, encargo de 1 beat) vuelven a la cola y se ofrecen una segunda vez, en otra salida y en otro lugar —nunca dos veces en la misma salida ni en el mismo sitio—; si tampoco se atienden, sedimentan. Dos ofertas: una sola es frágil (basta un semáforo, una conversación real o el móvil en el bolsillo), infinitas son un incordio. Sedimentar no penaliza ni se reprocha: nadie comenta que el jugador no fuese.
@@ -64,11 +72,13 @@ Franjas del mundo ("al anochecer", "por la mañana") y citas ("estará en la fue
 
 ### 5. Actores
 
-NPCs implicados: dador, objetivo, secundarios. Cada NPC con nombre vive o trabaja en un lugar concreto (capa "casas de NPC": mismo mecanismo de anclaje único que los servicios). Estado: qué sabe, qué recuerda del jugador (alimenta los arcos largos).
+NPCs implicados: dador, objetivo, secundarios. Cada NPC con nombre vive o trabaja en un lugar concreto. Estado: qué sabe, qué recuerda del jugador (alimenta los arcos largos).
+
+→ Resuelto el 5-ago-2026 en `npcs.md`, con una enmienda: **el NPC no consume anclaje propio, hereda el del sitio donde trabaja**, así que las "casas de NPC" quedan aplazadas y reducidas a quien no trabaja en ninguno. El reparto crece con lo jugado (generación perezosa y determinista por semilla + sitio + puesto), su memoria es corta y guarda la versión **fiel** de lo que vivió contigo —el testigo es la única fuente de verdad en un mundo donde todo lo demás llega deformado, y no corrige lo que se cuenta en el pueblo—, las franjas son propiedad de la escena y no de la persona, y nadie cambia por el paso del tiempo: solo por lo que haces, y lo roto se puede reparar.
 
 ### 6. Recompensa y consecuencia
 
-Inmediata (oro, objeto, XP) y persistente. Lo persistente no se aplica de golpe ni en todas partes: **viaja por la red de calzadas**, que `buildRoutes` construye como árbol de expansión mínima y que por tanto define un único camino entre dos núcleos, con saltos y metros bien definidos.
+Inmediata (oro, objeto; ~~XP~~ → **la XP se retira el 5-ago-2026**, ver `progresion.md`: no hay niveles sino rango social por núcleo, porque subir de nivel en un juego cuyo techo son tus piernas premia a quien más anda) y persistente. Lo persistente no se aplica de golpe ni en todas partes: **viaja por la red de calzadas**, que `buildRoutes` construye como árbol de expansión mínima y que por tanto define un único camino entre dos núcleos, con saltos y metros bien definidos.
 
 - **Origen y contenido**: la plantilla declara si su desenlace es notable y con qué semilla nace el rumor. Nace en el núcleo donde ocurrió, en nivel 0.
 - **Latencia por distancia real**: el rumor avanza un tramo (~2 km) por paso del mundo, la misma unidad que el reloj del jugador. Consecuencia: se puede adelantar a la propia fama — ir derecho al pueblo vecino es llegar a la vez que la noticia; entretenerse por el monte es llegar después de ella.
@@ -86,6 +96,8 @@ Una quest no se escribe sobre lugares concretos sino como plantilla con ROLES: "
 ### 8. Aptitud y seguridad (transversal)
 
 Contenido apto para menores (principio de la spec, y filtro sobre todo texto LLM); no dirigir a sitios físicamente problemáticos; horario diurno por defecto; nada que incentive correr ni cruzar mal.
+
+→ Lo operativo queda decidido el 5-ago-2026 en `seguridad-privacidad.md`: del móvil no sale nada del jugador y al LLM solo le llega ficción (el prompt no lleva nombres reales de anclajes); el permiso de ubicación es solo "mientras se usa", pedido en contexto; el anclaje que no vale lo descarta el jugador con un gesto reversible que anota sin resembrar; y el juego no distingue a un menor porque es apto por diseño, con el horario diurno como ajuste activado de origen.
 
 Dos consecuencias de las decisiones 3 y 4. **Contar los pasos del día a día es opt-in explícito**: exige permisos de salud, viene apagado de origen y el juego es completo sin activarlo. Y **el aviso de tres capas está diseñado para no mirar la pantalla en marcha**: el háptico y la notificación avisan desde el bolsillo para que el jugador decida cuándo parar a mirar, no para que mire mientras anda.
 

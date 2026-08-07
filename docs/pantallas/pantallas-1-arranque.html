@@ -1,0 +1,460 @@
+<title>Pantallas 1 · El arranque — Walking Adventure</title>
+
+<style>
+  :root {
+    --tierra: #7fae5a;
+    --mar: #3f7fa8;
+    --tinta: #1e2b18;
+    --marca: #c62828;
+    --placa: #efe3c0;
+    --filete: #8a6d34;
+
+    --fondo: #f2ecdb;
+    --fondo-2: #e8e0c9;
+    --texto: #1e2b18;
+    --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16);
+    --bisel: #2a3324;
+
+    --serif: Georgia, "IM Fell English", "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+      --linea: rgba(230, 226, 208, 0.16); --filete: #b08c44; --marca: #e05a4f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+    --linea: rgba(230, 226, 208, 0.16); --filete: #b08c44; --marca: #e05a4f;
+  }
+  :root[data-theme="light"] {
+    --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16); --filete: #8a6d34; --marca: #c62828;
+  }
+
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font-family: var(--sans); font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .envoltorio { max-width: 1120px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .cabecera { border-bottom: 2px solid var(--filete); padding-bottom: 28px; }
+  .migas { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-2); margin: 0 0 14px; }
+  .cabecera h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; }
+  .cabecera h1 em { font-style: italic; color: var(--filete); }
+  .entradilla { max-width: 62ch; color: var(--texto-2); margin: 0; font-size: 1.02rem; }
+
+  .reglas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 36px 0 8px; }
+  .regla { border-left: 3px solid var(--filete); padding: 4px 0 4px 14px; }
+  .regla b { display: block; font-family: var(--serif); font-size: 1.02rem; font-weight: 400; margin-bottom: 3px; }
+  .regla span { font-size: 0.86rem; color: var(--texto-2); }
+
+  .aviso-voces { margin: 34px 0 8px; padding: 14px 18px; background: var(--fondo-2); border-radius: 2px; font-size: 0.88rem; color: var(--texto-2); }
+  .aviso-voces b { color: var(--texto); font-weight: 600; }
+
+  .pantalla { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; padding: 52px 0; border-top: 1px solid var(--linea); }
+  .pantalla:first-of-type { border-top: 2px solid var(--filete); }
+  @media (max-width: 760px) { .pantalla { grid-template-columns: 1fr; gap: 30px; } }
+
+  .notas h2 { font-family: var(--serif); font-weight: 400; font-size: 1.62rem; margin: 0 0 4px; line-height: 1.2; text-wrap: balance; }
+  .paso { font-family: var(--mono); font-size: 0.78rem; color: var(--filete); letter-spacing: 0.1em; margin: 0 0 10px; }
+  .notas > p { margin: 0 0 18px; max-width: 60ch; color: var(--texto-2); }
+  .notas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .notas li { max-width: 62ch; font-size: 0.94rem; padding-left: 16px; position: relative; }
+  .notas li::before { content: "—"; position: absolute; left: 0; color: var(--filete); }
+  .notas li b { font-weight: 600; }
+  .fuente { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--marca); border: 1px solid currentColor; border-radius: 2px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  .nuevo { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--fondo); background: var(--filete); border-radius: 2px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.06em; }
+
+  .movil { background: var(--bisel); border-radius: 26px; padding: 9px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); position: sticky; top: 28px; }
+  @media (max-width: 760px) { .movil { position: static; max-width: 300px; } }
+  .lienzo { background: var(--placa); border-radius: 18px; overflow: hidden; aspect-ratio: 9 / 17.4; display: flex; flex-direction: column; font-family: var(--serif); color: var(--tinta); position: relative; }
+  .barra { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 9px; padding: 8px 14px 2px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+
+  .navega { display: flex; align-items: center; gap: 10px; padding: 6px 14px 0; font-family: var(--sans); }
+  .atras { font-size: 15px; line-height: 1; color: rgba(30,43,24,0.75); width: 18px; }
+  .atras.apagado { opacity: 0.22; }
+  .avance { display: flex; gap: 4px; flex: 1; }
+  .avance i { height: 2.5px; flex: 1; border-radius: 2px; background: rgba(30,43,24,0.16); }
+  .avance i.hecho { background: rgba(30,43,24,0.55); }
+  .avance i.aqui { background: var(--tinta); }
+  .cuenta { font-size: 9px; color: rgba(30,43,24,0.45); letter-spacing: 0.06em; }
+
+  .lista-larga { max-height: 158px; overflow-y: auto; padding-right: 2px; -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent 100%); mask-image: linear-gradient(to bottom, #000 82%, transparent 100%); }
+  .cuerpo { flex: 1; display: flex; flex-direction: column; padding: 14px 18px 18px; gap: 12px; overflow: hidden; }
+
+  .rotulo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0; }
+  .titular { font-size: 20px; line-height: 1.18; margin: 0; font-weight: 400; }
+  .titular.chico { font-size: 16px; }
+  .parrafo { font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .parrafo.tenue { color: rgba(30,43,24,0.62); }
+  .italica { font-style: italic; }
+
+  .opciones { display: grid; gap: 7px; }
+  .opcion { border: 1px solid rgba(30,43,24,0.28); border-radius: 3px; padding: 8px 11px; font-size: 12.5px; display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,0.28); }
+  .opcion.puesta { border-color: var(--tinta); border-width: 1.5px; background: rgba(255,255,255,0.6); }
+  .radio { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgba(30,43,24,0.45); flex: none; }
+  .opcion.puesta .radio { border-color: var(--tinta); background: radial-gradient(circle, var(--tinta) 0 42%, transparent 44%); }
+
+  .campo { border: none; border-bottom: 1.5px solid rgba(30,43,24,0.4); padding: 6px 2px; font-family: var(--serif); font-size: 17px; color: var(--tinta); background: transparent; width: 100%; }
+  .sugerencias { display: flex; flex-wrap: wrap; gap: 5px; }
+  .sugerencia { font-family: var(--sans); font-size: 9.5px; padding: 3px 7px; border-radius: 999px; border: 1px solid rgba(30,43,24,0.28); color: rgba(30,43,24,0.68); }
+  .genero { display: flex; gap: 6px; font-family: var(--sans); font-size: 10px; }
+  .genero span { padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(30,43,24,0.28); color: rgba(30,43,24,0.6); }
+  .genero span.puesta { background: var(--tinta); color: var(--placa); border-color: var(--tinta); }
+
+  .boton { margin-top: auto; text-align: center; background: var(--tinta); color: var(--placa); padding: 11px; border-radius: 3px; font-size: 13px; letter-spacing: 0.04em; }
+  .boton.hueco { background: transparent; color: rgba(30,43,24,0.6); border: 1px solid rgba(30,43,24,0.3); margin-top: 0; }
+
+  .fases { display: grid; gap: 9px; font-family: var(--sans); font-size: 11px; }
+  .fase { display: flex; align-items: center; gap: 9px; color: rgba(30,43,24,0.45); }
+  .fase.hecha { color: rgba(30,43,24,0.8); }
+  .fase.ahora { color: var(--tinta); font-weight: 600; }
+  .punto { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid currentColor; flex: none; }
+  .fase.hecha .punto, .fase.ahora .punto { background: currentColor; }
+
+  .mapa svg { display: block; width: 100%; height: auto; }
+
+  .tarjeta { border: 1px solid rgba(30,43,24,0.3); border-left: 3px solid var(--marca); padding: 10px 12px; border-radius: 2px; background: rgba(255,255,255,0.34); }
+  .tarjeta h4 { margin: 0 0 4px; font-size: 14px; font-weight: 400; }
+  .tarjeta p { margin: 0; font-size: 11.5px; line-height: 1.45; color: rgba(30,43,24,0.72); }
+  .tarjeta .medida { font-family: var(--sans); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--filete); margin-top: 6px; display: block; }
+
+  .pie { border-top: 2px solid var(--filete); margin-top: 40px; padding-top: 28px; }
+  .pie h3 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0 0 14px; }
+  .pie ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 70ch; color: var(--texto-2); font-size: 0.94rem; }
+  .pie li { padding-left: 22px; position: relative; }
+  .pie li b { color: var(--texto); }
+  .pie .cerrado::before { content: "✓"; position: absolute; left: 0; color: var(--filete); font-weight: 700; }
+  .pie .abierto::before { content: "?"; position: absolute; left: 2px; color: var(--marca); font-weight: 700; }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <p class="migas">Walking Adventure · Diseño de pantallas · 1 de 6</p>
+    <h1>El arranque<br><em>de forastera a alguien de aquí</em></h1>
+    <p class="entradilla">Las siete pantallas que van desde abrir la app por primera vez hasta salir a andar. Cada una lleva al lado la decisión de <code>game-design/</code> que la manda: si una pantalla no puede citar ninguna, sobra.</p>
+  </header>
+
+  <div class="reglas">
+    <div class="regla"><b>Pantalla permitida</b><span>Estás en casa y parada. Es el momento en que el juego sí puede pedir atención.</span></div>
+    <div class="regla"><b>Nada de números de distancia</b><span>Ni kilómetros ni pasos. El juego habla de sitios y de tramos.</span></div>
+    <div class="regla"><b>Cómico-cálido</b><span>El mundo se toma en serio a sí mismo. El chiste nunca es a costa del sitio real.</span></div>
+    <div class="regla"><b>En femenino por defecto</b><span>Y todo escrito para sonar bien dicho en voz alta a quien camina contigo.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Dos voces en el documento.</b> Lo que va en <span style="font-family:var(--serif)">serif</span> es lo que el juego dice; lo que va en sans somos nosotros hablando del juego. Las fuentes reales son Cinzel e IM Fell English, que aquí no se pueden cargar: en su lugar hay pilas del sistema.<br><br><b>Y dos voces dentro del juego.</b> El onboarding habla como aplicación —explica qué hace y por qué, en primera persona del plural— y el juego habla como mundo. La frontera está en el botón de «salir a andar» de la pantalla 6: es la última pantalla que dice «nosotros».</p>
+
+  <p class="aviso-voces"><b>Se puede volver atrás.</b> Las cinco pantallas del onboarding llevan flecha y contador, así que ninguna decisión es una puerta que se cierra: quien deniega el permiso y se arrepiente vuelve, y quien no se convence del nombre lo cambia antes de generar nada. Con dos excepciones, y las dos salen de decisiones ya tomadas: <b>no se deshace dónde se generó el mapa</b>, porque lo generado no se resiembra jamás, y <b>no se cambia el oficio</b>, porque es la única palanca mecánica del personaje y lo que le da peso es que haya aventuras que con esta persona no verás nunca. El nombre, el género y el tramo sí se cambian después sin tocar el mundo — el tramo decide hasta dónde te mandan, nunca qué existe.</p>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:41</span><span>▮▮▮</span></div>
+      <div class="navega"><span class="atras apagado">‹</span><span class="avance"><i class="aqui"></i><i></i><i></i><i></i><i></i></span><span class="cuenta">1/5</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Tu personaje</p>
+        <h2 class="titular">¿Quién vas a ser ahí dentro?</h2>
+        <p class="parrafo tenue">Dinos el nombre de tu personaje. Puede coincidir con el tuyo, aunque inventarse otro tiene más gracia.</p>
+        <input class="campo" value="Xoana" readonly aria-label="Nombre del personaje">
+        <div class="sugerencias">
+          <span class="sugerencia">↻ otro</span><span class="sugerencia">Sabela</span>
+          <span class="sugerencia">Uxía</span><span class="sugerencia">Brais</span>
+          <span class="sugerencia">Antón</span>
+        </div>
+        <div class="genero"><span class="puesta">se dirigen a ti en femenino</span><span>en masculino</span></div>
+        <p class="rotulo" style="margin-top:4px">A qué te dedicas</p>
+        <p class="parrafo tenue" style="font-size:11px;margin-top:-4px">Marca qué aventuras te va a ofrecer el mundo, y esto no se cambia luego.</p>
+        <div class="opciones lista-larga">
+          <div class="opcion puesta" style="display:block"><span class="radio" style="display:inline-block;vertical-align:middle;margin-right:9px"></span>Buhonera, de las que van y vienen<span style="display:block;margin-left:22px;margin-top:4px;font-size:10.5px;line-height:1.4;color:rgba(30,43,24,0.62)">Te mandarán a llevar cosas de un sitio a otro y a tratar con quien vive lejos. Es el oficio que más te hace cruzar el mapa entero.</span></div>
+          <div class="opcion"><span class="radio"></span>Herborista, de las que saben de hierbas</div>
+          <div class="opcion"><span class="radio"></span>Guardabosques, de las que andan el monte</div>
+          <div class="opcion"><span class="radio"></span>Tabernera, de las que oyen de todo</div>
+          <div class="opcion"><span class="radio"></span>Herrera, de las que arreglan lo roto</div>
+          <div class="opcion"><span class="radio"></span>Posadera, de las que dan cama y charla</div>
+          <div class="opcion"><span class="radio"></span>Boticaria, de las que curan lo que se puede</div>
+          <div class="opcion"><span class="radio"></span>Mercadera, de las que regatean sin despeinarse</div>
+          <div class="opcion"><span class="radio"></span>Cantera, de las que trabajan la piedra</div>
+        </div>
+        <div class="boton">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1</p>
+      <h2>Quién eres</h2>
+      <p>Dos campos y se acabó: nombre y oficio. Lo que el personaje <em>es</em> para la gente no se elige aquí, se gana andando.</p>
+      <ul>
+        <li><b>Es el nombre del personaje, no el tuyo</b>, y la pantalla lo dice en la primera línea. El campo además llega con uno ya sorteado, así que se puede seguir sin escribir nada — y nadie teclea su nombre real por inercia. <span class="fuente">personaje §1</span><span class="nuevo">nuevo</span></li>
+        <li><b>Femenino por defecto.</b> Donde el castellano obliga a elegir sin motivo, el sesgo va hacia el femenino: llega puesto y se cambia en un toque. Las sugerencias muestran femeninos primero. <span class="fuente">lenguaje</span><span class="nuevo">nuevo</span></li>
+        <li>El género gramatical es dato vivo, no adorno: el código bifurca por él cada vez que el mundo se dirige a ti. «Forastera» y «forastero» no son la misma cadena con otra letra. <span class="fuente">personaje §1</span></li>
+        <li>Las sugerencias salen del paquete de idioma del mapa, así que en Galicia son gallegas y el nombre pega con el sitio. <span class="fuente">personaje §1</span></li>
+        <li>No se pregunta la edad. Nunca. <span class="fuente">seguridad §4</span></li>
+        <li><b>El oficio no se cambia nunca más, y la pantalla lo dice antes de elegir.</b> Es la única palanca mecánica del personaje y lo que le da peso es que haya aventuras que con esta persona no verás; un oficio cambiable en un toque sería una preferencia y no una decisión. Si es permanente, el momento de tomarla no puede ser un menú de nombres bonitos. <span class="fuente">personaje §3</span><span class="nuevo">decidido</span></li>
+        <li><b>El elegido se despliega y explica qué implica.</b> Así la pantalla informa en el momento de decidir sin convertirse en un muro de texto que nadie lee. Los demás se quedan en su línea de sabor. <span class="nuevo">decidido</span></li>
+        <li>Si te arrepientes, la salida es <b>empezar de nuevo</b> desde ajustes, y el coste está bien repartido solo: crece con lo jugado. El día 2 no tienes nada que perder; el día 200 te arrepientes mucho menos. <span class="fuente">partida-guardada §4</span></li>
+        <li><b>La lista lleva scroll para que el diseño escale</b>, no porque vaya a haber nueve oficios: <code>personaje.md</code> §3 sigue fijando tres o cuatro, y por un motivo medido — el oficio filtra las aventuras y eso multiplica el catálogo necesario. Los nueve de la maqueta están para comprobar que la pantalla no cambia de forma si algún día crecen. <span class="fuente">personaje §3</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:42</span><span>▮▮▮</span></div>
+      <div class="navega"><span class="atras">‹</span><span class="avance"><i class="hecho"></i><i class="aqui"></i><i></i><i></i><i></i></span><span class="cuenta">2/5</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Tu nivel de dificultad</p>
+        <h2 class="titular">En media hora andando, ¿tú dónde llegas?</h2>
+        <div class="opciones">
+          <div class="opcion"><span class="radio"></span>A la vuelta de la esquina</div>
+          <div class="opcion"><span class="radio"></span>A un par de manzanas</div>
+          <div class="opcion puesta"><span class="radio"></span>Al otro barrio</div>
+          <div class="opcion"><span class="radio"></span>Al pueblo de al lado</div>
+        </div>
+        <p class="parrafo tenue" style="font-size:11.5px">No te preocupes por acertar: se ajusta solo a medida que camines.</p>
+        <div class="boton">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2</p>
+      <h2>Tu tramo</h2>
+      <p><b>Esta es la pantalla de dificultad</b>, traducida a un juego que va de moverse. Donde otro juego pregunta fácil, normal o difícil, este pregunta cuánto andas — y de la respuesta salen el tamaño de las aventuras, la distancia de los desvíos y el tamaño de tu mapa.</p>
+      <ul>
+        <li>La diferencia con una selección de dificultad de toda la vida: aquí <b>ninguna opción es peor juego</b>. No hay menos contenido en «a la vuelta de la esquina», hay la misma forma a otra escala. <span class="fuente">accesibilidad §1</span><span class="nuevo">nuevo</span></li>
+        <li>Se pregunta <b>en lenguaje de sitios y no de distancias</b>, porque el juego no enseña kilómetros y porque nadie sabe su ritmo en metros por minuto. <span class="fuente">accesibilidad §1</span></li>
+        <li>El ajuste posterior <b>no se comenta jamás</b>. Si el juego dijera «últimamente andas menos», sería una app de salud y un reproche. <span class="fuente">accesibilidad §1</span></li>
+        <li>Aquí no aparece la palabra accesibilidad, ni hay una opción para quien va en silla. Esa persona elige la primera y el juego entero se redimensiona: no es un modo, es la unidad de medida.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:43</span><span>▮▮▮</span></div>
+      <div class="navega"><span class="atras">‹</span><span class="avance"><i class="hecho"></i><i class="hecho"></i><i class="aqui"></i><i></i><i></i></span><span class="cuenta">3/5</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Tu mapa</p>
+        <h2 class="titular chico">Permiso de ubicación</h2>
+        <p class="parrafo">Necesitamos tu ubicación para generar el mapa del juego y para saber cuánto caminas. Nunca, nunca, nunca la guardamos en ningún sitio, y tampoco la compartimos con nadie.</p>
+        <div class="tarjeta" style="border-left-color:var(--filete)">
+          <h4 style="font-family:var(--sans);font-size:12px">Ubicación · mientras usas la app</h4>
+          <p style="font-family:var(--sans);font-size:10.5px">Nunca en segundo plano. Si la app no está abierta, el juego no puede seguirte.</p>
+        </div>
+        <div class="boton">Permitir</div>
+        <div class="boton hueco">Prefiero elegir el punto a mano</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 3</p>
+      <h2>El permiso</h2>
+      <p>Pedido en contexto, con la razón delante y en el momento en que hace falta. Nunca al instalar.</p>
+      <ul>
+        <li>Solo <b>«mientras se usa»</b>. Es el permiso que un padre acepta sin pensárselo, y resulta bastar para todo lo decidido. <span class="fuente">seguridad §2</span></li>
+        <li><b>Se pide aquí y no en la primera salida</b>, porque levantar el mapa necesita saber por dónde andas y ocurre antes. El documento decía lo otro; se corrigió al dibujar esta pantalla. <span class="fuente">seguridad §2</span><span class="nuevo">corregido</span></li>
+        <li>La salida «a mano» no es un adorno: hay quien no quiere dar la ubicación y hay quien prefiere levantar el mapa donde trabaja o donde veranea. Y con la flecha de atrás, <b>denegar el permiso deja de ser una puerta cerrada</b>: se vuelve y se cambia de idea.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:43</span><span>▮▮▮</span></div>
+      <div class="navega" style="padding-bottom:6px"><span class="atras">‹</span><span class="avance"><i class="hecho"></i><i class="hecho"></i><i class="hecho"></i><i class="aqui"></i><i></i></span><span class="cuenta">4/5</span></div>
+      <div class="cuerpo" style="padding:0">
+        <div class="mapa">
+          <svg viewBox="0 0 300 300" role="img" aria-label="Mapa real del barrio con un círculo que marca el alcance y un punto central que se puede arrastrar">
+            <rect width="300" height="300" fill="#e6e1d6"/>
+            <g stroke="#cfc7b6" stroke-width="9" fill="none">
+              <path d="M-10 78 H310"/><path d="M-10 168 H310"/><path d="M-10 250 H310"/>
+              <path d="M64 -10 V310"/><path d="M158 -10 V310"/><path d="M244 -10 V310"/>
+            </g>
+            <g stroke="#dcd5c6" stroke-width="4" fill="none">
+              <path d="M-10 122 H310"/><path d="M-10 210 H310"/><path d="M110 -10 V310"/><path d="M200 -10 V310"/>
+            </g>
+            <rect x="72" y="86" width="30" height="26" fill="#dad3c2"/>
+            <rect x="168" y="86" width="24" height="26" fill="#dad3c2"/>
+            <rect x="72" y="178" width="30" height="24" fill="#dad3c2"/>
+            <rect x="208" y="178" width="28" height="24" fill="#dad3c2"/>
+            <rect x="120" y="130" width="30" height="28" fill="#c9d6b4"/>
+            <circle cx="150" cy="150" r="104" fill="rgba(63,127,168,0.16)" stroke="#3f7fa8" stroke-width="2.5" stroke-dasharray="7 5"/>
+            <circle cx="150" cy="150" r="9" fill="#c62828" stroke="#7d1414" stroke-width="2"/>
+            <circle cx="150" cy="150" r="17" fill="none" stroke="#c62828" stroke-width="1.5" opacity="0.4"/>
+          </svg>
+        </div>
+        <div style="padding:12px 18px 16px;display:flex;flex-direction:column;gap:9px;flex:1">
+          <p class="rotulo">Dónde generar el mapa del juego</p>
+          <p class="parrafo">Puedes arrastrar la marca a otro sitio. El círculo es hasta dónde llega el mundo por ahora.</p>
+          <p class="parrafo tenue" style="font-size:11px">El tamaño sale de la dificultad que elegiste: te da para una tarde larga.</p>
+          <div class="boton">Generar aquí</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 4</p>
+      <h2>Dónde se levanta<span class="nuevo">nueva</span></h2>
+      <p>Faltaba en la primera versión y es la única pantalla del arranque donde se ve el mundo real tal cual: calles grises, manzanas, un parque. A partir de aquí ya no se vuelve a ver.</p>
+      <ul>
+        <li><b>El círculo sale de tu tramo</b>, no de un número que elijas. Quien anda poco ve un círculo pequeño y quien anda mucho lo ve grande, y las dos partidas son igual de jugables. <span class="fuente">alcance §2</span></li>
+        <li>Se puede arrastrar, y conviene: <b>el mapa se ancla a una coordenada redondeada, no a tu posición exacta</b>, para que estés dentro pero no en el centro. Así se puede enseñar el mapa sin enseñar el portal. <span class="fuente">alcance §2</span></li>
+        <li>El texto habla de <b>«una tarde larga»</b> y no de metros ni de minutos, igual que el resto del juego.</li>
+        <li><b>Círculo, decidido</b>, aunque por dentro el mapa sea una celda de una rejilla. El círculo comunica alcance —lo que te da el cuerpo— y la celda es una consecuencia de cómo se cosen los mapas entre sí, que al jugador no le sirve de nada saber aquí. <span class="fuente">alcance §2</span><span class="nuevo">decidido</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:44</span><span>▮▮▮</span></div>
+      <div class="navega"><span class="atras">‹</span><span class="avance"><i class="hecho"></i><i class="hecho"></i><i class="hecho"></i><i class="hecho"></i><i class="aqui"></i></span><span class="cuenta">5/5</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Generando el mundo del juego</p>
+        <h2 class="titular chico">Esto puede tardar un poco, pero solo ocurre una vez…</h2>
+        <div class="fases">
+          <div class="fase hecha"><span class="punto"></span>Mirando qué hay por ahí</div>
+          <div class="fase hecha"><span class="punto"></span>Separando la tierra del agua</div>
+          <div class="fase hecha"><span class="punto"></span>Repartiendo la gente</div>
+          <div class="fase ahora"><span class="punto"></span>Trazando las calzadas</div>
+          <div class="fase"><span class="punto"></span>Buscando los sitios con historia</div>
+          <div class="fase"><span class="punto"></span>Poniéndole nombre a todo</div>
+        </div>
+        <p class="parrafo italica tenue" style="margin-top:auto;font-size:12px">«…y mientras tanto, ahí fuera ya pasan cosas que nadie te ha contado.»</p>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 5</p>
+      <h2>La generación</h2>
+      <p>La única espera larga del juego, y ocurre una vez por mapa. Las fases son las que ya existen en el generador, dichas en voz de mundo en lugar de en voz de programa.</p>
+      <ul>
+        <li><b>Overpass propio, en nuestro servidor</b>, con el objetivo de <b>bajar de un minuto</b>. Contra los mirrors públicos esto tarda minutos, y esos minutos caen en el peor sitio posible para perder a alguien. Por debajo del minuto, una lista de fases basta y no hace falta entretener a nadie. <span class="fuente">arquitectura §3</span><span class="nuevo">nuevo</span></li>
+        <li><b>Si la app se cierra a mitad, se vuelve al paso anterior con lo contestado precubierto.</b> Nadie repite el onboarding por haber recibido una llamada. <span class="fuente">arranque</span><span class="nuevo">nuevo</span></li>
+        <li>Al final de esta pantalla corre el <b>prólogo</b>: unos cuantos pasos del mundo antes de que tú existas, para que el primer pueblo al que llegues ya esté hablando de algo. La última línea lo anuncia sin explicarlo. <span class="fuente">arranque §1</span></li>
+        <li>El prólogo además <b>se compone</b>: se resiembra hasta que dos núcleos alcanzables tengan versiones distintas del mismo suceso. Esa es la puesta en escena del mejor truco del juego. <span class="fuente">arranque §2</span></li>
+        <li>Junto a la preparación de una salida, es el único momento con red obligatoria. A partir de aquí tu mapa está congelado y se juega sin cobertura. <span class="fuente">partida §1</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:47</span><span>▮▮▮</span></div>
+      <div class="cuerpo" style="padding:0">
+        <div class="mapa">
+          <svg viewBox="0 0 300 320" role="img" aria-label="El mapa de fantasía con dos pueblos rotulados y varios sitios dibujados sin nombre">
+            <rect width="300" height="320" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V222 C252 236 214 216 168 230 C120 244 74 230 0 248 Z" fill="#7fae5a"/>
+            <path d="M0 248 C74 230 120 244 168 230 C214 216 252 236 300 222" fill="none" stroke="#12321f" stroke-width="7"/>
+            <path d="M120 0 C132 46 108 78 126 118 C142 154 118 186 130 222" fill="none" stroke="#1f6f9e" stroke-width="6"/>
+            <g stroke="rgba(30,43,24,0.75)" stroke-width="5" fill="none" stroke-linecap="round">
+              <path d="M78 92 C118 78 156 104 196 88"/><path d="M196 88 C214 128 186 160 200 196"/><path d="M78 92 C64 138 92 166 84 206"/>
+            </g>
+            <g stroke="#f2e7c8" stroke-width="2.4" fill="none" stroke-linecap="round">
+              <path d="M78 92 C118 78 156 104 196 88"/><path d="M196 88 C214 128 186 160 200 196"/><path d="M78 92 C64 138 92 166 84 206"/>
+            </g>
+            <circle cx="78" cy="92" r="7" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+            <circle cx="196" cy="88" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+            <circle cx="200" cy="196" r="4.5" fill="#c62828" stroke="#7d1414" stroke-width="1.4" opacity="0.45"/>
+            <circle cx="84" cy="206" r="4.5" fill="#c62828" stroke="#7d1414" stroke-width="1.4" opacity="0.45"/>
+            <g opacity="0.5" fill="#1e2b18">
+              <circle cx="146" cy="140" r="2.6"/><circle cx="112" cy="176" r="2.6"/><circle cx="228" cy="140" r="2.6"/><circle cx="60" cy="146" r="2.6"/>
+            </g>
+            <g font-family="Georgia, serif" font-size="10.5" letter-spacing="1.2">
+              <g><rect x="34" y="66" width="88" height="18" rx="3" fill="#efe3c0" stroke="#8a6d34"/>
+                 <text x="78" y="79" text-anchor="middle" fill="#1e2b18">VILANOVA</text></g>
+              <g><rect x="152" y="62" width="88" height="18" rx="3" fill="#efe3c0" stroke="#8a6d34"/>
+                 <text x="196" y="75" text-anchor="middle" fill="#1e2b18">MONFRIDA</text></g>
+            </g>
+            <g font-family="Georgia, serif" font-size="9" font-style="italic" fill="rgba(30,43,24,0.62)">
+              <text x="146" y="158" text-anchor="middle">una torre</text>
+              <text x="112" y="194" text-anchor="middle">unas piedras</text>
+            </g>
+            <rect x="0" y="0" width="300" height="320" fill="none" stroke="#8a6d34" stroke-width="6"/>
+          </svg>
+        </div>
+        <div style="padding:12px 18px 16px;display:flex;flex-direction:column;gap:8px;flex:1">
+          <p class="rotulo">Tu mapa</p>
+          <h2 class="titular chico" style="margin:0">As Terras de Vilanova</h2>
+          <p class="parrafo">Cada sitio de este mapa existe de verdad, con otro nombre y otra vida. Y es donde va a pasar todo.</p>
+          <p class="parrafo tenue" style="font-size:11.5px">Lo que pase se irá escribiendo según andes. Hoy son solo nombres en un mapa; caminando aparecerán más sitios, más gente y más historias. ¡Disfrútalo!</p>
+          <div class="boton">Salir a andar</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 6</p>
+      <h2>Tu mapa, el día uno</h2>
+      <p>El momento en que el juego enseña lo que es, y en el que hay que explicar el trato: esto es tu barrio con otra ropa, y la historia se teje andando. Sin ese párrafo, un mapa bonito es solo un mapa bonito.</p>
+      <ul>
+        <li><b>Tres cosas que decir y ninguna más</b>: que los sitios son reales, que ahí ocurre la historia, y que se escribe según andas. En tres líneas y sin tutorial. <span class="nuevo">nuevo</span></li>
+        <li><b>Ningún número en el texto.</b> Una versión anterior decía «hoy solo son dos nombres», que era verdad en esta maqueta y falso en el juego: el día 1 ya conoces todos los núcleos y todas las calzadas, porque son la infraestructura de navegación — en un mundo de paseo, trece nombres y no dos. Se puede contar en tiempo de ejecución, pero «trece» ya no dice lo que la frase quería decir. <span class="fuente">lenguaje</span><span class="nuevo">corregido</span></li>
+        <li>El mapa dibujado aquí está simplificado a dos pueblos para que se lea a este tamaño. <b>Un mundo de paseo real tiene siete núcleos y seis calzadas</b>, que es justo donde el solape de rótulos se nota.</li>
+        <li>Los <b>cuatro niveles de conocimiento</b> se ven a simple vista. Núcleos y calzadas nacen sabidos porque son la infraestructura de navegación; los sitios pequeños se ven como bultos sin rótulo —«una torre», «unas piedras»— hasta que los pisas o alguien te habla de ellos. <span class="fuente">bucle §1</span></li>
+        <li>El mapa es la lámina, no un mapa de aplicación: mar plano, tierra plana, costa y ríos gruesos, calzadas con filete y puntos rojos. Es el estilo <b>Reino</b> que ya existe. <span class="fuente">render/styles.js</span></li>
+        <li>Los núcleos van sobre placa de pergamino y los parajes con halo, para que <b>pueblo y paraje se distingan sin leer el nombre</b>.</li>
+        <li><b>Y aquí se ve la deuda de render</b>: falta el algoritmo que coloque los rótulos sin que ninguno pise a otro. Con dos placas juntas canta el doble que con dos textos. <span class="fuente">arquitectura</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>9:48</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Lo que se cuenta hoy</p>
+        <h2 class="titular chico">Por aquí hay quien necesita algo</h2>
+        <div class="tarjeta">
+          <h4>La entrega sospechosa</h4>
+          <p>Un paquete envuelto en hule, una herrera al otro lado del mapa y alguien que preferiría que no llegase.</p>
+          <span class="medida">Una aventura · unas dos horas</span>
+        </div>
+        <div class="tarjeta" style="border-left-color:rgba(30,43,24,0.3)">
+          <h4>El pequeño peregrinaje</h4>
+          <p>Una ofrenda, una piedra antigua y unas palabras que hay que decir enteras.</p>
+          <span class="medida">Un paseo · una hora</span>
+        </div>
+        <p class="parrafo tenue" style="font-size:11px;margin-top:auto">Las horas son orientativas: aquí lo que cuenta es lo que andas. Si hoy te da para veinte minutos, lo dejas y ya está. El mundo se queda quieto hasta que vuelvas.</p>
+        <p class="parrafo tenue" style="font-size:11px">Y puedes salir a andar sin coger ninguna. El mundo se mueve igual.</p>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 7</p>
+      <h2>La primera aventura</h2>
+      <p>No hay formulario de presupuesto. Se ofrecen las aventuras del día y cada una declara su tamaño con una palabra del mundo y su equivalencia en tiempo.</p>
+      <ul>
+        <li><b>La regla del reloj se explica aquí, en dos líneas.</b> «Dos horas» es una medida de camino, no un cronómetro: quien tarda el doble juega lo mismo, y quien lo deja a los veinte minutos no pierde nada porque el mundo avanza con los pasos y se queda quieto cuando paras. Es lo único de las mecánicas que conviene decir en voz alta. <span class="fuente">quests, decisión 4</span><span class="nuevo">nuevo</span></li>
+        <li>Se elige <b>por antojo, no por aritmética</b>. Ningún número de distancia aparece en pantalla. <span class="fuente">bucle §3</span></li>
+        <li>La lista está filtrada por tu oficio, con afinidad declarada por plantilla: unas pocas aventuras no las verás nunca con este personaje. <span class="fuente">personaje §3</span></li>
+        <li>La <b>primera</b> se elige además por dónde pasa: tiene que llevarte a los dos núcleos que oyeron versiones distintas del mismo suceso. Solo la primera; después, el mundo vuelve a ser azaroso. <span class="fuente">arranque §2</span></li>
+        <li>Y la última línea importa tanto como las tarjetas: <b>andar sin aventura tiene que ser visible</b>, porque los kilómetros mueven el mundo igual. Caben las dos cosas. <span class="fuente">quests, decisión 4</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <h3>Decidido al dibujar estas pantallas</h3>
+    <ul>
+      <li class="cerrado"><b>«Comarca» pasa a llamarse «mapa»</b>, en los trece documentos. Donde significaba la gente de allí y no la unidad de mundo, se reescribió a mano.</li>
+      <li class="cerrado"><b>El permiso de ubicación se adelanta</b> a levantar el primer mapa, que es lo primero que lo necesita.</li>
+      <li class="cerrado"><b>El nombre del personaje se pide en el onboarding</b>, con nombre sorteado de partida y dejando claro que no es el del jugador.</li>
+      <li class="cerrado"><b>Femenino por defecto</b>, y con ello un documento nuevo: <code>game-design/lenguaje.md</code>.</li>
+      <li class="cerrado"><b>Overpass propio en nuestro servidor</b>, y onboarding reanudable si la app se cierra durante la generación.</li>
+      <li class="cerrado"><b>El declutter de rótulos</b> deja de ser deuda vaga y pasa a ser un algoritmo de colocación en <code>arquitectura.md</code>.</li>
+      <li class="cerrado"><b>El onboarding habla como app; el juego habla como mundo.</b> La frontera está en el botón de «salir a andar»: hasta ahí el texto explica qué hace la aplicación y por qué, y a partir de ahí solo habla el mundo. Sale de los copies de esta revisión y queda escrito en <code>lenguaje.md</code>.</li>
+      <li class="cerrado"><b>Círculo, no celda</b>, en la pantalla 4. El círculo comunica alcance; la celda es una consecuencia interna de cómo se cosen los mapas.</li>
+      <li class="cerrado"><b>La generación tiene objetivo: menos de un minuto.</b> Por debajo de ahí, la lista de fases basta.</li>
+      <li class="cerrado"><b>El onboarding tiene navegación hacia atrás</b>, con flecha y contador en las cinco pantallas. Resuelve de una vez el permiso denegado y el arrepentimiento con el nombre, y deja una sola cosa irreversible: dónde se generó el mapa.</li>
+      <li class="cerrado"><b>La lista de oficios lleva scroll</b> y escala sin cambiar de forma.</li>
+    </ul>
+
+    <h3>Lo que sigue abierto</h3>
+    <ul>
+      <li class="abierto"><b>Los oficios concretos</b> siguen sin escribirse. Los de la pantalla salen de los servicios que el mundo sabe generar, pero es una lista de trabajo: el número se queda en tres o cuatro, y el scroll está para que la pantalla no se rompa si algún día son más.</li>
+      <li class="cerrado"><b>El oficio no se cambia pasada esta pantalla</b>, ni por la flecha ni por ajustes. Es la única palanca mecánica del personaje y lo que le da peso es que haya aventuras que con esta persona no verás nunca. La salida, si te arrepientes, es «empezar de nuevo» desde ajustes, y su coste crece con lo jugado — justo al ritmo al que deja de importar.</li>
+      <li class="cerrado"><b>El nombre y el género gramatical sí se cambian</b>, y a partir de aquí van por ajustes: no tienen consecuencia mecánica y encerrar a alguien en un nombre que no le gusta no protege nada.</li>
+    </ul>
+  </footer>
+
+</div>

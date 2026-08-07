@@ -1,0 +1,507 @@
+<title>Pantallas 4 · Al parar — Walking Adventure</title>
+
+<style>
+  :root {
+    --tierra: #7fae5a; --mar: #3f7fa8; --tinta: #1e2b18; --marca: #c62828;
+    --placa: #efe3c0; --filete: #8a6d34;
+    --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16); --bisel: #2a3324;
+    --serif: Georgia, "IM Fell English", "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+      --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  }
+  :root[data-theme="dark"] { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+    --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  :root[data-theme="light"] { --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30,43,24,0.16); --filete: #8a6d34; --marca: #c62828; }
+
+  body { margin: 0; background: var(--fondo); color: var(--texto); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .envoltorio { max-width: 1120px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .cabecera { border-bottom: 2px solid var(--filete); padding-bottom: 28px; }
+  .migas { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-2); margin: 0 0 14px; }
+  .cabecera h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; }
+  .cabecera h1 em { font-style: italic; color: var(--filete); }
+  .entradilla { max-width: 62ch; color: var(--texto-2); margin: 0; font-size: 1.02rem; }
+
+  .reglas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 36px 0 8px; }
+  .regla { border-left: 3px solid var(--filete); padding: 4px 0 4px 14px; }
+  .regla b { display: block; font-family: var(--serif); font-size: 1.02rem; font-weight: 400; margin-bottom: 3px; }
+  .regla span { font-size: 0.86rem; color: var(--texto-2); }
+
+  .aviso-voces { margin: 34px 0 8px; padding: 14px 18px; background: var(--fondo-2); border-radius: 2px; font-size: 0.88rem; color: var(--texto-2); }
+  .aviso-voces b { color: var(--texto); font-weight: 600; }
+
+  .pantalla { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; padding: 52px 0; border-top: 1px solid var(--linea); }
+  .pantalla:first-of-type { border-top: 2px solid var(--filete); }
+  @media (max-width: 760px) { .pantalla { grid-template-columns: 1fr; gap: 30px; } }
+
+  .notas h2 { font-family: var(--serif); font-weight: 400; font-size: 1.62rem; margin: 0 0 4px; line-height: 1.2; text-wrap: balance; }
+  .paso { font-family: var(--mono); font-size: 0.78rem; color: var(--filete); letter-spacing: 0.1em; margin: 0 0 10px; }
+  .notas > p { margin: 0 0 18px; max-width: 60ch; color: var(--texto-2); }
+  .notas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .notas li { max-width: 62ch; font-size: 0.94rem; padding-left: 16px; position: relative; }
+  .notas li::before { content: "—"; position: absolute; left: 0; color: var(--filete); }
+  .notas li b { font-weight: 600; }
+  code { font-family: var(--mono); font-size: 0.86em; background: var(--fondo-2); border-radius: 2px; padding: 0 4px; }
+  .fuente { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--marca); border: 1px solid currentColor; border-radius: 2px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  .nuevo { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--fondo); background: var(--filete); border-radius: 2px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.06em; }
+
+  .movil { background: var(--bisel); border-radius: 26px; padding: 9px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); position: sticky; top: 28px; }
+  @media (max-width: 760px) { .movil { position: static; max-width: 300px; } }
+  .lienzo { background: var(--placa); border-radius: 18px; overflow: hidden; aspect-ratio: 9 / 17.4; display: flex; flex-direction: column; font-family: var(--serif); color: var(--tinta); position: relative; }
+  .barra { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 9px; padding: 8px 14px 2px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+  .cuerpo { flex: 1; display: flex; flex-direction: column; padding: 12px 18px 14px; gap: 11px; overflow: hidden; }
+
+  .rotulo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0; }
+  .titular { font-size: 20px; line-height: 1.18; margin: 0; font-weight: 400; }
+  .titular.chico { font-size: 16px; }
+  .parrafo { font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .parrafo.tenue { color: rgba(30,43,24,0.62); }
+  .italica { font-style: italic; }
+  .empuja { margin-top: auto; }
+
+  .boton { text-align: center; background: var(--tinta); color: var(--placa); padding: 11px; border-radius: 3px; font-size: 13px; letter-spacing: 0.04em; }
+  .boton.hueco { background: transparent; color: rgba(30,43,24,0.6); border: 1px solid rgba(30,43,24,0.3); }
+
+  /* El visor: la imagen a sangre y el nombre sobre placa */
+  .lienzo.visor .cuerpo { padding: 0; position: relative; }
+  .marco-visor { position: absolute; inset: 0; }
+  .marco-visor svg { display: block; width: 100%; height: 100%; }
+  .corte { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--placa); box-shadow: 0 0 0 1px rgba(0,0,0,0.28); }
+  .tirador { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; border-radius: 50%;
+    background: var(--placa); border: 1.5px solid var(--filete); display: grid; place-items: center; font-family: var(--sans); font-size: 12px; color: var(--tinta); }
+  .cartela { position: absolute; left: 12px; right: 12px; bottom: 12px; background: var(--placa); border: 1px solid var(--filete); border-radius: 2px; padding: 9px 11px; }
+  .cartela h3 { margin: 0; font-size: 15px; font-weight: 400; line-height: 1.2; }
+  .cartela p { margin: 4px 0 0; font-size: 11.5px; line-height: 1.4; color: rgba(30,43,24,0.7); }
+  .cartela .rotulo { margin-bottom: 3px; }
+  .banda-alta { position: absolute; left: 0; right: 0; top: 0; padding: 9px 14px 16px; font-family: var(--sans); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: rgba(239,227,192,0.9);
+    background: linear-gradient(to bottom, rgba(20,26,18,0.5), rgba(20,26,18,0));
+    display: flex; justify-content: space-between; align-items: flex-start; }
+  .cerrar { width: 22px; height: 22px; border-radius: 50%; background: rgba(239,227,192,0.92); color: var(--tinta);
+    display: grid; place-items: center; font-size: 11px; flex: none; margin-top: -2px; }
+
+  .secuencia { margin: 40px 0 8px; border: 1px solid var(--linea); border-radius: 3px; padding: 22px 24px; background: var(--fondo-2); }
+  .secuencia h3 { font-family: var(--serif); font-weight: 400; font-size: 1.28rem; margin: 0 0 6px; }
+  .secuencia > p { margin: 0 0 18px; font-size: 0.92rem; color: var(--texto-2); max-width: 66ch; }
+  .secuencia ol { margin: 0; padding: 0 0 0 0; list-style: none; display: grid; gap: 14px; counter-reset: seq; }
+  .secuencia li { position: relative; padding-left: 34px; font-size: 0.94rem; max-width: 68ch; counter-increment: seq; }
+  .secuencia li::before { content: counter(seq); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--filete); color: var(--filete); font-family: var(--mono); font-size: 0.74rem; display: grid; place-items: center; }
+  .secuencia li b { font-weight: 600; }
+  .secuencia li em { color: var(--texto-2); font-style: normal; }
+
+  /* La escena: diálogo sin retrato */
+  .dialogo { border-left: 2px solid var(--filete); padding-left: 11px; }
+  .dialogo .quien { font-family: var(--sans); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0 0 4px; }
+  .dialogo p { margin: 0; font-size: 13px; line-height: 1.5; font-style: italic; }
+
+  .voz-alta { display: flex; align-items: center; gap: 6px; font-family: var(--sans); font-size: 9.5px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+  .voz-alta i { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; display: grid; place-items: center; font-size: 8px; font-style: normal; flex: none; }
+
+  .zurron { display: grid; gap: 9px; }
+  .entrada { border-left: 2px solid rgba(30,43,24,0.28); padding-left: 10px; font-size: 12px; line-height: 1.45; }
+  .entrada b { font-weight: 400; font-style: italic; color: rgba(30,43,24,0.55); font-size: 10px; display: block; font-family: var(--sans); letter-spacing: 0.06em; }
+
+  .premio { border: 1px solid var(--filete); border-radius: 2px; padding: 10px 12px; background: rgba(255,255,255,0.4); }
+  .premio h4 { margin: 0 0 3px; font-size: 13.5px; font-weight: 400; }
+  .premio p { margin: 0; font-size: 11.5px; line-height: 1.45; color: rgba(30,43,24,0.7); }
+
+  .opciones { display: grid; gap: 7px; }
+  .opcion { border: 1px solid rgba(30,43,24,0.28); border-radius: 2px; padding: 9px 11px; font-size: 12px; }
+  .opcion.roja { border-color: var(--marca); color: var(--marca); }
+
+  .pareja { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0 4px; }
+  .capa { border: 1px solid var(--linea); border-radius: 3px; padding: 10px 12px; }
+  .capa b { display: block; font-family: var(--serif); font-weight: 400; font-size: 0.98rem; margin-bottom: 2px; }
+  .capa span { font-size: 0.84rem; color: var(--texto-2); }
+
+  .pie { border-top: 2px solid var(--filete); margin-top: 40px; padding-top: 28px; }
+  .pie h3 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0 0 14px; }
+  .pie ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 70ch; color: var(--texto-2); font-size: 0.94rem; }
+  .pie li { padding-left: 22px; position: relative; }
+  .pie li b { color: var(--texto); }
+  .pie .cerrado::before { content: "✓"; position: absolute; left: 0; color: var(--filete); font-weight: 700; }
+  .pie .abierto::before { content: "?"; position: absolute; left: 2px; color: var(--marca); font-weight: 700; }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <p class="migas">Walking Adventure · Diseño de pantallas · 4 de 6</p>
+    <h1>Al parar<br><em>el momento por el que existe el juego</em></h1>
+    <p class="entradilla">Has llegado a algún sitio y estás quieta, así que aquí la pantalla vuelve a estar permitida. Es donde ocurre la revelación del anclaje —que O Torreón Esquecido <em>es</em> el chiringuito de Manolo— y es el único trozo de tiempo de pantalla en la calle que el diseño concede.</p>
+  </header>
+
+  <div class="reglas">
+    <div class="regla"><b>El chiste y la magia son el mismo</b><span>La gracia y el asombro salen del desajuste entre la ficción y el sitio. No hay que elegir uno.</span></div>
+    <div class="regla"><b>Todo estaba escrito antes de salir</b><span>Textos e imágenes se generaron en casa. Aquí no se llama a la red para nada.</span></div>
+    <div class="regla"><b>Nunca hay que entrar</b><span>El geofence es generoso y se valida desde la calle. Un sitio cerrado o privado no bloquea nada.</span></div>
+    <div class="regla"><b>El chiste no es a costa del sitio</b><span>Siempre a costa del desajuste. Es el barrio de gente de verdad.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Aquí manda la voz del mundo.</b> Lo que va en <span style="font-family:var(--serif)">serif</span> es lo que el juego dice; lo que va en sans somos nosotros hablando de él. Las ilustraciones de los móviles son bocetos para enseñar la composición: en la app, la de ficción la genera un modelo y la del sitio real es una fotografía.</p>
+
+  <div class="secuencia">
+    <h3>La secuencia de una llegada</h3>
+    <p>Ninguna de estas pantallas se navega: llegar a un sitio las encadena. Conviene tenerlo escrito porque no se deduce de las pantallas por separado, y porque el orden es una decisión y no una casualidad.</p>
+    <ol>
+      <li><b>El visor</b>, si es la primera vez aquí y el sitio tiene ilustración. <em>Se abre solo, se cierra con la flecha de arriba o tocando fuera, y debajo está el resto. Es una capa, no un paso: en las visitas siguientes no se abre solo y queda a un toque.</em></li>
+      <li><b>El beat</b>, si este sitio es uno del lazo de hoy o si te ha caído un micro-encuentro. <em>No siempre hay beat. Llegar a un sitio sin haber venido a nada es el caso normal, y entonces lo que hay es la ficha.</em></li>
+      <li><b>Lo que aquí se cuenta</b>, si el sitio es un núcleo. <em>Al final y no al principio: el beat es el motivo del viaje y el estado del pueblo es el marco, así que ponerlo delante lo convertiría en un peaje. Y así cabe dentro lo que se dice de lo que acabas de hacer en otro sitio, porque los rumores viajan. Si no hay beat, esto es la llegada entera.</em></li>
+    </ol>
+  </div>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo visor">
+      <div class="barra"><span>19:41</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <div class="marco-visor">
+          <svg viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Ilustración de fantasía: una torre en ruinas sobre un cabo, al atardecer">
+            <defs>
+              <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#c9a45e"/><stop offset="0.55" stop-color="#e6cf9a"/><stop offset="1" stop-color="#efe3c0"/>
+              </linearGradient>
+            </defs>
+            <rect width="300" height="520" fill="url(#cielo)"/>
+            <circle cx="222" cy="150" r="26" fill="#f2e7c8" opacity="0.75"/>
+            <path d="M0 300 C60 286 96 302 150 292 C206 282 250 296 300 288 V520 H0 Z" fill="#3f7fa8" opacity="0.55"/>
+            <path d="M0 330 C58 318 104 340 158 328 C214 316 254 336 300 326 V520 H0 Z" fill="#5f9243"/>
+            <path d="M0 372 C64 358 112 384 172 370 C226 358 262 378 300 368 V520 H0 Z" fill="#4b7a36"/>
+            <g fill="#1e2b18" opacity="0.14">
+              <path d="M118 372 L150 214 L182 372 Z"/>
+            </g>
+            <g>
+              <path d="M126 336 L126 226 L174 226 L174 336 Z" fill="#8f8873" stroke="#2c2a22" stroke-width="2.4"/>
+              <path d="M126 226 L120 216 L134 216 L134 206 L146 206 L146 216 L156 216 L156 206 L168 206 L168 216 L180 216 L174 226 Z" fill="#a39a83" stroke="#2c2a22" stroke-width="2.2"/>
+              <path d="M174 250 C186 262 184 292 172 306" fill="none" stroke="#2c2a22" stroke-width="2.2"/>
+              <rect x="140" y="252" width="12" height="18" rx="5" fill="#2c2a22"/>
+              <rect x="138" y="296" width="17" height="40" rx="2" fill="#2c2a22" opacity="0.82"/>
+              <path d="M126 268 L112 274 L114 336 L126 336 Z" fill="#7d7663" stroke="#2c2a22" stroke-width="2"/>
+            </g>
+            <g stroke="#2c2a22" stroke-width="1.6" opacity="0.5" fill="none">
+              <path d="M96 348 C110 340 122 344 132 338"/><path d="M176 342 C190 336 202 342 216 336"/>
+            </g>
+            <g fill="#2c2a22" opacity="0.35">
+              <path d="M58 402 l5 -16 l5 16 z"/><path d="M242 392 l5 -14 l5 14 z"/><path d="M78 428 l4 -12 l4 12 z"/>
+            </g>
+            <g stroke="#2c2a22" stroke-width="1.4" fill="none" opacity="0.45">
+              <path d="M204 176 c6 -5 12 -1 8 5 c-4 6 -12 3 -8 -5"/><path d="M188 190 c5 -4 10 -1 7 4 c-3 5 -10 2 -7 -4"/>
+            </g>
+          </svg>
+        </div>
+        <div class="banda-alta"><span>Has llegado</span><span class="cerrar">▾</span></div>
+        <div class="corte" style="right:0"><div class="tirador">◂ ▸</div></div>
+        <div class="cartela">
+          <p class="rotulo">Paraje · vigilancia</p>
+          <h3>O Torreón Esquecido</h3>
+          <p class="italica">Arrastra para ver qué hay de verdad.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1</p>
+      <h2>El visor, lado de la ficción</h2>
+      <p>Lo primero que hay cuando sacas el móvil: el sitio como lo ve el mundo, con su nombre y su tipo. El tirador está en el borde, así que se ve que hay algo debajo sin explicarlo.</p>
+      <ul>
+        <li><b>No ha saltado nada para llegar aquí.</b> La escena quedó disponible al detectar que estabas parada dentro del geofence, y espera. Esto es lo que encuentras al mirar, no lo que te ha interrumpido. <span class="fuente">bucle, momento 3</span></li>
+        <li><b>La imagen existía antes de salir.</b> Se generó en casa, para el reparto de la aventura aceptada, que son tres a cinco lugares sabidos de antemano. Aquí no se llama a la red ni una vez. <span class="fuente">bucle §2</span></li>
+        <li><b>Y el modelo que la dibujó no sabe qué sitio es.</b> El prompt lleva solo ficción: tipo de paraje, nombre inventado y tono. Ningún dato real sale del móvil, y el precio es que el chiste central tiene que salir de plantilla o de código. <span class="fuente">seguridad §1</span></li>
+        <li><b>El geofence es generoso —unos 30 a 50 metros— y se valida desde la calle.</b> Nunca hay que entrar en ningún sitio, ni que esté abierto: un anclaje puede ser una casa, un local cerrado o una finca. <span class="fuente">quests §3</span></li>
+        <li>El tipo va escrito arriba en la cartela —<b>paraje, vigilancia</b>— porque es lo que explica por qué te han mandado aquí y no a otro lado. <span class="fuente">parajes.md</span></li>
+        <li><b>La flecha de arriba lo cierra</b>, y debajo está lo que has venido a hacer. El visor es una capa y no un paso previo: si fuera un paso, la revelación se convertiría en un trámite entre el jugador y su recado. <span class="fuente">bucle §2</span><span class="nuevo">decidido</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo visor">
+      <div class="barra"><span>19:41</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <div class="marco-visor">
+          <svg viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="El visor a medio arrastrar: a la izquierda la torre ilustrada, a la derecha el chiringuito real">
+            <defs>
+              <linearGradient id="cielo2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#c9a45e"/><stop offset="0.55" stop-color="#e6cf9a"/><stop offset="1" stop-color="#efe3c0"/>
+              </linearGradient>
+              <clipPath id="izq"><rect x="0" y="0" width="130" height="520"/></clipPath>
+              <clipPath id="der"><rect x="130" y="0" width="170" height="520"/></clipPath>
+            </defs>
+            <g clip-path="url(#izq)">
+              <rect width="300" height="520" fill="url(#cielo2)"/>
+              <path d="M0 330 C58 318 104 340 158 328 C214 316 254 336 300 326 V520 H0 Z" fill="#5f9243"/>
+              <path d="M0 372 C64 358 112 384 172 370 C226 358 262 378 300 368 V520 H0 Z" fill="#4b7a36"/>
+              <path d="M126 336 L126 226 L174 226 L174 336 Z" fill="#8f8873" stroke="#2c2a22" stroke-width="2.4"/>
+              <path d="M126 226 L120 216 L134 216 L134 206 L146 206 L146 216 L156 216 L156 206 L168 206 L168 216 L180 216 L174 226 Z" fill="#a39a83" stroke="#2c2a22" stroke-width="2.2"/>
+              <rect x="140" y="252" width="12" height="18" rx="5" fill="#2c2a22"/>
+              <path d="M126 268 L112 274 L114 336 L126 336 Z" fill="#7d7663" stroke="#2c2a22" stroke-width="2"/>
+            </g>
+            <g clip-path="url(#der)">
+              <rect width="300" height="520" fill="#b9c2c6"/>
+              <rect y="300" width="300" height="220" fill="#9aa39a"/>
+              <rect x="132" y="288" width="176" height="26" fill="#8e9691"/>
+              <rect x="136" y="252" width="150" height="62" fill="#dcdcd4" stroke="#7d837e" stroke-width="1.4"/>
+              <rect x="150" y="266" width="34" height="26" fill="#8b9ba1"/>
+              <rect x="200" y="266" width="46" height="48" fill="#6f7a78"/>
+              <rect x="136" y="244" width="150" height="10" fill="#c2453c"/>
+              <text x="212" y="290" text-anchor="middle" font-family="ui-sans-serif, sans-serif" font-size="9" fill="#4b524e" letter-spacing="1">BAR</text>
+              <g fill="#c9cfc8" stroke="#7d837e" stroke-width="1.2">
+                <path d="M168 330 l24 -14 l24 14 z"/><path d="M232 336 l22 -13 l22 13 z"/>
+              </g>
+              <rect x="190" y="330" width="2" height="26" fill="#7d837e"/>
+              <rect x="253" y="336" width="2" height="24" fill="#7d837e"/>
+              <g fill="#8a938c">
+                <rect x="160" y="360" width="14" height="12" rx="2"/><rect x="182" y="362" width="14" height="12" rx="2"/>
+                <rect x="238" y="362" width="14" height="12" rx="2"/><rect x="260" y="360" width="14" height="12" rx="2"/>
+              </g>
+              <rect x="146" y="384" width="150" height="4" fill="#7f877f"/>
+            </g>
+          </svg>
+        </div>
+        <div class="banda-alta"><span></span><span class="cerrar">▾</span></div>
+        <div class="corte" style="left:130px"><div class="tirador">◂ ▸</div></div>
+        <div class="cartela">
+          <p class="rotulo">Y en realidad</p>
+          <h3>El chiringuito de Manolo</h3>
+          <p>Cierra a las ocho. La torre lleva ahí bastante menos de lo que dicen.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2</p>
+      <h2>El visor, arrastrado</h2>
+      <p>El momento de máximo efecto del juego, y el más barato de contar: es un slider. La cartela cambia con el arrastre y dice el nombre real.</p>
+      <ul>
+        <li><b>La magia y el chiste son lo mismo</b>, y por eso no hay que elegir tono. El mundo se toma en serio a sí mismo y el juego sabe perfectamente que es un chiringuito. <span class="fuente">bucle §6</span></li>
+        <li><b>El chiste es a costa del desajuste, nunca del sitio ni de quien lo regenta.</b> Sin esa regla, un juego sobre el barrio de la gente se convierte en burlarse del barrio de la gente. La línea de la cartela se ríe de la torre, no de Manolo. <span class="fuente">bucle §6</span></li>
+        <li><b>El dato real no sale del móvil.</b> Nombre y foto del sitio viven en el dispositivo y no entran en ninguna llamada; lo que se cruza aquí ya estaba las dos partes descargado antes de salir. <span class="fuente">seguridad §1</span></li>
+        <li><b>La foto sale de Google Places y se pide al crear el mapa</b>, no al aceptar la aventura: en la misma tanda que la consulta de Places que ya se hace. Así el móvil manda coordenadas una sola vez y la regla de privacidad no hay que enmendarla. <span class="fuente">seguridad §1</span><span class="nuevo">decidido</span></li>
+        <li><b>Y donde Places no tiene foto</b> —cruceiros, molinos, miradores— el visor no cae a ficha de texto: la ilustración sí existe, así que abre igual y el arrastre descubre la cartela sobre fondo liso. Se pierde la foto, no el momento. <span class="nuevo">decidido</span></li>
+        <li>Queda dicho, porque explica por qué la foto no es el centro: <b>de pie delante del chiringuito compite con tener el chiringuito delante</b>. Su valor está tanto en el diario, después, como aquí.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>19:43</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">O Torreón Esquecido</p>
+        <h2 class="titular chico">Hay alguien esperando</h2>
+        <p class="parrafo">Sentada en el muro, con la caja en el regazo como si pesara más de lo que pesa.</p>
+        <div class="dialogo">
+          <p class="quien">Sabela, la que reparte el correo</p>
+          <p>«Menuda hora. Ya pensaba que te habías vuelto. Toma, y no la abras hasta Monfrida, que allí sabrán qué hacer con ella mejor que tú y que yo.»</p>
+        </div>
+        <p class="parrafo tenue" style="font-size:11.5px">Te la da con las dos manos, que es más de lo que hace falta para una caja de ese tamaño.</p>
+        <div class="voz-alta empuja"><i>A</i><span>Tamaño del texto</span></div>
+        <div class="boton">Coger la caja</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 3</p>
+      <h2>La escena</h2>
+      <p>El beat: lo que pasa aquí. Lugar, disparador, escena y resultado, y el resultado es lo que empuja al siguiente sitio.</p>
+      <ul>
+        <li><b>Sin retrato.</b> Los retratos de NPC están en las ideas sin cerrar, no en las decisiones, y la escena funciona sin ellos: quien es Sabela lo dice su puesto y cómo habla. Meter una cara falsa antes de decidirlo sería inventarse una decisión. <span class="fuente">npcs.md</span></li>
+        <li><b>Sabela no existía hasta que hizo falta</b>, y ahora existe para siempre. El reparto crece con lo jugado, con generación perezosa y determinista por semilla más sitio más puesto — nunca por un contador de apariciones. <span class="fuente">npcs §1</span></li>
+        <li><b>Un solo botón, porque los beats son lineales de inicio.</b> Ramificar —elegir entre dos pistas— está aplazado a propósito, y dibujar dos opciones aquí prometería algo que el diseño no ha decidido. <span class="fuente">quests §2</span></li>
+        <li><b>El texto está escrito para leerse en voz alta</b>, porque el modo compañía es dos personas andando con una sola partida. De ahí el ajuste de tamaño de letra a mano, que es lo único de aplicación que se cuela en este momento y se cuela porque hace falta. <span class="fuente">personaje §4</span><span class="nuevo">decidido</span></li>
+        <li>Cómo te habla Sabela <b>depende del rango que tengas en su núcleo</b>, y eso cambia el trato y el precio, nunca lo que se te ofrece. No hay ninguna cifra de reputación en pantalla. <span class="fuente">progresion §1</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>19:44</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Llevas encima</p>
+        <div class="premio">
+          <h4>Una caja que no se abre hasta Monfrida</h4>
+          <p>Pesa poco. Suena a menos.</p>
+        </div>
+        <p class="parrafo">Sabela dice que en Monfrida preguntes por la casa del tejado verde, y que si no está, esperes.</p>
+        <div class="miniatura" style="border-radius:3px;overflow:hidden;border:1.5px solid var(--filete)">
+          <svg viewBox="0 0 300 140" role="img" aria-label="Miniatura del mapa con el siguiente destino marcado">
+            <rect width="300" height="140" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V104 C248 118 208 100 162 114 C114 128 64 112 0 128 Z" fill="#7fae5a"/>
+            <path d="M0 128 C64 112 114 128 162 114 C208 100 248 118 300 104" fill="none" stroke="#12321f" stroke-width="5"/>
+            <g fill="none" stroke-linecap="round">
+              <path d="M84 108 C96 74 138 62 190 48" stroke="rgba(30,43,24,0.72)" stroke-width="7"/>
+              <path d="M84 108 C96 74 138 62 190 48" stroke="#f2e7c8" stroke-width="2.8"/>
+            </g>
+            <circle cx="84" cy="108" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <circle cx="190" cy="48" r="14" fill="none" stroke="#c62828" stroke-width="1.8" opacity="0.5"/>
+            <circle cx="190" cy="48" r="7" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <rect x="140" y="16" width="100" height="20" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2"/>
+            <text x="190" y="30" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#1e2b18">Monfrida</text>
+          </svg>
+        </div>
+        <p class="parrafo tenue italica" style="font-size:11.5px">Por el Camiño do Sal se llega antes.</p>
+        <div class="boton empuja">Seguir andando</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 4</p>
+      <h2>Lo que te llevas</h2>
+      <p>El resultado del beat, que es lo que empuja al siguiente: información, un objeto, un cambio de estado. Y la última pantalla antes de volver al bolsillo.</p>
+      <ul>
+        <li><b>El objeto no es un requisito, es una llave.</b> Los objetos abren otra puerta al mismo beat en lugar de bloquearlo: si lo pierdes o no lo tienes, hay otro camino. Es el primer mecanismo real de arcos largos. <span class="fuente">progresion §3</span></li>
+        <li><b>El siguiente sitio se dice con nombre y se marca en el mapa</b>: el texto ambienta y el mapa confirma. Y va con nombre aunque no hayas ido nunca, que es lo que se gana por que te lo cuenten. <span class="fuente">quests, decisión 2 · bucle §1</span></li>
+        <li><b>Ni un número.</b> Ni cuánto falta, ni cuántos beats quedan, ni cuánto oro llevas encima aquí. Lo que hace falta para andar es el nombre del sitio. <span class="fuente">bucle §3</span></li>
+        <li><b>Esta pantalla cierra el momento</b> y el móvil se vuelve al bolsillo. La regla del artefacto 3 vuelve a aplicarse en cuanto empiezas a andar: cero controles.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>20:12</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">En Monfrida se habla de</p>
+        <h2 class="titular chico">La campana del carro</h2>
+        <div class="zurron">
+          <div class="entrada"><b>Lo que cuentan aquí</b>Que se llevaron tres campanas de la ermita para fundirlas, y que a mitad de camino los bueyes se plantaron y no hubo quien los moviera.</div>
+          <div class="entrada"><b>Y de ti</b>Que hay una forastera preguntando por casas de tejado verde. Nadie ha dicho nada más.</div>
+        </div>
+        <p class="parrafo tenue" style="font-size:11.5px">Queda anotado en tu diario, con el sitio y el momento.</p>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 5</p>
+      <h2>Lo que aquí se cuenta</h2>
+      <p>Al llegar a un núcleo aflora su estado: lo que allí se dice, en la versión que les llegó. Es el único sitio donde el jugador se entera de lo que hace el mundo.</p>
+      <ul>
+        <li><b>No se llega aquí tocando nada: cierra la llegada.</b> Va después del beat y no antes, porque el beat es el motivo del viaje y esto es el marco — delante sería un peaje. Y si no hay beat, esto es la llegada entera. <span class="fuente">bucle §2</span><span class="nuevo">decidido</span></li>
+        <li><b>No hay panel con la verdad del mundo, y esto es el sustituto.</b> Te enteras porque aquí te lo cuentan, y por eso enterarse cuesta piernas. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Era una campana y aquí son tres.</b> El rumor llegó abultado, un salto por aldea. El diario guardará esta versión, no la buena. <span class="fuente">quests §6</span></li>
+        <li><b>Y nunca se enseña el nivel de deformación.</b> Es dato vivo interno: no hay etiqueta de «abultado» ni medidor de fiabilidad. Se descubre triangulando tu propio diario entre pueblos, sin tutorial. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Una entrada no se sobrescribe con una más veraz.</b> Si oyes la buena después de la torcida, conviven las dos, que es lo que hace posible la triangulación. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Lo que se cuenta de ti aparece aquí también</b>, y en su versión. Es el mismo canal: la reputación es lo que llegó, no lo que hiciste. <span class="fuente">quests §6</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>18:20</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">O Torreón Esquecido · otra vez</p>
+        <h2 class="titular chico">Manolo ha cambiado la sombrilla</h2>
+        <p class="parrafo">Y la de antes está tirada detrás del muro, doblada como si hubiera perdido una pelea.</p>
+        <div class="dialogo">
+          <p class="quien">Manolo, que aquí es el guardián de la torre</p>
+          <p>«Tú otra vez. Pues mira, ya que estás: si vas hacia Monfrida, diles que la campana no la traigo yo.»</p>
+        </div>
+        <div class="boton hueco empuja">Volver a mirar la torre</div>
+        <div class="boton">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 6</p>
+      <h2>La segunda vez</h2>
+      <p>Vuelves a un sitio que ya conoces. El chiste ya lo sabes, así que la pantalla no lo repite.</p>
+      <ul>
+        <li><b>Abre por lo que ha cambiado, y el visor queda a un toque.</b> Repetir la ceremonia lo convertiría en un paso entre el jugador y lo que ha venido a hacer, y a la tercera deja de ser magia. <span class="fuente">bucle §2</span><span class="nuevo">decidido</span></li>
+        <li><b>Volver se tiene que sentir distinto de descubrir</b>, porque son premios distintos: descubrir es el premio de alejarse y profundizar es el premio de la rutina, que no hay que merecer. <span class="fuente">bucle §5</span></li>
+        <li><b>Manolo tiene puesto en la ficción</b> porque el NPC hereda el anclaje del sitio donde trabaja, en lugar de gastar uno propio. Es lo que hace que la capa de NPCs salga gratis en el recurso escaso. <span class="fuente">npcs §1</span></li>
+        <li>Y esto es <b>subir a «lo conoces bien»</b>: el sitio no cambia, cambia lo que se cuenta en él. Es el motor del barrio de tres calles, que no es el caso raro sino el normal. <span class="fuente">bucle §1, §7</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>20:31</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Paraje · refugio</p>
+        <h2 class="titular chico">A Casa da Ferreira</h2>
+        <p class="parrafo tenue" style="font-size:11.5px">En realidad: el lavadero municipal.</p>
+        <p class="parrafo">Cuatro pilas de piedra y un tejadillo. Dicen que la ferreira trabajaba aquí porque el agua le templaba el hierro mejor que en ningún otro sitio, y que se fue el día que le pusieron el tejado.</p>
+        <p class="parrafo tenue italica">No has venido a nada. Simplemente pasabas.</p>
+        <div class="boton hueco empuja">Este sitio no pega</div>
+        <div class="boton">Seguir andando</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 7</p>
+      <h2>La ficha de texto</h2>
+      <p>Lo que te pilla de paso, sin imagen, porque las imágenes solo existen para el reparto de la aventura aceptada. Es el fallback, y tiene que leerse como una pantalla del juego y no como un error.</p>
+      <ul>
+        <li><b>El fallback digno es un principio del proyecto, no una excusa.</b> Nombre de fantasía, qué es en realidad, y la escena: los tres datos que hacen el chiste. Lo que falta es la ilustración, no el contenido. <span class="fuente">bucle §2</span></li>
+        <li><b>Esta misma pantalla es la que sale sin cobertura</b>, y por eso no dice en ningún sitio que falte nada. Anunciarlo solo serviría para señalar algo que el jugador no puede arreglar. <span class="fuente">bucle, momento 1</span></li>
+        <li><b>Descubrir sin que te manden es el pilar de la cartografía</b>: esto es subir de «lo ves» a «lo conoces». Se registra en silencio y se entinta al echar el telón. <span class="fuente">bucle §1</span></li>
+        <li>La ficha de un paraje sale de <b>su tipo y su escena</b>, no del sitio real: una casa de ferreira que es un lavadero está bien, porque el tipo de fantasía está desacoplado del anclaje a propósito. <span class="fuente">parajes.md</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>20:32</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">A Casa da Ferreira</p>
+        <h2 class="titular chico">¿Qué le pasa a este sitio?</h2>
+        <p class="parrafo tenue" style="font-size:12px">No hace falta que digas por qué. Con marcarlo, el juego deja de mandarte aquí.</p>
+        <div class="opciones">
+          <div class="opcion">Es una casa particular</div>
+          <div class="opcion">No se puede llegar a pie</div>
+          <div class="opcion">No es sitio para pararse</div>
+          <div class="opcion">Ya no existe</div>
+          <div class="opcion roja">Otra cosa</div>
+        </div>
+        <p class="parrafo tenue italica empuja" style="font-size:11px">Se puede deshacer cuando quieras.</p>
+        <div class="boton">Marcarlo</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 8</p>
+      <h2>El sitio que no pega</h2>
+      <p>El gesto de descarte de un anclaje. Existe porque OpenStreetMap y Places no distinguen entre un molino y el garaje de alguien, y quien vive allí sí.</p>
+      <ul>
+        <li><b>Reversible y sin justificación obligatoria.</b> Marcarlo basta; los motivos están porque ayudan a decidir qué hacer con el sitio, no porque haya que rendir cuentas. <span class="fuente">seguridad §3</span></li>
+        <li><b>Anota sin resembrar.</b> El mundo no se regenera al descartar un anclaje: el sitio deja de recibir casting y el mapa se queda como está. Resembrar rompería el invariante más duro del proyecto. <span class="fuente">seguridad §3 · bucle §5</span></li>
+        <li><b>Es la única salvaguarda que escala.</b> Ningún filtro de tags puede saber que ese cobertizo es de alguien; el vecindario sí. Y es también la respuesta a que el juego se juega en el barrio de gente de verdad. <span class="fuente">seguridad §3</span></li>
+        <li><b>No hay reporte a ningún sitio.</b> Se queda en tu dispositivo, como todo lo demás. Nadie recibe una lista de casas marcadas. <span class="fuente">seguridad §1</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="pareja">
+    <div class="capa"><b>Con reparto</b><span>Los tres a cinco lugares de la aventura aceptada tienen visor con imagen, generada en casa antes de salir.</span></div>
+    <div class="capa"><b>De paso</b><span>Todo lo demás cae a ficha de texto, que es la misma pantalla que sale sin cobertura y no se anuncia como falta.</span></div>
+  </div>
+
+  <div class="pie">
+    <h3>Lo que este artefacto cierra</h3>
+    <ul>
+      <li class="cerrado"><b>El visor abre por el lado de la ficción</b>, con el tirador en el borde: se ve que hay algo debajo sin que nadie lo explique. La cartela cambia al arrastrar y es donde se dice el nombre real.</li>
+      <li class="cerrado"><b>El tipo del sitio va escrito en la cartela</b> —paraje, vigilancia—, porque es lo que explica por qué te han mandado aquí.</li>
+      <li class="cerrado"><b>La escena va sin retrato de NPC.</b> Los retratos están en las ideas sin cerrar, no en las decisiones, y dibujar una cara antes de decidirlo sería inventarse la decisión.</li>
+      <li class="cerrado"><b>Un solo botón en la escena</b>, porque los beats son lineales de inicio. Dibujar dos opciones prometería una ramificación que está aplazada a propósito.</li>
+      <li class="cerrado"><b>El ajuste de tamaño de letra vive aquí</b>, y es lo único de registro de aplicación que se cuela en el momento. Se cuela porque el modo compañía es dos personas leyendo en voz alta de un móvil.</li>
+      <li class="cerrado"><b>La ficha de texto es la misma pantalla con imagen que sin cobertura</b>, y no dice en ningún sitio que falte nada.</li>
+      <li class="cerrado"><b>El descarte de anclaje pide motivo pero no lo exige</b>, es reversible y no se reporta a ningún sitio. Anota sin resembrar.</li>
+    </ul>
+      <li class="cerrado"><b>La foto real sale de Google Places y se pide al crear el mapa</b>, no al aceptar la aventura. Va en la misma tanda que la consulta de Places que ya se hace, así que el móvil manda coordenadas una sola vez y la regla de privacidad se queda intacta. De paso, el mapa entero queda utilizable sin cobertura.</li>
+      <li class="cerrado"><b>Sin foto, el visor no cae a ficha de texto.</b> La ilustración de ficción existe siempre, así que abre igual y el arrastre descubre la cartela sobre fondo liso. Se pierde la foto, no el momento — que importa porque los anclajes sin foto en Places son justamente los que ensanchan el vocabulario de escenas.</li>
+      <li class="cerrado"><b>La segunda vez, el visor no vuelve a abrirse solo.</b> La pantalla abre por lo que ha cambiado y el visor queda a un toque. Volver tiene que sentirse distinto de descubrir, porque son premios distintos.</li>
+      <li class="cerrado"><b>El visor es una capa, no un paso.</b> Se abre solo la primera vez y se cierra con una flecha, dejando debajo lo que has venido a hacer. Con eso el visor de la primera visita y el que queda «a un toque» dejan de ser dos cosas y son una con dos maneras de aparecer.</li>
+      <li class="cerrado"><b>La secuencia de una llegada está escrita</b>: visor si es la primera vez, beat si lo hay, y lo que aquí se cuenta si el sitio es un núcleo. Ninguna se navega y el orden es una decisión — el marco va detrás del motivo del viaje.</li>
+      <li class="cerrado"><b>No siempre hay beat.</b> Llegar a un sitio sin haber venido a nada es el caso normal, no la excepción, y entonces lo que hay es la ficha del sitio.</li>
+    </ul>
+    <h3>Y una lección de método</h3>
+    <ul>
+      <li class="cerrado"><b>Cuando algo real tenga que salir del móvil, primero se mira si cabe en la llamada que ya existe.</b> La foto de Places parecía obligar a enmendar la regla de privacidad, y solo obligaba a pedirla en otro momento. Anotado en <code>seguridad-privacidad.md</code> §1.</li>
+    </ul>
+  </div>
+
+</div>

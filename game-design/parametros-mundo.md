@@ -50,7 +50,7 @@ Regla de ritmo: un beat (escena, conversación, entrega) cada 10-15 min → una 
 
 - Templo/capilla: el anclaje real más abundante (iglesias) y hoy no se usa como servicio, solo como posible aldea. Curación, bendiciones, el sacerdote que sabe cosas.
 - Casa del gremio / ayuntamiento con tablón de anuncios: punto de entrada mecánico de las quests ("mira el tablón"). Solo en ciudades y pueblos.
-- Casas de NPC: los NPCs con nombre deberían vivir en un edificio real concreto, igual que los servicios. No es un tipo de tienda, es una capa nueva: cada NPC importante lleva su anclaje real. Reutiliza el mecanismo de anclaje único (`taken`) existente.
+- ~~Casas de NPC: los NPCs con nombre deberían vivir en un edificio real concreto, igual que los servicios. No es un tipo de tienda, es una capa nueva: cada NPC importante lleva su anclaje real. Reutiliza el mecanismo de anclaje único (`taken`) existente.~~ → **enmendado el 5-ago-2026** en `npcs.md`: el NPC **no consume anclaje propio, hereda el del sitio al que pertenece** (el tabernero ya está anclado en la taberna; el granjero, en la granja). Meter a cada NPC a competir por anclajes libres los pondría a pelear justo con los parajes, que es el recurso peor servido en barrios pequeños. Las casas de NPC quedan aplazadas y reducidas a quien no trabaja en ningún sitio.
 - Puerto/embarcadero en mundos costeros (anclaje: puertos reales): justifica narrativamente el mar.
 
 ### Reducción
@@ -64,4 +64,5 @@ Mundo estándar del juego: radio ~1,2 km (elegido como "aventura de 2 h"), 1 ciu
 ## Pendientes
 
 1. ~~Definir la taxonomía de parajes~~ → hecha, ver `parajes.md` (tipo desacoplado del anclaje real, sesgo suave, escenas con pesos, cruces/puentes como colchón, nombres por idioma según ubicación).
+3. **Los cupos de parajes de este documento son un techo por ritmo, no la cifra final** (5-ago-2026). `parajes.md` añade un **suelo derivado del catálogo** —escenas distintas que piden las plantillas ÷ escenas por paraje, hoy cuatro— porque el cupo por ritmo dejaba mundos de 500 m con dos parajes que no pueden montar una quest. Techo por ritmo, suelo por aritmética, y el suelo sube solo si el catálogo se ensancha. Cuando se reabran estos cupos hay que reexpresarlos además **en tramos y no en metros**, por el tramo personal de `accesibilidad.md`.
 2. ~~Presets vs slider~~ → decidido: **presets + modo avanzado**. El selector muestra los 3 presets de duración como opción principal (paseo ~1 h → 0,7 km, aventura ~2 h → 1,2 km, jornada ~3 h → 1,9 km) y un desplegable "avanzado" con el slider de km actual para testing. El juego final hereda los presets; el slider queda como herramienta de depuración.

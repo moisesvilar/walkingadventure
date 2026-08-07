@@ -1,0 +1,343 @@
+<title>Pantallas 2 · Antes de salir — Walking Adventure</title>
+
+<style>
+  :root {
+    --tierra: #7fae5a; --mar: #3f7fa8; --tinta: #1e2b18; --marca: #c62828;
+    --placa: #efe3c0; --filete: #8a6d34;
+    --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16); --bisel: #2a3324;
+    --serif: Georgia, "IM Fell English", "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+      --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  }
+  :root[data-theme="dark"] { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+    --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  :root[data-theme="light"] { --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30,43,24,0.16); --filete: #8a6d34; --marca: #c62828; }
+
+  body { margin: 0; background: var(--fondo); color: var(--texto); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .envoltorio { max-width: 1120px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .cabecera { border-bottom: 2px solid var(--filete); padding-bottom: 28px; }
+  .migas { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-2); margin: 0 0 14px; }
+  .cabecera h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; }
+  .cabecera h1 em { font-style: italic; color: var(--filete); }
+  .entradilla { max-width: 62ch; color: var(--texto-2); margin: 0; font-size: 1.02rem; }
+
+  .reglas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 36px 0 8px; }
+  .regla { border-left: 3px solid var(--filete); padding: 4px 0 4px 14px; }
+  .regla b { display: block; font-family: var(--serif); font-size: 1.02rem; font-weight: 400; margin-bottom: 3px; }
+  .regla span { font-size: 0.86rem; color: var(--texto-2); }
+
+  .aviso-voces { margin: 34px 0 8px; padding: 14px 18px; background: var(--fondo-2); border-radius: 2px; font-size: 0.88rem; color: var(--texto-2); }
+  .aviso-voces b { color: var(--texto); font-weight: 600; }
+
+  .pantalla { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; padding: 52px 0; border-top: 1px solid var(--linea); }
+  .pantalla:first-of-type { border-top: 2px solid var(--filete); }
+  @media (max-width: 760px) { .pantalla { grid-template-columns: 1fr; gap: 30px; } }
+
+  .notas h2 { font-family: var(--serif); font-weight: 400; font-size: 1.62rem; margin: 0 0 4px; line-height: 1.2; text-wrap: balance; }
+  .paso { font-family: var(--mono); font-size: 0.78rem; color: var(--filete); letter-spacing: 0.1em; margin: 0 0 10px; }
+  .notas > p { margin: 0 0 18px; max-width: 60ch; color: var(--texto-2); }
+  .notas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .notas li { max-width: 62ch; font-size: 0.94rem; padding-left: 16px; position: relative; }
+  .notas li::before { content: "—"; position: absolute; left: 0; color: var(--filete); }
+  .notas li b { font-weight: 600; }
+  .fuente { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--marca); border: 1px solid currentColor; border-radius: 2px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  .nuevo { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--fondo); background: var(--filete); border-radius: 2px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.06em; }
+
+  .movil { background: var(--bisel); border-radius: 26px; padding: 9px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); position: sticky; top: 28px; }
+  @media (max-width: 760px) { .movil { position: static; max-width: 300px; } }
+  .lienzo { background: var(--placa); border-radius: 18px; overflow: hidden; aspect-ratio: 9 / 17.4; display: flex; flex-direction: column; font-family: var(--serif); color: var(--tinta); }
+  .barra { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 9px; padding: 8px 14px 2px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+  .cuerpo { flex: 1; display: flex; flex-direction: column; padding: 12px 18px 14px; gap: 11px; overflow: hidden; }
+
+  .rotulo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0; }
+  .titular { font-size: 20px; line-height: 1.18; margin: 0; font-weight: 400; }
+  .titular.chico { font-size: 16px; }
+  .parrafo { font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .parrafo.tenue { color: rgba(30,43,24,0.62); }
+  .italica { font-style: italic; }
+
+  .boton { text-align: center; background: var(--tinta); color: var(--placa); padding: 11px; border-radius: 3px; font-size: 13px; letter-spacing: 0.04em; }
+  .boton.hueco { background: transparent; color: rgba(30,43,24,0.6); border: 1px solid rgba(30,43,24,0.3); }
+  .empuja { margin-top: auto; }
+
+  .tarjeta { border: 1px solid rgba(30,43,24,0.3); border-left: 3px solid var(--marca); padding: 10px 12px; border-radius: 2px; background: rgba(255,255,255,0.34); }
+  .tarjeta h4 { margin: 0 0 4px; font-size: 14px; font-weight: 400; }
+  .tarjeta p { margin: 0; font-size: 11.5px; line-height: 1.45; color: rgba(30,43,24,0.72); }
+  .tarjeta .medida { font-family: var(--sans); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--filete); margin-top: 6px; display: block; }
+
+  .mapa svg { display: block; width: 100%; height: auto; }
+  .miniatura { border-radius: 3px; overflow: hidden; border: 1.5px solid var(--filete); }
+
+  .zurron { display: grid; gap: 9px; }
+  .entrada { border-left: 2px solid rgba(30,43,24,0.28); padding-left: 10px; font-size: 12px; line-height: 1.45; }
+  .entrada b { font-weight: 400; font-style: italic; color: rgba(30,43,24,0.55); font-size: 10px; display: block; font-family: var(--sans); letter-spacing: 0.06em; }
+
+  .pie-nav { display: flex; justify-content: space-around; border-top: 1px solid rgba(30,43,24,0.2); padding: 9px 0 4px; font-family: var(--sans); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(30,43,24,0.45); }
+  .pie-nav span.aqui { color: var(--tinta); font-weight: 700; }
+
+  .fases { display: grid; gap: 9px; font-family: var(--sans); font-size: 11px; }
+  .fase { display: flex; align-items: center; gap: 9px; color: rgba(30,43,24,0.45); }
+  .fase.hecha { color: rgba(30,43,24,0.8); }
+  .fase.ahora { color: var(--tinta); font-weight: 600; }
+  .punto { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid currentColor; flex: none; }
+  .fase.hecha .punto, .fase.ahora .punto { background: currentColor; }
+
+  .cinta { display: flex; gap: 6px; align-items: center; font-family: var(--sans); font-size: 9.5px; color: rgba(30,43,24,0.6); }
+  .cinta i { width: 6px; height: 6px; border-radius: 50%; background: var(--marca); flex: none; }
+
+  .pie { border-top: 2px solid var(--filete); margin-top: 40px; padding-top: 28px; }
+  .pie h3 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0 0 14px; }
+  .pie ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 70ch; color: var(--texto-2); font-size: 0.94rem; }
+  .pie li { padding-left: 22px; position: relative; }
+  .pie li b { color: var(--texto); }
+  .pie .cerrado::before { content: "✓"; position: absolute; left: 0; color: var(--filete); font-weight: 700; }
+  .pie .abierto::before { content: "?"; position: absolute; left: 2px; color: var(--marca); font-weight: 700; }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <p class="migas">Walking Adventure · Diseño de pantallas · 2 de 6</p>
+    <h1>Antes de salir<br><em>el único momento en que el juego pide atención</em></h1>
+    <p class="entradilla">Estás en casa y parada, así que aquí sí se puede leer, elegir y esperar. Las cinco pantallas van de abrir la app a tener la salida lista, y a partir de la última el juego no vuelve a pedir pantalla hasta que te pares en algún sitio.</p>
+  </header>
+
+  <div class="reglas">
+    <div class="regla"><b>El último momento con red</b><span>Aquí se escriben los textos y se dibujan los lugares. Después se anda sin cobertura.</span></div>
+    <div class="regla"><b>Sin panel del mundo</b><span>No hay pantalla que te cuente la verdad de lo que pasa ahí fuera. Eso se oye llegando.</span></div>
+    <div class="regla"><b>Se elige por antojo</b><span>Ninguna cifra de distancia. Palabra del mundo y una hora orientativa.</span></div>
+    <div class="regla"><b>Andar sin nada es una opción</b><span>Y tiene que verse, porque los kilómetros mueven el mundo igual.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Aquí manda la voz del mundo.</b> El onboarding hablaba como aplicación; desde que existe tu mapa, quien habla es la comarca. Lo que va en <span style="font-family:var(--serif)">serif</span> es lo que el juego dice; lo que va en sans somos nosotros hablando de él.</p>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>18:12</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Tu mapa · día 23</p>
+        <h2 class="titular chico" style="margin-bottom:2px">As Terras de Vilanova</h2>
+        <p class="parrafo tenue" style="font-size:11.5px">Xoana, buhonera</p>
+        <div class="tarjeta" style="border-left-color:var(--marca);background:rgba(198,40,40,0.06)">
+          <p class="rotulo" style="font-size:8px;margin-bottom:3px">Lo dejaste a medias</p>
+          <h4 style="font-size:13px">La entrega sospechosa</h4>
+          <p>Te quedaste camino del Torreón, con el paquete todavía en el zurrón.</p>
+        </div>
+        <div class="miniatura">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Miniatura del mapa con la zona conocida entintada y el resto a lápiz">
+            <rect width="300" height="150" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V112 C250 124 210 106 166 118 C120 130 70 116 0 132 Z" fill="#7fae5a"/>
+            <path d="M0 132 C70 116 120 130 166 118 C210 106 250 124 300 112" fill="none" stroke="#12321f" stroke-width="5"/>
+            <g stroke="rgba(30,43,24,0.7)" stroke-width="4" fill="none" stroke-linecap="round">
+              <path d="M70 54 C112 42 150 66 190 50"/><path d="M190 50 C206 82 182 100 196 118"/>
+            </g>
+            <g stroke="#f2e7c8" stroke-width="2" fill="none" stroke-linecap="round">
+              <path d="M70 54 C112 42 150 66 190 50"/><path d="M190 50 C206 82 182 100 196 118"/>
+            </g>
+            <g stroke="rgba(30,43,24,0.3)" stroke-width="2.5" stroke-dasharray="4 4" fill="none">
+              <path d="M70 54 C52 88 76 104 66 128"/><path d="M240 60 C254 88 236 104 246 124"/>
+            </g>
+            <circle cx="70" cy="54" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <circle cx="190" cy="50" r="5" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <circle cx="66" cy="128" r="4" fill="#c62828" stroke="#7d1414" stroke-width="1.2" opacity="0.4"/>
+            <circle cx="246" cy="124" r="4" fill="#c62828" stroke="#7d1414" stroke-width="1.2" opacity="0.4"/>
+            <circle cx="140" cy="88" r="3" fill="#1e2b18" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="boton">Seguir con la entrega</div>
+        <div class="boton hueco">Ver qué más se cuenta hoy</div>
+        <div class="boton hueco">Salir a andar sin más</div>
+        <div class="pie-nav empuja" style="justify-content:space-between;padding:9px 0 4px;text-transform:none;letter-spacing:0;font-family:Georgia,serif;font-size:11px;color:rgba(30,43,24,0.75)"><span>El diario</span><span>La repisa</span><span>Ajustes</span></div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1</p>
+      <h2>La portada</h2>
+      <p>Lo que ves al abrir la app cualquier día que no sea el primero. Cuatro cosas: dónde estás, quién eres, qué hay hoy y por dónde se sale.</p>
+      <ul>
+        <li><b>No hay panel del estado del mundo, y es una decisión.</b> Se descartó a propósito una pantalla consultable con lo que pasa ahí fuera, porque convierte la consecuencia social en estadísticas e invita a mirar el móvil andando. Lo que se cuenta se oye llegando a los sitios. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Tampoco hay marcador de reputación.</b> Por lo mismo: el rango existe, pero se nota en cómo te hablan, no en una lista de pueblos con estrellitas. <span class="fuente">progresion §1</span></li>
+        <li>La miniatura enseña de un vistazo <b>lo entintado contra lo que sigue a lápiz</b>: se ve cuánto llevas andado sin ningún porcentaje. <span class="fuente">bucle §1</span></li>
+        <li><b>«Salir a andar sin más» es un botón, no una nota al pie.</b> Los kilómetros mueven el mundo con aventura o sin ella. <span class="fuente">quests, decisión 4</span></li>
+        <li><b>La aventura a medias es una tarjeta arriba, no una pantalla aparte.</b> No secuestra la app: desde ahí se puede mirar el diario o salir sin ella, que es lo coherente con que abandonarla no cueste nada. <span class="fuente">bucle §4</span><span class="nuevo">decidido</span></li>
+        <li>Y solo puede aparecer <b>con la salida todavía abierta</b>: si llegaste a casa, el cierre en corto ya se disparó. El caso real es cerrar la app andando, quedarse sin batería o que suene el teléfono. <span class="fuente">bucle §4</span><span class="nuevo">precisión</span></li>
+        <li><b>No hay selector de mapas.</b> El activo lo decide dónde estás; si llegas a un sitio que no toca con ninguno de los tuyos, se ofrece levantar uno nuevo, y al volver a casa vuelve el de casa sin preguntar. Los antiguos se leen desde el diario. <span class="fuente">alcance §3</span><span class="nuevo">decidido</span></li>
+        <li><b>No hay barra de pestañas, y esto se decidió en el artefacto 6.</b> Aquí iba dibujada una y se ha quitado: la portada es la casa y el diario, la repisa y los ajustes son puertas que cuelgan de ella. Cuatro destinos de igual peso convierten el juego en una aplicación con secciones y dejan los ajustes con el mismo rango que el mapa. <span class="fuente">artefacto 6</span><span class="nuevo">corregido</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>18:12</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Mientras no estabas</p>
+        <h2 class="titular">El mundo anduvo lo suyo</h2>
+        <div class="zurron">
+          <div class="entrada"><b>En Monfrida</b>Se llevaron la campana de la ermita para fundirla y a mitad de camino cambiaron de idea. Ahí sigue, en un carro, desde el martes.</div>
+          <div class="entrada"><b>En Vilanova</b>Dicen que el puente viejo no lo tiró la crecida, sino el peso de algo que cruzó de noche.</div>
+          <div class="entrada"><b>Por el camino de la costa</b>Alguien dejó una bota nueva colgada de un mojón. Solo una.</div>
+        </div>
+        <p class="parrafo tenue italica" style="font-size:11px">Todo esto pasó mientras hacías tus cosas.</p>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2</p>
+      <h2>El zurrón</h2>
+      <p>Solo aparece si tienes activado el modo que cuenta los pasos del día a día, y solo si hay algo guardado. Vacía la reserva y no vuelve hasta la próxima vez.</p>
+      <ul>
+        <li><b>Contenedor propio, entradas prestadas.</b> Lo único que se escribe nuevo es el marco —«el mundo anduvo lo suyo»—; cada entrada trae su texto de lo que la generó. Así el resumen no duplica la lógica de fallback. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Tope de cinco pasos, y el tope lo fija esta pantalla.</b> No es una limitación técnica: es lo que cabe en algo que se lee de una sentada. Volver tras tres meses enseña lo mismo que volver tras tres días. <span class="fuente">quests, decisión 4</span></li>
+        <li>Los textos de los pasos de fondo <b>no existían todavía</b>, porque ocurrieron con la app cerrada. Se escriben aquí, en una única llamada agrupada al abrir la salida. Es la única excepción a «el LLM se invoca al crear la quest». <span class="fuente">quests, decisión 3</span></li>
+        <li>Si esa llamada falla, cada entrada cae a su texto de plantilla y el resumen se lee igual.</li>
+        <li><b>Ninguna entrada te reprocha nada</b> ni te dice lo que te has perdido. El mundo hizo lo suyo; tú no estabas y no pasa nada. <span class="fuente">quests, decisión 4</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>18:13</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Lo que se cuenta hoy</p>
+        <h2 class="titular chico">Por aquí hay quien necesita algo</h2>
+        <div class="tarjeta">
+          <h4>La entrega sospechosa</h4>
+          <p>Un paquete envuelto en hule, una herrera al otro lado del mapa y alguien que preferiría que no llegase.</p>
+          <span class="medida">Una aventura · unas dos horas</span>
+        </div>
+        <div class="tarjeta" style="border-left-color:rgba(30,43,24,0.3)">
+          <h4>La ronda del vigía</h4>
+          <p>El vigía está viejo y la ronda es larga. Alguien tiene que subir a mirar y contarle todo lo que se vea.</p>
+          <span class="medida">Un paseo · una hora</span>
+        </div>
+        <div class="tarjeta" style="border-left-color:rgba(30,43,24,0.3)">
+          <h4>Un recado de camino</h4>
+          <p>Una mujer con un cesto busca quien lo lleve dos calles más allá.</p>
+          <span class="medida">Un momento</span>
+        </div>
+        <p class="parrafo tenue" style="font-size:11px">Y puedes salir a andar sin coger ninguna. El mundo se mueve igual.</p>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 3</p>
+      <h2>Lo que hay hoy</h2>
+      <p>Las aventuras que el mundo puede montar con lo que tiene, filtradas por tu oficio y ordenadas por nada en particular.</p>
+      <ul>
+        <li><b>Cada una declara su tamaño con una palabra del mundo</b> y una hora orientativa: un paseo, una aventura, una jornada. Ningún número de distancia. <span class="fuente">bucle §3</span></li>
+        <li>El tercer sitio lo ocupa <b>un recado suelto</b>, que no es una aventura: sale de la cola de entregas y por eso mide «un momento». Que aparezca ahí es lo que hace que un día sin aventura de tu oficio no sea un día vacío. <span class="fuente">personaje §3</span></li>
+        <li><b>La lista está filtrada por oficio</b>, con afinidad declarada por plantilla: hay aventuras que con este personaje no verás nunca. <span class="fuente">personaje §3</span></li>
+        <li><b>Y aquí se ve el techo del catálogo.</b> Con treinta plantillas y afinidad, un barrio pequeño da del orden de diez esqueletos jugables por oficio; a partir de ahí la lista empieza a repetirse y lo que la salva es que lo social cambie debajo. <span class="fuente">personaje §3</span></li>
+        <li><b>Máximo tres, y es un tope y no un número fijo.</b> Algunos días habrá tres y otros una, según lo que castee y según tu oficio; un día con una sola no es un día roto. Tres se comparan de un vistazo, y a partir de ahí la pantalla se vuelve un catálogo. <span class="fuente">bucle §3</span><span class="nuevo">decidido</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>18:14</span><span>▮▮▮</span></div>
+      <div class="cuerpo" style="padding:0">
+        <div class="mapa">
+          <svg viewBox="0 0 300 200" role="img" aria-label="El lazo de la aventura dibujado sobre el mapa, con el primer destino nombrado y el resto marcado sin nombre">
+            <rect width="300" height="200" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V150 C250 162 210 144 166 156 C120 168 70 154 0 170 Z" fill="#7fae5a"/>
+            <path d="M0 170 C70 154 120 168 166 156 C210 144 250 162 300 150" fill="none" stroke="#12321f" stroke-width="6"/>
+            <g stroke="rgba(30,43,24,0.7)" stroke-width="5" fill="none" stroke-linecap="round">
+              <path d="M62 118 C86 66 150 58 196 74"/><path d="M196 74 C232 96 226 128 200 142"/><path d="M200 142 C150 156 96 148 62 118"/>
+            </g>
+            <g stroke="#c62828" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-dasharray="1 7">
+              <path d="M62 118 C86 66 150 58 196 74"/><path d="M196 74 C232 96 226 128 200 142"/><path d="M200 142 C150 156 96 148 62 118"/>
+            </g>
+            <g font-family="Georgia, serif" font-size="11">
+              <circle cx="62" cy="118" r="10" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.6"/><text x="62" y="122" text-anchor="middle" fill="#1e2b18">1</text>
+              <circle cx="196" cy="74" r="9" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.4"/><text x="196" y="78" text-anchor="middle" fill="rgba(30,43,24,0.5)">2</text>
+              <circle cx="200" cy="142" r="9" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.4"/><text x="200" y="146" text-anchor="middle" fill="rgba(30,43,24,0.5)">3</text>
+            </g>
+            <g font-family="Georgia, serif" font-size="9.5" letter-spacing="1">
+              <rect x="16" y="128" width="94" height="16" rx="3" fill="#efe3c0" stroke="#8a6d34"/>
+              <text x="63" y="140" text-anchor="middle" fill="#1e2b18">TABERNA DA COROA</text>
+            </g>
+          </svg>
+        </div>
+        <div style="padding:12px 18px 14px;display:flex;flex-direction:column;gap:9px;flex:1">
+          <h2 class="titular chico" style="margin:0">La entrega sospechosa</h2>
+          <p class="parrafo">«Llévaselo a la herrera. No preguntes. Y si alguien te sale al paso, no era mío.»</p>
+          <div class="cinta"><i></i>Una aventura · unas dos horas · vuelves donde empiezas</div>
+          <p class="parrafo tenue" style="font-size:11px">Empiezas en la Taberna da Coroa. El resto te lo irán diciendo.</p>
+          <div class="boton empuja">Me la quedo</div>
+          <div class="boton hueco">Otra cosa</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 4</p>
+      <h2>La ficha</h2>
+      <p>Lo único que hay que decidir en todo el juego con la pantalla delante. Y para decidir hacen falta dos cosas: cuánto se anda y si apetece.</p>
+      <ul>
+        <li><b>Se enseña la forma del lazo pero solo se nombra la primera parada.</b> Así se puede juzgar la caminata —dónde cae, cuánto rodea, que vuelve al principio— sin destripar la historia. Los puntos 2 y 3 están, pero sin nombre. <span class="fuente">quests §3</span></li>
+        <li><b>El texto ambienta y el mapa confirma.</b> Es literalmente la decisión 2 de `quests.md`: el guiado usa el lenguaje del mundo y el destino aparece marcado. <span class="fuente">quests, decisión 2</span></li>
+        <li><b>«Vuelves donde empiezas» se dice explícitamente</b>, porque la forma de lazo es lo que hace que aceptar no dé miedo: nadie se queda tirado a dos horas de casa. <span class="fuente">quests §3</span></li>
+        <li>El gancho lo escribe el LLM con el texto de plantilla como fallback, y es de los pocos sitios donde se nota si hay red o no. <span class="fuente">quests, decisión 1</span></li>
+        <li><b>Duda:</b> si el lazo se dibuja completo desde el principio o se va revelando. Completo ayuda a decidir; revelado da más sorpresa. Aquí está completo porque esta pantalla existe para decidir.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>18:14</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Preparando la salida</p>
+        <h2 class="titular chico">Un momento, que hay que escribirlo…</h2>
+        <div class="fases">
+          <div class="fase hecha"><span class="punto"></span>Repartiendo los papeles</div>
+          <div class="fase ahora"><span class="punto"></span>Escribiendo lo que se dirá</div>
+          <div class="fase"><span class="punto"></span>Dibujando los sitios</div>
+        </div>
+        <p class="parrafo tenue" style="font-size:11.5px">A partir de aquí no hace falta cobertura. Puedes meter el móvil en el bolsillo.</p>
+        <div class="boton empuja">Listo. Vamos.</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 5</p>
+      <h2>La preparación</h2>
+      <p>Segundos, no minutos. Es donde se gastan las dos únicas cosas que salen del móvil, y donde el juego promete que a partir de ahí se calla.</p>
+      <ul>
+        <li><b>Aquí se invoca al LLM</b>, con el reparto ya casteado: textos de la aventura, diálogos, el gancho. Nunca durante la caminata. <span class="fuente">quests, decisión 1</span></li>
+        <li><b>Y aquí se generan las imágenes</b> de los tres a cinco lugares del lazo, porque el visor del anclaje tiene que existir antes de que llegues. <span class="fuente">bucle §2</span></li>
+        <li><b>Del prompt se excluye todo dato real.</b> El modelo ve nombres de fantasía y tipos abstractos, nunca cómo se llama el bar. <span class="fuente">seguridad §1</span></li>
+        <li><b>«Puedes meter el móvil en el bolsillo» es la frase más importante de la pantalla.</b> Es el contrato del juego dicho en una línea, y el momento de decirlo es justo antes de andar. <span class="fuente">bucle, los cuatro momentos</span></li>
+        <li><b>Sin cobertura no se avisa de nada.</b> Los textos caen a plantilla, el visor cae a ficha de texto y la pantalla dice lo mismo de siempre. Anunciarlo solo serviría para señalar algo que el jugador no puede arreglar, y el diseño de fallbacks existe precisamente para que la salida funcione entera con menos piel. <span class="fuente">bucle, los cuatro momentos</span><span class="nuevo">decidido</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <h3>Lo que sale de dibujar estas cinco</h3>
+    <ul>
+      <li class="cerrado"><b>La portada no lleva panel del mundo ni marcador de reputación.</b> Las dos cosas estaban descartadas por escrito, pero es aquí donde se nota que sobran: la pantalla queda más limpia sin ellas.</li>
+      <li class="cerrado"><b>El recado suelto comparte lista con las aventuras.</b> Es lo que hace que un día sin aventura de tu oficio siga teniendo algo.</li>
+      <li class="cerrado"><b>La ficha enseña el lazo entero y nombra solo la primera parada.</b> Decidir sin destripar.</li>
+      <li class="cerrado"><b>La aventura a medias es una tarjeta en la portada</b>, y solo existe con la salida abierta: llegar a casa dispara el cierre en corto.</li>
+      <li class="cerrado"><b>Máximo tres aventuras a la vez</b>, como tope y no como número fijo.</li>
+      <li class="cerrado"><b>Sin cobertura no se avisa</b>: se sale igual, con textos de plantilla y fichas de texto.</li>
+      <li class="cerrado"><b>No hay selector de mapas</b>: el activo lo decide dónde estás, y los antiguos se leen desde el diario.</li>
+    </ul>
+
+    <h3>Lo que sigue abierto</h3>
+    <ul>
+      <li class="cerrado"><b>No hay barra de navegación.</b> Decidido en el artefacto 6: la portada es la casa y el diario, la repisa y los ajustes son puertas que cuelgan de ella. La barra que iba dibujada aquí se ha quitado.</li>
+      <li class="cerrado"><b>El mapa de otro sitio se lee desde el diario, que tiene un capítulo por mapa.</b> También del artefacto 6: no hay cajón de láminas ni selector, hay tramos de tu vida con sus días y su mapa dentro.</li>
+    </ul>
+  </footer>
+
+</div>
