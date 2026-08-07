@@ -1,0 +1,18 @@
+{
+  "arranque": "2026-08-07T22:00:00Z",
+  "modo": "unattended",
+  "preflight": {
+    "node": "v24.10.0",
+    "verifica_gherkin": "ok (33 caracteristicas, 162 escenarios, 174 casos)",
+    "verifica_flujo": "ok (40 pantallas, 83 aristas)",
+    "headless": "ok",
+    "git": "limpio",
+    "maestro": "AUSENTE — las pruebas @app no se pueden ejecutar en esta maquina"
+  },
+  "spec_actual": null,
+  "fase": "preflight",
+  "iteracion": 0,
+  "historial": [],
+  "bloqueos": [],
+  "escenarios_anadidos": []
+}

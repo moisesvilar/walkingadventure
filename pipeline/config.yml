@@ -1,0 +1,12 @@
+# Configuración del pipeline de implementación.
+# Lo lee wa-spec (references/interaction-format.md) para saber si puede preguntar.
+# En esta ejecución nadie está mirando: unattended, sin excepciones.
+
+mode: unattended
+
+# Tope de iteraciones por spec antes de marcarla blocked (docs/prompt-implementacion.md §5).
+max_iteraciones: 3
+
+# Las specs viven donde manda .claude/rules/naming.md, no donde dice el SKILL.md de wa-spec.
+# Ver pipeline/decisiones-orquestador.md, decisión 1.
+specs_dir: docs/specs
