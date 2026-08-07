@@ -1178,3 +1178,37 @@ La comprobación que este repo permitía y casi ningún proyecto tiene: **la bat
 `docs/checklist.md`: el backlog del pipeline en el formato tabla canónico, **42 specs en 6 bloques** (núcleo portado → mundo vivo → la palabra → app y mapa → bucle en la calle → lo que queda en casa), una fila por spec implementable y testeable de una pasada — la capa de NPCs son cinco RF y una spec —, con el orden como prioridad de ejecución y el estado en manos de `/somo-pipeline`. El nombre `checklist.md` estaba reservado en `CLAUDE.md` para esto desde el 5-ago-2026.
 
 **Verificado**: un script ad hoc cruzó las anclas del PRD contra sus fuentes — las 94 citas de `testing.md` existen literalmente, los 30 nodos `[flujo: AnPm]` están en el diagrama, los 15 documentos citados existen, y los 116 RF y 16 RNF del PRD cuadran uno a uno con las filas del checklist (cazó dos RF sin fila, que se recolocaron). Y los tres verificadores del repo siguen en verde: `verifica-flujo.mjs` (40 pantallas, 83 aristas), `verifica-gherkin.mjs` (174 casos) y `test/headless.mjs`.
+
+---
+
+# Iteración 7-ago-2026 (XXI) — el pipeline, adaptado a un juego que no es una web
+
+Antes de escribir el encargo de implementación desatendida salió que **las cuatro skills del pipeline no sirven tal cual**, y no por un detalle: `somo-dev-fable` declara «Stack fijo: TypeScript estricto, Vite 6, React 19, Tailwind v4, shadcn/ui, React Router v7, Supabase». Este proyecto es React Native con Expo, Skia y un paquete de núcleo sin dependencias. `somo-qa-dev-fable` genera e2e con Playwright contra un dev server web y `somo-qa-tester-fable` exige credenciales de Supabase DEV.
+
+Había tres ausencias más: **`/somo-pipeline` no existe** —las cuatro skills dan por hecho un orquestador que las llama, lleva `pipeline/state.json` y es el único que escribe la columna `Estado`—, tampoco existe **`somo-qa-analyst`**, que es quien dictamina defecto de prueba contra defecto de código, y faltaba **`.claude/rules/naming.md`**, que `somo-spec-fable` lee como contexto obligatorio.
+
+## Copiadas al repo con prefijo `wa-`
+
+Las cuatro viven ahora en `.claude/skills/` con nombres propios: `wa-spec`, `wa-dev`, `wa-qa-dev`, `wa-qa-tester`. El prefijo es deliberado — una skill de proyecto que se llama igual que la de usuario deja ambigüedad sobre cuál se invoca, y un bucle desatendido no puede adivinar.
+
+De 5218 líneas se fueron 1426 (el catálogo de shadcn, el contexto de Supabase y su ciclo de vida), se reescribieron el contexto de stack, el sistema de diseño, el framework de pruebas, la estrategia de dobles y el runner, y el resto se quedó: el método de esas skills es lo bueno que tienen.
+
+## Dos runners, y los decide la propia batería
+
+`node:test` para `@nucleo` y Maestro para `@app`. La clasificación no se inventó: **`docs/testing.md` ya etiqueta cada característica por dónde puede correr**, y 18 de 33 son `@nucleo`, o sea Node pelado contra el paquete compartido. El grueso no necesita toolchain de React Native, lo que además conserva la regla de que el núcleo no importa nada de plataforma.
+
+## Tres bugs que solo aparecieron al ejecutar el runner
+
+**Sin ninguna prueba devolvía PASS.** Verde y no verificado no son lo mismo, y en un bucle que nadie mira esa confusión es cómo una spec sin verificar se da por buena. Ahora hay un tercer estado, `VACIO`, con código de salida 2, y el prompt le dice al orquestador que no lo lea como verde.
+
+**`node --test <directorio>` no funciona en Node 24**: trata el directorio como un fichero de test y falla con `MODULE_NOT_FOUND`. Hay que pasarle los ficheros.
+
+**Y el arreglo de eso usaba `mapfile`, que es de bash 4**, cuando macOS trae la 3.2. Sustituido por un bucle `while read`.
+
+Los tres estados están comprobados: 0 con una prueba que pasa, 1 con una que falla, 2 sin ninguna.
+
+## El encargo
+
+`docs/prompt-implementacion.md`, con preflight que para antes de empezar si falta algo, el bucle de ocho pasos, los criterios del veredicto —incluido el tercer caso que no es ni prueba ni código: infraestructura ausente, o un import de React Native colado en el núcleo— y un tope de tres iteraciones por spec antes de marcarla bloqueada y seguir. Un bucle desatendido que se atasca en la fila 3 desperdicia el resto de la noche.
+
+**Verificado**: el preflight del prompt ejecutado tal cual (Node 24, las cuatro skills, naming, los cuatro documentos, y `verifica-gherkin`, `verifica-flujo` y `headless` en verde); Maestro ausente, que es el caso que el diseño del runner ya contempla; el runner probado en sus tres estados; y `git check-ignore` sobre lo nuevo, por la trampa de siempre.
