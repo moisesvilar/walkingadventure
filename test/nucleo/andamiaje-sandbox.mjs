@@ -10,7 +10,7 @@
 // Nada de esto toca el árbol del proyecto ni la red.
 
 import { spawnSync } from 'node:child_process';
-import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,15 +65,21 @@ const PRUEBA_QUE_FALLA = [
  * @param {'ninguna'|'pasa'|'falla'} [opciones.pruebas='ninguna']  qué hay en test/nucleo/
  * @param {boolean} [opciones.conReports=true]  si test/reports/ existe de antemano
  * @param {boolean} [opciones.nucleoRoto=false] planta un packages/nucleo/ que importa React Native
+ * @param {boolean} [opciones.nucleoIlegible=false] planta un packages/nucleo que existe y no se
+ *   puede recorrer (un fichero donde se espera un directorio): es la manera portable de forzar
+ *   que la comprobación de la frontera reviente sin depender de permisos ni de quién ejecuta
  * @param {number}  [opciones.flujos=0]         cuántos .yaml hay en test/app/
  * @param {object|null} [opciones.mapa=null]    contenido de test/spec-test-map.json
  * @param {boolean} [opciones.conGit=false]     inicializa un repo git (queda sucio a propósito)
+ * @param {string|null} [opciones.bateria]      contenido de docs/testing.md; `null` no la escribe,
+ *   que es como se fuerza que el validador no llegue a validar
  */
 export function creaSandbox(opciones = {}) {
   const {
     pruebas = 'ninguna',
     conReports = true,
     nucleoRoto = false,
+    nucleoIlegible = false,
     flujos = 0,
     mapa = null,
     conGit = false,
@@ -82,14 +88,24 @@ export function creaSandbox(opciones = {}) {
 
   const raiz = mkdtempSync(join(tmpdir(), 'wa-andamiaje-'));
 
-  mkdirSync(join(raiz, 'scripts'), { recursive: true });
-  for (const s of ['qa-tester-run.sh', 'comprueba-nucleo.mjs', 'valida-spec-test-map.mjs']) {
-    copyFileSync(join(RAIZ_REPO, 'scripts', s), join(raiz, 'scripts', s));
+  // `scripts/` entero, y no una lista de los tres que se creía que hacían falta.
+  // La lista fija se desincronizó en cuanto el andamiaje creció: al aparecer
+  // `scripts/guardian-principal.mjs` —que los otros importan— el árbol de mentira
+  // pasó a ser una copia incompleta, los scripts copiados reventaban con
+  // ERR_MODULE_NOT_FOUND y ocho casos se pusieron en rojo por culpa del sandbox y
+  // no del runner. El defecto no era la dependencia que faltaba: era enumerar
+  // dependencias a mano en una copia que tiene que ser fiel. Copiar el directorio
+  // no vuelve a caducar cuando se añada el siguiente módulo auxiliar.
+  //
+  // (Que el runner se niegue a dar PASS sobre un andamiaje incompleto es el
+  // comportamiento correcto y no se toca: lo que estaba mal era el árbol.)
+  cpSync(join(RAIZ_REPO, 'scripts'), join(raiz, 'scripts'), { recursive: true });
+  for (const s of readdirSync(join(raiz, 'scripts'))) {
+    if (s.endsWith('.sh')) chmodSync(join(raiz, 'scripts', s), 0o755);
   }
-  chmodSync(join(raiz, 'scripts', 'qa-tester-run.sh'), 0o755);
 
   mkdirSync(join(raiz, 'docs'), { recursive: true });
-  writeFileSync(join(raiz, 'docs', 'testing.md'), bateria);
+  if (bateria !== null) writeFileSync(join(raiz, 'docs', 'testing.md'), bateria);
 
   mkdirSync(join(raiz, 'test', 'nucleo'), { recursive: true });
   mkdirSync(join(raiz, 'test', 'app'), { recursive: true });
@@ -105,6 +121,11 @@ export function creaSandbox(opciones = {}) {
   if (nucleoRoto) {
     mkdirSync(join(raiz, 'packages', 'nucleo'), { recursive: true });
     writeFileSync(join(raiz, 'packages', 'nucleo', 'mundo.mjs'), "import 'react-native';\n\nexport const nada = 1;\n");
+  }
+
+  if (nucleoIlegible) {
+    mkdirSync(join(raiz, 'packages'), { recursive: true });
+    writeFileSync(join(raiz, 'packages', 'nucleo'), 'esto existe y no es un directorio\n');
   }
 
   if (mapa !== null) {
@@ -135,6 +156,12 @@ export function creaSandbox(opciones = {}) {
       };
     },
 
+    /** Ejecuta `node <argv...>` dentro del sandbox y devuelve código y salidas. */
+    ejecutaNode(argv, extra = {}) {
+      const r = spawnSync(process.execPath, argv, { cwd: raiz, encoding: 'utf8', ...extra });
+      return { codigo: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
+    },
+
     /** Los reports escritos, por nombre. */
     reports() {
       const dir = join(raiz, 'test', 'reports');
@@ -152,6 +179,26 @@ export function creaSandbox(opciones = {}) {
       rmSync(raiz, { recursive: true, force: true });
     },
   };
+}
+
+// Las dos formas de invocación que el veredicto no puede distinguir, y que hay
+// que poder montar a mano porque estos ficheros corren siempre desde dentro de un
+// `node --test`: el entorno de partida ya trae NODE_TEST_CONTEXT, así que la
+// «shell limpia» es la que hay que fabricar, no la otra.
+
+/** El entorno de esta máquina sin ninguna variable que cambie la forma de `node --test`. */
+export function entornoLimpio(base = process.env) {
+  const env = {};
+  for (const [k, v] of Object.entries(base)) {
+    if (k === 'NODE_OPTIONS' || k.startsWith('NODE_TEST_')) continue;
+    env[k] = v;
+  }
+  return env;
+}
+
+/** El mismo entorno tal y como lo hereda un subproceso lanzado desde otro `node --test`. */
+export function entornoDentroDeNodeTest(base = process.env) {
+  return { ...entornoLimpio(base), NODE_TEST_CONTEXT: 'child-v8' };
 }
 
 /**

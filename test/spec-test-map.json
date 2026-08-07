@@ -142,7 +142,7 @@
       "fichero": "test/nucleo/andamiaje-gps.test.mjs",
       "caso": "Un recorrido emite posiciones a cadencia fija y sin saltos entre puntos consecutivos",
       "hueco_de_bateria": true,
-      "nota": "La distancia entre posiciones consecutivas se mide con una cinta métrica propia de la prueba, no con la del doble: midiendo con la misma función un error de proyección se cancelaría consigo mismo."
+      "nota": "La distancia entre posiciones consecutivas se mide con una cinta métrica propia de la prueba, no con la del doble: midiendo con la misma función un error de proyección se cancelaría consigo mismo. La contrapartida es que las dos cifras no coinciden al último dígito, así que la tolerancia es relativa al paso (0,1 %) y no absoluta: medido sobre este recorrido, el exceso es de 2,03e-5 m sobre un paso de 1,3889 m, un 0,0015 %. La tolerancia absoluta de 1e-6 m que había antes exigía que dos proyecciones distintas coincidiesen en el micrómetro y ponía en rojo un criterio que se cumple."
     },
     {
       "spec": "SPEC-001",
@@ -614,6 +614,262 @@
       "fichero": "test/nucleo/andamiaje-mapa-cobertura.test.mjs",
       "caso": "El resultado de validar el mapa sale en el report como aviso de infraestructura y nunca como prueba en rojo",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado cualquier script del andamiaje que se pueda ejecutar directamente, cuando se inspecciona cómo decide si es el programa principal, entonces compara rutas canónicas con los enlaces simbólicos resueltos en los dos lados, y no dos cadenas sin resolver.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "Todos los scripts ejecutables del andamiaje deciden que son el programa principal de la misma manera",
+      "hueco_de_bateria": true,
+      "nota": "Toda la iteración es hueco de batería: RF-INFRA-007 no tiene todavía Característica en docs/testing.md. Este caso cubre además el criterio de «Robustez de la clase entera» sobre que ninguno decide por su cuenta, y comprueba que el módulo compartido está versionado: un guardián que importan los tres scripts y que no viaja con ellos los deja a los tres sin arrancar."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado cualquier script del andamiaje que se pueda ejecutar directamente, cuando se inspecciona cómo decide si es el programa principal, entonces compara rutas canónicas con los enlaces simbólicos resueltos en los dos lados, y no dos cadenas sin resolver.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "El guardián compara rutas canónicas con los enlaces simbólicos resueltos en los dos lados",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso del mismo criterio, y el que lo afirma de verdad: el anterior mira el código y este dispara el guardián con el enlace por el lado de process.argv[1] y por el lado de import.meta.url. Con path.resolve a secas fallarían los dos sentidos."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado `scripts/valida-spec-test-map.mjs`, cuando se ejecuta por su ruta real y por una ruta equivalente que atraviesa un enlace simbólico, entonces las dos ejecuciones imprimen lo mismo y devuelven el mismo código de salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "scripts/valida-spec-test-map.mjs da lo mismo por su ruta real que por una ruta con enlace simbólico",
+      "hueco_de_bateria": true,
+      "nota": "El enlace se crea a propósito y no se confía en que /var lo sea: en macOS el temporal ya atraviesa uno, pero en Linux no, y sin enlace explícito la prueba pasaría en Linux sin comprobar nada."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado `scripts/comprueba-nucleo.mjs`, cuando se ejecuta por su ruta real y por una ruta equivalente que atraviesa un enlace simbólico, entonces las dos ejecuciones imprimen lo mismo y devuelven el mismo código de salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "scripts/comprueba-nucleo.mjs da lo mismo por su ruta real que por una ruta con enlace simbólico",
+      "hueco_de_bateria": true,
+      "nota": "Se ejecuta sobre un sandbox con regresión de frontera plantada: si el guardián no se disparase, la ejecución saldría 0 y en silencio, que es exactamente el fallo que se está cerrando."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado un script del andamiaje invocado por una ruta relativa, por una ruta con `..` en medio o por un enlace simbólico que apunta directamente al fichero, cuando se ejecuta, entonces se reconoce como programa principal en los tres casos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "Un script del andamiaje se reconoce como principal por ruta relativa, con .. en medio y por un enlace al fichero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado cualquier script del andamiaje, cuando se importa como módulo en lugar de ejecutarlo, entonces no ejecuta su cuerpo principal, no escribe nada por la salida estándar y no fija ningún código de salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "Importar un script del andamiaje no ejecuta su cuerpo principal, no escribe nada y no fija código de salida",
+      "hueco_de_bateria": true,
+      "nota": "El envoltorio es un módulo aparte, y no un `node -e`, para que el guardián se evalúe contra un process.argv[1] que existe y no coincide. Con `node -e` no hay argv[1] y la prueba pasaría por el motivo equivocado."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado `scripts/captura-fixtures.mjs`, cuando se importa desde otro módulo, entonces no captura ningún fixture y no abre ninguna conexión de red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "Importar scripts/captura-fixtures.mjs no captura ningún fixture ni abre ninguna conexión de red",
+      "hueco_de_bateria": true,
+      "nota": "Hermética por construcción: el inspector de tráfico en modo estricto corta cualquier salida por fetch y la nombra, y un contador encima registra el intento aunque el corte lo tumbe. Se afirman las tres cosas —ningún intento, ningún error y ningún directorio de fixtures creado—, porque afirmar esto leyendo el código sería fe."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado un proceso sin `process.argv[1]` o con un `process.argv[1]` que apunta a algo que no existe, cuando se evalúa el guardián, entonces decide que el script no es el programa principal y no lanza ninguna excepción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "El guardián decide que no es principal, sin lanzar, cuando no hay argv[1] o apunta a algo que no existe",
+      "hueco_de_bateria": true,
+      "nota": "La ausencia real se afirma en un proceso de verdad sin argv[1] (`node -e`), no pasando `undefined` a esPrincipal: `undefined` activa el parámetro por defecto, que es leer process.argv[1], justo lo contrario de lo que se quiere afirmar."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado cualquier script del andamiaje que emite un veredicto, cuando se ejecuta directamente, entonces escribe siempre al menos una línea de veredicto reconocible antes de terminar, cualquiera que sea el resultado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "scripts/valida-spec-test-map.mjs escribe su línea de veredicto pase lo que pase",
+      "hueco_de_bateria": true,
+      "nota": "Cinco desenlaces: sin mapa, mapa válido, mapa que no es JSON, mapa inválido y batería ausente."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado cualquier script del andamiaje que emite un veredicto, cuando se ejecuta directamente, entonces escribe siempre al menos una línea de veredicto reconocible antes de terminar, cualquiera que sea el resultado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "scripts/comprueba-nucleo.mjs escribe su línea de veredicto pase lo que pase",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso del mismo criterio, uno por script con veredicto. Cuatro desenlaces: sin paquete, frontera intacta, regresión y paquete ilegible."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado `scripts/valida-spec-test-map.mjs`, cuando termina sin haber llegado a validar, entonces sale con un código distinto de 0 y explica por qué no pudo validar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "scripts/valida-spec-test-map.mjs que no llega a validar sale con un código distinto de 0 y explica por qué",
+      "hueco_de_bateria": true,
+      "nota": "Se fuerza quitando docs/testing.md, que es lo que el validador lee para cruzar escenarios. Se afirma el 2 y no solo el «distinto de 0»: son tres desenlaces distintos y el runner publica el código en el report."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado `scripts/comprueba-nucleo.mjs`, cuando termina sin haber llegado a comprobar la frontera, entonces sale con un código distinto de 0 y explica por qué no pudo comprobarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "scripts/comprueba-nucleo.mjs que no llega a comprobar la frontera sale con un código distinto de 0 y explica por qué",
+      "hueco_de_bateria": true,
+      "nota": "Se fuerza plantando un packages/nucleo que existe y no es un directorio. Es la manera portable: chmod 000 no vale porque root lo atraviesa igual y la prueba pasaría o no según quién la ejecute."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el runner, cuando un script de validación termina con código 0 pero sin línea de veredicto reconocible, entonces el report lo registra como «no se pudo validar» y nunca como validación correcta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Un validador del mapa que sale 0 sin línea de veredicto se registra como no se pudo validar",
+      "hueco_de_bateria": true,
+      "nota": "El validador mudo se sustituye dentro del sandbox: es la reproducción exacta de lo que hacía el de verdad cuando su guardián no se disparaba. Se contrasta con el mismo árbol y el validador bueno para que la afirmación no dependa de una sola frase del report."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el runner, cuando es la comprobación de la frontera del núcleo la que termina sin veredicto reconocible, entonces la ejecución no puede terminar en PASS.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Sin línea de veredicto en la comprobación de la frontera, la ejecución no puede terminar en PASS",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el mapa de cobertura sin validar por cualquier motivo, cuando se lee el report, entonces eso sigue apareciendo en la sección de infraestructura y nunca como una prueba en rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Un mapa que no se pudo validar sigue apareciendo en infraestructura y nunca como prueba en rojo",
+      "hueco_de_bateria": true,
+      "nota": "El motivo aquí es el código 2 del validador, no un mapa inválido: el caso del mapa inválido ya lo cubre andamiaje-mapa-cobertura.test.mjs desde la spec base, y el criterio nuevo dice «por cualquier motivo»."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el runner, cuando lanza `node --test`, entonces lo hace con un entorno del que ha eliminado al menos `NODE_TEST_CONTEXT` y `NODE_OPTIONS`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Todos los subprocesos del runner reciben un entorno sin NODE_TEST_* ni NODE_OPTIONS",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el entorno que ven los subprocesos, no sobre el texto del runner: un `node` de mentira delante en el PATH anota su propio entorno y delega en el de verdad. Cubre también el criterio de que todos los subprocesos reciban el mismo entorno saneado."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el runner, cuando lanza cualquiera de sus subprocesos —la comprobación de núcleo, la validación del mapa, `node --test` y Maestro—, entonces todos reciben el mismo entorno saneado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Todos los subprocesos del runner reciben un entorno sin NODE_TEST_* ni NODE_OPTIONS",
+      "hueco_de_bateria": true,
+      "nota": "Mismo caso que el criterio anterior: además de que no haya variables heredadas, se comprueba que consten las cuatro invocaciones. Una lista vacía cumpliría lo primero sin haber lanzado nada. Maestro se cubre con un maestro de mentira en el mismo PATH, porque en esta máquina no está instalado."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado `NODE_TEST_CONTEXT` en el entorno de partida y una prueba de `test/nucleo/` que falla, cuando se ejecuta el runner, entonces termina con código 1, exactamente igual que desde una shell limpia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Con NODE_TEST_CONTEXT heredada y una prueba en rojo, el runner termina con código 1",
+      "hueco_de_bateria": true,
+      "nota": "Es la reproducción literal del defecto del report SPEC-001-run-20260807T223412Z: antes daba 0 con el caso en rojo dentro del fichero que el propio report adjunta."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el mismo árbol de trabajo, cuando se ejecuta el runner desde una shell limpia y desde dentro de otro `node --test`, entonces el veredicto y el código de salida son los mismos en las dos ejecuciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "El mismo árbol da el mismo veredicto desde una shell limpia y desde dentro de otro node --test",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren los tres desenlaces (verde, rojo y nada que ejecutar) y se comparan código y primera línea del report, no el report entero: la línea de variables saneadas difiere a propósito entre los dos entornos de partida."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado que el runner ha eliminado alguna variable heredada, cuando se lee el report, entonces la sección de infraestructura nombra cuáles quitó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "El report nombra las variables heredadas que el runner retiró",
+      "hueco_de_bateria": true,
+      "nota": "Incluye el caso contrario: con el entorno de partida limpio el report lo dice también, porque el silencio no distingue «no había nada que quitar» de «no se miró»."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el runner, cuando termina, entonces su salida estándar sigue conteniendo la ruta del report y nada más: el saneamiento se cuenta en el report, no por la salida estándar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "El saneamiento se cuenta en el report y no por la salida estándar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el runner, cuando decide PASS, entonces solo lo hace habiendo reconocido el resumen de la ejecución, con al menos un caso ejecutado, con cero fallos en el resumen y con código 0 del subproceso; si falta cualquiera de las cuatro condiciones, no hay PASS.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "El PASS exige resumen reconocido, al menos un caso, cero fallos y código 0",
+      "hueco_de_bateria": true,
+      "nota": "Cinco ejecuciones: las cuatro condiciones juntas y cada una rota por separado. La salida de `node --test` se fabrica con un `node` de mentira delante en el PATH, que es la única manera de sustituirla sin romper los otros tres subprocesos del runner ni tocar el runner, que es lo que está a prueba."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado una salida de `node --test` en la que el runner no reconoce el resumen esperado, cuando termina, entonces el resultado es «no se pudo ejecutar» con código 2, nunca PASS.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Una salida de node --test cuyo resumen no se reconoce vale 2 y nunca PASS",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado una salida cuyo resumen no se reconoce, cuando se lee el report, entonces trae la salida literal completa de la ejecución y dice qué esperaba encontrar y no encontró.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Cuando el resumen no se reconoce, el report trae la salida literal y dice qué esperaba encontrar",
+      "hueco_de_bateria": true,
+      "nota": "Se afirman las tres líneas que esperaba («# tests <n>», «# pass <n>», «# fail <n>») y no solo que avise: sin decir qué buscaba, el aviso no le sirve a quien tiene que arreglarlo."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado ficheros de prueba en `test/nucleo/` y un resumen que declara cero casos ejecutados, cuando termina el runner, entonces no da PASS: había pruebas y no se ejecutó ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Con ficheros de prueba y un resumen que declara cero casos, el runner no da PASS",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado una discrepancia entre el código de salida de `node --test` y el resumen que el runner reconoce, cuando se emite el veredicto, entonces se elige el peor de los dos y la discrepancia queda registrada en el report.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Ante una discrepancia entre el código de node --test y su resumen se toma el peor de los dos y queda registrada",
+      "hueco_de_bateria": true,
+      "nota": "Los dos sentidos: código distinto de 0 con cero fallos en el resumen, y código 0 con un fallo en el resumen. Uno solo dejaría vivo el que más importa, que es el segundo."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado un report cuya primera línea de contenido dice PASS, cuando se leen los resultados de `@nucleo`, entonces el recuento de casos ejecutados es mayor que cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-veredicto.test.mjs",
+      "caso": "Un report que dice PASS trae un recuento de casos mayor que cero",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba desde los dos entornos de partida, limpio y sucio, porque el verde que no ejecutó nada solo aparecía en uno de los dos."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado cualquier pieza del andamiaje que emita un veredicto, cuando se ejecuta cuatro veces sobre el mismo árbol —por ruta real y por ruta con enlace simbólico, desde una shell limpia y desde dentro de otro `node --test`—, entonces las cuatro ejecuciones dan el mismo veredicto y el mismo código de salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "Las cuatro invocaciones de cada pieza que emite veredicto dan el mismo veredicto y el mismo código",
+      "hueco_de_bateria": true,
+      "nota": "Las tres piezas con veredicto —los dos scripts y el runner— por las cuatro combinaciones. El runner se invoca a mano y no con el ayudante del sandbox porque lo que está a prueba es precisamente la ruta de invocación, y el ayudante siempre usa la del sandbox."
+    },
+    {
+      "spec": "SPEC-001-iter-1",
+      "criterio": "Dado el andamiaje entregado, cuando se enumeran los scripts que se pueden ejecutar directamente, entonces todos deciden si son el programa principal de la misma manera, sin variantes por script.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-guardian.test.mjs",
+      "caso": "Todos los scripts ejecutables del andamiaje deciden que son el programa principal de la misma manera",
+      "hueco_de_bateria": true,
+      "nota": "Mismo caso que el primer criterio del bloque del guardián. La lista enumerada son los tres .mjs del andamiaje: overpass-setup.sh y los verifica-*.mjs son herramientas del prototipo y la spec los deja fuera; qa-tester-run.sh es bash y no comparte guardián."
     }
   ]
 }

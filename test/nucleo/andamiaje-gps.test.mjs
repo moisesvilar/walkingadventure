@@ -34,6 +34,27 @@ function metros(a, b) {
   return Math.sqrt(dLat * dLat + x * x) * 6371000;
 }
 
+// Margen de la comprobación de saltos, RELATIVO al paso y no absoluto.
+//
+// Medir con una cinta distinta de la del productor es lo que da valor a la
+// prueba, y es también lo que garantiza que las dos cifras no coincidan al
+// último dígito: el productor reparte la longitud del tramo con el coseno de la
+// latitud del tramo entero y la prueba vuelve a medir con el coseno de la
+// latitud de cada par de puntos. Medido sobre este mismo recorrido:
+//
+//   n = 437 · pasoM = 1.3888888888888888 · saltoMax = 1.3889092091376078
+//   exceso = 2.03e-5 m → 0.0015 % del paso
+//
+// Veinte micrómetros sobre 1,39 m es desajuste de proyección, no un salto. La
+// tolerancia absoluta de 1e-6 m que había antes no era afirmable: exigía que dos
+// proyecciones distintas coincidiesen en el micrómetro, y ponía en rojo un
+// criterio que se cumple. Un salto de verdad —un vértice que se traga, una
+// cadencia que se rompe— es del orden del propio paso, no de una milésima suya,
+// así que un 0,1 % deja pasar el desajuste con 67 veces de holgura sobre lo
+// medido y sigue cazando cualquier salto real con tres órdenes de magnitud de
+// margen.
+const MARGEN_RELATIVO = 1e-3;
+
 describe('El GPS simulado', () => {
   test('Un recorrido emite posiciones a cadencia fija y sin saltos entre puntos consecutivos', () => {
     const cadenciaMs = 1000;
@@ -50,9 +71,11 @@ describe('El GPS simulado', () => {
         `la cadencia se rompe entre las posiciones ${i - 1} y ${i}`,
       );
       const salto = metros(secuencia[i - 1], secuencia[i]);
+      const tope = pasoM * (1 + MARGEN_RELATIVO);
       assert.ok(
-        salto <= pasoM + 1e-6,
-        `salto de ${salto.toFixed(3)} m entre las posiciones ${i - 1} y ${i}, y el paso es de ${pasoM.toFixed(3)} m`,
+        salto <= tope,
+        `salto de ${salto} m entre las posiciones ${i - 1} y ${i}: el paso es de ${pasoM} m y el tope, ` +
+        `con el ${MARGEN_RELATIVO * 100} % de margen por desajuste de proyección, es de ${tope} m`,
       );
     }
   });

@@ -47,6 +47,10 @@ const ANDAMIAJE = [
   join(RAIZ_REPO, 'scripts', 'captura-fixtures.mjs'),
   join(RAIZ_REPO, 'scripts', 'valida-spec-test-map.mjs'),
   join(RAIZ_REPO, 'scripts', 'comprueba-nucleo.mjs'),
+  // El guardián compartido llegó con SPEC-001-iter-1 y es andamiaje como los
+  // demás: si se quedara fuera de esta lista, el único módulo que los otros tres
+  // importan sería también el único sin comprobar.
+  join(RAIZ_REPO, 'scripts', 'guardian-principal.mjs'),
 ];
 
 describe('Estructura y frontera del andamiaje', () => {
