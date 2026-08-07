@@ -432,3 +432,735 @@ De todo esto sale un tipo de beat nuevo en la sección 2, el de **lugar diferido
 - **8, nuevo**: motor de pasos y propagación. Con una advertencia arquitectónica: **no es una fase de `build.js`**. `build.js` crea el mundo, esto evoluciona el estado de una partida encima; meterlo en la tubería rompería "misma tubería, mismos mundos". Puede implementarse **antes que la capa de NPCs**, a granularidad de núcleo.
 
 **Verificado**: nada que ejecutar, es diseño. Lo que sí se comprobó contra el código antes de escribir es que la mecánica se apoya en lo que existe — `buildRoutes` como árbol de expansión mínima con `pts`, `nodos` y la marca `fallback`, y `js/names/` como fuente única de nombres propios.
+
+---
+
+# Iteración 5-ago-2026 (II) — el bucle jugable: qué hace que esto apetezca
+
+Segunda iteración de **diseño, sin código**, y la primera que reordena el trabajo pendiente en lugar de añadirle cosas. Nace de una corrección: `docs/checklist.md` estaba ordenado por esfuerzo y mezclaba lo decidido con lo que ni siquiera estaba planteado. Se reordena entero con un criterio nuevo —**primero lo que hay que decidir, después lo que solo hay que escribir**— y aparecen seis pendientes de diseño que no estaban en ninguna parte: el bucle jugable, el personaje, la progresión y economía, el alcance del mundo, seguridad/privacidad/menores y la partida guardada. La capa de NPCs, que estaba en "la inversión grande", sube con ellos.
+
+De esa lista se cierra el primero, en `game-design/bucle-jugable.md`. La pregunta que responde no es "cómo funciona una salida" —eso son piezas y varias ya estaban en `quests.md`— sino **por qué querría alguien salir a andar hoy**, con la restricción de que la respuesta no puede ser "porque tengo una quest": las quests se acaban y el barrio no cambia.
+
+## Los tres pilares comparten moneda, y por eso no compiten
+
+El usuario eligió que el corazón fueran las tres cosas a la vez y equilibradas —cartografiar, lo que se cuenta, y la caminata como decisión—, que es la respuesta que normalmente significa que ninguna es el corazón. Se sostiene por dos hallazgos.
+
+El primero es que **ya comparten unidad**: el tramo (~2 km, ~30 min) dimensiona un beat, dura un paso del mundo y es lo que tarda un rumor en dar un salto. El equilibrio deja de ser filosofía y pasa a ser aritmética. El segundo es que **el bucle se cierra solo**: andar cuesta piernas → lo andado fija territorio → el territorio fijado es por donde viaja lo que se cuenta → lo que se cuenta da la razón para volver a andar. Y no por casualidad: el mapa que se gana *es* el árbol de `buildRoutes` por el que se propaga lo social.
+
+Lo único que los tres se disputan de verdad es la atención del jugador en marcha, que por diseño debe ser casi cero. Se resuelve con **cuatro momentos** —antes de salir, en marcha, al parar en un lugar, el telón— y una regla comprobable: si un pilar se cuela en el momento de otro, está mal.
+
+## Lo que se decidió
+
+**El mapa registra lo que sabes, no dónde estuviste.** Cuatro niveles de conocimiento (no lo sabes · lo ves sin nombre · lo conoces · lo conoces bien), estado inicial por escala —lo que se ve de lejos nace visible— y se sube **con las piernas o con la boca de otro**: un rumor puede rotularte un sitio donde no has estado. Ahí la cartografía deja de ser un pilar aparte. Dos restricciones duras lo acotan: el casting **no** mira lo descubierto (si no, los primeros días no hay juego, que es cuando menos castea el mundo) y un sitio al que te mandan tiene nombre aunque no hayas ido, porque la decisión 2 guía por nombres.
+
+**El visor se queda en la calle.** Se propuso lo contrario —texto al llegar, visor en casa, con el argumento de que enseñar la foto de algo que tienes a tres metros es competir con la realidad y perder— y el usuario eligió el visor completo en el sitio. Se acepta con sus consecuencias escritas: las imágenes tienen que existir antes de salir (misma regla que ya rige para el LLM: al crear la quest, jamás durante la caminata), lo que te pilla de paso cae a ficha de texto, y el telón se queda sin su premio y hereda el mapa entintándose y el diario.
+
+**No hay presupuesto: la quest declara su tamaño** con una palabra del mundo y su equivalencia en tiempo, y se elige por antojo. El efecto secundario es una mejora: la decisión táctica se muda de un menú a la calle — *¿me da hoy el cuerpo para el desvío?* es mejor tensión andando que rellenando un formulario.
+
+**Volverse a casa a mitad se cierra en corto, con final digno**, no se pausa: pausar habría reabierto la decisión 4 de `quests.md`. Y no genera rumor, porque comentar que lo dejaste a medias sería reprochar por la puerta de atrás lo que la decisión 3 dice que no se reprocha.
+
+**El relevo va por dos vías y se llevan las dos**, porque premian comportamientos distintos: profundizar es continuo y automático (el premio de la rutina), crecer por los bordes es un acontecimiento (el premio de alejarse). Con un invariante duro — **lo ya generado no se resiembra jamás** — que hoy el código no permite: `countsForRadius` cambia el mundo entero al cambiar el radio, así que crecer significa coser comarcas vecinas, no ampliar la propia. Efecto colateral: irse de vacaciones pasa a ser "una comarca que no toca con la tuya", media respuesta gratis a otro pendiente.
+
+**El tono es cómico-cálido**, y esta es la decisión que más deuda genera: los seis textos de `templates.js` están en registro de cuento popular y se quedan fuera de tono. Se cierra con dos reglas que la hacen sostenible: el humor vive en **cómo se cuenta** y nunca en **lo que pasa**, y el chiste jamás es a costa del sitio real ni de quien lo regenta, siempre del desajuste. Regalo del tono: la escalera fiel · abultado · trastocado · leyenda es exactamente cómo crece un chiste, así que la deformación de rumores deja de ser una mecánica y pasa a ser el humor del juego.
+
+**El barrio de tres calles** —que es el caso normal, no el raro— se ataca por tres sitios: lo social y profundizar, más densidad en radios pequeños (que reabre los cupos de `parametros-mundo.md`), y un estirón del mundo que **se ofrece y nunca se impone**, para no romper el pilar de que las piernas de hoy las pone el jugador.
+
+## Lo que queda abierto
+
+**La accesibilidad**, que venía dentro de este mismo pendiente y no se peloteó: el juego da por supuestas unas piernas y nadie ha decidido hasta dónde se estira eso. Es lo único de la agenda original que se queda sin respuesta. Con ella quedan tres flecos más, todos anotados al final del documento: cuándo se echa el telón exactamente, el hueco de las primeras semanas —cartografía que aún no da de sí y capa social que todavía no ha arrancado, el momento más frágil del bucle— y si el preset de generación y el tamaño de la salida son la misma perilla o dos.
+
+**Verificado**: nada que ejecutar, es diseño. Lo que sí se comprobó contra el código antes de escribir: que `countsForRadius` regenera y no amplía (lo que convierte el crecimiento por bordes en trabajo real y no en un parámetro), que `test/casting-report.mjs` ya mide el fallo del mundo pequeño que describe el punto 7, y que los textos de `templates.js` están en un registro distinto del tono recién elegido.
+
+---
+
+# Iteración 5-ago-2026 (III) — accesibilidad: el tramo deja de ser una constante
+
+Tercera iteración de diseño del día, y la más corta, porque el grueso ya estaba pensado: `game-design/accesibilidad.md`. Se eligió empezar por aquí entre los ocho pendientes de diseño con un argumento de coste: **la accesibilidad no es un tema, es la unidad de medida**. Si el tramo pasa a ser personal, todo lo que se decida después nace expresado en tramos; si se decide al final, hay que traducir todo lo escrito entretanto — y ya hay un documento así, `parametros-mundo.md`, calibrado entero en metros absolutos.
+
+## El encuadre: no es un modo, es la unidad
+
+La decisión de fondo es que **no hay "modo accesible"**. Hay un juego cuya unidad base es personal: un tramo deja de ser 2 km y pasa a ser *lo que tú andas en media hora*. Con eso se redimensiona solo el juego entero, y quien va en silla, quien anda despacio o un crío de cinco años juegan al mismo juego con la misma forma, a otra escala. Nadie elige dificultad ni carga con una etiqueta: eliges cuánto andas y por dónde puedes andar, que es lo que elige todo el mundo.
+
+Y apareció un ahorro que no se esperaba: **el caso de la accesibilidad es el mismo caso del barrio de tres calles**. Un tramo pequeño produce una comarca pequeña, y eso ya lo resolvió `bucle-jugable.md` §7 por tres vías. La accesibilidad no necesita mecánica propia — necesita que el caso pequeño esté bien resuelto.
+
+## Las cuatro decisiones
+
+**El tramo se declara una vez y el juego lo corrige midiendo**, con la pregunta hecha en lenguaje de sitios y no de distancias ("en media hora andando, ¿tú dónde llegas?"), coherente con que el juego no enseñe números de distancia. Con tres reglas: el ajuste **no se comenta jamás** —si el juego dice "últimamente andas menos" se convierte en app de salud y en un reproche—, mide el ritmo andando y no el reloj de la salida, y **no puede redimensionar el mundo ya generado**, porque chocaría con el invariante de no resembrar. De ese choque sale una promoción: separar el preset del radio del mundo del preset de la salida deja de ser deuda menor y pasa a ser requisito.
+
+Consecuencia bonita: **el reloj del mundo deja de estar en metros y pasa a estar en esfuerzo**. Dos jugadores muy distintos viven mundos que avanzan al mismo ritmo narrativo aunque uno haga 6 km y el otro 900.
+
+**El filtro de accesibilidad evita y declara.** No es una opción de menú sino un filtro sobre el grafo viario, y como el trazado, el lazo y el casting salen todos de ahí, se propaga solo. El mundo entero sigue existiendo y dibujándose; simplemente no te mandan por ahí, y el mapa lo dice en lenguaje del mundo —la Escalinata, la senda de tierra— porque **tú sabes de tu barrio más que OSM**: esa escalera puede tener una rampa que nadie ha mapeado. Dos hallazgos al comprobarlo contra el código: lo que nos inventamos nosotros (`coserHuecos` hasta 180 m, las rectas `fallback`) no puede prometerse como transitable, y los caminos difíciles necesitan nombre, que hoy los ramales no tienen. Y una limitación que se escribe en vez de disimularse: **las cuestas no se pueden prometer**, porque `incline` está poco mapeado y no hay modelo de elevación — y es justo lo que más importa en silla.
+
+**Cada aviso viaja por dos capas**, y aquí la decisión importante no es la regla sino su letra pequeña: **el par tiene que mezclar una capa de bolsillo con una de pantalla**. Háptico y sonido fallan a la vez para la misma persona, así que duplicar así es cumplir la regla en el papel sin servir de nada. Encaja sin tocar `quests.md`: las noticias van por háptico más marca, las oportunidades por notificación más háptico, y la reserva de la notificación queda intacta. Con una tercera regla que protege el "no mirar la pantalla": el aviso se lee de un vistazo o no se lee, nunca es un "toca para saber más".
+
+**El suelo es moverse, no andar**, y está medido en vez de argumentado: por debajo de unos 250 m de radio, `countsForRadius` da el mínimo absoluto y `parajeCountForRadius` un solo paraje — ahí un lazo aún se compone, apurado, y por debajo ya no hay juego que montar. Ese límite se dice claro y antes de instalar: hay gente para la que esto no puede ser su juego, y decirlo es más respetuoso que un modo de mentira.
+
+## Lo que queda abierto
+
+**Qué cuenta como "moverse"**: silla eléctrica, bici, transporte. La decisión dice "desplazamiento propio" y no zanja la propulsión; la respuesta probablemente pase por el esfuerzo y no por el medio, pero arrastra el reloj del mundo — 20 km en bici serían diez pasos en una tarde. Con ella quedan las cuestas (reabrir si algún día hay modelo de elevación) y cómo se pregunta el tramo sin que parezca un formulario médico.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra el código antes de escribir: el suelo real de `countsForRadius` (r < 250 → un núcleo de cada tipo) y de `parajeCountForRadius` (250 → 1), que `M_PER_MIN = 72` en `casting.js` es hoy la única constante de ritmo y por tanto el punto por donde entra el tramo personal, y que `coserHuecos` (180 m) y las rutas `fallback` son aristas inventadas por el generador y no calles de OSM.
+
+---
+
+# Iteración 5-ago-2026 (IV) — el arranque: el mundo llevaba rato andando sin ti
+
+Cuarta y última iteración de diseño del día: `game-design/arranque.md`, que cierra el pendiente más frágil que había dejado abierto `bucle-jugable.md`.
+
+Lo primero fue acotar el problema, porque "las primeras semanas" no es un problema, es una queja. Los días 1 y 2 los cubre la novedad —generas tu mundo, descubres que tu bar es una taberna, haces tu primera aventura—. **El agujero son los días 3 al 10**: la novedad ya pasó, la cartografía funciona pero es un placer pasivo que se acumula sin drama, y lo social sigue en cero porque todavía no has hecho nada que nadie pueda contar. Lo más distintivo del juego necesita semanas para aparecer, y ahí es donde se pierde la gente.
+
+## El mundo llega con pasado
+
+La decisión que resuelve casi todo lo demás: **el mundo no nace vacío en el paso 0**, nace con unos cuantos pasos ya dados. Hay rumores circulando y versiones ya deformadas asentadas en cada núcleo antes de que tú aparezcas. El día 1 entras en una aldea y ya están hablando de algo.
+
+No hace falta maquinaria nueva —es la propagación de `quests.md` §6 ejecutada antes de empezar— y no contradice que los kilómetros sean el reloj: el prólogo no es tiempo tuyo, es lo que pasó antes de que llegaras, y tu contador sigue empezando en cero. Se siembra con la semilla del mundo y su propio sufijo, así que **el pasado es una propiedad del lugar**, como los nombres: dos personas con la misma semilla oyen el mismo.
+
+Cuánto pasado queda como criterio y no como número —lo que tarde en haber algo que contar en cada núcleo, ni un paso más— porque pasarse tiene un coste concreto: si todo lo que oyes ya es leyenda de nivel 3, el mundo suena a museo y no a vecindario.
+
+Y el regalo: **el mismo mecanismo sirve para tres arranques**. El de la partida, el de una comarca nueva cuando el mundo crece por los bordes, y el del mundo efímero de vacaciones. Llegar a un sitio donde no has estado nunca y que ya tenga vida es el mismo problema tres veces.
+
+## El mejor truco del juego se adelanta a la primera salida
+
+El prólogo cambia el terreno de la deformación de rumores. Ya no hace falta hacer algo notable y esperar a que viaje: el día 1 hay rumores viejos circulando en versiones distintas según el pueblo, así que **triangular es posible en la primera salida** en vez de en la tercera semana.
+
+Y no se deja al azar, pero tampoco se explica: **puesta en escena**. El arranque se asegura de que un mismo suceso haya llegado a dos núcleos alcanzables con niveles distintos y de que la primera aventura pase por los dos. El juego no dice nada; coloca el descubrimiento donde vas a tropezarte con él. De ahí salen dos requisitos —el prólogo se compone y se resiembra si no cumple la condición, y la primera aventura se elige también por dónde pasa— y una raya que quedó escrita: **esto es del arranque y solo del arranque**, porque una puesta en escena permanente convierte el mundo en un guion.
+
+## Y termina con un hito, no con una curva
+
+Se propuso que el arranque se apagara solo, sin momento; se eligió que **termine y se marque**. El criterio no es una fecha ni un contador de salidas: dura hasta que el mundo tiene material tuyo, y eso ocurre la primera vez que llegas a un núcleo y lo que allí se cuenta eres tú, contado por otros y no exactamente como fue.
+
+La decisión trae media decisión más, de redacción: **el hito dice que el mundo ha cambiado, no que el jugador haya aprobado**. "Ahora hay quien cuenta cosas de ti", nunca "ya dominas las mecánicas". Es la diferencia entre cerrar una etapa y admitir que llevabas ruedines.
+
+## Lo que queda abierto
+
+**Quien tarda un mes en producir algo notable**: con ese criterio, quien juega poco o no completa aventuras no cierra nunca el arranque. Queda propuesta pendiente de ratificar —que también termine cuando el jugador ya ha visto el truco, dos versiones del mismo suceso en su diario— para que cierre por una vía o por la otra. Y **cuántos pasos dura el prólogo**, que tiene criterio pero no número, y el número solo sale midiendo sobre mundos reales, como se hizo en su día con el casting.
+
+**Verificado**: nada que ejecutar, es diseño. Lo que se comprobó antes de escribir es que la pieza existe: la propagación por el árbol con latencia por metros y deformación por saltos ya está especificada en `quests.md` §6, así que el prólogo es esa misma maquinaria corrida hacia atrás y no un sistema nuevo.
+
+---
+
+# Iteración 5-ago-2026 (V) — el personaje: identidad sí, cuerpo no
+
+Quinta iteración de diseño: `game-design/personaje.md`. Es el único pendiente del proyecto que no puede apoyarse en OpenStreetMap — todo lo ficticio se ancla a algo real y el personaje es lo único sin anclaje —, así que había que decidirlo entero.
+
+## Se descartó que el personaje fueras tú
+
+La propuesta más coherente con el principio de anclaje era que no hubiera criatura intermedia: la persona real como anclaje del personaje, igual que el bar lo es de la taberna, y lo que se cuenta ahí fuera contado de ti y con tu nombre. Se descartó porque pedir un nombre real en un juego para menores abre una conversación de privacidad que no compensa. También se descartó llegar sin nombre y que el mundo te bautizara — pero de esa se rescató lo mejor, como se ve abajo.
+
+**Un personaje que interpretas**, entonces, con una regla que evita el único fallo grave de esa opción: **identidad sí, cuerpo no**. Nada de resistencia, velocidad ni fatiga; el cansancio, el ritmo y las piernas son del jugador y ya están medidos por el tramo personal de `accesibilidad.md`. En el único juego cuyo mando es un cuerpo real, sustituirlo por estadísticas era la disonancia que hundía la decisión.
+
+Y el rescate: **el mundo no te llama por tu nombre hasta que te conoce**. Tienes nombre desde el minuto uno, pero para la comarca eres la forastera hasta el hito de fin de arranque — que pasa a ser exactamente el momento en que empiezan a llamarte Xoana. Dos documentos que se apoyan sin haberlo planeado.
+
+## Lo que se elige y lo que se gana
+
+Pantalla corta —nombre y oficio— y ahí acaba. Lo que el personaje **es** para la comarca se gana andando, y de ahí sale la mejor consecuencia del día: **el mote nace del rumor, no del hecho**. Como la reputación es lo que llegó, el apodo se pega a partir de lo que se cuenta, así que pueden llamarte "la que cruzó el monte de noche" por algo que no ocurrió exactamente así. Es dato vivo, lo fija el código, y cada plantilla y cada suceso declaran su mote candidato igual que ya declaran su rumor. **Y el mote es por comarca**: en el pueblo de al lado te conocen por otra cosa, y en la comarca vecina por nada.
+
+Dos detalles que parecían menores y no lo son: el nombre lo **propone** el paquete de idioma del mundo (si el mundo es gallego, las sugerencias son gallegas) con texto libre encima y filtro de aptitud, porque ese texto acaba dentro de lo que genere el LLM; y **el género gramatical del personaje es dato vivo**, no adorno, porque el código bifurca por él cada vez que el mundo se dirige al jugador.
+
+## El oficio filtra, y el modelo salió de un challenge
+
+Se decidió que el oficio **filtre** las aventuras que se ofrecen, no solo que las ordene, sabiendo el riesgo medido: el casting ya falla en mundos pequeños. La primera mitigación propuesta —generar mucho en el precalentamiento— se corrigió al escribirla, porque el prólogo genera sucesos del mundo y no aventuras: las aventuras salen de castear plantillas contra el mundo que hay.
+
+La segunda pasó por un challenge pedido expresamente, y el challenge cambió la decisión. La propuesta era llegar a 20-30 plantillas genéricas que, adaptadas por oficio y contexto, dieran 4-5 aventuras cada una — del orden de 150 por oficio. Tres objeciones la corrigieron:
+
+- **Esas 150 son pieles, no aventuras.** Por el corolario de la decisión 1 de `quests.md`, con LLM y sin LLM la estructura es la misma —mismo casting, mismos beats, mismo lazo— y solo cambia la piel. En un barrio de seis localizaciones el jugador no reconoce la prosa: reconoce que otra vez le mandan a la iglesia y luego al bar.
+- **Y esconde una contradicción**: si una plantilla se adapta a cualquier oficio, el oficio no filtra nada, solo cambia la voz — que es exactamente la opción descartada media hora antes. No se pueden tener las dos.
+- **El cuello de botella no es el catálogo, es el barrio.** Los fallos del informe de casting dicen todos lo mismo (*sin candidatos para X: un paraje con escena Y*) y se concentran en mundos de paseo con 2-3 parajes: ronda del vigía 77%, peregrinaje 82%. Plantillas nuevas con el mismo vocabulario de roles fallarán en los mismos barrios por la misma razón.
+
+De ahí salió el modelo que se adoptó: **afinidad declarada, de 1 a N oficios por plantilla**. Unas pocas exclusivas —que son las que hacen que elegir signifique algo, porque hay aventuras que no verás nunca con este personaje— y la mayoría compartidas por dos o tres. El multiplicador del catálogo baja de ×4 a ×1,5 y el filtro conserva los dientes.
+
+Con eso, la aritmética honesta: 30 plantillas, afinidad ×1,5 y la tasa del caso pequeño dejan del orden de **diez esqueletos jugables por oficio en un barrio de tres calles**. Suficiente para que no haya día muerto, que era el riesgo — y muy lejos de 150. La intuición de partida era correcta en la dirección y estaba inflada unas quince veces en la magnitud; con el número real la decisión de filtrar se sostiene, con el inflado nos habríamos confiado.
+
+Dos requisitos más que quedaron escritos: ampliar el catálogo hay que hacerlo **variando los roles que pide**, no solo la historia que cuenta, o no sirve para los barrios pequeños; y **una plantilla ya no es un texto** —roles que castean, lazo que cierra, tramos, fallbacks, rumor, mote y desenlace de repuesto, en cómico-cálido y para leerse en voz alta, validada contra el informe—, así que treinta son trabajo real. Y la parte de la mitigación original que sí funciona: el precalentamiento deja cargada la **cola de entregas**, de modo que un día sin aventura de tu oficio no sea un día vacío.
+
+## Y la pregunta incómoda, resuelta por lo barato
+
+**Modo compañía: una partida, dos cuerpos.** Manda un móvil, el otro sobra, la aventura es de los dos. Cuesta poco de código y bastante de diseño, pero es diseño que este juego ya quería: **textos escritos para leerse en voz alta** y nada que exija tocar la pantalla. Probablemente sea la mejor forma de jugar a esto. El multijugador de verdad —dos partidas sincronizadas, lo que hace una llegando a oídos de la otra por las mismas calzadas— se descartó por ser otro proyecto: servidores, cuentas y la conversación entera de privacidad y menores.
+
+## Lo que queda abierto
+
+El día en que no castea ninguna aventura de tu oficio (con propuesta: ofrecer una que no es lo tuyo, dicho en tono, que en cómico-cálido es un chiste y no una disculpa); si el acompañante real tiene sitio en la ficción; si se admite una forma neutra de género gramatical; y la lista exacta de oficios, que tiene criterio pero no nombres.
+
+Y una nota de frontera para el pendiente siguiente: **el mote y la fama por comarca son ya media respuesta a "progresión y economía"**, y el oficio filtrando aventuras es media progresión. Conviene abrirlo sabiendo que parte de su terreno ya está ocupado.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra el código antes de escribir: que el catálogo son hoy seis plantillas en `app/js/quests/templates.js` (de ahí el número concreto del riesgo de filtrar por oficio), y que `castAll` ofrece el catálogo entero sin ningún criterio de selección, que es donde entraría el filtro.
+
+---
+
+# Iteración 5-ago-2026 (VI) — el cuello de botella no era el barrio, era el cupo
+
+Iteración corta y correctiva, nacida de un challenge del usuario que resultó tener razón. Toca `game-design/parajes.md` y `parametros-mundo.md`, los dos documentos cerrados más antiguos del proyecto.
+
+## El error
+
+Al justificar por qué ampliar el catálogo de plantillas no bastaba, quedó escrito que "el cuello de botella no es el catálogo, es el barrio": que un barrio de tres calles no tiene reparto suficiente y que plantillas nuevas fallarían igual. El usuario lo rebatió con un argumento de sentido común —en 500 m hay fácilmente trece negocios— y al ir a comprobarlo apareció el dato que lo zanja: **los mundos sintéticos del informe de casting se generan con 90 anclajes y fallan exactamente igual que los pequeños reales**.
+
+Si con 90 anclajes en 700 m sigue sin haber un paraje con escena de vigilancia, el problema no puede ser la falta de lugares. Es que `parajeCountForRadius` **solo crea dos** a los 500 m. No es escasez del mundo: es un cupo nuestro. La frase correcta era "el generador tira casi todo el reparto que el barrio le da".
+
+## Dos decisiones
+
+**La cobertura de escenas manda sobre la afinidad del anclaje.** `parajes.md` ya decía que el tipo está desacoplado del anclaje real —una ruina puede ser un chiringuito— pero no decía qué pasa cuando el sesgo temático y la necesidad de la historia se estorban. Ahora sí: primero se eligen los tipos que hacen falta para cubrir el vocabulario de escenas, después se les asigna anclaje con el sesgo suave de siempre, y **se sacrifica el sesgo sin drama si no hay uno afín**. Que una atalaya sea un bar es infinitamente mejor que quedarse sin ningún sitio desde el que vigilar: de un anclaje raro el jugador tira con imaginación, de una escena que no existe no se puede tirar.
+
+**Y el suelo del cupo se deriva en vez de intuirse.** La discusión "cuánta densidad en radios pequeños" se estaba planteando a ojo, con la objeción —mía— de que trece parajes en 500 m convierten el hito en mobiliario urbano. La objeción se cae porque el número sale solo:
+
+```
+parajes mínimos = escenas distintas que piden las plantillas ÷ escenas por paraje
+```
+
+Siete escenas hoy, dos o más por paraje: **cuatro**. No trece. Uno cada ~125 m de recorrido, que sigue siendo un hito. El cupo por ritmo de `parametros-mundo.md` se queda como techo y esto pone el suelo, y es una regla viva: si el catálogo crece a 20-30 plantillas y el vocabulario se ensancha, el suelo sube solo sin que nadie lo renegocie.
+
+## Google Places entra, como relleno
+
+El usuario zanjó también la objeción del coste. OSM sigue siendo la tubería —terreno, costa, ríos, callejero— y Places entra **solo a rellenar el pool de anclajes** donde OSM va flojo, que en España es el negocio pequeño: la asesoría, la clínica dental, la barbería. No cambia ninguna fase.
+
+Quedan escritas dos cautelas que hay que resolver antes de conectarlo: los términos de Places permiten almacenar indefinidamente el `place_id` pero no el resto del contenido, y hay una cláusula sobre mostrar sus datos en un mapa que no es de Google, que es exactamente lo que hace nuestro canvas. La tercera preocupación —el determinismo, si la fuente cambia bajo los pies— resultó estar ya cubierta: `bucle-jugable.md` §5 congela el mundo al generarse, así que la solución estaba puesta antes de que existiera el problema.
+
+Y sigue en pie la regla del reconocimiento, con un matiz que este debate afinó: **más anclajes no es más diversidad de escenas**. Trece locales comerciales son la misma categoría y alimentan los mismos tipos de paraje. Lo que ensancha el vocabulario son torres, miradores, capillas, molinos y cruceiros — no barberías.
+
+**Verificado**: nada que ejecutar, es diseño. El dato que sostiene la corrección sí es medido: `test/casting-report.mjs` genera mundos sintéticos con 90 anclajes y aun así reporta "sin candidatos para un paraje con escena X" (ronda del vigía 77%, peregrinaje 82% sobre 22 mundos), y `parajeCountForRadius` da 1/2/4/7/8 para 250/500/1000/2000/10000 m — cupo, no escasez.
+
+---
+
+# Iteración 5-ago-2026 (VII) — progresión: ni niveles ni tienda
+
+Sexta iteración de diseño del día: `game-design/progresion.md`, que decide qué hacen de verdad el oro, la XP y la reputación que `quests.md` §6 llevaba repartiendo sin definir.
+
+El pendiente se ordenó con una constatación: **el juego ya tenía dos progresiones y ninguna es numérica** — el mapa que se llena y la comarca que te conoce. Así que no había que añadir una progresión, había que decidir si hacía falta una tercera. Y con una restricción heredada de `accesibilidad.md` que lo gobierna todo: **subir de nivel en un juego cuyo techo son tus piernas premia a quien más anda**. Cualquier progresión tenía que medirse en lo que haces, nunca en cuánto te has movido.
+
+## Se retira la XP
+
+No hay niveles. Hay **rango social por núcleo**, una escalera corta y con nombre —forastero · conocido · alguien de aquí— que se gana por lo que se cuenta de ti. La XP se retira explícitamente de `quests.md` §6.
+
+Dos propiedades salen solas de que el rango lo mueva la propagación de rumores y no la distancia: puedes ser *alguien* en un pueblo donde no has estado nunca, porque la noticia llegó antes que tú; y un pueblo al que vas cada día pero al que no llega nada tuyo te sigue tratando de forastera. De ahí la simetría que ordena el juego entero: **tú conoces al pueblo por ir; el pueblo te conoce a ti por lo que le llega.** Andar profundiza tu mapa, actuar sube tu rango.
+
+Y una corrección de paso: `personaje.md` decía que el mote era "por comarca" y a la vez que en el pueblo de al lado te conocen por otra cosa, que se contradicen. **Todo lo social vive a nivel de núcleo**, que es donde llega el rumor y donde se sedimenta. Corregido allí.
+
+## El oro compra saber, y usa la propagación en vez de saltársela
+
+El oro compra información y voluntades: que te cuenten lo que saben sin ir hasta allí, que alguien lleve un recado. Con una regla dura —**nunca compra distancia**, no se puede pagar por no andar— y con el hallazgo que hace que esto no rompa nada: **lo que compras es lo que ese hombre sabe, en la versión que a él le llegó**. Pagar no da la verdad, da otra versión con su nivel de deformación encima, y puede ser peor que ir andando. El oro compra un nodo del árbol, no la realidad.
+
+Segunda regla dura, esta de principios: **el juego nunca manda a gastar en el negocio real del anclaje, ni el oro ficticio toca dinero de verdad**. Un juego que reparte monedas sabiendo que la taberna es el bar de abajo está a un paso de ser un vehículo publicitario, y con menores delante eso no es una decisión de economía.
+
+## El rango no cierra nada
+
+Se descartó que el rango abriera aventuras vedadas al forastero. Es el mismo fork que el oficio —¿filtra o colorea?— con una diferencia decisiva: **con el oficio empiezas eligiendo; con el rango empiezas siendo forastera en todas partes a la vez**, así que un rango que cerrase contenido dejaría el juego en su punto más pobre exactamente el día 1 — el agujero al que la iteración anterior dedicó un documento entero.
+
+Lo que sí cambia el rango es el trato, cuánto te cuentan y **el precio de la información, incluido el precio cero**. Ahí enganchan las dos monedas sin inventar una tienda, y sale la síntesis del documento: **el rango y el oro no son dos sistemas, son el mismo visto de dos lados** — el rango es crédito social y el oro lo suple cuando no lo tienes.
+
+## Los objetos como llave, que era idea del usuario
+
+La propuesta llegó como pregunta —objetos que no se combinan pero que abren conversaciones y caminos alternativos— y resultó ser mejor de lo que parecía por una razón lateral: **rescata los micro-encuentros**. Hoy un hallazgo de cuneta es una anécdota de quince segundos que se puede ignorar gratis; si tres semanas después esa hebilla de latón abre una conversación, el paseo tonto de un martes se vuelve retroactivamente algo.
+
+Encaja además donde ya había sitio: el disparador `{tipo: llegada | franja | con_objeto}` está escrito en `quests.md` §2 y sin usar; tener el objeto es dato vivo y el diálogo que abre es dato inerte con fallback, así que la frontera con el LLM no se mueve; y es **el primer mecanismo real de arcos largos**, que `quests.md` prometía sin tener con qué.
+
+Se acotó con la regla que evita la explosión de ramas y el cierre del juego a quien no tiene nada: **nunca es requisito, solo otra puerta al mismo beat**. Mismos beats, mismo lazo, otra forma de atravesarlo — con lo que el casting sigue siendo testeable y el corolario de "con LLM y sin LLM, misma estructura" queda intacto. La ramificación estructural sigue aplazada, como decía `quests.md` §2.
+
+Y lo que no es llave queda en **la repisa**: cosas que no hacen nada salvo contar de dónde vinieron. Le devuelve al telón el premio que perdió cuando el visor del anclaje se mudó a la calle. Simetría con la otra mitad: **el mapa guarda lo que sabes; la repisa guarda lo que puedes demostrar.**
+
+## Lo que queda abierto
+
+Si el rango puede bajar —con propuesta escrita: no, porque mide cuánto te conocen y no cuánto te aprecian, y el signo de lo que se cuenta sería un eje aparte—; de dónde salen los objetos-llave; qué pasa con el oro acumulado, que si solo compra información sobra pronto y un contador sin tope acaba siendo un marcador de progreso por la puerta de atrás; y los nombres exactos de los tres escalones.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra los documentos antes de escribir: que `quests.md` §2 ya define el disparador `con_objeto` (así que los objetos-llave no inventan mecanismo), que §6 prometía XP sin definirla (de ahí que retirarla sea una edición y no una contradicción), y que §6 permite que lo que se cuenta de ti tenga signo malo — lo que obliga a separar notoriedad de aprecio y no a inventar un rango que baje.
+
+---
+
+# Iteración 5-ago-2026 (VIII) — NPCs: el testigo es la única fuente de verdad
+
+Séptima iteración de diseño del día y la última del bloque grande: `game-design/npcs.md` cierra el pendiente 2 de `quests.md`, que llevaba desde el principio marcado como el cuello de botella del diseño de quests. Llegó barato, y por dos razones: las decisiones de hoy ya habían decidido media capa sin nombrarla —el rango define cómo te tratan, el mote cómo te llaman, los informantes ya eran un NPC con oficio y precio— y porque la primera pregunta se resolvió con una enmienda en lugar de con un sistema.
+
+## La enmienda que abarata el pendiente entero
+
+`parametros-mundo.md` daba por hecho que cada NPC con nombre consume un anclaje real propio, su casa, con el mismo mecanismo `taken` que los servicios. Eso lo mete a competir por el recurso escaso que la iteración anterior acababa de proteger para los parajes. Pero **el tabernero no necesita anclaje: ya está anclado en la taberna**.
+
+Regla general: **el NPC hereda el anclaje del sitio al que pertenece**, servicio o núcleo. El granjero queda anclado en la granja, una aldea sin servicios puede tener cara igualmente, y la capa entera sale gratis en anclajes. Las casas de NPC quedan aplazadas y reducidas a quien no trabaja en ningún sitio. Enmendado en `parametros-mundo.md`.
+
+## El reparto crece con lo jugado
+
+El mundo no nace poblado: cada sitio tiene una cara titular y las demás aparecen cuando una aventura las necesita. Sale de una aportación del usuario —que un mismo servicio puede tener varias caras: posadera, cocinera, mozo de cuadra— que multiplicaba el reparto por cuatro y se llevaba por delante lo único que hace valiosa esta capa: **que te reconozcan solo significa algo si el reparto se puede recordar**. Poblando bajo demanda se conservan las dos cosas, y aparece la frase que resume la decisión: **cada cara que conoces la conoces por algo**.
+
+Con una trampa técnica que quedó escrita antes de que nadie la pise: **el puesto es la clave, no el orden**. La generación es determinista por `semilla + sitio + puesto`, jamás por un contador de aparición — si la clave fuera "el tercero que conocí aquí", el mismo mundo daría personas distintas según en qué orden hubieras jugado. Y como los NPCs son estado de partida y no del mundo, sale una propiedad bonita: dos jugadores con la misma semilla tienen **el mismo mundo y repartos distintos**.
+
+## Lo mejor de la capa: el testigo
+
+La memoria tenía un choque de frente, porque ya hay una memoria funcionando —lo que se cuenta en cada núcleo, que llega por rumor y llega deformado— y una memoria individual en paralelo puede contradecirla. La salida convierte el choque en la mejor pieza del sistema: **el que estuvo allí tiene la versión de nivel 0**.
+
+En un mundo donde todo lo que se cuenta está deformado, el testigo es la única fuente de verdad, y volver a preguntarle es cómo se consigue. Su memoria es corta y por hechos: solo las veces que fue un rol en una aventura tuya. Y con una regla que no admitía dos respuestas: **el testigo no corrige lo que se cuenta en el pueblo**. Si el testimonio arreglara el rumor, el sistema de deformación se curaría solo y se moriría. Queda algo mejor: **puedes saber la verdad y seguir siendo famoso por una mentira.**
+
+Engancha además con la economía de la iteración anterior: un informante te **vende** lo que oyó, deformado; un testigo te **cuenta gratis** lo que vivió, fiel. Lo que se compra es lo que se oye; lo que vivió contigo no tiene precio porque ya lo compartisteis.
+
+## Y un principio del proyecto que llevaba todo el día apareciendo
+
+Las franjas horarias parecían incompatibles con "fallar por no llegar debe ser casi imposible", y se resolvieron igual que otras tres cosas hoy: **llegar a tiempo abre una puerta extra, llegar tarde no cancela nada**. Con el matiz que añadió el usuario, la franja acabó siendo **propiedad de la escena y no de la persona** — nadie ficha, nadie se mueve, y nos ahorramos simular la vida de los NPCs, que es exactamente lo que hace frágil esta capa en otros juegos.
+
+Al escribirlo se vio que el patrón ya gobierna cuatro sistemas independientes, así que queda escrito como principio: el objeto-llave abre otra puerta y nunca es requisito, el estirón se ofrece y nunca se impone, el rango cambia el trato y nunca cierra el catálogo, la franja añade una salida y nunca cancela la escena.
+
+> **Lo que el jugador no controla puede abrirle puertas, nunca cerrárselas.**
+
+Es la formulación general de "ignorarlo es gratis" y de "se falla por decisiones, no por piernas", y cualquier sistema nuevo debería pasar esa prueba antes de entrar.
+
+## El único mecanismo que va hacia abajo
+
+Nadie se muda, envejece ni muere por el paso del tiempo —sería retirar algo por ausencia, que la decisión 4 de `quests.md` prohíbe— pero los actos sí cambian el trato, porque §6 dice que lo que hiciste viaja para bien y para mal. Una relación se puede quemar y **se puede reconstruir**: no se vuelve al punto de partida, pero sí a poder sentarse.
+
+Es el único sitio del proyecto donde algo puede empeorar: el rango no baja, los objetos no se pierden, el mapa no se borra. La consecuencia de un acto feo vive en la relación con una persona concreta — y trae consigo el mejor arco largo que puede tener este juego, el de la reparación.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra los documentos y el código antes de escribir: que `quests.md` §2 ya define el disparador `{tipo: franja}` sin usar, que §5 pedía casas ancladas con `taken` (de ahí la enmienda), y que `casting.js` tiene una regla de que dos roles no pueden caer en el mismo lugar — lo que obliga a decidir si varias caras de un mismo servicio, que comparten coordenadas exactas, cuentan como un sitio o como varios.
+
+---
+
+# Iteración 5-ago-2026 (IX) — alcance del mundo: la rejilla convierte una promesa en una forma
+
+Octava iteración de diseño: `game-design/alcance-del-mundo.md`. Llegaba medio resuelto —`bucle-jugable.md` §5 ya prohibía resembrar y hablaba de coser comarcas, `arranque.md` ya daba pasado a una comarca nueva, `npcs.md` ya había separado el mundo de la partida— y quedaban tres preguntas.
+
+## Se descarta el mundo compartido
+
+La propuesta era que el mundo fuese del **lugar**: semilla = coordenadas, con lo que la Comarca de Vilanova sería la misma para todo el que vive en Vilanova y el juego ofrecería algo que ningún otro puede — que tu barrio tenga una versión fantástica compartida con tus vecinos, mientras todo lo vivo (mapa, diario, rango, reparto) sigue siendo de cada uno. Se eligió lo contrario: **la semilla lleva al jugador dentro**, cada uno su mundo.
+
+Trae intimidad y una ganancia concreta para el pendiente de privacidad —nadie puede cruzar dos mapas ni deducir dónde vives por los nombres— y una consecuencia arquitectónica que hay que tener presente: **el mundo deja de ser una función del lugar y pasa a formar parte de la partida guardada**. Con `lat,lon#n` bastaba saber dónde estás para recalcularlo entero; ahora no. Esa cadena pasa a ser el dato más valioso que existe: si se pierde, se pierde el mundo. Requisito duro heredado por "la partida guardada": **tiene que sobrevivir a un cambio de móvil**.
+
+Y lo compartido no desaparece, cambia de naturaleza: pasa de ser el defecto a ser un acto deliberado —intercambiarse la semilla—, así que conviene que sea corta, legible y copiable.
+
+## La rejilla, que es la decisión que más resuelve
+
+Las comarcas dejan de ser círculos alrededor del jugador y pasan a ser **celdas de una rejilla**. Con eso se disuelve el problema técnico que `bucle-jugable.md` §5 había dejado abierto a conciencia: **crecer deja de ser regenerar y pasa a ser generar otra celda**, y los cupos dejan de depender de un radio variable para calcularse una vez por celda. El invariante de "lo generado no se resiembra jamás" deja de ser una promesa que hay que cumplir y pasa a ser **una propiedad de la forma**.
+
+Dos matices que salieron al escribirlo: la rejilla es **personal, como el mundo, y se dimensiona en tramos** —una celda mide *k tramos tuyos*, así que la comarca de quien anda 300 m por tramo es más pequeña y exactamente igual de jugable, que es la regla de `accesibilidad.md` aplicada a la geografía—; y se **ancla a una coordenada redondeada** cercana a donde arrancaste y no a ti, para que estés dentro de tu celda pero no en su centro y el mapa se pueda enseñar sin enseñar el portal.
+
+Y una distinción que conviene no perder: una celda vecina se abre **por pisarla**, porque el mundo tiene que existir donde estás —lo que cubre a quien vive pegado a un borde—, o **como acontecimiento** al completar la tuya, que es la recompensa del bucle. Una cosa es que el mundo exista y otra que se te premie.
+
+## Una partida, muchas comarcas
+
+Viajar lejos abre una celda que no toca con la tuya, dentro de la misma partida, y tú viajas entera: personaje, oficio, repisa, diario y objetos. **Lo que no viaja es el rango, y no hizo falta inventar nada para que no viajara**: es por núcleo, así que donde nadie ha oído hablar de ti vuelves a ser forastera automáticamente — que es el arranque otra vez, con su prólogo y su pasado, y es de lo mejor que tiene el juego.
+
+Al volver a casa te siguen conociendo, y el mundo de casa no ha avanzado en tu ausencia porque el reloj son tus kilómetros: volver de tres semanas fuera es volver de tres días. Con esto queda servida además la idea que estaba apuntada en el checklist como "varias partidas para el mundo efímero de vacaciones": no hacen falta partidas separadas, porque **una comarca que no visitas no cuesta nada** y sigue ahí si algún día vuelves.
+
+## Lo que queda abierto
+
+El tamaño de celda en tramos, que tiene criterio pero no número; si lo que se cuenta de ti puede llegar a comarcas lejanas —propuesta: que no, porque la reputación viaja a pie y volver a ser forastera es la gracia—; qué pasa con el árbol de calzadas en la costura entre dos celdas contiguas, que probablemente deba contar como un salto más; y cómo se pasa la semilla si dos personas quieren compartir mundo.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra el código antes de escribir: que la semilla es hoy `lat,lon#n` con el `#n` ya en uso como contador de resiembra en el prototipo, y que `countsForRadius` calcula los cupos a partir del radio — que es exactamente lo que deja de tener sentido al pasar a celdas.
+
+---
+
+# Iteración 5-ago-2026 (X) — seguridad y privacidad: al modelo solo le llega ficción
+
+Novena iteración de diseño: `game-design/seguridad-privacidad.md`. Llegaba adelgazado, porque casi todo lo que protege a un jugador se había decidido durante el día por otros motivos — el nombre inventado, el oro que no toca dinero real, el mundo que nadie puede cruzar, la pantalla apagada en marcha, el filtro del grafo viario.
+
+## El vector que nadie había mirado
+
+El pendiente hablaba de permisos y de rastro de ubicación, pero al enumerar qué sale del móvil apareció otra cosa: **el LLM es la única vía por la que algo sale de forma continua**, y el contrato tal como estaba pensado llevaría nombres reales de anclajes para vestir la escena. Un prompt que dice "la taberna es el bar Casa Manolo" es una dirección postal aproximada saliendo del dispositivo cada vez que se crea una quest.
+
+La decisión: del móvil no sale nada del jugador, y del prompt se excluye todo dato real. Salen exactamente dos cosas — las coordenadas al generar el mundo, una vez, y prompts con nombres de fantasía, tipos abstractos y tono. El anclaje real se queda para los ojos del jugador.
+
+Con un coste que quedó escrito: **el guiño central del juego deja de estar al alcance del modelo**. Que O Torreón Esquecido sea el chiringuito de Manolo tendrá que salir de plantilla o de código, que es donde vive el dato real. El LLM pierde su mejor material.
+
+## El permiso invasivo resultó no hacer falta
+
+La pregunta era ubicación en segundo plano o app en marcha, y al repasar lo decidido no había nada que exigiera lo primero: una salida empieza cuando abres la app, y el modo de pasos de fondo lee los pasos acumulados de la app de salud **al abrir**, sin GPS mientras tanto. Así que basta el permiso "mientras se usa", pedido en contexto al empezar la primera salida.
+
+El punto débil —que el sistema mate la app a mitad de caminata— resultó estar cubierto por una regla anterior: los avisos no transportan nada que se pueda perder, así que la noticia sigue sedimentada en su núcleo y la oportunidad sigue en la cola. "Ignorarlo es gratis" cubre también el caso de no haberte enterado.
+
+## Anotar no es resembrar
+
+Para el anclaje que no vale —la finca con perro, el parque que es un solar, las obras— decide el que camina: un gesto de dos toques quita el sitio de las aventuras conservando su nombre y su posición en el mapa. La distinción entre **anotar** y **resembrar** deja intacto el invariante de `bucle-jugable.md` §5.
+
+Con el filtro previo de tipos como primera línea (el filtro quita lo que OSM sabe; el gesto, lo que OSM no puede saber) y con una alarma que ya existía: si alguien descarta tanto que baja del suelo de cuatro parajes de `parajes.md`, entra el estirón ofrecido de §7.
+
+## Y el juego no pregunta la edad
+
+Sin verificación, sin modo infantil. La misma lógica que en accesibilidad: no hay un modo, hay una forma de estar hecho. El documento incluye la tabla de qué riesgo cubre cada decisión anterior —gasto, datos, contacto con desconocidos, compulsión, contenido, esfuerzo físico, sitios problemáticos— y en los siete casos lo que protege a un crío ya estaba puesto por otra razón y protege igual a un adulto. El horario diurno queda como ajuste activado de origen y quitable, y para vigilar a un hijo están los controles de familia del propio móvil, que el juego no reimplementa.
+
+## Lo que queda abierto
+
+Exportar la semilla, que es la única red de seguridad compatible con que no salga nada y que `alcance-del-mundo.md` había dejado colgando; qué pasa con la caché del proxy de generación, que hoy guarda por hash qué coordenadas ha pedido gente; y cómo se le cuenta todo esto al jugador, que en un juego que no manda nada a ningún sitio es tanto una obligación como un argumento de venta.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra el código antes de escribir: que `parsePois` guarda el nombre real del anclaje en cada elemento generado (`real: {name, kind}`), que es el dato que no puede entrar en una llamada de red, y que `server.mjs` cachea las consultas de Overpass en disco por hash del QL, de donde sale el pendiente de la caché.
+
+---
+
+# Iteración 5-ago-2026 (XI) — la partida guardada, y el bloque de diseño cerrado
+
+Décima y última iteración de diseño del día: `game-design/partida-guardada.md`. El inventario venía hecho por todo lo anterior —semilla, contador de pasos, comarcas con sus mapas y rangos, oído, vuelo, cola, diario, repisa, objetos, personaje, NPCs, anclajes descartados y textos cacheados del LLM—, así que quedaban tres preguntas.
+
+## La trampa del determinismo
+
+Parecía bastar con guardar la semilla y regenerar. La letra pequeña lo impide: el determinismo de este proyecto siempre ha sido "misma semilla **más los mismos datos de OSM**", y OSM cambia. Alguien mapea una calle, cierra un bar, se corrige un tag. Regenerar tu comarca dentro de un año daría otros núcleos y otros nombres — exactamente lo que prohíbe `bucle-jugable.md` §5.
+
+Se congela el mundo entero, unos pocos megas por comarca con las polilíneas de calzadas y terreno como grueso. Y sale gratis una propiedad que el pendiente de seguridad había dejado suelta: **una salida entera se juega sin red**. La red hace falta al abrir una comarca nueva y antes de salir, para textos e imágenes, y nunca mientras andas.
+
+## Dos verdades, con una mandando
+
+Se guardan el estado y el registro de hechos. Dos verdades en paralelo es el bug clásico, así que van con reglas: el estado manda, el registro es auditoría y reconstrucción de emergencia; el registro tiene que ser suficiente para reconstruir o no sirve de nada; y si la reconstrucción con una versión nueva da otro resultado, se avisa en lugar de disimularlo.
+
+## Y una corrección de hace una hora
+
+`seguridad-privacidad.md` había dejado como red de seguridad **exportar la semilla**, un código copiable en ajustes. Congelar el mundo lo invalida: la semilla ya no reproduce nada. Lo que hay que poder sacar es la partida entera, y eso son megas.
+
+Va por la copia del sistema —iCloud o Google Backup, cifrada y bajo la cuenta del jugador, sin servidor nuestro— más un fichero exportable a mano, que pasa a ser también el vehículo para compartir mundo con otra persona. Con una salvedad que matiza la decisión 1 de seguridad y que quedó escrita en los dos documentos: **ahí los datos sí salen del móvil**, aunque no hacia nosotros. Lo que no sale ni ahí es el rastro de ubicación, que no se guarda.
+
+## El bloque de diseño, cerrado
+
+Esta mañana el checklist estaba ordenado por esfuerzo y mezclaba lo decidido con lo que ni siquiera estaba planteado. Se reordenó con un criterio nuevo —primero lo que hay que decidir, después lo que solo hay que escribir— y aparecieron ocho pendientes de diseño, seis de los cuales no estaban en ninguna parte. Hoy quedan cerrados los ocho, con nueve documentos nuevos en `game-design/` y cuatro enmiendas a los tres que ya existían.
+
+Lo que queda son treinta y pocos flecos anotados al final de cada documento, y ninguno bloquea: casi todos son contenido que se decide al escribirlo o números que solo salen midiendo. Y entra en la lista lo único grande que seguía sin decidir y que ya no depende de nada: **la arquitectura real de la app**, que estaba esperando a que cerrara seguridad y privacidad.
+
+## Y el índice de pendientes cambia de oficio
+
+Con el diseño cerrado, el camino hacia el código deja de pasar por una lista escrita a mano: de `game-design/` sale un PRD completo, del PRD sale la lista de tareas de implementación, y esas se ejecutan con el bucle `/somo-spec-fable` → `/somo-dev-fable` → `/somo-qa-dev-fable` → `/somo-qa-tester-fable` hasta tener las pruebas en verde.
+
+Así que el índice pierde sus 45 tareas de implementación y se queda solo con lo que falta por **decidir**. Y cambia de nombre: **`docs/checklist.md` pasa a ser `docs/pendientes.md`**, porque `/somo-plan-fable` escribe su backlog en `docs/checklist.md` y habría pisado el fichero. Las menciones al "checklist" en las entradas anteriores de esta bitácora se refieren a ese mismo fichero con su nombre viejo.
+
+Antes de borrar las tareas se comprobó que nada quedara solo ahí: el declutter de rótulos y la placa de los otros estilos viven en la iteración de Reino y en las trampas de `CLAUDE.md`, la detección de región por límites administrativos está en `parajes.md`, y el resto sale de los documentos de diseño, que son la fuente del PRD. Lo único que había que rescatar era un dato de proyecto que no estaba en ningún documento: qué se conserva del prototipo y qué no — que la iteración siguiente acaba matizando.
+
+---
+
+# Iteración 5-ago-2026 (XII) — la arquitectura, y el servidor que no íbamos a tener
+
+Se decide antes del PRD porque condiciona la mitad de las tareas que salgan de él: `game-design/arquitectura.md`. Vive en `game-design/` aunque sea una decisión técnica, porque es una decisión cerrada y porque esa es la carpeta de la que se va a generar el PRD.
+
+## Cinco requisitos que descartan solos la vía barata
+
+Leer los pasos de la app de salud, háptico desde el bolsillo, notificaciones, entrar en la copia del sistema y funcionar sin cobertura. Con eso, la PWA queda fuera sin discusión: en web no hay HealthKit, el háptico en iOS es casi inexistente y no hay forma de entrar en el respaldo del sistema.
+
+Se elige **React Native con Expo**, y el argumento decisivo no es el de siempre: es que JavaScript en el cliente permite compartir el generador determinista con `test/headless.mjs`. De ahí sale una regla dura — **el núcleo no puede importar nada de React Native** — porque si lo hace deja de correr en Node y se pierde la red de seguridad más importante del repo. Lo que era una costumbre del proyecto pasa a ser requisito.
+
+## Se reabre lo de reimplementar de cero, y con motivo
+
+Estaba dado por zanjado que la app se rehacía entera. Con JavaScript en el cliente esa decisión deja de ser gratis: tirar el generador significa quedarse sin garantía de determinismo mientras se rehacen sus tests. Así que el núcleo se **porta a un paquete compartido** —`core`, `world`, `names`, `quests`, la capa de partida— y de cero van el render, las pantallas y los datos.
+
+Con dos apuntes. Portar no es copiar: la rejilla sustituye al radio, los cupos pasan a ser por celda, la cobertura de escenas invierte el orden de asignación de tipos y el tramo personal entra por donde hoy hay una constante suelta. Y la frontera entre núcleo y plataforma ya está trazada en el prototipo aunque fuera por otro motivo — `buildWorld` recibe `fetchData` inyectado en lugar de llamar a la red por su cuenta.
+
+## Y la parte que los documentos daban por hecha sin decirlo
+
+`partida-guardada.md` y `alcance-del-mundo.md` presumen de que no hay servidor nuestro, y es cierto para los datos del jugador. Faltaba la otra mitad: el LLM, la generación de imágenes y Places necesitan claves, y una clave dentro de la app es una clave pública. **Va a haber servidor.**
+
+Lo que se decide es qué clase de servidor, y la tensión apareció al escribirla: un proxy con claves y sin ninguna comprobación es un proxy que cualquiera puede usar con tu factura en cuanto extraiga la URL. La salida es la **atestación de plataforma** (App Attest, Play Integrity), que verifica que la llamada viene de una instalación legítima de la app **sin identificar a la persona**. Se descartó el token anónimo por instalación, más simple de montar, porque es un identificador persistente con el que se puede correlacionar todo lo que ha pedido un móvil.
+
+El proxy cachea solo lo inerte —imágenes por su prompt de ficción, que no dice nada de nadie y es lo que cuesta dinero— y no registra quién llama, ni desde dónde, ni guarda partidas. La frase que hay que mantener: **un proxy con claves no es un servidor con partidas dentro**.
+
+## Lo que queda abierto
+
+Si Overpass va directo desde el móvil o por el proxy, que es elegir quién ve tus coordenadas; qué pasa cuando la atestación falla, porque un rechazo duro deja fuera a gente legítima; el coste por jugador en llamadas de LLM e imagen, que es el presupuesto que `quests.md` dejó abierto y que ahora tiene dónde medirse; y verificar que los cinco estilos se trasladan a Skia sin perder el pintado, que es el producto visible del proyecto.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra el código antes de escribir: que `buildWorld` recibe `fetchData` inyectado (la frontera núcleo/plataforma ya existe), que `M_PER_MIN = 72` en `casting.js` es el punto por el que entra el tramo personal, y que los cinco estilos de `render/styles.js` son objetos de datos fusionados sobre `DEFAULTS`, que es lo que hace plausible trasladarlos a otro motor de dibujo.
+
+**Verificado**: nada que ejecutar, es diseño. Comprobado contra el código antes de escribir: que `buildWorld` devuelve el mundo con `geo` completo dentro (coastlines, lakes, rivers, forests, peaks, roads), que es el bulto real de lo que hay que serializar, y que la caché del proxy ya congela de hecho las respuestas de Overpass por hash del QL — el mismo problema resuelto un nivel más abajo y por otra razón.
+
+---
+
+# Iteración 5-ago-2026 (XIII) — dibujar las pantallas, y lo que sale al dibujarlas
+
+Empieza el paso 2 del camino hacia el código: el diseño de pantallas, en artefactos, uno por momento del bucle. El primero cubre el arranque, de abrir la app a salir a andar.
+
+Dibujar una pantalla obliga a concretar lo que un documento puede dejar en el aire, y el primer artefacto ya devolvió cinco decisiones al diseño.
+
+## Un renombrado que toca trece documentos
+
+**«Comarca» pasa a llamarse «mapa».** Es la palabra que el jugador ve, y "comarca" pedía explicación mientras que "mapa" es lo que la cosa es. El cambio no fue mecánico: en varios sitios «comarca» significaba *la gente de allí* y no la unidad de mundo, y ahí «mapa» no dice lo mismo — "para la gente de ese mapa", "la gente que te va conociendo". Esos se reescribieron a mano.
+
+## El lenguaje del juego, que no tenía documento
+
+`game-design/lenguaje.md`. El lenguaje es inclusivo y, donde el castellano obliga a elegir sin motivo, **el sesgo va hacia el femenino**: el personaje llega con el femenino ya puesto, el reparto de NPCs se equilibra por generación en vez de dejarlo al azar, y el oficio no arrastra el estereotipo — la herrera, la vigía, la cantera.
+
+Lo interesante es la restricción que manda sobre el cómo, y venía ya decidida: **los textos se leen en voz alta** (`personaje.md` §4). Eso descarta desdoblar en cada frase y descarta la -e, porque las dos suenan mal dichas a otra persona mientras camináis. Queda reformular, que casi siempre lee mejor que el masculino que sustituye: *quien camina*, *la gente de aquí*, *el vecindario*.
+
+Y una línea que conviene tener escrita: esto es **sesgo en el reparto y en la duda, nunca censura del personaje**. Cabe un tabernero gruñón; lo que no cabe es que el gruñón sea siempre él.
+
+## Tres decisiones que salieron de mirar las pantallas
+
+**El permiso de ubicación se adelanta.** `seguridad-privacidad.md` decía "al empezar la primera salida", pero levantar el mapa necesita saber por dónde andas y ocurre antes. Corregido allí.
+
+**El nombre del personaje se pide en el onboarding**, no dentro de la ficción. Y con dos matices que solo aparecen al dibujar el campo: deja claro que es el nombre del **personaje** y no el de la persona, y llega con un nombre ya sorteado, para que se pueda empezar sin escribir nada y para que nadie teclee su nombre real por inercia.
+
+**Overpass propio, en nuestro servidor**, con la imagen Docker que el proyecto ya usa en local. Cierra el pendiente 1 de `arquitectura.md`, y el motivo es la fricción antes que la privacidad: contra los mirrors públicos la generación tarda minutos, y esa espera cae en el onboarding, que es el peor sitio para perder a alguien. Con su complemento en `arranque.md`: si el jugador cierra la app a mitad, vuelve al paso anterior con lo contestado precubierto.
+
+**Y el declutter de rótulos deja de ser deuda vaga**: pasa a `arquitectura.md` como algoritmo que calcula posición y tamaño de todos los rótulos antes de pintar. Es la pantalla del mapa la que lo hace evidente.
+
+**Verificado**: el artefacto se publicó y se revisó pantalla a pantalla. Los colores de los móviles salen de `render/styles.js` (estilo Reino) en lugar de inventarse, y `node test/headless.mjs` sigue en verde tras el renombrado, que no toca código.
+
+---
+
+# Iteración 6-ago-2026 (XIV) — antes de salir, y cuatro decisiones que salen de la portada
+
+Segundo artefacto de pantallas: de abrir la app a tener la salida lista. Cinco pantallas —portada, zurrón de lo que pasó mientras no estabas, lista de aventuras, ficha con el lazo dibujado y preparación—, y como el anterior, dibujarlas devolvió decisiones al diseño.
+
+**Máximo tres aventuras a la vez**, y es un tope y no un número fijo. Tres caben de un vistazo y se comparan sin leer; a partir de ahí la pantalla se vuelve catálogo y elegir deja de ser un antojo para ser una compra. Algunos días habrá una sola, según lo que castee en tu mapa y según tu oficio, y un día con una no es un día roto. En `bucle-jugable.md` §3.
+
+**La aventura a medias es una tarjeta en la portada, no una pantalla aparte.** Y con una precisión que solo aparece al preguntarse cuándo puede ocurrir: **solo existe con la salida abierta**. Si llegaste a casa, el cierre en corto ya se disparó y no queda nada pendiente; el caso real es cerrar la app andando, quedarse sin batería o que suene el teléfono. La tarjeta no secuestra la app —desde ahí se puede mirar el diario o salir a andar sin ella—, que es lo único coherente con que abandonar una aventura no cueste nada.
+
+**Sin cobertura no se avisa de nada.** La pantalla de preparación dice exactamente lo mismo haya red o no: los textos caen a plantilla, el visor del anclaje cae a ficha de texto y la salida sigue sin que nada se llame fallo. Es lo que el diseño de fallbacks prometía desde el principio; lo nuevo es que ahora también rige para la interfaz. Anunciarlo solo serviría para señalar algo que el jugador no puede arreglar.
+
+**Y no hay selector de mapas.** El activo lo decide dónde estás: la app abre el de tu sitio, y si llegas a algún lado que no toca con ninguno de los tuyos, ofrece levantar uno nuevo. Al volver a casa vuelve el de casa sin preguntar. Encaja con una decisión de la misma mañana sin haberlo buscado: los mapas antiguos se leen desde el diario, que ya era donde vive lo que has vivido. Leerlos sí, jugarlos desde el sofá no. En `alcance-del-mundo.md` §3.
+
+## Lo que se confirmó por descarte
+
+Dibujar la portada obligó a decidir qué **no** hay en ella, y las tres ausencias son decisiones viejas que por fin tienen consecuencia visible: no hay panel del estado del mundo (lo que se cuenta se oye llegando), no hay marcador de reputación (el rango se nota en cómo te hablan) y no hay una sola cifra de distancia. Lo que sí hay y podría no estar: **«salir a andar sin más» como botón**, porque los kilómetros mueven el mundo con aventura o sin ella.
+
+Queda abierta la barra de navegación de abajo, que en el artefacto va dibujada como propuesta y no como decisión, y con qué forma se lee un mapa antiguo desde el diario. Las dos son del artefacto 6.
+
+**Verificado**: nada que ejecutar, es diseño. El artefacto se publicó y se revisó pantalla a pantalla, con la paleta sacada de `render/styles.js` (estilo Reino) igual que el anterior.
+
+---
+
+# Iteración 6-ago-2026 (XV) — en marcha, y un rótulo del sistema que resuelve tres cosas
+
+Tercer artefacto de pantallas, el más raro de los seis: el momento que está diseñado para no mirarse. Siete pantallas —el bolsillo, el mapa si miras, la noticia que llega, la oportunidad, el desvío, un camino evitado y una séptima dibujada tachada— y casi todas existen para justificar por qué el móvil sigue guardado.
+
+## La pieza que no estaba y sostiene tres decisiones
+
+**Una salida abierta arranca un servicio en primer plano con notificación persistente**, Actividad en Vivo en iOS. Salió al preguntarse qué hace la app con el móvil bloqueado en el bolsillo, que era la colisión más gorda del momento: `seguridad-privacidad.md` §2 pide solo el permiso de ubicación «mientras se usa», y andar media hora con la pantalla apagada parecía pedir el permanente.
+
+No hubo que retocar esa decisión, hubo que sostenerla: con un servicio en primer plano la app **cuenta como en uso**, así que el permiso se queda tal cual está escrito. El precio es un rótulo del sistema en tu pantalla de bloqueo durante toda la salida, con dos condiciones — es tan austero como el resto del momento (hacia dónde vas y nada más, ni una cifra) y es **visible a propósito**, porque una app que sigue leyendo tu ubicación tiene que decirlo mientras lo hace.
+
+Y ese rótulo, que tenía que estar de todos modos, resuelve gratis el pendiente 2 de `bucle-jugable.md`, abierto desde que se escribió: **el telón lo echa volver, y la salida a mano vive en el rótulo**. Hay salidas que no acaban donde empezaron —te quedas en casa de alguien, coges el bus—, y esas se quedarían abiertas hasta la próxima caminata. Poniendo la salida manual en el rótulo, el control existe sin romper la regla del momento: lo tocable es del sistema y no hay que abrir nada para llegar a él. Se descartó cerrar sola al detectar que llevas rato quieta, porque adivinar mal echa el telón sobre una aventura viva y una parada larga es una cosa normal que el resto del diseño ya se ocupa de no penalizar.
+
+## En marcha no hay ni un control tocable
+
+La regla del momento 2 era «pantalla prohibida». Dibujarlo le da la forma dura: **ni un control**, ni para aceptar un desvío ni para descartar un aviso ni para pausar, porque cualquier cosa tocable es una razón para sacar el móvil. Al desvío se dice que sí girando, lo que además muda la decisión táctica del menú a las piernas, que es lo que §3 quería. Y el coste del desvío se enseña con el ramal dibujado y una frase —«queda cerca, pero de camino no está»—, nunca con metros.
+
+Dos decisiones menores de la misma tanda: el mapa va con el **norte arriba** (es un mapa dibujado, no un navegador; girarlo destroza rótulos, cartela y brújula) y tu posición es **una marca roja del propio mapa** y no un punto azul de sistema: estás dentro del mundo, no encima de él.
+
+## El descubrimiento se cobra al telón
+
+**Andar por sitio nuevo no produce nada en el momento.** Se descartó un háptico de descubrimiento, que le habría dado su momento al pilar de la cartografía a cambio de meter un canal de aviso más en el único momento que se diseñó callado. Se registra en silencio y el mapa se entinta de golpe al llegar a casa.
+
+Con una consecuencia que conviene tener escrita: **el mapa en marcha no cambia durante la salida**. Lo único que se mueve en él es tu marca y las de los avisos. Así mirar no aporta nada nuevo, que es el efecto que busca el momento, y el telón tiene algo que enseñar en vez de ser un trámite.
+
+## La pantalla que no vamos a hacer
+
+La séptima va dibujada y tachada, con sus kilómetros, su ritmo, sus kilocalorías, su barra de progreso al 62 % y su racha de seis días. Vale la pena dibujarla porque es la que este momento pide sola y la que se colaría si nadie dice que no. Cada cifra rompe una decisión escrita: el porcentaje deshace que la aventura declare su tamaño con una palabra (§3), la racha castiga la ausencia, que es justo lo que el reloj del mundo se diseñó para no hacer (`quests.md` decisión 4), y todas dan una razón para sacar el móvil. El contador de pasos existe por dentro y mueve el mundo; que el jugador lo vea es otra cosa y no hace falta para nada.
+
+## Y una tarea que aparece en el generador
+
+**Los ramales a parajes pasan a necesitar nombre.** Hoy nacen sin él a propósito. `accesibilidad.md` §2 ya lo pedía para poder declarar un camino evitado; ahora hay un segundo motivo, y es el que lo vuelve inevitable: el desvío se ofrece nombrando el ramal.
+
+Quedan dos cosas para el artefacto 4: quién decide que has llegado —si el geofence valida solo o hace falta un gesto—, de lo que depende que el móvil salga del bolsillo por su cuenta o porque tú lo saques; y qué pasa si te vas por otro lado y el lazo deja de tener sentido.
+
+**Verificado**: nada que ejecutar, es diseño. El artefacto se publicó y se revisó pantalla a pantalla, con la paleta de `render/styles.js` (estilo Reino) como los dos anteriores.
+
+## Apéndice: un aviso que no decía dónde
+
+Revisando la pantalla 4 salió un defecto en el propio texto de ejemplo. El aviso decía «hay una vieja discutiendo con un burro en el cruce de aquí al lado», y con eso **no se puede ir**: quien quisiera atenderlo tenía que tocar la notificación, que es el «toca para saber más» que `accesibilidad.md` §3 prohíbe, con otro disfraz. Estaba escrito mirando el chiste y no la utilidad.
+
+El arreglo es de redacción: el aviso nombra el sitio, porque el mundo tiene nombres justamente para eso. Y deja una prueba que vale para cualquier aviso futuro: **si tocando se aprende algo que hacía falta, el aviso está mal escrito**.
+
+Con el sitio dentro, tocar pasa a ser opcional, y se decide qué hace: **abre el mapa con la marca del encuentro puesta**, y nada más. No acepta —se acepta yendo—, no abre escena y no abre el visor. Eso amplía un poco la regla de que en marcha no hay controles: lo tocable es lo que vive en la pantalla de bloqueo por ser del sistema, o sea el rótulo persistente y los avisos de oportunidad.
+
+## Apéndice II: la escena no se dispara, espera
+
+De preguntar qué tiene que hacer el jugador para atender ese aviso salieron dos cosas.
+
+La primera es una aclaración que faltaba en el artefacto: **el micro-encuentro y el desvío no son lo mismo**. El aviso de la pantalla 4 salta al entrar en el geofence del sitio, así que cuando lo lees ya lo tienes delante e ibas hacia allí de todos modos: atenderlo es pararte, y no cuesta nada. El desvío de la pantalla 5 está fuera del lazo y sí cuesta piernas. Confundirlos hace pensar que hay que viajar a algún sitio para hacer caso a una notificación.
+
+La segunda es una decisión que estaba aparcada para el artefacto 4 y que aquí se cerró: **validar la llegada no es un gesto ni un disparo**. Al detectar que estás parada dentro del geofence, la escena queda **disponible** y espera. No enciende la pantalla, no pone la app delante, no te llama. Si miras, está ahí; si no, sigues andando y no ha pasado nada — que es lo que hace que pararse en un semáforo dentro del geofence no tenga consecuencias. Se descartó abrirla sola: nadie se perdería nada, pero convierte el móvil en algo que te llama en vez de avisarte, que es la línea que sostiene todo el momento.
+
+Y de ahí sale una regla que evita tener dos comportamientos para el mismo gesto: **abrir la app enseña lo que corresponde al sitio donde estás**, no lo que corresponde al botón que tocaste. Andando, el mapa; parada dentro de un geofence, la escena. Da igual si entras por el aviso, por el rótulo persistente o por el icono: quien decide qué hay es el estado y no la puerta.
+
+## Apéndice III: irse por otro lado, que resultó no existir
+
+El último fleco del artefacto, y la mayor parte estaba contestada por decisiones tomadas sin mirar este caso. **El juego no lleva la cuenta del trazado**: guía por nombres de sitio y valida por geofence, así que la ruta dibujada es una sugerencia y no un contrato, y «irse por otro lado» casi no existe como concepto. Otra calle es invisible. Otro sitio no pasa nada —ni «te has desviado» ni recalculando, que es un navegador y encima el reproche que §4 se cuidó de no meter por la puerta de atrás—. Pasar cerca de un beat camino del supermercado valida igual, y eso es un regalo y no una anomalía. Está escrito como §9 de `bucle-jugable.md`.
+
+Dos huecos sí lo eran.
+
+**El vehículo se aparta.** Coche, autobús, tren: el motor de pasos deja de contar y los geofences dejan de validar. Sin esto un viaje en tren vacía el mundo de golpe, el dimensionado en tramos deja de significar nada y encima saltan escenas desde la ventanilla. Cierra la mitad del pendiente 1 de `accesibilidad.md`; la bici y la silla eléctrica siguen abiertas, que es donde la pregunta era de verdad, porque un autobús no es una duda de esfuerzo.
+
+Lo interesante fue **qué pasa cuando la detección duda**, porque una detección que puede fallar es una decisión disfrazada, y resultó que «no cuenta» son tres efectos distintos con dos criterios. Medir el tramo excluye la velocidad de vehículo sin contemplaciones, y es barato equivocarse porque el tramo se corrige sobre muchas salidas. Contar kilómetros y validar geofences, en cambio, **cuentan y validan en la duda**, por aplicación directa del principio de `npcs.md` —lo que el jugador no controla puede abrirle puertas, nunca cerrárselas—: un paso de más no puede quitarle nada a nadie, porque un paso solo añade, mientras que no contar los kilómetros de quien baja una cuesta larga en silla le borra su esfuerzo, que es el fallo que `accesibilidad.md` existe para evitar. Y quien quiera recorrerse el juego en coche puede: **no hay marcador que proteger**, así que apretar la detección hasta que no se escape nada solo tendría víctimas legítimas.
+
+**Y la salida que no vuelve a casa ni se cierra** se resolvió separando dos cosas que se estaban confundiendo: el servicio en primer plano y la salida abierta. El servicio se para tras un buen rato sin que andes por tu cuenta y el rótulo desaparece —no puede haber un cacharro nuestro en tu pantalla de bloqueo durante días—, pero la salida sigue abierta y espera en la portada. Eso obliga a que la tarjeta de a medias ofrezca **seguir o dejarlo aquí**, y no solo seguir como estaba escrito; «dejarlo aquí» dispara el mismo cierre en corto que llegar a casa. Se descartó cerrarla sola pasadas unas horas, por el mismo motivo que se descartó cerrarla al quedarte quieta. Que espere días no molesta, y es una de esas veces en que el diseño ya estaba pagado: el reloj del mundo son tus kilómetros, así que retomar el martes una aventura del jueves anterior no llega tarde a nada.
+
+Con esto el artefacto 3 no deja nada abierto.
+
+---
+
+# Iteración 6-ago-2026 (XVI) — al parar, y una foto que casi rompe la regla de privacidad
+
+Cuarto artefacto de pantallas, el del momento por el que existe el juego: la revelación del anclaje. Ocho pantallas — el visor por el lado de la ficción, el visor arrastrado, la escena, lo que te llevas, lo que aquí se cuenta, la segunda vez, la ficha de texto y el sitio que no pega.
+
+## La foto del lado real, y el momento en que se pide
+
+**Sale de Google Places, por el proxy.** Se descartó que la hiciera el jugador con la cámara, que era gratis y más íntimo pero dejaba la primera visita sin revelación visual justo en el momento de más efecto del juego.
+
+Lo interesante no fue de dónde sino **cuándo**, porque ahí había una colisión que no se veía a simple vista. Pedir la foto de un sitio es mandar qué sitio es, y `seguridad-privacidad.md` §1 dice que del móvil solo salen las coordenadas al generar el mundo, **una vez**. Pedirlas al aceptar cada aventura habría contado al proxy qué sitios reales tienes cerca y cuándo, y habría obligado a enmendar la regla.
+
+No hizo falta: **se piden al crear el mapa**, en la misma tanda que la consulta de Places que ya se hace. Ninguna llamada nueva, la regla intacta, y de propina el mapa entero queda utilizable sin cobertura, que es lo que `partida-guardada.md` §1 pide. El precio es el volumen de fotos por jugador, que amortigua la caché del proxy por sitio — son públicas y las mismas para todo el mundo.
+
+Queda escrito como lección de método, porque va a volver a pasar: **cuando algo real tenga que salir del móvil, primero se mira si cabe en la llamada que ya existe.**
+
+**Y donde Places no tiene foto** —cruceiros, molinos, miradores, que son justamente los anclajes que ensanchan el vocabulario de escenas— el visor no se degrada a ficha de texto. La ilustración de ficción sí existe: abre igual y el arrastre descubre la cartela sobre fondo liso. Se pierde la foto, no el momento.
+
+## La segunda vez no repite la ceremonia
+
+**Al volver a un sitio conocido, el visor no se abre solo**: la pantalla abre por lo que ha cambiado y el visor queda a un toque. Repetir el mismo arrastre lo convertiría en un paso entre el jugador y lo que ha venido a hacer, y a la tercera deja de ser magia. Además hace que volver se sienta distinto de descubrir, que es lo que §5 pide: profundizar y descubrir son premios distintos y no deben notarse igual.
+
+## Tres cosas que se decidieron por no dibujarlas
+
+Dibujar obliga a poner o no poner, y tres ausencias son decisiones:
+
+**La escena va sin retrato de NPC.** Los retratos están en `docs/pendientes.md` como idea sin cerrar, no como decisión, y dibujar una cara los habría convertido en decisión por la vía de los hechos. Funciona sin ella: quién es Sabela lo dicen su puesto y cómo habla.
+
+**Un solo botón en la escena**, porque los beats son lineales de inicio y ramificar está aplazado a propósito. Dos opciones dibujadas prometerían algo que el diseño no ha decidido.
+
+**Y el ajuste de tamaño de letra sí entra**, que es lo único de registro de aplicación que se cuela en un momento que habla como mundo. Se cuela porque el modo compañía es dos personas leyendo en voz alta del mismo móvil, y eso no se resuelve con voz de mundo.
+
+**Verificado**: nada que ejecutar, es diseño. El artefacto se publicó y se revisó pantalla a pantalla, con la paleta de `render/styles.js` (estilo Reino) como los tres anteriores. Comprobado contra los documentos antes de escribir: que el geofence de `quests.md` §3 es generoso (~30-50 m) y activable desde espacio público, que es lo que garantiza que nunca haya que entrar en ningún sitio.
+
+## Apéndice: la secuencia de una llegada, que no estaba escrita
+
+Al revisar el artefacto se vio que faltaba lo más básico: cómo se encadenan estas pantallas. No estaba en ningún documento y en el artefacto tampoco, porque cada pantalla se había dibujado por separado. Ahora está en `bucle-jugable.md` §2 y como bloque propio en el artefacto.
+
+**El visor es una capa por encima de la escena, no un paso previo.** La primera vez se abre solo y se cierra con una flecha o tocando fuera, dejando debajo lo que has venido a hacer. Sale de aplicar la decisión de la segunda visita hacia atrás, y lo que gana es que el visor de la primera vez y el que queda «a un toque» dejan de ser dos cosas distintas: son **una con dos maneras de aparecer**. Si fuera un paso, la revelación se convertiría en un trámite entre el jugador y su recado.
+
+**Y el orden al llegar a un núcleo es beat primero, lo que allí se cuenta después.** El beat es el motivo del viaje y el estado del pueblo es el marco, así que ponerlo delante convertiría en peaje algo que tiene que ser un regalo; y al ir detrás cabe dentro lo que se dice de lo que acabas de hacer en otro sitio, porque los rumores viajan. Si no hay beat, el estado del núcleo es la llegada entera.
+
+Una precisión que hacía falta y que el artefacto daba a entender mal: **no siempre hay beat al llegar**. Llegar a un sitio sin haber venido a nada es el caso normal y no la excepción, y entonces lo que hay es la ficha del sitio.
+
+---
+
+# Iteración 6-ago-2026 (XVII) — el telón, y la secuencia que faltaba otra vez
+
+Quinto artefacto: de vuelta en casa. Seis pantallas — el mapa entintándose, el desenlace, lo que se pone en camino, la entrada del diario, el cierre en corto y el día que no descubriste nada.
+
+## Lo que se decidió dibujando
+
+**El telón se echa solo y sin avisar.** Ni notificación —están reservadas a las oportunidades— ni la app poniéndose delante, que sería el móvil llamándote en vez de avisarte. El telón ocurre; lo que espera es que lo leas.
+
+**El rumor se ve salir y no se ve llegar.** Fue la decisión difícil. La tentación es enseñar la propagación por el árbol de calzadas, que queda precioso y es el sistema del que más orgulloso está el proyecto; pero eso es el panel del estado del mundo que la portada se negó a tener, y enseñar el nivel de deformación explicaría el mejor truco del juego en lugar de ponerlo en escena. Se ve que algo ha salido de ese núcleo, y nada más.
+
+**El oro sí se enseña como número**, que parecía chocar con «ni una cifra» y no choca: aquella prohibición era sobre distancias y tiempos, que son lo que convierte esto en una app de deporte. El oro es una moneda que se gasta en cosas concretas y sin verlo no se puede decidir en qué. Anotado en `progresion.md` porque es el tipo de regla que se aplica de más si nadie marca el límite. Con su pareja: **el rango se dice con una frase y nunca con una lista de pueblos** — «en Monfrida ya saben quién eres» hace el trabajo de un medidor sin ser uno.
+
+**Tres tintas en el mapa** —lo de hoy recién puesto, lo sabido asentado, lo demás a lápiz— y sin leyenda, porque la diferencia se ve. Lo ganado se dice en palabras del mundo: lo ves, lo conoces, lo conoces bien.
+
+**Y en el diario, lo tuyo en primera persona y lo oído aparte**, porque son dos cosas con distinta autoridad: lo que hiciste lo sabes, lo que te contaron no.
+
+## La secuencia, que volvió a faltar
+
+Igual que en el artefacto anterior, las pantallas estaban dibujadas por separado y el encadenado no estaba en ningún sitio, lo que se notó en cuanto alguien intentó leerlas en orden: parecía que el cierre en corto era una alternativa al mapa y que el paseo sin aventura era una pantalla distinta. Ni una cosa ni la otra.
+
+**El telón es una secuencia con dos ramas**, ahora escrita en `bucle-jugable.md` §8: el mapa siempre · el desenlace, o el cierre en corto en su lugar · el rumor solo si era notable · el diario siempre. Un paseo sin aventura es mapa y diario, sin nada en medio: la diferencia entre un paseo y una aventura no es que se cierren de otra manera, es que uno tiene desenlace y el otro no.
+
+Conviene sacar la lección, porque van dos veces: **una pantalla dibujada aparte no dice cuándo aparece, y eso hay que escribirlo a propósito.** Los dos artefactos que llevan bloque de secuencia son los dos que lo tenían mal antes de escribirlo.
+
+## El día flojo
+
+Al desenredar la secuencia apareció un hueco del caso normal, no del raro: **qué enseña el mapa cuando no descubriste nada**. Tu vuelta de siempre, todo ya en «lo conoces bien», la lista vacía.
+
+**Sale el mapa igual y el título lo reconoce**: «hoy no has visto nada que no supieras». Se descartó saltarse la pantalla, que evitaba enseñar algo sin contenido pero hacía desaparecer el objeto central del juego justo el día en que menos apetece salir. Y se descartó trazar el recorrido, que siempre tendría algo que enseñar pero se parece demasiado a una app de deporte. La línea hay que escribirla con cuidado para que suene a constatación y no a reproche — la misma cuerda floja que el ajuste del tramo, que tampoco se comenta jamás.
+
+**Verificado**: nada que ejecutar, es diseño. El artefacto se publicó y se revisó pantalla a pantalla, con la paleta de `render/styles.js` (estilo Reino) como los cuatro anteriores.
+
+---
+
+# Iteración 6-ago-2026 (XVIII) — de consulta, y el paso 2 cerrado
+
+Sexto y último artefacto de pantallas: el diario, la repisa y los ajustes. Seis pantallas, y las tres preguntas que traía se hicieron **antes** de dibujar en lugar de después, porque cada una cambiaba las seis a la vez.
+
+## No hay barra de pestañas: la portada es la casa
+
+El artefacto 2 llevaba una barra de cuatro —mapa, diario, repisa, ajustes— dibujada explícitamente como propuesta. Se quita. Cuatro destinos de igual peso convierten el juego en una aplicación con secciones y dejan los ajustes con el mismo rango que el mapa; además el mapa, que es el producto visible del proyecto, llevaba una barra encima en todas las pantallas.
+
+La portada es un lugar y el diario, la repisa y los ajustes son puertas que cuelgan de ella. Todo queda a dos toques en vez de a uno, que es el precio. El artefacto 2 está corregido y republicado.
+
+## El diario se lee de dos maneras, y la segunda se gana
+
+La decisión de la que más cuelga. El diario empieza siendo cronológico y nada más. **La primera vez que oyes una segunda versión de algo que ya tenías apuntado**, el juego pone las dos juntas en el sitio, sin explicar nada — «esto ya lo habías oído. No así» —, y a partir de ahí el diario también se puede leer **por historias**.
+
+El punto está en el orden y no en la función. Agrupar desde el primer día habría regalado el mejor truco del juego: que dos relatos sean el mismo dejaría de ser algo que descubres para ser algo que te dicen. No agrupar nunca lo habría dejado en algo que ocurre y que casi nadie llega a ver, y de ese sistema cuelga medio juego. El descubrimiento es del jugador y la comodidad viene después, que es exactamente cómo `arranque.md` pone en escena la deformación en lugar de explicarla.
+
+Dos restricciones para que la vista nueva no deshaga lo que protege: **se ordena por cuándo lo oíste, nunca de más fiel a más torcida**, y **no se marca cuál es la buena**. Y el mecanismo sale gratis, porque el rumor ya tiene identidad interna: lo que se decide es cuándo esa identidad se hace visible, que hasta ahora no lo era nunca.
+
+## El diario tiene un capítulo por mapa
+
+Cierra la otra pregunta aplazada del artefacto 2. Los mapas antiguos no viven en un cajón de láminas —que se parecía demasiado al selector que `alcance-del-mundo.md` §3 acababa de descartar— sino como capítulos: abres el de aquel sitio y dentro están sus días, su gente y su mapa. Cada mapa es un tramo de tu vida y no una opción de una lista. Con una asimetría que hay que asumir en lugar de corregir: el capítulo de casa es un tomo y el de unas vacaciones un cuadernillo.
+
+## Lo demás que se decidió
+
+**La repisa no es un inventario**: sin peso, sin huecos, sin nada que tirar, porque los objetos son llaves y recuerdos y no equipo. Cada uno con de quién y de qué día. Y debajo, **los motes por núcleo**, que son lo más parecido a una ficha de personaje que hay en el juego y que hacen de reputación sin ser una barra — verlos juntos es ver que en cada pueblo eres otra.
+
+**Y los ajustes son la única excepción a la frontera de los dos registros**, anotada en `lenguaje.md`. Ahí se vuelve a hablar como aplicación y se nota hasta en la tipografía, porque un ajuste disfrazado de acertijo es peor que un ajuste. Que sea la única excepción es lo que la hace sostenible. Dentro: el tramo en lenguaje de sitios y con el ajuste automático sin comentar jamás, «caminos que evitar» sin que aparezca la palabra accesibilidad, los pasos de fondo apagados, el horario diurno encendido, los cinco estilos de pintado, los sitios marcados —que es donde por fin se puede deshacer un descarte— y la copia exportable.
+
+## Con esto se cierra el paso 2
+
+Seis artefactos, treinta y nueve pantallas y ningún momento del bucle sin dibujar. El índice con enlaces y resúmenes está en `docs/pantallas.md`.
+
+Lo que el paso deja como saldo: **catorce decisiones nuevas de diseño y tres pendientes cerrados** —el 2 de `bucle-jugable.md`, el 1 de `arquitectura.md` y medio del 1 de `accesibilidad.md`—, además de un documento que no existía (`lenguaje.md`). Ninguna habría salido leyendo los documentos: salieron de preguntarse qué se dibuja en una pantalla concreta.
+
+Lo siguiente es el paso 3, el PRD, que sale de `game-design/` y de estos seis artefactos.
+
+**Verificado**: nada que ejecutar, es diseño. El artefacto se publicó y se revisó pantalla a pantalla, y el artefacto 2 se corrigió y republicó en su misma URL.
+
+## Apéndice: empezar de nuevo, que es borrar y no reiniciar
+
+Faltaba en ajustes. Y no es un botón cualquiera: por la decisión 1 de `partida-guardada.md` el mundo está congelado y **no se puede rehacer**, así que empezar otra vez en la misma calle daría otro sitio con otros nombres. Esta pantalla acaba siendo el único lugar del juego donde hay que explicarle al jugador una decisión técnica, y hay que explicarla porque cambia lo que está a punto de hacer.
+
+**La copia se ofrece, no se hace sola**: quien quiere irse limpio se va limpio y no le dejamos megas que no ha pedido. El precio es escribir el aviso para que se lea. Y funciona como salida de verdad porque el fichero es el mismo que sirve para abrir un mundo ajeno, así que se puede volver. Tres reglas más de redacción y jerarquía: se enumera lo que se pierde **en cosas y no en datos** —el personaje, los mapas por su nombre, los días de diario, lo que la gente sabe de ti—, porque «esta acción no se puede deshacer» no dice nada que nadie lea; lo destructivo **no es el botón principal**; y aquí se habla como aplicación sin disfraz, que es el caso que mejor justifica la excepción de `lenguaje.md`.
+
+## Y una decisión que el reset destapó: el oficio no se cambia
+
+Al dibujar los ajustes quedó claro que el reset carga con algo que no estaba escrito. **El oficio se elige en el arranque y se queda**: ni ajuste para cambiarlo ni camino en la ficción para aprender otro. Lo que da peso a la única palanca mecánica del personaje es precisamente que haya aventuras que con esta persona no verás nunca, y un oficio cambiable en un toque es una preferencia y no una decisión.
+
+Lo interesante es que el coste de arrepentirse **está bien repartido sin haberlo diseñado**: crece con lo jugado. El día 2 no tienes nada que perder y resetear es barato; el día 200 te arrepientes mucho menos y además no querrías tirar doscientos días de diario. La decisión se endurece justo al ritmo al que deja de importar.
+
+Con una obligación que sí genera: **la pantalla de elección del arranque tiene que decir qué implica cada oficio antes de cerrarse**. Si la decisión es permanente, el momento de tomarla no puede ser un menú de nombres bonitos.
+
+## Apéndice II: una contradicción que llevaba publicada desde el artefacto 1
+
+Al revisar la pantalla de creación de personaje apareció que el artefacto 1 decía lo contrario de lo que se acababa de decidir: *«el nombre, el género, el oficio y hasta la dificultad se pueden cambiar después sin tocar el mundo»*. Llevaba ahí desde que se dibujó la navegación hacia atrás, y nadie lo había cruzado con `personaje.md` porque `personaje.md` tampoco decía nada.
+
+Corregido en los tres sitios. **El oficio no se cambia, ni por la flecha ni por ajustes.** El nombre y el género gramatical sí, y van en ajustes: no tienen consecuencia mecánica, y encerrar a alguien en un nombre que no le gusta no protege nada. Cierra de paso el pendiente que el artefacto 1 tenía abierto sobre cambiar nombre u oficio pasada la creación.
+
+Dos cambios más que se derivan:
+
+**La pantalla de elección dice qué implica el oficio antes de cerrarse.** Una línea sobre la lista —«marca qué aventuras te va a ofrecer el mundo, y esto no se cambia luego»— y el oficio marcado se despliega para explicar a qué te manda. Así informa en el momento de decidir sin convertirse en un muro de texto que nadie lee.
+
+**Y el género gramatical faltaba en los ajustes del artefacto 6**, aunque `lenguaje.md` diga que se cambia en un toque. Estaba solo en la creación de personaje, o sea que era un toque que solo existía durante treinta segundos del onboarding.
+
+Lección del apéndice, que es la misma de los bloques de secuencia: **lo que un artefacto da por supuesto sin que ningún documento lo diga acaba siendo una decisión tomada por nadie.** Aquí lo dio por supuesto dos veces y en direcciones opuestas.
+
+## Apéndice III: el flujo entero, y un script que lo vigila
+
+`docs/flujo.md`: un diagrama de estados con las **40 pantallas** de los seis artefactos como nodos —etiquetados `pantalla N · artefacto M`— y, en cada arista, la acción que la recorre («Seguir») o la condición que la hace existir («solo si el desenlace era notable»). Es la vista que ningún artefacto por separado puede dar: cada uno dibuja un momento y las costuras entre momentos solo se ven aquí. Y no es teoría — las dos veces que un artefacto estuvo mal, el fallo era exactamente eso: una arista que no existía.
+
+Tres cosas que se ven en el diagrama y no en los documentos:
+
+- **El bolsillo es el centro de gravedad.** *Pantalla 1 · artefacto 3* es el nodo con más aristas de todo el juego, y es la pantalla diseñada para no mirarse. Todo lo que pasa en la calle sale de ahí y vuelve ahí.
+- **Solo hay tres rombos, y ninguno pregunta nada al jugador**: a qué sitio llegas, qué hay debajo del visor y si el sitio es un núcleo. Las bifurcaciones las decide el mundo; el jugador decide con las piernas.
+- **El artefacto 3 casi no tiene aristas internas.** Sus pantallas cuelgan de la 1 y vuelven a la 1 sin encadenarse: es la forma que toma en un grafo la regla de que en marcha no hay ni un control tocable.
+
+**Y se verifica solo**: `node scripts/verifica-flujo.mjs` extrae las pantallas de los seis HTML y comprueba cuatro cosas — que están todas, que no sobra ninguna, que ningún nodo miente sobre a qué pantalla y artefacto pertenece, y que ninguna queda sin aristas. **Las cuatro se comprobaron rompiendo el diagrama a propósito**, porque un check verde que nunca se ha visto fallar no es evidencia de nada: quitando un nodo, dejando uno suelto, añadiendo una pantalla a un artefacto sin ponerla en el diagrama, y cambiando el título de un nodo. Los cuatro fallan con salida 1 y el mensaje correcto.
+
+Dos decisiones de repo que esto obligó:
+
+**Los seis HTML se copian a `docs/pantallas/`.** Un script que verifica contra ficheros de un directorio temporal caduca al cerrar la sesión, y además el PRD del paso 3 se va a escribir a partir de estos artefactos: no puede depender de una página privada que solo ve una persona.
+
+**Y las variantes del telón se reetiquetan como 1B y 2B.** «PANTALLA 2 · EN SU LUGAR» se lee bien pero no se parsea, y una comprobación determinista no puede depender de una tabla de casos especiales escrita a mano.
+
+Trampa de mermaid que costó un rato y queda anotada en `CLAUDE.md`: **un nodo referenciado en una arista antes de declararse acaba fuera de su subgrafo**, así que todas las declaraciones van arriba y las aristas debajo.
+
+**Verificado**: `node scripts/verifica-flujo.mjs` en verde (40 pantallas, 40 nodos, 83 aristas, ninguna suelta), sus cuatro afirmaciones comprobadas por rotura deliberada, y el diagrama renderizado de verdad para descartar errores de sintaxis del mermaid.
+
+---
+
+# Iteración 6-ago-2026 (XIX) — la batería de pruebas, antes de implementar
+
+`docs/testing.md`: **33 características y 174 casos ejecutables** en Gherkin, escritos antes de que exista una línea de la app. Cada característica cita la decisión de `game-design/` de la que sale, y la regla de precedencia queda escrita: si un escenario y un documento se contradicen, manda el documento y el escenario está mal.
+
+El orden importa. Escribirla ahora obliga a que cada decisión de diseño se pueda enunciar como comportamiento observable, y las que no se dejan es que estaban vagas. Escribirla después habría producido lo de siempre: pruebas que confirman lo que el código hace.
+
+## Cuatro niveles, y dos áreas bloqueantes
+
+`@nucleo` corre en Node contra el paquete compartido sin dispositivo ni red, y es el grueso —18 de 33—. `@app` necesita GPS simulado y reloj de mundo controlable. `@red` toca el proxy. Y `@manual` es lo que no se puede afirmar con una aserción, que va escrito en el mismo formato para que no se olvide: si el chiste tiene gracia, si el chiste nunca es a costa del sitio real, si la revelación del anclaje emociona.
+
+**Las de `@determinismo` y `@privacidad` son bloqueantes**, y por motivos distintos: una regresión de determinismo rompe el invariante del que cuelga el proyecto entero, y una de privacidad saca del móvil algo que no debía salir.
+
+## Lo que la batería obliga a montar
+
+Escribir los escenarios destapó qué andamiaje hace falta, y conviene tenerlo listado antes de que alguien lo improvise: fixtures de OSM congelados para cuatro tipos de mundo —costero, urbano denso, barrio de tres calles y el suelo de 250 m—, GPS simulado con paradas y con tramos a velocidad de vehículo, un **reloj de mundo controlable distinto del reloj del sistema**, un doble del proxy con modo «falla siempre», y un inspector de tráfico saliente, que es la única manera de afirmar «esto no sale del móvil» en vez de suponerlo.
+
+## Y un validador, porque nadie va a ejecutar esto en meses
+
+`node scripts/verifica-gherkin.mjs` comprueba que los bloques están bien formados: `# language: es`, una característica por bloque, cada línea empezando por palabra clave del locale español, cada esquema con su tabla y sus columnas cuadradas con los marcadores que usan los pasos, ningún nombre de escenario repetido, ninguna característica sin `Fuente:` y **ningún escenario sin `Entonces`**, que es la manera más silenciosa de tener una suite verde que no comprueba nada.
+
+Cazó cuatro errores míos a la primera pasada: había usado «Aunque», «Porque» y «Ni» como conectores, que en castellano encadenan perfectamente y en Gherkin no son nada. Y el propio validador tenía un fallo —no sabía de etiquetas ni de la descripción libre de una característica— que solo apareció al ejecutarlo. Sus fallos se comprobaron rompiendo el fichero a propósito: quitando un `Entonces`, descuadrando una tabla y quitando una `Fuente:`.
+
+**Verificado**: `node scripts/verifica-gherkin.mjs` en verde (33 características, 162 escenarios, 4 esquemas con 12 ejemplos), tres modos de fallo comprobados por rotura deliberada, y `node scripts/verifica-flujo.mjs` y `node test/headless.mjs` siguen en verde.
