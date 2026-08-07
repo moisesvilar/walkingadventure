@@ -20,14 +20,15 @@ function segSideDist(p, a, b) {
 }
 
 /**
- * coastlines: polilíneas [{x,y},...] en metros. extent: semi-lado del cuadrado
- * cubierto. cell: tamaño de celda. Cada celda se clasifica por el LADO del
- * segmento de costa más cercano (índice espacial por cubos): robusto frente a
- * huecos en los ways de costa, al contrario que un relleno por inundación.
+ * coastlines: tramos de costa {pts: [{x,y},...], osmId} en metros. extent:
+ * semi-lado del cuadrado cubierto. cell: tamaño de celda. Cada celda se clasifica
+ * por el LADO del segmento de costa más cercano (índice espacial por cubos):
+ * robusto frente a huecos en los ways de costa, al contrario que un relleno por
+ * inundación.
  */
 export function buildSeaMask(coastlines, extent, cell = 200) {
   const segs = [];
-  for (const line of coastlines) {
+  for (const { pts: line } of coastlines) {
     for (let s = 0; s < line.length - 1; s++) segs.push([line[s], line[s + 1]]);
   }
   if (!segs.length) return null;

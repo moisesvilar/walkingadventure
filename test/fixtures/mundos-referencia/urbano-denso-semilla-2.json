@@ -3,7 +3,9 @@
     "mundo_congelado": "urbano-denso",
     "semilla": "40.42,-3.70#2",
     "revision_prototipo": "07f1c41",
-    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico."
+    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
+    "regenerado_por": "SPEC-002-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-002-iter-1: la entrada de datos del núcleo pasa a ordenarse por la clave estable de OSM y la unicidad de nombre pasa a ser del mundo entero, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Miradia",
   "idioma": "es",

@@ -640,7 +640,7 @@ function tracePoly(ctx, pts, px) {
 }
 
 function drawLakes(ctx, lakes, px, T) {
-  for (const lake of lakes) {
+  for (const { pts: lake } of lakes) {
     tracePoly(ctx, lake, px);
     ctx.closePath();
     ctx.fillStyle = T.water.lake;
@@ -668,7 +668,7 @@ function drawRivers(ctx, rivers, px, T) {
 function drawCoastlines(ctx, coastlines, px, T) {
   const c0 = T.coast;
   for (const c of coastlines) {
-    const pts = c.map(px);
+    const pts = c.pts.map(px);
     if (pts.length < 2) continue;
     // Islotes: el relleno de tierra ya los descarta al limpiar la máscara, pero su línea
     // de costa seguía dibujándose y quedaban manchas oscuras flotando en el azul. Se mide
@@ -716,7 +716,7 @@ function drawCoastlines(ctx, coastlines, px, T) {
 }
 
 function drawForests(ctx, forests, px, rng, T, mask) {
-  for (const f of forests) {
+  for (const { pts: f } of forests) {
     if (polygonArea(f) < 30000) continue;
     // nada se dibuja sobre el agua: los bosques que caen en el mar son islas que la
     // máscara no distingue, y flotando en el azul se ven como manchas verdes sueltas

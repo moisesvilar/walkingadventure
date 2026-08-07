@@ -4,7 +4,8 @@
 import { dist, pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
 import { isSea } from './seamask.js';
 import { makeRng, randInt, shuffle } from '../core/rng.js';
-import { POI_LABELS } from '../names/index.js';
+import { POI_LABELS, crearIndiceDeNombres } from '../names/index.js';
+import { comparaClaveOsm } from './osm.js';
 
 // Servicios de cada tipo de núcleo (fixed siempre; extra según tamaño).
 const SERVICES = {
@@ -45,10 +46,10 @@ function isFirmLand(p, seaMask, ring = 400) {
 }
 
 function inWater(p, lakes) {
-  for (const lake of lakes) {
-    const bb = polygonBBox(lake);
+  for (const { pts } of lakes) {
+    const bb = polygonBBox(pts);
     if (p.x < bb.minX || p.x > bb.maxX || p.y < bb.minY || p.y > bb.maxY) continue;
-    if (pointInPolygon(p, lake)) return true;
+    if (pointInPolygon(p, pts)) return true;
   }
   return false;
 }
@@ -91,13 +92,15 @@ export function countsForRadius(r) {
 /**
  * anchors: POIs reales proyectados. geo: features geográficas. radius: metros.
  * names: paquete de nombres del idioma del mundo (packages/nucleo/names/).
+ * indice: índice de nombres del mundo, compartido por las cinco familias que
+ * nombran; por defecto uno propio, para que la fase se pueda ejercitar suelta.
  * Devuelve { settlements, freeAnchors }: los anclajes no consumidos quedan
  * disponibles para los parajes.
  */
-export function generateSettlements(anchors, geo, radius, seedStr, seaMask = null, names) {
+export function generateSettlements(anchors, geo, radius, seedStr, seaMask = null, names, indice = crearIndiceDeNombres()) {
   const rng = makeRng(seedStr);
   const settlements = [];
-  const lakes = geo.lakes.filter((l) => polygonArea(l) > 40000); // ignora estanques
+  const lakes = geo.lakes.filter((l) => polygonArea(l.pts) > 40000); // ignora estanques
 
   const f = Math.max(0.005, Math.min(1, radius / 20000));
   const SEP = { ciudad: 2500 * f, pueblo: 2000 * f, aldea: 1500 * f, granja: 1200 * f };
@@ -113,11 +116,16 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
   const count = (t) => settlements.filter((x) => x.type === t).length;
   const okTerrain = (p) => !inWater(p, lakes) && isFirmLand(p, seaMask, firmRing);
 
+  // El nombre pasa por el índice del mundo: hasta esta iteración ni los núcleos ni
+  // las granjas comprobaban nada y salían mundos con dos «Casal da Colmea».
   const makeSettlement = (type, pos, anchor) => ({
     type,
     x: pos.x,
     y: pos.y,
-    name: type === 'granja' ? names.farmName(rng) : names.townName(rng),
+    name: indice.fija(
+      () => (type === 'granja' ? names.farmName(rng) : names.townName(rng)),
+      (base, k) => names.variantName(base, k),
+    ),
     anchor: anchor ? { name: anchor.name, kind: anchor.kind, osmId: anchor.osmId ?? null } : null,
     services: [],
   });
@@ -127,11 +135,14 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
   const assignServices = (s) => {
     const kinds = serviceKinds(rng, s.type);
     const fpr = footprintRadius(s.type, radius);
+    // Empate a distancia: lo rompe la clave estable de OSM y no el orden en que
+    // llegaron los anclajes, que es lo que hacía la ordenación estable de
+    // JavaScript cuando dos POIs caían exactamente a la misma distancia.
     const near = usable
       .filter((a) => !taken.has(a))
       .map((a) => ({ a, d: dist(a, s) }))
       .filter((x) => x.d <= fpr)
-      .sort((x, y) => x.d - y.d);
+      .sort((x, y) => x.d - y.d || comparaClaveOsm(x.a.osmId, y.a.osmId));
 
     const pickSpaced = (minSep) => {
       const chosen = [];
@@ -153,7 +164,7 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
       return {
         kind,
         label: POI_LABELS[kind],
-        name: names.poiName(rng, kind),
+        name: indice.fija(() => names.poiName(rng, kind), (base, k) => names.variantName(base, k)),
         x: a.x,
         y: a.y,
         real: { name: a.name, kind: a.kind, osmId: a.osmId ?? null },

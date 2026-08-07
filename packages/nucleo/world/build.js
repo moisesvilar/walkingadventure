@@ -8,7 +8,7 @@ import { generateSettlements } from './settlements.js';
 import { buildRoutes, linkParajes, pegarAViario } from './routes.js';
 import { generateParajes } from './parajes.js';
 import { castAll } from '../quests/casting.js';
-import { localeFor, namesFor } from '../names/index.js';
+import { localeFor, namesFor, crearIndiceDeNombres } from '../names/index.js';
 import { makeRng } from '../core/rng.js';
 
 /**
@@ -25,6 +25,11 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, onStatus = 
   }
 
   const names = namesFor(localeFor(lat, lon));
+  // Un solo índice de nombres para todo el mundo, creado aquí y repartido a las
+  // fases: la unicidad es del mundo entero y no de cada familia. Se crea en la
+  // orquestación y no en un módulo con estado propio para que dos mundos
+  // generados en el mismo proceso no se contaminen.
+  const indiceNombres = crearIndiceDeNombres();
 
   await onStatus('fetch');
   let data = await fetchData(lat, lon, rBase);
@@ -57,14 +62,14 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, onStatus = 
   }
 
   await onStatus('settlements');
-  const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, seaMask, names);
+  const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, seaMask, names, indiceNombres);
   await onStatus('routes');
   // pegar al viario ANTES de trazar: si un núcleo no cuelga de la red principal, el
   // trazado no tendría más remedio que unirlo con una recta por la que no se puede andar
   const movidos = pegarAViario(settlements, geo.roads);
-  const routes = buildRoutes(settlements, geo.roads, seed, names);
+  const routes = buildRoutes(settlements, geo.roads, seed, names, indiceNombres);
   await onStatus('parajes');
-  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names);
+  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names, indiceNombres);
   // los parajes se enganchan a la red DESPUÉS de existir: hasta aquí no se sabe dónde
   // están, y algunos nacen precisamente de los cruces de las calzadas
   movidos.push(...pegarAViario(parajes.filter((p) => p.origin !== 'grafo'), geo.roads));

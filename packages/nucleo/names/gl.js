@@ -61,6 +61,10 @@ const PARAJE_PARTS = {
   monasterio: [['O Mosteiro', 'O Priorado', 'A Abadía'], ['Gris', 'do Abrente', 'dos Calados', 'da Vide', 'do Eco'], { 'A Abadía': ['Gris', 'do Abrente', 'dos Calados', 'da Vide', 'do Eco'] }],
 };
 
+// Epítetos de sitio para desempatar nombres repetidos. Sintagmas preposicionales
+// y no adjetivos: valen igual para «O Pozo» y para «A Fonte», sin discordancias.
+const VARIANT_TAILS = ['de Arriba', 'de Abaixo', 'do Abrente', 'do Solpor', 'da Sombra', 'da Solaina', 'do Norte', 'do Sur', 'de Levante', 'de Poñente', 'do Camiño', 'do Val'];
+
 export const gl = {
   locale: 'gl',
 
@@ -92,6 +96,19 @@ export const gl = {
     const [bases, epithets, overrides] = PARAJE_PARTS[type];
     const base = pick(rng, bases);
     return `${base} ${pick(rng, overrides[base] ?? epithets)}`;
+  },
+
+  // Regla de desempate de la interfaz común, misma que en `es`: un epíteto de
+  // sitio en el idioma del mundo en lugar de un sufijo numérico. Sin rng, función
+  // del nombre y del intento, y encadenando epítetos si el repertorio se agota.
+  variantName(base, intento) {
+    let nombre = base;
+    let k = Math.max(0, Math.floor(intento) || 0);
+    do {
+      nombre += ` ${VARIANT_TAILS[k % VARIANT_TAILS.length]}`;
+      k = Math.floor(k / VARIANT_TAILS.length);
+    } while (k > 0);
+    return nombre;
   },
 
   worldTitle(rng) {

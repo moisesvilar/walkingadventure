@@ -3,31 +3,33 @@
     "mundo_congelado": "costero",
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
-    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico."
+    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
+    "regenerado_por": "SPEC-002-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-002-iter-1: la entrada de datos del núcleo pasa a ordenarse por la clave estable de OSM y la unicidad de nombre pasa a ser del mundo entero, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
   "radio_dibujo_m": 1200,
   "recuentos": {
     "nucleos": 7,
-    "servicios": 12,
-    "parajes": 5,
-    "calzadas": 10
+    "servicios": 11,
+    "parajes": 3,
+    "calzadas": 9
   },
   "nucleos": [
     {
-      "nombre": "Montetoño de Arriba",
+      "nombre": "Miratoño do Carballo",
       "tipo": "aldea",
       "x": -594,
       "y": -129,
       "anclaje": "node/5323981960"
     },
     {
-      "nombre": "Ponteño da Brétema",
+      "nombre": "Valtoño do Dragón",
       "tipo": "aldea",
-      "x": -58,
-      "y": 417,
-      "anclaje": "way/551279363"
+      "x": -32,
+      "y": -118,
+      "anclaje": "node/5323941422"
     },
     {
       "nombre": "Soutozán da Brétema",
@@ -37,25 +39,25 @@
       "anclaje": "node/662618011"
     },
     {
-      "nombre": "Casal da Colmea",
+      "nombre": "Casal da Pedra Gris",
+      "tipo": "granja",
+      "x": 367,
+      "y": 433,
+      "anclaje": "node/3689211743"
+    },
+    {
+      "nombre": "Casal do Carballo Torto",
       "tipo": "granja",
       "x": -201,
       "y": 599,
       "anclaje": "node/4502883744"
     },
     {
-      "nombre": "Casal da Colmea",
+      "nombre": "Casal dos Vagalumes",
       "tipo": "granja",
-      "x": 17,
-      "y": -135,
-      "anclaje": "node/3648044330"
-    },
-    {
-      "nombre": "Casal da Néboa",
-      "tipo": "granja",
-      "x": -139,
-      "y": 6,
-      "anclaje": "node/5844583387"
+      "x": 151,
+      "y": 679,
+      "anclaje": "node/3689212319"
     },
     {
       "nombre": "Miramar da Brétema",
@@ -88,18 +90,18 @@
       "anclaje": "node/5323989706"
     },
     {
+      "nombre": "Mercado do Cervo Durmido",
+      "tipo": "mercado",
+      "x": 513,
+      "y": 15,
+      "anclaje": "way/51954982"
+    },
+    {
       "nombre": "Mercado do Dragón Bailador",
       "tipo": "mercado",
       "x": 27,
       "y": -142,
       "anclaje": "node/3648044335"
-    },
-    {
-      "nombre": "Mercado do Dragón Bailador",
-      "tipo": "mercado",
-      "x": 513,
-      "y": 15,
-      "anclaje": "way/51954982"
     },
     {
       "nombre": "Pousada da Serea Dourada",
@@ -116,20 +118,6 @@
       "anclaje": "node/3643421657"
     },
     {
-      "nombre": "Pousada do Moucho Durmido",
-      "tipo": "posada",
-      "x": 4,
-      "y": -116,
-      "anclaje": "node/3648044332"
-    },
-    {
-      "nombre": "Pousada do Raposo Argalleiro",
-      "tipo": "posada",
-      "x": -169,
-      "y": -67,
-      "anclaje": "node/3648044338"
-    },
-    {
       "nombre": "Taberna da Coroa Bailadora",
       "tipo": "taberna",
       "x": 432,
@@ -137,7 +125,14 @@
       "anclaje": "node/7343578083"
     },
     {
-      "nombre": "Taberna do Corvo Bailador",
+      "nombre": "Taberna do Corvo Ledo",
+      "tipo": "taberna",
+      "x": 4,
+      "y": -116,
+      "anclaje": "node/3648044332"
+    },
+    {
+      "nombre": "Taberna do Dragón Argalleiro",
       "tipo": "taberna",
       "x": -626,
       "y": -267,
@@ -153,18 +148,11 @@
   ],
   "parajes": [
     {
-      "nombre": "A Torre Vixía da Fin",
+      "nombre": "A Torre Vixía do Solpor",
       "tipo": "atalaya",
-      "x": 367,
-      "y": 433,
-      "anclaje": "node/3689211743"
-    },
-    {
-      "nombre": "O Cruce do Aforcado",
-      "tipo": "cruce",
-      "x": -271,
-      "y": 534,
-      "anclaje": null
+      "x": -395,
+      "y": -36,
+      "anclaje": "node/3648044334"
     },
     {
       "nombre": "A Capela do Peregrino",
@@ -174,18 +162,11 @@
       "anclaje": "node/2897243760"
     },
     {
-      "nombre": "O Altar dos Antigos",
-      "tipo": "piedra",
-      "x": 151,
-      "y": 679,
-      "anclaje": "node/3689212319"
-    },
-    {
       "nombre": "O Pazo Queimado",
       "tipo": "ruina",
-      "x": -395,
-      "y": -36,
-      "anclaje": "node/3648044334"
+      "x": -58,
+      "y": 417,
+      "anclaje": "way/551279363"
     }
   ],
   "calzadas": [
@@ -207,46 +188,32 @@
       "nombre": "A Calzada dos Ventos",
       "tipo": "calzada",
       "desde": [
-        -58,
-        417
+        367,
+        433
       ],
       "hasta": [
-        -201,
-        599
+        151,
+        679
       ],
-      "puntos": 28,
+      "puntos": 31,
       "recta": false
     },
     {
-      "nombre": "A Corredoira do Mediodía",
+      "nombre": "A Corredoira das Neves",
       "tipo": "calzada",
       "desde": [
-        -201,
-        599
+        229,
+        -244
       ],
       "hasta": [
-        -139,
-        6
+        367,
+        433
       ],
-      "puntos": 28,
+      "puntos": 23,
       "recta": false
     },
     {
-      "nombre": "A Senda de Ponteño da Brétema",
-      "tipo": "calzada",
-      "desde": [
-        17,
-        -135
-      ],
-      "hasta": [
-        -58,
-        417
-      ],
-      "puntos": 34,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño de Montetoño de Arriba",
+      "nombre": "A Senda de Miratoño do Carballo",
       "tipo": "calzada",
       "desde": [
         -201,
@@ -260,6 +227,20 @@
       "recta": false
     },
     {
+      "nombre": "A Vella Ruta do Norte",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        -201,
+        599
+      ],
+      "puntos": 42,
+      "recta": false
+    },
+    {
       "nombre": "O Camiño dos Ventos",
       "tipo": "calzada",
       "desde": [
@@ -267,10 +248,10 @@
         -244
       ],
       "hasta": [
-        17,
-        -135
+        -32,
+        -118
       ],
-      "puntos": 7,
+      "puntos": 8,
       "recta": false
     },
     {
@@ -281,10 +262,10 @@
         -35
       ],
       "hasta": [
-        -316,
-        16
+        -271,
+        534
       ],
-      "puntos": 3,
+      "puntos": 23,
       "recta": false
     },
     {
@@ -295,22 +276,8 @@
         -36
       ],
       "hasta": [
-        -316,
-        16
-      ],
-      "puntos": 3,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        151,
-        679
-      ],
-      "hasta": [
-        -90,
-        413
+        -271,
+        534
       ],
       "puntos": 23,
       "recta": false
@@ -319,14 +286,14 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        367,
-        433
+        -58,
+        417
       ],
       "hasta": [
-        149,
-        -59
+        -176,
+        315
       ],
-      "puntos": 20,
+      "puntos": 12,
       "recta": false
     }
   ],

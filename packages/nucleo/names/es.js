@@ -63,6 +63,11 @@ const PARAJE_PARTS = {
   monasterio: [['El Monasterio', 'El Priorato', 'La Abadía'], ['Gris', 'del Alba', 'de los Callados', 'de la Vid', 'del Eco'], {}],
 };
 
+// Epítetos de sitio para desempatar nombres repetidos. Todos son sintagmas
+// preposicionales y no adjetivos: valen igual para «El Pozo» y para «La Fuente»,
+// sin discordancias de género.
+const VARIANT_TAILS = ['de Arriba', 'de Abajo', 'del Alba', 'del Ocaso', 'de la Umbría', 'de la Solana', 'del Norte', 'del Sur', 'de Levante', 'de Poniente', 'del Camino', 'del Valle'];
+
 export const es = {
   locale: 'es',
 
@@ -94,6 +99,22 @@ export const es = {
     const [bases, epithets, overrides] = PARAJE_PARTS[type];
     const base = pick(rng, bases);
     return `${base} ${pick(rng, overrides[base] ?? epithets)}`;
+  },
+
+  // Regla de desempate de la interfaz común: el nombre que sale de aquí sigue
+  // siendo un nombre del idioma del mundo, y no un identificador técnico pegado al
+  // final —un «(2)» en el rótulo de un mapa rompe la ficción—. No recibe rng a
+  // propósito: es función del nombre y del intento, así que dos generaciones con
+  // la misma semilla desambiguan igual sin consumir el azar de ninguna fase. Con
+  // el repertorio agotado encadena epítetos, de modo que siempre hay uno libre.
+  variantName(base, intento) {
+    let nombre = base;
+    let k = Math.max(0, Math.floor(intento) || 0);
+    do {
+      nombre += ` ${VARIANT_TAILS[k % VARIANT_TAILS.length]}`;
+      k = Math.floor(k / VARIANT_TAILS.length);
+    } while (k > 0);
+    return nombre;
   },
 
   worldTitle(rng) {
