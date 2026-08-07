@@ -1,0 +1,140 @@
+{
+  "nombre": "costero",
+  "descripcion": "Sanxenxo: línea de costa, radio de paseo. Ejercita la máscara tierra/mar y el radio dinámico costero.",
+  "coordenada": {
+    "lat": 42.402,
+    "lon": -8.809
+  },
+  "radio_m": 700,
+  "capturado": "2026-08-07",
+  "fuente": "Overpass local del proyecto sobre el extracto spain-latest (scripts/overpass-setup.sh)",
+  "consultas": {
+    "geo": "\n[out:json][timeout:180];\nway[\"natural\"=\"coastline\"](around:700,42.402,-8.809);\nout geom;\n(\n  way[\"natural\"=\"water\"](around:700,42.402,-8.809);\n  way[\"waterway\"~\"^(river|stream|canal)$\"](around:700,42.402,-8.809);\n  way[\"landuse\"=\"forest\"](around:700,42.402,-8.809);\n  way[\"natural\"=\"wood\"](around:700,42.402,-8.809);\n  way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary|unclassified|track)$\"](around:700,42.402,-8.809);\n  node[\"natural\"=\"peak\"](around:700,42.402,-8.809);\n);\nout geom 8000;",
+    "pois": "\n[out:json][timeout:180];\n(\n  nwr[\"amenity\"=\"place_of_worship\"](around:700,42.402,-8.809);\n  nwr[\"amenity\"=\"monastery\"](around:700,42.402,-8.809);\n  nwr[\"historic\"~\"^(monument|memorial|castle|ruins|city_gate|archaeological_site|wayside_cross|wayside_shrine|monastery)$\"](around:700,42.402,-8.809);\n  nwr[\"tourism\"=\"viewpoint\"](around:700,42.402,-8.809);\n  nwr[\"man_made\"~\"^(tower|lighthouse)$\"](around:700,42.402,-8.809);\n  nwr[\"natural\"=\"spring\"](around:700,42.402,-8.809);\n  nwr[\"amenity\"=\"fountain\"](around:700,42.402,-8.809);\n  nwr[\"leisure\"=\"park\"](around:700,42.402,-8.809);\n  nwr[\"shop\"=\"mall\"](around:700,42.402,-8.809);\n  nwr[\"amenity\"~\"^(cafe|restaurant|ice_cream|fast_food|library)$\"](around:700,42.402,-8.809);\n  nwr[\"amenity\"=\"drinking_water\"](around:700,42.402,-8.809);\n  nwr[\"amenity\"~\"^(bar|pub|nightclub|stripclub|casino|gambling|brothel)$\"](around:700,42.402,-8.809);\n  nwr[\"shop\"~\"^(erotic|alcohol|tobacco|bookmaker)$\"](around:700,42.402,-8.809);\n);\nout center 12000;",
+    "callejero": "\n[out:json][timeout:120];\nway[\"highway\"~\"^(residential|living_street|pedestrian|service|unclassified|track|path|footway|cycleway|steps)$\"](around:700,42.402,-8.809);\nout geom 3000;"
+  },
+  "inventario": {
+    "geo": {
+      "total": 76
+    },
+    "pois": {
+      "total": 61,
+      "locales_adultos": {
+        "total": 16,
+        "ejemplos": [
+          {
+            "tipo": "node",
+            "id": 662618040,
+            "amenity": "pub",
+            "shop": null,
+            "nombre": null
+          },
+          {
+            "tipo": "node",
+            "id": 662618052,
+            "amenity": "pub",
+            "shop": null,
+            "nombre": null
+          },
+          {
+            "tipo": "node",
+            "id": 662618054,
+            "amenity": "pub",
+            "shop": null,
+            "nombre": "El Aviador"
+          },
+          {
+            "tipo": "node",
+            "id": 662618072,
+            "amenity": "bar",
+            "shop": null,
+            "nombre": "Tela Marinera"
+          },
+          {
+            "tipo": "node",
+            "id": 662618411,
+            "amenity": "bar",
+            "shop": null,
+            "nombre": null
+          }
+        ]
+      },
+      "agua_potable": {
+        "total": 0
+      },
+      "por_etiqueta": {
+        "amenity=bar": 11,
+        "amenity=cafe": 5,
+        "amenity=fast_food": 2,
+        "amenity=ice_cream": 3,
+        "amenity=place_of_worship": 2,
+        "amenity=pub": 5,
+        "amenity=restaurant": 25,
+        "historic=memorial": 2,
+        "historic=wayside_cross": 1,
+        "leisure=park": 3,
+        "tourism=artwork": 2,
+        "tourism=hotel": 1,
+        "tourism=viewpoint": 2
+      }
+    },
+    "callejero": {
+      "total_vias": 269,
+      "componentes": 24,
+      "vias_por_componente": [
+        223,
+        9,
+        6,
+        4,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "distancia_al_vecino_mas_cercano_m": [
+        4,
+        7,
+        17,
+        19,
+        13,
+        14,
+        4,
+        4,
+        39,
+        73,
+        47,
+        6,
+        13,
+        46,
+        93,
+        49,
+        7,
+        46,
+        7,
+        58,
+        7,
+        9,
+        12,
+        4
+      ],
+      "distancia_minima_entre_componentes_m": 4,
+      "distancia_maxima_al_vecino_mas_cercano_m": 93
+    }
+  }
+}

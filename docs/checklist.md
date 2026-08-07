@@ -6,7 +6,7 @@
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 1 | andamiaje-pruebas | RF-INFRA-007 | must | pending |
+| 1 | andamiaje-pruebas | RF-INFRA-007 | must | wip |
 | 2 | paquete-compartido | RF-INFRA-001, RNF-DET-001, RNF-DET-003 | must | pending |
 | 3 | rejilla-celdas-semilla | RF-MUNDO-001, RF-MUNDO-002, RF-MUNDO-003, RF-MUNDO-004, RF-MUNDO-005 | must | pending |
 | 4 | tramo-personal | RF-PJ-004, RF-MUNDO-007, RNF-ACC-001, RNF-ACC-003 | must | pending |
