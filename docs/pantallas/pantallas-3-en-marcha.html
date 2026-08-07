@@ -1,0 +1,473 @@
+<title>Pantallas 3 · En marcha — Walking Adventure</title>
+
+<style>
+  :root {
+    --tierra: #7fae5a; --mar: #3f7fa8; --tinta: #1e2b18; --marca: #c62828;
+    --placa: #efe3c0; --filete: #8a6d34;
+    --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16); --bisel: #2a3324;
+    --serif: Georgia, "IM Fell English", "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+      --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  }
+  :root[data-theme="dark"] { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+    --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  :root[data-theme="light"] { --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30,43,24,0.16); --filete: #8a6d34; --marca: #c62828; }
+
+  body { margin: 0; background: var(--fondo); color: var(--texto); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .envoltorio { max-width: 1120px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .cabecera { border-bottom: 2px solid var(--filete); padding-bottom: 28px; }
+  .migas { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-2); margin: 0 0 14px; }
+  .cabecera h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; }
+  .cabecera h1 em { font-style: italic; color: var(--filete); }
+  .entradilla { max-width: 62ch; color: var(--texto-2); margin: 0; font-size: 1.02rem; }
+
+  .reglas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 36px 0 8px; }
+  .regla { border-left: 3px solid var(--filete); padding: 4px 0 4px 14px; }
+  .regla b { display: block; font-family: var(--serif); font-size: 1.02rem; font-weight: 400; margin-bottom: 3px; }
+  .regla span { font-size: 0.86rem; color: var(--texto-2); }
+
+  .aviso-voces { margin: 34px 0 8px; padding: 14px 18px; background: var(--fondo-2); border-radius: 2px; font-size: 0.88rem; color: var(--texto-2); }
+  .aviso-voces b { color: var(--texto); font-weight: 600; }
+
+  .pantalla { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; padding: 52px 0; border-top: 1px solid var(--linea); }
+  .pantalla:first-of-type { border-top: 2px solid var(--filete); }
+  @media (max-width: 760px) { .pantalla { grid-template-columns: 1fr; gap: 30px; } }
+
+  .notas h2 { font-family: var(--serif); font-weight: 400; font-size: 1.62rem; margin: 0 0 4px; line-height: 1.2; text-wrap: balance; }
+  .paso { font-family: var(--mono); font-size: 0.78rem; color: var(--filete); letter-spacing: 0.1em; margin: 0 0 10px; }
+  .notas > p { margin: 0 0 18px; max-width: 60ch; color: var(--texto-2); }
+  .notas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .notas li { max-width: 62ch; font-size: 0.94rem; padding-left: 16px; position: relative; }
+  .notas li::before { content: "—"; position: absolute; left: 0; color: var(--filete); }
+  .notas li b { font-weight: 600; }
+  .fuente { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--marca); border: 1px solid currentColor; border-radius: 2px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  code { font-family: var(--mono); font-size: 0.86em; background: var(--fondo-2); border-radius: 2px; padding: 0 4px; }
+  .nuevo { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--fondo); background: var(--filete); border-radius: 2px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.06em; }
+
+  .movil { background: var(--bisel); border-radius: 26px; padding: 9px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); position: sticky; top: 28px; }
+  @media (max-width: 760px) { .movil { position: static; max-width: 300px; } }
+  .lienzo { background: var(--placa); border-radius: 18px; overflow: hidden; aspect-ratio: 9 / 17.4; display: flex; flex-direction: column; font-family: var(--serif); color: var(--tinta); position: relative; }
+  .barra { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 9px; padding: 8px 14px 2px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+  .cuerpo { flex: 1; display: flex; flex-direction: column; padding: 12px 18px 14px; gap: 11px; overflow: hidden; }
+
+  .rotulo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0; }
+  .titular { font-size: 20px; line-height: 1.18; margin: 0; font-weight: 400; }
+  .parrafo { font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .parrafo.tenue { color: rgba(30,43,24,0.62); }
+  .italica { font-style: italic; }
+
+  /* La pantalla apagada y la de bloqueo: el estado normal de este momento */
+  .lienzo.dormida { background: #0d120c; color: #d8d2bc; }
+  .dormida .barra { color: rgba(216,210,188,0.45); }
+  .reloj { font-family: var(--sans); font-weight: 200; font-size: 52px; letter-spacing: -0.02em; text-align: center; margin: 34px 0 0; line-height: 1; color: #ece7d2; }
+  .fecha { font-family: var(--sans); font-size: 11px; text-align: center; color: rgba(216,210,188,0.55); margin: 6px 0 0; letter-spacing: 0.05em; }
+  .nada { font-family: var(--sans); font-size: 10px; text-align: center; color: rgba(216,210,188,0.28); margin-top: auto; margin-bottom: 16px; letter-spacing: 0.1em; }
+  .rotulo-so { margin: 26px 10px 0; background: rgba(238,233,215,0.1); border-radius: 12px; padding: 9px 12px; font-family: var(--sans); }
+  .rotulo-so .app { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(216,210,188,0.55); margin: 0 0 4px; }
+  .rotulo-so .dice { margin: 0; font-family: var(--serif); font-size: 12.5px; color: #ece7d2; }
+  .rotulo-so .accion { margin: 8px 0 0; padding-top: 7px; border-top: 1px solid rgba(216,210,188,0.16); font-size: 10.5px; color: rgba(216,210,188,0.72); letter-spacing: 0.02em; }
+  .aviso-so { margin: 26px 10px 0; background: rgba(238,233,215,0.14); border-radius: 12px; padding: 10px 12px; font-family: var(--sans); backdrop-filter: blur(2px); }
+  .aviso-so .app { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(216,210,188,0.6); margin: 0 0 4px; }
+  .aviso-so p { margin: 0; font-family: var(--serif); font-size: 12.5px; line-height: 1.4; color: #f0ebd6; }
+
+  /* El mapa a pantalla completa: en marcha no hay nada más */
+  .lienzo.lleno .cuerpo { padding: 0; position: relative; }
+  .lienzo.lleno svg { display: block; width: 100%; height: 100%; }
+  .faja { position: absolute; left: 0; right: 0; top: 0; padding: 9px 14px 12px; font-size: 12.5px; line-height: 1.35;
+    background: linear-gradient(to bottom, rgba(239,227,192,0.96), rgba(239,227,192,0)); }
+  .faja .rotulo { margin-bottom: 2px; }
+  .faja p { margin: 0; }
+  .zocalo { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 14px 12px; font-size: 12px; line-height: 1.4;
+    background: linear-gradient(to top, rgba(239,227,192,0.97) 55%, rgba(239,227,192,0)); }
+  .zocalo p { margin: 0; }
+  .zocalo .rotulo { margin-bottom: 3px; }
+
+  .pulso { display: inline-flex; align-items: center; gap: 5px; font-family: var(--sans); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--marca); }
+  .pulso i { width: 7px; height: 7px; border-radius: 50%; background: var(--marca); flex: none; box-shadow: 0 0 0 3px rgba(198,40,40,0.22); }
+
+  /* La pantalla descartada */
+  .lienzo.tachada .cuerpo { gap: 14px; }
+  .metricon { font-family: var(--sans); text-align: center; }
+  .metricon .cifra { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .metricon .pie-cifra { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.5); margin-top: 4px; }
+  .rejilla-metricas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-family: var(--sans); }
+  .barra-progreso { height: 7px; border-radius: 4px; background: rgba(30,43,24,0.15); overflow: hidden; }
+  .barra-progreso i { display: block; height: 100%; width: 62%; background: var(--marca); }
+  .tacha { position: absolute; inset: 0; pointer-events: none; }
+  .tacha svg { width: 100%; height: 100%; display: block; }
+  .sello { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-8deg); font-family: var(--sans);
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--marca); border: 2px solid var(--marca);
+    border-radius: 3px; padding: 7px 12px; background: rgba(239,227,192,0.9); font-weight: 700; text-align: center; line-height: 1.4; }
+
+  .pareja { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0 4px; }
+  .capa { border: 1px solid var(--linea); border-radius: 3px; padding: 10px 12px; }
+  .capa b { display: block; font-family: var(--serif); font-weight: 400; font-size: 0.98rem; margin-bottom: 2px; }
+  .capa span { font-size: 0.84rem; color: var(--texto-2); }
+
+  .pie { border-top: 2px solid var(--filete); margin-top: 40px; padding-top: 28px; }
+  .pie h3 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0 0 14px; }
+  .pie ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 70ch; color: var(--texto-2); font-size: 0.94rem; }
+  .pie li { padding-left: 22px; position: relative; }
+  .pie li b { color: var(--texto); }
+  .pie .cerrado::before { content: "✓"; position: absolute; left: 0; color: var(--filete); font-weight: 700; }
+  .pie .abierto::before { content: "?"; position: absolute; left: 2px; color: var(--marca); font-weight: 700; }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <p class="migas">Walking Adventure · Diseño de pantallas · 3 de 6</p>
+    <h1>En marcha<br><em>la pantalla que está diseñada para no mirarse</em></h1>
+    <p class="entradilla">Estás andando. Es el momento más largo de la salida y el único donde el juego no puede pedirte nada, porque pedirlo significa que alguien cruza una calle mirando el móvil. Estas siete pantallas existen casi todas para justificar por qué el móvil sigue en el bolsillo.</p>
+  </header>
+
+  <div class="reglas">
+    <div class="regla"><b>El móvil avisa, no llama</b><span>Vibra desde el bolsillo y tú decides cuándo parar. Nunca al revés.</span></div>
+    <div class="regla"><b>Se lee de un vistazo o no se lee</b><span>Si un aviso lleva contenido, va entero en una línea. Ningún «toca para saber más».</span></div>
+    <div class="regla"><b>Ignorarlo es gratis</b><span>Nada caduca por no mirar, nada se pierde y nadie lo comenta.</span></div>
+    <div class="regla"><b>Sin una sola cifra</b><span>Ni kilómetros, ni ritmo, ni pasos, ni porcentaje. Esto no es una app de deporte.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Aquí solo habla el mundo.</b> Lo que va en <span style="font-family:var(--serif)">serif</span> es lo que el juego dice; lo que va en sans somos nosotros hablando de él. En marcha la aplicación no tiene voz: si algo solo se puede decir como aplicación, hay que rediseñar el momento.</p>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo dormida">
+      <div class="barra"><span>18:41</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="reloj">18:41</p>
+        <p class="fecha">jueves, 6 de agosto</p>
+        <div class="rotulo-so">
+          <p class="app">Walking Adventure</p>
+          <p class="dice">Vas hacia Monfrida.</p>
+          <p class="accion">Dar la salida por terminada</p>
+        </div>
+        <p class="nada">SIN AVISOS</p>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1</p>
+      <h2>El bolsillo</h2>
+      <p>Esta es la pantalla de verdad de este momento, y hay que enseñarla porque es la que más tiempo dura. Estás andando hacia algún sitio y la app no ha dicho nada en veinte minutos.</p>
+      <ul>
+        <li><b>Que no pase nada es el comportamiento correcto, no un hueco de diseño.</b> El aviso existe para que no tengas que mirar; si además hubiera algo que consultar de vez en cuando, la regla se cumpliría en el papel y se rompería en la calle. <span class="fuente">bucle, cuatro momentos</span></li>
+        <li><b>El rótulo del sistema es lo que mantiene viva la salida con el móvil bloqueado</b>: un servicio en primer plano, Actividad en Vivo en iOS. Y es lo que permite seguir pidiendo solo el permiso de ubicación «mientras se usa», porque con él la app cuenta como en uso. <span class="fuente">seguridad §2</span><span class="nuevo">decidido</span></li>
+        <li>Y es <b>tan austero como el resto del momento</b>: hacia dónde vas, y nada más. Ni una cifra, ni un progreso, ni un contador. Visible a propósito, además: una app que sigue leyendo tu ubicación tiene que decirlo mientras lo hace. <span class="nuevo">decidido</span></li>
+        <li><b>De aquí se da la salida por terminada</b>, y es la única cosa tocable que existe en marcha. Vive aquí y no en la pantalla del juego precisamente porque el rótulo es del sistema y ya tiene que estar. <span class="fuente">bucle §8</span><span class="nuevo">decidido</span></li>
+        <li><b>La cartografía se registra sola.</b> Andar por sitio nuevo no pide confirmar nada ni celebra nada: lo que has visto queda anotado y se ve al echar el telón. <span class="fuente">bucle §1</span></li>
+        <li>Y no hay <b>tiempo restante ni distancia que falta</b>. La aventura declaró su tamaño con una palabra antes de salir —un paseo, una aventura, una jornada— y ese contrato no se convierte en una cuenta atrás por el camino. <span class="fuente">bucle §3</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo lleno">
+      <div class="barra"><span>18:41</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <svg viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa de fantasía en marcha: tu posición avanzando por una calzada hacia Monfrida">
+          <rect width="300" height="520" fill="#3f7fa8"/>
+          <path d="M0 0 H300 V430 C246 452 206 434 160 448 C112 462 62 446 0 464 Z" fill="#7fae5a"/>
+          <path d="M0 464 C62 446 112 462 160 448 C206 434 246 452 300 430" fill="none" stroke="#12321f" stroke-width="6"/>
+          <g fill="#5f9243" opacity="0.85">
+            <ellipse cx="52" cy="180" rx="46" ry="34"/><ellipse cx="86" cy="146" rx="34" ry="26"/>
+            <ellipse cx="252" cy="286" rx="42" ry="30"/>
+          </g>
+          <path d="M300 96 C244 122 232 176 186 202 C142 228 128 282 96 316 C68 346 48 372 34 430" fill="none" stroke="#3f7fa8" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+          <g stroke="rgba(30,43,24,0.28)" stroke-width="2" fill="none">
+            <path d="M40 470 L86 424 L64 386"/><path d="M198 452 L214 402 L262 392"/><path d="M118 300 L156 268"/>
+          </g>
+          <g fill="none" stroke-linecap="round">
+            <path d="M150 476 C144 414 178 372 172 314 C166 256 196 216 202 158" stroke="rgba(30,43,24,0.75)" stroke-width="9"/>
+            <path d="M150 476 C144 414 178 372 172 314 C166 256 196 216 202 158" stroke="#f2e7c8" stroke-width="3.4"/>
+          </g>
+          <g>
+            <circle cx="202" cy="158" r="8" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+            <rect x="150" y="122" width="104" height="22" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2"/>
+            <text x="202" y="137" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#1e2b18">Monfrida</text>
+          </g>
+          <g>
+            <circle cx="88" cy="352" r="5" fill="#1e2b18" opacity="0.55"/>
+            <text x="98" y="356" font-family="Georgia, serif" font-size="11.5" fill="#1e2b18" opacity="0.8">A Pena Ruín</text>
+          </g>
+          <text x="164" y="404" font-family="Georgia, serif" font-style="italic" font-size="11.5" fill="#1e2b18" opacity="0.75" transform="rotate(-72 164 404)">Camiño do Sal</text>
+          <circle cx="150" cy="476" r="13" fill="#c62828" opacity="0.16"/>
+          <circle cx="150" cy="476" r="6" fill="#c62828" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <div class="faja">
+          <p class="rotulo">Vas por</p>
+          <p>el Camiño do Sal, hacia Monfrida</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2</p>
+      <h2>Si miras</h2>
+      <p>Lo que hay debajo de la pantalla de bloqueo. Se diseña para que quien la mire tarde un segundo en confirmar que va bien y se la vuelva a guardar.</p>
+      <ul>
+        <li><b>El mapa ocupa todo y no hay nada encima.</b> Ni botones, ni panel, ni acciones: cualquier control que se pueda tocar es una razón para sacar el móvil. <span class="fuente">bucle, cuatro momentos</span></li>
+        <li><b>El texto guía en lenguaje del mundo y el mapa lo confirma.</b> «Sigue el Camiño do Sal hasta Monfrida», no «gire a la derecha en 200 m»: las rutas nombradas son la infraestructura de navegación. <span class="fuente">quests, decisión 2</span></li>
+        <li><b>Norte arriba, siempre.</b> Esto es un mapa dibujado, no un navegador, y girarlo con la brújula destruye los rótulos y la cartela. Decisión de este artefacto. <span class="nuevo">decidido</span></li>
+        <li><b>A Pena Ruín está rotulado y no has ido nunca.</b> Se lo contaron a tu personaje al encargar la aventura; lo que se gana andando es lo que no te ha contado nadie. <span class="fuente">bucle §1</span></li>
+        <li>Tu posición es <b>una marca roja como las del mapa</b>, no un punto azul de sistema. Estás dentro del mundo, no encima de él. <span class="nuevo">decidido</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo lleno">
+      <div class="barra"><span>18:58</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <svg viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="El mismo mapa, con una marca nueva sobre Monfrida indicando que allí se cuenta algo">
+          <rect width="300" height="520" fill="#3f7fa8"/>
+          <path d="M0 0 H300 V430 C246 452 206 434 160 448 C112 462 62 446 0 464 Z" fill="#7fae5a"/>
+          <path d="M0 464 C62 446 112 462 160 448 C206 434 246 452 300 430" fill="none" stroke="#12321f" stroke-width="6"/>
+          <g fill="#5f9243" opacity="0.85">
+            <ellipse cx="52" cy="180" rx="46" ry="34"/><ellipse cx="86" cy="146" rx="34" ry="26"/>
+            <ellipse cx="252" cy="286" rx="42" ry="30"/>
+          </g>
+          <path d="M300 96 C244 122 232 176 186 202 C142 228 128 282 96 316 C68 346 48 372 34 430" fill="none" stroke="#3f7fa8" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+          <g fill="none" stroke-linecap="round">
+            <path d="M150 476 C144 414 178 372 172 314 C166 256 196 216 202 158" stroke="rgba(30,43,24,0.75)" stroke-width="9"/>
+            <path d="M150 476 C144 414 178 372 172 314 C166 256 196 216 202 158" stroke="#f2e7c8" stroke-width="3.4"/>
+          </g>
+          <g>
+            <circle cx="202" cy="158" r="14" fill="none" stroke="#c62828" stroke-width="2" opacity="0.45"/>
+            <circle cx="202" cy="158" r="8" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+            <rect x="150" y="122" width="104" height="22" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2"/>
+            <text x="202" y="137" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#1e2b18">Monfrida</text>
+            <text x="248" y="176" font-family="Georgia, serif" font-style="italic" font-size="24" fill="#c62828">✳</text>
+          </g>
+          <text x="164" y="404" font-family="Georgia, serif" font-style="italic" font-size="11.5" fill="#1e2b18" opacity="0.75" transform="rotate(-72 164 404)">Camiño do Sal</text>
+          <circle cx="150" cy="404" r="13" fill="#c62828" opacity="0.16"/>
+          <circle cx="150" cy="404" r="6" fill="#c62828" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <div class="faja">
+          <p class="rotulo">Vas por</p>
+          <p>el Camiño do Sal, hacia Monfrida</p>
+        </div>
+        <div class="zocalo">
+          <p class="rotulo">En Monfrida hay algo que contar</p>
+          <p class="italica">Lo sabrás al llegar.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 3</p>
+      <h2>Llega una noticia</h2>
+      <p>Un rumor ha alcanzado un sitio del mapa. El móvil ha dado un toque y ha vuelto a callarse; esto es lo que hay debajo si miras, y sigue estando ahí si no miras.</p>
+      <ul>
+        <li><b>Dos capas obligatorias, y una es del bolsillo y otra de la pantalla.</b> Aquí, háptico más marca en el mapa. Duplicar con háptico y sonido no vale, porque los dos fallan a la vez para la misma persona. <span class="fuente">accesibilidad §3</span></li>
+        <li><b>La notificación no se usa para esto</b>, y es una reserva deliberada: se guarda para las oportunidades, para que cuando salte signifique algo. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Las noticias sedimentan.</b> No hay que atenderlas: lo que se cuenta en Monfrida seguirá contándose allí cuando llegues, mañana o la semana que viene. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Nunca salta durante un beat en curso</b> de la aventura principal. Si estás dentro de una escena, el mundo espera. <span class="fuente">quests, decisión 3</span></li>
+        <li>El zócalo es <b>una línea entera, no un adelanto</b>. Dice que hay algo y dónde; el contenido se oye llegando, que es la regla que sostiene todo el sistema de rumores. <span class="fuente">quests, decisión 3</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo dormida">
+      <div class="barra"><span>19:06</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="reloj">19:06</p>
+        <p class="fecha">jueves, 6 de agosto</p>
+        <div class="aviso-so">
+          <p class="app">Walking Adventure · ahora</p>
+          <p>Hay una vieja discutiendo con un burro en el cruce de A Pena Ruín, y el burro va ganando.</p>
+        </div>
+        <div class="rotulo-so" style="margin-top:10px;opacity:0.72">
+          <p class="app">Walking Adventure</p>
+          <p class="dice">Vas hacia Monfrida.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 4</p>
+      <h2>Llega una oportunidad</h2>
+      <p>Un micro-encuentro de un beat, en el camino. El único aviso del juego que se atreve a encender la pantalla, y por eso está racionado.</p>
+      <ul>
+        <li><b>Salta al entrar en el geofence del sitio</b>, así que cuando lo lees el cruce ya lo tienes delante: ibas hacia allí de todos modos. No hay que desviarse a ningún lado, y hacerle caso es pararte ahí. Esto es lo que separa esta pantalla de la 5. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Pararte no dispara nada</b>: la escena queda disponible y espera. Si miras, está ahí; si no, sigues andando y no ha pasado nada. Por eso pararte en un semáforo dentro del geofence no tiene consecuencias, y por eso el móvil no te llama nunca. <span class="fuente">bucle, momento 3</span><span class="nuevo">decidido</span></li>
+        <li><b>Entera en una línea, con su gracia dentro.</b> Se lee de un vistazo o no se lee: enterarse de algo sin parar es parte del placer de caminar con esto. <span class="fuente">accesibilidad §3</span></li>
+        <li><b>Nunca un «toca para saber más»</b>, que es exactamente el gesto que hace mirar el móvil andando. Si el contenido no cabe, el aviso está mal escrito. <span class="fuente">accesibilidad §3</span></li>
+        <li><b>Y «completo» incluye dónde.</b> Este aviso decía «en el cruce de aquí al lado» y con eso no se puede ir: obligaba a tocar, que es la misma prohibición con otro disfraz. El mundo tiene nombres para esto. La prueba: <b>si tocando se aprende algo que hacía falta, el aviso está mal escrito</b>. <span class="fuente">accesibilidad §3</span><span class="nuevo">corregido</span></li>
+        <li><b>Tocarlo abre la app, y la app enseña lo que corresponde al sitio donde estás</b>: andando, el mapa con la marca puesta; parada dentro del geofence, la escena. Una sola regla, así que da igual por dónde entres —el aviso, el rótulo o el icono de la app—: quien decide qué hay es el estado y no la puerta. Lo que nunca hace es aceptar nada, porque se acepta yendo. <span class="fuente">bucle §2</span><span class="nuevo">decidido</span></li>
+        <li><b>No hay botones de aceptar ni rechazar.</b> Se acepta yendo. El desvío cuesta cero —ocurre en el camino y no te saca del lazo— e ignorarlo es gratis. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Se ofrece dos veces y luego sedimenta.</b> Nunca dos veces en la misma salida ni en el mismo sitio: una sola oferta es frágil —basta un semáforo o una conversación de verdad— e infinitas son un incordio. <span class="fuente">quests, decisión 3</span></li>
+        <li>Y sedimentar <b>no se reprocha ni se comenta</b>. Nadie en el mundo dice que no fuiste. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>El par sigue siendo doble</b>: notificación más háptico. La notificación sola no llega a quien lleva el móvil en la mochila. <span class="fuente">accesibilidad §3</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo lleno">
+      <div class="barra"><span>19:14</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <svg viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Un cruce en el camino: la calzada sigue recta y un ramal marcado se desvía hacia un paraje">
+          <rect width="300" height="520" fill="#3f7fa8"/>
+          <path d="M0 0 H300 V430 C246 452 206 434 160 448 C112 462 62 446 0 464 Z" fill="#7fae5a"/>
+          <path d="M0 464 C62 446 112 462 160 448 C206 434 246 452 300 430" fill="none" stroke="#12321f" stroke-width="6"/>
+          <g fill="#5f9243" opacity="0.85"><ellipse cx="54" cy="196" rx="48" ry="36"/><ellipse cx="92" cy="160" rx="32" ry="24"/></g>
+          <g fill="none" stroke-linecap="round">
+            <path d="M150 476 C144 414 178 372 172 314 C166 256 196 216 202 158" stroke="rgba(30,43,24,0.75)" stroke-width="9"/>
+            <path d="M150 476 C144 414 178 372 172 314 C166 256 196 216 202 158" stroke="#f2e7c8" stroke-width="3.4"/>
+          </g>
+          <g fill="none" stroke-linecap="round">
+            <path d="M172 314 C132 300 104 272 74 258" stroke="#c62828" stroke-width="6" opacity="0.85" stroke-dasharray="1 11"/>
+          </g>
+          <g>
+            <path d="M74 258 l7 -13 l7 13 z" fill="#c62828"/>
+            <circle cx="74" cy="258" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <text x="30" y="240" font-family="Georgia, serif" font-size="12" fill="#1e2b18">O Fuso da Vella</text>
+          </g>
+          <circle cx="202" cy="158" r="8" fill="#c62828" stroke="#7d1414" stroke-width="1.6" opacity="0.55"/>
+          <rect x="150" y="122" width="104" height="22" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2" opacity="0.75"/>
+          <text x="202" y="137" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#1e2b18" opacity="0.75">Monfrida</text>
+          <circle cx="172" cy="314" r="13" fill="#c62828" opacity="0.16"/>
+          <circle cx="172" cy="314" r="6" fill="#c62828" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <div class="zocalo">
+          <p class="rotulo">A mano izquierda</p>
+          <p>Se ve el tejado de O Fuso da Vella. Queda cerca, pero de camino no está.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 5</p>
+      <h2>El desvío</h2>
+      <p>El cruce donde un paraje queda a un rato de camino, <b>fuera del lazo</b>. No confundir con la pantalla 4: aquello ocurría en el camino y costaba cero, y esto cuesta piernas. Es la única decisión táctica del juego, y se toma con ellas.</p>
+      <ul>
+        <li><b>No hay botón de aceptar el desvío.</b> Aceptas girando. Poner un botón convertiría una decisión del cuerpo en una decisión de menú, que es justo lo que se quitó de antes de salir. <span class="fuente">bucle §3</span></li>
+        <li><b>Aquí es donde vive la pregunta «¿me da hoy el cuerpo?»</b>, y en la calle es mejor tensión que en una pantalla de configuración. <span class="fuente">bucle §3</span></li>
+        <li><b>Cuánto cuesta se dice con la vista, no con un número.</b> «Queda cerca, pero de camino no está», y el ramal dibujado hace el resto: nada de «+800 m». <span class="fuente">bucle §3</span></li>
+        <li>El ramal <b>tiene nombre porque hay que poder nombrarlo</b>. Hoy los ramales a parajes nacen sin nombre a propósito, y esto lo cambia. <span class="fuente">accesibilidad §2</span></li>
+        <li><b>Si no giras no pasa nada</b>, y el paraje sigue ahí para otro día. Volver al mismo sitio es además cómo se sube al nivel «lo conoces bien». <span class="fuente">bucle §1, §5</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo lleno">
+      <div class="barra"><span>19:22</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <svg viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice" role="img" aria-label="El camino rodea una escalinata: el atajo aparece dibujado y declarado, y la ruta va por otro lado">
+          <rect width="300" height="520" fill="#3f7fa8"/>
+          <path d="M0 0 H300 V430 C246 452 206 434 160 448 C112 462 62 446 0 464 Z" fill="#7fae5a"/>
+          <path d="M0 464 C62 446 112 462 160 448 C206 434 246 452 300 430" fill="none" stroke="#12321f" stroke-width="6"/>
+          <g fill="#5f9243" opacity="0.85"><ellipse cx="248" cy="230" rx="44" ry="32"/></g>
+          <g fill="none" stroke-linecap="round">
+            <path d="M120 470 C118 420 92 386 96 336 C100 286 140 254 150 200 C158 164 182 142 208 130" stroke="rgba(30,43,24,0.75)" stroke-width="9"/>
+            <path d="M120 470 C118 420 92 386 96 336 C100 286 140 254 150 200 C158 164 182 142 208 130" stroke="#f2e7c8" stroke-width="3.4"/>
+          </g>
+          <g stroke="rgba(30,43,24,0.45)" stroke-width="2.5" fill="none" stroke-dasharray="5 5">
+            <path d="M120 470 C176 424 196 320 208 130"/>
+          </g>
+          <g stroke="rgba(30,43,24,0.5)" stroke-width="2.4" stroke-linecap="round">
+            <path d="M152 396 l16 -9"/><path d="M158 378 l16 -9"/><path d="M163 360 l16 -9"/><path d="M167 342 l16 -9"/>
+          </g>
+          <g>
+            <rect x="176" y="352" width="106" height="21" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2"/>
+            <text x="229" y="367" text-anchor="middle" font-family="Georgia, serif" font-size="12.5" fill="#1e2b18">A Escaleira Vella</text>
+          </g>
+          <circle cx="208" cy="130" r="8" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+          <circle cx="120" cy="470" r="13" fill="#c62828" opacity="0.16"/>
+          <circle cx="120" cy="470" r="6" fill="#c62828" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <div class="zocalo">
+          <p class="rotulo">Por qué das esta vuelta</p>
+          <p>A Escaleira Vella corta por arriba, pero son ochenta escalones. El camino largo va por el lado del río.</p>
+        </div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 6</p>
+      <h2>La Escaleira Vella</h2>
+      <p>El filtro de accesibilidad en la calle. La ruta va por donde puedes ir, y el mapa te enseña lo que ha evitado y por qué.</p>
+      <ul>
+        <li><b>El filtro evita, no borra.</b> La escalinata existe, se dibuja y tiene nombre; lo único que pasa es que el trazado no te manda por ahí. <span class="fuente">accesibilidad §2</span></li>
+        <li><b>Y se declara porque tú sabes de tu barrio más que OpenStreetMap.</b> Puede haber una rampa al lado que nadie ha mapeado, y esa decisión es tuya, no del juego. <span class="fuente">accesibilidad §2</span></li>
+        <li><b>Se dice en lenguaje del mundo</b>, con nombre propio y una razón concreta. Ni etiquetas de accesibilidad, ni iconos, ni ninguna palabra que convierta esto en un modo. <span class="fuente">accesibilidad, encuadre</span></li>
+        <li><b>Las cuestas no se prometen.</b> <code>incline</code> está poco mapeado y el proyecto no tiene modelo de elevación, así que este mismo camino puede ser un repecho sin que nadie lo avise. Decirlo es mejor que fingir que está cubierto. <span class="fuente">accesibilidad §2</span></li>
+        <li><b>Lo que nos inventamos nosotros tampoco se promete.</b> Los tramos que <code>coserHuecos</code> une hasta 180 m y las rectas <code>fallback</code> son suposiciones nuestras, no calles: bajo filtro no pueden darse por transitables. <span class="fuente">accesibilidad §2</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo tachada">
+      <div class="barra"><span>19:31</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo" style="text-align:center">Salida en curso</p>
+        <div class="metricon"><div class="cifra">4,2</div><div class="pie-cifra">kilómetros</div></div>
+        <div class="rejilla-metricas">
+          <div class="metricon"><div class="cifra" style="font-size:24px">11'40"</div><div class="pie-cifra">ritmo</div></div>
+          <div class="metricon"><div class="cifra" style="font-size:24px">5 812</div><div class="pie-cifra">pasos</div></div>
+          <div class="metricon"><div class="cifra" style="font-size:24px">218</div><div class="pie-cifra">kcal</div></div>
+          <div class="metricon"><div class="cifra" style="font-size:24px">48:03</div><div class="pie-cifra">tiempo</div></div>
+        </div>
+        <div>
+          <div class="barra-progreso"><i></i></div>
+          <p class="rotulo" style="text-align:center;margin-top:6px">62 % de la aventura</p>
+        </div>
+        <div class="metricon" style="margin-top:auto"><div class="cifra" style="font-size:16px">Racha: 6 días</div></div>
+      </div>
+      <div class="tacha">
+        <svg viewBox="0 0 100 174" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="8" y1="12" x2="92" y2="162" stroke="#c62828" stroke-width="1.6" opacity="0.85"/>
+          <line x1="92" y1="12" x2="8" y2="162" stroke="#c62828" stroke-width="1.6" opacity="0.85"/>
+        </svg>
+      </div>
+      <div class="sello">No<br>existe</div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 7</p>
+      <h2>La que no vamos a hacer</h2>
+      <p>Vale la pena dibujarla porque es la pantalla que este momento pide sola, la que aparece en cualquier app parecida y la que se colaría si nadie dice que no.</p>
+      <ul>
+        <li><b>Cada cifra de aquí rompe una decisión escrita.</b> Los kilómetros y el ritmo convierten esto en una app de deporte; el porcentaje deshace que la aventura declare su tamaño con una palabra; la racha castiga la ausencia, que es justo lo que el reloj del mundo se diseñó para no hacer. <span class="fuente">bucle §3 · quests, decisión 4</span></li>
+        <li><b>Y todas ellas dan una razón para sacar el móvil</b>, que es lo único que este momento no puede permitirse.</li>
+        <li><b>El contador de pasos existe por dentro y no se enseña.</b> El motor de pasos mueve el mundo con tus kilómetros; que el jugador los vea es otra cosa distinta y no hace falta para nada. <span class="fuente">quests, decisión 4</span></li>
+        <li><b>Tampoco hay racha ni logros.</b> Volver tras tres meses enseña lo mismo que volver tras tres días: el mundo no acumula deuda mientras no andas. <span class="fuente">quests, decisión 4</span></li>
+        <li>La única medida que el juego lleva de ti es <b>el tramo</b>, se ajusta midiendo y <b>no se comenta jamás</b>. Si el juego dijera «últimamente andas menos», sería un reproche. <span class="fuente">accesibilidad §1</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="pareja">
+    <div class="capa"><b>Noticias</b><span>Háptico desde el bolsillo más marca en el mapa. Sin notificación, para no gastarla.</span></div>
+    <div class="capa"><b>Oportunidades</b><span>Notificación más háptico. Es el único aviso que enciende la pantalla, y por eso está racionado.</span></div>
+  </div>
+
+  <div class="pie">
+    <h3>Lo que este artefacto cierra</h3>
+    <ul>
+      <li class="cerrado"><b>La salida sigue viva con el móvil bloqueado gracias a un rótulo del sistema</b> —servicio en primer plano, Actividad en Vivo en iOS—, y eso es lo que permite seguir pidiendo solo el permiso de ubicación «mientras se usa». La decisión de <code>seguridad-privacidad.md</code> §2 no había que retocarla: había que sostenerla.</li>
+      <li class="cerrado"><b>El rótulo es austero y visible a propósito</b>: hacia dónde vas y nada más. Ni cifras ni progreso. Y visible porque una app que sigue leyendo tu ubicación tiene que decirlo mientras lo hace.</li>
+      <li class="cerrado"><b>Andar por sitio nuevo se cobra al echar el telón</b>, nunca en marcha. Se descartó un háptico de descubrimiento: le habría dado su momento al pilar de la cartografía a cambio de meter un canal de aviso más en el único momento que se diseñó callado.</li>
+      <li class="cerrado"><b>Y por tanto el mapa en marcha no cambia durante la salida.</b> Solo se mueven tu marca y las de los avisos. Mirar no aporta nada nuevo, que es el efecto que busca el momento, y el telón tiene algo que enseñar.</li>
+      <li class="cerrado"><b>El telón lo echa volver, y la salida a mano vive en el rótulo del sistema.</b> Cierra el pendiente 2 de <code>bucle-jugable.md</code>, y sale gratis porque el rótulo ya tenía que estar ahí por otra razón. Se descartó cerrar sola al detectar que llevas rato quieta: adivinar mal echa el telón sobre una aventura viva, y una parada larga es normal.</li>
+      <li class="cerrado"><b>En marcha no hay ni un control tocable.</b> Ni aceptar un desvío, ni descartar un aviso, ni pausar. Lo único tocable vive en la pantalla de bloqueo y es del sistema: el rótulo persistente, y las notificaciones de oportunidad, que <b>abren el mapa con la marca puesta</b> y nada más.</li>
+      <li class="cerrado"><b>Un aviso completo incluye dónde.</b> Nombra el sitio, porque el mundo tiene nombres para eso. La prueba, que vale para cualquier aviso futuro: si tocando se aprende algo que hacía falta, el aviso está mal escrito.</li>
+      <li class="cerrado"><b>Validar la llegada no es un gesto ni un disparo.</b> Parada dentro del geofence, la escena queda disponible y espera; no enciende la pantalla ni pone la app delante. Si miras está ahí, y si no, sigues andando. Es lo que hace que pararse en un semáforo no tenga consecuencias.</li>
+      <li class="cerrado"><b>Abrir la app enseña lo que corresponde al sitio donde estás</b>, no lo que corresponde al botón que tocaste: andando el mapa, parada dentro de un geofence la escena. Una sola regla para el aviso, el rótulo y el icono.</li>
+      <li class="cerrado"><b>El mapa va con el norte arriba</b> y tu posición es una marca roja del propio mapa. Es un mapa dibujado, no un navegador: girarlo destroza los rótulos, la cartela y la brújula.</li>
+      <li class="cerrado"><b>El coste de un desvío se enseña con el dibujo y con una frase</b>, nunca con metros ni minutos.</li>
+      <li class="cerrado"><b>El camino difícil se declara con nombre propio y razón concreta</b>, en lenguaje del mundo. Ninguna palabra convierte esto en un modo.</li>
+      <li class="cerrado"><b>Los ramales a parajes pasan a necesitar nombre.</b> Hoy nacen sin él a propósito, y sin nombre no se puede ni ofrecer un desvío ni declarar un camino evitado.</li>
+    </ul>
+      <li class="cerrado"><b>Irse por otro lado no existe como concepto</b>, porque el juego no lleva la cuenta del trazado: guía por nombres de sitio y valida por geofence, así que la ruta dibujada es una sugerencia y no un contrato. Otra calle es invisible; otro sitio no pasa nada, sin «te has desviado» ni recalculando; y pasar cerca de un beat camino del supermercado valida igual, que es un regalo y no una anomalía.</li>
+      <li class="cerrado"><b>El vehículo se aparta.</b> Detectada velocidad de coche, autobús o tren, el motor de pasos deja de contar y los geofences dejan de validar. Y cuando la detección duda: medir el tramo excluye el vehículo, pero contar kilómetros y validar <b>cuentan en la duda</b>, porque un paso de más no le quita nada a nadie y no contar los de quien baja una cuesta larga en silla le borra su esfuerzo.</li>
+      <li class="cerrado"><b>El rótulo se retira, la salida no se cierra.</b> Tras un buen rato sin andar, el servicio en primer plano se para —no puede vivir días en tu pantalla de bloqueo— y la aventura espera en la portada, con la tarjeta ofreciendo seguir o dejarlo aquí. Que espere días no molesta: el reloj del mundo son tus kilómetros.</li>
+    </ul>
+  </div>
+
+</div>

@@ -1,0 +1,411 @@
+<title>Pantallas 5 · El telón — Walking Adventure</title>
+
+<style>
+  :root {
+    --tierra: #7fae5a; --mar: #3f7fa8; --tinta: #1e2b18; --marca: #c62828;
+    --placa: #efe3c0; --filete: #8a6d34;
+    --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30, 43, 24, 0.16); --bisel: #2a3324;
+    --serif: Georgia, "IM Fell English", "Times New Roman", serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+      --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  }
+  :root[data-theme="dark"] { --fondo: #141a12; --fondo-2: #1c241a; --texto: #e6e2d0; --texto-2: #9aa892;
+    --linea: rgba(230,226,208,0.16); --filete: #b08c44; --marca: #e05a4f; }
+  :root[data-theme="light"] { --fondo: #f2ecdb; --fondo-2: #e8e0c9; --texto: #1e2b18; --texto-2: #55604c;
+    --linea: rgba(30,43,24,0.16); --filete: #8a6d34; --marca: #c62828; }
+
+  body { margin: 0; background: var(--fondo); color: var(--texto); font-family: var(--sans);
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .envoltorio { max-width: 1120px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .cabecera { border-bottom: 2px solid var(--filete); padding-bottom: 28px; }
+  .migas { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--texto-2); margin: 0 0 14px; }
+  .cabecera h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; }
+  .cabecera h1 em { font-style: italic; color: var(--filete); }
+  .entradilla { max-width: 62ch; color: var(--texto-2); margin: 0; font-size: 1.02rem; }
+
+  .reglas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 36px 0 8px; }
+  .regla { border-left: 3px solid var(--filete); padding: 4px 0 4px 14px; }
+  .regla b { display: block; font-family: var(--serif); font-size: 1.02rem; font-weight: 400; margin-bottom: 3px; }
+  .regla span { font-size: 0.86rem; color: var(--texto-2); }
+
+  .aviso-voces { margin: 34px 0 8px; padding: 14px 18px; background: var(--fondo-2); border-radius: 2px; font-size: 0.88rem; color: var(--texto-2); }
+  .aviso-voces b { color: var(--texto); font-weight: 600; }
+
+  .secuencia { margin: 40px 0 8px; border: 1px solid var(--linea); border-radius: 3px; padding: 22px 24px; background: var(--fondo-2); }
+  .secuencia h3 { font-family: var(--serif); font-weight: 400; font-size: 1.28rem; margin: 0 0 6px; }
+  .secuencia > p { margin: 0 0 18px; font-size: 0.92rem; color: var(--texto-2); max-width: 66ch; }
+  .secuencia ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: seq; }
+  .secuencia li { position: relative; padding-left: 34px; font-size: 0.94rem; max-width: 68ch; counter-increment: seq; }
+  .secuencia li::before { content: counter(seq); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--filete); color: var(--filete); font-family: var(--mono); font-size: 0.74rem; display: grid; place-items: center; }
+  .secuencia li em { color: var(--texto-2); font-style: normal; }
+
+  .pantalla { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; padding: 52px 0; border-top: 1px solid var(--linea); }
+  .pantalla:first-of-type { border-top: 2px solid var(--filete); }
+  @media (max-width: 760px) { .pantalla { grid-template-columns: 1fr; gap: 30px; } }
+
+  .notas h2 { font-family: var(--serif); font-weight: 400; font-size: 1.62rem; margin: 0 0 4px; line-height: 1.2; text-wrap: balance; }
+  .paso { font-family: var(--mono); font-size: 0.78rem; color: var(--filete); letter-spacing: 0.1em; margin: 0 0 10px; }
+  .notas > p { margin: 0 0 18px; max-width: 60ch; color: var(--texto-2); }
+  .notas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .notas li { max-width: 62ch; font-size: 0.94rem; padding-left: 16px; position: relative; }
+  .notas li::before { content: "—"; position: absolute; left: 0; color: var(--filete); }
+  .notas li b { font-weight: 600; }
+  code { font-family: var(--mono); font-size: 0.86em; background: var(--fondo-2); border-radius: 2px; padding: 0 4px; }
+  .fuente { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--marca); border: 1px solid currentColor; border-radius: 2px; padding: 1px 5px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  .nuevo { display: inline-block; font-family: var(--mono); font-size: 0.72rem; color: var(--fondo); background: var(--filete); border-radius: 2px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.06em; }
+
+  .movil { background: var(--bisel); border-radius: 26px; padding: 9px; box-shadow: 0 14px 34px rgba(0,0,0,0.24); position: sticky; top: 28px; }
+  @media (max-width: 760px) { .movil { position: static; max-width: 300px; } }
+  .lienzo { background: var(--placa); border-radius: 18px; overflow: hidden; aspect-ratio: 9 / 17.4; display: flex; flex-direction: column; font-family: var(--serif); color: var(--tinta); position: relative; }
+  .barra { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 9px; padding: 8px 14px 2px; color: rgba(30,43,24,0.5); letter-spacing: 0.04em; }
+  .cuerpo { flex: 1; display: flex; flex-direction: column; padding: 12px 18px 14px; gap: 11px; overflow: hidden; }
+
+  .rotulo { font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(30,43,24,0.55); margin: 0; }
+  .titular { font-size: 20px; line-height: 1.18; margin: 0; font-weight: 400; }
+  .titular.chico { font-size: 16px; }
+  .parrafo { font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .parrafo.tenue { color: rgba(30,43,24,0.62); }
+  .italica { font-style: italic; }
+  .empuja { margin-top: auto; }
+
+  .boton { text-align: center; background: var(--tinta); color: var(--placa); padding: 11px; border-radius: 3px; font-size: 13px; letter-spacing: 0.04em; }
+  .boton.hueco { background: transparent; color: rgba(30,43,24,0.6); border: 1px solid rgba(30,43,24,0.3); }
+
+  .miniatura { border-radius: 3px; overflow: hidden; border: 1.5px solid var(--filete); }
+  .miniatura svg { display: block; width: 100%; height: auto; }
+
+  .ganado { display: grid; gap: 7px; }
+  .linea-ganado { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-bottom: 1px dotted rgba(30,43,24,0.3); padding-bottom: 5px; font-size: 12.5px; }
+  .linea-ganado span:last-child { font-family: var(--sans); font-size: 11px; color: rgba(30,43,24,0.6); white-space: nowrap; }
+
+  .diario { background: rgba(255,255,255,0.42); border: 1px solid rgba(30,43,24,0.22); border-radius: 2px; padding: 11px 12px; }
+  .diario .fecha { font-family: var(--sans); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(30,43,24,0.5); margin: 0 0 6px; }
+  .diario h4 { margin: 0 0 5px; font-size: 14px; font-weight: 400; }
+  .diario p { margin: 0 0 7px; font-size: 11.5px; line-height: 1.5; }
+  .diario p:last-child { margin-bottom: 0; }
+  .oido { border-left: 2px solid rgba(30,43,24,0.28); padding-left: 9px; font-style: italic; color: rgba(30,43,24,0.72); }
+
+  .telon-marco { position: absolute; inset: 0; pointer-events: none; }
+  .telon-marco svg { width: 100%; height: 100%; display: block; }
+
+  .pareja { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0 4px; }
+  .capa { border: 1px solid var(--linea); border-radius: 3px; padding: 10px 12px; }
+  .capa b { display: block; font-family: var(--serif); font-weight: 400; font-size: 0.98rem; margin-bottom: 2px; }
+  .capa span { font-size: 0.84rem; color: var(--texto-2); }
+
+  .pie { border-top: 2px solid var(--filete); margin-top: 40px; padding-top: 28px; }
+  .pie h3 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; margin: 0 0 14px; }
+  .pie ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 70ch; color: var(--texto-2); font-size: 0.94rem; }
+  .pie li { padding-left: 22px; position: relative; }
+  .pie li b { color: var(--texto); }
+  .pie .cerrado::before { content: "✓"; position: absolute; left: 0; color: var(--filete); font-weight: 700; }
+  .pie .abierto::before { content: "?"; position: absolute; left: 2px; color: var(--marca); font-weight: 700; }
+</style>
+
+<div class="envoltorio">
+
+  <header class="cabecera">
+    <p class="migas">Walking Adventure · Diseño de pantallas · 5 de 6</p>
+    <h1>El telón<br><em>donde se cobra todo lo que se guardó en silencio</em></h1>
+    <p class="entradilla">Has vuelto. Durante la salida el juego no felicitó nada, no enseñó ni una cifra y no dijo que estabas descubriendo sitios: todo eso se registró callado y se paga aquí, de una vez. Es el momento que le da sentido a que en marcha no pasara nada.</p>
+  </header>
+
+  <div class="reglas">
+    <div class="regla"><b>El telón se echa solo</b><span>Al volver. Lo que espera es que lo leas, no que lo dispares.</span></div>
+    <div class="regla"><b>Se echa haya o no aventura</b><span>Un paseo sin nada también tiene su mapa entintado y su entrada de diario.</span></div>
+    <div class="regla"><b>Nada se reprocha</b><span>Ni volverse a mitad, ni no salir en un mes. El mundo no lleva la cuenta de lo que no hiciste.</span></div>
+    <div class="regla"><b>Lo que hiciste se pone en camino</b><span>Y viaja a pie, por las calzadas, deformándose. Tú ya no lo controlas.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Aquí manda la voz del mundo.</b> Lo que va en <span style="font-family:var(--serif)">serif</span> es lo que el juego dice; lo que va en sans somos nosotros hablando de él.</p>
+
+  <div class="secuencia">
+    <h3>Cuándo ocurre esto</h3>
+    <p>El telón no es una pantalla que se abre: es lo que pasa cuando la salida se cierra. Y la salida se cierra de dos maneras, las dos ya decididas.</p>
+    <ol>
+      <li><b>Al volver al punto de partida</b>, que es la norma y que el lazo garantiza. <em>Volver es cuestión de dónde estás y no de qué kilómetros pusiste tú: si vuelves en autobús, has vuelto.</em></li>
+      <li><b>Dando la salida por terminada</b> desde el rótulo del sistema, para las salidas que no acaban donde empezaron. <em>O desde la tarjeta de la portada con «dejarlo aquí», si el rótulo ya se retiró.</em></li>
+    </ol>
+    <p style="margin:18px 0 0"><b style="color:var(--texto)">En los dos casos el telón se echa solo, sin avisar.</b> No hay notificación —están reservadas a las oportunidades— ni la app se pone delante, que sería el móvil llamándote en lugar de avisarte. El telón ocurre; lo que espera es que lo leas, y al abrir la app es lo primero que hay.</p>
+  </div>
+
+  <div class="secuencia" style="margin-top:16px">
+    <h3>Qué se ve, y en qué orden</h3>
+    <p>Estas seis pantallas no son seis caminos: son una secuencia con dos ramas. Conviene dibujarlo porque de las pantallas sueltas no se deduce, y porque el orden es una decisión.</p>
+    <ol>
+      <li><b>El mapa se entinta.</b> <em>Siempre. Haya aventura o no, y hayas vuelto entera o a mitad.</em></li>
+      <li><b>El desenlace</b>, si había aventura y la terminaste. <em>O <b>el cierre en corto</b> en su lugar, si volviste a mitad. Es alternativa al desenlace, no al mapa.</em></li>
+      <li><b>Lo que se pone en camino</b>, solo si el desenlace era notable. <em>Nunca después de un cierre en corto, que por decisión no genera rumor.</em></li>
+      <li><b>La entrada del diario.</b> <em>Siempre, y cierra.</em></li>
+    </ol>
+    <p style="margin:18px 0 0"><b style="color:var(--texto)">Un paseo sin aventura es entonces el mapa y el diario</b>, sin nada en medio — no una pantalla distinta con su propio título. La diferencia entre un paseo y una aventura no es que se cierren de otra manera: es que uno tiene desenlace y el otro no.</p>
+  </div>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>21:04</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Ya estás en casa</p>
+        <h2 class="titular chico">Hoy has ensanchado el mapa</h2>
+        <div class="miniatura">
+          <svg viewBox="0 0 300 300" role="img" aria-label="El mapa con lo andado hoy recién entintado, lo antiguo en tinta asentada y el resto a lápiz">
+            <rect width="300" height="300" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V236 C248 252 208 234 162 248 C114 262 64 246 0 262 Z" fill="#7fae5a"/>
+            <path d="M0 262 C64 246 114 262 162 248 C208 234 248 252 300 236" fill="none" stroke="#12321f" stroke-width="5"/>
+            <g stroke="rgba(30,43,24,0.32)" stroke-width="2.4" stroke-dasharray="4 5" fill="none">
+              <path d="M232 96 C252 128 236 158 248 188"/><path d="M40 120 C24 150 40 176 30 206"/>
+            </g>
+            <g fill="none" stroke-linecap="round">
+              <path d="M96 236 C104 190 140 176 176 148" stroke="rgba(30,43,24,0.55)" stroke-width="7"/>
+              <path d="M96 236 C104 190 140 176 176 148" stroke="#f2e7c8" stroke-width="2.6"/>
+            </g>
+            <g fill="none" stroke-linecap="round">
+              <path d="M176 148 C196 118 186 84 208 56" stroke="#1e2b18" stroke-width="8"/>
+              <path d="M176 148 C196 118 186 84 208 56" stroke="#f6ecd0" stroke-width="3"/>
+              <path d="M176 148 C150 132 128 106 106 100" stroke="#1e2b18" stroke-width="7"/>
+              <path d="M176 148 C150 132 128 106 106 100" stroke="#f6ecd0" stroke-width="2.6"/>
+            </g>
+            <circle cx="96" cy="236" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <g>
+              <circle cx="208" cy="56" r="7" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+              <rect x="160" y="24" width="96" height="20" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2"/>
+              <text x="208" y="38" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#1e2b18">Monfrida</text>
+            </g>
+            <g>
+              <circle cx="106" cy="100" r="5" fill="#1e2b18"/>
+              <text x="116" y="104" font-family="Georgia, serif" font-size="11" fill="#1e2b18">O Fuso da Vella</text>
+            </g>
+            <circle cx="176" cy="148" r="5" fill="#1e2b18" opacity="0.85"/>
+            <text x="186" y="152" font-family="Georgia, serif" font-size="10.5" fill="#1e2b18" opacity="0.85">O Torreón</text>
+          </svg>
+        </div>
+        <div class="ganado">
+          <div class="linea-ganado"><span>O Fuso da Vella</span><span>lo conoces</span></div>
+          <div class="linea-ganado"><span>El Camiño do Sal</span><span>entero</span></div>
+          <div class="linea-ganado"><span>O Torreón Esquecido</span><span>lo conoces bien</span></div>
+        </div>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1</p>
+      <h2>El mapa se entinta</h2>
+      <p>Lo primero, y el pago de la decisión más rara del artefacto anterior: durante la salida el mapa no cambió ni una vez. Todo lo de hoy sale aquí, de golpe.</p>
+      <ul>
+        <li><b>Esto es lo que hace que en marcha no pasara nada.</b> Si el mapa se hubiera ido entintando por el camino, mirar el móvil habría dado algo, y este momento no tendría nada que enseñar. <span class="fuente">bucle §1</span></li>
+        <li><b>Tres tintas y no dos</b>: lo de hoy, recién puesto y más oscuro; lo que ya sabías, asentado; y lo que sigue sin saberse, a lápiz. Sin leyenda, porque la diferencia se ve. <span class="nuevo">decidido</span></li>
+        <li><b>La lista dice de qué nivel a qué nivel</b>, en palabras del mundo —lo ves, lo conoces, lo conoces bien— y nunca en porcentajes. Es el mismo idioma de los cuatro niveles de conocimiento. <span class="fuente">bucle §1</span></li>
+        <li><b>O Torreón sube a «lo conoces bien» por haber vuelto</b>, no por haber hecho nada especial. Profundizar es el premio de la rutina y no hay que merecerlo. <span class="fuente">bucle §5</span></li>
+        <li><b>Ni kilómetros ni tiempo.</b> Lo que se enseña es territorio ganado, que es una medida del mundo y no del cuerpo. <span class="fuente">bucle §3</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>21:04</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">La entrega sospechosa</p>
+        <h2 class="titular chico">Acabó como acaban estas cosas</h2>
+        <p class="parrafo">En Monfrida no había ninguna casa de tejado verde, pero sí una mujer que llevaba tres días esperando una caja. Abrió, miró dentro y se echó a reír. No dijo de qué.</p>
+        <div class="ganado">
+          <div class="linea-ganado"><span>Once monedas</span><span>y una comida</span></div>
+          <div class="linea-ganado"><span>La llave del molino viejo</span><span>dice que la vas a necesitar</span></div>
+        </div>
+        <p class="parrafo tenue" style="font-size:11.5px">En Monfrida ya saben quién eres. En el resto del mapa, todavía no.</p>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2</p>
+      <h2>El desenlace</h2>
+      <p>Cómo acabó la aventura. Es la última pieza de texto que el LLM escribió antes de que salieras de casa, y por eso está aquí y no se genera ahora.</p>
+      <ul>
+        <li><b>El oro sí es un número, y se enseña.</b> La prohibición de cifras era sobre distancias y tiempos, que convierten esto en una app de deporte. El oro es una moneda que se gasta, y sin verla no se puede decidir en qué. <span class="fuente">progresion §2</span><span class="nuevo">decidido</span></li>
+        <li><b>La llave no es un requisito.</b> Los objetos abren otra puerta al mismo beat en lugar de bloquearlo, así que perderla no cierra nada. <span class="fuente">progresion §3</span></li>
+        <li><b>El rango se dice con una frase, nunca con una barra.</b> «En Monfrida ya saben quién eres» hace el trabajo de un medidor de reputación sin ser uno, y dice de paso que el rango es por núcleo. <span class="fuente">progresion §1</span></li>
+        <li><b>Nada de XP.</b> Se retiró a propósito: subir de nivel en un juego cuyo techo son tus piernas premia a quien más anda. <span class="fuente">progresion.md</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>21:05</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Y ahora</p>
+        <h2 class="titular chico">Lo de la caja ya se cuenta en Monfrida</h2>
+        <p class="parrafo">De ahí sale por donde salen estas cosas. Tú ya no puedes hacer nada.</p>
+        <div class="miniatura">
+          <svg viewBox="0 0 300 170" role="img" aria-label="Del núcleo de Monfrida sale una marca por la calzada, sin decir a dónde llega">
+            <rect width="300" height="170" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V128 C248 142 208 124 162 138 C114 152 64 136 0 152 Z" fill="#7fae5a"/>
+            <g fill="none" stroke-linecap="round">
+              <path d="M96 132 C104 96 140 84 176 62" stroke="rgba(30,43,24,0.45)" stroke-width="6"/>
+              <path d="M176 62 C214 44 236 60 268 44" stroke="rgba(30,43,24,0.45)" stroke-width="6"/>
+              <path d="M176 62 C158 34 128 30 96 22" stroke="rgba(30,43,24,0.45)" stroke-width="6"/>
+            </g>
+            <circle cx="176" cy="62" r="16" fill="none" stroke="#c62828" stroke-width="1.6" opacity="0.35"/>
+            <circle cx="176" cy="62" r="24" fill="none" stroke="#c62828" stroke-width="1.2" opacity="0.18"/>
+            <circle cx="176" cy="62" r="7" fill="#c62828" stroke="#7d1414" stroke-width="1.6"/>
+            <rect x="128" y="76" width="96" height="20" rx="2" fill="#efe3c0" stroke="#8a6d34" stroke-width="1.2"/>
+            <text x="176" y="90" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#1e2b18">Monfrida</text>
+            <g fill="#c62828" opacity="0.55">
+              <circle cx="204" cy="53" r="3"/><circle cx="152" cy="50" r="3"/>
+            </g>
+          </svg>
+        </div>
+        <p class="parrafo tenue italica" style="font-size:11.5px">Ya te enterarás de cómo lo cuentan.</p>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 3</p>
+      <h2>Lo que se pone en camino</h2>
+      <p>El rumor nace en el núcleo donde ocurrió, en nivel cero, y a partir de aquí viaja solo. Es la promesa del bucle entero: lo que hiciste vuelve a ti contado por otros.</p>
+      <ul>
+        <li><b>Se ve salir, no se ve llegar.</b> El mapa enseña que algo se ha puesto en marcha desde Monfrida y no a dónde va ni cuándo. Enseñar la propagación sería el panel del estado del mundo que la portada se negó a tener. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Y sobre todo no se ve deformarse.</b> El nivel es dato vivo interno: si el juego enseñara «esto llegará abultado a Vilanova», el mejor truco del juego se explicaría en vez de ponerse en escena. <span class="fuente">quests §6 · arranque.md</span></li>
+        <li><b>Viaja a pie</b>, un tramo por paso del mundo, y por el árbol de calzadas, que define un único camino entre dos núcleos. Se puede adelantar a su propia fama: ir derecho al pueblo vecino es llegar a la vez que la noticia. <span class="fuente">quests §6</span></li>
+        <li><b>Solo aparece si el desenlace era notable.</b> Lo declara la plantilla; una entrega rutinaria no genera nada y esta pantalla no sale. <span class="fuente">quests §6</span></li>
+        <li><b>Y no se puede impedir.</b> Es lo que hace que las decisiones pesen: la reputación no es lo que hiciste, es lo que llegó. <span class="fuente">quests §6</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>21:06</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Tu diario</p>
+        <div class="diario">
+          <p class="fecha">Jueves · el día 23</p>
+          <h4>La entrega sospechosa</h4>
+          <p>Sabela me dio una caja en O Torreón y me dijo que no la abriera. No la abrí.</p>
+          <p class="oido">En Monfrida se cuenta que se llevaron tres campanas de la ermita y que los bueyes se plantaron a mitad de camino.</p>
+          <p class="oido">Y que hay una forastera preguntando por casas de tejado verde.</p>
+        </div>
+        <p class="parrafo tenue" style="font-size:11px">Lo que oíste queda como lo oíste.</p>
+        <div class="boton hueco empuja">Ver el diario entero</div>
+        <div class="boton">Cerrar</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 4</p>
+      <h2>La entrada del día</h2>
+      <p>Lo que queda por escrito. El diario es la otra cara del mapa: el mapa registra lo que sabes del territorio y el diario lo que has oído.</p>
+      <ul>
+        <li><b>Registra lo oído, no lo cierto.</b> Eran dos campanas y aquí quedan tres, porque así te lo contaron. El diario nunca corrige. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Y nunca dice cuánto se deformó</b>, porque eso es dato vivo. Que las noticias se tuercen se descubre triangulando tu propio diario entre pueblos, sin que nadie lo explique. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Una entrada no se sobrescribe con otra más veraz.</b> Si mañana oyes la buena, conviven las dos, que es justamente lo que hace posible triangular. <span class="fuente">quests, decisión 3</span></li>
+        <li><b>Lo tuyo va en primera persona y lo oído entrecomillado aparte.</b> Son dos cosas con distinta autoridad: lo que hiciste lo sabes, lo que te contaron no. <span class="nuevo">decidido</span></li>
+        <li>El diario entero es <b>pantalla de consulta</b> y va en el artefacto 6. Aquí solo se enseña la hoja de hoy.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>19:52</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">La entrega sospechosa</p>
+        <h2 class="titular chico">Se resolvió sin ti</h2>
+        <p class="parrafo">Sabela esperó un rato en el muro, se cansó y le dio la caja al primero que pasaba camino de Monfrida. Dice que era de fiar. Dice.</p>
+        <div class="ganado">
+          <div class="linea-ganado"><span>Tres monedas</span><span>por las molestias</span></div>
+        </div>
+        <p class="parrafo tenue italica" style="font-size:11.5px">Y hoy has andado, que es lo que mueve el mundo.</p>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 2B · EN SU LUGAR</p>
+      <h2>El cierre en corto</h2>
+      <p>Te volviste a mitad, te cansaste o se te hizo tarde. La aventura se resuelve a la baja y se cierra con un final de verdad.</p>
+      <ul>
+        <li><b>Ocupa el sitio del desenlace, no el del mapa.</b> El mapa se entinta igual: volverse a mitad no anula lo andado. Y detrás no viene la pantalla del rumor, porque un cierre en corto no genera ninguno. <span class="fuente">bucle §4, §8</span></li>
+        <li><b>Un final digno es parte de la diversión.</b> Dejar el hilo colgando sería peor que un desenlace de repuesto, y el desenlace de repuesto lo trae escrito cada plantilla. <span class="fuente">bucle §4</span></li>
+        <li><b>No genera rumor.</b> Si el mundo comentara que lo dejaste a medias, estaríamos reprochando por la puerta de atrás justo lo que el diseño dice que no se reprocha. Nadie comenta que el jugador no fuese. <span class="fuente">bucle §4</span></li>
+        <li><b>Ni una palabra de reproche en el texto tampoco.</b> Sabela se cansó, que es lo que hace la gente; el juego no dice «no llegaste a tiempo». <span class="fuente">bucle §4</span></li>
+        <li><b>Y el telón se echa igual</b>: esta pantalla va entre las mismas que las demás, con su mapa entintado y su entrada de diario. Volverse a mitad no es una salida fallida. <span class="fuente">bucle §4</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="pantalla">
+    <div class="movil"><div class="lienzo">
+      <div class="barra"><span>20:18</span><span>▮▮▮</span></div>
+      <div class="cuerpo">
+        <p class="rotulo">Ya estás en casa</p>
+        <h2 class="titular chico">Hoy no has visto nada que no supieras</h2>
+        <div class="miniatura">
+          <svg viewBox="0 0 300 190" role="img" aria-label="El mapa sin ninguna tinta nueva: todo lo recorrido hoy ya estaba sabido">
+            <rect width="300" height="190" fill="#3f7fa8"/>
+            <path d="M0 0 H300 V148 C248 162 208 144 162 158 C114 172 64 156 0 172 Z" fill="#7fae5a"/>
+            <path d="M0 172 C64 156 114 172 162 158 C208 144 248 162 300 148" fill="none" stroke="#12321f" stroke-width="5"/>
+            <g stroke="rgba(30,43,24,0.3)" stroke-width="2.2" stroke-dasharray="4 5" fill="none">
+              <path d="M242 34 C262 66 246 96 258 126"/>
+            </g>
+            <g fill="none" stroke-linecap="round">
+              <path d="M96 150 C104 116 138 106 168 92" stroke="rgba(30,43,24,0.5)" stroke-width="6"/>
+              <path d="M96 150 C104 116 138 106 168 92" stroke="#f2e7c8" stroke-width="2.4"/>
+              <path d="M96 150 C68 132 56 106 60 80" stroke="rgba(30,43,24,0.5)" stroke-width="6"/>
+              <path d="M96 150 C68 132 56 106 60 80" stroke="#f2e7c8" stroke-width="2.4"/>
+              <path d="M168 92 C200 74 214 84 236 66" stroke="rgba(30,43,24,0.5)" stroke-width="6"/>
+              <path d="M168 92 C200 74 214 84 236 66" stroke="#f2e7c8" stroke-width="2.4"/>
+            </g>
+            <circle cx="96" cy="150" r="6" fill="#c62828" stroke="#7d1414" stroke-width="1.4"/>
+            <circle cx="60" cy="80" r="5" fill="#1e2b18" opacity="0.8"/>
+            <text x="70" y="76" font-family="Georgia, serif" font-size="11" fill="#1e2b18" opacity="0.8">A Pedra Torta</text>
+            <circle cx="236" cy="66" r="5" fill="#1e2b18" opacity="0.8"/>
+            <text x="176" y="52" font-family="Georgia, serif" font-size="11" fill="#1e2b18" opacity="0.8">O Muíño</text>
+          </svg>
+        </div>
+        <p class="parrafo tenue" style="font-size:12px">Andaste por sitios tuyos. El mundo, mientras, anduvo lo suyo.</p>
+        <div class="boton empuja">Seguir</div>
+      </div>
+    </div></div>
+    <div class="notas">
+      <p class="paso">PANTALLA 1B · EL DÍA FLOJO</p>
+      <h2>Cuando no descubriste nada</h2>
+      <p>Tu vuelta de siempre, todo ya en «lo conoces bien», la lista vacía. Con el tiempo este es el caso normal y no el raro, así que merece dibujarse.</p>
+      <ul>
+        <li><b>El mapa sale igual y el título lo reconoce.</b> Se descartó saltarse la pantalla: haría desaparecer el objeto central del juego justo el día en que menos apetece salir. <span class="fuente">bucle §8</span><span class="nuevo">decidido</span></li>
+        <li><b>Ninguna tinta nueva, y se ve.</b> Es la contrapartida de las tres tintas: cuando no hay tinta fresca, el mapa lo dice sin decirlo. <span class="fuente">bucle §1</span></li>
+        <li><b>La línea suena a constatación, no a reproche.</b> Es la misma cuerda floja que el ajuste del tramo, que tampoco se comenta jamás: el juego no puede insinuar que hoy anduviste poco. <span class="fuente">accesibilidad §1</span></li>
+        <li><b>Y el mundo sí anduvo.</b> Los kilómetros mueven el mundo con aventura o sin ella, así que el día flojo no es un día perdido — lo que pasó se oirá llegando a los sitios, no aquí. <span class="fuente">quests, decisión 4</span></li>
+        <li>Un <b>paseo sin aventura</b> se cierra con esta misma pantalla y el diario, sin nada en medio. No es una pantalla distinta con su propio título, y por eso no hay una séptima aquí. <span class="fuente">bucle §8</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="pareja">
+    <div class="capa"><b>Con aventura</b><span>Mapa, desenlace, lo que se pone en camino si era notable, y diario.</span></div>
+    <div class="capa"><b>Sin aventura, o a medias</b><span>Mapa y diario siempre; desenlace de repuesto si volviste a mitad; ningún rumor en ninguno de los dos casos.</span></div>
+  </div>
+
+  <p class="aviso-voces"><b>Las seis pantallas son cuatro momentos.</b> Dos de ellas son variantes que ocupan el sitio de otra: el cierre en corto va donde iría el desenlace, y el día flojo es el mapa cuando no hay tinta nueva. Ninguna es un camino aparte.</p>
+
+  <div class="pie">
+    <h3>Lo que este artefacto cierra</h3>
+    <ul>
+      <li class="cerrado"><b>El telón se echa solo y sin avisar.</b> Ni notificación —están reservadas a las oportunidades— ni la app poniéndose delante. Lo que espera es que lo leas: al abrir, es lo primero.</li>
+      <li class="cerrado"><b>Tres tintas en el mapa</b>: lo de hoy recién puesto, lo que ya sabías asentado, lo que sigue sin saberse a lápiz. Sin leyenda, porque la diferencia se ve.</li>
+      <li class="cerrado"><b>Lo ganado se dice en palabras del mundo</b> —lo ves, lo conoces, lo conoces bien— y nunca en porcentajes ni en kilómetros.</li>
+      <li class="cerrado"><b>El oro sí se enseña como número.</b> La prohibición de cifras era sobre distancias y tiempos; el oro es una moneda que se gasta y sin verla no se puede decidir en qué.</li>
+      <li class="cerrado"><b>El rango se dice con una frase, nunca con una barra</b> — «en Monfrida ya saben quién eres», que de paso dice que es por núcleo.</li>
+      <li class="cerrado"><b>El rumor se ve salir, no se ve llegar</b>, y jamás se ve deformarse. Enseñar la propagación sería el panel del estado del mundo que la portada se negó a tener, y enseñar el nivel explicaría el mejor truco del juego en vez de ponerlo en escena.</li>
+      <li class="cerrado"><b>En el diario, lo tuyo en primera persona y lo oído aparte.</b> Son dos cosas con distinta autoridad: lo que hiciste lo sabes, lo que te contaron no.</li>
+      <li class="cerrado"><b>El telón es una secuencia con dos ramas, no seis caminos.</b> Mapa siempre · desenlace, o el cierre en corto en su lugar · el rumor solo si era notable · diario siempre. Un paseo sin aventura es mapa y diario, no una pantalla con título propio.</li>
+      <li class="cerrado"><b>El día que no descubres nada, el mapa sale igual y el título lo reconoce.</b> Se descartó saltarse la pantalla: haría desaparecer el objeto central del juego justo el día en que menos apetece salir. Y la línea tiene que sonar a constatación y no a reproche, como el ajuste del tramo.</li>
+    </ul>
+  </div>
+
+</div>
