@@ -1,0 +1,183 @@
+{
+  "cabecera": {
+    "mundo_congelado": "suelo-250m",
+    "semilla": "42.40,-8.81#1",
+    "revision_prototipo": "07f1c41",
+    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico."
+  },
+  "titulo": "Reinos de Vaeloria",
+  "idioma": "gl",
+  "radio_dibujo_m": 250,
+  "recuentos": {
+    "nucleos": 5,
+    "servicios": 6,
+    "parajes": 0,
+    "calzadas": 4
+  },
+  "nucleos": [
+    {
+      "nombre": "Ribadoiro",
+      "tipo": "aldea",
+      "x": -135,
+      "y": -36,
+      "anclaje": null
+    },
+    {
+      "nombre": "Outeimar do Vento",
+      "tipo": "ciudad",
+      "x": -32,
+      "y": -118,
+      "anclaje": "node/5323941422"
+    },
+    {
+      "nombre": "Casal do Espiño",
+      "tipo": "granja",
+      "x": 1,
+      "y": 23,
+      "anclaje": null
+    },
+    {
+      "nombre": "Casal do Espiño",
+      "tipo": "granja",
+      "x": 32,
+      "y": -50,
+      "anclaje": null
+    },
+    {
+      "nombre": "Lamitoño da Moura",
+      "tipo": "pueblo",
+      "x": 27,
+      "y": -142,
+      "anclaje": "node/3648044335"
+    }
+  ],
+  "servicios": [
+    {
+      "nombre": "Forxa do Gato Durmido",
+      "tipo": "armeria",
+      "x": 102,
+      "y": -178,
+      "anclaje": "node/13742917501"
+    },
+    {
+      "nombre": "Botica do Carballo Bailador",
+      "tipo": "boticario",
+      "x": -169,
+      "y": -67,
+      "anclaje": "node/3648044338"
+    },
+    {
+      "nombre": "Arcana do Caldeiro Prateado",
+      "tipo": "conjureria",
+      "x": -139,
+      "y": 6,
+      "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "Mercado da Espada Bailadora",
+      "tipo": "mercado",
+      "x": 130,
+      "y": -183,
+      "anclaje": "node/3643421606"
+    },
+    {
+      "nombre": "Pousada da Lúa Bailadora",
+      "tipo": "posada",
+      "x": 4,
+      "y": -116,
+      "anclaje": "node/3648044332"
+    },
+    {
+      "nombre": "Taberna do Grifo Feiticeiro",
+      "tipo": "taberna",
+      "x": 17,
+      "y": -135,
+      "anclaje": "node/3648044330"
+    }
+  ],
+  "parajes": [],
+  "calzadas": [
+    {
+      "nombre": "A Calzada das Brétemas",
+      "tipo": "calzada",
+      "desde": [
+        1,
+        23
+      ],
+      "hasta": [
+        -135,
+        -36
+      ],
+      "puntos": 4,
+      "recta": false
+    },
+    {
+      "nombre": "A Calzada do Leste",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        27,
+        -142
+      ],
+      "puntos": 4,
+      "recta": false
+    },
+    {
+      "nombre": "A Vella Ruta do Abrente Frío",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        32,
+        -50
+      ],
+      "puntos": 3,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Norte",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        1,
+        23
+      ],
+      "puntos": 5,
+      "recta": false
+    }
+  ],
+  "casting": [
+    {
+      "plantilla": "cita-en-la-fuente",
+      "castea": false
+    },
+    {
+      "plantilla": "entrega-sospechosa",
+      "castea": false
+    },
+    {
+      "plantilla": "peregrinaje",
+      "castea": false
+    },
+    {
+      "plantilla": "rescate-en-la-granja",
+      "castea": false
+    },
+    {
+      "plantilla": "ronda-del-vigia",
+      "castea": false
+    },
+    {
+      "plantilla": "tres-pistas",
+      "castea": false
+    }
+  ]
+}

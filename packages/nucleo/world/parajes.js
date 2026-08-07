@@ -105,11 +105,11 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
     for (let i = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1];
       const bb = { minX: Math.min(a.x, b.x), maxX: Math.max(a.x, b.x), minY: Math.min(a.y, b.y), maxY: Math.max(a.y, b.y) };
-      for (const river of rivers) {
-        const rb = polygonBBox(river);
+      for (const { pts: cauce } of rivers) {
+        const rb = polygonBBox(cauce);
         if (rb.minX > bb.maxX || rb.maxX < bb.minX || rb.minY > bb.maxY || rb.maxY < bb.minY) continue;
-        for (let j = 0; j < river.length - 1; j++) {
-          const hit = segIntersect(a, b, river[j], river[j + 1]);
+        for (let j = 0; j < cauce.length - 1; j++) {
+          const hit = segIntersect(a, b, cauce[j], cauce[j + 1]);
           if (!hit) continue;
           if (settlements.some((s) => dist(hit, s) < 80)) continue;
           if (out.every((c) => dist(c, hit) >= sep)) out.push({ x: hit.x, y: hit.y, type: 'puente' });
@@ -176,7 +176,7 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   for (const { a } of scored) {
     if (placed.length >= target - graphFloor) break;
     const type = nextType(BIAS[a.kind]);
-    tryPlace(a, type, { name: a.name, kind: a.kind }, 'anclaje');
+    tryPlace(a, type, { name: a.name, kind: a.kind, osmId: a.osmId ?? null }, 'anclaje');
   }
 
   // 2) cruces/puentes del grafo hasta completar el cupo
@@ -189,7 +189,7 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   for (const { a } of scored) {
     if (placed.length >= target) break;
     if (placed.some((p) => p.real && p.x === a.x && p.y === a.y)) continue;
-    tryPlace(a, nextType(BIAS[a.kind]), { name: a.name, kind: a.kind }, 'anclaje');
+    tryPlace(a, nextType(BIAS[a.kind]), { name: a.name, kind: a.kind, osmId: a.osmId ?? null }, 'anclaje');
   }
 
   // nombres únicos y ficha final

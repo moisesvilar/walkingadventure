@@ -1,15 +1,16 @@
 // Flujo de la app: elegir ubicación y duración → consultar OSM → generar mundo → pintar.
 
-import { fetchGeoFeatures, fetchPois, fetchStreets, parseStreets } from './data/overpass.js';
-import { generateSettlements, footprintRadius } from './world/settlements.js';
-import { buildRoutes, linkParajes } from './world/routes.js';
-import { generateParajes } from './world/parajes.js';
-import { buildSeaMask } from './world/seamask.js';
-import { buildWorld } from './world/build.js';
-import { castAll } from './quests/casting.js';
+import { fetchGeoFeatures, fetchPois, fetchStreets } from './data/overpass.js';
+import { parseStreets } from '../../packages/nucleo/world/osm.js';
+import { generateSettlements, footprintRadius } from '../../packages/nucleo/world/settlements.js';
+import { buildRoutes, linkParajes } from '../../packages/nucleo/world/routes.js';
+import { generateParajes } from '../../packages/nucleo/world/parajes.js';
+import { buildSeaMask } from '../../packages/nucleo/world/seamask.js';
+import { buildWorld } from '../../packages/nucleo/world/build.js';
+import { castAll } from '../../packages/nucleo/quests/casting.js';
 import { renderMap } from './render/map.js';
 import { STYLES, DEFAULT_STYLE, getStyle, styleFonts } from './render/styles.js';
-import { namesFor } from './names/index.js';
+import { namesFor } from '../../packages/nucleo/names/index.js';
 
 // Presets de duración (game-design/parametros-mundo.md): el jugador elige cuánto
 // quiere caminar, no kilómetros. El slider de km queda en "avanzado" para testing.
@@ -554,7 +555,7 @@ window.__wa = {
       { pts: mkLine(() => 0, (k) => k * 50), nodes: null, level: 'principal', name: null },
       { pts: mkLine((k) => k * 50, (k) => k * 50), nodes: null, level: 'pista', name: null },
     ];
-    const rivers = [mkLine((k) => k * 50 + 25, (k) => -k * 50 + 300)];
+    const rivers = [{ pts: mkLine((k) => k * 50 + 25, (k) => -k * 50 + 300), kind: 'river' }];
     // terreno sintético: sin él no se pueden comparar los estilos, que se juegan casi
     // todo en bosques, montañas, costa y agua
     const blob = (cx, cy, rx, ry, n = 24) =>

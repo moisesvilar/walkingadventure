@@ -3,9 +3,9 @@
 // Ningún color ni grosor está fijado aquí: todo sale del estilo (app/js/render/styles.js), para
 // poder repintar el mismo mundo con otra plantilla sin regenerarlo.
 
-import { makeRng } from '../core/rng.js';
-import { pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
-import { isSea } from '../world/seamask.js';
+import { makeRng } from '../../../packages/nucleo/core/rng.js';
+import { pointInPolygon, polygonBBox, polygonArea } from '../../../packages/nucleo/core/geo.js';
+import { isSea } from '../../../packages/nucleo/world/seamask.js';
 import { getStyle, DEFAULT_STYLE } from './styles.js';
 
 // Tamaños de rótulo antes de aplicar la escala tipográfica del estilo.
@@ -659,7 +659,7 @@ function drawRivers(ctx, rivers, px, T) {
     // solo los cauces principales: los regatos (`stream`) llenan el mapa de hilos azules
     if (T.capas.soloRiosPrincipales && r.kind && r.kind !== 'river') continue;
     ctx.lineWidth = T.water.riverW;
-    tracePoly(ctx, r, px);
+    tracePoly(ctx, r.pts, px);
     ctx.stroke();
   }
 }

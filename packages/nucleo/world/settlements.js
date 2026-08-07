@@ -90,7 +90,7 @@ export function countsForRadius(r) {
 
 /**
  * anchors: POIs reales proyectados. geo: features geográficas. radius: metros.
- * names: paquete de nombres del idioma del mundo (app/js/names/).
+ * names: paquete de nombres del idioma del mundo (packages/nucleo/names/).
  * Devuelve { settlements, freeAnchors }: los anclajes no consumidos quedan
  * disponibles para los parajes.
  */
@@ -118,7 +118,7 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
     x: pos.x,
     y: pos.y,
     name: type === 'granja' ? names.farmName(rng) : names.townName(rng),
-    anchor: anchor ? { name: anchor.name, kind: anchor.kind } : null,
+    anchor: anchor ? { name: anchor.name, kind: anchor.kind, osmId: anchor.osmId ?? null } : null,
     services: [],
   });
 
@@ -156,7 +156,7 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
         name: names.poiName(rng, kind),
         x: a.x,
         y: a.y,
-        real: { name: a.name, kind: a.kind },
+        real: { name: a.name, kind: a.kind, osmId: a.osmId ?? null },
       };
     });
     pool = pool.filter((a) => !taken.has(a));

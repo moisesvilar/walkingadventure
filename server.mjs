@@ -14,6 +14,10 @@ const PORT = process.env.PORT || 8137;
 // Los estáticos viven en app/, no en la raíz: el servidor se queda arriba porque
 // además es el proxy de Overpass, que no es parte del front.
 const ROOT = new URL('./app/', import.meta.url).pathname;
+// El generador ya no vive dentro de app/: es el paquete compartido, y el prototipo
+// lo importa por ruta relativa (../../packages/nucleo/...). Servirlo aquí es lo que
+// evita tener una segunda copia del generador "para que el prototipo funcione".
+const PAQUETES = new URL('./packages/', import.meta.url).pathname;
 // Caché COMPARTIDA por todas las sesiones y worktrees: fuera del repo, igual que
 // la base de datos de Overpass. Dentro del repo, cada worktree arrancaba con la
 // caché fría y volvía a castigar a los mirrors públicos por las mismas consultas.
@@ -119,8 +123,10 @@ async function handleOverpass(req, res) {
 async function handleStatic(req, res) {
   let pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   if (pathname === '/') pathname = '/index.html';
-  const file = normalize(join(ROOT, pathname));
-  if (!file.startsWith(ROOT)) {
+  const enPaquetes = pathname.startsWith('/packages/');
+  const raiz = enPaquetes ? PAQUETES : ROOT;
+  const file = normalize(join(raiz, enPaquetes ? pathname.slice('/packages'.length) : pathname));
+  if (!file.startsWith(raiz)) {
     res.writeHead(403);
     res.end();
     return;

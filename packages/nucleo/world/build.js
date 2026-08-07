@@ -1,8 +1,8 @@
 // Construcción completa de un mundo a partir de las consultas OSM.
-// Compartida por la app (app/js/main.js) y las herramientas headless
-// (test/casting-report.mjs): misma tubería, mismos mundos.
+// Tubería canónica del generador: la comparten la app y las herramientas
+// headless, y es la única. Misma tubería, mismos mundos.
 
-import { parseGeo, parsePois } from '../data/overpass.js';
+import { parseGeo, parsePois } from './osm.js';
 import { buildSeaMask, computeDisplayRadius } from './seamask.js';
 import { generateSettlements } from './settlements.js';
 import { buildRoutes, linkParajes, pegarAViario } from './routes.js';
@@ -17,6 +17,13 @@ import { makeRng } from '../core/rng.js';
  * | 'settlements' | 'routes' | 'parajes'.
  */
 export async function buildWorld({ lat, lon, rBase, seed, fetchData, onStatus = async () => {} }) {
+  // El núcleo no llama a la red por su cuenta: si nadie le inyecta `fetchData`,
+  // el fallo tiene que decirlo por su nombre y antes de empezar. Con la frontera
+  // ya comprobable, un TypeError a mitad de la primera fase esconde el motivo.
+  if (typeof fetchData !== 'function') {
+    throw new Error('buildWorld necesita que se le inyecte fetchData(lat, lon, radius) → { geoJson, poiJson }');
+  }
+
   const names = namesFor(localeFor(lat, lon));
 
   await onStatus('fetch');

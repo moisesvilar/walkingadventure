@@ -1,0 +1,148 @@
+{
+  "cabecera": {
+    "mundo_congelado": "barrio-tres-calles",
+    "semilla": "42.18,-7.82#1",
+    "revision_prototipo": "07f1c41",
+    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico."
+  },
+  "titulo": "Reinos do Carballo Eterno",
+  "idioma": "gl",
+  "radio_dibujo_m": 500,
+  "recuentos": {
+    "nucleos": 5,
+    "servicios": 0,
+    "parajes": 1,
+    "calzadas": 4
+  },
+  "nucleos": [
+    {
+      "nombre": "Mirancelle do Corvo",
+      "tipo": "aldea",
+      "x": -23,
+      "y": -110,
+      "anclaje": null
+    },
+    {
+      "nombre": "Pontencelle",
+      "tipo": "ciudad",
+      "x": -251,
+      "y": -157,
+      "anclaje": null
+    },
+    {
+      "nombre": "Casal da Colmea",
+      "tipo": "granja",
+      "x": 14,
+      "y": -205,
+      "anclaje": null
+    },
+    {
+      "nombre": "Casal do Muíño Roto",
+      "tipo": "granja",
+      "x": 208,
+      "y": -177,
+      "anclaje": null
+    },
+    {
+      "nombre": "Montenova do Carballo",
+      "tipo": "pueblo",
+      "x": -381,
+      "y": 98,
+      "anclaje": null
+    }
+  ],
+  "servicios": [],
+  "parajes": [
+    {
+      "nombre": "O Vao de Pedra",
+      "tipo": "puente",
+      "x": -141,
+      "y": 26,
+      "anclaje": null
+    }
+  ],
+  "calzadas": [
+    {
+      "nombre": "A Corredoira do Abrente",
+      "tipo": "calzada",
+      "desde": [
+        -251,
+        -157
+      ],
+      "hasta": [
+        -23,
+        -110
+      ],
+      "puntos": 6,
+      "recta": false
+    },
+    {
+      "nombre": "A Vella Ruta de Poñente",
+      "tipo": "calzada",
+      "desde": [
+        208,
+        -177
+      ],
+      "hasta": [
+        14,
+        -205
+      ],
+      "puntos": 4,
+      "recta": false
+    },
+    {
+      "nombre": "A Vella Ruta do Abrente",
+      "tipo": "calzada",
+      "desde": [
+        -23,
+        -110
+      ],
+      "hasta": [
+        208,
+        -177
+      ],
+      "puntos": 88,
+      "recta": false
+    },
+    {
+      "nombre": "A Vella Ruta do Noroeste",
+      "tipo": "calzada",
+      "desde": [
+        -251,
+        -157
+      ],
+      "hasta": [
+        -381,
+        98
+      ],
+      "puntos": 12,
+      "recta": false
+    }
+  ],
+  "casting": [
+    {
+      "plantilla": "cita-en-la-fuente",
+      "castea": false
+    },
+    {
+      "plantilla": "entrega-sospechosa",
+      "castea": false
+    },
+    {
+      "plantilla": "peregrinaje",
+      "castea": false
+    },
+    {
+      "plantilla": "rescate-en-la-granja",
+      "castea": false
+    },
+    {
+      "plantilla": "ronda-del-vigia",
+      "castea": false
+    },
+    {
+      "plantilla": "tres-pistas",
+      "castea": false
+    }
+  ]
+}

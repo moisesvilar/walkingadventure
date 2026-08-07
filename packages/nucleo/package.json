@@ -1,0 +1,16 @@
+{
+  "name": "@walkingadventure/nucleo",
+  "version": "0.1.0",
+  "description": "Núcleo compartido de Walking Adventure: generación determinista del mundo. JavaScript ESM puro, sin dependencias, sin plataforma.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./core/*": "./core/*",
+    "./world/*": "./world/*",
+    "./names/*": "./names/*",
+    "./quests/*": "./quests/*"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
