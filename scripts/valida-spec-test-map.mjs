@@ -8,11 +8,19 @@
 //   node scripts/valida-spec-test-map.mjs
 //
 // Sale 0 si el mapa es válido o si todavía no existe (que no es un error: hasta
-// que wa-qa-dev escriba pruebas no hay nada que mapear) y 1 si hay problemas.
+// que wa-qa-dev escriba pruebas no hay nada que mapear), 1 si hay problemas y 2 si
+// no llegó a validar. El 2 existe porque el runner recoge este código y lo publica
+// en el report: un código que no distingue «válido» de «no validé» es exactamente
+// el verde que no ejecutó nada.
+//
+// Escribe siempre una línea `VEREDICTO: <estado> — <mensaje>` antes de terminar,
+// pase lo que pase: es lo que el runner busca para dar por buena la ejecución.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { esPrincipal } from './guardian-principal.mjs';
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..');
 const MAPA = join(RAIZ, 'test', 'spec-test-map.json');
@@ -89,10 +97,21 @@ export function validaMapa() {
   };
 }
 
-// Ejecutable directo: es lo que llama el runner.
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const r = validaMapa();
-  console.log(r.mensaje);
+// Ejecutable directo: es lo que llama el runner. El guardián compara rutas
+// canónicas (ver scripts/guardian-principal.mjs) porque comparar las cadenas a
+// secas dejaba este bloque sin ejecutar en cuanto la ruta pasaba por un enlace
+// simbólico, y entonces el script salía 0 sin haber validado nada.
+if (esPrincipal(import.meta.url)) {
+  // El catch no es defensivo por costumbre: cualquier excepción aquí —una batería
+  // ilegible, un permiso— significa «no llegué a validar», y eso tiene que salir
+  // por el 2 y no por el 0 que Node pondría por defecto.
+  let r;
+  try {
+    r = validaMapa();
+  } catch (e) {
+    r = { estado: 'no-validado', problemas: [], mensaje: `no se pudo validar el mapa: ${e && e.message ? e.message : String(e)}` };
+  }
+  console.log(`VEREDICTO: ${r.estado} — ${r.mensaje}`);
   for (const p of r.problemas) console.log(`- ${p}`);
-  process.exitCode = r.estado === 'invalido' ? 1 : 0;
+  process.exitCode = { valido: 0, 'sin-mapa': 0, invalido: 1 }[r.estado] ?? 2;
 }

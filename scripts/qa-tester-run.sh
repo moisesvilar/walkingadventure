@@ -16,6 +16,10 @@
 # con "no se ejecutó" es el peor fallo posible en un bucle desatendido: da verde
 # sin haber ejecutado nada.
 #
+# De ahí la regla que gobierna todo lo de abajo: el PASS es por afirmación
+# —ejecuté esto, reconocí el resumen, y salió bien—, nunca por ausencia de
+# señales de fallo. Si no se entiende lo que llegó, el resultado es 2.
+#
 # Sin credenciales, sin .env, sin red y sin dev server. Maestro ausente es
 # infraestructura ausente: se registra aparte y nunca produce un verde.
 
@@ -23,6 +27,23 @@ set -uo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NODE_MINIMO=20
+
+# --- saneamiento del entorno ------------------------------------------------
+#
+# Va lo primero, antes de cualquier subproceso, para que todos reciban el mismo
+# entorno: la comprobación de núcleo, la validación del mapa, `node --test` y
+# Maestro. Con NODE_TEST_CONTEXT heredada —la situación normal cuando a este
+# runner lo lanza otro `node --test`— Node cambia la forma de su salida, el
+# resumen TAP que se busca más abajo deja de aparecer y el veredicto salía verde
+# con casos en rojo. Se retiran solo las que cambian esa forma: un entorno en
+# blanco se llevaría por delante PATH y HOME y haría el runner inejecutable.
+
+SANEADAS=""
+for VARIABLE in $(env | grep -E '^(NODE_TEST_[A-Za-z0-9_]*|NODE_OPTIONS)=' | cut -d= -f1 | LC_ALL=C sort -u); do
+  SANEADAS="$SANEADAS $VARIABLE"
+  unset "$VARIABLE"
+done
+SANEADAS="${SANEADAS# }"
 
 uso() {
   cat >&2 <<'FIN'
@@ -100,6 +121,10 @@ cd "$RAIZ" || { echo "no se puede entrar en $RAIZ" >&2; exit 2; }
 node scripts/comprueba-nucleo.mjs >"$TMP/nucleo.txt" 2>&1
 NUCLEO_RC=$?
 
+# Sin línea de veredicto no hay comprobación que creerse, aunque el código sea 0:
+# es justo el caso que se está corrigiendo (el guardián que no se disparaba).
+if grep -q '^VEREDICTO: ' "$TMP/nucleo.txt"; then FRONTERA_VEREDICTO=1; else FRONTERA_VEREDICTO=0; fi
+
 # --- inventario de lo que hay que ejecutar ----------------------------------
 
 PRUEBAS=()
@@ -118,8 +143,11 @@ if command -v maestro >/dev/null 2>&1; then HAY_MAESTRO=1; else HAY_MAESTRO=0; f
 
 EJECUTADO=0
 FALLO=0
+NO_EJECUTABLE=0
 NUCLEO_ESTADO="no ejecutado (fuera del alcance pedido)"
 NUCLEO_TOTAL=0; NUCLEO_PASA=0; NUCLEO_FALLA=0
+NUCLEO_FALTA=""
+DISCREPANCIA=""
 
 if [ "$ALCANCE" != "app" ]; then
   if [ "${#PRUEBAS[@]}" -eq 0 ]; then
@@ -137,12 +165,37 @@ if [ "$ALCANCE" != "app" ]; then
     NUCLEO_TOTAL="$(grep '^# tests ' "$TMP/nucleo-run.txt" | tail -1 | awk '{print $3}')"
     NUCLEO_PASA="$(grep '^# pass ' "$TMP/nucleo-run.txt" | tail -1 | awk '{print $3}')"
     NUCLEO_FALLA="$(grep '^# fail ' "$TMP/nucleo-run.txt" | tail -1 | awk '{print $3}')"
-    NUCLEO_TOTAL="${NUCLEO_TOTAL:-0}"; NUCLEO_PASA="${NUCLEO_PASA:-0}"; NUCLEO_FALLA="${NUCLEO_FALLA:-0}"
-    if [ "$RC" -ne 0 ]; then
-      FALLO=1
-      NUCLEO_ESTADO="FALLO (código $RC)"
+
+    # Antes, un recuento que no aparecía caía a 0 y la ejecución seguía como si
+    # todo estuviera bien. Ahora no reconocer el resumen es terminal: es lo único
+    # que afirma que esto se ejecutó de verdad y que se entendió lo que salió.
+    case "$NUCLEO_TOTAL" in ''|*[!0-9]*) NUCLEO_FALTA="$NUCLEO_FALTA '# tests <n>'" ;; esac
+    case "$NUCLEO_PASA"  in ''|*[!0-9]*) NUCLEO_FALTA="$NUCLEO_FALTA '# pass <n>'" ;; esac
+    case "$NUCLEO_FALLA" in ''|*[!0-9]*) NUCLEO_FALTA="$NUCLEO_FALTA '# fail <n>'" ;; esac
+
+    if [ -n "$NUCLEO_FALTA" ]; then
+      NO_EJECUTABLE=1
+      NUCLEO_TOTAL="?"; NUCLEO_PASA="?"; NUCLEO_FALLA="?"
+      NUCLEO_ESTADO="no se pudo ejecutar: la salida de \`node --test\` no trae el resumen TAP esperado (código del subproceso: $RC)"
+    elif [ "$NUCLEO_TOTAL" -eq 0 ]; then
+      # Había ficheros de prueba y el resumen declara cero casos: eso no es verde,
+      # es que no se ejecutó ninguno.
+      NO_EJECUTABLE=1
+      NUCLEO_ESTADO="no se pudo ejecutar: había ${#PRUEBAS[@]} fichero(s) de prueba y el resumen declara 0 casos ejecutados (código del subproceso: $RC)"
     else
-      NUCLEO_ESTADO="OK"
+      # Código del subproceso y resumen tienen que decir lo mismo. Cuando no, se
+      # toma el peor de los dos y la discrepancia queda escrita.
+      if [ "$RC" -ne 0 ] && [ "$NUCLEO_FALLA" -eq 0 ]; then
+        DISCREPANCIA="\`node --test\` salió con código $RC pero el resumen declara 0 fallos. Se toma el peor de los dos."
+      elif [ "$RC" -eq 0 ] && [ "$NUCLEO_FALLA" -ne 0 ]; then
+        DISCREPANCIA="\`node --test\` salió con código 0 pero el resumen declara $NUCLEO_FALLA fallo(s). Se toma el peor de los dos."
+      fi
+      if [ "$RC" -ne 0 ] || [ "$NUCLEO_FALLA" -ne 0 ]; then
+        FALLO=1
+        NUCLEO_ESTADO="FALLO (código $RC, $NUCLEO_FALLA caso(s) en rojo)"
+      else
+        NUCLEO_ESTADO="OK"
+      fi
     fi
   fi
 fi
@@ -171,11 +224,29 @@ fi
 node scripts/valida-spec-test-map.mjs >"$TMP/mapa.txt" 2>&1
 MAPA_RC=$?
 
+# Un mapa que no se pudo validar sigue sin teñir de rojo, pero tampoco cuenta como
+# validación correcta: se dice con esas palabras en el report.
+if grep -q '^VEREDICTO: ' "$TMP/mapa.txt" && [ "$MAPA_RC" -ne 2 ]; then MAPA_VALIDADO=1; else MAPA_VALIDADO=0; fi
+
 # --- veredicto --------------------------------------------------------------
+#
+# La frontera del núcleo es bloqueante, y desde esta iteración lo es también su
+# silencio: sin línea de veredicto no se comprobó nada, y eso no puede acabar en
+# PASS. El 2 va por delante del 1 a propósito —«no se pudo ejecutar» le dice a
+# quien orquesta que arregle la máquina, no el código—, y los dos son no-cero, que
+# es lo único que distingue el contrato de wa-qa-tester.
 
-if [ "$NUCLEO_RC" -ne 0 ]; then FALLO=1; fi
+if [ "$FRONTERA_VEREDICTO" -eq 0 ]; then
+  NO_EJECUTABLE=1
+elif [ "$NUCLEO_RC" -eq 1 ]; then
+  FALLO=1
+elif [ "$NUCLEO_RC" -ne 0 ]; then
+  NO_EJECUTABLE=1
+fi
 
-if [ "$FALLO" -ne 0 ]; then
+if [ "$NO_EJECUTABLE" -ne 0 ]; then
+  CODIGO=2; VEREDICTO=FAIL
+elif [ "$FALLO" -ne 0 ]; then
   CODIGO=1; VEREDICTO=FAIL
 elif [ "$EJECUTADO" -eq 0 ]; then
   CODIGO=2; VEREDICTO=FAIL
@@ -202,8 +273,12 @@ fi
   echo
   echo "## 2 · Regresión de núcleo"
   echo
-  if [ "$NUCLEO_RC" -ne 0 ]; then
+  if [ "$FRONTERA_VEREDICTO" -eq 0 ]; then
+    echo "**No se pudo comprobar la frontera de \`packages/nucleo/\`:** \`scripts/comprueba-nucleo.mjs\` terminó con código \`$NUCLEO_RC\` y sin línea \`VEREDICTO:\`. No es «está intacta»: es que no se comprobó, y por eso esta ejecución no puede terminar en PASS."
+  elif [ "$NUCLEO_RC" -eq 1 ]; then
     echo "**Hay regresión en la frontera de \`packages/nucleo/\`.** Va antes que cualquier otro resultado: si el núcleo deja de importar en Node, las pruebas de determinismo dejan de existir."
+  elif [ "$NUCLEO_RC" -ne 0 ]; then
+    echo "**La comprobación de la frontera declaró que no llegó a comprobarla** (código \`$NUCLEO_RC\`)."
   fi
   echo '```'
   cat "$TMP/nucleo.txt"
@@ -223,7 +298,16 @@ fi
   else
     echo "- \`test/app/\`: ${#FLUJOS[@]} flujo(s)."
   fi
-  echo "- Mapa de cobertura (\`test/spec-test-map.json\`), código \`$MAPA_RC\`:"
+  if [ -n "$SANEADAS" ]; then
+    echo "- **Variables heredadas retiradas del entorno de los subprocesos:** $SANEADAS. Cambian la forma de la salida de \`node --test\` y con ellas el veredicto dependería de quién lanza el runner."
+  else
+    echo "- Entorno de partida limpio: no había ninguna variable que retirar (se vigilan \`NODE_TEST_*\` y \`NODE_OPTIONS\`)."
+  fi
+  if [ "$MAPA_VALIDADO" -eq 0 ]; then
+    echo "- Mapa de cobertura (\`test/spec-test-map.json\`), código \`$MAPA_RC\`: **no se pudo validar** (sin línea \`VEREDICTO:\` reconocible, o el validador declaró que no llegó a validar). Sigue sin ser rojo, pero tampoco cuenta como validación correcta."
+  else
+    echo "- Mapa de cobertura (\`test/spec-test-map.json\`), código \`$MAPA_RC\`:"
+  fi
   echo
   echo '```'
   cat "$TMP/mapa.txt"
@@ -235,6 +319,12 @@ fi
   echo "- Ficheros: ${#PRUEBAS[@]}"
   if [ -f "$TMP/nucleo-run.txt" ]; then
     echo "- Casos: $NUCLEO_TOTAL · pasan: $NUCLEO_PASA · fallan: $NUCLEO_FALLA"
+    if [ -n "$NUCLEO_FALTA" ]; then
+      echo "- Resumen TAP: **no reconocido**. Se esperaban en la salida de \`node --test --test-reporter=tap\` las líneas$NUCLEO_FALTA y no aparecen, así que no se puede afirmar nada de esta ejecución."
+    fi
+    if [ -n "$DISCREPANCIA" ]; then
+      echo "- **Discrepancia:** $DISCREPANCIA"
+    fi
     if [ "$NUCLEO_FALLA" != "0" ] || [ "$NUCLEO_ESTADO" != "OK" ]; then
       echo
       echo "Salida literal:"

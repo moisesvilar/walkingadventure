@@ -8,11 +8,18 @@
 //   node scripts/comprueba-nucleo.mjs
 //
 // Sale 0 si la frontera está intacta (o si el paquete todavía no existe, que es
-// el caso hasta SPEC-002) y 1 si hay regresión.
+// el caso hasta SPEC-002), 1 si hay regresión y 2 si no llegó a comprobarla. El 2
+// importa más aquí que en ningún otro sitio: este código decide el veredicto del
+// runner, así que «no comprobé» no puede parecerse a «está intacta».
+//
+// Escribe siempre una línea `VEREDICTO: <estado> — <mensaje>` antes de terminar:
+// es lo que el runner busca para dar por buena la comprobación.
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { esPrincipal } from './guardian-principal.mjs';
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..');
 const NUCLEO = join(RAIZ, 'packages', 'nucleo');
@@ -72,9 +79,17 @@ export async function compruebaNucleo() {
   };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const r = await compruebaNucleo();
-  console.log(r.mensaje);
+// Guardián por rutas canónicas (ver scripts/guardian-principal.mjs): comparando
+// las cadenas a secas, una invocación a través de un enlace simbólico dejaba este
+// bloque sin ejecutar y una regresión de la frontera pasaba sin dejar rastro.
+if (esPrincipal(import.meta.url)) {
+  let r;
+  try {
+    r = await compruebaNucleo();
+  } catch (e) {
+    r = { estado: 'no-comprobada', hallazgos: [], mensaje: `no se pudo comprobar la frontera: ${e && e.message ? e.message : String(e)}` };
+  }
+  console.log(`VEREDICTO: ${r.estado} — ${r.mensaje}`);
   for (const h of r.hallazgos) console.log(`- ${h}`);
-  process.exitCode = r.estado === 'regresion' ? 1 : 0;
+  process.exitCode = { intacta: 0, 'sin-paquete': 0, regresion: 1 }[r.estado] ?? 2;
 }

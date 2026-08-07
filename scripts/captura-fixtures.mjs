@@ -15,6 +15,8 @@ import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { esPrincipal } from './guardian-principal.mjs';
+
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DESTINO = join(RAIZ, 'test', 'fixtures', 'osm');
 
@@ -347,7 +349,12 @@ async function principal(argv) {
   for (const mundo of seleccion) await captura(mundo, endpoint);
 }
 
-principal(process.argv.slice(2)).catch((e) => {
-  console.error(`error: ${e.message}`);
-  process.exitCode = 1;
-});
+// Con guardián, y no una llamada suelta en el cuerpo del módulo: sin él, importar
+// este fichero desde cualquier sitio —una prueba que solo quiere leer MUNDOS—
+// disparaba una captura contra la red. El mismo guardián que los demás scripts.
+if (esPrincipal(import.meta.url)) {
+  principal(process.argv.slice(2)).catch((e) => {
+    console.error(`error: ${e.message}`);
+    process.exitCode = 1;
+  });
+}
