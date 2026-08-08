@@ -1,7 +1,7 @@
 // Núcleos de población ficticios a partir de anclajes reales (POIs), con cupos
 // exactos por radio y servicios anclados a POIs reales únicos.
 
-import { dist, pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
+import { cuantizaPunto, dist, pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
 import { isSea } from './seamask.js';
 import { makeRng, randInt, shuffle } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
@@ -215,7 +215,9 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
       if (attempts % 300 === 0) sep /= 2;
       const ang = rng() * Math.PI * 2;
       const r = Math.sqrt(rng()) * radius * 0.9;
-      const p = { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
+      // A la rejilla de precisión, como todo punto en metros: este no viene del
+      // proyector, así que si no se cuantiza aquí entra sin cuantizar al documento.
+      const p = cuantizaPunto({ x: Math.cos(ang) * r, y: Math.sin(ang) * r });
       if (!farFromAll(p, settlements, sep)) continue;
       if (!okTerrain(p)) continue;
       place(type, p, null);

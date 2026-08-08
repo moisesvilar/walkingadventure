@@ -53,6 +53,10 @@ const ANILLOS_DE_BUSQUEDA = 40;
 // coordenada de OSM da el mismo número, y por debajo del milímetro no hay dato
 // que distinguir. Por encima, dos coordenadas con el mismo identificador son dos
 // sitios distintos y eso es un error del dato que hay que declarar.
+//
+// Con la rejilla de `PRECISION_M` esto es en la práctica una igualdad exacta: dos
+// puntos cuantizados o son el mismo o están a un metro. Sigue diciendo lo que
+// quería decir, pero su número ya no tiene significado propio.
 const MISMO_PUNTO_M = 0.001;
 
 /**
@@ -407,8 +411,15 @@ export function construyeGrafo(vias, opciones = {}) {
     const marcaDeLaVia = aptitudDeVia(via.filtrables);
     const nombre = via.name ?? null;
     for (let i = 0; i < ids.length - 1; i++) {
+      // El mismo nodo dos veces seguidas no es una arista. Lo que se descarta es el
+      // **lazo sobre sí mismo** y no la arista de longitud cero: con la rejilla de
+      // `PRECISION_M`, dos nodos distintos de OSM separados por menos de medio metro
+      // caen en la misma coordenada, y tirar su arista partiría una vía real por la
+      // mitad para que el cosido la volviera a unir después como suposición nuestra.
+      // Un camino real degradado a conjetura es exactamente el fallo silencioso que
+      // este módulo existe para cerrar.
+      if (ids[i] === ids[i + 1]) continue;
       const metros = dist(pts[i], pts[i + 1]);
-      if (metros <= 0) continue; // dos puntos en la misma coordenada no son una arista
       const enExtremos = [bordillos.get(ids[i]) ?? null, bordillos.get(ids[i + 1]) ?? null];
       anadeAmbos(ids[i], ids[i + 1], {
         metros,
@@ -565,7 +576,9 @@ export function pegarAViario(puntos, grafoViario, maxMove = MOVER_MAX) {
     if (mejor == null || md > maxMove) continue; // demasiado lejos: se queda como está
 
     const q = grafo.coord.get(mejor);
-    movidos.push({ punto: p, metros: Math.round(md) });
+    // `md` sale de `dist` y ya está en la rejilla de precisión: redondear aquí otra
+    // vez sería inventarse un segundo criterio de redondeo.
+    movidos.push({ punto: p, metros: md });
     p.x = q.x;
     p.y = q.y;
   }

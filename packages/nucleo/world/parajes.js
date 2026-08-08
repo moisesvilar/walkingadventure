@@ -8,7 +8,7 @@
 // Cruces y puentes del grafo viario participan en la cobertura en igualdad de
 // condiciones, y son el único colchón de una celda sin anclajes.
 
-import { dist, segIntersect, polygonBBox } from '../core/geo.js';
+import { cuantizaPunto, dist, segIntersect, polygonBBox } from '../core/geo.js';
 import { isSea } from './seamask.js';
 import { makeRng, pick, shuffle } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
@@ -168,8 +168,11 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
         const rb = polygonBBox(cauce);
         if (rb.minX > bb.maxX || rb.maxX < bb.minX || rb.minY > bb.maxY || rb.maxY < bb.minY) continue;
         for (let j = 0; j < cauce.length - 1; j++) {
-          const hit = segIntersect(a, b, cauce[j], cauce[j + 1]);
-          if (!hit) continue;
+          const corte = segIntersect(a, b, cauce[j], cauce[j + 1]);
+          if (!corte) continue;
+          // El cruce con el río nace de una intersección y no del proyector: a la
+          // rejilla, como los demás puntos en metros.
+          const hit = cuantizaPunto(corte);
           const dNucleo = Math.min(Infinity, ...settlements.map((s) => dist(hit, s)));
           if (dNucleo < PEGADO_A_NUCLEO_M) continue;
           if (out.every((c) => dist(c, hit) >= sep)) {

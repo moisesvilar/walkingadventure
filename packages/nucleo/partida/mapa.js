@@ -36,6 +36,12 @@ export function creaMapa({ semilla, lat, lon, anclaje, tramoM }) {
     id: rejilla.id,
     anclaje: rejilla.anclaje,
     rejilla,
+    // El título y el idioma son del mapa y no de ninguna celda: los fija `registra`
+    // al abrir la primera y `levantaIndice` los trae del documento. Un mapa sin
+    // ninguna celda todavía no tiene ninguno que declarar, y ese nulo sí es un
+    // estado del mundo.
+    titulo: null,
+    idioma: null,
     celdas: [],
     costuras: [],
   };
@@ -84,6 +90,20 @@ export function resuelvePosicion(mapa, lat, lon) {
 // vez, al aparecer el segundo lado del borde: recalcular una costura existente al
 // abrir una tercera celda la haría cambiar sin que nadie hubiera tocado su borde.
 function registra(mapa, registro) {
+  // El título y el idioma del mapa son los de la celda que ordena **primero por su
+  // clave** y no los de la primera que se abrió: el índice no puede cambiar porque
+  // las celdas se abran en otro orden. Se fijan aquí, al registrar, y no se derivan
+  // al congelar: una celda de un mapa cargado es una ficha sin mundo, y derivarlos
+  // de ella los perdía en silencio al reescribir el índice.
+  let primera = null;
+  for (const c of mapa.celdas) if (primera === null || c.clave < primera) primera = c.clave;
+  if (primera === null || registro.clave < primera) {
+    if (!registro.mundo) {
+      throw new Error(`no se puede registrar la celda ${registro.clave} en el mapa ${mapa.id}: llega sin su mundo dentro`);
+    }
+    mapa.titulo = registro.mundo.title;
+    mapa.idioma = registro.mundo.locale;
+  }
   mapa.celdas.push(registro);
   for (const vecina of celdasContiguas(registro.celda)) {
     const otra = celdaAbierta(mapa, vecina);
@@ -201,14 +221,36 @@ const ordenDeCostura = (a, b) => (
   a.celdas[0] < b.celdas[0] ? -1 : a.celdas[0] > b.celdas[0] ? 1 : a.celdas[1] < b.celdas[1] ? -1 : a.celdas[1] > b.celdas[1] ? 1 : 0
 );
 
+/**
+ * El valor de un campo obligatorio del objeto que se está congelando, o un error
+ * que lo nombra.
+ *
+ * Al **escribir** un documento, un campo ausente es un error y no un `null`. Un nulo
+ * de la ruta de congelado solo es legítimo cuando el esquema lo declara anulable y
+ * su valor nulo es un estado del mundo —una vía sin nombre, un mapa sin ninguna
+ * celda abierta—, nunca un estado de la carga. Sin esta distinción, «no lo tengo
+ * cargado» se escribe en disco como «no existe» y el dato ya no se puede recuperar.
+ */
+function exigeCampo(objeto, campo, donde) {
+  if (objeto == null || !Object.prototype.hasOwnProperty.call(objeto, campo)) {
+    throw new Error(`${donde}: falta el campo "${campo}" en el objeto de origen, y al escribir un documento un campo ausente es un error y no un null`);
+  }
+  return objeto[campo];
+}
+
 /** La ficha de una celda dentro del índice: lo que se sabe de ella sin cargarla. */
 function fichaDeCelda(registro) {
+  // Los cinco campos por su nombre y ninguno derivado del mundo: una ficha los tiene
+  // todos, así que el índice de un mapa cargado se escribe igual que el de uno
+  // generado. Si falta uno, se falla nombrándolo en vez de escribir un nulo.
+  const donde = `la ficha de la celda ${registro?.clave ?? 'sin clave'}`;
+  const celda = exigeCampo(registro, 'celda', donde);
   return {
-    clave: registro.clave,
-    i: registro.celda.i,
-    j: registro.celda.j,
-    motivo: registro.motivo,
-    sinContenidoJugable: registro.sinContenidoJugable,
+    clave: exigeCampo(registro, 'clave', donde),
+    i: exigeCampo(celda, 'i', donde),
+    j: exigeCampo(celda, 'j', donde),
+    motivo: exigeCampo(registro, 'motivo', donde),
+    sinContenidoJugable: exigeCampo(registro, 'sinContenidoJugable', donde),
   };
 }
 
@@ -225,18 +267,17 @@ function fichaDeCelda(registro) {
 export function congelaIndice(mapa) {
   if (!mapa?.rejilla) throw new Error('congelaIndice necesita un mapa levantado con creaMapa');
   const celdas = mapa.celdas.map(fichaDeCelda).sort(ordenPorClave);
-  // El título y el idioma del mundo salen de la primera celda en orden de clave y
-  // no de la primera que se abrió: el índice no puede cambiar porque se abran las
-  // celdas en otro orden. Sin ninguna celda todavía, no hay título que declarar.
-  const primera = mapa.celdas.slice().sort(ordenPorClave)[0] ?? null;
   const doc = {
     version: VERSION_FORMATO,
     generador: VERSION_GENERADOR,
     clase: CLASES.INDICE,
     id: mapa.id,
     anclaje: { lat: mapa.anclaje.lat, lon: mapa.anclaje.lon },
-    titulo: primera?.mundo?.title ?? null,
-    idioma: primera?.mundo?.locale ?? null,
+    // Del propio mapa y **nunca de `celda.mundo`**: las celdas de un mapa cargado
+    // son fichas sin mundo, y atravesarlas escribía nulos que no distinguían «este
+    // mapa no tiene ninguna celda» de «esta celda no se ha leído todavía».
+    titulo: exigeCampo(mapa, 'titulo', `el índice del mapa ${mapa.id}`),
+    idioma: exigeCampo(mapa, 'idioma', `el índice del mapa ${mapa.id}`),
     ladoM: mapa.rejilla.ladoM,
     tramoM: mapa.rejilla.tramoM,
     tramoPedidoM: mapa.rejilla.tramoPedidoM,

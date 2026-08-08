@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
+    "regenerado_por": "SPEC-009-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
   },
   "titulo": "Dominios de Miradia",
   "idioma": "es",
@@ -71,9 +71,9 @@
     {
       "nombre": "Forja del Ciervo Encantado",
       "tipo": "armeria",
-      "x": -759,
-      "y": 106,
-      "anclaje": "node/9595953054"
+      "x": -771,
+      "y": 114,
+      "anclaje": "node/9595953053"
     },
     {
       "nombre": "Forja del Yunque Rojo",
@@ -86,8 +86,8 @@
       "nombre": "Botica de la Espada Dorada",
       "tipo": "boticario",
       "x": -690,
-      "y": 107,
-      "anclaje": "node/9595953061"
+      "y": 232,
+      "anclaje": "node/6895672170"
     },
     {
       "nombre": "Botica del Farol Dorado",
@@ -169,9 +169,9 @@
     {
       "nombre": "Taberna del Roble Danzarín",
       "tipo": "taberna",
-      "x": -690,
-      "y": 232,
-      "anclaje": "node/6895672170"
+      "x": -698,
+      "y": 107,
+      "anclaje": "node/9595953060"
     }
   ],
   "parajes": [
@@ -185,8 +185,8 @@
     {
       "nombre": "La Encrucijada del Perro Negro",
       "tipo": "cruce",
-      "x": -433,
-      "y": -327,
+      "x": -418,
+      "y": -335,
       "anclaje": null
     },
     {
@@ -237,7 +237,7 @@
         701,
         692
       ],
-      "puntos": 54,
+      "puntos": 52,
       "recta": false
     },
     {
@@ -293,7 +293,7 @@
         -279,
         -775
       ],
-      "puntos": 61,
+      "puntos": 60,
       "recta": false
     },
     {
@@ -332,10 +332,10 @@
         -231
       ],
       "hasta": [
-        -600,
-        -259
+        -580,
+        -144
       ],
-      "puntos": 24,
+      "puntos": 19,
       "recta": false
     },
     {

@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
+    "regenerado_por": "SPEC-009-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
   },
   "titulo": "Reinos de Vaeloria",
   "idioma": "gl",
@@ -13,7 +13,7 @@
   "recuentos": {
     "nucleos": 5,
     "servicios": 6,
-    "parajes": 2,
+    "parajes": 1,
     "calzadas": 4
   },
   "nucleos": [
@@ -99,17 +99,10 @@
   ],
   "parajes": [
     {
-      "nombre": "A Encrucillada do Aforcado",
+      "nombre": "A Encrucillada do Mercador",
       "tipo": "cruce",
-      "x": 53,
-      "y": -74,
-      "anclaje": null
-    },
-    {
-      "nombre": "O Cruce dos Xuramentos",
-      "tipo": "cruce",
-      "x": -138,
-      "y": -83,
+      "x": -58,
+      "y": 11,
       "anclaje": null
     }
   ],
@@ -139,7 +132,7 @@
         -132,
         50
       ],
-      "puntos": 18,
+      "puntos": 22,
       "recta": false
     },
     {
@@ -190,7 +183,7 @@
     },
     {
       "plantilla": "ronda-del-vigia",
-      "castea": true
+      "castea": false
     },
     {
       "plantilla": "tres-pistas",

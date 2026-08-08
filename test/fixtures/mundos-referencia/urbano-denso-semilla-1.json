@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
+    "regenerado_por": "SPEC-009-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
   },
   "titulo": "Marcas de Kaelun",
   "idioma": "es",
@@ -41,23 +41,23 @@
     {
       "nombre": "Granja de la Colmena",
       "tipo": "granja",
-      "x": 60,
-      "y": 674,
-      "anclaje": "node/2717079169"
+      "x": 126,
+      "y": 804,
+      "anclaje": "node/2717079175"
     },
     {
       "nombre": "Granja de la Niebla",
       "tipo": "granja",
-      "x": -365,
-      "y": -195,
-      "anclaje": "node/2631133126"
+      "x": -330,
+      "y": -205,
+      "anclaje": "node/2631134831"
     },
     {
       "nombre": "Granja de las Cabras",
       "tipo": "granja",
-      "x": 2,
-      "y": 822,
-      "anclaje": "node/1388332887"
+      "x": -5,
+      "y": 724,
+      "anclaje": "node/1388356941"
     },
     {
       "nombre": "Ferrabriga de los Vientos",
@@ -71,9 +71,9 @@
     {
       "nombre": "Forja del Farol Plateado",
       "tipo": "armeria",
-      "x": -759,
-      "y": 106,
-      "anclaje": "node/9595953054"
+      "x": -771,
+      "y": 114,
+      "anclaje": "node/9595953053"
     },
     {
       "nombre": "Forja del Gato Rojo",
@@ -85,16 +85,16 @@
     {
       "nombre": "Botica del Cuervo Plateado",
       "tipo": "boticario",
-      "x": -283,
-      "y": -6,
-      "anclaje": "node/3670167557"
+      "x": -255,
+      "y": -3,
+      "anclaje": "node/178821166"
     },
     {
       "nombre": "Botica del Roble Astuto",
       "tipo": "boticario",
       "x": -690,
-      "y": 107,
-      "anclaje": "node/9595953061"
+      "y": 232,
+      "anclaje": "node/6895672170"
     },
     {
       "nombre": "Arcana de la Luna Danzarina",
@@ -148,9 +148,9 @@
     {
       "nombre": "Taberna del Ciervo Rojo",
       "tipo": "taberna",
-      "x": -690,
-      "y": 232,
-      "anclaje": "node/6895672170"
+      "x": -698,
+      "y": 107,
+      "anclaje": "node/9595953060"
     },
     {
       "nombre": "Taberna del Dragón Alegre",
@@ -162,56 +162,42 @@
   ],
   "parajes": [
     {
-      "nombre": "La Atalaya del Fin",
+      "nombre": "El Faro del Ocaso",
       "tipo": "atalaya",
       "x": -505,
       "y": -286,
       "anclaje": "way/629874170"
     },
     {
-      "nombre": "La Encrucijada de los Juramentos",
+      "nombre": "La Encrucijada del Mercader",
       "tipo": "cruce",
-      "x": -232,
-      "y": -186,
+      "x": -14,
+      "y": -231,
       "anclaje": null
     },
     {
-      "nombre": "El Monasterio de los Callados",
-      "tipo": "monasterio",
-      "x": -76,
-      "y": 668,
-      "anclaje": "way/1270441425"
-    },
-    {
-      "nombre": "El Menhir del Alba",
-      "tipo": "piedra",
-      "x": -76,
-      "y": -223,
-      "anclaje": "node/13730222901"
-    },
-    {
-      "nombre": "La Fortaleza Caída",
-      "tipo": "ruina",
+      "nombre": "La Capilla del Silencio",
+      "tipo": "ermita",
       "x": -195,
       "y": 517,
       "anclaje": "node/13342702051"
+    },
+    {
+      "nombre": "El Altar del Alba",
+      "tipo": "piedra",
+      "x": -390,
+      "y": -131,
+      "anclaje": "node/2631124674"
+    },
+    {
+      "nombre": "La Torre Caída",
+      "tipo": "ruina",
+      "x": -148,
+      "y": -193,
+      "anclaje": "node/6896343088"
     }
   ],
   "calzadas": [
-    {
-      "nombre": "El Camino de Ferrabriga de los Vientos",
-      "tipo": "calzada",
-      "desde": [
-        -365,
-        -195
-      ],
-      "hasta": [
-        271,
-        -265
-      ],
-      "puntos": 40,
-      "recta": false
-    },
     {
       "nombre": "El Camino del Alba",
       "tipo": "calzada",
@@ -223,7 +209,7 @@
         -363,
         310
       ],
-      "puntos": 24,
+      "puntos": 26,
       "recta": false
     },
     {
@@ -237,95 +223,81 @@
         -272,
         29
       ],
-      "puntos": 32,
-      "recta": false
-    },
-    {
-      "nombre": "El Paso del Norte",
-      "tipo": "calzada",
-      "desde": [
-        60,
-        674
-      ],
-      "hasta": [
-        2,
-        822
-      ],
-      "puntos": 7,
+      "puntos": 30,
       "recta": false
     },
     {
       "nombre": "La Calzada del Alba Fría",
       "tipo": "calzada",
       "desde": [
-        -363,
-        310
+        -5,
+        724
       ],
       "hasta": [
-        60,
-        674
+        126,
+        804
       ],
-      "puntos": 27,
+      "puntos": 16,
       "recta": false
     },
     {
-      "nombre": "La Calzada del Suroeste",
+      "nombre": "La Calzada del Sur",
       "tipo": "calzada",
       "desde": [
         -272,
         29
       ],
       "hasta": [
-        -365,
-        -195
+        -330,
+        -205
       ],
-      "puntos": 24,
+      "puntos": 27,
       "recta": false
     },
     {
-      "nombre": "La Senda del Este",
-      "tipo": "ramal",
+      "nombre": "La Senda de Ferrabriga de los Vientos",
+      "tipo": "calzada",
       "desde": [
-        -76,
-        -223
+        -330,
+        -205
       ],
       "hasta": [
-        -52,
-        -218
+        271,
+        -265
       ],
-      "puntos": 2,
+      "puntos": 39,
       "recta": false
     },
     {
-      "nombre": "La Trocha del Nordeste",
-      "tipo": "ramal",
+      "nombre": "La Vieja Ruta del Nordeste",
+      "tipo": "calzada",
       "desde": [
-        -505,
-        -286
+        -363,
+        310
       ],
       "hasta": [
-        -359,
-        -202
+        -5,
+        724
       ],
-      "puntos": 30,
+      "puntos": 26,
       "recta": false
     },
     {
-      "nombre": "La Vereda de El Monasterio de los Callados",
+      "nombre": "El Sendero del Alba",
       "tipo": "ramal",
       "desde": [
-        -76,
-        668
+        -390,
+        -131
       ],
       "hasta": [
-        -41,
-        684
+        -354,
+        -128
       ],
-      "puntos": 3,
+      "puntos": 5,
       "recta": false
     },
     {
-      "nombre": "La Vereda de La Fortaleza Caída",
+      "nombre": "La Vereda de La Capilla del Silencio",
       "tipo": "ramal",
       "desde": [
         -195,
@@ -336,6 +308,34 @@
         548
       ],
       "puntos": 3,
+      "recta": false
+    },
+    {
+      "nombre": "La Vereda de La Torre Caída",
+      "tipo": "ramal",
+      "desde": [
+        -148,
+        -193
+      ],
+      "hasta": [
+        -152,
+        -200
+      ],
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": "La Vereda del Nordeste",
+      "tipo": "ramal",
+      "desde": [
+        -505,
+        -286
+      ],
+      "hasta": [
+        -350,
+        -192
+      ],
+      "puntos": 31,
       "recta": false
     }
   ],
