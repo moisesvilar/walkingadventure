@@ -91,24 +91,36 @@ function exigeProductores(productores) {
  *   **Sin ningún productor el motor funciona entero** y el contador avanza igual:
  *   lo declara la spec y es como corre en `node --test`. Es la única ausencia que
  *   aquí no es un error; todo lo demás que falte se dice.
+ *
+ *   `baseDePaso` es la **base de siembra**, opcional: una función `(n) => string`
+ *   que sustituye a `semillaDePaso`. Existe por el prólogo del mundo (SPEC-013),
+ *   que instancia este mismo motor con un contador y una base propios —los suyos
+ *   cuelgan de la semilla del mapa con el sufijo del prólogo y el número de
+ *   intento— y muere al terminar el intento. Sin ella el prólogo compartiría flujo
+ *   de azar con los primeros pasos de la jugadora, que es la colisión que el sufijo
+ *   por fase existe para impedir. Ninguna otra decisión del motor se reabre.
  */
-export function creaMotorDePasos({ semilla, mapaId, estado = estadoDePasos(), productores = [] } = {}) {
+export function creaMotorDePasos({ semilla, mapaId, estado = estadoDePasos(), productores = [], baseDePaso = null } = {}) {
   const semillaPartida = exigeSemilla(semilla);
   const id = exigeMapaId(mapaId);
   const cola = exigeProductores(productores);
   const registro = estadoDeMapa(estado, id);
+  if (baseDePaso !== null && typeof baseDePaso !== 'function') {
+    throw new Error(`la base de siembra del motor llega como ${JSON.stringify(baseDePaso) ?? String(baseDePaso)}: se espera una función (n) => string, o nada para la de la partida`);
+  }
+  const base = (n) => (baseDePaso ? baseDePaso(n) : semillaDePaso(semillaPartida, id, n));
 
   // Calcula el paso entero **sin tocar nada**: los productores corren, sus efectos
   // se validan, y solo si todo sale bien lo escribe quien llama. Un paso se aplica
   // entero o no se aplica, porque su contenido depende de su número y un número
   // gastado a medias haría la partida irreproducible.
   const calcula = (n) => {
-    const base = semillaDePaso(semillaPartida, id, n);
+    const semillaBase = base(n);
     const efectos = [];
     for (const p of cola) {
       // Cada productor recibe un azar derivado del suyo: añadir la cola de
       // oportunidades no puede desplazar los rumores ya sembrados.
-      const producidos = p.produce(n, makeRng(`${base}#${p.id}`));
+      const producidos = p.produce(n, makeRng(`${semillaBase}#${p.id}`));
       for (const e of validaEfectos(producidos, `el productor "${p.id}" en el paso ${n} del mapa ${id}`)) efectos.push(e);
     }
     return congelaHondo({ n, efectos });
@@ -134,12 +146,12 @@ export function creaMotorDePasos({ semilla, mapaId, estado = estadoDePasos(), pr
 
     /** La semilla del paso `n` —o del último dado—, sin ninguna marca de reloj dentro. */
     semillaDelPaso(n = registro.n) {
-      return semillaDePaso(semillaPartida, id, n);
+      return base(n);
     },
 
     /** El azar del paso `n`, reproducible: dos veces desde cero dan exactamente lo mismo. */
     azarDelPaso(n = registro.n) {
-      return makeRng(semillaDePaso(semillaPartida, id, n));
+      return makeRng(base(n));
     },
 
     /**
