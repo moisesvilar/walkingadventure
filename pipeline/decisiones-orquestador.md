@@ -63,3 +63,11 @@ Eso es exactamente RF-MUNDO-007, que el checklist asigna a las **filas 4 y 6**, 
 `wa-qa-tester` ejecuta `scripts/qa-tester-run.sh`, que no existe en el repo. No es un olvido: es exactamente lo que pide la fila 1 del checklist (`andamiaje-pruebas`, RF-INFRA-007).
 
 **Decisión:** el script lo entrega SPEC-001 como código de producción. Hasta que exista, no hay nada que ejecutar.
+
+## 6e · El tope del 25 %, medido sobre la entrada y no sobre la salida
+
+`wa-qa-dev` señaló una ambigüedad real del criterio «ninguna etiqueta aporta más del 25 % de los candidatos que se le ofrecen». La implementación limita la **cuenta** a `floor(n · 0,25)` sobre el conjunto que entra; medido sobre el conjunto que **sale**, la etiqueta dominante queda en 33-36 %.
+
+**Decisión: se acepta la lectura por el conjunto de entrada.** La otra es insatisfacible cuando un solo `kind` domina el pool —no hay reparto posible que baje del 25 % si el 60 % de lo disponible es restaurante— y el criterio de `parajes.md` no es un porcentaje, es «ningún tag masivo monopoliza un tipo de paraje». Ese fin se cumple y está medido: 769 locales de adultos fuera, `drinking_water` fuera, `amenity=fountain` dentro, y la casteabilidad **sube** de 21/48 a 24/48 con `costero` recuperando sus cinco parajes.
+
+No merece iteración. Queda anotado aquí y en la nota de esa entrada del mapa de cobertura, para que quien afine los números en `parajes.md` sepa qué se midió.
