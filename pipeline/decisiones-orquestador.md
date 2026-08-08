@@ -178,3 +178,19 @@ Y los presupuestos que de verdad deciden si esto cabe en un móvil **se cumplen 
 **Decisión: el tope por hecho pasa a 500 B, y `version-oida` queda declarado como el tipo caro.** Los agregados no se tocan: son los que valen. `wa-dev` hizo bien en no forzarlo abreviando nombres de campo — habría cambiado un número sin cambiar nada real.
 
 **Desviación de procedimiento que declaro:** la spec pedía ajustar este número «por iteración con el dato delante», y lo estoy resolviendo como veredicto. Lo hago porque es un solo umbral, no cambia comportamiento y los agregados pasan; pero queda escrito que el camino formal era una iteración, para que nadie lea esto como que los umbrales se mueven a conveniencia.
+
+## 6r · El entregable de B2, verificado a mano, y lo que destapó
+
+El PRD promete para B2 «simulación completa de partida en Node: pasos, rumores, rangos y diario, determinista». Con las ocho filas en verde y 1036 casos pasando, monté esa simulación de punta a punta fuera del repo. **La entrega existe** —mundo, prólogo con par avalado, salidas casteadas, pasos, rumores llegando con su nivel, rango, oro, objetos, motes, diario y determinismo entre procesos— pero salieron **cuatro defectos que 1036 pruebas unitarias no veían**:
+
+**a · Congelar la partida se rompe en su camino feliz.** `cierraSalidaDeProgresion` construye `procedencia` como objeto y `AREA_OBJETOS` la declara `texto?`: basta con que un desenlace entregue un objeto sin procedencia explícita para que **la partida no se pueda guardar**. Las pruebas no lo veían porque llaman a `congelaObjetos` directamente y **se saltan el sobre**.
+
+**b · `dia` tiene dos contratos incompatibles** en el mismo bloque: `objetoPersistente` exige texto, `entradaDeDiario` exige entero ≥ 0.
+
+**c · El prólogo infla el rango antes de jugar.** Sus sucesos llegan a todos y `rangoEn` cuenta rumores sin mirar protagonista, así que **los diez núcleos amanecen en nombradía o pertenencia el día 1**, con la jugadora sin haber hecho nada. Choca con `progresion.md`. SPEC-014 ya había cerrado `PROTAGONISTAS` para que el prólogo no disparase el hito; al rango le faltaba la misma cautela.
+
+**d · Bytes NUL dentro de literales de plantilla** en `partida/rumores.js` y `partida/puestos.js`: `file` y `grep` los tratan como binarios.
+
+**La lección, y es la más cara de la ejecución:** una suite verde de mil casos **no es una demostración de que el producto funciona**. Los cuatro defectos viven en las costuras entre filas, y cada fila probaba su lado. El entregable por bloque del PRD no es ceremonia: es el único momento en que alguien recorre el camino entero.
+
+Lo que **no** son defectos y quedan como frontera correcta: no hay motor de salida (aceptar, recorrer y cerrar es de las filas 34 y 36, B5), no hay textos (B3 sin empezar) y la cola de entregas se siembra pero no la consume nadie (fila 19).
