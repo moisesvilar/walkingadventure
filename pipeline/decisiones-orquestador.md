@@ -85,3 +85,15 @@ Lo que §6d dejaba abierto ya está hecho. Con SPEC-006, `barrio-tres-calles` ca
 La casteabilidad agregada sobre los ocho extractos: **21/48 antes de la fila 5 → 17/48 con la primera entrega de SPEC-005 (regresión, corregida por iteración) → 24/48 → 30/48 con SPEC-006.**
 
 El escenario **«El mundo mínimo todavía compone un lazo»**, que llevaba tres filas seguidas sin poder cerrarse y se reatribuyó dos veces (§6c y §6d), **está vivo y en verde**.
+
+## 6h · La degradación silenciosa del grafo, y por qué el mismo bug salió tres veces
+
+`buildRoutes` y `pegarAViario` aceptaban en el mismo parámetro **una lista de vías o un grafo**. Pasarles `geo.roads` donde tocaba el grafo cosido no fallaba: degradaba en silencio y el mundo salía con un grafo pobre sin que nada se pusiera rojo.
+
+Esa firma permisiva es la causa de que el mismo cableado a medias apareciera **tres veces**: el `fetchData` de la app (el callejero no llegaba al grafo, así que SPEC-007 era código muerto), el helper `mundo-de-prueba.mjs` y el helper `celda-de-prueba.mjs`. Las tres veces el efecto fue idéntico: algo que parecía cubierto sin estarlo. La tercera destapó además una **regresión real** — `crossingCandidates` definía cruce como «punto compartido por 2+ calzadas», que solo funciona con un grafo pobre; con el callejero dentro, `suelo-250m` perdía su único paraje y el mundo mínimo dejaba de castear otra vez.
+
+Es la misma forma de fallo que los dos defectos de SPEC-001 y que el `parajes.js` sin vocabulario de SPEC-006. **Cuatro veces la misma cosa**: una pieza que, al no estar, no protesta.
+
+**Decisión: se cierra por contrato, no por vigilancia.** `exigeGrafo` falla nombrando lo que llegó, el parámetro pasa a llamarse `grafoViario`, y `viasDelGrafo` se exporta para que nadie tenga que reconstruir la tubería a mano. Es el mismo criterio que la propia SPEC-007 aplica a la marca de suposición: obligatoria, y su ausencia error de construcción, porque con un campo opcional «perderla» y «no haberla tenido nunca» son indistinguibles.
+
+Efecto medido del arreglo completo: casteabilidad **30/48 → 32/48**, `suelo-250m` de 2/6 a **3/6**, `barrio-tres-calles` de 4 a 6 parajes.
