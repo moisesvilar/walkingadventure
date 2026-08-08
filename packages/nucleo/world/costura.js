@@ -3,7 +3,7 @@
 // celdas a propósito — si viviera dentro de una, abrir la vecina la modificaría, y
 // eso es resembrar.
 
-import { makeProjector } from '../core/geo.js';
+import { dist, makeProjector } from '../core/geo.js';
 import { congelaHondo } from '../core/congelar.js';
 import { SUFIJOS_DE_FASE, semillaDeCelda } from '../core/semilla.js';
 import { claveDeCelda, ordenCanonico, proyectorDeRejilla, sonContiguas } from './rejilla.js';
@@ -107,7 +107,7 @@ export function coseCeldas({ rejilla, a, b, semilla, mapaId }) {
   const pares = [];
   for (const x of cp) {
     for (const y of cq) {
-      const d = Math.hypot(x.punto.x - y.punto.x, x.punto.y - y.punto.y);
+      const d = dist(x.punto, y.punto);
       if (d <= UMBRAL_COSTURA_M) pares.push({ d, x, y });
     }
   }
@@ -122,7 +122,9 @@ export function coseCeldas({ rejilla, a, b, semilla, mapaId }) {
     aristas.push({
       desde: { celda: x.celda, clave: x.clave, ...proyRejilla.toLatLon(x.punto) },
       hasta: { celda: y.celda, clave: y.clave, ...proyRejilla.toLatLon(y.punto) },
-      metros: Math.round(d),
+      // Ya viene en la rejilla de precisión desde `dist`: la costura no redondea por
+      // su cuenta, que era el segundo número de precisión repartido por el código.
+      metros: d,
       // Marcada como suposición, igual que lo que cose el callejero interno: el
       // mapa no puede prometer un camino que nadie ha comprobado que exista.
       suposicion: true,

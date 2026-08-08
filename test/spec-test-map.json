@@ -3147,9 +3147,9 @@
       "criterio": "Dado los ocho extractos de referencia regenerados tras esta iteración, cuando se suman las plantillas que castean en todos ellos, entonces el total es al menos 21 de 48, que es el valor medido en `cec7d91`, el commit anterior a esta fila.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/reparto.test.mjs",
-      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 21 de 48",
+      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 31 de 48",
       "hueco_de_bateria": true,
-      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral es el número medido en cec7d91 y no el de hoy (24/48), para que una mejora no ponga rojo el caso."
+      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral vigente es 31/48, dictaminado en `pipeline/decisiones-orquestador.md` §6k: la cuantización de SPEC-009-iter-1 cuesta un lazo de `suelo-250m#1` y se aceptó a cambio de que el documento del mundo denso quepa en su presupuesto. La trayectoria del umbral desde que se escribió el caso es 21 (cec7d91) → 24 → 30 → 32 → 31. Sigue escrito como umbral y no como igualdad, para que una mejora no ponga rojo el caso."
     },
     {
       "spec": "SPEC-005-iter-1",
@@ -3696,7 +3696,7 @@
       "criterio": "Dado dos componentes separadas exactamente por el umbral de 180 m, cuando se construye el grafo, entonces se cosen: el umbral es inclusivo.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/grafo.test.mjs",
-      "caso": "El umbral es inclusivo: a 180 m se cose y a 180,01 no",
+      "caso": "El umbral es inclusivo: a 180 m se cose y a 181 no",
       "hueco_de_bateria": true,
       "nota": "La spec lo declara hueco de la batería: los dos escenarios que hay usan 40 m y 400 m, holgadamente a los dos lados, y el borde no está cubierto."
     },
@@ -3705,8 +3705,9 @@
       "criterio": "Dado dos componentes separadas por 180,01 m, cuando se construye el grafo, entonces no se cosen.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/grafo.test.mjs",
-      "caso": "El umbral es inclusivo: a 180 m se cose y a 180,01 no",
-      "hueco_de_bateria": true
+      "caso": "El umbral es inclusivo: a 180 m se cose y a 181 no",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se escribió con 180,01 y desde SPEC-009-iter-1 esa distancia ya no existe: los metros van en la rejilla de `PRECISION_M`, así que 180,01 y 180 son el mismo metro. El caso afirma lo mismo —el umbral es inclusivo, no estricto— con el primer valor por encima que la rejilla distingue, `COSER_MAX + PRECISION_M`."
     },
     {
       "spec": "SPEC-007",
@@ -4136,9 +4137,9 @@
       "criterio": "Dado un way con dos puntos en la misma coordenada, cuando se construye el grafo, entonces no se añade una arista de peso cero.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/grafo.test.mjs",
-      "caso": "Dos puntos en la misma coordenada no producen una arista de peso cero",
+      "caso": "El lazo sobre sí mismo no produce arista, y dos nodos distintos en la misma coordenada sí",
       "hueco_de_bateria": true,
-      "nota": "Se afirma sobre las aristas de OSM, que es lo que dice el criterio. Los dos nodos coincidentes quedan en componentes distintas y el cosido sí los une, con una arista marcada `cosida` de cero metros: no es una arista real presentada como tal, pero queda anotado como hallazgo del caso límite por si la fila 8 lo tuviera que mirar."
+      "nota": "SPEC-009-iter-1 derogó de hecho este criterio y `pipeline/decisiones-orquestador.md` §6l lo ratificó: con los metros en la rejilla de `PRECISION_M`, dos nodos de OSM distintos a menos de medio metro comparten coordenada y su arista de peso cero es la calle, no una arista espuria. Descartarla partía vías reales para que el cosido las reinventara como suposición nuestra. El caso pasa a afirmar lo que de la guarda sigue valiendo —un nodo repetido consigo mismo no es una arista— más lo que la iteración hizo legítimo: la arista existe, se declara real y no ensucia el camino mínimo. El criterio de SPEC-007 tal como está escrito ya no se cumple ni se puede cumplir; queda pendiente de que la spec lo actualice."
     },
     {
       "spec": "SPEC-007",
@@ -4713,6 +4714,811 @@
       "fichero": "test/nucleo/accesibilidad.test.mjs",
       "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
       "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema"
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mundo generado, cuando se mide la longitud de una arista entre dos puntos distintos, entonces no es cero: las longitudes se calculan sobre coordenadas ya cuantizadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Una arista de peso cero no deja el trazado dando vueltas",
+      "hueco_de_bateria": true,
+      "nota": "El reverso del criterio, que es donde estaba el defecto: dos puntos **coincidentes** sí dan cero —a la resolución del metro esa es la verdad— y `pipeline/decisiones-orquestador.md` §6l decidió conservar esa arista en lugar de descartarla. El caso afirma que conservarla no rompe el trazado. Estuvo en rojo mientras el desempate de `caminoMinimo` reasignaba `previo` en los dos sentidos de una arista de coste cero: la cadena de predecesores dejaba de ser un árbol y la reconstrucción del camino no terminaba. Cerrado el defecto, está en verde, y con él se pudo remedir «Un tramo difícil sin nombre propio hace fallar la entrega nombrando el tramo», que no podía medir urbano-denso mientras durase. El caso corre en otro proceso con el montón acotado —el fallo era un bucle que llena la memoria—, y su guion importa el paquete por ruta calculada en tiempo de ejecución: un literal con la raíz interpolada haría saltar la guarda «node --test test/nucleo/ arranca sin instalar ninguna dependencia», que no distingue —ni debe— un import de este módulo de uno escrito para otro proceso."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el paquete entregado, cuando se busca de dónde sale la precisión con la que se guardan los metros, entonces hay una sola constante, con su justificación escrita al lado, y ningún otro número de precisión repartido por el código.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La precisión sale de una sola constante, con su justificación al lado",
+      "hueco_de_bateria": true,
+      "nota": "Tres afirmaciones y las tres estáticas, porque el criterio es sobre el código y no sobre lo que produce: una sola declaración de `PRECISION_M` en todo el paquete y en `core/geo.js`, ninguna otra constante cuyo nombre suene a precisión, y la justificación en el comentario de al lado citando el presupuesto que la decidió. Un valor que se justifica en otro documento se cambia sin leerlo."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el paquete entregado, cuando se recorren las fases de generación, entonces todas cuantizan con esa constante y ninguna redondea por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La precisión sale de una sola constante, con su justificación al lado",
+      "hueco_de_bateria": true,
+      "nota": "La parte estática del criterio: las seis fases que la spec nombra como productoras de metros —`build`, `grafo`, `routes`, `settlements`, `parajes` y `costura`— toman `cuantizaM`, `cuantizaPunto` o `dist` de `core/geo.js`. La parte que de verdad muerde es la de después, sobre el documento: si una fase redondeara por su cuenta, el número saldría fuera de la rejilla y el otro caso lo vería. No se prohíbe todo `Math.round` en esas fases a propósito: hay redondeos legítimos que no son de metros —claves de nodo, cupos, pasos de rejilla— y una prohibición ciega los convertiría en falsos rojos."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el módulo de congelado, cuando se recorre lo que hace con los números, entonces no redondea ni uno: escribe lo que le llega, que es lo que hace afirmable el ida y vuelta exacto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El módulo de congelado no redondea ni un número",
+      "hueco_de_bateria": true,
+      "nota": "Es la mitad del contrato «se cuantiza al generar y nunca al volcar». Sobre `partida/mundo.js` y `partida/formato.js`: ni `Math.round`, ni `toFixed`, ni `toPrecision`, ni el cuantizador, ni la constante. Los `Math.floor`/`Math.ceil` que quedan se dejan pasar exigiendo que todos dividan entre 8, que es lo que son: contar bytes de la rejilla de bits de la máscara de mar."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un documento de celda, cuando se recorre cualquier número que esté en metros, entonces es múltiplo exacto de la constante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Todo número en metros del documento de una celda es múltiplo exacto de la constante",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre **todos** los números del documento de los cuatro mundos congelados y no sobre una lista de campos elegidos a mano, que es lo que dejaría entrar el que se olvide: lo enumerado es lo contrario, las dos únicas familias que no están en metros —los grados y los pesos de escena—, y el caso comprueba además que ninguna de las dos sale vacía, para que el filtro no pueda tragárselo todo en silencio. Con la rejilla del metro, «múltiplo exacto» es «entero». La comprobación va por el cociente y no por el resto: `-10000 % 1` es `-0`, y con igualdad estricta el resto pondría rojo todo metro negativo redondo."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un documento de celda, cuando se leen las coordenadas en grados de su cabecera —anclaje, centro, esquinas— y los extremos de las costuras del índice, entonces la constante no los ha tocado: gobierna los metros y solo los metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La constante gobierna los metros y no toca los grados de la cabecera",
+      "hueco_de_bateria": true,
+      "nota": "La mitad del criterio que vive en el documento de una celda; la de las costuras del índice está en el caso «Los grados de las costuras del índice no los toca la rejilla del metro», de almacen.test.mjs. Se afirma de dos maneras: los grados del documento son exactamente los que calcula la rejilla, y conservan seis decimales o más —un metro de longitud son ~1,2e-5 grados—, que es la prueba de que nadie los ha llevado a la rejilla. Es el caso que impide el arreglo fácil de cuantizarlo todo: redondear el anclaje movería el identificador del mapa que fija SPEC-003."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa guardado con al menos una celda abierta, cuando se carga, se abre una celda y se vuelve a guardar, entonces el índice escrito es idéntico byte a byte al que había: no se ha perdido nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cargar el mapa, abrir una celda y volver a guardarlo deja el índice idéntico byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "El ciclo entero y no la lectura de un campo, que es lo que pide la spec: guardar, cargar sin ninguna celda, cargar una, y volver a guardar. La versión con el defecto pasaba cualquier comprobación que no cargase el mapa antes, porque con las celdas en memoria el título sí estaba donde se buscaba."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa cargado cuyas celdas son todas fichas sin mundo, cuando se congela su índice, entonces declara el mismo título y el mismo idioma que declaraba antes de cargarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un mapa cargado cuyas celdas son fichas sin mundo declara el mismo título y el mismo idioma",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba antes que nada que las celdas son fichas de verdad —`mundoDeCelda` falla nombrando la celda—, para que el caso no pueda pasar por accidente sobre un mapa con las celdas cargadas."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el código que congela el índice, cuando se busca de dónde salen sus campos, entonces ninguno se deriva del mundo de una celda ni de ninguna otra estructura que la carga perezosa pueda dejar sin rellenar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Ningún campo del índice se deriva del mundo de una celda",
+      "hueco_de_bateria": true,
+      "nota": "De código, porque el fallo era de código: con las celdas cargadas la versión mala también producía el documento bueno. Se leen los cuerpos de `congelaIndice` y de `fichaDeCelda` con los comentarios quitados —esos comentarios nombran `celda.mundo` a propósito, para decir que de ahí no se saca nada—, y se exige además que el título y el idioma salgan de `exigeCampo(mapa, …)`."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa con al menos una celda abierta al que le falta el título o el idioma, cuando se congela su índice, entonces falla nombrando el campo, en lugar de escribir un documento con `null`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null",
+      "hueco_de_bateria": true,
+      "nota": "Cubre también el criterio general de la iteración —al escribir un documento, un campo ausente es un error y no un `null`— probándolo sobre un tercer campo que no es ninguno de los dos del defecto, `motivo` de una ficha de celda: si la guarda fuera solo para el título y el idioma, la clase seguiría abierta. Y el reverso, en el mismo caso: el nulo de un mapa recién creado sin ninguna celda sigue pasando, porque ahí sí es un estado del mundo."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado cualquier documento de esta capa, cuando se escribe leyendo un campo obligatorio que no está en el objeto de origen, entonces se falla nombrando el campo: al escribir un documento, un campo ausente es un error y no un `null`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null",
+      "hueco_de_bateria": true,
+      "nota": "Es el criterio que cierra la clase, y por eso se prueba sobre un campo ajeno al defecto (`motivo`) además de sobre los dos que lo tuvieron. Queda un hueco declarado: se afirma sobre la ruta de congelado del índice y no sobre la del documento de celda, que tiene sus propios casos de campo obligatorio en persistencia.test.mjs."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa recién creado sin ninguna celda congelada todavía, cuando se congela su índice, entonces el título y el idioma son nulos y no hay error: ahí el nulo sí es un estado del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null",
+      "hueco_de_bateria": true,
+      "nota": "Va en el mismo caso que el criterio anterior a propósito: la distinción entre el nulo legítimo y el nulo que sale de no haber cargado algo solo se ve afirmando los dos lados juntos. El escenario de SPEC-009 «Un mapa recién creado sin ninguna celda congelada se carga con cero celdas y ningún error» lo afirma también, por el lado de la carga."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa con varias celdas, cuando se abren en cualquier orden, entonces el título y el idioma del índice son siempre los de la celda que ordena primero por su clave.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El título y el idioma del índice son los de la celda que ordena primero, se abran en el orden que se abran",
+      "hueco_de_bateria": true,
+      "nota": "Se abren las dos celdas en los dos órdenes y se comprueba antes que los dos mundos dan títulos distintos, que si no el caso no compararía nada. Se afirma además sobre el texto entero del índice, no solo sobre los dos campos: el orden de apertura no puede mover nada del documento."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa, cuando se guarda dos veces seguidas sin abrir ni cargar nada entre medias, entonces los dos índices escritos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Guardar dos veces seguidas sin tocar nada escribe el mismo índice byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un documento de celda, cuando se leen las coordenadas en grados de su cabecera —anclaje, centro, esquinas— y los extremos de las costuras del índice, entonces la constante no los ha tocado: gobierna los metros y solo los metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Los grados de las costuras del índice no los toca la rejilla del metro",
+      "hueco_de_bateria": true,
+      "nota": "La mitad del criterio que vive en el índice: los extremos de una costura son grados y conservan precisión más fina que el metro, mientras que sus `metros` sí están en la rejilla. Redondearlos movería el punto donde dos celdas se cosen."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo recién generado, cuando se congela la celda, entonces el documento contiene el terreno, los núcleos con sus servicios, los parajes, las calzadas, los ramales, el callejero, la máscara de mar, los nombres y el título del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El documento de una celda lleva el terreno, los núcleos con sus servicios, los parajes, las calzadas, los ramales, el callejero, la máscara de mar, los nombres y el título",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se lee cualquier núcleo, servicio o paraje anclado a un lugar real, entonces lleva el identificador nativo de su anclaje en la forma que fijó SPEC-005 (`osm:node/123456`, `places:ChIJ...`).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Cada núcleo, servicio o paraje anclado lleva el identificador nativo de su anclaje",
+      "hueco_de_bateria": true,
+      "nota": "la spec escribe la forma como «osm:node/123456»; lo que SPEC-005 dejó implementado es la clave nativa «node/123456», y es esa la que se afirma."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se lee cualquier tramo de calzada, de ramal o de callejero, entonces lleva su marca de suposición declarada, con el mismo valor que tenía en el grafo: nulo, `'cosida'` o `'fallback'`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Lo cosido y lo inventado queda marcado",
+      "escenario": "Lo cosido y lo inventado queda marcado"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo con aristas cosidas, cuando se congela y se vuelve a levantar, entonces el grafo reconstruido no cose ni un hueco más: lo cosido llega congelado como dato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Lo cosido y lo inventado queda marcado",
+      "escenario": "Lo cosido y lo inventado queda marcado"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se lee su cabecera, entonces declara el identificador del mapa, el índice de la celda, el lado de la celda y el tramo con el que se dimensionó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La cabecera del documento declara el mapa, la celda, el lado, el tramo y el idioma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se lee su cabecera, entonces declara el idioma del que salieron los nombres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La cabecera del documento declara el mapa, la celda, el lado, el tramo y el idioma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo generado en una celda costera, cuando se congela, entonces la máscara de mar entra en el documento y no se recalcula al cargar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La máscara de mar entra en el documento y no se recalcula al cargar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se busca en él la respuesta cruda de Overpass o cualquier texto de consulta, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "En el documento no aparece la respuesta cruda de Overpass ni ningún texto de consulta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda y ninguna fuente de datos inyectada, cuando se levanta el mundo, entonces se obtiene el mundo entero sin pedir nada a nadie.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Levantar un mundo no necesita ninguna fuente de datos inyectada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo levantado desde su documento, cuando cambian por completo los datos de OSM de esa zona, entonces el mundo sigue siendo el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El mundo no depende de OSM después de generarse",
+      "escenario": "El mundo no depende de OSM después de generarse"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo recién generado, cuando se congela, se levanta y se vuelve a congelar, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Congelar, levantar y volver a congelar da el mismo documento byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "sobre los cuatro mundos congelados por dos celdas, con dos vueltas completas."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo recién generado y el mismo mundo levantado desde su documento, cuando se comparan campo a campo, entonces no hay ninguna diferencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El mundo levantado no difiere del recién generado en ningún campo",
+      "hueco_de_bateria": true,
+      "nota": "los tres Map del grafo se comparan como diccionarios: su orden de inserción es lo único que no se reproduce, y depender de él contradiría el escenario bloqueante «El orden de iteración no depende del orden de inserción»."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo recién generado y el mismo mundo levantado desde su documento, cuando se castean las plantillas contra los dos, entonces el resultado del casting es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El casting sale igual contra el mundo generado y contra el levantado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo cuyos ríos llevan su tipo, cuando se congela y se levanta, entonces cada río conserva el suyo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Cada río conserva su tipo al congelar y levantar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo en el que alguna propiedad viaja colgada de un array en lugar de en un campo de objeto, cuando se congela, entonces la validación falla nombrando el campo, en lugar de escribir un documento al que le falta el dato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Una propiedad colgada de un array hace fallar la congelación nombrando el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo con un valor que JSON no sabe escribir —`NaN`, `Infinity` o `undefined`—, cuando se congela, entonces falla nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Un valor que JSON no sabe escribir hace fallar la congelación nombrando el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo con un `Map`, un `Set` o una función colgando de cualquier campo, cuando se congela, entonces falla nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Un valor que JSON no sabe escribir hace fallar la congelación nombrando el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento levantado, cuando se comparan sus números con los del mundo original, entonces ninguno ha cambiado de valor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ningún número cambia de valor al pasar por el documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo con nombres acentuados y en gallego, cuando se congela y se levanta, entonces los nombres vuelven idénticos, carácter a carácter.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Los nombres acentuados y en gallego vuelven idénticos, carácter a carácter",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el mismo mundo, cuando se congela dos veces, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Congelar, levantar y volver a congelar da el mismo documento byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se inspecciona el orden de sus listas, entonces cada una está ordenada por un criterio declarado y estable, y ninguna por el orden en que se insertaron sus elementos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Cada lista del documento está ordenada por un criterio declarado y estable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo cuyos elementos se recorren en otro orden al congelar, cuando se compara el documento, entonces es idéntico al anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El orden de iteración no depende del orden de inserción",
+      "escenario": "El orden de iteración no depende del orden de inserción"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado cualquier documento escrito por esta entrega, cuando se lee, entonces lleva un campo de versión de formato, entero, con valor 1.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Todo documento declara la versión del formato y la del generador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el paquete entregado, cuando se busca de dónde sale ese entero, entonces hay una sola constante y todos los documentos la toman de ahí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La versión del formato sale de una sola constante",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento sin campo de versión, cuando se intenta levantar, entonces se rechaza nombrando el campo que falta, antes de interpretar nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Un documento sin versión, con una mayor o con una menor no se abre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento con una versión de formato mayor que la que el juego entiende, cuando se intenta levantar, entonces no se abre y el error declara la versión que trae y la que se esperaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Un documento sin versión, con una mayor o con una menor no se abre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento con una versión de formato menor que la actual, cuando se intenta levantar, entonces el error declara que hace falta migrarlo, sin intentar interpretarlo con las reglas nuevas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Un documento sin versión, con una mayor o con una menor no se abre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento, cuando se lee su cabecera, entonces declara con qué versión del generador se escribió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Todo documento declara la versión del formato y la del generador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento, cuando se levanta, entonces la versión del formato se comprueba antes que cualquier otro campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La versión se comprueba antes que cualquier otro campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con la celda «0,0» congelada, cuando se abre y se congela la celda «1,0», entonces el documento de «0,0» sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia",
+      "nota": "aquí el escenario se afirma sobre el documento del almacén y no sobre la memoria, que es lo que estrena esta spec."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con dos celdas contiguas congeladas, cuando se lee el índice del mapa, entonces declara las dos celdas abiertas y la costura de calzadas del borde que comparten.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El índice declara las dos celdas abiertas y la costura del borde que comparten",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el índice de un mapa, cuando se lee su identificador, entonces es el anclaje redondeado del mapa que fijó SPEC-003, y no una coordenada más fina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El identificador del índice es el anclaje redondeado del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con veinte celdas abiertas, cuando se carga el mapa, entonces se lee el índice y ninguna celda, hasta que alguna haga falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cargar un mapa de veinte celdas lee el índice y ninguna celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un índice que declara una celda que el almacén no tiene, cuando se carga el mapa, entonces falla nombrando la celda que falta, sin devolver un mapa a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un índice que declara una celda que el almacén no tiene falla nombrando la celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el índice de un mapa, cuando se busca en él la semilla de la partida, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "En el índice del mapa no aparece la semilla de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa recién creado sin ninguna celda congelada todavía, cuando se carga, entonces se obtiene un mapa con cero celdas abiertas y ningún error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un mapa recién creado sin ninguna celda congelada se carga con cero celdas y ningún error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se buscan los anclajes libres que ningún elemento consumió, entonces no aparecen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ni los anclajes libres, ni el casting, ni la auditoría de la generación entran en el documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se busca el casting de plantillas, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ni los anclajes libres, ni el casting, ni la auditoría de la generación entran en el documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se busca la auditoría de la generación —qué núcleos y parajes se movieron hasta el viario—, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ni los anclajes libres, ni el casting, ni la auditoría de la generación entran en el documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se buscan los rangos, el diario, la repisa, los rumores en vuelo o cualquier dato del jugador, entonces no aparecen: el documento describe el mundo y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ningún dato del jugador ni ningún binario entra en el documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se busca el contenido binario de una imagen o de una foto, entonces no aparece, ni en línea ni codificado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ningún dato del jugador ni ningún binario entra en el documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se comprueba su esquema, entonces es cerrado: un campo que no esté declarado hace fallar la validación nombrándolo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El esquema cerrado rechaza un campo que no está declarado, nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un elemento del mundo que puede llevar ilustración, cuando se congela la celda, entonces el documento guarda su prompt de ficción y la clave derivada de él, más la referencia al recurso local o la declaración de que no lo hay.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "El documento guarda el prompt de ficción de una ilustración, su clave y dónde está el recurso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un anclaje con foto del lado real, cuando se congela la celda, entonces el documento guarda su `place_id`, la referencia al recurso local y la fecha de captura, y ninguna URL de Places.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "El documento guarda el place_id de una foto, su recurso local y su fecha de captura, y ninguna URL de Places",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un texto ya validado del LLM, cuando se congela la celda, entonces se guarda en línea con su clave y con su origen declarado, `llm` o `plantilla`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Un texto ya validado se guarda en línea con su clave y con su origen declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo sin ninguna ilustración, ninguna foto y ningún texto del LLM, cuando se congela y se levanta, entonces el mundo está completo y jugable, y cada hueco declara que está vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Un mundo sin ninguna ilustración, ninguna foto y ningún texto del LLM está completo y es jugable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo cuya ilustración de un paraje no está residente, cuando se juega ese paraje, entonces el juego cae al material de plantilla sin pedir nada a la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Una ilustración que no está residente no impide jugar el paraje: se cae al material de plantilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un anclaje sin foto residente, cuando se abre su visor, entonces abre igual con la cartela sobre fondo liso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Una ilustración que no está residente no impide jugar el paraje: se cae al material de plantilla",
+      "hueco_de_bateria": true,
+      "nota": "lo que se afirma aquí es que la cartela del anclaje sobrevive sin foto; que el visor abra es «Sin foto de Places, el visor abre igual», que es @app y de la fila 33."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo congelado y una aventura, cuando se pregunta qué le falta para jugarse sin red, entonces se enumeran los recursos ausentes sin hacer ninguna petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Se enumeran los recursos ausentes de una aventura sin hacer ninguna petición",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo congelado con todos sus recursos residentes, cuando se pregunta lo mismo, entonces la respuesta es que no falta nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Con todos los recursos residentes la respuesta es que no falta nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el área `partida/` del paquete, cuando se inspeccionan sus imports, entonces ninguno habla con la red: los huecos se rellenan desde fuera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El área partida/ no importa nada que hable con la red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento escrito sin ilustraciones y otro escrito después con ellas ya residentes, cuando se comparan las dos capas de ficción, entonces no ha cambiado ni un nombre, ni un tipo, ni una posición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Rellenar los huecos después no toca ni un nombre, ni un tipo, ni una posición de la capa de ficción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el mundo congelado urbano denso, cuando se genera su celda y se congela, entonces el documento ocupa menos de 2 MB sin comprimir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El documento del mundo urbano denso ocupa menos de 2 MB sin comprimir",
+      "hueco_de_bateria": true,
+      "nota": "rojo esperado: el documento mide 2953,4 KB frente al presupuesto de 2048 KB. La prueba está escrita como pide la spec y no ajustada a la medida."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el mundo congelado del suelo de 250 m, cuando se genera su celda y se congela, entonces el documento ocupa menos de 200 KB sin comprimir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El documento del mundo del suelo de 250 m ocupa menos de 200 KB sin comprimir",
+      "hueco_de_bateria": true,
+      "nota": "medido: 171,6 KB."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con veinte celdas abiertas, cuando se congela su índice, entonces ocupa menos de 100 KB.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cargar un mapa de veinte celdas lee el índice y ninguna celda",
+      "hueco_de_bateria": true,
+      "nota": "medido: 8,4 KB de índice con veinte celdas."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se leen sus coordenadas, entonces están en metros relativos al anclaje del mapa, y no en grados repetidos elemento a elemento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Las coordenadas del documento van en metros relativos al anclaje del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado una calzada cuyo trazado recorre tramos del callejero, cuando se lee el documento, entonces los cita por su identificador en lugar de copiar sus puntos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Una calzada cita los tramos del callejero por su identificador en lugar de copiar sus puntos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado los recursos binarios de un mapa, cuando se mide el documento, entonces no cuentan dentro de él: viven aparte y se miden aparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Los recursos binarios no cuentan dentro del documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda o el índice de un mapa, cuando se recorren todos sus campos, entonces no hay ninguna posición del jugador ni ningún histórico de posiciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un jugador que ha andado cien salidas, cuando se comparan los documentos del mundo antes y después, entonces son idénticos byte a byte: el mundo congelado no crece al andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el índice de un mapa, cuando se lee su anclaje, entonces es el redondeado, y la coordenada exacta del arranque no está en ningún campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El identificador del índice es el anclaje redondeado del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado cualquier documento de esta entrega, cuando se buscan marcas de tiempo del reloj real, entonces la única es la fecha de captura del contenido refrescable de Places.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La única marca de tiempo del documento es la fecha de captura de Places",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo al que se le añade un campo con una posición del jugador, cuando se congela, entonces el esquema cerrado lo rechaza nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El esquema cerrado rechaza un campo que no está declarado, nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un almacén sin ningún mapa, cuando se listan los mapas de la partida, entonces se obtiene una lista vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un almacén sin ningún mapa devuelve una lista vacía y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento truncado a la mitad, cuando se intenta levantar, entonces falla nombrando el documento y no devuelve ningún mundo a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un documento truncado a la mitad falla nombrando el documento y no devuelve nada a medias",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento válido al que le falta un campo obligatorio, cuando se intenta levantar, entonces falla nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un documento al que le falta un campo obligatorio falla nombrando el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un almacén que falla al escribir, cuando se congela una celda, entonces el error se propaga y el documento anterior sigue intacto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un almacén que falla al escribir propaga el error y deja intacto el documento anterior",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado la misma celda congelada dos veces con el mismo mundo, cuando se comparan los documentos escritos, entonces son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "La misma celda congelada dos veces da documentos idénticos byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el módulo de partida sin almacén inyectado, cuando se congela un mundo, entonces se obtiene el documento en memoria y no se escribe nada en ningún sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Sin almacén inyectado el mundo se congela igual y no se escribe en ningún sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el inspector de tráfico saliente en modo estricto, cuando se carga un mapa entero desde su almacén, entonces no se registra ninguna petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cargar un mapa entero desde su almacén no abre ninguna conexión de red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el inspector en modo estricto y un mundo ya generado, cuando se congela, entonces no se registra ninguna petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Congelar un mundo ya generado no abre ninguna conexión de red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo congelado, una aventura preparada y todos sus recursos residentes, cuando se juega la salida entera con el inspector en modo estricto, entonces no se registra ninguna petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Una salida entera se juega sin red",
+      "escenario": "Una salida entera se juega sin red"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el doble del proxy en modo falla siempre, cuando se carga el mapa y se recorre la salida entera, entonces todo funciona y ninguna pantalla menciona la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Una salida entera se juega sin red",
+      "escenario": "Una salida entera se juega sin red"
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado una celda ya abierta, cuando el jugador la vuelve a pisar, entonces se lee del almacén y no se consulta OSM.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Una celda ya abierta se lee del almacén y no se consulta OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se lee cualquier tramo de calzada, de ramal o de callejero, entonces lleva su marca de suposición declarada, con el mismo valor que tenía en el grafo: nulo, `'cosida'` o `'fallback'`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Los tres valores de la marca de suposición sobreviven al ida y vuelta",
+      "escenario": "Lo cosido y lo inventado queda marcado",
+      "nota": "ningún mundo congelado produce hoy un tramo \"fallback\": el tercer valor se ejercita marcando un tramo a mano sobre un mundo ya generado."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mundo recién generado, cuando se congela, se levanta y se vuelve a congelar, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La máscara de mar y el grafo viario vuelven enteros del documento",
+      "hueco_de_bateria": true,
+      "nota": "los dos bultos con codificación propia —la rejilla de bits y el grafo con sus tres Map—, que es donde una pérdida no se vería comparando el resto."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se lee cualquier núcleo, servicio o paraje anclado a un lugar real, entonces lleva el identificador nativo de su anclaje en la forma que fijó SPEC-005 (`osm:node/123456`, `places:ChIJ...`).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Ningún anclaje aparece dos veces",
+      "escenario": "Ningún anclaje aparece dos veces",
+      "nota": "el escenario, afirmado sobre el mundo levantado: el registro de uso único viaja congelado."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con la celda «0,0» congelada, cuando se abre y se congela la celda «1,0», entonces el documento de «0,0» sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "afirmado sobre el documento: el tramo con el que se dimensionó la celda vive en su cabecera."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con la celda «0,0» congelada, cuando se abre y se congela la celda «1,0», entonces el documento de «0,0» sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "nota": "afirmado sobre el documento: recorrer los cinco estilos no toca ni un byte."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un mapa con dos celdas contiguas congeladas, cuando se lee el índice del mapa, entonces declara las dos celdas abiertas y la costura de calzadas del borde que comparten.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El título y el idioma del mapa sobreviven a cargarlo y volver a guardarlo",
+      "hueco_de_bateria": true,
+      "nota": "ROJO: defecto detectado. congelaIndice lee el título y el idioma del mundo de la primera celda, y un mapa cargado tiene fichas sin mundo, así que volver a guardar su índice los escribe como null."
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado un documento de celda, cuando se inspecciona el orden de sus listas, entonces cada una está ordenada por un criterio declarado y estable, y ninguna por el orden en que se insertaron sus elementos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "La capa de recursos sale en un orden declarado y no en el de inserción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009",
+      "criterio": "Dado el doble del proxy en modo falla siempre, cuando se carga el mapa y se recorre la salida entera, entonces todo funciona y ninguna pantalla menciona la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "lo que sostiene el escenario son los huecos de textos con su origen declarado."
     }
   ]
 }

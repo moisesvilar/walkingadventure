@@ -8,6 +8,7 @@
     "./core/*": "./core/*",
     "./world/*": "./world/*",
     "./names/*": "./names/*",
+    "./partida/*": "./partida/*",
     "./quests/*": "./quests/*"
   },
   "engines": {

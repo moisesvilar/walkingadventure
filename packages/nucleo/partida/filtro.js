@@ -99,6 +99,14 @@ function costeDeArista(arista, criterios) {
 const suma = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 const compara = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
+// El orden en que salen del montículo: primero el coste y, a igualdad de coste, el
+// propio nodo. El desempate por nodo **no es cosmético**: con aristas de peso cero
+// hay varios nodos con el mismo coste vector, y sin él quién se asienta antes lo
+// decidiría el orden en que se insertaron, o sea el orden de llegada de los ways.
+// De ese orden depende ahora qué nodo puede ser predecesor de cuál, así que un
+// empate sin romper sería no determinismo en la ruta.
+const comparaEntrada = (x, y) => compara(x[0], y[0]) || comparaNodo(x[1], y[1]);
+
 // Montículo con comparador: el de `grafo.js` ordena por un número y aquí el coste
 // es un vector de tres. No se generaliza aquel para no tocar el camino que ya usan
 // el trazado de calzadas y el enlace de parajes.
@@ -110,7 +118,7 @@ class Monticulo {
     let i = a.length - 1;
     while (i > 0) {
       const p = (i - 1) >> 1;
-      if (compara(a[p][0], a[i][0]) <= 0) break;
+      if (comparaEntrada(a[p], a[i]) <= 0) break;
       [a[p], a[i]] = [a[i], a[p]];
       i = p;
     }
@@ -125,8 +133,8 @@ class Monticulo {
       for (;;) {
         const l = 2 * i + 1, r = l + 1;
         let m = i;
-        if (l < a.length && compara(a[l][0], a[m][0]) < 0) m = l;
-        if (r < a.length && compara(a[r][0], a[m][0]) < 0) m = r;
+        if (l < a.length && comparaEntrada(a[l], a[m]) < 0) m = l;
+        if (r < a.length && comparaEntrada(a[r], a[m]) < 0) m = r;
         if (m === i) break;
         [a[m], a[i]] = [a[i], a[m]];
         i = m;
@@ -146,18 +154,36 @@ class Monticulo {
  * El empate lo rompe el identificador del nodo anterior y no el orden de la lista
  * de adyacencia: dos callejeros con los mismos datos en otro orden tienen que dar
  * la misma ruta.
+ *
+ * Y ese desempate solo se aplica **hacia nodos aún no asentados**, que es lo que
+ * garantiza que la cadena de predecesores sea un árbol. Con aristas de peso cero
+ * —legítimas desde que los metros van en la rejilla del metro: dos nodos de OSM
+ * consecutivos dentro del mismo metro— el empate se puede dar en los dos sentidos
+ * de la misma arista, y reasignar en los dos dejaba `previo[a] = b` y
+ * `previo[b] = a`: la reconstrucción no llegaba nunca al origen y llenaba la
+ * memoria. Asentarse es un orden estricto y total —un nodo se asienta una sola vez,
+ * y en un instante distinto de cualquier otro—, así que exigir que el predecesor
+ * esté asentado y el sucesor no hace imposible que dos nodos lo sean el uno del
+ * otro. De paso cierra que el origen reciba predecesor: es el primero en asentarse.
  */
 function caminoMinimo(grafo, src, dst, criterios) {
   const coste = new Map([[src, [0, 0, 0]]]);
   const previo = new Map();
   const porDonde = new Map();
+  const asentados = new Set();
   const monticulo = new Monticulo();
   monticulo.push([0, 0, 0], src);
   while (monticulo.size) {
     const [cu, u] = monticulo.pop();
+    if (asentados.has(u)) continue;
     const actual = coste.get(u);
     if (actual && compara(cu, actual) > 0) continue;
+    asentados.add(u);
     for (const arista of grafo.adj.get(u) ?? []) {
+      // Lo ya asentado tiene su coste cerrado —los tres componentes del coste son
+      // no negativos, así que nada lo mejora— y su predecesor decidido. Tocarlo
+      // solo podría cerrar un ciclo.
+      if (asentados.has(arista.hasta)) continue;
       const nuevo = suma(cu, costeDeArista(arista, criterios));
       const previoCoste = coste.get(arista.hasta);
       const cmp = previoCoste === undefined ? -1 : compara(nuevo, previoCoste);

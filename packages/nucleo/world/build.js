@@ -14,6 +14,7 @@ import { sueloDeVocabulario } from './escenas.js';
 import { castAll } from '../quests/casting.js';
 import { localeFor, namesFor, crearIndiceDeNombres } from '../names/index.js';
 import { makeRng } from '../core/rng.js';
+import { cuantizaM } from '../core/geo.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 
 const ORDEN_DE_NUCLEOS = ['ciudad', 'pueblo', 'aldea', 'granja'];
@@ -126,7 +127,10 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     geo.callejero = data.callejeroJson ? parseStreets(data.callejeroJson, lat, lon) : [];
     geo.bordillos = data.callejeroJson ? parseBordillos(data.callejeroJson, lat, lon) : [];
     await onStatus('mask');
-    seaMask = buildSeaMask(geo.coastlines, rFetch, Math.max(40, Math.min(200, rFetch / 140)));
+    // El lado de la celda de la máscara sale de una división y acaba en el
+    // documento, así que se cuantiza como cualquier otro metro: es la única forma
+    // de que la máscara congelada no guarde la precisión de la coma flotante.
+    seaMask = buildSeaMask(geo.coastlines, rFetch, cuantizaM(Math.max(40, Math.min(200, rFetch / 140))));
     radius = computeDisplayRadius(seaMask, {
       rBase,
       rMax,

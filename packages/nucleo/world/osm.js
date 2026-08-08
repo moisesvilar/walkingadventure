@@ -82,7 +82,9 @@ export function parseGeo(json, lat0, lon0) {
     const t = el.tags || {};
     if (el.type === 'node' && t.natural === 'peak') {
       const p = proj.toXY(el.lat, el.lon);
-      out.peaks.push({ ...p, ele: parseFloat(t.ele) || 0, name: t.name, osmId: claveOsm(el, [p]) });
+      // `?? null` y no `t.name` a secas: un `undefined` no sobrevive a JSON y el
+      // nombre del pico desaparecería en silencio al congelar la celda.
+      out.peaks.push({ ...p, ele: parseFloat(t.ele) || 0, name: t.name ?? null, osmId: claveOsm(el, [p]) });
       continue;
     }
     if (el.type !== 'way') continue;

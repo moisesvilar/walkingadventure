@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
+    "regenerado_por": "SPEC-009-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
   },
   "titulo": "Reinos de Vaeloria",
   "idioma": "gl",
@@ -185,17 +185,17 @@
   ],
   "calzadas": [
     {
-      "nombre": "A Calzada do Noroeste",
+      "nombre": "A Calzada do Oeste",
       "tipo": "calzada",
       "desde": [
-        229,
-        -244
-      ],
-      "hasta": [
         4,
         -116
       ],
-      "puntos": 32,
+      "hasta": [
+        -230,
+        -35
+      ],
+      "puntos": 15,
       "recta": false
     },
     {
@@ -213,17 +213,17 @@
       "recta": false
     },
     {
-      "nombre": "O Camiño de Castroláns a Vella",
+      "nombre": "A Vella Ruta dos Ventos",
       "tipo": "calzada",
       "desde": [
         229,
         -244
       ],
       "hasta": [
-        495,
-        -115
+        4,
+        -116
       ],
-      "puntos": 25,
+      "puntos": 37,
       "recta": false
     },
     {
@@ -251,21 +251,21 @@
         235,
         -577
       ],
-      "puntos": 31,
+      "puntos": 30,
       "recta": false
     },
     {
-      "nombre": "O Camiño do Oeste",
+      "nombre": "O Camiño do Nordés",
       "tipo": "calzada",
       "desde": [
-        4,
-        -116
+        229,
+        -244
       ],
       "hasta": [
-        -230,
-        -35
+        495,
+        -115
       ],
-      "puntos": 15,
+      "puntos": 26,
       "recta": false
     },
     {
@@ -318,10 +318,10 @@
         -257
       ],
       "hasta": [
-        190,
-        -244
+        162,
+        -260
       ],
-      "puntos": 3,
+      "puntos": 5,
       "recta": false
     }
   ],

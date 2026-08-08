@@ -111,3 +111,22 @@ Dos límites que SPEC-008 deja abiertos y que **no se han disimulado**:
 Las ocho filas en `done`. La suite pasa de 0 a **441 casos, 438 en verde, 0 rojos, 3 saltados**.
 
 Trayectoria de la casteabilidad agregada sobre los ocho extractos, que es la medida de salud del generador: **21/48 al empezar → 17/48 (regresión de SPEC-005, corregida por iteración) → 24/48 → 30/48 (SPEC-006) → 32/48 (SPEC-007)**. SPEC-008 no la mueve.
+
+## 6k · Un lazo contra 367 KB: se acepta 31/48
+
+`wa-dev` escaló porque la iteración de SPEC-009 exigía que la casteabilidad no bajara de **32/48** y la cuantización la deja en **31/48**. El dato que no existía cuando se escribió ese criterio:
+
+- Cuantizando **solo coordenadas**: 32/48, pero `urbano-denso` pesa **2326,5 KB** y **no cabe** en el presupuesto de 2048.
+- Cuantizando **coordenadas y longitudes**: **31/48**, y pesa **1959,1 KB**, con margen.
+
+La pérdida es concreta y pequeña: `suelo-250m#1` baja de 3/6 a 2/6 porque un candidato a cruce queda a 139,8 m del elegido y la separación mínima son 150. **El mundo mínimo sigue casteando** —dos plantillas con lazo cerrado—, que es lo que la fila 6 vino a garantizar.
+
+**Decisión: se acepta 31/48 y se rebaja el criterio a ≥ 31/48.** El presupuesto de tamaño es una restricción dura de diseño —el mundo congelado vive en un móvil y una salida entera se juega sin red— y no se negocia contra un lazo en el mundo sintético más pobre. Escribí «no baja de 32» sin conocer el precio; conociéndolo, la elección es esta.
+
+**Queda una tercera vía sin explorar, y la anoto para no perderla:** las longitudes de arista son geometría pura y determinista a partir de las coordenadas, así que **podrían recomputarse al levantar en lugar de guardarse**. Eso daría el tamaño sin cuantizarlas y quizá devolvería el 32. No se ha hecho aquí porque toca el esquema, que la iteración declaró fuera de alcance, y porque recomputar entra en tensión con «lo cosido se congela, no se recalcula». Merece medirse antes de dar el 31 por definitivo.
+
+## 6l · La cuantización destapó una guarda mal escrita
+
+Efecto colateral que `wa-dev` encontró y arregló: `construyeGrafo` descartaba **la arista de longitud cero**, y con la rejilla del metro eso empezó a partir vías reales que el cosido volvía a unir **como suposición nuestra** (urbano-denso: −71 aristas, cosidas 19 → 62). O sea, el mapa se llenaba de tramos marcados «nos lo hemos inventado» que eran calle de verdad.
+
+La guarda quería decir «descarta el lazo sobre sí mismo» y decía otra cosa. Corregido, vuelve a 14.734 aristas y 19 cosidas. Es la clase de error que solo aparece cuando cambias la escala del dato.

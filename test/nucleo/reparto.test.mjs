@@ -59,7 +59,21 @@ const ANTES_DE_LA_FILA = {
   'urbano-denso#2': { castea: 6, parajes: 5, servicios: 14 },
 };
 
-const SUELO_AGREGADO = 21;
+/**
+ * El suelo agregado de casteabilidad **vigente**, que es el que dictaminó el
+ * orquestador en `pipeline/decisiones-orquestador.md` §6k: 31 de 48. Venía siendo
+ * 21 —lo medido en `cec7d91`— y la trayectoria desde entonces fue 24 → 30 → 32.
+ * SPEC-009-iter-1 lo deja en 31: cuantizar los metros al metro deja un candidato a
+ * cruce de `suelo-250m#1` a 139,8 m del elegido, con 150 de separación mínima, y esa
+ * plantilla deja de castear. Se aceptó porque el precio de conservar el lazo era
+ * incumplir el presupuesto de tamaño del documento —2326 KB contra 2048—, que es
+ * una restricción dura: el mundo congelado vive en un móvil.
+ *
+ * Sigue escrito como umbral y no como cifra exacta, y a propósito: una igualdad
+ * pondría rojo el caso cuando el generador mejore, que es lo contrario de lo que
+ * este caso vigila. Subirlo cuando mejore es una decisión explícita.
+ */
+const SUELO_AGREGADO = 31;
 const PLANTILLAS_POR_MUNDO = 6;
 
 const LOS_OCHO = LOS_CUATRO.flatMap((nombre) => LAS_DOS_SEMILLAS.map((semilla) => ({ nombre, semilla, clave: `${nombre}#${semilla}` })));
@@ -312,13 +326,13 @@ describe('El tope actúa al repartir y solo sobre el excedente', () => {
 });
 
 describe('La casteabilidad no puede bajar', () => {
-  test('La casteabilidad agregada de los ocho extractos de referencia no baja de 21 de 48', async () => {
+  test('La casteabilidad agregada de los ocho extractos de referencia no baja de 31 de 48', async () => {
     let agregado = 0;
     const detalle = [];
     for (const { nombre, semilla, clave } of LOS_OCHO) {
       const r = extraeReferencia(await generaMundo(nombre, semillaDe(nombre, semilla)));
       const castea = r.casting.filter((c) => c.castea).length;
-      assert.equal(r.casting.length, PLANTILLAS_POR_MUNDO, `${clave}: el catálogo de plantillas ha cambiado de tamaño y el umbral 21/48 ya no significa lo mismo`);
+      assert.equal(r.casting.length, PLANTILLAS_POR_MUNDO, `${clave}: el catálogo de plantillas ha cambiado de tamaño y el umbral ${SUELO_AGREGADO}/48 ya no significa lo mismo`);
       agregado += castea;
       detalle.push(`${clave} ${castea}/${PLANTILLAS_POR_MUNDO}`);
     }

@@ -28,10 +28,12 @@ import {
   SUPOSICIONES,
   aristaEntre,
   construyeGrafo,
+  dijkstra,
   nodoMasCercano,
   pegarAViario,
   validaGrafo,
 } from '../../packages/nucleo/world/grafo.js';
+import { PRECISION_M } from '../../packages/nucleo/core/geo.js';
 import { buildRoutes, linkParajes, tramosSupuestos, validaTramos } from '../../packages/nucleo/world/routes.js';
 import { parseStreets } from '../../packages/nucleo/world/osm.js';
 import { namesFor } from '../../packages/nucleo/names/index.js';
@@ -162,9 +164,16 @@ describe('El callejero troceado de OSM se cose antes de trazar', () => {
     const congelado = mundoCongelado('barrio-tres-calles');
     const { lat, lon } = congelado.manifiesto.coordenada;
     const real = construyeGrafo(parseStreets(congelado.callejero, lat, lon));
-    const metros = real.informe.metrosCosidos.map((m) => Math.round(m * 10) / 10);
-    assert.deepEqual(metros, [21.9, 104.1], 'no se han cosido los dos huecos cortos del fixture');
-    for (const m of real.informe.metrosCosidos) assert.ok(m <= COSER_MAX, `se ha cosido un hueco de ${m} m, por encima del umbral`);
+    // Los dos huecos se afirman en metros enteros y sin redondearlos aquí. Eran
+    // 21,9 y 104,1 mientras los metros nacían con toda la precisión del doble;
+    // desde que SPEC-009-iter-1 los cuantiza a `PRECISION_M`, son 22 y 104 y ya
+    // llegan en la rejilla. Se quita el redondeo de la prueba a propósito: era lo
+    // único que impedía ver que el grafo dejara de entregarlos cuantizados.
+    assert.deepEqual(real.informe.metrosCosidos, [22, 104], 'no se han cosido los dos huecos cortos del fixture');
+    for (const m of real.informe.metrosCosidos) {
+      assert.equal(m % PRECISION_M, 0, `el hueco cosido de ${m} m no cae en la rejilla de ${PRECISION_M} m`);
+      assert.ok(m <= COSER_MAX, `se ha cosido un hueco de ${m} m, por encima del umbral`);
+    }
   });
 
   test('Los huecos largos no se cosen', () => {
@@ -177,7 +186,10 @@ describe('El callejero troceado de OSM se cose antes de trazar', () => {
     const { lat, lon } = congelado.manifiesto.coordenada;
     const real = construyeGrafo(parseStreets(congelado.callejero, lat, lon));
     assert.equal(real.informe.componentes, 2, 'el hueco de 239 m del fixture se ha cosido');
-    assert.equal(Math.round(real.informe.separacionMinimaSinCoserM * 100) / 100, 239.46, 'no se declara la separación que quedó sin coser');
+    // Mismo motivo que arriba: 239,46 era ese hueco medido con la precisión del
+    // doble y desde SPEC-009-iter-1 son 239 clavados, así que el redondeo a dos
+    // decimales de la prueba sobra y se afirma el metro entero.
+    assert.equal(real.informe.separacionMinimaSinCoserM, 239, 'no se declara la separación que quedó sin coser');
   });
 
   test('Lo cosido y lo inventado queda marcado', async () => {
@@ -202,10 +214,24 @@ describe('El callejero troceado de OSM se cose antes de trazar', () => {
     for (const v of MARCAS_DE_SUPOSICION) assert.notEqual(typeof v, 'boolean', 'la marca no puede ser un booleano');
   });
 
-  test('El umbral es inclusivo: a 180 m se cose y a 180,01 no', () => {
+  test('El umbral es inclusivo: a 180 m se cose y a 181 no', () => {
+    // El caso separaba 180 de 180,01 y desde SPEC-009-iter-1 ya no puede: con los
+    // metros en la rejilla de `PRECISION_M`, esas dos distancias **son el mismo
+    // metro**, así que el par no distinguía nada. Lo que se afirma no se ablanda
+    // —que el umbral es inclusivo y no estricto— sino que se dice con el primer
+    // valor por encima que la rejilla sí distingue, que es `COSER_MAX +
+    // PRECISION_M`. Y para que «exactamente el umbral» sea una distancia
+    // representable, el umbral tiene que caer en la rejilla: eso se afirma antes.
     assert.equal(COSER_MAX, 180, 'el umbral de cosido ha cambiado de valor');
-    assert.equal(construyeGrafo(dosComponentes(180)).informe.cosidas, 1, 'a exactamente el umbral no se ha cosido');
-    assert.equal(construyeGrafo(dosComponentes(180.01)).informe.cosidas, 0, 'se ha cosido un hueco por encima del umbral');
+    assert.equal(COSER_MAX % PRECISION_M, 0, 'el umbral no cae en la rejilla, así que «exactamente el umbral» no es una distancia que el grafo pueda medir');
+    assert.equal(construyeGrafo(dosComponentes(COSER_MAX)).informe.cosidas, 1, 'a exactamente el umbral no se ha cosido');
+    assert.equal(construyeGrafo(dosComponentes(COSER_MAX + PRECISION_M)).informe.cosidas, 0, 'se ha cosido un hueco por encima del umbral');
+
+    // Y lo que queda entre los dos, dicho en voz alta en lugar de callado: un
+    // hueco de 180,4 m se cose porque la rejilla lo lleva al umbral. Es la
+    // consecuencia declarada de cuantizar, no un umbral más laxo, y conviene que
+    // esté escrito para que nadie la descubra como sorpresa.
+    assert.equal(construyeGrafo(dosComponentes(180.4)).informe.cosidas, 1, 'un hueco que la rejilla lleva al umbral no se ha cosido');
   });
 
   test('Dos componentes con varias parejas por debajo del umbral se cosen por la más próxima y una sola vez', () => {
@@ -733,10 +759,43 @@ describe('Entradas inválidas', () => {
     assert.equal(grafo.informe.aristas, 0, 'un way de un solo punto ha producido una arista');
   });
 
-  test('Dos puntos en la misma coordenada no producen una arista de peso cero', () => {
-    const grafo = construyeGrafo([via([1, 2], [[10, 10], [10, 10]])]);
-    const reales = aristas(grafo).filter((a) => a.suposicion === SUPOSICIONES.NINGUNA);
-    assert.deepEqual(reales, [], 'se ha añadido una arista de OSM de peso cero');
+  test('El lazo sobre sí mismo no produce arista, y dos nodos distintos en la misma coordenada sí', () => {
+    // Este caso decía «dos puntos en la misma coordenada no producen una arista de
+    // peso cero», y SPEC-009-iter-1 lo derogó de hecho: con los metros en la
+    // rejilla de `PRECISION_M`, dos nodos de OSM distintos separados por menos de
+    // medio metro caen en la misma coordenada, y su arista **es la calle**.
+    // Descartarla era lo que partía vías reales en dos para que el cosido las
+    // volviera a unir después marcadas como suposición nuestra —un camino de
+    // verdad degradado a conjetura, 71 aristas menos y las cosidas de 19 a 62 en
+    // urbano-denso—, que es justo el fallo silencioso que este módulo existe para
+    // cerrar (`pipeline/decisiones-orquestador.md` §6l). Lo que la guarda quería
+    // decir, y sigue valiendo entero, es que un nodo repetido consigo mismo no es
+    // una arista; eso es lo primero que se afirma aquí.
+    const lazo = construyeGrafo([via([1, 1], [[10, 10], [10, 10]])]);
+    assert.deepEqual(aristas(lazo), [], 'un nodo repetido consigo mismo ha producido una arista');
+    assert.deepEqual(lazo.nodeIds, [1]);
+
+    // Y la contraria, que es lo que la iteración hizo legítimo: la arista existe,
+    // pesa cero porque a esta resolución esa es la verdad, y se declara **real**.
+    // Que no lleve marca es lo que la separa de un camino inventado, y que la vía
+    // siga siendo una sola componente es lo que impide que el cosido la reinvente.
+    const juntos = construyeGrafo([via([1, 2], [[10, 10], [10, 10]])]);
+    const arista = aristaEntre(juntos, 1, 2);
+    assert.equal(arista.metros, 0, 'dos nodos de OSM en la misma coordenada no están a cero metros');
+    assert.equal(arista.suposicion, SUPOSICIONES.NINGUNA, 'una arista de OSM se ha degradado a suposición por medir cero');
+    assert.equal(juntos.informe.cosidas, 0, 'la arista de peso cero se ha vuelto a inventar como cosida');
+    assert.equal(juntos.informe.componentes, 1, 'dos nodos consecutivos de una vía real han quedado en componentes distintas');
+
+    // Aceptar el peso cero obliga a comprobar lo que el caso viejo protegía de
+    // rebote: que no ensucia el camino mínimo. La relajación de Dijkstra es
+    // estricta, así que una arista de cero ni alarga la búsqueda ni relaja nada
+    // dos veces; y no conecta nada que no estuviera unido, porque solo aparece
+    // entre nodos que OSM declara consecutivos en la misma vía.
+    const { dist: d } = dijkstra(juntos, 1);
+    assert.equal(d.get(2), 0, 'el camino mínimo entre dos nodos coincidentes no es cero');
+    const aparte = construyeGrafo([via([1, 2], [[10, 10], [10, 10]]), via([7, 8], [[0, 900], [100, 900]])]);
+    assert.equal(aparte.informe.componentes, 2, 'el escenario necesita una componente que el cosido no alcance');
+    assert.equal(dijkstra(aparte, 1).dist.get(7), undefined, 'la arista de peso cero ha conectado una componente que no lo estaba');
   });
 
   test('Un way sin identificadores de nodo se identifica por coordenada de forma estable', () => {

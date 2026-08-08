@@ -22,8 +22,10 @@
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 
 import { LOS_CUATRO, fuente, generaMundo, semillaDe } from './mundo-de-prueba.mjs';
+import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
 
 import {
   ANCHURA_MINIMA_M,
@@ -440,6 +442,45 @@ describe('El filtro sobre el grafo evita y declara, nunca borra', () => {
       'un grafo sin tramos es una respuesta, no un error',
     );
   });
+
+  test('Una arista de peso cero no deja el trazado dando vueltas', () => {
+    // Caso nuevo de SPEC-009-iter-1, y el más pequeño que reproduce el defecto que
+    // destapó la cuantización. Desde que los metros van en la rejilla del metro,
+    // dos nodos de OSM distintos a menos de medio metro comparten coordenada y su
+    // arista pesa cero —legítimamente: a esta resolución es la verdad, y §6l
+    // decidió conservarla—. El desempate de `caminoMinimo` reasigna `previo`
+    // cuando dos caminos empatan en coste, y con un coste cero ese empate puede
+    // darse **en los dos sentidos de la misma arista**: `previo[2] = 3` y
+    // `previo[3] = 2`. La cadena de predecesores deja de ser un árbol y la
+    // reconstrucción del camino no llega nunca al origen.
+    //
+    // Se ejecuta en otro proceso y con el montón acotado a propósito: el fallo es
+    // un bucle que llena la memoria, así que dentro del runner se llevaría por
+    // delante todo el fichero en lugar de dar un rojo. Con el defecto vivo, el
+    // hijo muere; arreglado, sale en cero y en menos de un segundo.
+    // El guion del hijo importa por ruta calculada en tiempo de ejecución, no por
+    // especificador literal, y no es un rodeo estético: la guarda de
+    // `andamiaje-estructura.test.mjs` lee el texto de estos ficheros y exige que
+    // todo import sea de `node:` o relativo, que es lo que sostiene que la suite
+    // corra en un Node pelado. Un literal con la raíz interpolada dentro de una
+    // cadena la haría saltar, y la guarda tiene razón: no distingue —ni debe— un
+    // import de este módulo de uno escrito para otro proceso.
+    const guion = `
+      const raiz = ${JSON.stringify(RAIZ_REPO)};
+      const { construyeGrafo } = await import(raiz + '/packages/nucleo/world/grafo.js');
+      const { trazaLazo, CRITERIOS } = await import(raiz + '/packages/nucleo/partida/filtro.js');
+      // Los nodos 2 y 3 caen en la misma coordenada. El identificador del origen
+      // (9) es mayor que el de 3, que es lo que hace que el desempate reasigne.
+      const grafo = construyeGrafo([{ nodes: [9, 2, 3], pts: [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 0 }] }]);
+      trazaLazo({ grafo, puntos: [{ x: 0, y: 0 }, { x: 100, y: 0 }], criterios: CRITERIOS, tramo: 2000, cerrado: false });
+    `;
+    const hijo = spawnSync(process.execPath, ['--max-old-space-size=64', '--input-type=module', '-e', guion], { encoding: 'utf8' });
+    assert.equal(
+      hijo.status,
+      0,
+      `el trazado no termina sobre una arista de peso cero: la cadena de predecesores tiene un ciclo. ${(hijo.stderr ?? '').split('\n').slice(0, 3).join(' | ')}`,
+    );
+  });
 });
 
 // ── Lo cosido y lo inventado, visto desde la aptitud ─────────────────────────────
@@ -689,10 +730,31 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
       'un tramo difícil sin nombre se está declarando a medias en vez de hacer fallar la entrega',
     );
 
-    // Y sobre dato real, con número: de los 16 lazos que castean en los cuatro
-    // mundos congelados, 4 no se pueden entregar con los cuatro criterios porque
+    // Y sobre dato real, con número: de los 15 lazos que castean en los cuatro
+    // mundos congelados, 3 no se pueden entregar con los cuatro criterios porque
     // atraviesan o rodean un tramo difícil que el grafo no sabe nombrar.
-    const medido = { costero: { lazos: 6, fallan: 3 }, 'urbano-denso': { lazos: 6, fallan: 1 }, 'barrio-tres-calles': { lazos: 1, fallan: 0 }, 'suelo-250m': { lazos: 3, fallan: 0 } };
+    //
+    // `suelo-250m` baja de 3 lazos a 2 con SPEC-009-iter-1, y no es una regresión
+    // de esta capa: al cuantizar los metros, un candidato a cruce de ese mundo
+    // queda a 139,8 m del elegido y la separación mínima son 150, así que una
+    // plantilla deja de castear. El orquestador lo dictaminó y lo aceptó en
+    // `pipeline/decisiones-orquestador.md` §6k, a cambio de que el documento del
+    // mundo denso quepa en su presupuesto.
+    //
+    // El `fallan: 1` de urbano-denso que este caso esperaba era el último valor
+    // medido **antes** de la cuantización, y no se pudo reconfirmar mientras sus
+    // seis lazos reventaban con el ciclo de «Una arista de peso cero no deja el
+    // trazado dando vueltas». Arreglado ese defecto, se remide: urbano-denso
+    // entrega **sus seis lazos**, y el agregado pasa de 15/4 a **15/3**. Barrio
+    // 1/0, costero 6/3 y suelo-250m 2/0 quedan confirmados sin cambio.
+    //
+    // Lo que eso significa, y conviene no leerlo de más: la deuda que SPEC-008
+    // dejó anotada —tramos difíciles sin nombre, que se cierra nombrándolos al
+    // generar y es de SPEC-007— **se ha reducido, no ha desaparecido**. Costero
+    // sigue perdiendo 3 de sus 6 lazos por lo mismo. La regresión esperada del
+    // repo sigue en pie: el día que SPEC-007 nombre todo tramo difícil, este caso
+    // se pondrá rojo y habrá que actualizarlo.
+    const medido = { costero: { lazos: 6, fallan: 3 }, 'urbano-denso': { lazos: 6, fallan: 0 }, 'barrio-tres-calles': { lazos: 1, fallan: 0 }, 'suelo-250m': { lazos: 2, fallan: 0 } };
     let lazos = 0, fallan = 0;
     for (const nombre of LOS_CUATRO) {
       const w = await generaMundo(nombre, semillaDe(nombre, '1'));
@@ -710,6 +772,6 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
       lazos += candidatas.length;
       fallan += sinNombre;
     }
-    assert.deepEqual({ lazos, fallan }, { lazos: 16, fallan: 4 }, 'el número de lazos que no se pueden entregar por falta de nombre ha cambiado');
+    assert.deepEqual({ lazos, fallan }, { lazos: 15, fallan: 3 }, 'el número de lazos que no se pueden entregar por falta de nombre ha cambiado');
   });
 });
