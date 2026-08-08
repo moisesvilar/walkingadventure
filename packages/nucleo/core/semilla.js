@@ -157,6 +157,7 @@ export function formateaSemilla(semilla) {
  * que lo haga, no desplazará a ninguna otra fase.
  */
 export const SUFIJOS_DE_FASE = {
+  anclajes: ':anclajes',
   nucleos: ':nucleos',
   calzadas: ':routes',
   parajes: ':parajes',

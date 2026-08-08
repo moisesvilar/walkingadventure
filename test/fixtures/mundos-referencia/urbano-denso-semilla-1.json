@@ -18,18 +18,18 @@
   },
   "nucleos": [
     {
-      "nombre": "Fuenfrida de Arriba",
+      "nombre": "Hozbriga",
       "tipo": "aldea",
-      "x": -276,
-      "y": -240,
-      "anclaje": "node/11255230071"
+      "x": 435,
+      "y": -279,
+      "anclaje": "node/4907944788"
     },
     {
-      "nombre": "Fuenluna de los Vientos",
+      "nombre": "Vegaverde del Alba",
       "tipo": "aldea",
-      "x": 197,
-      "y": 520,
-      "anclaje": "node/5064733418"
+      "x": -781,
+      "y": -173,
+      "anclaje": "node/927878116"
     },
     {
       "nombre": "Valmora",
@@ -39,32 +39,32 @@
       "anclaje": "node/623776661"
     },
     {
-      "nombre": "Granja de la Colmena",
-      "tipo": "granja",
-      "x": 2,
-      "y": 822,
-      "anclaje": "node/1388332887"
-    },
-    {
       "nombre": "Granja de los Manzanos",
       "tipo": "granja",
-      "x": -487,
-      "y": 194,
-      "anclaje": "node/1556708366"
+      "x": 235,
+      "y": 1077,
+      "anclaje": "node/363997551"
     },
     {
       "nombre": "Granja del Arado",
       "tipo": "granja",
-      "x": -490,
-      "y": 295,
-      "anclaje": "node/12712730759"
+      "x": 192,
+      "y": 522,
+      "anclaje": "node/4224135949"
+    },
+    {
+      "nombre": "Granja del Brezal",
+      "tipo": "granja",
+      "x": 459,
+      "y": 503,
+      "anclaje": "node/3636501443"
     },
     {
       "nombre": "Ferrabriga de los Vientos",
       "tipo": "pueblo",
-      "x": 271,
-      "y": -265,
-      "anclaje": "node/2723834809"
+      "x": 388,
+      "y": -477,
+      "anclaje": "node/5325719508"
     }
   ],
   "servicios": [
@@ -78,9 +78,9 @@
     {
       "nombre": "Forja del Gato Rojo",
       "tipo": "armeria",
-      "x": 256,
-      "y": -315,
-      "anclaje": "node/13429616602"
+      "x": 334,
+      "y": -458,
+      "anclaje": "node/12810197250"
     },
     {
       "nombre": "Botica del Roble Astuto",
@@ -92,9 +92,9 @@
     {
       "nombre": "Arcana de la Luna Danzarina",
       "tipo": "conjureria",
-      "x": 217,
-      "y": -238,
-      "anclaje": "node/926177482"
+      "x": 334,
+      "y": -502,
+      "anclaje": "node/5329727676"
     },
     {
       "nombre": "Arcana del Grifo Alegre",
@@ -111,11 +111,18 @@
       "anclaje": "node/4671064646"
     },
     {
+      "nombre": "Posada de la Luna Risueña",
+      "tipo": "posada",
+      "x": 197,
+      "y": 520,
+      "anclaje": "node/5064733418"
+    },
+    {
       "nombre": "Posada de la Sirena Danzarina",
       "tipo": "posada",
-      "x": 262,
-      "y": -267,
-      "anclaje": "node/2723834799"
+      "x": 380,
+      "y": -469,
+      "anclaje": "way/686207618"
     },
     {
       "nombre": "Posada del Caldero Errante",
@@ -125,18 +132,18 @@
       "anclaje": "way/1042066798"
     },
     {
-      "nombre": "Posada del Roble Astuto",
-      "tipo": "posada",
-      "x": -494,
-      "y": 287,
-      "anclaje": "node/3245942746"
-    },
-    {
       "nombre": "Taberna de la Espada Alegre",
       "tipo": "taberna",
-      "x": 313,
-      "y": -273,
-      "anclaje": "node/4975520980"
+      "x": 396,
+      "y": -509,
+      "anclaje": "node/2546777613"
+    },
+    {
+      "nombre": "Taberna del Caldero Dormido",
+      "tipo": "taberna",
+      "x": 439,
+      "y": -268,
+      "anclaje": "node/8568795617"
     },
     {
       "nombre": "Taberna del Ciervo Rojo",
@@ -146,126 +153,105 @@
       "anclaje": "node/6895672170"
     },
     {
-      "nombre": "Taberna del Cuervo Astuto",
+      "nombre": "Taberna del Yunque Dorado",
       "tipo": "taberna",
-      "x": 202,
-      "y": 518,
-      "anclaje": "node/13980472701"
-    },
-    {
-      "nombre": "Taberna del Farol Errante",
-      "tipo": "taberna",
-      "x": -250,
-      "y": -244,
-      "anclaje": "node/3150984148"
+      "x": -782,
+      "y": -175,
+      "anclaje": "node/4660686396"
     }
   ],
   "parajes": [
     {
-      "nombre": "La Encrucijada de las Brujas",
+      "nombre": "El Cruce del Perro Negro",
       "tipo": "cruce",
-      "x": -350,
-      "y": 528,
+      "x": 328,
+      "y": 567,
       "anclaje": null
     },
     {
-      "nombre": "El Crucero de la Vela",
-      "tipo": "ermita",
-      "x": -519,
-      "y": -231,
-      "anclaje": "way/629873316"
+      "nombre": "La Fuente del Susurro",
+      "tipo": "fuente",
+      "x": 472,
+      "y": 859,
+      "anclaje": "way/1545706579"
     },
     {
-      "nombre": "El Santuario del Monte",
-      "tipo": "ermita",
-      "x": 267,
-      "y": 320,
-      "anclaje": "relation/18565266"
+      "nombre": "La Abadía Gris",
+      "tipo": "monasterio",
+      "x": -464,
+      "y": -156,
+      "anclaje": "node/2569444822"
     },
     {
-      "nombre": "La Piedra del Alba",
-      "tipo": "piedra",
-      "x": -103,
-      "y": 735,
-      "anclaje": "node/2686612540"
-    },
-    {
-      "nombre": "La Muralla Caída",
+      "nombre": "El Torreón Olvidado",
       "tipo": "ruina",
-      "x": -618,
-      "y": 648,
-      "anclaje": "node/12627911761"
+      "x": -368,
+      "y": -71,
+      "anclaje": "node/5370215785"
+    },
+    {
+      "nombre": "El Torreón de los Ecos",
+      "tipo": "ruina",
+      "x": 206,
+      "y": -296,
+      "anclaje": "node/2955144792"
     }
   ],
   "calzadas": [
     {
-      "nombre": "El Camino del Alba Fría",
+      "nombre": "El Camino de Levante",
       "tipo": "calzada",
       "desde": [
-        -490,
-        295
+        -781,
+        -173
       ],
       "hasta": [
-        2,
-        822
+        435,
+        -279
       ],
-      "puntos": 25,
+      "puntos": 119,
       "recta": false
     },
     {
-      "nombre": "El Camino del Nordeste",
+      "nombre": "El Camino del Sur",
       "tipo": "calzada",
       "desde": [
         -711,
         170
       ],
       "hasta": [
-        -490,
-        295
+        -781,
+        -173
       ],
-      "puntos": 61,
+      "puntos": 12,
       "recta": false
     },
     {
-      "nombre": "La Senda de Ferrabriga de los Vientos",
+      "nombre": "El Paso del Norte",
       "tipo": "calzada",
       "desde": [
-        -276,
-        -240
+        459,
+        503
       ],
       "hasta": [
-        271,
-        -265
+        235,
+        1077
       ],
-      "puntos": 59,
+      "puntos": 54,
       "recta": false
     },
     {
-      "nombre": "La Vieja Ruta de la Solana",
+      "nombre": "La Calzada de Levante",
       "tipo": "calzada",
       "desde": [
-        -487,
-        194
+        192,
+        522
       ],
       "hasta": [
-        -276,
-        -240
+        459,
+        503
       ],
-      "puntos": 44,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta del Alba",
-      "tipo": "calzada",
-      "desde": [
-        -490,
-        295
-      ],
-      "hasta": [
-        197,
-        520
-      ],
-      "puntos": 62,
+      "puntos": 5,
       "recta": false
     },
     {
@@ -276,22 +262,36 @@
         170
       ],
       "hasta": [
-        -487,
-        194
+        192,
+        522
       ],
-      "puntos": 42,
+      "puntos": 120,
+      "recta": false
+    },
+    {
+      "nombre": "La Vieja Ruta del Sur",
+      "tipo": "calzada",
+      "desde": [
+        435,
+        -279
+      ],
+      "hasta": [
+        388,
+        -477
+      ],
+      "puntos": 6,
       "recta": false
     },
     {
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -103,
-        735
+        -368,
+        -71
       ],
       "hasta": [
-        -312,
-        735
+        -363,
+        -65
       ],
       "puntos": 2,
       "recta": false
@@ -300,12 +300,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -519,
-        -231
+        -464,
+        -156
       ],
       "hasta": [
-        -550,
-        -136
+        -476,
+        -111
       ],
       "puntos": 2,
       "recta": false
@@ -314,12 +314,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -618,
-        648
+        206,
+        -296
       ],
       "hasta": [
-        -673,
-        677
+        178,
+        -364
       ],
       "puntos": 2,
       "recta": false
@@ -328,14 +328,14 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        267,
-        320
+        472,
+        859
       ],
       "hasta": [
-        225,
-        356
+        484,
+        866
       ],
-      "puntos": 5,
+      "puntos": 2,
       "recta": false
     }
   ],

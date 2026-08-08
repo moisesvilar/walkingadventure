@@ -6,7 +6,7 @@ import { isSea } from './seamask.js';
 import { makeRng, randInt, shuffle } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { POI_LABELS, crearIndiceDeNombres } from '../names/index.js';
-import { comparaClaveOsm } from './osm.js';
+import { comparaClaveOsm } from './clave-osm.js';
 
 // Servicios de cada tipo de núcleo (fixed siempre; extra según tamaño). Exportada
 // para que `cupos.js` cuente servicios leyendo esta declaración en vez de copiarla:
@@ -97,10 +97,12 @@ export function countsForRadius(r) {
  * names: paquete de nombres del idioma del mundo (packages/nucleo/names/).
  * indice: índice de nombres del mundo, compartido por las cinco familias que
  * nombran; por defecto uno propio, para que la fase se pueda ejercitar suelta.
+ * pool: el registro de uso único de la celda, si quien genera lo lleva; cada
+ * núcleo y cada servicio declara ahí el anclaje que consume y con qué papel.
  * Devuelve { settlements, freeAnchors }: los anclajes no consumidos quedan
  * disponibles para los parajes.
  */
-export function generateSettlements(anchors, geo, radius, seedStr, seaMask = null, names, indice = crearIndiceDeNombres()) {
+export function generateSettlements(anchors, geo, radius, seedStr, seaMask = null, names, indice = crearIndiceDeNombres(), pool = null) {
   // Con sufijo de fase, como las demás. Hasta aquí esta fase derivaba su generador
   // de la semilla pelada: no era un fallo de determinismo, pero la dejaba compartir
   // flujo con cualquiera que llegara con la misma cadena y contradecía la regla de
@@ -118,10 +120,20 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
   // errores de máscara...).
   const usable = anchors.filter((a) => Math.hypot(a.x, a.y) < radius * 0.93 && !isSea(seaMask, a));
   const taken = new Set(); // anclajes consumidos por núcleos o servicios
-  let pool = usable.slice();
+  let candidatos = usable.slice();
 
   const count = (t) => settlements.filter((x) => x.type === t).length;
   const okTerrain = (p) => !inWater(p, lakes) && isFirmLand(p, seaMask, firmRing);
+
+  // La ficha del lado real de un anclaje. Para los que vienen de Places viaja
+  // además su identificador y el contenido refrescable, que es lo único suyo que se
+  // puede guardar; la capa de ficción no depende de nada de eso.
+  const fichaReal = (a) => ({
+    name: a.name,
+    kind: a.kind,
+    osmId: a.osmId ?? null,
+    ...(a.fuente === 'places' ? { placeId: a.placeId ?? null, refrescable: a.refrescable ?? null } : {}),
+  });
 
   // El nombre pasa por el índice del mundo: hasta esta iteración ni los núcleos ni
   // las granjas comprobaban nada y salían mundos con dos «Casal da Colmea».
@@ -133,7 +145,7 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
       () => (type === 'granja' ? names.farmName(rng) : names.townName(rng)),
       (base, k) => names.variantName(base, k),
     ),
-    anchor: anchor ? { name: anchor.name, kind: anchor.kind, osmId: anchor.osmId ?? null } : null,
+    anchor: anchor ? fichaReal(anchor) : null,
     services: [],
   });
 
@@ -168,21 +180,26 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
     s.services = kinds.slice(0, sel.length).map((kind, i) => {
       const a = sel[i].a;
       taken.add(a);
+      const name = indice.fija(() => names.poiName(rng, kind), (base, k) => names.variantName(base, k));
+      if (pool && a.osmId) pool.tomar(a.osmId, 'servicio', name);
       return {
         kind,
         label: POI_LABELS[kind],
-        name: indice.fija(() => names.poiName(rng, kind), (base, k) => names.variantName(base, k)),
+        name,
         x: a.x,
         y: a.y,
-        real: { name: a.name, kind: a.kind, osmId: a.osmId ?? null },
+        real: fichaReal(a),
       };
     });
-    pool = pool.filter((a) => !taken.has(a));
+    candidatos = candidatos.filter((a) => !taken.has(a));
   };
 
   const place = (type, pos, anchor) => {
     const s = makeSettlement(type, pos, anchor);
-    if (anchor) taken.add(anchor);
+    if (anchor) {
+      taken.add(anchor);
+      if (pool && anchor.osmId) pool.tomar(anchor.osmId, 'nucleo', s.name);
+    }
     settlements.push(s);
     assignServices(s);
     return s;
@@ -207,35 +224,35 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
 
   // Ciudades: los clústeres de anclajes con más peso, bien separadas entre sí.
   const citySep = Math.max(SEP.ciudad, radius * 0.35);
-  for (let i = 0; i < nCiudades && pool.length; i++) {
+  for (let i = 0; i < nCiudades && candidatos.length; i++) {
     let best = null, bestScore = -1;
-    for (const a of pool) {
+    for (const a of candidatos) {
       if (i > 0 && !farFromAll(a, settlements.filter((x) => x.type === 'ciudad'), citySep)) continue;
-      const sc = clusterScore(a, pool, 2000 * f);
+      const sc = clusterScore(a, candidatos, 2000 * f);
       if (sc > bestScore) { bestScore = sc; best = a; }
     }
     if (!best) break;
     place('ciudad', best, best);
-    pool = pool.filter((a) => dist(a, best) > 3000 * f);
+    candidatos = candidatos.filter((a) => dist(a, best) > 3000 * f);
   }
   fillRandom('ciudad', nCiudades);
 
   // Pueblos: siguientes clústeres.
-  for (let i = 0; i < nPueblos && pool.length; i++) {
+  for (let i = 0; i < nPueblos && candidatos.length; i++) {
     let best = null, bestScore = -1;
-    for (const a of pool) {
+    for (const a of candidatos) {
       if (!farFromAll(a, settlements, SEP.pueblo)) continue;
-      const sc = clusterScore(a, pool, 1200 * f);
+      const sc = clusterScore(a, candidatos, 1200 * f);
       if (sc > bestScore) { bestScore = sc; best = a; }
     }
     if (!best) break;
     place('pueblo', best, best);
-    pool = pool.filter((a) => dist(a, best) > 1800 * f);
+    candidatos = candidatos.filter((a) => dist(a, best) > 1800 * f);
   }
   fillRandom('pueblo', nPueblos);
 
   // Aldeas: anclajes sueltos, preferimos emplazamientos (iglesias, miradores...).
-  const aldeaCandidates = shuffle(rng, pool).sort((a, b) => (b.cat === 'emplazamiento') - (a.cat === 'emplazamiento'));
+  const aldeaCandidates = shuffle(rng, candidatos).sort((a, b) => (b.cat === 'emplazamiento') - (a.cat === 'emplazamiento'));
   for (const a of aldeaCandidates) {
     if (count('aldea') >= nAldeas) break;
     if (taken.has(a)) continue;
@@ -245,7 +262,7 @@ export function generateSettlements(anchors, geo, radius, seedStr, seaMask = nul
   fillRandom('aldea', nAldeas);
 
   // Granjas: ancladas a locales reales restantes; relleno en tierra firme si faltan.
-  const farmCandidates = shuffle(rng, pool).sort((a, b) => (b.cat === 'local') - (a.cat === 'local'));
+  const farmCandidates = shuffle(rng, candidatos).sort((a, b) => (b.cat === 'local') - (a.cat === 'local'));
   for (const a of farmCandidates) {
     if (count('granja') >= nGranjas) break;
     if (taken.has(a)) continue;

@@ -28,12 +28,14 @@ export const MOTIVOS_DE_APERTURA = ['pisada', 'acontecimiento'];
  *   `rejilla` la del mapa; `semilla` la de la partida; `mapaId` el identificador
  *   del mapa (su anclaje); `celda` el índice `{ i, j }`; `motivo` por cuál de las
  *   dos vías se abre; `consultaOsm({ celda, limites, margenM })` la consulta de
- *   datos inyectada —el llamante decide caché y red—; `onStatus` se pasa tal cual
+ *   datos inyectada —el llamante decide caché y red—; `demanda` cuántos anclajes
+ *   pide la celda, inyectada y opcional; `places` la fuente de relleno ya
+ *   descargada, también opcional; `onStatus` se pasa tal cual
  *   a la tubería; `tramoM` el tramo de quien juega **hoy**, con el que se
  *   dimensionan los cupos de esta celda y solo de esta.
  * @returns el registro de la celda, congelado.
  */
-export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'pisada', consultaOsm, onStatus, tramoM }) {
+export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'pisada', consultaOsm, demanda = null, places = null, onStatus, tramoM }) {
   if (!rejilla) throw new Error('generaCelda necesita la rejilla del mapa');
   exigeCelda(celda);
   const semillaPartida = exigeSemilla(semilla);
@@ -70,6 +72,15 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
     rBase: rejilla.radioInscritoM,
     seed: semillaCelda,
     fetchData,
+    // La demanda de anclajes **llega inyectada y no se deriva de `cupos`**, aunque
+    // los cupos estén aquí al lado: los cupos los dimensiona el tramo de quien
+    // juega, y el contenido del mundo no puede depender del tramo —dos partidas con
+    // la misma semilla y tramos distintos generan el mismo mundo (SPEC-004)—. Un
+    // pool alimentado por los cupos ataría lo segundo a lo primero.
+    ...(demanda ? { demanda } : {}),
+    // La fuente de relleno es opcional y su ausencia es el caso normal: sin ella la
+    // celda se genera igual y queda registrada como generada sin relleno.
+    ...(places ? { places } : {}),
     ...(onStatus ? { onStatus } : {}),
   });
 

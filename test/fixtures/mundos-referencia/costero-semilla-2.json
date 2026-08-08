@@ -12,20 +12,20 @@
   "radio_dibujo_m": 1200,
   "recuentos": {
     "nucleos": 7,
-    "servicios": 12,
-    "parajes": 5,
+    "servicios": 10,
+    "parajes": 3,
     "calzadas": 9
   },
   "nucleos": [
     {
-      "nombre": "Ferreimar da Moura",
+      "nombre": "Pontemar",
       "tipo": "aldea",
-      "x": -32,
-      "y": -118,
-      "anclaje": "node/5323941422"
+      "x": 504,
+      "y": -156,
+      "anclaje": "way/25582680"
     },
     {
-      "nombre": "Lamincelle do Corvo",
+      "nombre": "Ribaláns da Moura",
       "tipo": "aldea",
       "x": -594,
       "y": -129,
@@ -39,69 +39,69 @@
       "anclaje": "node/662618011"
     },
     {
+      "nombre": "Casal da Colmea",
+      "tipo": "granja",
+      "x": -58,
+      "y": 417,
+      "anclaje": "way/551279363"
+    },
+    {
       "nombre": "Casal do Arado",
       "tipo": "granja",
-      "x": -230,
-      "y": -35,
-      "anclaje": "node/2897243760"
+      "x": 793,
+      "y": 430,
+      "anclaje": null
     },
     {
-      "nombre": "Casal do Muíño Roto",
+      "nombre": "Casal dos Tres Carballos",
       "tipo": "granja",
-      "x": 151,
-      "y": 679,
-      "anclaje": "node/3689212319"
-    },
-    {
-      "nombre": "Casal dos Vagalumes",
-      "tipo": "granja",
-      "x": 235,
-      "y": -577,
-      "anclaje": "node/11598411069"
+      "x": 513,
+      "y": 15,
+      "anclaje": "way/51954982"
     },
     {
       "nombre": "Outeidre do Vento",
       "tipo": "pueblo",
-      "x": 495,
-      "y": -115,
-      "anclaje": "node/7343578013"
+      "x": 17,
+      "y": -135,
+      "anclaje": "node/3648044330"
     }
   ],
   "servicios": [
     {
       "nombre": "Forxa da Serea Feiticeira",
       "tipo": "armeria",
-      "x": 141,
-      "y": -186,
-      "anclaje": "node/5323999387"
-    },
-    {
-      "nombre": "Botica do Moucho Ledo",
-      "tipo": "boticario",
-      "x": 326,
-      "y": -210,
-      "anclaje": "node/5026323093"
-    },
-    {
-      "nombre": "Arcana do Zafre Dourado",
-      "tipo": "conjureria",
       "x": 143,
       "y": -328,
       "anclaje": "node/5323989706"
     },
     {
+      "nombre": "Botica do Moucho Ledo",
+      "tipo": "boticario",
+      "x": 140,
+      "y": -240,
+      "anclaje": "node/5323998615"
+    },
+    {
+      "nombre": "Arcana do Zafre Dourado",
+      "tipo": "conjureria",
+      "x": 102,
+      "y": -178,
+      "anclaje": "node/13742917501"
+    },
+    {
       "nombre": "Arcana do Zafre Durmido",
       "tipo": "conjureria",
-      "x": 513,
-      "y": 15,
-      "anclaje": "way/51954982"
+      "x": 157,
+      "y": -247,
+      "anclaje": "node/662618475"
     },
     {
       "nombre": "Mercado da Estrela Dourada",
       "tipo": "mercado",
-      "x": 363,
+      "x": 212,
       "y": -210,
-      "anclaje": "node/3689211112"
+      "anclaje": "node/6144955636"
     },
     {
       "nombre": "Mercado do Carballo Dourado",
@@ -113,81 +113,53 @@
     {
       "nombre": "Pousada do Gato Argalleiro",
       "tipo": "posada",
-      "x": 239,
-      "y": -237,
-      "anclaje": "node/3643421657"
+      "x": 216,
+      "y": -253,
+      "anclaje": "node/662617847"
     },
     {
       "nombre": "Pousada do Grifo Vermello",
       "tipo": "posada",
-      "x": 504,
-      "y": -156,
-      "anclaje": "way/25582680"
-    },
-    {
-      "nombre": "Taberna da Serea Dourada",
-      "tipo": "taberna",
-      "x": 180,
-      "y": -271,
-      "anclaje": "node/662618417"
-    },
-    {
-      "nombre": "Taberna do Corvo Durmido",
-      "tipo": "taberna",
-      "x": -626,
-      "y": -267,
-      "anclaje": "node/3648044336"
-    },
-    {
-      "nombre": "Taberna do Grifo Feiticeiro",
-      "tipo": "taberna",
       "x": 4,
       "y": -116,
       "anclaje": "node/3648044332"
     },
     {
+      "nombre": "Taberna da Serea Dourada",
+      "tipo": "taberna",
+      "x": 295,
+      "y": -208,
+      "anclaje": "node/3689211114"
+    },
+    {
       "nombre": "Taberna do Moucho Vermello",
       "tipo": "taberna",
-      "x": 432,
-      "y": -118,
-      "anclaje": "node/7343578083"
+      "x": 130,
+      "y": -183,
+      "anclaje": "node/3643421606"
     }
   ],
   "parajes": [
     {
-      "nombre": "A Torre Vixía da Espera",
-      "tipo": "atalaya",
-      "x": -395,
-      "y": -36,
-      "anclaje": "node/3648044334"
-    },
-    {
-      "nombre": "A Encrucillada do Can Negro",
-      "tipo": "cruce",
-      "x": 27,
-      "y": 83,
-      "anclaje": null
-    },
-    {
-      "nombre": "O Cruce do Aforcado",
-      "tipo": "cruce",
-      "x": -287,
-      "y": 466,
-      "anclaje": null
-    },
-    {
-      "nombre": "A Capela da Candea",
+      "nombre": "A Ermida da Candea",
       "tipo": "ermita",
-      "x": -139,
-      "y": 6,
-      "anclaje": "node/5844583387"
+      "x": -32,
+      "y": -118,
+      "anclaje": "node/5323941422"
     },
     {
-      "nombre": "A Poza Clara",
-      "tipo": "fuente",
-      "x": -58,
-      "y": 417,
-      "anclaje": "way/551279363"
+      "nombre": "A Muralla Esquecida",
+      "tipo": "ruina",
+      "x": 180,
+      "y": -271,
+      "anclaje": "node/662618417"
+    },
+    {
+      "nombre": "A Torre Caída",
+      "tipo": "ruina",
+      "x": 342,
+      "y": -210,
+      "anclaje": "node/5026323233"
     }
   ],
   "calzadas": [
@@ -195,124 +167,124 @@
       "nombre": "A Calzada das Neves",
       "tipo": "calzada",
       "desde": [
-        -32,
-        -118
+        17,
+        -135
       ],
       "hasta": [
-        151,
-        679
+        -58,
+        417
       ],
-      "puntos": 54,
+      "puntos": 34,
       "recta": false
     },
     {
-      "nombre": "A Calzada do Noroeste",
+      "nombre": "A Calzada do Leste",
       "tipo": "calzada",
       "desde": [
         229,
         -244
       ],
       "hasta": [
-        -32,
-        -118
-      ],
-      "puntos": 8,
-      "recta": false
-    },
-    {
-      "nombre": "A Corredoira dos Ventos",
-      "tipo": "calzada",
-      "desde": [
-        -32,
-        -118
-      ],
-      "hasta": [
-        -230,
-        -35
-      ],
-      "puntos": 55,
-      "recta": false
-    },
-    {
-      "nombre": "A Senda de Outeidre do Vento",
-      "tipo": "calzada",
-      "desde": [
-        229,
-        -244
-      ],
-      "hasta": [
-        495,
-        -115
+        504,
+        -156
       ],
       "puntos": 14,
       "recta": false
     },
     {
-      "nombre": "O Camiño de Lamincelle do Corvo",
+      "nombre": "A Corredoira das Neves",
       "tipo": "calzada",
       "desde": [
-        -230,
-        -35
+        504,
+        -156
       ],
       "hasta": [
-        -594,
-        -129
+        513,
+        15
       ],
-      "puntos": 48,
+      "puntos": 4,
       "recta": false
     },
     {
-      "nombre": "O Camiño do Mediodía",
+      "nombre": "A Corredoira do Abrente Frío",
       "tipo": "calzada",
       "desde": [
         229,
         -244
       ],
       "hasta": [
-        235,
-        -577
+        793,
+        430
       ],
-      "puntos": 3,
+      "puntos": 30,
       "recta": false
     },
     {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        -139,
-        6
-      ],
-      "hasta": [
-        -316,
-        16
-      ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        -395,
-        -36
-      ],
-      "hasta": [
-        -320,
-        -41
-      ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
+      "nombre": "O Camiño de Ribaláns da Moura",
+      "tipo": "calzada",
       "desde": [
         -58,
         417
       ],
       "hasta": [
-        -90,
-        413
+        -594,
+        -129
+      ],
+      "puntos": 55,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño dos Ventos",
+      "tipo": "calzada",
+      "desde": [
+        229,
+        -244
+      ],
+      "hasta": [
+        17,
+        -135
+      ],
+      "puntos": 7,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        83,
+        -15
+      ],
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        180,
+        -271
+      ],
+      "hasta": [
+        157,
+        -59
+      ],
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        342,
+        -210
+      ],
+      "hasta": [
+        320,
+        -44
       ],
       "puntos": 2,
       "recta": false
@@ -325,7 +297,7 @@
     },
     {
       "plantilla": "entrega-sospechosa",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "peregrinaje",
@@ -337,7 +309,7 @@
     },
     {
       "plantilla": "ronda-del-vigia",
-      "castea": true
+      "castea": false
     },
     {
       "plantilla": "tres-pistas",

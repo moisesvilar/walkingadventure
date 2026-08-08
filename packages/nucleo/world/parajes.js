@@ -6,12 +6,12 @@
 // selección puntuando cerca-de-ruta y lejos-de-núcleos, y cruces/puentes del
 // grafo viario como colchón garantizado en zonas pobres de datos.
 
-import { dist, pointPolylineDist, segIntersect, polygonBBox } from '../core/geo.js';
+import { dist, segIntersect, polygonBBox } from '../core/geo.js';
 import { isSea } from './seamask.js';
 import { makeRng, pick, shuffle } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { footprintRadius } from './settlements.js';
-import { comparaClaveOsm } from './osm.js';
+import { puntuaCandidatos } from './anclajes.js';
 import { crearIndiceDeNombres } from '../names/index.js';
 
 // Tipos cuyo emplazamiento sale de un anclaje real; cruce y puente se derivan del grafo.
@@ -131,26 +131,24 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
  * settlements, routes, geo, radius, seaMask: mundo ya generado.
  * names: paquete de nombres del idioma del mundo.
  * indice: índice de nombres del mundo, compartido con las demás familias.
+ * pool: el registro de uso único de la celda, si quien genera lo lleva; los
+ *   parajes anclados avisan de lo que consumen para que conste quién se lo llevó.
  */
-export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres()) {
+export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres(), pool = null) {
   const rng = makeRng(seedStr + SUFIJOS_DE_FASE.parajes);
   const target = parajeCountForRadius(radius);
-  const routePls = routes.filter((r) => !r.fallback).map((r) => r.pts);
 
-  // Elegibilidad de anclajes: en tierra, dentro del mundo y FUERA del radio
-  // urbano de todo núcleo (un paraje pegado a la ciudad no se siente paraje).
+  // Elegibilidad de anclajes: en tierra y dentro del mundo. Estar dentro del radio
+  // urbano de un núcleo ya NO excluye: `parajes.md` dice «se penalizan», y como
+  // filtro duro dejaba el pool vacío en una celda pequeña y urbana. La penalización
+  // vive en la puntuación, que ordena sin excluir.
   const outsideTowns = (p) => settlements.every((s) => dist(p, s) > footprintRadius(s.type, radius) * 1.05);
-  const eligible = freeAnchors.filter((a) => Math.hypot(a.x, a.y) < radius * 0.95 && !isSea(seaMask, a) && outsideTowns(a));
+  const eligible = freeAnchors.filter((a) => Math.hypot(a.x, a.y) < radius * 0.95 && !isSea(seaMask, a));
 
-  // Puntuación: cerca de una ruta (+2/<100 m, +1/<300 m) — un paraje al que no
-  // lleva ningún camino no se usará —, con algo de azar de desempate.
-  const scored = eligible
-    .map((a) => {
-      const dRoute = routePls.length ? Math.min(...routePls.map((pts) => pointPolylineDist(a, pts))) : Infinity;
-      return { a, score: (dRoute < 100 ? 2 : dRoute < 300 ? 1 : 0) + rng() * 0.8 };
-    })
-    // el empate lo rompe la clave estable de OSM, nunca el orden de llegada
-    .sort((x, y) => y.score - x.score || comparaClaveOsm(x.a.osmId, y.a.osmId));
+  // Etapa 2 del pool: cerca de ruta suma, dentro del radio urbano resta y el nombre
+  // propio desempata. No consume azar de esta fase — el desempate lo trae cada
+  // anclaje de la suya —, así que puntuar dos veces da el mismo orden.
+  const scored = puntuaCandidatos(eligible, { settlements, routes, radius });
 
   // Candidatos del grafo (colchón garantizado sin Overpass).
   const graphCands = shuffle(rng, [
@@ -167,8 +165,22 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   const tryPlace = (cand, type, real, origin) => {
     if (!placed.every((p) => dist(p, cand) >= sep)) return false;
     placed.push({ type, x: cand.x, y: cand.y, real, origin });
+    // El anclaje se marca como consumido solo cuando el paraje se coloca de verdad:
+    // un candidato que no cabe no gasta nada. Los cruces y puentes del grafo no
+    // pasan por aquí porque no traen anclaje ninguno.
+    if (pool && origin === 'anclaje' && cand.osmId) pool.tomar(cand.osmId, 'paraje');
     return true;
   };
+
+  // La ficha del lado real. Para los anclajes de Places viaja además su
+  // identificador y el contenido refrescable: es lo único suyo que se puede
+  // guardar, y la capa de ficción no depende de ello.
+  const fichaReal = (a) => ({
+    name: a.name,
+    kind: a.kind,
+    osmId: a.osmId ?? null,
+    ...(a.fuente === 'places' ? { placeId: a.placeId ?? null, refrescable: a.refrescable ?? null } : {}),
+  });
 
   // 1) anclajes hasta (target - graphFloor), con tipo por sesgo suave + diversidad
   let cycle = shuffle(rng, ANCHORED_TYPES);
@@ -181,10 +193,16 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
     if (!cycle.length) cycle = shuffle(rng, ANCHORED_TYPES);
     return cycle.shift();
   };
+  // Los anclajes ya gastados por esta fase, para que la tercera vuelta no vuelva a
+  // ofrecer uno colocado: repetirlo sería consumir dos veces el mismo lugar real.
+  const usados = new Set();
+  const marca = (a) => usados.add(a.osmId ?? `${a.x},${a.y}`);
+  const gastado = (a) => usados.has(a.osmId ?? `${a.x},${a.y}`);
+
   for (const { a } of scored) {
     if (placed.length >= target - graphFloor) break;
     const type = nextType(BIAS[a.kind]);
-    tryPlace(a, type, { name: a.name, kind: a.kind, osmId: a.osmId ?? null }, 'anclaje');
+    if (tryPlace(a, type, fichaReal(a), 'anclaje')) marca(a);
   }
 
   // 2) cruces/puentes del grafo hasta completar el cupo
@@ -196,8 +214,8 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   // 3) si el grafo no dio y quedan anclajes, seguir con anclajes
   for (const { a } of scored) {
     if (placed.length >= target) break;
-    if (placed.some((p) => p.real && p.x === a.x && p.y === a.y)) continue;
-    tryPlace(a, nextType(BIAS[a.kind]), { name: a.name, kind: a.kind, osmId: a.osmId ?? null }, 'anclaje');
+    if (gastado(a)) continue;
+    if (tryPlace(a, nextType(BIAS[a.kind]), fichaReal(a), 'anclaje')) marca(a);
   }
 
   // nombres únicos y ficha final; el conjunto de usados es el del mundo entero y

@@ -10,64 +10,19 @@
 // poder decidir. Sin esto, el orden en que Overpass devuelve los elementos entraba
 // en la generación como un dato encubierto y el mundo cambiaba con él.
 //
-// Es también la frontera donde se decide QUÉ del mundo real entra en el juego,
-// incluido el filtro de aptitud para menores: los locales de adultos no tienen
-// regla que los reconozca y por tanto se descartan aquí.
+// Qué del mundo real entra en el juego —el catálogo de admisión, el filtro de
+// tipos problemáticos y los topes— ya no está aquí: es el pool de `anclajes.js`,
+// y este módulo solo le sirve de puerta para los POIs.
 
 import { makeProjector } from '../core/geo.js';
+import { claveOsm, ordenaPorClave } from './clave-osm.js';
+import { construyePool } from './anclajes.js';
+
+export { claveOsm, comparaClaveOsm } from './clave-osm.js';
 
 function wayToPoints(el, proj) {
   if (!el.geometry) return null;
   return el.geometry.map((g) => proj.toXY(g.lat, g.lon));
-}
-
-// Orden canónico de OSM. Se compara el tipo por este rango y no alfabéticamente
-// porque es el orden en que OSM y Overpass enumeran el mundo; alfabético metería
-// las relaciones entre los nodos y los ways sin que nadie lo espere al leer.
-const RANGO_TIPO = { node: 0, way: 1, relation: 2 };
-
-/**
- * Clave estable de un elemento de OSM: `tipo/id`, la misma forma que ya viaja con
- * los anclajes y lo único único de verdad en OSM, porque un node y un way pueden
- * compartir número.
- *
- * Los elementos sin identificador utilizable —OSM no lo garantiza y una respuesta
- * recortada puede traerlos— caen a una clave derivada de su geometría proyectada
- * y redondeada al metro. La regla es la misma en las tres funciones de parseo a
- * propósito: dos ejecuciones sobre los mismos datos le asignan la misma clave.
- */
-export function claveOsm(el, pts) {
-  if (el.type && el.id != null) return `${el.type}/${el.id}`;
-  return `geom/${(pts ?? []).map((p) => `${Math.round(p.x)},${Math.round(p.y)}`).join(';')}`;
-}
-
-/**
- * Orden total sobre las claves de OSM: primero el tipo por el orden canónico,
- * después el identificador como número.
- *
- * Comparar `tipo/id` como texto pondría `way/1000` antes que `way/99`, que no es
- * un orden que nadie pueda predecir leyendo los datos. Las claves derivadas de la
- * geometría van al final y se comparan como texto: no tienen número que comparar.
- */
-export function comparaClaveOsm(a, b) {
-  const ca = a ?? '', cb = b ?? '';
-  const ra = RANGO_TIPO[ca.slice(0, ca.indexOf('/'))] ?? 3;
-  const rb = RANGO_TIPO[cb.slice(0, cb.indexOf('/'))] ?? 3;
-  if (ra !== rb) return ra - rb;
-  if (ra !== 3) {
-    const na = Number(ca.slice(ca.indexOf('/') + 1));
-    const nb = Number(cb.slice(cb.indexOf('/') + 1));
-    if (na !== nb) return na - nb;
-  }
-  return ca < cb ? -1 : ca > cb ? 1 : 0;
-}
-
-// Ordena en el sitio una colección de entidades ya parseadas por su clave estable.
-// Se hace aquí, en el borde del núcleo, y no en cada fase: el orden de llegada de
-// Overpass no puede entrar en la generación como un dato encubierto, y repartir la
-// ordenación por las fases garantiza que la próxima fase que se añada se olvide.
-function ordenaPorClave(lista) {
-  return lista.sort((a, b) => comparaClaveOsm(a.osmId, b.osmId));
 }
 
 function isClosed(el) {
@@ -138,61 +93,14 @@ export function parseStreets(json, lat0, lon0) {
   return ordenaPorClave(out);
 }
 
-// Categorías de POI. Tres campos, tres usos distintos:
-//   kind   — etiqueta del lugar real ("📍 Restos del Acueducto Romano (ruinas)")
-//            y clave del sesgo suave de tipo de paraje (BIAS en parajes.js).
-//   cat    — 'emplazamiento' | 'local': las aldeas prefieren emplazamientos y
-//            las granjas locales (settlements.js).
-//   weight — peso en el clúster que decide dónde nacen ciudades y pueblos.
-// El orden importa: gana la primera regla que hace match.
-// Nota de dimensionado: fuentes y manantiales entran con peso bajo a propósito.
-// Son anclaje de paraje, no motivo para fundar una ciudad, y en casco urbano hay
-// tantas que con peso alto desplazarían el clúster de la ciudad hacia ellas.
-const POI_KINDS = [
-  { match: (t) => t.shop === 'mall', kind: 'centro comercial', cat: 'local', weight: 5 },
-  { match: (t) => t.historic === 'castle', kind: 'castillo', cat: 'emplazamiento', weight: 5 },
-  { match: (t) => t.amenity === 'monastery' || t.historic === 'monastery', kind: 'monasterio', cat: 'emplazamiento', weight: 5 },
-  { match: (t) => ['ruins', 'city_gate'].includes(t.historic), kind: 'ruinas', cat: 'emplazamiento', weight: 4 },
-  { match: (t) => t.historic === 'archaeological_site', kind: 'piedra antigua', cat: 'emplazamiento', weight: 4 },
-  { match: (t) => t.leisure === 'park', kind: 'parque', cat: 'emplazamiento', weight: 4 },
-  { match: (t) => ['monument', 'memorial'].includes(t.historic), kind: 'monumento', cat: 'emplazamiento', weight: 4 },
-  { match: (t) => t.man_made === 'lighthouse', kind: 'faro', cat: 'emplazamiento', weight: 3 },
-  { match: (t) => t.amenity === 'place_of_worship', kind: 'iglesia', cat: 'emplazamiento', weight: 3 },
-  { match: (t) => t.tourism === 'viewpoint', kind: 'mirador', cat: 'emplazamiento', weight: 3 },
-  { match: (t) => ['wayside_cross', 'wayside_shrine'].includes(t.historic), kind: 'crucero', cat: 'emplazamiento', weight: 2 },
-  { match: (t) => t.man_made === 'tower', kind: 'torre', cat: 'emplazamiento', weight: 2 },
-  { match: (t) => t.natural === 'spring', kind: 'manantial', cat: 'emplazamiento', weight: 2 },
-  { match: (t) => t.amenity === 'library', kind: 'biblioteca', cat: 'local', weight: 2 },
-  { match: (t) => ['fountain', 'drinking_water'].includes(t.amenity), kind: 'fuente', cat: 'emplazamiento', weight: 1 },
-  { match: (t) => t.amenity === 'restaurant', kind: 'restaurante', cat: 'local', weight: 1 },
-  { match: (t) => t.amenity === 'cafe', kind: 'cafetería', cat: 'local', weight: 1 },
-  { match: (t) => t.amenity === 'ice_cream', kind: 'heladería', cat: 'local', weight: 1 },
-  { match: (t) => t.amenity === 'fast_food', kind: 'comida rápida', cat: 'local', weight: 1 },
-];
-
-export function parsePois(json, lat0, lon0) {
-  const proj = makeProjector(lat0, lon0);
-  const anchors = [];
-  for (const el of json.elements || []) {
-    const t = el.tags || {};
-    const lat = el.lat ?? el.center?.lat;
-    const lon = el.lon ?? el.center?.lon;
-    if (lat == null || lon == null) continue;
-    const def = POI_KINDS.find((k) => k.match(t));
-    if (!def) continue;
-    // El identificador de OSM viaja con el anclaje. Sirve para dos cosas: afirmar
-    // desde fuera que ningún lugar real alimenta dos elementos de fantasía —la
-    // regla de anclaje único— y ordenar esta lista, que es lo que impide que el
-    // orden de llegada de Overpass decida qué anclaje se lleva cada núcleo.
-    const p = proj.toXY(lat, lon);
-    anchors.push({
-      ...p,
-      osmId: claveOsm(el, [p]),
-      name: t.name || null,
-      kind: def.kind,
-      cat: def.cat,
-      weight: def.weight,
-    });
-  }
-  return ordenaPorClave(anchors);
+/**
+ * Los anclajes admitidos de una respuesta de POIs: el pool de `anclajes.js` sin su
+ * registro de uso único.
+ *
+ * Se conserva aquí, con la firma de siempre, porque es la puerta por la que la app
+ * y las pruebas piden los anclajes; quien genera un mundo entero usa
+ * `construyePool` directamente, que además le devuelve el registro.
+ */
+export function parsePois(json, lat0, lon0, opciones = {}) {
+  return construyePool({ ...opciones, poiJson: json, lat0, lon0 }).anclajes;
 }

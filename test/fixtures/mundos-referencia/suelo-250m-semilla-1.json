@@ -46,34 +46,34 @@
       "anclaje": null
     },
     {
-      "nombre": "Castroláns a Vella",
+      "nombre": "Covaboa",
       "tipo": "pueblo",
-      "x": 27,
-      "y": -142,
-      "anclaje": "node/3648044335"
+      "x": 167,
+      "y": 108,
+      "anclaje": null
     }
   ],
   "servicios": [
     {
       "nombre": "Forxa do Corvo Ledo",
       "tipo": "armeria",
-      "x": 102,
-      "y": -178,
-      "anclaje": "node/13742917501"
-    },
-    {
-      "nombre": "Botica da Estrela Argalleira",
-      "tipo": "boticario",
       "x": -169,
       "y": -67,
       "anclaje": "node/3648044338"
     },
     {
+      "nombre": "Botica da Estrela Argalleira",
+      "tipo": "boticario",
+      "x": 27,
+      "y": -142,
+      "anclaje": "node/3648044335"
+    },
+    {
       "nombre": "Arcana do Farol Argalleiro",
       "tipo": "conjureria",
-      "x": -139,
-      "y": 6,
-      "anclaje": "node/5844583387"
+      "x": 102,
+      "y": -178,
+      "anclaje": "node/13742917501"
     },
     {
       "nombre": "Mercado do Xabarín Ledo",
@@ -100,21 +100,49 @@
   "parajes": [],
   "calzadas": [
     {
-      "nombre": "A Calzada do Nordés",
+      "nombre": "A Calzada das Neves",
       "tipo": "calzada",
       "desde": [
-        27,
-        -142
+        112,
+        -99
+      ],
+      "hasta": [
+        167,
+        108
+      ],
+      "puntos": 8,
+      "recta": false
+    },
+    {
+      "nombre": "A Calzada do Sur",
+      "tipo": "calzada",
+      "desde": [
+        104,
+        -74
+      ],
+      "hasta": [
+        112,
+        -99
+      ],
+      "puntos": 4,
+      "recta": false
+    },
+    {
+      "nombre": "A Vella Ruta do Abrente",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
       ],
       "hasta": [
         104,
         -74
       ],
-      "puntos": 3,
+      "puntos": 4,
       "recta": false
     },
     {
-      "nombre": "A Calzada dos Ventos",
+      "nombre": "O Camiño do Noroeste",
       "tipo": "calzada",
       "desde": [
         -32,
@@ -125,34 +153,6 @@
         50
       ],
       "puntos": 11,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño de Castroláns a Vella",
-      "tipo": "calzada",
-      "desde": [
-        -32,
-        -118
-      ],
-      "hasta": [
-        27,
-        -142
-      ],
-      "puntos": 4,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño do Nordés",
-      "tipo": "calzada",
-      "desde": [
-        27,
-        -142
-      ],
-      "hasta": [
-        112,
-        -99
-      ],
-      "puntos": 4,
       "recta": false
     }
   ],

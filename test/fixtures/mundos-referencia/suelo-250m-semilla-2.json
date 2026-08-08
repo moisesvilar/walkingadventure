@@ -18,10 +18,10 @@
   },
   "nucleos": [
     {
-      "nombre": "Mirathar do Carballo",
+      "nombre": "Sabrencelle",
       "tipo": "aldea",
-      "x": 141,
-      "y": 117,
+      "x": 67,
+      "y": -10,
       "anclaje": null
     },
     {
@@ -32,48 +32,48 @@
       "anclaje": "node/5323941422"
     },
     {
+      "nombre": "Casal da Néboa",
+      "tipo": "granja",
+      "x": 49,
+      "y": 190,
+      "anclaje": null
+    },
+    {
       "nombre": "Casal do Carballo Torto",
       "tipo": "granja",
-      "x": 152,
-      "y": 96,
+      "x": 9,
+      "y": -43,
       "anclaje": null
     },
     {
-      "nombre": "Casal do Espiño",
-      "tipo": "granja",
-      "x": 11,
-      "y": 30,
-      "anclaje": null
-    },
-    {
-      "nombre": "Outeidre do Vento",
+      "nombre": "Ribalonga do Vento",
       "tipo": "pueblo",
-      "x": 27,
-      "y": -142,
-      "anclaje": "node/3648044335"
+      "x": -59,
+      "y": 44,
+      "anclaje": null
     }
   ],
   "servicios": [
     {
       "nombre": "Forxa da Serea Feiticeira",
       "tipo": "armeria",
-      "x": 102,
-      "y": -178,
-      "anclaje": "node/13742917501"
-    },
-    {
-      "nombre": "Botica do Moucho Ledo",
-      "tipo": "boticario",
       "x": -169,
       "y": -67,
       "anclaje": "node/3648044338"
     },
     {
+      "nombre": "Botica do Moucho Ledo",
+      "tipo": "boticario",
+      "x": 27,
+      "y": -142,
+      "anclaje": "node/3648044335"
+    },
+    {
       "nombre": "Arcana do Zafre Dourado",
       "tipo": "conjureria",
-      "x": -139,
-      "y": 6,
-      "anclaje": "node/5844583387"
+      "x": 102,
+      "y": -178,
+      "anclaje": "node/13742917501"
     },
     {
       "nombre": "Mercado do Carballo Dourado",
@@ -100,59 +100,59 @@
   "parajes": [],
   "calzadas": [
     {
-      "nombre": "A Calzada da Solaina",
+      "nombre": "A Calzada do Abrente Frío",
       "tipo": "calzada",
       "desde": [
-        141,
-        117
+        -59,
+        44
       ],
       "hasta": [
-        152,
-        96
+        49,
+        190
+      ],
+      "puntos": 14,
+      "recta": false
+    },
+    {
+      "nombre": "A Calzada do Nordés",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        9,
+        -43
       ],
       "puntos": 3,
       "recta": false
     },
     {
-      "nombre": "A Calzada do Norte",
+      "nombre": "A Senda de Ribalonga do Vento",
       "tipo": "calzada",
       "desde": [
         -32,
         -118
       ],
       "hasta": [
-        11,
-        30
+        -59,
+        44
       ],
-      "puntos": 5,
+      "puntos": 10,
       "recta": false
     },
     {
-      "nombre": "A Senda de Mirathar do Carballo",
-      "tipo": "calzada",
-      "desde": [
-        27,
-        -142
-      ],
-      "hasta": [
-        141,
-        117
-      ],
-      "puntos": 9,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño do Abrente",
+      "nombre": "O Camiño do Abrente Frío",
       "tipo": "calzada",
       "desde": [
         -32,
         -118
       ],
       "hasta": [
-        27,
-        -142
+        67,
+        -10
       ],
-      "puntos": 4,
+      "puntos": 3,
       "recta": false
     }
   ],
