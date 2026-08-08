@@ -472,6 +472,35 @@ describe('Los nombres son únicos y del idioma del sitio', () => {
   });
 });
 
+/**
+ * La única divergencia entre el casting commiteado en los extractos y el que el
+ * paquete produce hoy, declarada una a una y con dueño.
+ *
+ * SPEC-010 mide los trechos **sobre el grafo cosido y filtrado** en lugar de en
+ * línea recta con un factor de rodeo, y el orquestador lo dictaminó en
+ * `pipeline/decisiones-orquestador.md` §6m: `barrio-tres-calles#2 ·
+ * ronda-del-vigía` deja de castear porque el único pueblo del mundo está a 1688 m
+ * de grafo del centro aunque en línea recta sean 126 —un callejero casi en árbol—,
+ * y con ida y vuelta el lazo no cabe en un paseo. Antes se ofrecía **mintiendo**.
+ *
+ * Va como lista cerrada y no como «el casting queda fuera de la comparación» a
+ * propósito: lo que se afirma sigue siendo la igualdad exacta con el extracto en
+ * las otras 47 casillas, y cualquier deriva que no sea esta se pone roja. Los
+ * extractos no se regeneran aquí: eso es de quien orquesta, y hasta que lo haga la
+ * excepción vive escrita en la prueba, donde se ve.
+ */
+const DIVERGENCIAS_DEL_GRAFO = {
+  'barrio-tres-calles#2': { 'ronda-del-vigia': false },
+};
+
+/** El casting que el extracto commiteado predice, con las divergencias de §6m aplicadas. */
+function castingEsperado(nombre, n) {
+  const cambios = DIVERGENCIAS_DEL_GRAFO[`${nombre}#${n}`] ?? {};
+  return leeExtracto(nombre, n).casting.map((c) => (
+    Object.prototype.hasOwnProperty.call(cambios, c.plantilla) ? { ...c, castea: cambios[c.plantilla] } : c
+  ));
+}
+
 describe('Equivalencia con el prototipo', () => {
   test('Hay un extracto de referencia por cada mundo congelado y cada semilla', () => {
     for (const nombre of LOS_CUATRO) {
@@ -497,7 +526,7 @@ describe('Equivalencia con el prototipo', () => {
   test('El paquete regenera cada extracto de referencia idéntico al commiteado', async () => {
     for (const nombre of LOS_CUATRO) {
       for (const n of LAS_DOS_SEMILLAS) {
-        const esperado = { ...leeExtracto(nombre, n) };
+        const esperado = { ...leeExtracto(nombre, n), casting: castingEsperado(nombre, n) };
         delete esperado.cabecera;
         const w = await generaMundo(nombre, semillaDe(nombre, n));
         assert.deepEqual(extraeReferencia(w), esperado, `${nombre}#${n}: el paquete no regenera el extracto del prototipo`);
@@ -526,11 +555,26 @@ describe('Equivalencia con el prototipo', () => {
   });
 
   test('Las plantillas que castean y las que no son las del prototipo', async () => {
+    let divergencias = 0;
     for (const nombre of LOS_CUATRO) {
       for (const n of LAS_DOS_SEMILLAS) {
         const w = await generaMundo(nombre, semillaDe(nombre, n));
-        assert.deepEqual(extraeReferencia(w).casting, leeExtracto(nombre, n).casting, `${nombre}#${n}`);
+        const commiteado = leeExtracto(nombre, n).casting;
+        const real = extraeReferencia(w).casting;
+        assert.deepEqual(real, castingEsperado(nombre, n), `${nombre}#${n}`);
+
+        // Y la divergencia de §6m solo puede ir en un sentido: **perder** un lazo
+        // que la línea recta regalaba, nunca ganar uno. Ganar sería medir de menos,
+        // que es exactamente el defecto del que se venía.
+        for (let k = 0; k < real.length; k++) {
+          assert.equal(real[k].plantilla, commiteado[k].plantilla, `${nombre}#${n}: el catálogo ha cambiado de orden o de contenido`);
+          if (real[k].castea === commiteado[k].castea) continue;
+          assert.equal(commiteado[k].castea, true, `${nombre}#${n} · ${real[k].plantilla}: el paquete castea un lazo que el prototipo no casteaba`);
+          divergencias += 1;
+        }
       }
     }
+    // Una, y solo una, en los ocho extractos: la que §6m dictaminó.
+    assert.equal(divergencias, 1, 'el número de lazos que la medida sobre el grafo retira ha cambiado respecto de lo que dictaminó §6m');
   });
 });

@@ -598,7 +598,15 @@ describe('El encuadre: ni la palabra ni una opción peor', () => {
     const lazo = trazaLazo({ grafo, puntos: EXTREMOS, criterios: CRITERIOS, tramo: 2000, cerrado: false });
     const mundo = mundoSinRepartoPorElFiltro();
     const falta = repartoDeAventuras({ mundo, criterios: ['escalones'], tramo: TRAMO_DEL_MUNDO_SIN_REPARTO });
-    const w = await generaMundo('barrio-tres-calles', semillaDe('barrio-tres-calles', '1'));
+    // El mundo real de este caso pasa de `barrio-tres-calles` a `suelo-250m`, y no
+    // es una rebaja: lo que se afirma es qué palabras entrega la capa, no cuál de
+    // los cuatro mundos las entrega. Con el casting de SPEC-010 —trechos medidos
+    // sobre el grafo— el reparto elige otros lugares, y el único lazo del barrio
+    // pasa ahora por un tramo difícil **sin nombre propio**, así que la entrega
+    // falla por la deuda §6i-a en vez de devolver un reparto que mirar. Esa deuda
+    // sigue viva y tiene su propio caso más abajo, con su número; aquí hace falta
+    // un mundo que entregue, y `suelo-250m` entrega sus dos lazos.
+    const w = await generaMundo('suelo-250m', semillaDe('suelo-250m', '1'));
     const reparto = repartoDeAventuras({ mundo: w, criterios: CRITERIOS, tramo: 1500 });
 
     let mensajes = '';
@@ -617,7 +625,13 @@ describe('El encuadre: ni la palabra ni una opción peor', () => {
   });
 
   test('Ninguna opción es peor juego: mismas aventuras, mismos beats y el mismo mundo', async () => {
-    for (const nombre of ['barrio-tres-calles', 'suelo-250m']) {
+    // `barrio-tres-calles` sale y entra `urbano-denso`, por el mismo motivo que el
+    // caso anterior: con los trechos medidos sobre el grafo (SPEC-010) el reparto
+    // del barrio cae sobre un tramo difícil sin nombre y la entrega falla por la
+    // deuda §6i-a, que tiene su caso aparte. El cambio **amplía** lo que se mide:
+    // urbano-denso entrega seis aventuras con sus cuatro criterios donde el barrio
+    // aportaba una sola.
+    for (const nombre of ['urbano-denso', 'suelo-250m']) {
       const w = await generaMundo(nombre, semillaDe(nombre, '1'));
       const huella = huellaDelGrafo(w.viario);
       const dibujado = JSON.stringify({ callejero: w.geo.callejero, routes: w.routes, parajes: w.parajes, settlements: w.settlements });
@@ -754,7 +768,19 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
     // sigue perdiendo 3 de sus 6 lazos por lo mismo. La regresión esperada del
     // repo sigue en pie: el día que SPEC-007 nombre todo tramo difícil, este caso
     // se pondrá rojo y habrá que actualizarlo.
-    const medido = { costero: { lazos: 6, fallan: 3 }, 'urbano-denso': { lazos: 6, fallan: 0 }, 'barrio-tres-calles': { lazos: 1, fallan: 0 }, 'suelo-250m': { lazos: 2, fallan: 0 } };
+    // Remedido con SPEC-010, que mide los trechos **sobre el grafo** en lugar de en
+    // línea recta: el reparto elige otros lugares y por tanto cambia qué lazos
+    // tropiezan con un tramo difícil sin nombre. `barrio-tres-calles` pasa de 1/0 a
+    // **1/1** —su único lazo, `ronda-del-vigía`, ahora sale del pueblo por un tramo
+    // que el grafo no sabe nombrar— y el agregado vuelve de 15/3 a **15/4**.
+    // Costero 6/3, urbano-denso 6/0 y suelo-250m 2/0 quedan confirmados sin cambio.
+    //
+    // Léase con cuidado, porque no dice lo que parece: la deuda **no ha crecido**,
+    // se ha movido. Es la misma de siempre —tramos difíciles sin nombre, que se
+    // cierra nombrándolos al generar y es de SPEC-007— y sigue siendo la única
+    // regresión esperada del repo: el día que SPEC-007 nombre todo tramo difícil,
+    // este caso se pondrá rojo y habrá que actualizarlo.
+    const medido = { costero: { lazos: 6, fallan: 3 }, 'urbano-denso': { lazos: 6, fallan: 0 }, 'barrio-tres-calles': { lazos: 1, fallan: 1 }, 'suelo-250m': { lazos: 2, fallan: 0 } };
     let lazos = 0, fallan = 0;
     for (const nombre of LOS_CUATRO) {
       const w = await generaMundo(nombre, semillaDe(nombre, '1'));
@@ -772,6 +798,6 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
       lazos += candidatas.length;
       fallan += sinNombre;
     }
-    assert.deepEqual({ lazos, fallan }, { lazos: 15, fallan: 3 }, 'el número de lazos que no se pueden entregar por falta de nombre ha cambiado');
+    assert.deepEqual({ lazos, fallan }, { lazos: 15, fallan: 4 }, 'el número de lazos que no se pueden entregar por falta de nombre ha cambiado');
   });
 });

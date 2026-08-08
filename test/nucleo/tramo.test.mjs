@@ -57,6 +57,14 @@ function recogeProsa(valor, out = [], vistos = new Set()) {
   return out;
 }
 
+/** Todas las cadenas de un dato estructurado, a cualquier profundidad y en orden estable. */
+function cadenasDe(valor, out = []) {
+  if (typeof valor === 'string') out.push(valor);
+  else if (Array.isArray(valor)) for (const v of valor) cadenasDe(v, out);
+  else if (valor && typeof valor === 'object') for (const v of Object.values(valor)) cadenasDe(v, out);
+  return out;
+}
+
 /** Todo texto que el núcleo exporta, venga de donde venga, sin enumerar módulos. */
 async function textosExportadosDelNucleo() {
   const textos = [];
@@ -83,7 +91,16 @@ async function textosDeDentroDelJuego() {
     const mundo = await generaMundo(nombre, '42.40,-8.81#1');
     exportados.push({ de: `mundo ${nombre}`, texto: mundo.title });
     for (const n of nombresDelMundo(mundo)) exportados.push({ de: `mundo ${nombre}`, texto: n });
-    for (const c of mundo.casting) if (c.motivo) exportados.push({ de: `casting ${nombre}`, texto: c.motivo });
+    // SPEC-010 convierte el motivo del fallo en **dato estructurado** —clave, roles
+    // y requisito— y deja de ser la frase que este bucle metía tal cual. Se recorren
+    // todas sus cadenas, una por una, en vez de la cadena de antes: el motivo ya no
+    // es prosa, y precisamente por eso hay que seguir mirándolo, para que nadie lo
+    // devuelva a serlo por la puerta de atrás. Los números quedan fuera a propósito:
+    // `enTramos` o `topeEnTramos` son la medida del fallo, no un texto que nadie lee.
+    for (const c of mundo.casting) {
+      if (!c.motivo) continue;
+      for (const cadena of cadenasDe(c.motivo)) exportados.push({ de: `casting ${nombre}`, texto: cadena });
+    }
   }
   return exportados;
 }
