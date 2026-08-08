@@ -9897,6 +9897,848 @@
       "fichero": "test/nucleo/npcs.test.mjs",
       "caso": "Un mapa sin ningún núcleo enumera cero sitios y no falla",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la escalera de rango, cuando se enumera, entonces tiene exactamente tres escalones con nombre y es ordinal.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "La escalera de rango tiene exactamente tres escalones con nombre y es ordinal",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la escalera, cuando se busca un valor intermedio entre dos escalones, entonces no existe: es enumerada y no continua.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "La escalera de rango tiene exactamente tres escalones con nombre y es ordinal",
+      "hueco_de_bateria": true,
+      "nota": "el mismo caso recorre 0..200 y comprueba que ningún recuento cae fuera del enumerado: no hay valor intermedio"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo, cuando se consulta el rango que allí se tiene, entonces se obtiene un escalón y su tono, y ninguna cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango de un núcleo es un escalón y su tono, y ninguna cifra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la consulta de rango, cuando se inspecciona lo que devuelve, entonces no lleva el recuento de lo que ha llegado, ni un porcentaje, ni cuánto falta para el escalón siguiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "No hay ninguna barra ni lista de reputación",
+      "escenario": "No hay ninguna barra ni lista de reputación",
+      "nota": "la mitad @nucleo del escenario: no hay con qué pintar un medidor. Que ninguna pantalla lo pinte es de las filas 32, 36 y 38"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la superficie pública de esta entrega, cuando se busca una consulta que devuelva el rango de todos los núcleos del mapa a la vez, entonces no existe: se pregunta núcleo a núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "No hay ninguna barra ni lista de reputación",
+      "escenario": "No hay ninguna barra ni lista de reputación"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado los escalones, cuando se leen sus claves, entonces ninguna nombra un género gramatical.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Las claves de los escalones no nombran ningún género gramatical",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un escalón recibido fuera del enumerado, cuando se pide el trato que le corresponde, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un escalón fuera del enumerado falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el rango de un núcleo, cuando se busca alguna operación que lo baje, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "No existe ninguna operación que baje el rango: no es estado, es cálculo",
+      "hueco_de_bateria": true,
+      "nota": "se cubre con dos casos: la superficie no expone ninguna operación que baje, y el escalón es no decreciente de 0 a 200"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el rango de un núcleo, cuando se busca alguna operación que lo baje, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El escalón nunca baja al crecer lo que ha llegado, de cero a doscientos",
+      "hueco_de_bateria": true,
+      "nota": "la propiedad, medida sobre el ordinal del enumerado: un cálculo que bajara pone esto en rojo"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el catálogo de mecanismos que esta entrega expone, cuando se enumeran los que pueden bajar, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Los mecanismos de esta entrega que pueden bajar son ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo al que no ha llegado nada de la jugadora, cuando se consulta el rango, entonces está en el escalón de partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango sube por lo que llega, no por lo que se pisa",
+      "escenario": "El rango sube por lo que llega, no por lo que se pisa"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una jugadora que pasa por «Vilanova» cada día sin hacer nada allí, cuando el mundo avanza veinte pasos, entonces en «Vilanova» sigue en el escalón de partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango sube por lo que llega, no por lo que se pisa",
+      "escenario": "El rango sube por lo que llega, no por lo que se pisa"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace notable en «Monfrida» y un núcleo vecino al que llega el rumor, cuando se consulta el rango en ese vecino, entonces ha subido, aunque la jugadora no haya estado nunca allí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Se puede ser alguien en un pueblo donde no has estado",
+      "escenario": "Se puede ser alguien en un pueblo donde no has estado"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo, cuando se inspecciona de qué depende su rango, entonces depende solo de lo que ha llegado a ese núcleo, y de nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango depende solo de lo que ha llegado a ese núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el cálculo del rango, cuando se buscan entre sus entradas los metros andados, los pasos del mundo, las llegadas por geofence o las veces que se ha visitado el núcleo, entonces no interviene ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango depende solo de lo que ha llegado a ese núcleo",
+      "hueco_de_bateria": true,
+      "nota": "el mismo caso inspecciona la firma de rangoEn: ni metros, ni pasos, ni geofences, ni visitas"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado dos jugadoras con tramos muy distintos, cuando las dos terminan la misma aventura casteada a su tramo, entonces el rumor que nace es equivalente y suben lo mismo de rango.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Avanza igual quien anda 6 km y quien anda 900 m",
+      "escenario": "Avanza igual quien anda 6 km y quien anda 900 m"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo que ha oído un rumor de signo feo, cuando se consulta el rango, entonces también ha subido: que te conozcan por algo feo también es que te conozcan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un rumor de signo feo también sube el rango",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo que ha oído un rumor en nivel 3, cuando se consulta el rango, entonces cuenta igual que uno oído en nivel 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un rumor oído en nivel 3 cuenta igual que uno oído en nivel 0",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo justo en el umbral de un escalón, cuando se consulta, entonces está en el escalón superior: el umbral se alcanza, no se supera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El umbral de un escalón se alcanza, no se supera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo con un rango ya alcanzado, cuando el mundo avanza cien pasos sin que llegue nada nuevo, entonces el rango no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un paso solo añade",
+      "escenario": "Un paso solo añade",
+      "nota": "de este escenario aquí se sostiene la aserción «ningún rango ha bajado», y por construcción"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo con rango, cuando se consulta cien pasos después, entonces sigue igual: lo oído no caduca y el rango tampoco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un paso solo añade",
+      "escenario": "Un paso solo añade"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el rango de un núcleo, cuando se consulta dos veces sin que haya llegado nada entre medias, entonces devuelve lo mismo: es función pura de lo que ese núcleo ha oído.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Consultar el rango dos veces sin que llegue nada devuelve lo mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una jugadora en el escalón más alto en su mapa de casa, cuando levanta un mapa nuevo en otro sitio, entonces en el mapa nuevo está en el escalón de partida en todos sus núcleos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango no viaja entre mapas",
+      "escenario": "El rango no viaja entre mapas"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida con dos mapas, cuando un rumor viaja en uno, entonces el rango de los núcleos del otro no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un rumor que viaja en un mapa no mueve el rango de los núcleos del otro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un mapa nuevo, cuando se consulta el rango, entonces no hace falta ninguna regla de traslado ni ninguna conversión: no hay nada que trasladar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "El rango no viaja entre mapas",
+      "escenario": "El rango no viaja entre mapas"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un mapa nuevo, cuando se consultan los motes, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "En un mapa nuevo no hay ningún mote",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo de un mapa, cuando se pide su rango contra otro mapa activo, entonces falla nombrando el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Pedir el rango de un núcleo contra otro mapa activo falla nombrando el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un informante y dos jugadoras en escalones distintos del mismo núcleo, cuando cada una le pregunta qué ofrece, entonces se les ofrece exactamente lo mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El rango cambia el trato y el precio, no el catálogo",
+      "escenario": "El rango cambia el trato y el precio, no el catálogo"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado ese mismo caso, cuando se comparan los precios, entonces son distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El rango cambia el trato y el precio, no el catálogo",
+      "escenario": "El rango cambia el trato y el precio, no el catálogo"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado ese mismo caso, cuando se comparan los tonos, entonces son distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El rango cambia el trato y el precio, no el catálogo",
+      "escenario": "El rango cambia el trato y el precio, no el catálogo"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el catálogo que un informante ofrece, cuando se inspecciona de qué depende, entonces no depende del rango en ese núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El rango cambia el trato y el precio, no el catálogo",
+      "escenario": "El rango cambia el trato y el precio, no el catálogo",
+      "nota": "el mismo caso inspecciona la firma de catalogoDelInformante: no recibe el rango"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una jugadora en el escalón de partida, cuando pide el precio de un ítem, entonces es el precio base declarado por ese ítem.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "En el escalón de partida el precio es el precio base declarado por el ítem",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una jugadora en el escalón más alto, cuando pide el precio del mismo ítem, entonces es cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "En el escalón más alto el precio es cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una jugadora en el escalón intermedio, cuando pide el precio de un ítem de precio base impar, entonces el precio es la mitad redondeada hacia arriba, y nunca cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "En el escalón intermedio el precio es la mitad redondeada hacia arriba y nunca cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un precio cero, cuando se compra, entonces la compra se resuelve entera y no se cobra nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un precio cero se compra entero y no cobra nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el tono, cuando se lee, entonces es una clave de un enumerado cerrado, una por escalón, y nunca un texto redactado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El tono es una clave de un enumerado cerrado, una por escalón",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una aventura que necesita un lugar de un núcleo donde se está en el escalón de partida, cuando se castea, entonces se castea igual: el rango no filtra el catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Una aventura se castea igual en un núcleo donde se está en el escalón de partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un ítem sin precio base declarado, cuando se pide su precio, entonces falla nombrando el ítem, en lugar de suponer uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un ítem sin precio base declarado falla nombrando el ítem",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el catálogo de lo que el oro puede comprar, cuando se enumeran sus tipos, entonces es cerrado y son saber y favores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "No se puede pagar por no andar",
+      "escenario": "No se puede pagar por no andar"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado todo lo que se puede comprar, cuando se revisa uno por uno, entonces nada de ello reduce la distancia que hay que andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "No se puede pagar por no andar",
+      "escenario": "No se puede pagar por no andar"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un ítem del catálogo, cuando se inspecciona su efecto, entonces no toca el tramo de la jugadora, ni el grafo, ni el filtro de caminos que evitar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "No se puede pagar por no andar",
+      "escenario": "No se puede pagar por no andar"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un favor, cuando se inspecciona su efecto, entonces no retira, no acorta y no sustituye ningún beat de ninguna aventura casteada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "No se puede pagar por no andar",
+      "escenario": "No se puede pagar por no andar",
+      "nota": "el caso peligroso —un favor que toque un beat— se cubre además con su propio caso"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un favor que devolviera un efecto sobre un beat, cuando se aplica, entonces se rechaza nombrando el favor y el estado de la partida no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un favor que devolviera un efecto sobre un beat se rechaza nombrando el favor",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un informante que recibió el rumor en nivel 2, cuando la jugadora le paga por lo que sabe, entonces recibe la versión de nivel 2.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Lo que compras es la versión que ese informante oyó",
+      "escenario": "Lo que compras es la versión que ese informante oyó"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado ese mismo informante, cuando la jugadora le paga, entonces no recibe la versión fiel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Lo que compras es la versión que ese informante oyó",
+      "escenario": "Lo que compras es la versión que ese informante oyó"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un informante de un núcleo y una cara testigo del mismo núcleo, cuando los dos cuentan el mismo hecho, entonces el informante cobra su versión y el testigo cuenta la fiel sin cobrar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El testigo cuenta la fiel sin cobrar y el informante cobra la que le llegó",
+      "hueco_de_bateria": true,
+      "nota": "el escenario «El testigo directo es fiel y no corrige al pueblo» es @app y ya vive en test/nucleo/testigo.test.mjs (SPEC-014); aquí se afirma la mitad nueva, que es que al informante se le paga"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un informante de un núcleo que no ha oído nada de un hecho, cuando se le pregunta por él, entonces no tiene nada que vender, y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un informante que no ha oído nada no tiene nada que vender, y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado todas las maneras de ganar y gastar oro, cuando se revisan, entonces ninguna implica una compra con dinero real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El oro ficticio no toca dinero real",
+      "escenario": "El oro ficticio no toca dinero real"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el catálogo entero, cuando se revisa, entonces ningún ítem manda a gastar en el negocio real al que está anclado el sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El oro ficticio no toca dinero real",
+      "escenario": "El oro ficticio no toca dinero real"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado lo que una compra devuelve, cuando se inspecciona, entonces no lleva el nivel de deformación de lo que se compró.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Lo que compras es la versión que ese informante oyó",
+      "escenario": "Lo que compras es la versión que ese informante oyó",
+      "nota": "la ausencia del nivel de deformación se afirma en el mismo caso; que no salga a pantalla es de las filas 16 y 37"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida recién creada, cuando se consulta la bolsa, entonces marca cero y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Una partida recién creada tiene la bolsa a cero, y cero no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace que declara oro, cuando se cierra la salida, entonces la bolsa sube en lo declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un desenlace que declara oro sube la bolsa en lo declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace que no declara oro, cuando se cierra la salida, entonces la bolsa no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un desenlace que no declara oro no mueve la bolsa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una compra de precio mayor que la bolsa, cuando se intenta, entonces se rechaza nombrando lo que falta y no se entrega nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Una compra más cara que la bolsa se rechaza nombrando lo que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una compra rechazada, cuando se consulta la bolsa, entonces no ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Una compra más cara que la bolsa se rechaza nombrando lo que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la bolsa, cuando se busca alguna operación que la deje por debajo de cero, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Ninguna operación deja la bolsa por debajo de cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la superficie pública de esta entrega, cuando se busca una consulta del oro acumulado a lo largo de la partida, entonces no existe: solo se puede preguntar el saldo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "No existe ninguna consulta del oro acumulado: solo el saldo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el gasto de oro, cuando se busca dónde ocurre, entonces ocurre en una compra de la jugadora y nunca en un paso del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El oro se gasta en una compra y nunca en un paso del mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el motor de pasos, cuando se enumeran sus productores, entonces esta capa no es ninguno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "El oro se gasta en una compra y nunca en un paso del mundo",
+      "hueco_de_bateria": true,
+      "nota": "el mismo caso comprueba que ninguno de los cinco módulos declara identidad de productor ni sabe producir, y que cien pasos del mundo no mueven la bolsa"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida con dos mapas, cuando se consulta la bolsa desde cada uno, entonces es la misma: el oro es lo que se lleva encima.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "La bolsa es una por partida y se consulta igual desde los dos mapas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un beat con disparador `con_objeto` y la jugadora con ese objeto, cuando llega, entonces se le ofrece la vía del objeto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado ese mismo beat y la jugadora sin ese objeto, cuando llega, entonces existe otra manera de resolver el beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado ese mismo beat resuelto por las dos vías, cuando se comparan los resultados, entonces son el mismo y empujan al mismo beat siguiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una aventura casteada, cuando se castea con objetos y sin ninguno, entonces salen los mismos beats en el mismo orden y el mismo lazo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Con objetos y sin ninguno salen los mismos beats, en el mismo orden y con el mismo lazo",
+      "hueco_de_bateria": true,
+      "nota": "la frontera de inyección se cubre además con el caso de la vista de tenencia"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una aventura casteada, cuando se castea con objetos y sin ninguno, entonces salen los mismos beats en el mismo orden y el mismo lazo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "La vista que recibe el casting solo responde si un objeto se tiene y no puede escribir nada",
+      "hueco_de_bateria": true,
+      "nota": "la frontera de inyección de la spec, que es lo que permite afirmar que el reparto no cambia"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida sin ningún objeto, cuando se ofrecen aventuras, entonces se ofrecen igual: ninguna aventura pide un objeto para ser ofrecida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Ninguna aventura pide un objeto para ser ofrecida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el conjunto de beats de una aventura, cuando se busca uno que solo se pueda resolver llevando un objeto, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Ningún beat del catálogo se puede resolver solo llevando un objeto",
+      "hueco_de_bateria": true,
+      "nota": "26 beats del catálogo, 2 con_objeto y 0 cerrados"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un objeto usado en una vía `con_objeto`, cuando se consulta después, entonces se sigue teniendo: la llave no se gasta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "La llave no se gasta al usarse",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un objeto, cuando se lee, entonces trae su clase del enumerado cerrado, su procedencia y el día en que se obtuvo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "La repisa no es un inventario",
+      "escenario": "La repisa no es un inventario"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un objeto de clase recuerdo, cuando se busca un beat que abra, entonces no abre ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Un objeto de clase recuerdo no abre ningún beat",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un objeto que ya se tiene, cuando un desenlace vuelve a entregarlo, entonces se sigue teniendo una sola vez y no se apila.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Un objeto que ya se tiene no se apila al volver a entregarlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado los objetos de la partida, cuando se buscan un peso, un número de huecos o una manera de tirarlos, entonces no existe ninguno de los tres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "La repisa no es un inventario",
+      "escenario": "La repisa no es un inventario"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un objeto que se intenta guardar sin clase declarada, cuando entra, entonces falla nombrando el objeto, en lugar de suponer que es un recuerdo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Un objeto sin clase declarada falla nombrando el objeto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un objeto de un mapa, cuando se levanta otro mapa, entonces se sigue teniendo: los objetos son de la jugadora y no del sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Los objetos viajan con la jugadora al levantar otro mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace notable que declara mote candidato, cuando su rumor llega a un núcleo, entonces ese candidato entra en juego en ese núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "El mote nace del rumor y es por núcleo",
+      "escenario": "El mote nace del rumor y es por núcleo",
+      "nota": "la característica está etiquetada @app; lo que se sostiene aquí es el dato del que cuelga, que es de núcleo. La pantalla es de la fila 38"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace notable que declara mote candidato, cuando su rumor llega a un núcleo, entonces ese candidato entra en juego en ese núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Un desenlace que declara mote candidato sin rumor del que colgarlo falla",
+      "hueco_de_bateria": true,
+      "nota": "el mote nace del rumor: sin rumor no hay de qué colgarlo"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un rumor que llega a dos núcleos con distinto nivel, cuando se consulta el mote en cada uno, entonces puede ser distinto en cada uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "El mote nace del rumor y es por núcleo",
+      "escenario": "El mote nace del rumor y es por núcleo"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo que ha oído varios rumores con candidatos distintos, cuando se consulta el mote, entonces se pega el candidato que más veces ha llegado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Se pega el candidato que más veces ha llegado a ese núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo con dos candidatos empatados en número, cuando se consulta el mote, entonces se resuelve con una regla declarada y no por el orden en que llegaron.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Un empate de candidatos se resuelve por regla declarada y no por el orden de llegada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo que no ha oído nada, cuando se consulta el mote, entonces no hay ninguno, y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Un núcleo que no ha oído nada no tiene mote, y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un rumor cuyo desenlace no declara mote candidato, cuando llega a un núcleo, entonces el mote de ese núcleo no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Un rumor sin mote candidato no cambia el mote del núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el mote de un núcleo, cuando se lee, entonces es la referencia al candidato declarado y no un texto redactado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "El mote es la referencia al candidato declarado y no un texto redactado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un mote, cuando se consulta desde otro núcleo del mismo mapa, entonces ese otro núcleo tiene el suyo o ninguno, nunca el ajeno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Cada núcleo tiene el suyo o ninguno, nunca el ajeno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado la superficie pública de esta entrega, cuando se busca una consulta de todos los motes del mapa a la vez, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "No existe ninguna consulta de todos los motes del mapa a la vez",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el mismo mundo y la misma partida, cuando se calculan los rangos dos veces desde cero, entonces salen idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Los rangos calculados dos veces desde cero salen idénticos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el mismo mundo y la misma partida, cuando se calculan los motes dos veces desde cero, entonces salen idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motes.test.mjs",
+      "caso": "Los motes calculados dos veces desde cero salen idénticos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado dos partidas que oyeron los mismos rumores en orden distinto, cuando se comparan sus rangos y sus motes, entonces son iguales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Dos partidas que oyeron lo mismo en orden distinto tienen los mismos rangos y los mismos motes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida con oro y objetos, cuando se serializa y se vuelve a cargar, entonces vuelven la misma bolsa y los mismos objetos con su procedencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "La bolsa y los objetos vuelven de su documento con la misma procedencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida, cuando se serializa y se vuelve a cargar, entonces los rangos y los motes vuelven a salir de lo oído y no hace falta que estuvieran guardados aparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Los rangos y los motes vuelven a salir de lo oído sin haber estado guardados aparte",
+      "hueco_de_bateria": true,
+      "nota": "sostiene la mitad de «El registro basta para reconstruir» que toca a esta fila; el escenario entero, con los NPCs conocidos y la política de qué manda al cargar, es de la fila 39"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un mundo congelado, cuando se gana oro, se compra saber y se obtienen objetos, entonces el documento de cada celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Ganar oro, comprar saber y guardar objetos deja el documento de la celda idéntico byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "la característica «Lo generado no se resiembra jamás» no trae ningún escenario para esta capa: los suyos hablan de la generación"
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ninguna iteración cuyo resultado dependa del orden de inserción de un `Set` o un `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Ningún módulo de la progresión usa azar, reloj ni orden de inserción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspeccionan sus imports, entonces no importan `buildWorld` ni ninguna fase de la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Ningún módulo de la progresión importa buildWorld ni ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el día que acompaña a un objeto, cuando se busca de dónde sale, entonces llega como argumento de quien cierra la salida y no se lee dentro del núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "El día de un objeto llega como argumento de quien cierra la salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un núcleo que no existe en el mapa activo, cuando se pide su rango, entonces falla nombrando el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un núcleo que no existe en el mapa activo falla nombrando el núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un mapa sin ningún núcleo, cuando se consultan los rangos, entonces no hay ninguno y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rango.test.mjs",
+      "caso": "Un mapa sin ningún núcleo no tiene rangos y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un ítem que no está en el catálogo cerrado, cuando se intenta comprar, entonces falla nombrando el ítem.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un ítem que no está en el catálogo falla nombrando el ítem",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un efecto de compra de un tipo que no está en el catálogo cerrado, cuando se aplica, entonces falla nombrando el tipo, en lugar de aplicarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un efecto de compra fuera del catálogo cerrado falla nombrando el tipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un informante de otro mapa, cuando se le intenta comprar, entonces falla nombrando el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un informante de otro mapa falla nombrando el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace que declara oro con un valor negativo o no entero, cuando se cierra la salida, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un desenlace con oro negativo o no entero falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un cierre de salida en el que la entrega de oro y objetos falla a mitad, cuando se lee el estado, entonces ni la bolsa ni los objetos han cambiado: se aplica entero o no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Un cierre de salida que falla a mitad no deja ni bolsa ni objetos tocados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una compra que falla a mitad, cuando se lee el estado, entonces ni la bolsa ha cambiado ni se ha entregado nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/oro.test.mjs",
+      "caso": "Una compra que falla a mitad no cobra nada y no entrega nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un beat `con_objeto` cuya plantilla no declara vía alternativa, cuando se resuelve, entonces falla nombrando el beat, en lugar de exigir el objeto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Un beat con_objeto sin vía alternativa falla nombrando el beat",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado una partida sin ningún objeto, cuando se consultan los objetos, entonces la lista está vacía y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/objetos.test.mjs",
+      "caso": "Una partida sin ningún objeto devuelve la repisa vacía y no falla",
+      "hueco_de_bateria": true
     }
   ]
 }

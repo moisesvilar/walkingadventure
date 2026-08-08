@@ -31,6 +31,7 @@ import { PESO_MINIMO_DE_ESCENA } from '../world/escenas.js';
 import { namesFor } from '../names/index.js';
 import { arbolDeCaminos, caminoDesdeArbol, normalizaCriterios, tramosDelCamino } from '../partida/filtro.js';
 import { caraDeSitio } from '../partida/npcs.js';
+import { SIN_OBJETOS, exigeTenencia } from '../partida/objetos.js';
 import { dimensionaSalida, rangoDeBeats } from '../partida/salida.js';
 import { exigeTramoM } from '../partida/tramo.js';
 import { MOTIVOS_DE_CASTING, motivoDeCasting } from './motivos.js';
@@ -207,7 +208,12 @@ function exigePartida(partida) {
  *   `grafo` el viario cosido —por defecto el del mundo—; `criterios` los caminos
  *   que se evitan, que llegan inyectados; `franjaPermitida` el horario diurno, que
  *   llega **como franja** y viene activado de origen; `resuelveRolHumano` la capa
- *   de NPCs, doblada mientras no exista; `semilla` la del mundo si no se da otra.
+ *   de NPCs, doblada mientras no exista; `tenencia` la vista de solo lectura de los
+ *   objetos de la partida (SPEC-015), que **solo decide por qué vía se atraviesa un
+ *   beat `con_objeto`** y no toca ni el reparto ni el lazo: es la frontera de
+ *   inyección entera de `progresion.md` —«que `castTemplate` reciba también el
+ *   estado de la partida, sin que eso cambie los beats»—; `semilla` la del mundo si
+ *   no se da otra.
  * @returns `{ ok: true, tpl, aventura, beats, ... }` o `{ ok: false, tpl, motivo }`
  *   con el motivo estructurado del catálogo cerrado.
  */
@@ -221,9 +227,11 @@ export function casteaPlantilla({
   franjaPermitida = FRANJA_DIURNA,
   resuelveRolHumano = rolHumanoDelSitio,
   medidor = null,
+  tenencia = SIN_OBJETOS,
   semilla = mundo?.seed,
 }) {
   const metrosPorTramo = exigeTramoM(tramoM, 'el casting de aventuras');
+  const laTenencia = exigeTenencia(tenencia, 'el casting de aventuras');
   const desde = exigePartida(partida);
   const orden = validaPlantilla(plantilla);
   const medida = medidor ?? medidorDeTrechos(grafo, criterios);
@@ -408,7 +416,7 @@ export function casteaPlantilla({
     asignacion[rid] = resuelveRolHumano({ sitio, rol: roles[rid], plantilla, mundo, semilla });
   }
 
-  return exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla });
+  return exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla, tenencia: laTenencia });
 }
 
 function recorridoDe(beats, asignacion, desde, medida) {
@@ -429,7 +437,7 @@ function fallo(plantilla, motivo) {
   return congelaHondo({ ok: false, tpl: plantilla, plantilla: plantilla.id, motivo });
 }
 
-function exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla }) {
+function exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla, tenencia = SIN_OBJETOS }) {
   const recorrido = recorridoDe(beats, asignacion, desde, medida);
   const lugares = beats.map((b) => asignacion[b.rol]);
 
@@ -443,6 +451,7 @@ function exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, sa
       // El último no empuja a ninguno: eso es lo que cierra la cadena.
       siguiente: i === beats.length - 1 ? null : i + 2,
       tramos: anterior === lugares[i] ? [] : medida.tramos(anterior, lugares[i]),
+      tenencia,
     });
   });
 
@@ -530,12 +539,18 @@ export function exigeEncuadre(mundo) {
   return encuadre;
 }
 
-/** Castea una plantilla contra un mundo con el encuadre que el mundo declara. */
-export function castTemplate(mundo, plantilla, semilla = mundo.seed) {
-  return casteaPlantilla({ ...exigeEncuadre(mundo), mundo, plantilla, semilla });
+/**
+ * Castea una plantilla contra un mundo con el encuadre que el mundo declara.
+ *
+ * `tenencia` es lo único que el estado de la partida aporta aquí, y por eso entra
+ * como opción y no como estado entero: con objetos y sin ninguno el reparto es el
+ * mismo, y lo único que cambia es por qué vía se atraviesa un beat `con_objeto`.
+ */
+export function castTemplate(mundo, plantilla, semilla = mundo.seed, { tenencia = SIN_OBJETOS } = {}) {
+  return casteaPlantilla({ ...exigeEncuadre(mundo), mundo, plantilla, semilla, tenencia });
 }
 
 /** Castea el catálogo del prototipo contra un mundo, con su encuadre. */
-export function castAll(mundo, semilla = mundo.seed) {
-  return casteaCatalogo({ ...exigeEncuadre(mundo), mundo, catalogo: TEMPLATES, semilla });
+export function castAll(mundo, semilla = mundo.seed, { tenencia = SIN_OBJETOS } = {}) {
+  return casteaCatalogo({ ...exigeEncuadre(mundo), mundo, catalogo: TEMPLATES, semilla, tenencia });
 }
