@@ -6292,6 +6292,693 @@
       "caso": "Sobre el mundo mínimo de 250 m ninguna plantilla queda fuera del resultado",
       "escenario": "El mundo mínimo todavía compone un lazo",
       "nota": "La garantía es de SPEC-006 y esta spec la consume sin poder contradecirla. Lo que se afirma aquí es la mitad que le toca al casting: ninguna plantilla queda fuera del resultado y cada una que no castea trae su motivo del catálogo."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida recién creada con su primer mapa, cuando se lee el contador de pasos, entonces marca cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Una partida recién creada marca cero pasos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un contador en cero, cuando se ejecuta un paso, entonces el paso ejecutado es el número uno y el contador queda en uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El primer paso es el número uno y deja el contador en uno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un contador en un valor cualquiera, cuando se le pide avanzar siete pasos, entonces se ejecutan siete pasos consecutivos numerados desde el actual más uno, sin saltos y sin repeticiones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Avanzar siete pasos los ejecuta consecutivos desde el actual más uno, sin saltos ni repeticiones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un contador, cuando se le pide avanzar cero pasos, entonces no se ejecuta ninguno y el contador no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Avanzar cero pasos no ejecuta ninguno y no mueve el contador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un contador, cuando se le pide avanzar un número que no es entero positivo, entonces falla con un error explícito que nombra lo recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Avanzar un número que no es entero no negativo falla nombrando lo recibido",
+      "hueco_de_bateria": true,
+      "nota": "El cero es el no-op declarado del criterio anterior; el caso cubre lo demás: negativo, con decimales, texto y nulo."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el paso número `n` de un mapa, cuando se pide su semilla, entonces se deriva de la semilla de la partida, del identificador del mapa y del sufijo `:tick:` con el número del paso, con el mismo mecanismo de semillas de fase que fijó SPEC-003.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "La semilla de un paso se deriva de la semilla de la partida, del mapa y del sufijo \":tick:\" con su número",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el mismo mapa y el mismo número de paso, cuando se piden su semilla y su azar dos veces desde cero, entonces las dos ejecuciones producen exactamente lo mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El contenido de un paso lo decide su número",
+      "escenario": "El contenido de un paso lo decide su número",
+      "nota": "El escenario de la batería, reexpresado sobre la semilla de SPEC-003: el \"42.40,-8.81#1\" original filtraba la ubicación."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el paso 7 de un mapa, cuando se compara con el paso 7 de otro mapa de la misma partida, entonces sus semillas son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El paso 7 de dos mapas de la misma partida no comparte semilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el paso 7 de un mapa, cuando se compara con el paso 7 del mismo mapa en otra partida con otra semilla, entonces sus semillas son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El paso 7 del mismo mapa en dos partidas con semillas distintas no comparte semilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado dos partidas distintas que llegan al paso 12, cuando se comparan los pasos 12 con la misma semilla de partida y el mismo mapa, entonces producen lo mismo, aunque uno se haya alcanzado en un día y el otro en tres meses.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Dos partidas que llegan al paso 12 producen lo mismo, una de un tirón y otra en cuatro tandas",
+      "hueco_de_bateria": true,
+      "nota": "Tandas 5+0+4+3, las que midió wa-dev. La batería no tiene escenario para el mismo número alcanzado a ritmos distintos."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el paso `n`, cuando se inspecciona lo que entra en su semilla, entonces no entra ninguna fecha, ninguna hora ni ningún dato de cuándo se ejecutó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "En la semilla de un paso no entra ninguna fecha, ninguna hora ni cuándo se ejecutó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el módulo del motor, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ningún temporizador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El motor no lee el reloj del sistema: ni Date.now, ni new Date, ni temporizadores, ni Math.random",
+      "hueco_de_bateria": true,
+      "nota": "Hueco que la propia SPEC-011 declara: la prohibición de la batería vive en «El mundo es una función de la semilla y de los datos de OSM», que habla de la generación, y el motor es capa y no fase."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un contador que ha avanzado, cuando se serializa la partida y se vuelve a cargar, entonces el contador vuelve con el mismo valor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El contador vuelve del documento con el mismo valor",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el contador de pasos, cuando se busca dónde se guarda, entonces viaja con la partida y nunca dentro del documento congelado de ninguna celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El contador viaja con la partida y nunca dentro del documento congelado de una celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora con un tramo de 2 km y una salida abierta, cuando anda 6 km, entonces el mundo ha avanzado tres pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Un tramo andado es un paso del mundo",
+      "escenario": "Un tramo andado es un paso del mundo"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora con un tramo de 600 m y una salida abierta, cuando anda 1 800 m, entonces el mundo ha avanzado tres pasos, los mismos que la de 2 km con sus 6 km.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Avanza igual quien anda 6 km y quien anda 900 m",
+      "escenario": "Avanza igual quien anda 6 km y quien anda 900 m",
+      "nota": "El escenario habla del rango; aquí se afirma la mitad que vive en el contador, que es de donde sale."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora con un tramo de 2 km, cuando anda 5 km en una salida, entonces el mundo ha avanzado dos pasos y quedan 1 000 m de resto sin gastar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Cinco kilómetros con un tramo de 2 km dan dos pasos y mil metros de resto",
+      "hueco_de_bateria": true,
+      "nota": "Hueco que la propia SPEC-011 declara: el escenario de la batería usa 6 km sobre 2 km, que divide exacto, y nada dice del resto."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el resto de una salida anterior, cuando se abre otra salida y se andan los metros que le faltaban, entonces el paso se completa y el resto vuelve a cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "El resto de una salida se conserva y lo completa la siguiente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: es la decisión con más consecuencias para quien sale poco rato y la batería no la cubre."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una salida sin un solo metro andando, cuando se cierra, entonces el mundo no ha avanzado ningún paso y el resto no ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Una salida sin un solo metro andando no avanza el mundo ni toca el resto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una salida abierta, cuando se andan los metros de un paso, entonces el paso se ejecuta durante la caminata y no se difiere al telón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los pasos se ejecutan durante la caminata y no se difieren al telón",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: «El jugador se puede adelantar a su propia fama» lo implica pero es de la fila 12."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado los mismos metros entregados de una vez o troceados en veinte muestras, cuando se convierten en pasos, entonces el número de pasos ejecutados y el resto son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los mismos metros de una vez o en veinte muestras dan los mismos pasos y el mismo resto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una entrega de metros negativa o no numérica, cuando se convierte en pasos, entonces falla nombrando el valor recibido, sin tocar el contador ni el resto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Una entrega de metros negativa o no numérica falla sin tocar el contador ni el resto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida sin tramo declarado, cuando se convierten metros en pasos, entonces falla nombrando el tramo que falta, en lugar de suponer uno por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Sin tramo declarado la conversión falla nombrando el tramo que falta, en lugar de suponer uno por defecto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una salida abierta, cuando se convierten sus metros en pasos, entonces el tramo usado es el que la jugadora tenía al abrir la salida y no cambia a mitad de ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "El tramo usado es el que había al abrir la salida y no cambia a mitad de ella",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora cuyo tramo baja al cerrar la salida, cuando se leen los pasos ya ejecutados, entonces ninguno se recalcula ni se reescribe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Bajar el tramo al cerrar la salida no recalcula ningún paso ya ejecutado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el mismo cambio de tramo, cuando se lee el resto pendiente, entonces sigue expresado en metros y no se reescala.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "El resto pendiente sigue en metros y no se reescala al cambiar el tramo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado los pasos de una salida activa, cuando se busca dónde se acumulan, entonces no se acumulan en ninguna reserva: se gastan según se generan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los pasos de una salida activa no se acumulan en ninguna reserva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una salida en la que se andan doce tramos seguidos, cuando se convierten en pasos, entonces se ejecutan los doce, sin ningún tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Doce tramos seguidos en una salida ejecutan doce pasos, sin ningún tope",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una traza de salida con sus segmentos ya clasificados, cuando se cuentan los metros para el motor, entonces entran los clasificados como andando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los metros clasificados como andando entran en el contador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una traza con un tramo a velocidad de vehículo, cuando se cuentan los metros para el motor, entonces esos metros no entran.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Un viaje en tren no hace avanzar el mundo",
+      "escenario": "Un viaje en tren no hace avanzar el mundo",
+      "nota": "La mitad @nucleo del escenario, que en la batería es @app: dada una traza clasificada, qué metros mueven el contador."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora con una salida abierta que se desplaza 30 km a velocidad de vehículo, cuando se cuentan los metros, entonces el motor no avanza ningún paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Un viaje en tren no hace avanzar el mundo",
+      "escenario": "Un viaje en tren no hace avanzar el mundo"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una vuelta a casa en autobús desde 6 km, cuando se cierra la salida, entonces esos metros no han hecho avanzar el mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Volver a casa en autobús echa el telón igual",
+      "escenario": "Volver a casa en autobús echa el telón igual",
+      "nota": "De este escenario se sostiene aquí la segunda mitad —esos kilómetros no han hecho avanzar el mundo—; que el telón se eche es @app."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una traza con 800 m a velocidad ambigua, cuando se cuentan los metros para el motor, entonces esos 800 m cuentan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "En la duda, cuenta",
+      "escenario": "En la duda, cuenta"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado los mismos 800 m ambiguos, cuando se compara con lo que hace la medición del tramo, entonces la respuesta es la contraria, y las dos salen del mismo módulo de SPEC-004 en lugar de estar escritas dos veces.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "La asimetría de la duda sale del módulo de SPEC-004 y no está escrita dos veces",
+      "escenario": "La medición del tramo sí excluye la velocidad ambigua",
+      "nota": "La otra cara del escenario, que es de SPEC-004: aquí se afirma que las dos respuestas salen del mismo módulo."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el motor de pasos, cuando se inspecciona su implementación, entonces no clasifica velocidades por su cuenta: recibe los segmentos ya clasificados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "El motor no clasifica velocidades por su cuenta: recibe los segmentos ya clasificados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una traza con un segmento sin clasificar, cuando se cuentan sus metros, entonces falla nombrando el segmento, en lugar de suponer que se andaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Un segmento sin clasificar hace fallar el conteo nombrando el segmento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una traza cuyos segmentos son todos de vehículo, cuando se cuentan los metros, entonces el total es cero y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Una traza cuyos segmentos son todos de vehículo da cero metros y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida con los pasos de fondo apagados, cuando se le entregan kilómetros de fondo, entonces no se ejecuta ningún paso y la reserva sigue vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Con los pasos de fondo apagados no se ejecuta ningún paso y la reserva sigue vacía",
+      "hueco_de_bateria": true,
+      "nota": "«Los pasos de fondo vienen apagados» es de la fila 42 y afirma el interruptor; aquí solo el mecanismo que recibe el dato."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida con los pasos de fondo activados, cuando se le entregan kilómetros equivalentes a tres pasos, entonces se ejecutan tres pasos y la reserva contiene tres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Kilómetros de fondo equivalentes a tres pasos ejecutan tres y dejan tres en la reserva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida con los pasos de fondo activados, cuando acumula kilómetros equivalentes a doce pasos sin salir, entonces la reserva contiene cinco pasos y el contador del mundo ha avanzado cinco, no doce.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "La reserva de pasos de fondo tiene tope de cinco",
+      "escenario": "La reserva de pasos de fondo tiene tope de cinco"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado la reserva llena, cuando llegan más kilómetros de fondo, entonces no se ejecuta ningún paso más y no queda ninguna deuda pendiente de ejecutar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Con la reserva llena los kilómetros de fondo no ejecutan más pasos y no dejan deuda",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: el escenario afirma que el contador avanzó cinco y no doce, pero no que no quede deuda."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado la reserva llena y kilómetros de fondo descartados, cuando se vacía la reserva y se entregan kilómetros nuevos, entonces los pasos que se ejecutan salen solo de los nuevos, sin recuperar nada de lo descartado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Vaciar la reserva no recupera nada de lo descartado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: nada verifica que los pasos descartados no reaparezcan al vaciar."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado la reserva con cuatro pasos y kilómetros equivalentes a tres, cuando se convierten, entonces se ejecuta uno y se descartan los otros dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Con cuatro en la reserva y kilómetros para tres se ejecuta uno y se descartan dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una reserva con entradas, cuando se lee, entonces se entregan sus pasos en el orden en que se ejecutaron y la reserva queda vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "La reserva se lee en el orden en que se ejecutaron los pasos y queda vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una reserva vacía, cuando se lee, entonces se obtiene una lista vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Una reserva vacía se lee como lista vacía y no como error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el tope de la reserva, cuando se busca de dónde sale, entonces hay una sola constante con valor cinco y todo lo que la consulta la lee de ahí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "El tope de la reserva sale de una sola constante con valor cinco",
+      "escenario": "La reserva de pasos de fondo tiene tope de cinco",
+      "nota": "El cinco del escenario, afirmado sobre la constante: que haya una sola es lo que impide que se desincronicen dos."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una reserva vaciada, cuando se comparan los pasos ejecutados desde el fondo con los de una salida activa, entonces son de la misma naturaleza y llevan el mismo número correlativo del mismo contador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los pasos de la reserva y los de una salida activa son de la misma naturaleza y del mismo contador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida con los pasos de fondo activados y la reserva llena, cuando la jugadora sale a andar, entonces los pasos de la salida activa se ejecutan igual, sin que el tope de la reserva los frene.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Con la reserva llena los pasos de la salida activa se ejecutan igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una reserva con pasos sin leer, cuando se serializa la partida y se vuelve a cargar, entonces la reserva vuelve con los mismos pasos y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "La reserva vuelve del documento con los mismos pasos y en el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el motor, cuando se busca cómo sabe si los pasos de fondo están activos, entonces lo recibe como dato de la partida y no lo consulta a ninguna capa de la plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Si los pasos de fondo están activos lo dice la partida, no ninguna capa de la plataforma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora que ha andado 0 km en treinta días, cuando abre la app, entonces el mundo no ha avanzado ningún paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Estar un mes sin salir no acumula mundo pendiente",
+      "escenario": "Estar un mes sin salir no acumula mundo pendiente"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora que vuelve tras tres meses sin salir y otra que vuelve tras tres días, cuando las dos han andado los mismos metros, entonces el contador de las dos está en el mismo valor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Quien vuelve tras tres meses y quien vuelve tras tres días con los mismos metros tienen el mismo contador",
+      "escenario": "Estar un mes sin salir no acumula mundo pendiente",
+      "nota": "La otra mitad del escenario: no solo que no se acumule mundo pendiente, sino que los mismos metros dejan el mismo contador."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el motor de pasos, cuando se busca en su superficie pública una operación que reciba una fecha, un intervalo o un número de días, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Ninguna operación de la superficie pública del motor recibe una fecha, un intervalo ni un número de días",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado la apertura de la app, cuando no llega ningún metro de ninguna de las dos fuentes, entonces no se ejecuta ningún paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Al abrir la app sin metros de ninguna de las dos fuentes no se ejecuta ningún paso",
+      "escenario": "Estar un mes sin salir no acumula mundo pendiente"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida guardada hace un año, cuando se carga, entonces el contador es el mismo con el que se guardó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Una partida guardada hace un año carga con el mismo contador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un paso ejecutado, cuando se inspecciona lo que queda registrado de él, entonces no lleva ninguna marca de tiempo del reloj real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso ejecutado no lleva ninguna marca de tiempo del reloj real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un mundo en el paso 40, cuando se ejecutan diez pasos sin que la jugadora actúe, entonces no ha caducado ninguna aventura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso solo añade",
+      "escenario": "Un paso solo añade",
+      "nota": "Un solo caso cubre las cuatro consecuencias que el criterio enumera, porque el escenario las afirma sobre el mismo mundo en el paso 40."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el mismo caso, cuando se revisan los NPCs, entonces no se ha retirado ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso solo añade",
+      "escenario": "Un paso solo añade"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el mismo caso, cuando se revisan los rangos por núcleo, entonces ninguno ha bajado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso solo añade",
+      "escenario": "Un paso solo añade"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el mismo caso, cuando se revisan el oro, los objetos y el diario, entonces nada se ha restado, retirado ni borrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso solo añade",
+      "hueco_de_bateria": true,
+      "nota": "El escenario enumera aventuras, NPCs y rangos; el oro, los objetos y el diario los añade la spec y la batería no los cubre."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el catálogo de tipos de efecto que un paso puede producir, cuando se enumera, entonces es cerrado y todos sus tipos añaden: ninguno quita, baja, caduca ni retira nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El catálogo de tipos de efecto es cerrado y todos sus tipos añaden",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: «Un paso solo añade» comprueba tres consecuencias concretas, no la garantía estructural."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un productor de paso que devuelve un efecto de un tipo que no está en el catálogo, cuando se ejecuta el paso, entonces falla nombrando el tipo, en lugar de aplicarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un efecto de un tipo que no está en el catálogo hace fallar el paso nombrando el tipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un productor de paso que devuelve un efecto que resta, cuando se ejecuta el paso, entonces se rechaza nombrando el efecto y el estado de la partida no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un efecto que resta se rechaza nombrando el efecto y el estado de la partida no cambia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un paso que falla al aplicarse, cuando se lee el contador, entonces no ha avanzado: un paso se aplica entero o no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso que falla al aplicarse no mueve el contador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un paso, cuando se busca si puede aplicar una consecuencia de un acto de la jugadora, entonces sí puede, y esa consecuencia puede ser mala: la regla protege contra penalizar la ausencia, no contra propagar lo que se hizo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso puede aplicar la consecuencia de un acto de la jugadora aunque sea mala",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida con dos mapas, cuando se leen sus contadores, entonces cada mapa tiene el suyo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Cada mapa de la partida tiene su propio contador",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: que cada mapa lleve su contador y su reserva no está afirmado en ningún escenario."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una jugadora que pasa tres semanas andando en otro mapa, cuando vuelve a casa, entonces el mundo de casa ha avanzado solo con los kilómetros que ella anduvo allí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El mundo de casa no avanza en tu ausencia",
+      "escenario": "El mundo de casa no avanza en tu ausencia",
+      "nota": "En la batería es @app en la práctica; lo que aquí se afirma es el contador por mapa, que es lo que obliga el escenario."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado metros andados con un mapa activo, cuando se convierten en pasos, entonces avanza el contador de ese mapa y ningún otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los metros andados con un mapa activo avanzan el contador de ese mapa y ningún otro",
+      "escenario": "El mundo de casa no avanza en tu ausencia"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado kilómetros de fondo, cuando se convierten en pasos, entonces avanza el contador del mapa activo y la reserva es la de ese mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Los kilómetros de fondo avanzan el contador del mapa activo y la reserva es la de ese mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado metros andados sin ningún mapa activo, cuando se convierten en pasos, entonces falla nombrando el mapa que falta, en lugar de avanzar un contador por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Sin mapa activo el motor falla nombrando el mapa que falta, en lugar de avanzar un contador por defecto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un mapa nuevo levantado en otro sitio, cuando se lee su contador, entonces marca cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un mapa nuevo levantado en otro sitio marca cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un mundo congelado y su documento, cuando se ejecutan cincuenta pasos, entonces el documento de cada celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El documento de cada celda sigue idéntico byte a byte después de cincuenta pasos",
+      "hueco_de_bateria": true,
+      "nota": "La característica «Lo generado no se resiembra jamás» no tiene escenario de pasos: los suyos son celda vecina, tramo y estilo."
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el módulo del motor, cuando se inspeccionan sus imports, entonces no importa `buildWorld` ni ninguna fase de la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El motor no importa buildWorld ni ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado la tubería de generación, cuando se enumeran sus fases, entonces el paso del mundo no es una de ellas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El paso del mundo no es una fase de la tubería de generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un mundo que ha avanzado cincuenta pasos, cuando se vuelve a generar la celda con la misma semilla y los mismos datos de OSM, entonces sale idéntica: los pasos no entran en la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Volver a generar la celda tras cincuenta pasos da un documento idéntico",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un paso ejecutado, cuando se inspecciona lo que ha escrito, entonces escribe solo en el estado de la partida y nunca en el mundo congelado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Un paso ejecutado escribe solo en el estado de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el motor sin ningún productor inyectado, cuando se ejecutan diez pasos, entonces el contador avanza diez y no ocurre nada más, sin error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Sin ningún productor el motor avanza diez pasos y no ocurre nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado dos productores inyectados, cuando se ejecuta un paso, entonces los dos se invocan en un orden declarado y estable, con el número del paso y su azar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Dos productores se invocan en un orden declarado y estable, con el número del paso y su azar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el mismo paso ejecutado dos veces desde el mismo estado, cuando se comparan los efectos producidos, entonces son idénticos y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El mismo paso ejecutado dos veces desde el mismo estado produce los mismos efectos en el mismo orden",
+      "escenario": "El contenido de un paso lo decide su número"
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado un productor que consume azar, cuando se ejecuta el paso, entonces recibe un azar derivado del suyo propio, de modo que añadir un productor no desplaza el azar de los demás.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "Añadir un productor no desplaza el azar de los demás",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el motor de pasos, cuando se inspecciona su superficie pública, entonces no exporta ningún texto destinado a mostrarse dentro del juego.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El motor no exporta ningún texto destinado a mostrarse dentro del juego",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado el motor de pasos, cuando se busca dónde expone el valor del contador, entonces ninguna consulta del núcleo lo devuelve a una capa de presentación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos.test.mjs",
+      "caso": "El valor del contador no lo devuelve ninguna consulta del núcleo a la capa de presentación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-011",
+      "criterio": "Dado una partida sin tramo declarado, cuando se convierten metros en pasos, entonces falla nombrando el tramo que falta, en lugar de suponer uno por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/kilometros.test.mjs",
+      "caso": "Un tramo declarado con el catálogo del arranque sirve igual que un número de metros",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso del mismo criterio: exigeTramoM es la única puerta y acepta tanto los metros ya resueltos como el estado del tramo del personaje, que es como llega de verdad."
     }
   ]
 }
