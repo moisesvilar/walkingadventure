@@ -36,7 +36,10 @@ import { dimensionaSalida, rangoDeBeats } from '../partida/salida.js';
 import { exigeTramoM } from '../partida/tramo.js';
 import { MOTIVOS_DE_CASTING, motivoDeCasting } from './motivos.js';
 import { TIPOS_DE_ROL, FRANJA_DIURNA, beatCasteado, franjaCabeEn, franjaDe, validaPlantilla } from './aventura.js';
-import { TEMPLATES } from './templates.js';
+// El catálogo llega **ya comprobado**: importarlo desde aquí es lo que hace que
+// cargar el casting compruebe el catálogo entero, en vez de dejar el error para el
+// primer casteo que use la plantilla mal escrita (SPEC-017).
+import { CATALOGO } from './catalogo.js';
 
 /**
  * El tope de un trecho entre dos beats: **un tramo**, ni más ni menos.
@@ -513,7 +516,7 @@ function exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, sa
  * sola da el mismo reparto que castear el catálogo entero, y recibirlo en otro
  * orden no cambia nada.
  */
-export function casteaCatalogo({ catalogo = TEMPLATES, mundo, grafo = mundo?.viario, criterios = [], ...resto }) {
+export function casteaCatalogo({ catalogo = CATALOGO, mundo, grafo = mundo?.viario, criterios = [], ...resto }) {
   const lista = catalogo ?? [];
   if (!lista.length) return [];
   const medidor = medidorDeTrechos(grafo, criterios);
@@ -550,7 +553,7 @@ export function castTemplate(mundo, plantilla, semilla = mundo.seed, { tenencia 
   return casteaPlantilla({ ...exigeEncuadre(mundo), mundo, plantilla, semilla, tenencia });
 }
 
-/** Castea el catálogo del prototipo contra un mundo, con su encuadre. */
+/** Castea el catálogo contra un mundo, con su encuadre. */
 export function castAll(mundo, semilla = mundo.seed, { tenencia = SIN_OBJETOS } = {}) {
-  return casteaCatalogo({ ...exigeEncuadre(mundo), mundo, catalogo: TEMPLATES, semilla, tenencia });
+  return casteaCatalogo({ ...exigeEncuadre(mundo), mundo, catalogo: CATALOGO, semilla, tenencia });
 }

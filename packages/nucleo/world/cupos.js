@@ -4,8 +4,10 @@
 // congelan con ella: cambiar el tramo después no redimensiona lo que ya existe.
 
 import { congelaHondo } from '../core/congelar.js';
+import { CATALOGO, PESO_MINIMO_POR_DEFECTO, compruebaCoberturaDeEscenas, vocabularioDeEscenas as vocabularioDelCatalogo } from '../quests/catalogo.js';
 import { TEMPLATES } from '../quests/templates.js';
 import { ESCENAS_POR_PARAJE, PESO_MINIMO_DE_ESCENA, normalizaVocabulario, sueloDeVocabulario } from './escenas.js';
+import { PARAJE_INFO } from './parajes.js';
 import { SERVICES } from './settlements.js';
 
 // El suelo y la forma del vocabulario viven en `escenas.js` y se reexportan desde
@@ -96,25 +98,14 @@ export function sueloDeParajes(plantillas = TEMPLATES) {
  * el vocabulario.
  */
 export function vocabularioDeEscenas(plantillas = TEMPLATES) {
-  if (!Array.isArray(plantillas) || plantillas.length === 0) {
-    throw new Error('el catálogo de plantillas está vacío: sin plantillas no hay escenas que contar y el suelo de parajes no se puede derivar');
-  }
-  const pedidas = [];
-  for (const plantilla of plantillas) {
-    for (const clave of Object.keys(plantilla?.roles ?? {}).sort()) {
-      const rol = plantilla.roles[clave];
-      if (rol?.tipo !== 'paraje' || !rol.escena) continue;
-      // Un rol admite alternativa (`['vigilancia', 'revelación']`), y las dos son
-      // vocabulario que el mundo tiene que saber decir: cuentan las dos.
-      for (const escena of Array.isArray(rol.escena) ? rol.escena : [rol.escena]) {
-        pedidas.push({ escena, pesoMinimo: rol.minPeso ?? PESO_MINIMO_DE_ESCENA });
-      }
-    }
-  }
+  const pedidas = vocabularioDelCatalogo(plantillas);
   if (pedidas.length === 0) {
     throw new Error('el catálogo de plantillas no pide ni una escena de paraje: el suelo de parajes no se puede derivar de él');
   }
-  // Normalizar ordena y funde repetidas quedándose con el peso más exigente.
+  // Normalizar ordena y funde repetidas quedándose con el peso más exigente. El
+  // catálogo ya lo hace por su lado; volver a pasar por aquí es lo que garantiza
+  // que un vocabulario **inyectado** y uno derivado tengan exactamente la misma
+  // forma, que es la frontera que SPEC-006 dejó abierta.
   return normalizaVocabulario(pedidas);
 }
 
@@ -199,3 +190,24 @@ function serviciosDe(nucleos) {
   for (const tipo of ORDEN_DE_NUCLEOS) garantizados += SERVICES[tipo].fixed.length * nucleos[tipo];
   return { garantizados };
 }
+
+// --- las dos costuras entre el catálogo y el mundo, comprobadas al cargar ---
+//
+// Este módulo es el único sitio del paquete que ve las dos orillas: el catálogo,
+// que **declara** qué escenas hacen falta, y la taxonomía de tipos de paraje, que
+// las **sostiene**. El catálogo no importa nada de mundo a propósito —el
+// vocabulario sale de él hacia fuera y nunca al revés—, así que la comprobación
+// vive aquí y se hace al cargar, no en la primera celda que se genere.
+
+// El peso por defecto está declarado a los dos lados por esa misma razón. Que
+// coincidan no queda a la buena fe: si alguien mueve uno, esto falla aquí.
+if (PESO_MINIMO_POR_DEFECTO !== PESO_MINIMO_DE_ESCENA) {
+  throw new Error(
+    `el peso mínimo de escena por defecto vale ${PESO_MINIMO_POR_DEFECTO} en el catálogo de plantillas y ${PESO_MINIMO_DE_ESCENA} en el mundo: ` +
+    'están declarados a los dos lados porque el catálogo no importa ningún módulo de mundo, y si dejan de coincidir el mundo se da por cubierto con parajes que el casting rechaza',
+  );
+}
+
+// Y que ningún tipo de paraje falte para lo que el catálogo pide: una escena sin
+// tipo que la cubra sale como hueco de cobertura en cada celda, en silencio.
+compruebaCoberturaDeEscenas({ catalogo: CATALOGO, taxonomia: PARAJE_INFO });

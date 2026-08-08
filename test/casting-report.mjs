@@ -14,6 +14,8 @@ const { buildRoutes } = await import('../packages/nucleo/world/routes.js');
 const { generateParajes } = await import('../packages/nucleo/world/parajes.js');
 const { castAll } = await import('../packages/nucleo/quests/casting.js');
 const { CLAVES_DE_MOTIVO } = await import('../packages/nucleo/quests/motivos.js');
+const { CATALOGO } = await import('../packages/nucleo/quests/catalogo.js');
+const { OFICIOS, coberturaPorOficio } = await import('../packages/nucleo/quests/oficios.js');
 const { TEMPLATES } = await import('../packages/nucleo/quests/templates.js');
 const { namesFor } = await import('../packages/nucleo/names/index.js');
 const { TRAMO_DE_REFERENCIA_M, vocabularioDeEscenas } = await import('../packages/nucleo/world/cupos.js');
@@ -29,10 +31,28 @@ const stats = new Map(TEMPLATES.map((t) => [t.id, { ok: 0, total: 0, motivos: ne
 // de salud una medida y no una lectura.
 const histograma = new Map(CLAVES_DE_MOTIVO.map((c) => [c, 0]));
 
+// La cobertura por oficio se **agrega**, no se recalcula: la mide una función del
+// paquete (`coberturaPorOficio`) y este informe solo la imprime. Es la misma regla
+// que el motivo estructurado de SPEC-010 —el informe mide en vez de leer— aplicada
+// al suelo de «diez esqueletos jugables por oficio» de `personaje.md` §3.
+const porOficio = new Map(OFICIOS.map((o) => [o, { casteables: 0, total: 0, minimo: Infinity, peorMundo: null }]));
+
 function record(worldName, results) {
   const line = results.map((c) => `${c.tpl.id.slice(0, 14)}${c.ok ? '✓' : '✗'}`).join(' ');
   const ok = results.filter((c) => c.ok).length;
+  const cobertura = coberturaPorOficio({ resultados: results, catalogo: CATALOGO });
+  const porOficioDelMundo = OFICIOS.map((o) => `${o} ${cobertura[o].casteables}/${cobertura[o].total}`).join('  ');
   console.log(`  ${worldName.padEnd(34)} ${ok}/${results.length}  ${line}`);
+  console.log(`  ${''.padEnd(34)} ${porOficioDelMundo}`);
+  for (const o of OFICIOS) {
+    const acumulado = porOficio.get(o);
+    acumulado.casteables += cobertura[o].casteables;
+    acumulado.total += cobertura[o].total;
+    if (cobertura[o].casteables < acumulado.minimo) {
+      acumulado.minimo = cobertura[o].casteables;
+      acumulado.peorMundo = worldName;
+    }
+  }
   for (const c of results) {
     const s = stats.get(c.tpl.id);
     s.total++;
@@ -136,3 +156,13 @@ console.log(`  ${'AGREGADO'.padEnd(22)} ${ok}/${total}`);
 // nunca salieron a cero: una clave que no aparece nunca también es información.
 console.log('\n— histograma de motivos (catálogo cerrado, sin parsear frases) —');
 for (const clave of CLAVES_DE_MOTIVO) console.log(`  ${clave.padEnd(30)} ${histograma.get(clave)}`);
+
+// Y el suelo por oficio, que es lo que `personaje.md` §3 pide medir y no estimar:
+// «del orden de diez esqueletos jugables por oficio en un barrio de tres calles».
+// Lo que importa no es el agregado sino el **peor mundo**, porque es ahí donde un
+// oficio se queda sin juego.
+console.log('\n— cobertura por oficio (agregado y peor mundo) —');
+for (const oficio of OFICIOS) {
+  const a = porOficio.get(oficio);
+  console.log(`  ${oficio.padEnd(10)} ${String(a.casteables).padStart(4)}/${a.total}   peor: ${a.minimo} en ${a.peorMundo}`);
+}
