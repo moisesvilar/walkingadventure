@@ -1400,21 +1400,30 @@
     },
     {
       "spec": "SPEC-003",
-      "criterio": "Dado dos partidas con semillas distintas, el mismo anclaje y los mismos datos de OSM, cuando se genera la celda «0,0» de cada una, entonces difieren en los nombres de al menos un núcleo.",
+      "criterio": "Dado dos partidas con semillas distintas, el mismo anclaje y los mismos datos de OSM, cuando se genera la celda «0,0» de cada una, entonces difieren en los nombres de al menos un núcleo y en la colocación de al menos un paraje.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/semilla.test.mjs",
-      "caso": "Dos partidas con semillas distintas, el mismo anclaje y los mismos datos difieren en los nombres de al menos un núcleo",
-      "hueco_de_bateria": true,
-      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. Se genera la celda «0,0» sobre el mundo congelado urbano-denso con las dos semillas."
+      "caso": "Dos vecinos ven mundos distintos",
+      "nota": "Los dos vecinos son dos partidas con semillas distintas sobre la misma coordenada «42.40,-8.81» y el mismo mundo congelado (costero, capturado junto a esa coordenada): lo único que puede separar sus mundos es la semilla. Se comparan los nombres de los núcleos y las posiciones de los parajes, no sus nombres.",
+      "escenario": "Dos vecinos ven mundos distintos"
     },
     {
       "spec": "SPEC-003",
-      "criterio": "Dado una semilla creada, cuando se inspecciona su contenido, entonces no contiene ninguna coordenada, ninguna fecha ni ningún identificador del dispositivo.",
+      "criterio": "Dado un mundo levantado en «42.40231,-8.80917», cuando se inspecciona la semilla de la partida, entonces no aparece la coordenada exacta del jugador ni la coordenada redondeada del anclaje.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/semilla.test.mjs",
-      "caso": "La semilla no contiene ninguna coordenada, ninguna fecha ni ningún identificador del dispositivo",
+      "caso": "La semilla no contiene ninguna coordenada",
+      "nota": "Se busca la coordenada entera y también cualquier tirada de cuatro cifras seguidas suya, porque un trozo bastaría para reconocer el portal de alguien. Y se afirma además lo fuerte: la semilla no depende de dónde se crea, con la misma entropía sale la misma cadena.",
+      "escenario": "La semilla no contiene ninguna coordenada"
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla creada, cuando se inspecciona su contenido, entonces no contiene ninguna fecha ni ningún identificador del dispositivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "La semilla no contiene ninguna fecha ni ningún identificador del dispositivo",
       "hueco_de_bateria": true,
-      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. La afirmación fuerte no es que no se vea una coordenada dentro, sino que la semilla no depende de dónde ni de cuándo se crea."
+      "nota": "La mitad de coordenadas del criterio original la cubre ahora el escenario «La semilla no contiene ninguna coordenada» de docs/testing.md; la de fecha e identificador del dispositivo sigue sin escenario y se queda como hueco. Se comprueba sobre la fuente de core/semilla.js: ni Date, ni process, ni navigator, ni getRandomValues, ni randomUUID."
     },
     {
       "spec": "SPEC-003",
@@ -1445,12 +1454,12 @@
     },
     {
       "spec": "SPEC-003",
-      "criterio": "Dado una cadena del alfabeto y la longitud correctos pero con un símbolo cambiado, cuando se valida como semilla, entonces el dígito de control la rechaza como mal copiada.",
+      "criterio": "Dado una cadena del alfabeto y la longitud correctos pero con un símbolo cambiado, cuando se valida como semilla, entonces se rechaza nombrando que no cuadra y no se genera ningún mundo.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/semilla.test.mjs",
-      "caso": "Una semilla mal copiada la rechaza el dígito de control",
-      "hueco_de_bateria": true,
-      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. Se prueban las quince posiciones de dato, una a una."
+      "caso": "Una semilla mal copiada se rechaza en vez de generar otro mundo",
+      "nota": "Se prueban las quince posiciones de dato, una a una. La segunda mitad del escenario —que no se genere ningún mundo— se afirma en la tubería: creaMapa y generaCelda fallan con la semilla mal copiada y la consulta de OSM no llega a recibir ni una llamada.",
+      "escenario": "Una semilla mal copiada se rechaza en vez de generar otro mundo"
     },
     {
       "spec": "SPEC-003",
