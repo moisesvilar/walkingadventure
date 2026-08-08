@@ -180,6 +180,33 @@ export function semillaDeMapa(semilla, mapaId) {
   return `${semilla}@${mapaId}`;
 }
 
+/**
+ * El sufijo del paso del mundo, declarado una sola vez como los de fase.
+ *
+ * Va **aparte** de `SUFIJOS_DE_FASE` a propósito: un paso no es una fase de la
+ * tubería y no cuelga de ninguna celda —es una capa sobre el mundo ya generado
+ * (`quests.md` decisión 4)—, así que meterlo en aquel catálogo haría que
+ * `semillasDeFase` prometiera una semilla de paso por celda que nadie debe usar.
+ * Lo que sí comparte con ellos es el mecanismo y el motivo: un sufijo propio para
+ * que el azar de los pasos no desplace el de nada más.
+ */
+export const SUFIJO_DE_PASO = ':tick:';
+
+/**
+ * La semilla del paso `n` de un mapa.
+ *
+ * Cuelga de la semilla del mapa —no de la de una celda— porque el contador es del
+ * mapa entero, y **no entra ninguna fecha ni ninguna hora**: el contenido de un
+ * paso lo decide su número, que es lo que hace que volver tras tres meses enseñe lo
+ * mismo que volver tras tres días.
+ */
+export function semillaDePaso(semilla, mapaId, n) {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new Error(`número de paso inválido ${JSON.stringify(n) ?? String(n)}: la semilla de un paso se deriva de su número, un entero no negativo`);
+  }
+  return `${semillaDeMapa(semilla, mapaId)}${SUFIJO_DE_PASO}${n}`;
+}
+
 /** La semilla de una celda concreta de un mapa. */
 export function semillaDeCelda(semilla, mapaId, celda) {
   return `${semillaDeMapa(semilla, mapaId)}#${celda.i},${celda.j}`;
