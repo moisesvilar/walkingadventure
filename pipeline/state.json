@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": null,
-  "fase": "B2-en-curso",
+  "spec_actual": "SPEC-014",
+  "fase": "dev",
   "iteracion": 0,
   "historial": [
     {
@@ -130,6 +130,16 @@
       "report": "test/reports/SPEC-012-run-20260808T154710Z.md",
       "casos": "727 casos: 724 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio"
+    },
+    {
+      "spec": "SPEC-013",
+      "slug": "prologo-mundo",
+      "resultado": "verde",
+      "iteraciones": 1,
+      "report": "test/reports/SPEC-013-iter-1-run-20260808T170730Z.md",
+      "casos": "848 casos: 845 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio",
+      "nota": "la iteracion corrigio un requisito cumplido de forma vacia (decisiones 6o): el par se componia pero ninguna candidata pasaba por el."
     }
   ],
   "bloqueos": [],
