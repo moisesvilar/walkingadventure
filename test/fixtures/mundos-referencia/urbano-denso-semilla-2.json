@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-009-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
+    "regenerado_por": "SPEC-017",
+    "motivo_regeneracion": "Regenerado por SPEC-017: el catálogo pasa de 6 a 30 plantillas, así que el casting de cada extracto cambia de forma y de tamaño; con él sube el vocabulario de escenas de 7 a 10 y el suelo de parajes de 4 a 5. Y todo tramo difícil que OSM deja sin nombre se nombra ya al construir el grafo (deuda de §6i-a), lo que reserva esos nombres en el índice del mundo antes que las calzadas y los ramales y cambia por tanto los nombres que estos sortean."
   },
   "titulo": "Dominios de Miradia",
   "idioma": "es",
@@ -176,17 +176,17 @@
   ],
   "parajes": [
     {
-      "nombre": "La Atalaya del Cuervo",
+      "nombre": "La Torre Vigía de la Espera",
       "tipo": "atalaya",
-      "x": -360,
-      "y": -114,
-      "anclaje": "node/2631128250"
+      "x": 598,
+      "y": 300,
+      "anclaje": "way/629875371"
     },
     {
-      "nombre": "La Encrucijada del Perro Negro",
+      "nombre": "El Cruce del Ahorcado",
       "tipo": "cruce",
-      "x": -418,
-      "y": -335,
+      "x": -414,
+      "y": -93,
       "anclaje": null
     },
     {
@@ -199,9 +199,9 @@
     {
       "nombre": "El Dolmen Cantor",
       "tipo": "piedra",
-      "x": -917,
-      "y": -231,
-      "anclaje": "way/95564940"
+      "x": -352,
+      "y": -260,
+      "anclaje": "node/510812830"
     },
     {
       "nombre": "La Muralla Quemada",
@@ -297,21 +297,7 @@
       "recta": false
     },
     {
-      "nombre": "La Senda de La Abadía de los Callados",
-      "tipo": "ramal",
-      "desde": [
-        -359,
-        -589
-      ],
-      "hasta": [
-        -292,
-        -588
-      ],
-      "puntos": 14,
-      "recta": false
-    },
-    {
-      "nombre": "La Trocha del Nordeste",
+      "nombre": "La Senda de La Muralla Quemada",
       "tipo": "ramal",
       "desde": [
         -1,
@@ -328,34 +314,92 @@
       "nombre": "La Vereda de El Dolmen Cantor",
       "tipo": "ramal",
       "desde": [
-        -917,
-        -231
+        -352,
+        -260
       ],
       "hasta": [
-        -580,
-        -144
+        -377,
+        -343
       ],
-      "puntos": 19,
+      "puntos": 7,
       "recta": false
     },
     {
-      "nombre": "La Vereda de las Nieves",
+      "nombre": "La Vereda de La Abadía de los Callados",
       "tipo": "ramal",
       "desde": [
-        -360,
-        -114
+        -359,
+        -589
       ],
       "hasta": [
-        -358,
-        -75
+        -292,
+        -588
       ],
-      "puntos": 5,
+      "puntos": 14,
+      "recta": false
+    },
+    {
+      "nombre": "La Vereda de La Torre Vigía de la Espera",
+      "tipo": "ramal",
+      "desde": [
+        598,
+        300
+      ],
+      "hasta": [
+        675,
+        228
+      ],
+      "puntos": 15,
       "recta": false
     }
   ],
   "casting": [
     {
+      "plantilla": "cita-adelantada",
+      "castea": true
+    },
+    {
       "plantilla": "cita-en-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "cuento-del-puente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-arreglo-de-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-camino-de-la-sal",
+      "castea": true
+    },
+    {
+      "plantilla": "el-encargo-de-la-forja",
+      "castea": true
+    },
+    {
+      "plantilla": "el-inventario-del-mercado",
+      "castea": true
+    },
+    {
+      "plantilla": "el-libro-que-no-se-presta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-recado-que-crece",
+      "castea": true
+    },
+    {
+      "plantilla": "el-refugio-de-la-tormenta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-relevo-de-la-guardia",
+      "castea": true
+    },
+    {
+      "plantilla": "el-ungüento-que-huele-mal",
       "castea": true
     },
     {
@@ -363,7 +407,55 @@
       "castea": true
     },
     {
+      "plantilla": "la-apuesta-de-la-taberna",
+      "castea": true
+    },
+    {
+      "plantilla": "la-carta-sin-remite",
+      "castea": true
+    },
+    {
+      "plantilla": "la-cuenta-pendiente",
+      "castea": true
+    },
+    {
+      "plantilla": "la-feria-que-no-cabe",
+      "castea": true
+    },
+    {
+      "plantilla": "la-guarida-de-nadie",
+      "castea": true
+    },
+    {
+      "plantilla": "la-posada-sin-sitio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-receta-perdida",
+      "castea": true
+    },
+    {
+      "plantilla": "la-vigilia-del-monasterio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-visita-que-toca",
+      "castea": true
+    },
+    {
+      "plantilla": "lo-que-dejo-la-crecida",
+      "castea": true
+    },
+    {
+      "plantilla": "peaje-de-la-costumbre",
+      "castea": true
+    },
+    {
       "plantilla": "peregrinaje",
+      "castea": true
+    },
+    {
+      "plantilla": "quien-vigila-al-vigia",
       "castea": true
     },
     {
@@ -372,6 +464,10 @@
     },
     {
       "plantilla": "ronda-del-vigia",
+      "castea": true
+    },
+    {
+      "plantilla": "susto-del-camino",
       "castea": true
     },
     {

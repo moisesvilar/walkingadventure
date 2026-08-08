@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-009-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
+    "regenerado_por": "SPEC-017",
+    "motivo_regeneracion": "Regenerado por SPEC-017: el catálogo pasa de 6 a 30 plantillas, así que el casting de cada extracto cambia de forma y de tamaño; con él sube el vocabulario de escenas de 7 a 10 y el suelo de parajes de 4 a 5. Y todo tramo difícil que OSM deja sin nombre se nombra ya al construir el grafo (deuda de §6i-a), lo que reserva esos nombres en el índice del mundo antes que las calzadas y los ramales y cambia por tanto los nombres que estos sortean."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
@@ -14,7 +14,7 @@
     "nucleos": 7,
     "servicios": 12,
     "parajes": 5,
-    "calzadas": 11
+    "calzadas": 10
   },
   "nucleos": [
     {
@@ -155,39 +155,39 @@
   ],
   "parajes": [
     {
-      "nombre": "A Torre Vixía da Fin",
-      "tipo": "atalaya",
-      "x": -58,
-      "y": 417,
-      "anclaje": "way/551279363"
+      "nombre": "O Cruce dos Xuramentos",
+      "tipo": "cruce",
+      "x": -26,
+      "y": 225,
+      "anclaje": null
     },
     {
-      "nombre": "A Capela do Monte",
-      "tipo": "ermita",
-      "x": 178,
-      "y": -257,
-      "anclaje": "way/232937500"
-    },
-    {
-      "nombre": "O Priorado Gris",
-      "tipo": "monasterio",
-      "x": -395,
-      "y": -36,
-      "anclaje": "node/3648044334"
-    },
-    {
-      "nombre": "A Anta do Abrente",
-      "tipo": "piedra",
+      "nombre": "A Fonte da Santa",
+      "tipo": "fuente",
       "x": -201,
       "y": 599,
       "anclaje": "node/4502883744"
     },
     {
-      "nombre": "O Torreón Roto",
-      "tipo": "ruina",
+      "nombre": "O Mosteiro da Vide",
+      "tipo": "monasterio",
       "x": -139,
       "y": 6,
       "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "O Altar do Abrente",
+      "tipo": "piedra",
+      "x": -395,
+      "y": -36,
+      "anclaje": "node/3648044334"
+    },
+    {
+      "nombre": "O Pazo Caído",
+      "tipo": "ruina",
+      "x": -58,
+      "y": 417,
+      "anclaje": "way/551279363"
     }
   ],
   "calzadas": [
@@ -276,20 +276,6 @@
       "recta": false
     },
     {
-      "nombre": "A Congostra do Leste",
-      "tipo": "ramal",
-      "desde": [
-        -139,
-        6
-      ],
-      "hasta": [
-        -58,
-        11
-      ],
-      "puntos": 6,
-      "recta": false
-    },
-    {
       "nombre": "A Corredoira do Leste",
       "tipo": "ramal",
       "desde": [
@@ -318,17 +304,17 @@
       "recta": false
     },
     {
-      "nombre": "O Carreiro de Poñente",
+      "nombre": "O Carreiro de Levante",
       "tipo": "ramal",
       "desde": [
-        178,
-        -257
+        -139,
+        6
       ],
       "hasta": [
-        162,
-        -260
+        -58,
+        11
       ],
-      "puntos": 5,
+      "puntos": 6,
       "recta": false
     },
     {
@@ -348,7 +334,51 @@
   ],
   "casting": [
     {
+      "plantilla": "cita-adelantada",
+      "castea": true
+    },
+    {
       "plantilla": "cita-en-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "cuento-del-puente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-arreglo-de-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-camino-de-la-sal",
+      "castea": true
+    },
+    {
+      "plantilla": "el-encargo-de-la-forja",
+      "castea": true
+    },
+    {
+      "plantilla": "el-inventario-del-mercado",
+      "castea": true
+    },
+    {
+      "plantilla": "el-libro-que-no-se-presta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-recado-que-crece",
+      "castea": true
+    },
+    {
+      "plantilla": "el-refugio-de-la-tormenta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-relevo-de-la-guardia",
+      "castea": true
+    },
+    {
+      "plantilla": "el-ungüento-que-huele-mal",
       "castea": true
     },
     {
@@ -356,8 +386,56 @@
       "castea": true
     },
     {
+      "plantilla": "la-apuesta-de-la-taberna",
+      "castea": true
+    },
+    {
+      "plantilla": "la-carta-sin-remite",
+      "castea": true
+    },
+    {
+      "plantilla": "la-cuenta-pendiente",
+      "castea": true
+    },
+    {
+      "plantilla": "la-feria-que-no-cabe",
+      "castea": true
+    },
+    {
+      "plantilla": "la-guarida-de-nadie",
+      "castea": true
+    },
+    {
+      "plantilla": "la-posada-sin-sitio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-receta-perdida",
+      "castea": true
+    },
+    {
+      "plantilla": "la-vigilia-del-monasterio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-visita-que-toca",
+      "castea": true
+    },
+    {
+      "plantilla": "lo-que-dejo-la-crecida",
+      "castea": true
+    },
+    {
+      "plantilla": "peaje-de-la-costumbre",
+      "castea": true
+    },
+    {
       "plantilla": "peregrinaje",
       "castea": true
+    },
+    {
+      "plantilla": "quien-vigila-al-vigia",
+      "castea": false
     },
     {
       "plantilla": "rescate-en-la-granja",
@@ -365,6 +443,10 @@
     },
     {
       "plantilla": "ronda-del-vigia",
+      "castea": true
+    },
+    {
+      "plantilla": "susto-del-camino",
       "castea": true
     },
     {

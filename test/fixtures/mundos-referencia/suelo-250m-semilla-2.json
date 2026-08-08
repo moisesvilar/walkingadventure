@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-009-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
+    "regenerado_por": "SPEC-017",
+    "motivo_regeneracion": "Regenerado por SPEC-017: el catálogo pasa de 6 a 30 plantillas, así que el casting de cada extracto cambia de forma y de tamaño; con él sube el vocabulario de escenas de 7 a 10 y el suelo de parajes de 4 a 5. Y todo tramo difícil que OSM deja sin nombre se nombra ya al construir el grafo (deuda de §6i-a), lo que reserva esos nombres en el índice del mundo antes que las calzadas y los ramales y cambia por tanto los nombres que estos sortean."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
@@ -173,16 +173,108 @@
   ],
   "casting": [
     {
+      "plantilla": "cita-adelantada",
+      "castea": true
+    },
+    {
       "plantilla": "cita-en-la-fuente",
       "castea": true
+    },
+    {
+      "plantilla": "cuento-del-puente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-arreglo-de-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-camino-de-la-sal",
+      "castea": true
+    },
+    {
+      "plantilla": "el-encargo-de-la-forja",
+      "castea": true
+    },
+    {
+      "plantilla": "el-inventario-del-mercado",
+      "castea": true
+    },
+    {
+      "plantilla": "el-libro-que-no-se-presta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-recado-que-crece",
+      "castea": false
+    },
+    {
+      "plantilla": "el-refugio-de-la-tormenta",
+      "castea": false
+    },
+    {
+      "plantilla": "el-relevo-de-la-guardia",
+      "castea": true
+    },
+    {
+      "plantilla": "el-ungüento-que-huele-mal",
+      "castea": false
     },
     {
       "plantilla": "entrega-sospechosa",
       "castea": false
     },
     {
+      "plantilla": "la-apuesta-de-la-taberna",
+      "castea": true
+    },
+    {
+      "plantilla": "la-carta-sin-remite",
+      "castea": true
+    },
+    {
+      "plantilla": "la-cuenta-pendiente",
+      "castea": true
+    },
+    {
+      "plantilla": "la-feria-que-no-cabe",
+      "castea": true
+    },
+    {
+      "plantilla": "la-guarida-de-nadie",
+      "castea": false
+    },
+    {
+      "plantilla": "la-posada-sin-sitio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-receta-perdida",
+      "castea": true
+    },
+    {
+      "plantilla": "la-vigilia-del-monasterio",
+      "castea": false
+    },
+    {
+      "plantilla": "la-visita-que-toca",
+      "castea": true
+    },
+    {
+      "plantilla": "lo-que-dejo-la-crecida",
+      "castea": true
+    },
+    {
+      "plantilla": "peaje-de-la-costumbre",
+      "castea": true
+    },
+    {
       "plantilla": "peregrinaje",
       "castea": false
+    },
+    {
+      "plantilla": "quien-vigila-al-vigia",
+      "castea": true
     },
     {
       "plantilla": "rescate-en-la-granja",
@@ -190,6 +282,10 @@
     },
     {
       "plantilla": "ronda-del-vigia",
+      "castea": true
+    },
+    {
+      "plantilla": "susto-del-camino",
       "castea": true
     },
     {

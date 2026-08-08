@@ -4,8 +4,8 @@
     "semilla": "42.18,-7.82#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-009-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
+    "regenerado_por": "SPEC-017",
+    "motivo_regeneracion": "Regenerado por SPEC-017: el catálogo pasa de 6 a 30 plantillas, así que el casting de cada extracto cambia de forma y de tamaño; con él sube el vocabulario de escenas de 7 a 10 y el suelo de parajes de 4 a 5. Y todo tramo difícil que OSM deja sin nombre se nombra ya al construir el grafo (deuda de §6i-a), lo que reserva esos nombres en el índice del mundo antes que las calzadas y los ramales y cambia por tanto los nombres que estos sortean."
   },
   "titulo": "Reinos do Carballo Eterno",
   "idioma": "gl",
@@ -13,7 +13,7 @@
   "recuentos": {
     "nucleos": 5,
     "servicios": 0,
-    "parajes": 4,
+    "parajes": 5,
     "calzadas": 4
   },
   "nucleos": [
@@ -56,28 +56,35 @@
   "servicios": [],
   "parajes": [
     {
-      "nombre": "A Encrucillada do Mercador",
-      "tipo": "cruce",
-      "x": -94,
-      "y": -458,
-      "anclaje": null
-    },
-    {
-      "nombre": "O Cruce das Meigas",
-      "tipo": "cruce",
-      "x": -159,
-      "y": 163,
-      "anclaje": null
-    },
-    {
-      "nombre": "O Cruce do Mercador",
+      "nombre": "A Encrucillada das Meigas",
       "tipo": "cruce",
       "x": 207,
       "y": 341,
       "anclaje": null
     },
     {
-      "nombre": "A Ponte Vella",
+      "nombre": "A Encrucillada do Aforcado",
+      "tipo": "cruce",
+      "x": -94,
+      "y": -458,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Cruce do Aforcado",
+      "tipo": "cruce",
+      "x": -159,
+      "y": 163,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Cruce dos Xuramentos",
+      "tipo": "cruce",
+      "x": 444,
+      "y": 222,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Vao da Derradeira Moeda",
       "tipo": "puente",
       "x": 96,
       "y": -415,
@@ -100,20 +107,6 @@
       "recta": false
     },
     {
-      "nombre": "A Corredoira de Poñente",
-      "tipo": "calzada",
-      "desde": [
-        271,
-        97
-      ],
-      "hasta": [
-        -264,
-        72
-      ],
-      "puntos": 82,
-      "recta": false
-    },
-    {
       "nombre": "A Vella Ruta do Norte",
       "tipo": "calzada",
       "desde": [
@@ -125,6 +118,20 @@
         97
       ],
       "puntos": 17,
+      "recta": false
+    },
+    {
+      "nombre": "A Vella Ruta do Solpor",
+      "tipo": "calzada",
+      "desde": [
+        271,
+        97
+      ],
+      "hasta": [
+        -264,
+        72
+      ],
+      "puntos": 82,
       "recta": false
     },
     {
@@ -144,7 +151,51 @@
   ],
   "casting": [
     {
+      "plantilla": "cita-adelantada",
+      "castea": true
+    },
+    {
       "plantilla": "cita-en-la-fuente",
+      "castea": false
+    },
+    {
+      "plantilla": "cuento-del-puente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-arreglo-de-la-fuente",
+      "castea": false
+    },
+    {
+      "plantilla": "el-camino-de-la-sal",
+      "castea": false
+    },
+    {
+      "plantilla": "el-encargo-de-la-forja",
+      "castea": false
+    },
+    {
+      "plantilla": "el-inventario-del-mercado",
+      "castea": false
+    },
+    {
+      "plantilla": "el-libro-que-no-se-presta",
+      "castea": false
+    },
+    {
+      "plantilla": "el-recado-que-crece",
+      "castea": false
+    },
+    {
+      "plantilla": "el-refugio-de-la-tormenta",
+      "castea": false
+    },
+    {
+      "plantilla": "el-relevo-de-la-guardia",
+      "castea": true
+    },
+    {
+      "plantilla": "el-ungüento-que-huele-mal",
       "castea": false
     },
     {
@@ -152,8 +203,56 @@
       "castea": false
     },
     {
+      "plantilla": "la-apuesta-de-la-taberna",
+      "castea": false
+    },
+    {
+      "plantilla": "la-carta-sin-remite",
+      "castea": false
+    },
+    {
+      "plantilla": "la-cuenta-pendiente",
+      "castea": false
+    },
+    {
+      "plantilla": "la-feria-que-no-cabe",
+      "castea": false
+    },
+    {
+      "plantilla": "la-guarida-de-nadie",
+      "castea": false
+    },
+    {
+      "plantilla": "la-posada-sin-sitio",
+      "castea": false
+    },
+    {
+      "plantilla": "la-receta-perdida",
+      "castea": false
+    },
+    {
+      "plantilla": "la-vigilia-del-monasterio",
+      "castea": false
+    },
+    {
+      "plantilla": "la-visita-que-toca",
+      "castea": true
+    },
+    {
+      "plantilla": "lo-que-dejo-la-crecida",
+      "castea": true
+    },
+    {
+      "plantilla": "peaje-de-la-costumbre",
+      "castea": true
+    },
+    {
       "plantilla": "peregrinaje",
       "castea": false
+    },
+    {
+      "plantilla": "quien-vigila-al-vigia",
+      "castea": true
     },
     {
       "plantilla": "rescate-en-la-granja",
@@ -161,6 +260,10 @@
     },
     {
       "plantilla": "ronda-del-vigia",
+      "castea": true
+    },
+    {
+      "plantilla": "susto-del-camino",
       "castea": true
     },
     {

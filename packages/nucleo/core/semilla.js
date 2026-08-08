@@ -163,6 +163,10 @@ export const SUFIJOS_DE_FASE = {
   // Los ramales a parajes nombran aparte de las calzadas y por eso tienen sufijo
   // propio: cambiar cómo se nombra una senda no puede renombrar el reino entero.
   ramales: ':ramales',
+  // Los tramos difíciles del callejero que OSM deja sin nombre se nombran al
+  // construir el grafo, antes que nada: sufijo propio para que ensanchar el
+  // repertorio de una senda no mueva ni un núcleo ni una calzada de sitio.
+  tramos: ':tramos',
   parajes: ':parajes',
   titulo: ':title',
   casting: ':cast',
