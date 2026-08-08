@@ -56,7 +56,11 @@ export async function generaMundo(nombre, seed, opciones = {}) {
   const fetchData = async (lat, lon, radius) => {
     llamadas.push({ lat, lon, radius });
     const datos = mundoCongelado(nombre, { ordenInvertido });
-    const crudo = { geoJson: datos.geo, poiJson: datos.pois };
+    // El callejero se sirve **siempre**: es la tercera parte del mundo congelado y
+    // donde están los huecos cortos que el grafo tiene que coser. Sin él la tubería
+    // construía el grafo solo con las carreteras del terreno, y los escenarios del
+    // cosido pasaban a mirar un grafo que nunca veía el dato que los provoca.
+    const crudo = { geoJson: datos.geo, poiJson: datos.pois, callejeroJson: datos.callejero };
     return transforma ? transforma(crudo) : crudo;
   };
 

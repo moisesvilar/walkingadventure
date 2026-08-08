@@ -160,6 +160,9 @@ export const SUFIJOS_DE_FASE = {
   anclajes: ':anclajes',
   nucleos: ':nucleos',
   calzadas: ':routes',
+  // Los ramales a parajes nombran aparte de las calzadas y por eso tienen sufijo
+  // propio: cambiar cómo se nombra una senda no puede renombrar el reino entero.
+  ramales: ':ramales',
   parajes: ':parajes',
   titulo: ':title',
   casting: ':cast',

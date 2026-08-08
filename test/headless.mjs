@@ -5,6 +5,8 @@
 
 import { generateSettlements, countsForRadius } from '../packages/nucleo/world/settlements.js';
 import { buildRoutes } from '../packages/nucleo/world/routes.js';
+import { construyeGrafo } from '../packages/nucleo/world/grafo.js';
+import { viasDelGrafo } from '../packages/nucleo/world/build.js';
 import { generateParajes, parajeCountForRadius, PARAJE_INFO } from '../packages/nucleo/world/parajes.js';
 import { vocabularioDeEscenas } from '../packages/nucleo/world/cupos.js';
 import { escenasQueCubre, sueloDeVocabulario } from '../packages/nucleo/world/escenas.js';
@@ -52,7 +54,7 @@ const SUELO = sueloDeVocabulario(VOCABULARIO);
 function generate(radius, seed, names) {
   const { anchors, geo } = syntheticWorld(radius);
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, names);
-  const routes = buildRoutes(settlements, geo.roads, seed, names);
+  const routes = buildRoutes(settlements, construyeGrafo(viasDelGrafo(geo)), seed, names);
   const ficha = {};
   const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, names, undefined, null, null, {
     vocabulario: VOCABULARIO,
@@ -109,7 +111,7 @@ console.log('— colchón del grafo sin anclajes —');
 {
   const { geo } = syntheticWorld(1200);
   const { settlements } = generateSettlements([], geo, 1200, 'test#4', null, es);
-  const routes = buildRoutes(settlements, geo.roads, 'test#4', es);
+  const routes = buildRoutes(settlements, construyeGrafo(viasDelGrafo(geo)), 'test#4', es);
   const parajes = generateParajes([], settlements, routes, geo, 1200, 'test#4', null, es, undefined, null, null, { vocabulario: VOCABULARIO });
   check(`sin anclajes → parajes del grafo: ${parajes.length}`, parajes.length >= 1 && parajes.every((p) => p.origin === 'grafo'));
 }

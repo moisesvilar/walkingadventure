@@ -4,8 +4,8 @@
     "semilla": "42.18,-7.82#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-006",
-    "motivo_regeneracion": "Regenerado por SPEC-006: el cupo de parajes deja de ser solo el techo por ritmo y pasa a ser el mayor entre ese techo y el suelo derivado del catálogo, y los tipos se eligen por cobertura de escenas antes de mirar ningún anclaje real, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-007",
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Comarcas do Vento Norte",
   "idioma": "gl",
@@ -13,7 +13,7 @@
   "recuentos": {
     "nucleos": 5,
     "servicios": 0,
-    "parajes": 3,
+    "parajes": 4,
     "calzadas": 4
   },
   "nucleos": [
@@ -56,21 +56,28 @@
   "servicios": [],
   "parajes": [
     {
-      "nombre": "A Encrucillada do Aforcado",
+      "nombre": "A Encrucillada do Mercador",
       "tipo": "cruce",
-      "x": 187,
-      "y": -229,
+      "x": -159,
+      "y": 163,
       "anclaje": null
     },
     {
-      "nombre": "A Encrucillada dos Xuramentos",
+      "nombre": "O Cruce do Aforcado",
       "tipo": "cruce",
-      "x": 310,
-      "y": 31,
+      "x": 402,
+      "y": -254,
       "anclaje": null
     },
     {
-      "nombre": "A Ponte de Pedra",
+      "nombre": "O Cruce dos Xuramentos",
+      "tipo": "cruce",
+      "x": 491,
+      "y": 373,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Vao da Peaxe",
       "tipo": "puente",
       "x": -141,
       "y": 26,
@@ -89,7 +96,7 @@
         109,
         -433
       ],
-      "puntos": 12,
+      "puntos": 26,
       "recta": false
     },
     {
@@ -131,7 +138,7 @@
         282,
         -296
       ],
-      "puntos": 7,
+      "puntos": 33,
       "recta": false
     }
   ],

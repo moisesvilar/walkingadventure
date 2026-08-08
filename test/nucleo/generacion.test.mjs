@@ -28,7 +28,8 @@ import {
 
 import { buildWorld } from '../../packages/nucleo/world/build.js';
 import { makeRng } from '../../packages/nucleo/core/rng.js';
-import { parseGeo, parsePois } from '../../packages/nucleo/world/osm.js';
+import { parseGeo, parsePois, parseStreets } from '../../packages/nucleo/world/osm.js';
+import { construyeGrafo } from '../../packages/nucleo/world/grafo.js';
 import { generateSettlements } from '../../packages/nucleo/world/settlements.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
 import { buildRoutes, pegarAViario } from '../../packages/nucleo/world/routes.js';
@@ -179,8 +180,20 @@ describe('El mundo es una función de la semilla y de los datos de OSM', () => {
     const anchors = parsePois(congelado.pois, lat, lon);
 
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radio, semilla, null, names);
-    pegarAViario(settlements, geo.roads);
-    const routes = buildRoutes(settlements, geo.roads, semilla, names);
+    // Las mismas vías que arma la tubería: las carreteras del terreno **más el
+    // callejero**, sin repetir por clave de OSM. Reproducir la fase con solo las
+    // carreteras compararía dos grafos distintos y el escenario mediría el dato en
+    // vez del azar de las fases.
+    const claves = new Set();
+    const vias = [...geo.roads, ...parseStreets(congelado.callejero, lat, lon)].filter((v) => {
+      if (!v.osmId) return true;
+      if (claves.has(v.osmId)) return false;
+      claves.add(v.osmId);
+      return true;
+    });
+    const grafo = construyeGrafo(vias);
+    pegarAViario(settlements, grafo);
+    const routes = buildRoutes(settlements, grafo, semilla, names);
     // La fase alterada: mismos datos, mismo vocabulario que usó la tubería real
     // —el del catálogo, que es el valor de arranque de `buildWorld`— y otro azar.
     // Si compartiera flujo con las demás, lo de arriba habría salido distinto.

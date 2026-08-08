@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-006",
-    "motivo_regeneracion": "Regenerado por SPEC-006: el cupo de parajes deja de ser solo el techo por ritmo y pasa a ser el mayor entre ese techo y el suelo derivado del catálogo, y los tipos se eligen por cobertura de escenas antes de mirar ningún anclaje real, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-007",
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
@@ -13,7 +13,7 @@
   "recuentos": {
     "nucleos": 5,
     "servicios": 6,
-    "parajes": 1,
+    "parajes": 2,
     "calzadas": 4
   },
   "nucleos": [
@@ -99,10 +99,17 @@
   ],
   "parajes": [
     {
-      "nombre": "O Cruce do Mercador",
+      "nombre": "A Encrucillada do Aforcado",
       "tipo": "cruce",
-      "x": 110,
-      "y": -44,
+      "x": -64,
+      "y": 85,
+      "anclaje": null
+    },
+    {
+      "nombre": "A Encrucillada dos Xuramentos",
+      "tipo": "cruce",
+      "x": -77,
+      "y": -92,
       "anclaje": null
     }
   ],
@@ -132,21 +139,21 @@
         11,
         30
       ],
-      "puntos": 5,
+      "puntos": 22,
       "recta": false
     },
     {
       "nombre": "A Senda de Mirathar do Carballo",
       "tipo": "calzada",
       "desde": [
-        27,
-        -142
+        11,
+        30
       ],
       "hasta": [
         141,
         117
       ],
-      "puntos": 9,
+      "puntos": 32,
       "recta": false
     },
     {
@@ -160,7 +167,7 @@
         27,
         -142
       ],
-      "puntos": 4,
+      "puntos": 12,
       "recta": false
     }
   ],
@@ -183,7 +190,7 @@
     },
     {
       "plantilla": "ronda-del-vigia",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "tres-pistas",

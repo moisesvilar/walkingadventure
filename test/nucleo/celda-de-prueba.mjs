@@ -35,7 +35,12 @@ export function consultaDeFixture(nombre, opciones = {}) {
   const fn = async (peticion) => {
     llamadas.push(peticion);
     const datos = mundoCongelado(nombre, opciones);
-    return { geoJson: datos.geo, poiJson: datos.pois };
+    // El callejero se sirve **siempre**, por lo mismo que en `mundo-de-prueba.mjs`:
+    // desde SPEC-007 la app lo pide y el grafo se cose con él. Sin servirlo, las
+    // celdas y las rejillas de estas pruebas se generaban sobre un grafo solo de
+    // carreteras —una configuración que ya no existe en producción— y lo que
+    // afirmaban dejaba de decir nada del mundo real.
+    return { geoJson: datos.geo, poiJson: datos.pois, callejeroJson: datos.callejero };
   };
   fn.llamadas = llamadas;
   return fn;

@@ -4,6 +4,7 @@ import { fetchGeoFeatures, fetchPois, fetchStreets } from './data/overpass.js';
 import { parseStreets } from '../../packages/nucleo/world/osm.js';
 import { generateSettlements, footprintRadius } from '../../packages/nucleo/world/settlements.js';
 import { buildRoutes, linkParajes } from '../../packages/nucleo/world/routes.js';
+import { construyeGrafo } from '../../packages/nucleo/world/grafo.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
 import { vocabularioDeEscenas } from '../../packages/nucleo/world/cupos.js';
 import { buildSeaMask } from '../../packages/nucleo/world/seamask.js';
@@ -315,13 +316,20 @@ async function fetchCached(key, fn) {
   return v;
 }
 
+// El callejero se pide **al generar** y no solo al enfocar un núcleo: desde
+// SPEC-007 alimenta el grafo viario, que es donde están los huecos cortos que hay
+// que coser antes de trazar. Va en la misma tanda que las otras dos y falla igual
+// que ellas: un mundo generado sin callejero es otro mundo, y sustituirlo en
+// silencio por una lista vacía es exactamente el fallo callado que el cosido
+// existe para cerrar.
 async function fetchData(lat, lon, radius) {
   const base = `${lat.toFixed(3)},${lon.toFixed(3)}@${radius}`;
-  const [geoJson, poiJson] = await Promise.all([
+  const [geoJson, poiJson, callejeroJson] = await Promise.all([
     fetchCached(base + ':geo', () => fetchGeoFeatures(lat, lon, radius)),
     fetchCached(base + ':poi', () => fetchPois(lat, lon, radius)),
+    fetchCached(base + ':streets', () => fetchStreets(lat, lon, radius)),
   ]);
-  return { geoJson, poiJson };
+  return { geoJson, poiJson, callejeroJson };
 }
 
 // --- panel lateral ---
@@ -579,9 +587,15 @@ window.__wa = {
     const geo = { coastlines, lakes, rivers, forests, peaks, roads };
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, 'demo#0', null, names);
     settlements.forEach((s) => { s.streets = []; });
-    const routes = buildRoutes(settlements, roads, 'demo#0', names);
-    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names, undefined, null, null, { vocabulario: vocabularioDeEscenas() });
-    routes.push(...linkParajes(parajes, routes, settlements, roads));
+    // el grafo también aquí una sola vez, como en la tubería: el hook de demo
+    // existe para probar el render, no para ser el único sitio donde el cosido se
+    // ejecuta dos veces sobre el mismo callejero
+    const grafo = construyeGrafo(roads);
+    const routes = buildRoutes(settlements, grafo, 'demo#0', names);
+    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names, undefined, null, null, { vocabulario: vocabularioDeEscenas(), grafo });
+    // los ramales nacen con nombre y del paquete de idioma, así que la fase pide
+    // semilla y nombres como cualquier otra que nombre algo
+    routes.push(...linkParajes(parajes, routes, settlements, grafo, 'demo#0', names));
     const seaMask = buildSeaMask(coastlines, radius * 1.5, 60);
     world = { seed: 'demo', radius, baseRadius: radius, origin: { lat: 0, lon: 0 }, locale: 'es', geo, anchors, settlements, routes, parajes, seaMask, title: 'Tierras de Prueba' };
     world.casting = castAll(world);

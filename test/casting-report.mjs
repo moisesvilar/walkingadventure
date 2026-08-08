@@ -6,7 +6,8 @@
 
 globalThis.__WA_PROXY__ = process.env.WA_PROXY ?? 'http://localhost:8137/api/overpass';
 
-const { buildWorld } = await import('../packages/nucleo/world/build.js');
+const { buildWorld, viasDelGrafo } = await import('../packages/nucleo/world/build.js');
+const { construyeGrafo } = await import('../packages/nucleo/world/grafo.js');
 const { fetchGeoFeatures, fetchPois } = await import('../app/js/data/overpass.js');
 const { generateSettlements } = await import('../packages/nucleo/world/settlements.js');
 const { buildRoutes } = await import('../packages/nucleo/world/routes.js');
@@ -59,7 +60,7 @@ function syntheticWorld(radius, seed) {
   const rivers = [{ pts: mkLine((k) => k * step + step / 2, (k) => -k * step + radius * 0.4), kind: 'river' }];
   const geo = { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads };
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, es);
-  const routes = buildRoutes(settlements, geo.roads, seed, es);
+  const routes = buildRoutes(settlements, construyeGrafo(viasDelGrafo(geo)), seed, es);
   const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, es, undefined, null, null, { vocabulario: VOCABULARIO });
   return { seed, radius, settlements, routes, parajes };
 }
