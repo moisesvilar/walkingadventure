@@ -32,6 +32,33 @@ function isClosed(el) {
 
 const MAJOR_HIGHWAYS = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary'];
 
+// Superficies que se leen como camino de tierra. Sesgan el nombre de un ramal, no
+// deciden nada más: es un rasgo de la senda, no una clasificación del viario.
+const SUPERFICIES_DE_TIERRA = ['ground', 'dirt', 'earth', 'unpaved', 'gravel', 'compacted', 'fine_gravel'];
+
+/**
+ * El nivel de una vía. Lo usa el cosido del grafo para no unir un puente con la
+ * carretera que pasa por debajo: en planta sus nodos están a pocos metros, y
+ * coserlos inventa un enlace que no existe. Sin el tag, mismo nivel.
+ */
+function nivelDeVia(t) {
+  const n = parseInt(t.layer, 10);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * El rasgo de una vía —`'escalones'`, `'tierra'`, `'estrecho'`— o nulo. Sesga el
+ * nombre del ramal que la recorra. Los tags que lo alimentan no se piden todavía en
+ * la consulta de callejero, así que hoy llega nulo casi siempre y el nombre sale
+ * igual sin él.
+ */
+function rasgoDeVia(t) {
+  if (t.highway === 'steps') return 'escalones';
+  if (t.surface && SUPERFICIES_DE_TIERRA.includes(t.surface)) return 'tierra';
+  if (t.highway === 'path' || t.width === '1' || t.highway === 'footway') return 'estrecho';
+  return null;
+}
+
 export function parseGeo(json, lat0, lon0) {
   const proj = makeProjector(lat0, lon0);
   const out = { coastlines: [], lakes: [], rivers: [], forests: [], peaks: [], roads: [] };
@@ -63,11 +90,13 @@ export function parseGeo(json, lat0, lon0) {
     else if ((t.landuse === 'forest' || t.natural === 'wood') && isClosed(el)) out.forests.push({ pts, osmId });
     else if (t.highway) {
       // nodes: ids OSM reales; son la clave de intersección del grafo viario
-      // (routes.js). Solo sirven si vienen alineados 1:1 con la geometría.
+      // (grafo.js). Solo sirven si vienen alineados 1:1 con la geometría.
       out.roads.push({
         pts,
         nodes: el.nodes && el.nodes.length === pts.length ? el.nodes : null,
         level: MAJOR_HIGHWAYS.includes(t.highway) ? 'principal' : 'pista',
+        layer: nivelDeVia(t),
+        rasgo: rasgoDeVia(t),
         name: t.name || null,
         osmId,
       });
@@ -80,6 +109,12 @@ export function parseGeo(json, lat0, lon0) {
 // Callejero local → dos niveles visuales: calles y sendas.
 const STREET_KINDS = ['residential', 'living_street', 'pedestrian', 'service', 'unclassified'];
 
+/**
+ * El callejero. Además de pintarse, **alimenta el grafo viario**: es donde están
+ * los huecos cortos que hay que coser antes de trazar, así que sale con los mismos
+ * campos que las carreteras de `parseGeo` —ids de nodo, nivel y rasgo— y no solo
+ * con su geometría.
+ */
 export function parseStreets(json, lat0, lon0) {
   const proj = makeProjector(lat0, lon0);
   const out = [];
@@ -88,7 +123,15 @@ export function parseStreets(json, lat0, lon0) {
     const pts = wayToPoints(el, proj);
     if (!pts || pts.length < 2) continue;
     const t = el.tags || {};
-    out.push({ pts, level: STREET_KINDS.includes(t.highway) ? 'calle' : 'senda', osmId: claveOsm(el, pts) });
+    out.push({
+      pts,
+      nodes: el.nodes && el.nodes.length === pts.length ? el.nodes : null,
+      level: STREET_KINDS.includes(t.highway) ? 'calle' : 'senda',
+      layer: nivelDeVia(t),
+      rasgo: rasgoDeVia(t),
+      name: t.name || null,
+      osmId: claveOsm(el, pts),
+    });
   }
   return ordenaPorClave(out);
 }

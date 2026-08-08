@@ -95,6 +95,30 @@ export const es = {
     return pick(rng, forms);
   },
 
+  /**
+   * El nombre de un ramal: la senda que lleva a un paraje.
+   *
+   * No es `roadName` y no puede serlo: `roadName` produce calzadas del reino —«El
+   * Camino del Este»— y un desvío de doscientos metros anunciado así miente sobre
+   * lo que hay. Aquí el registro es el de la senda, la vereda y la escalinata.
+   *
+   * `rasgo` (`'escalones'`, `'tierra'`, `'estrecho'` o nada) **sesga** la forma
+   * base, no la determina: si el dato no está, el nombre sale igual.
+   *
+   * **Sin `rng` devuelve la forma construida sobre `hastaName`**, que es la caída
+   * garantizada de la unicidad: es única porque el nombre del paraje lo es y cada
+   * paraje recibe como mucho un ramal.
+   */
+  ramalName(rng, dirWord, hastaName, rasgo) {
+    if (!rng) return `La Senda de ${hastaName}`;
+    const forms = [`La Senda ${dirWord}`, `La Vereda ${dirWord}`, `El Sendero ${dirWord}`, `La Trocha ${dirWord}`];
+    if (rasgo === 'escalones') forms.push(`La Escalinata ${dirWord}`, `Los Peldaños ${dirWord}`);
+    if (rasgo === 'tierra') forms.push(`El Camino de Tierra ${dirWord}`, `La Carrilada ${dirWord}`);
+    if (rasgo === 'estrecho') forms.push(`El Paso Angosto ${dirWord}`, `La Callejuela ${dirWord}`);
+    if (hastaName) forms.push(`La Senda de ${hastaName}`, `La Vereda de ${hastaName}`);
+    return pick(rng, forms);
+  },
+
   parajeName(rng, type) {
     const [bases, epithets, overrides] = PARAJE_PARTS[type];
     const base = pick(rng, bases);

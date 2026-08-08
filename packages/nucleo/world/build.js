@@ -2,11 +2,12 @@
 // Tubería canónica del generador: la comparten la app y las herramientas
 // headless, y es la única. Misma tubería, mismos mundos.
 
-import { parseGeo } from './osm.js';
+import { parseGeo, parseStreets } from './osm.js';
 import { construyePool } from './anclajes.js';
 import { buildSeaMask, computeDisplayRadius } from './seamask.js';
 import { generateSettlements, countsForRadius, SERVICES } from './settlements.js';
-import { buildRoutes, linkParajes, pegarAViario } from './routes.js';
+import { buildRoutes, linkParajes, tramosSupuestos, validaTramos } from './routes.js';
+import { construyeGrafo, pegarAViario, validaGrafo } from './grafo.js';
 import { generateParajes, parajeCountForRadius } from './parajes.js';
 import { TRAMO_DE_REFERENCIA_M, techoDeParajes, vocabularioDeEscenas } from './cupos.js';
 import { sueloDeVocabulario } from './escenas.js';
@@ -16,6 +17,28 @@ import { makeRng } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 
 const ORDEN_DE_NUCLEOS = ['ciudad', 'pueblo', 'aldea', 'granja'];
+
+/**
+ * Las vías con las que se construye el grafo: las carreteras del terreno más el
+ * callejero, en el mismo saco y sin repetir.
+ *
+ * Las dos consultas se solapan a propósito —`unclassified` y `track` salen en las
+ * dos—, así que un way puede llegar dos veces; se descarta por su clave estable de
+ * OSM y no por su geometría. El orden es el de las dos colecciones, que ya salen
+ * ordenadas por esa misma clave desde el parseo.
+ */
+function viasDelGrafo(geo) {
+  const vistas = new Set();
+  const out = [];
+  for (const via of [...geo.roads, ...(geo.callejero ?? [])]) {
+    if (via.osmId) {
+      if (vistas.has(via.osmId)) continue;
+      vistas.add(via.osmId);
+    }
+    out.push(via);
+  }
+  return out;
+}
 
 /**
  * Cuántos anclajes va a pedir este mundo, **leyendo** las declaraciones de las
@@ -76,6 +99,10 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   let data = await fetchData(lat, lon, rBase);
   await onStatus('terrain');
   let geo = parseGeo(data.geoJson, lat, lon);
+  // El callejero es **opcional** y su ausencia es un caso normal: quien no lo
+  // inyecta genera el mundo igual, solo que el grafo se queda con las carreteras.
+  // Cuando llega, es la fuente principal de los huecos cortos que hay que coser.
+  geo.callejero = data.callejeroJson ? parseStreets(data.callejeroJson, lat, lon) : [];
 
   // Zona costera: consulta ampliada + máscara tierra/mar + radio dinámico,
   // para que el borde del mapa no corte bahías ni rías por la mitad.
@@ -89,6 +116,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     await onStatus('coast');
     data = await fetchData(lat, lon, rFetch);
     geo = parseGeo(data.geoJson, lat, lon);
+    geo.callejero = data.callejeroJson ? parseStreets(data.callejeroJson, lat, lon) : [];
     await onStatus('mask');
     seaMask = buildSeaMask(geo.coastlines, rFetch, Math.max(40, Math.min(200, rFetch / 140)));
     radius = computeDisplayRadius(seaMask, {
@@ -133,10 +161,17 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   await onStatus('settlements');
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, seaMask, names, indiceNombres, pool);
   await onStatus('routes');
+  // El grafo viario, **una sola vez**: lo comparten el pegado de puntos al viario,
+  // el trazado de calzadas y el enlace de parajes. Construirlo dentro de cada fase
+  // —como hacía el prototipo, tres veces sobre el mismo callejero— son tres
+  // cosidos y tres oportunidades de divergir, y es además la fase más cara del
+  // generador. El callejero entra aquí con las carreteras: es donde están los
+  // huecos cortos que hay que coser antes de trazar.
+  const grafo = validaGrafo(construyeGrafo(viasDelGrafo(geo)));
   // pegar al viario ANTES de trazar: si un núcleo no cuelga de la red principal, el
   // trazado no tendría más remedio que unirlo con una recta por la que no se puede andar
-  const movidos = pegarAViario(settlements, geo.roads);
-  const routes = buildRoutes(settlements, geo.roads, seed, names, indiceNombres);
+  const movidos = pegarAViario(settlements, grafo);
+  const routes = buildRoutes(settlements, grafo, seed, names, indiceNombres);
   await onStatus('parajes');
   // Dónde se anota que una fase tuvo que saltarse los topes de diversidad. Lo
   // declara el mundo y no el pool: desde SPEC-005-iter-1 el pool no aplica topes,
@@ -152,8 +187,12 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   });
   // los parajes se enganchan a la red DESPUÉS de existir: hasta aquí no se sabe dónde
   // están, y algunos nacen precisamente de los cruces de las calzadas
-  movidos.push(...pegarAViario(parajes.filter((p) => p.origin !== 'grafo'), geo.roads));
-  routes.push(...linkParajes(parajes, routes, settlements, geo.roads));
+  movidos.push(...pegarAViario(parajes.filter((p) => p.origin !== 'grafo'), grafo));
+  routes.push(...linkParajes(parajes, routes, settlements, grafo, seed, names, indiceNombres));
+  // Ninguna capa aguas abajo puede perder la marca en silencio, y esto es lo que lo
+  // hace comprobable: un tramo sin marca es un error de construcción, no un dato
+  // que falte.
+  validaTramos(routes);
 
   const world = {
     seed,
@@ -167,6 +206,13 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     routes,
     parajes,
     movidos, // núcleos y parajes desplazados hasta el viario, para poder auditarlo
+    // El informe del grafo: cuántos nodos, cuántas componentes quedan, cuántas
+    // aristas se cosieron y cuál es la separación mínima que quedó sin coser. Lo
+    // último es lo que distingue un dato malo de una separación de verdad.
+    grafo: grafo.informe,
+    // Y la lista de tramos que son suposición nuestra, para que el filtro y la
+    // propagación de rumores no tengan que recorrer el grafo para saberlo.
+    suposiciones: tramosSupuestos(routes),
     // El pool, ya con lo que cada fase consumió: cuántos anclajes se admitieron, qué
     // se descartó y por qué, y si la celda se generó sin relleno de Places. Va como
     // dato plano y se calcula al final a propósito.

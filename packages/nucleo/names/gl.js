@@ -92,6 +92,22 @@ export const gl = {
     return pick(rng, forms);
   },
 
+  /**
+   * El nombre de un ramal: a senda que leva a un paraxe. Misma regla que en `es`,
+   * y por el mismo motivo — «A Escaleira Vella» de la pantalla del desvío es esto y
+   * no una calzada del reino—: sin `rng` devuelve la forma sobre `hastaName`, que
+   * es la caída garantizada de la unicidad, y `rasgo` sesga sin determinar.
+   */
+  ramalName(rng, dirWord, hastaName, rasgo) {
+    if (!rng) return `A Senda de ${hastaName}`;
+    const forms = [`A Senda ${dirWord}`, `A Corredoira ${dirWord}`, `O Carreiro ${dirWord}`, `A Congostra ${dirWord}`];
+    if (rasgo === 'escalones') forms.push(`A Escaleira ${dirWord}`, `Os Chanzos ${dirWord}`);
+    if (rasgo === 'tierra') forms.push(`A Corredoira de Terra ${dirWord}`, `O Camiño de Carro ${dirWord}`);
+    if (rasgo === 'estrecho') forms.push(`A Congostra Estreita ${dirWord}`, `O Paso Angosto ${dirWord}`);
+    if (hastaName) forms.push(`A Senda de ${hastaName}`, `O Carreiro de ${hastaName}`);
+    return pick(rng, forms);
+  },
+
   parajeName(rng, type) {
     const [bases, epithets, overrides] = PARAJE_PARTS[type];
     const base = pick(rng, bases);
