@@ -42,7 +42,7 @@ import {
   interpretaMetros,
   validaAptitud,
 } from '../../packages/nucleo/world/aptitud.js';
-import { SUPOSICIONES, aristaEntre, construyeGrafo, validaGrafo } from '../../packages/nucleo/world/grafo.js';
+import { SUPOSICIONES, aristaEntre, construyeGrafo, tramosDificilesSinNombre, validaGrafo } from '../../packages/nucleo/world/grafo.js';
 import { parseBordillos, parseStreets } from '../../packages/nucleo/world/osm.js';
 import {
   MOTIVOS_DE_FALTA,
@@ -730,10 +730,23 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
     assert.deepEqual(urbano.grafo.aptitud.bordillos, { apto: 1, noApto: 0, noSeSabe: 14733 });
   });
 
-  test('Un tramo difícil sin nombre propio hace fallar la entrega nombrando el tramo', async () => {
-    // Es lo que la spec pide, y no una limitación de la prueba: declarar «un tramo
-    // del camino» incumpliría en silencio el escenario del nombre propio. La
-    // solución de verdad —nombrar todo tramo difícil al generar— es de SPEC-007.
+  test('Todo tramo difícil se declara con nombre propio, y un grafo sin nombrar hace fallar la entrega', async () => {
+    // **La deuda de §6i-a está cerrada.** Este caso se llamaba «Un tramo difícil sin
+    // nombre propio hace fallar la entrega nombrando el tramo» y medía cuántos lazos
+    // reales no se podían entregar porque el grafo no sabía nombrar el tramo que
+    // rodeaban: eran 4 de 15, y era la única regresión esperada del repo, con la
+    // frase escrita de que el día que se nombrase todo tramo difícil este caso se
+    // pondría rojo y habría que actualizarlo. Ese día ha llegado: SPEC-017 nombra
+    // toda vía anónima con algún tramo difícil **al construir el grafo**, que es
+    // donde SPEC-007 dejó el dueño, y sobre dato real ya no falla ninguno.
+    //
+    // Lo que el caso afirma ahora es la propiedad, no la deuda, y son dos mitades.
+    // La de abajo, sobre los cuatro mundos congelados: **cero** lazos sin entregar
+    // por falta de nombre, y ni un solo tramo difícil anónimo en ningún grafo. La de
+    // arriba, sobre un grafo construido a mano sin pasar por el nombrador: la
+    // entrega sigue fallando **nombrando el tramo**, porque declarar «un tramo del
+    // camino» incumpliría en silencio el escenario del nombre propio. Sin esa
+    // mitad, la de abajo sería un cero que no demuestra nada.
     const grafo = construyeGrafo([
       via([1, 2], [[0, 0], [300, 0]], { filtrables: ESCALERA }), // sin name, como nacen los ramales
       via([1, 11, 2], [[0, 0], [150, 50], [300, 0]], { name: 'Rúa do Medio', filtrables: ASFALTO }),
@@ -744,43 +757,18 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
       'un tramo difícil sin nombre se está declarando a medias en vez de hacer fallar la entrega',
     );
 
-    // Y sobre dato real, con número: de los 15 lazos que castean en los cuatro
-    // mundos congelados, 3 no se pueden entregar con los cuatro criterios porque
-    // atraviesan o rodean un tramo difícil que el grafo no sabe nombrar.
+    // Y sobre dato real, con número. La trayectoria de la deuda, para que se lea
+    // entera: 15/3 medido con SPEC-008 → 15/4 con SPEC-010, que al medir los trechos
+    // sobre el grafo movió el reparto y con él qué lazos tropezaban → **84/0** con
+    // SPEC-017, que nombra todo tramo difícil al generar. El denominador sube de 15 a
+    // 84 porque el catálogo pasa de 6 a 30 plantillas: hay muchos más lazos que
+    // entregar y ninguno se queda sin nombre, que es más fuerte que el cero de antes.
     //
-    // `suelo-250m` baja de 3 lazos a 2 con SPEC-009-iter-1, y no es una regresión
-    // de esta capa: al cuantizar los metros, un candidato a cruce de ese mundo
-    // queda a 139,8 m del elegido y la separación mínima son 150, así que una
-    // plantilla deja de castear. El orquestador lo dictaminó y lo aceptó en
-    // `pipeline/decisiones-orquestador.md` §6k, a cambio de que el documento del
-    // mundo denso quepa en su presupuesto.
-    //
-    // El `fallan: 1` de urbano-denso que este caso esperaba era el último valor
-    // medido **antes** de la cuantización, y no se pudo reconfirmar mientras sus
-    // seis lazos reventaban con el ciclo de «Una arista de peso cero no deja el
-    // trazado dando vueltas». Arreglado ese defecto, se remide: urbano-denso
-    // entrega **sus seis lazos**, y el agregado pasa de 15/4 a **15/3**. Barrio
-    // 1/0, costero 6/3 y suelo-250m 2/0 quedan confirmados sin cambio.
-    //
-    // Lo que eso significa, y conviene no leerlo de más: la deuda que SPEC-008
-    // dejó anotada —tramos difíciles sin nombre, que se cierra nombrándolos al
-    // generar y es de SPEC-007— **se ha reducido, no ha desaparecido**. Costero
-    // sigue perdiendo 3 de sus 6 lazos por lo mismo. La regresión esperada del
-    // repo sigue en pie: el día que SPEC-007 nombre todo tramo difícil, este caso
-    // se pondrá rojo y habrá que actualizarlo.
-    // Remedido con SPEC-010, que mide los trechos **sobre el grafo** en lugar de en
-    // línea recta: el reparto elige otros lugares y por tanto cambia qué lazos
-    // tropiezan con un tramo difícil sin nombre. `barrio-tres-calles` pasa de 1/0 a
-    // **1/1** —su único lazo, `ronda-del-vigía`, ahora sale del pueblo por un tramo
-    // que el grafo no sabe nombrar— y el agregado vuelve de 15/3 a **15/4**.
-    // Costero 6/3, urbano-denso 6/0 y suelo-250m 2/0 quedan confirmados sin cambio.
-    //
-    // Léase con cuidado, porque no dice lo que parece: la deuda **no ha crecido**,
-    // se ha movido. Es la misma de siempre —tramos difíciles sin nombre, que se
-    // cierra nombrándolos al generar y es de SPEC-007— y sigue siendo la única
-    // regresión esperada del repo: el día que SPEC-007 nombre todo tramo difícil,
-    // este caso se pondrá rojo y habrá que actualizarlo.
-    const medido = { costero: { lazos: 6, fallan: 3 }, 'urbano-denso': { lazos: 6, fallan: 0 }, 'barrio-tres-calles': { lazos: 1, fallan: 1 }, 'suelo-250m': { lazos: 2, fallan: 0 } };
+    // El suelo del catálogo es umbral y el de los fallos es igualdad, y la asimetría
+    // es deliberada: cuántos lazos castea cada mundo puede mejorar y no debe poner
+    // rojo nada, pero **un solo** lazo que vuelva a no entregarse por falta de nombre
+    // es la deuda reabriéndose, y eso tiene que verse el mismo día.
+    const medido = { costero: { lazos: 29, fallan: 0 }, 'urbano-denso': { lazos: 29, fallan: 0 }, 'barrio-tres-calles': { lazos: 9, fallan: 0 }, 'suelo-250m': { lazos: 17, fallan: 0 } };
     let lazos = 0, fallan = 0;
     for (const nombre of LOS_CUATRO) {
       const w = await generaMundo(nombre, semillaDe(nombre, '1'));
@@ -794,10 +782,23 @@ describe('Lo que este filtro todavía no puede afirmar', () => {
           sinNombre++;
         }
       }
-      assert.deepEqual({ lazos: candidatas.length, fallan: sinNombre }, medido[nombre], `${nombre}: el reparto medido de lazos entregables ha cambiado`);
+      assert.equal(sinNombre, 0, `${nombre}: ${sinNombre} lazo(s) no se pueden entregar por falta de nombre, y la deuda de §6i-a estaba cerrada`);
+      assert.ok(
+        candidatas.length >= medido[nombre].lazos,
+        `${nombre}: castea ${candidatas.length} lazos y su suelo medido son ${medido[nombre].lazos}`,
+      );
+      // Y la raíz, no solo el síntoma: no queda ni un tramo difícil anónimo en el
+      // grafo. Sin esto, el cero de arriba podría venir de que el reparto esquiva
+      // por casualidad los tramos que siguen sin nombre.
+      assert.deepEqual(
+        tramosDificilesSinNombre(w.viario),
+        [],
+        `${nombre}: el grafo trae tramos difíciles sin nombre propio, y SPEC-017 los nombra a todos al generar`,
+      );
       lazos += candidatas.length;
       fallan += sinNombre;
     }
-    assert.deepEqual({ lazos, fallan }, { lazos: 15, fallan: 4 }, 'el número de lazos que no se pueden entregar por falta de nombre ha cambiado');
+    assert.equal(fallan, 0, 'ha vuelto a haber lazos que no se pueden entregar por falta de nombre: la deuda de §6i-a se ha reabierto');
+    assert.ok(lazos >= 84, `solo se han entregado ${lazos} lazos sobre los cuatro mundos y el suelo medido son 84: el caso está mirando muy poco`);
   });
 });

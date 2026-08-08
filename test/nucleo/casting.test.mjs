@@ -5,10 +5,17 @@
 // El porte de SPEC-002 no cambió ni una decisión de casting: lo que se afirmaba
 // allí es que seguía siendo determinista, y ese caso sigue vivo abajo, ampliado.
 //
+// SPEC-017 · El catálogo pasa de 6 a 30 plantillas, así que todas las cifras de
+//            salud de este fichero se remiden: no se ablanda ninguna, se reexpresa
+//            en la escala nueva (`pipeline/decisiones-orquestador.md` §6s). Y se
+//            remiden **dos veces**, porque el reequilibrio de plantillas que exige
+//            `personaje.md` §3 —diez esqueletos por oficio hasta en un barrio de
+//            tres calles— volvió a moverlas: 172 → 210 de 240.
+//
 // Lo que SPEC-010 añade se mide con números y no con adjetivos, porque el casting
 // es lo único de este repo que ya tiene un indicador de salud: sobre los ocho
-// extractos de referencia castean **30 lazos de 48**, todos cierran, ninguno de sus
-// trechos pasa de un tramo **medido sobre el grafo**, y los 18 que no castean
+// extractos de referencia castean **210 lazos de 240**, todos cierran, ninguno de
+// sus trechos pasa de un tramo **medido sobre el grafo**, y los 30 que no castean
 // reparten su motivo en un histograma que se cuenta sin parsear ni una frase.
 //
 // Los casos con nombre de escenario son los de docs/testing.md, literales. Cuatro
@@ -108,6 +115,21 @@ function codigoSinComentarios(ruta) {
   return fuente(ruta).replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
 }
 
+/**
+ * Los nombres que llevan las aristas del grafo viario, sin repetir.
+ *
+ * Son los de las vías anónimas de OSM que traen algún tramo difícil y que SPEC-017
+ * nombra al generar: no aparecen en `routes` ni en el callejero, y son la cuarta
+ * fuente de la que el guiado puede sacar legítimamente una cadena.
+ */
+function nombresDeLasAristas(grafo) {
+  const out = new Set();
+  for (const id of grafo?.nodeIds ?? []) {
+    for (const a of grafo.adj.get(id) ?? []) if (a.nombre) out.add(a.nombre);
+  }
+  return out;
+}
+
 /** Todo par clave/valor de un dato, a cualquier profundidad. */
 function recorre(valor, visita, ruta = '') {
   if (Array.isArray(valor)) valor.forEach((v, i) => recorre(v, visita, `${ruta}[${i}]`));
@@ -176,16 +198,24 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
   });
 
   test('Una plantilla sin candidatos no se ofrece', async () => {
-    // El mundo del escenario: `suelo-250m` no tiene ni un paraje, así que ninguno
-    // cubre la escena de guarida que pide `entrega-sospechosa`.
+    // El mundo del escenario: `suelo-250m` tiene un único paraje y no cubre la
+    // escena de guarida, así que una plantilla que exija guarida se queda sin ni un
+    // candidato.
+    //
+    // El ejemplar es `la-guarida-de-nadie` y no `entrega-sospechosa` como hasta
+    // SPEC-017: el reequilibrio del catálogo le dio a `riesgo` una escena
+    // alternativa (`['guarida', 'emboscada']`), y el cruce del mundo mínimo cubre la
+    // emboscada. Aquello dejó de ser un rol sin candidatos, que es lo único que este
+    // caso mide; `boca` sí pide guarida y nada más.
     const mundo = await mundoDe('suelo-250m', '1');
     assert.deepEqual(
       mundo.parajes.filter((p) => (p.scenes.guarida ?? 0) > 0).map((p) => p.name),
       [],
       'el mundo mínimo ha empezado a tener parajes con escena de guarida: el escenario ya no mide lo que dice',
     );
-    const guarida = TEMPLATES.find((t) => t.id === 'entrega-sospechosa');
-    assert.deepEqual(candidatosDeRol(mundo, guarida.roles.riesgo), [], 'hay candidatos para la guarida: el caso no comprueba nada');
+    const guarida = TEMPLATES.find((t) => t.id === 'la-guarida-de-nadie');
+    assert.deepEqual(guarida.roles.boca, { tipo: 'paraje', escena: 'guarida' }, 'el rol de guarida ha ganado una escena alternativa: el ejemplar ya no sirve para este caso');
+    assert.deepEqual(candidatosDeRol(mundo, guarida.roles.boca), [], 'hay candidatos para la guarida: el caso no comprueba nada');
 
     const c = castTemplate(mundo, guarida);
     assert.equal(c.ok, false, 'una plantilla sin ni un candidato para uno de sus roles se ha ofrecido igual');
@@ -193,8 +223,8 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
     // Y el motivo queda explicado: clave del catálogo, el rol que no se pudo
     // resolver y el requisito que ese rol pedía, los tres como dato.
     assert.equal(c.motivo.clave, MOTIVOS_DE_CASTING.SIN_CANDIDATOS);
-    assert.deepEqual([...c.motivo.roles], ['riesgo'], 'el motivo no nombra el rol que no se pudo resolver');
-    assert.deepEqual(c.motivo.requisito, requisitoDeRol(guarida.roles.riesgo), 'el motivo no lleva dentro el requisito que el rol pedía');
+    assert.deepEqual([...c.motivo.roles], ['boca'], 'el motivo no nombra el rol que no se pudo resolver');
+    assert.deepEqual(c.motivo.requisito, requisitoDeRol(guarida.roles.boca), 'el motivo no lleva dentro el requisito que el rol pedía');
     assert.deepEqual(c.motivo.requisito.escenas, ['guarida']);
 
     // El catálogo entero sobre el mundo mínimo: una entrada por plantilla, castee o
@@ -292,9 +322,13 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
         lazos += 1;
       }
     }
-    // Sin excepciones por tamaño y con número: son los 30 lazos que castean sobre
-    // los ocho extractos de referencia, el suelo que dictaminó §6m.
-    assert.equal(lazos, 30, `han cerrado ${lazos} lazos y sobre los ocho extractos castean 30: el indicador de salud del casting se ha movido`);
+    // Sin excepciones por tamaño y con número: son los 210 lazos que castean sobre
+    // los ocho extractos de referencia con el catálogo de treinta reequilibrado
+    // (§6s, 172 → 210). Es igualdad y no umbral a propósito, al revés que el suelo
+    // agregado de `reparto.test.mjs`: aquí lo que se afirma no es cuántos lazos hay
+    // sino que **todos** los que hay se han remedido y cierran, y un recuento que se
+    // mueve sin que nadie lo mire deja lazos sin comprobar.
+    assert.equal(lazos, 210, `han cerrado ${lazos} lazos y sobre los ocho extractos castean 210: el indicador de salud del casting se ha movido`);
   });
 
   test('El presupuesto de beats sale del tamaño declarado', async () => {
@@ -336,8 +370,8 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
         lazos += 1;
       }
     }
-    assert.equal(lazos, 30, `${lazos} lazos casteados y sobre los ocho extractos son 30`);
-    assert.ok(trechos >= 60, `solo se han medido ${trechos} trechos: el tope apenas se está verificando`);
+    assert.equal(lazos, 210, `${lazos} lazos casteados y sobre los ocho extractos son 210`);
+    assert.ok(trechos >= 700, `solo se han medido ${trechos} trechos: el tope apenas se está verificando`);
 
     // El tope se expresa en **tramos**, y el casting no tiene ni un metro ni un
     // ritmo escrito a mano: el prototipo codificaba MIN_LEG, MAX_LEG, DETOUR = 1,35
@@ -399,7 +433,7 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
         aventuras += 1;
       }
     }
-    assert.equal(aventuras, 30, `${aventuras} aventuras casteadas y sobre los ocho extractos son 30`);
+    assert.equal(aventuras, 210, `${aventuras} aventuras casteadas y sobre los ocho extractos son 210`);
     assert.ok(conFranja > 0, 'ninguna aventura casteada lleva franja: la parte que más se podría parecer a un tiempo límite no se está mirando');
   });
 });
@@ -443,11 +477,17 @@ describe('El motivo del fallo es un dato, no una frase', () => {
 
     // El histograma, con número. Es la medida de salud del generador que este
     // proyecto sí lleva, y sale de contar claves.
-    assert.equal(ok, 30, `castean ${ok} de 48 y el suelo dictaminado en §6m es 30`);
-    assert.equal(ok + fallos, 48, 'los ocho extractos por seis plantillas son 48 entradas, castee o no');
+    assert.equal(ok, 210, `castean ${ok} de 240 y el suelo remedido en §6s es 210`);
+    assert.equal(ok + fallos, 240, 'los ocho extractos por treinta plantillas son 240 entradas, castee o no');
+    // El histograma en la escala nueva, y se conserva como igualdad porque es lo que
+    // dice **de qué** se muere el casting. Sigue diciendo lo mismo que decía con seis
+    // plantillas —el cuello de botella es el mundo pequeño y no el catálogo: 24 de
+    // los 30 fallos son «sin candidatos»—, solo que el reequilibrio de plantillas se
+    // llevó por delante 40 de esos fallos (64 → 24) y dejó al descubierto cinco
+    // trechos que no caben, donde antes había uno.
     assert.deepEqual(
       Object.fromEntries([...histograma].sort()),
-      { 'lazo-que-no-cierra': 1, 'sin-candidatos': 17 },
+      { 'lazo-que-no-cierra': 1, 'sin-candidatos': 24, 'trecho-fuera-del-tope': 5 },
       'el histograma de motivos de fallo se ha movido',
     );
 
@@ -534,9 +574,14 @@ describe('El árbitro es el código y el narrador es el LLM', () => {
     // dejaría de ser idéntica a su origen.
     const mundo = await mundoDe('costero', '1');
     // Todo nombre que el mundo lleva encima: los de fantasía que produjo su paquete
-    // de idioma —núcleos, servicios, parajes, calzadas y sus ramales— y los reales
+    // de idioma —núcleos, servicios, parajes, calzadas y sus ramales—, los reales
     // del callejero de OSM, que son los que el guiado nombra al recorrer una calle
-    // que existe. Ningún otro sitio de donde pueda salir una cadena.
+    // que existe, y **los de las aristas del grafo**. Esta última fuente entra con
+    // SPEC-017: cerrada la deuda de §6i-a, toda vía anónima con algún tramo difícil
+    // se nombra ya al construir el grafo, y ese nombre vive solo en `mundo.viario`
+    // —no es una calzada ni una calle de OSM—, así que sin contarlo el guiado
+    // parecía estar redactando una cadena que en realidad venía del mundo. Ningún
+    // otro sitio de donde pueda salir una cadena.
     const nombresDelMundo = new Set([
       ...mundo.settlements.map((s) => s.name),
       ...mundo.settlements.flatMap((s) => s.services).map((v) => v.name),
@@ -545,6 +590,7 @@ describe('El árbitro es el código y el narrador es el LLM', () => {
       ...mundo.routes.flatMap((r) => (r.tramos ?? []).map((t) => t.nombre)),
       ...(mundo.geo.roads ?? []).map((c) => c.name),
       ...(mundo.geo.callejero ?? []).map((c) => c.name),
+      ...nombresDeLasAristas(mundo.viario),
     ].filter((n) => n != null));
     let textos = 0;
     for (const c of mundo.casting.filter((x) => x.ok)) {
@@ -937,15 +983,20 @@ describe('Los topes del presupuesto se expresan en tramos', () => {
 describe('Los roles humanos no hacen fallar el casting', () => {
   test('Un rol humano lo produce el sitio donde trabaja y no consume anclaje propio', async () => {
     const mundo = await mundoDe('costero', '1');
+    // Los tres roles de sitio se escriben aquí y no se heredan del catálogo: lo que
+    // este caso compara es la **misma** plantilla con y sin gente, y una plantilla
+    // del catálogo cuyos roles cambien —como le pasó a `entrega-sospechosa` con el
+    // reequilibrio de SPEC-017— convertiría la comparación en dos repartos distintos
+    // que no tienen por qué coincidir.
+    const lugares = {
+      origen: { tipo: 'servicio', kind: 'taberna' },
+      riesgo: { tipo: 'paraje', escena: 'guarida' },
+      destino: { tipo: 'servicio', kind: 'armeria' },
+    };
     const conGente = {
       ...copiaDe('entrega-sospechosa'),
       orden: ['origen', 'riesgo', 'destino', 'tabernero'],
-      roles: {
-        origen: { tipo: 'servicio', kind: 'taberna' },
-        riesgo: { tipo: 'paraje', escena: 'guarida' },
-        destino: { tipo: 'servicio', kind: 'armeria' },
-        tabernero: { tipo: 'humano', en: 'origen', puesto: 'tabernero' },
-      },
+      roles: { ...lugares, tabernero: { tipo: 'humano', en: 'origen', puesto: 'tabernero' } },
     };
     // El mundo no tiene ni una persona generada: la capa de NPCs es de otra fila.
     assert.equal(mundo.npcs, undefined, 'el mundo ya trae personas: el caso deja de medir lo que dice');
@@ -962,7 +1013,8 @@ describe('Los roles humanos no hacen fallar el casting', () => {
 
     // Y añadir el rol humano no cambia nada del reparto de los lugares: si lo
     // estrechara, una plantilla con gente castearía menos que la misma sin ella.
-    const sinGente = castTemplate(mundo, copiaDe('entrega-sospechosa'));
+    const sinGente = castTemplate(mundo, { ...conGente, orden: ['origen', 'riesgo', 'destino'], roles: lugares });
+    assert.equal(sinGente.ok, true, `la misma plantilla sin el rol humano no castea: ${sinGente.motivo?.clave}`);
     for (const rid of ['origen', 'riesgo', 'destino']) {
       assert.deepEqual(c.asignacion[rid], sinGente.asignacion[rid], `el rol humano ha movido el reparto del rol "${rid}"`);
     }

@@ -3147,9 +3147,9 @@
       "criterio": "Dado los ocho extractos de referencia regenerados tras esta iteración, cuando se suman las plantillas que castean en todos ellos, entonces el total es al menos 21 de 48, que es el valor medido en `cec7d91`, el commit anterior a esta fila.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/reparto.test.mjs",
-      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 30 de 48",
+      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 210 de 240",
       "hueco_de_bateria": true,
-      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral vigente es 30/48, dictaminado en `pipeline/decisiones-orquestador.md` §6m: SPEC-010 mide los trechos sobre el grafo cosido y filtrado en lugar de en línea recta con un factor de rodeo, y `barrio-tres-calles#2 · ronda-del-vigía` deja de castear porque su único pueblo está a 1688 m de grafo del centro aunque en línea recta sean 126. No es una regresión: antes ese lazo se ofrecía mintiendo. La trayectoria del umbral desde que se escribió el caso es 21 (cec7d91) → 24 → 30 → 32 → 31 (§6k, la cuantización) → 30 (§6m, la medida sobre el grafo). Sigue escrito como umbral y no como igualdad, para que una mejora no ponga rojo el caso."
+      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral vigente es 210/240. La trayectoria completa desde que se escribió el caso, con el catálogo de seis plantillas —48 casillas—, es 21 (cec7d91) → 24 → 30 → 32 → 31 (§6k, la cuantización) → 30 (§6m, los trechos medidos sobre el grafo cosido y filtrado en lugar de en línea recta con un factor de rodeo). SPEC-017 sube el catálogo a treinta, así que el denominador pasa a 240 y el suelo se remide entero: 172 (§6s) → 210, tras el reequilibrio de plantillas que exige `personaje.md` §3. Los dos tramos de la trayectoria no son comparables entre sí —30/48 es el 62,5 % y 210/240 el 87,5 %—: lo que se conserva es el instrumento, no la cifra. Sigue escrito como umbral y no como igualdad, para que una mejora no ponga rojo el caso; subirlo cuando el generador mejore es una decisión explícita, y esta subida lo es."
     },
     {
       "spec": "SPEC-005-iter-1",
@@ -4523,9 +4523,9 @@
       "criterio": "Dado un tramo difícil sin nombre propio en el grafo, cuando se va a declarar, entonces la entrega falla nombrando el tramo sin nombre, en vez de declarar un camino que no se puede nombrar.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/accesibilidad.test.mjs",
-      "caso": "Un tramo difícil sin nombre propio hace fallar la entrega nombrando el tramo",
+      "caso": "Todo tramo difícil se declara con nombre propio, y un grafo sin nombrar hace fallar la entrega",
       "hueco_de_bateria": true,
-      "nota": "Es el comportamiento que la spec exige, no un defecto de la prueba. Medido sobre dato real: de los 16 lazos que castean en los cuatro mundos congelados, 4 no se pueden entregar con los cuatro criterios (costero 3 de 6, urbano-denso 1 de 6). La solución de verdad —nombrar todo tramo difícil al generar— es de SPEC-007 y la propia spec lo anota en su hueco 5."
+      "nota": "El caso se renombró en SPEC-017 al cerrarse la deuda de §6i-a: toda vía anónima con algún tramo difícil se nombra ya al construir el grafo, así que sobre los cuatro mundos congelados ya no falla ninguna entrega —eran 4 de 15— y el grafo no deja ni un tramo difícil sin nombre. Lo que la spec exige sigue afirmándose sobre un grafo construido a mano sin pasar por el nombrador: sin esa mitad, el cero de la otra no demostraría nada."
     },
     {
       "spec": "SPEC-008",
@@ -11421,6 +11421,727 @@
       "caso": "Ningún fichero de packages/ contiene un byte NUL",
       "hueco_de_bateria": true,
       "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. Cierra el defecto (d): los NUL dentro de literales de plantilla de partida/rumores.js y partida/puestos.js hacían que file y grep tratasen los módulos como binarios, y ninguna prueba de comportamiento se pone roja por eso. Se comprueba el paquete entero y no los dos módulos donde apareció."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo entregado, cuando se cuenta, entonces tiene entre 24 y 30 plantillas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo trae entre 24 y 30 plantillas, con identificadores únicos y los tres tamaños",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se leen los identificadores de sus plantillas, entonces no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo trae entre 24 y 30 plantillas, con identificadores únicos y los tres tamaños",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se leen los tamaños declarados, entonces los tres tamaños de salida están representados y ninguno se queda sin ninguna plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo trae entre 24 y 30 plantillas, con identificadores únicos y los tres tamaños",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla del catálogo, cuando se cuentan sus beats, entonces están dentro del rango del tamaño que declara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo trae entre 24 y 30 plantillas, con identificadores únicos y los tres tamaños",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado las seis plantillas que venían del prototipo, cuando se leen sus textos en el catálogo entregado, entonces están reescritas en cómico-cálido y ninguna conserva el registro de cuento popular.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo trae entre 24 y 30 plantillas, con identificadores únicos y los tres tamaños",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma la mitad automatizable: que las seis conservan su identificador, que vive en partidas guardadas y en el informe. Que estén reescritas en cómico-cálido es @manual y va en la fila de revisión de cada plantilla, que el caso «Ningún texto del catálogo nombra el sitio real…» comprueba que exista."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se carga el módulo, entonces se comprueba a sí mismo entero y falla nombrando la plantilla y el campo, en vez de dejar el error para el primer casteo que la use.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla a la que le falta cualquiera de las declaraciones obligatorias —afinidad de oficio, rumor, desenlace, desenlace de repuesto o textos de fallback—, cuando se carga el catálogo, entonces falla nombrando la plantilla y la declaración que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla que declara un oficio que no está en el enumerado, cuando se carga el catálogo, entonces falla nombrando el oficio recibido y enumerando los válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla notable a la que le falta el signo o la semilla, cuando se carga el catálogo, entonces falla nombrando la plantilla y el campo que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla cuyo desenlace es notable, cuando se lee su mote candidato, entonces es la clave de un candidato declarado y nunca un texto redactado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier objeto que un desenlace entrega, cuando se lee, entonces trae su clase del enumerado cerrado y su procedencia estructurada con desenlace, plantilla y lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un efecto de relación cuyo rol no está entre los roles de la plantilla, cuando se carga el catálogo, entonces falla nombrando el rol huérfano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla con un texto vacío en cualquiera de sus campos obligatorios, cuando se carga el catálogo, entonces falla nombrando la plantilla y el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla con un identificador repetido, cuando se carga el catálogo, entonces falla nombrando el identificador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo por debajo de 24 plantillas o por encima de 30, cuando se carga, entonces falla nombrando el número que hay y el rango declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Una plantilla mal declarada hace fallar la carga nombrando la plantilla y el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se inspecciona, entonces no usa ninguna fuente de azar ni de tiempo del sistema: es datos y validación, y el azar es de quien castea.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo es datos y validación: ni azar, ni reloj, ni ningún módulo de mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el módulo del catálogo, cuando se inspecciona, entonces no importa el generador de parajes ni ningún módulo de mundo: el vocabulario sale de aquí hacia fuera y nunca al revés.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo es datos y validación: ni azar, ni reloj, ni ningún módulo de mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se recorre para castear, entonces el orden es el declarado en la lista y no el de ninguna estructura con orden de inserción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo es datos y validación: ni azar, ni reloj, ni ningún módulo de mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un oficio, cuando se filtra el catálogo por él, entonces se obtienen solo las plantillas que declaran afinidad con ese oficio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un oficio, cuando se filtra el catálogo por él, entonces existe al menos una plantilla del catálogo que no aparece nunca con ese oficio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el enumerado de oficios, cuando se lee, entonces es cerrado, tiene entre tres y cuatro entradas y cada una sale de un tipo de servicio que el mundo sabe generar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una clave de oficio, cuando se lee, entonces no nombra ningún género: la palabra con la que se dice la pone el paquete de idioma y concuerda con el género gramatical de la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las afinidades declaradas, entonces la media de oficios por plantilla está entre 1,5 y 2.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier oficio del enumerado, cuando se buscan sus plantillas exclusivas, entonces tiene al menos una que ningún otro oficio ve nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las exclusivas, entonces no pasan de un tercio del total, para que filtrar por oficio no deje a cada uno con su rincón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el filtro por oficio, cuando se inspecciona, entonces no castea nada: devuelve plantillas y quien las castea es SPEC-010.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado dos oficios distintos, cuando se filtra el catálogo con cada uno, entonces las dos listas conservan el orden declarado del catálogo y no dependen del oficio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un filtro con un oficio que no está en el enumerado, cuando se aplica, entonces falla nombrando el oficio recibido y enumerando los válidos, en lugar de devolver el catálogo entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un filtro sin oficio, cuando se aplica, entonces falla nombrando la dependencia que falta, en lugar de suponer uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo filtrado por cualquier oficio, cuando se lee, entonces nunca está vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla del catálogo, cuando se castea sobre la batería de mundos, entonces castea con lazo cerrado en al menos uno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra",
+      "nota": "Las treinta, una por una, y el precedente del repo es «tres pistas»: cuando una plantilla no cerraba, se corrigió la plantilla y no el test."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla casteada, cuando se leen su primer y su último beat, entonces los dos caen a menos de medio tramo del punto de partida, sin excepciones por tamaño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla del catálogo, cuando se lee su cadena de beats, entonces el primero y el último comparten rol o caen los dos en el mismo tipo de sitio del que se sale.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las plantillas que no declaran ningún rol de paraje, entonces son al menos un tercio del total.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo varía los roles que pide, que es lo que ataca el cuello de botella",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan los roles por tipo, entonces los cuatro tipos —servicio, núcleo, paraje y humano— están representados y ninguno se queda sin usar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo varía los roles que pide, que es lo que ataca el cuello de botella",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se agrupan las plantillas por la combinación de tipos de rol que piden, entonces ninguna combinación reúne más de un tercio del catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo varía los roles que pide, que es lo que ataca el cuello de botella",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier tipo de servicio que el mundo sabe generar, cuando se busca en el catálogo, entonces al menos una plantilla lo pide.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo varía los roles que pide, que es lo que ataca el cuello de botella",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las plantillas que piden más de dos roles de paraje, entonces no pasan de un cuarto del total.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El catálogo varía los roles que pide, que es lo que ataca el cuello de botella",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo y el mundo congelado `barrio-tres-calles`, cuando se castea filtrando por cada oficio, entonces cada oficio conserva al menos diez plantillas casteables.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada oficio conserva al menos diez plantillas casteables en un barrio de tres calles",
+      "hueco_de_bateria": true,
+      "nota": "ROJO, y a propósito. Es el hueco de diseño declarado en pipeline/decisiones-orquestador.md §6s: barrio-tres-calles no tiene ni un servicio y 20 de las 30 plantillas piden uno, así que cada oficio se queda en 3-5 casteables (#1: 5/3/5/4, #2: 4/3/3/3). El criterio va escrito con la exigencia real de personaje.md §3 y no se ablanda a lo medido: un criterio se rebaja cuando deja de mentir, no cuando incomoda (§6m). La corrección, si toca, es del diseño."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el resultado de castear el catálogo sobre la batería, cuando se agrega por oficio, entonces el recuento sale de las declaraciones y del catálogo cerrado de motivos, sin parsear ninguna frase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada oficio conserva al menos diez plantillas casteables en un barrio de tres calles",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un oficio y un mundo, cuando se listan sus plantillas no casteables, entonces cada una trae el motivo estructurado que SPEC-010 define, con su clave, su rol y su requisito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada oficio conserva al menos diez plantillas casteables en un barrio de tres calles",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier mundo de la batería y cualquier oficio, cuando se castea filtrando por él, entonces el resultado no es cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún oficio se queda a cero en ningún mundo de la batería",
+      "escenario": "Una plantilla sin candidatos no se ofrece",
+      "nota": "La spec lo declara así: «Una plantilla sin candidatos no se ofrece», que aquí se mide agregada por oficio. Es cosa distinta del suelo de diez, que es hueco de diseño y está rojo en el caso anterior."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado la medida de cobertura por oficio, cuando se pide, entonces la calcula una función del paquete y no el script que la imprime.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún oficio se queda a cero en ningún mundo de la batería",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo entregado, cuando se le pide el vocabulario de escenas de paraje, entonces devuelve las escenas que piden sus roles con el peso mínimo más exigente de cada una.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo entregado, cuando se compara su vocabulario con el de las seis plantillas portadas, entonces es un superconjunto: ampliar el catálogo nunca estrecha lo que el mundo tiene que saber decir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas",
+      "nota": "Cierra el hueco 8 que la propia spec declara: la batería comprobaba la aritmética del suelo, no que ampliar el catálogo no pudiera estrecharlo por descuido."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo entregado, cuando se deriva el suelo de parajes de una celda, entonces sube respecto al que daban las seis, sin tocar el código del generador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un rol del catálogo que declara escenas alternativas, cuando se construye el vocabulario, entonces cada alternativa cuenta como una escena distinta a cubrir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier escena que pida un rol de paraje del catálogo, cuando se busca en la taxonomía de tipos de paraje, entonces al menos un tipo la cubre con peso suficiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla que pide una escena que ningún tipo de paraje cubre, cuando se carga el catálogo, entonces falla nombrando la plantilla, el rol y la escena, en lugar de dejar que aparezca como hueco de taxonomía en cada celda generada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla, cuando se lee su declaración de rumor, entonces dice si su desenlace es notable, y la respuesta sale de la declaración y no se deduce del texto ni de la recompensa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "escenario": "El rumor solo aparece si el desenlace era notable"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla cuyo desenlace es notable, cuando se lee su declaración, entonces trae signo del enumerado cerrado y semilla con asunto, escala y detalle, todos como hechos estructurados y ninguno como prosa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "escenario": "El rumor solo aparece si el desenlace era notable"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las plantillas cuyo desenlace no es notable, entonces hay al menos dos: un mundo donde todo lo que haces se cuenta por los caminos es un mundo sin volumen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "escenario": "El rumor solo aparece si el desenlace era notable"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se leen sus motes candidatos, entonces ninguna clave la comparten dos plantillas con asuntos distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "escenario": "El mote nace del rumor y es por núcleo"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla, cuando se lee lo que su desenlace entrega, entonces declara el oro como un entero no negativo, y cero es una declaración legítima.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan los objetos de clase llave que entrega, entonces hay al menos uno por cada beat del catálogo que dispara con objeto, para que ninguna llave declarada no la entregue nadie.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier beat del catálogo que dispara con objeto, cuando se lee, entonces declara la vía alternativa que resuelve el mismo beat sin llevarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Cada desenlace declara su rumor, su mote, su oro y sus objetos",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla, cuando se leen sus efectos de relación, entonces cada uno nombra el rol de la cara afectada y trae su signo del enumerado cerrado de dos valores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los actos que rompen y los que reparan cuelgan de una decisión, nunca de no haber llegado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un efecto de relación que apunta a un rol que no es de un sitio con gente, cuando se carga el catálogo, entonces falla nombrando el rol y su tipo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los actos que rompen y los que reparan cuelgan de una decisión, nunca de no haber llegado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las plantillas que declaran algún acto feo, entonces hay al menos tres, y cada una lo declara sobre una decisión del beat y nunca sobre no haber llegado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los actos que rompen y los que reparan cuelgan de una decisión, nunca de no haber llegado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier acto feo declarado en el catálogo, cuando se busca la decisión que lo dispara, entonces es una decisión de la jugadora dentro de un beat, y no el resultado de plantarse, volverse o tardar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los actos que rompen y los que reparan cuelgan de una decisión, nunca de no haber llegado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se cuentan las plantillas que declaran algún acto reparador, entonces hay al menos tres, para que lo roto se pueda reparar con lo que hay escrito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los actos que rompen y los que reparan cuelgan de una decisión, nunca de no haber llegado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla que no declara ningún efecto de relación, cuando se termina su aventura, entonces no mueve ninguna relación, y eso no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los actos que rompen y los que reparan cuelgan de una decisión, nunca de no haber llegado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla, cuando se leen sus textos, entonces trae título, gancho y un texto por beat, y ninguno está vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier plantilla, cuando se leen sus desenlaces de repuesto, entonces trae dos: el de la aventura que acabó sin la jugadora y el de cerrar con lo que sí consiguió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 6 de la spec: la batería no afirma el desenlace de repuesto por el lado del catálogo. «El cierre en corto ocupa el sitio del desenlace» es @app y de la fila 36."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un desenlace de repuesto, cuando se lee, entonces no reprocha nada: ningún texto del catálogo comenta que la jugadora no fuese, no llegase o se volviese.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier texto del catálogo, cuando se mide, entonces cabe en el tope declarado de su clase, para que quepa en la pantalla que lo pinta sin recortarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo, cuando se comparan sus aperturas de gancho, entonces no hay dos plantillas que empiecen con la misma fórmula.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se pasan por la lista de fórmulas de masculino genérico evitable, entonces ninguno coincide.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa masculino genérico en fórmulas frecuentes",
+      "escenario": "No se usa masculino genérico en fórmulas frecuentes"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se busca un desdoblamiento del tipo «los vecinos y las vecinas», entonces no aparece ninguno: se reformula antes de desdoblar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa masculino genérico en fórmulas frecuentes",
+      "escenario": "No se usa masculino genérico en fórmulas frecuentes"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado la lista de fórmulas de masculino genérico, cuando se lee, entonces vive en el paquete de idioma y no dentro del catálogo, porque el mismo filtro lo usará después el texto generado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa masculino genérico en fórmulas frecuentes",
+      "escenario": "No se usa masculino genérico en fórmulas frecuentes"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se buscan terminaciones en `-e` o en `-x` usadas como marca de género, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa morfología inventada",
+      "escenario": "No se usa morfología inventada"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un texto del catálogo que se dirige a la jugadora con una forma que concuerda, cuando se lee, entonces la forma llega como una ranura de un catálogo cerrado y no como dos textos ni como una barra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa morfología inventada",
+      "escenario": "No se usa morfología inventada",
+      "nota": "Hueco 7 de la spec: nada en la batería afirma las ranuras de concordancia. Se cuelgan de «No se usa morfología inventada» porque son la forma que el proyecto usa en lugar de la morfología que prohíbe."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una ranura de concordancia, cuando se resuelve, entonces la resuelve el paquete de idioma contra el género gramatical de la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa morfología inventada",
+      "escenario": "No se usa morfología inventada"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una ranura de concordancia que el paquete de idioma no conoce, cuando se resuelve, entonces falla nombrando la ranura y el idioma, en lugar de dejar el marcador en el texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa morfología inventada",
+      "escenario": "No se usa morfología inventada"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un texto con ranuras y sin género gramatical inyectado, cuando se resuelve, entonces sale en femenino, que es el valor con el que llega la creación de personaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "No se usa morfología inventada",
+      "escenario": "No se usa morfología inventada"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se generan diez mundos distintos, entonces ningún texto se vuelve falso en ninguno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se busca una cifra de distancia, de tiempo de esfuerzo, de ritmo o de progreso, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se busca una cantidad de elementos del mundo —cuántos núcleos, cuántas calzadas, cuántos parajes—, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un texto del catálogo que nombra una cantidad de oro, cuando se lee, entonces la cantidad la pone el desenlace en tiempo de ejecución y no está escrita dentro del texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un texto del catálogo con una cifra escrita a mano que no es de oro, cuando se carga el catálogo, entonces falla nombrando la plantilla y el texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se busca el nombre de un anclaje real, una marca, una cadena o una categoría de OpenStreetMap, entonces no aparece ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto del catálogo nombra el sitio real ni una categoría de OpenStreetMap",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado todos los textos del catálogo, cuando se busca una referencia a un tipo de negocio contemporáneo por su nombre de hoy, entonces no aparece ninguna: el mundo se nombra en su propio registro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto del catálogo nombra el sitio real ni una categoría de OpenStreetMap",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado la revisión a mano del catálogo, cuando se termina, entonces queda anotada con una fila por plantilla, y una plantilla sin revisar no entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ningún texto del catálogo nombra el sitio real ni una categoría de OpenStreetMap",
+      "hueco_de_bateria": true,
+      "nota": "La mitad automatizable de RF-LANG-004. Si el humor se dirige al negocio o al barrio es @manual y vive en la fila de revisión de cada plantilla —escenarios «El chiste nunca es a costa del sitio real ni de quien lo regenta» y «El humor vive en cómo se cuenta, no en lo que pasa»—; aquí solo se comprueba que la fila exista y no esté vacía."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado una plantilla nueva añadida al final del catálogo, cuando se castea, entonces el reparto de todas las demás no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ampliar el catálogo no resiembra el reparto de las demás plantillas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado el catálogo entregado en distinto orden, cuando se castea, entonces cada plantilla obtiene el mismo reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ampliar el catálogo no resiembra el reparto de las demás plantillas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un mundo sembrado con `\"42.40,-8.81#1\"`, cuando se castea el catálogo dos veces, entonces las dos veces salen las mismas plantillas con el mismo reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ampliar el catálogo no resiembra el reparto de las demás plantillas",
+      "hueco_de_bateria": true,
+      "nota": "Se castea sobre los mundos congelados de la batería en vez de sobre esa semilla literal: el determinismo que la spec pide es el del catálogo, y la semilla del escenario es de un mundo que ningún fixture congela."
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier beat con disparador de franja, cuando se lee, entonces trae la variante de escena de llegar dentro de la franja, además del texto del beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado cualquier beat con disparador de objeto, cuando se lee, entonces trae el texto de la vía alternativa además del texto del beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Los textos de fallback y los dos desenlaces de repuesto están completos y no reprochan nada",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-017",
+      "criterio": "Dado un mundo ya generado, cuando se amplía el catálogo, entonces el documento de cada celda sigue idéntico byte a byte: lo generado no se resiembra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "Ampliar el catálogo no resiembra el reparto de las demás plantillas",
+      "hueco_de_bateria": true
     }
   ]
 }

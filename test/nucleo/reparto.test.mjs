@@ -48,6 +48,11 @@ import { isSea } from '../../packages/nucleo/world/seamask.js';
  * los extractos, que es justo el agujero por el que se coló el defecto. Subirla
  * cuando el generador mejore es una decisión explícita, no un efecto secundario.
  */
+// El `castea` de esta tabla está en la **escala de seis plantillas** y por eso ya
+// no muerde: con treinta, cualquier extracto lo supera sin esfuerzo. No se reescribe
+// —es la foto de `cec7d91` y su valor es histórico—, y quien vigila la escala nueva
+// por mundo es `SUELO_POR_MUNDO`, aquí abajo. Parajes y servicios siguen siendo suelo
+// vivo: son del generador y no del catálogo.
 const ANTES_DE_LA_FILA = {
   'barrio-tres-calles#1': { castea: 0, parajes: 2, servicios: 0 },
   // El único valor de esta tabla que se ha bajado, y por un veredicto explícito:
@@ -68,28 +73,56 @@ const ANTES_DE_LA_FILA = {
 };
 
 /**
- * El suelo agregado de casteabilidad **vigente**, que es el que dictaminó el
- * orquestador en `pipeline/decisiones-orquestador.md` §6m: 30 de 48.
+ * El suelo agregado de casteabilidad **vigente**: 210 de 240.
  *
- * Trayectoria completa, para leerla entera: 21 —lo medido en `cec7d91`— → 17
- * (regresión, corregida) → 24 → 30 → 32 → 31 (SPEC-009-iter-1, §6k: cuantizar los
- * metros al metro deja un candidato a cruce de `suelo-250m#1` a 139,8 m del
- * elegido con 150 de separación mínima) → **30** (SPEC-010, §6m: los trechos se
- * miden sobre el grafo cosido y filtrado y no en línea recta por un factor de
- * rodeo).
+ * Trayectoria completa, para leerla entera. Con el catálogo de **seis** plantillas
+ * —48 casillas— fue 21 (lo medido en `cec7d91`) → 17 (regresión, corregida) → 24 →
+ * 30 → 32 → 31 (SPEC-009-iter-1, §6k: cuantizar los metros al metro deja un
+ * candidato a cruce de `suelo-250m#1` a 139,8 m del elegido con 150 de separación
+ * mínima) → 30 (SPEC-010, §6m: los trechos se miden sobre el grafo cosido y
+ * filtrado y no en línea recta por un factor de rodeo). SPEC-017 sube el catálogo a
+ * **treinta**, así que el denominador pasa de 48 a 240 y el suelo se remide entero:
+ * 172 (§6s) → **210**, cuando el reequilibrio de plantillas que exige
+ * `personaje.md` §3 —diez esqueletos por oficio hasta en un barrio de tres calles—
+ * ensancha los roles de sitio de las que se ahogaban en los mundos pequeños.
  *
- * El último descenso no es una regresión y por eso se acepta: el lazo que se
- * pierde —`barrio-tres-calles#2 · ronda-del-vigía`— antes se ofrecía **mintiendo**,
- * con 1688 m de grafo presentados como 126 m de recta. Una casteabilidad más baja
- * y honesta vale más que una más alta que manda a andar trece veces lo dicho: el
- * indicador solo sirve si mide lo mismo que el juego.
+ * Los dos números no son comparables entre sí y no se pretende que lo sean: 30/48
+ * era el 62,5 % de un catálogo de seis y 210/240 es el 87,5 % de uno de treinta. Lo
+ * que se conserva es el instrumento —el mismo agregado sobre los mismos ocho
+ * extractos— y lo que cambia es lo que mide, que es la razón por la que se
+ * regeneraron los extractos: con treinta plantillas, la línea base de seis ya no
+ * describe el juego.
  *
  * Sigue escrito como umbral y no como cifra exacta, y a propósito: una igualdad
  * pondría rojo el caso cuando el generador mejore, que es lo contrario de lo que
- * este caso vigila. Subirlo cuando mejore es una decisión explícita.
+ * este caso vigila. Subirlo cuando mejore es una decisión explícita, y esta subida
+ * lo es: dejarlo en 172 con 210 medidos deja sin vigilar justo la mejora que la fila
+ * entregó.
  */
-const SUELO_AGREGADO = 30;
-const PLANTILLAS_POR_MUNDO = 6;
+const SUELO_AGREGADO = 210;
+const PLANTILLAS_POR_MUNDO = 30;
+
+/**
+ * Y el suelo **por mundo**, medido hoy. Existe porque el agregado, con treinta
+ * plantillas, tiene holgura de sobra para esconder el derrumbe de un extracto
+ * pequeño detrás de la subida de uno denso: 240 casillas amortiguan lo que 48 no
+ * amortiguaban. El caso pequeño es justamente el que este proyecto vigila.
+ *
+ * Remedidos tras el reequilibrio. El que importa es el barrio: 9 y 7 → **24 y 20**,
+ * que es la cifra que hace comprobable la exigencia de `personaje.md` §3 de diez
+ * esqueletos por oficio en un barrio de tres calles. Dejarlo en 9 permitiría perder
+ * quince plantillas ahí sin que ningún caso se pusiera rojo.
+ */
+const SUELO_POR_MUNDO = {
+  'barrio-tres-calles#1': 24,
+  'barrio-tres-calles#2': 20,
+  'costero#1': 29,
+  'costero#2': 29,
+  'suelo-250m#1': 19,
+  'suelo-250m#2': 29,
+  'urbano-denso#1': 30,
+  'urbano-denso#2': 30,
+};
 
 const LOS_OCHO = LOS_CUATRO.flatMap((nombre) => LAS_DOS_SEMILLAS.map((semilla) => ({ nombre, semilla, clave: `${nombre}#${semilla}` })));
 
@@ -341,19 +374,24 @@ describe('El tope actúa al repartir y solo sobre el excedente', () => {
 });
 
 describe('La casteabilidad no puede bajar', () => {
-  test('La casteabilidad agregada de los ocho extractos de referencia no baja de 30 de 48', async () => {
+  test('La casteabilidad agregada de los ocho extractos de referencia no baja de 210 de 240', async () => {
+    const casillas = LOS_OCHO.length * PLANTILLAS_POR_MUNDO;
     let agregado = 0;
     const detalle = [];
     for (const { nombre, semilla, clave } of LOS_OCHO) {
       const r = extraeReferencia(await generaMundo(nombre, semillaDe(nombre, semilla)));
       const castea = r.casting.filter((c) => c.castea).length;
-      assert.equal(r.casting.length, PLANTILLAS_POR_MUNDO, `${clave}: el catálogo de plantillas ha cambiado de tamaño y el umbral ${SUELO_AGREGADO}/48 ya no significa lo mismo`);
+      assert.equal(r.casting.length, PLANTILLAS_POR_MUNDO, `${clave}: el catálogo de plantillas ha cambiado de tamaño y el umbral ${SUELO_AGREGADO}/${casillas} ya no significa lo mismo`);
+      assert.ok(
+        castea >= SUELO_POR_MUNDO[clave],
+        `${clave}: castea ${castea} de ${PLANTILLAS_POR_MUNDO} y su suelo medido es ${SUELO_POR_MUNDO[clave]}: un extracto no puede derrumbarse a la sombra del agregado`,
+      );
       agregado += castea;
       detalle.push(`${clave} ${castea}/${PLANTILLAS_POR_MUNDO}`);
     }
     assert.ok(
       agregado >= SUELO_AGREGADO,
-      `la casteabilidad agregada es ${agregado} de ${LOS_OCHO.length * PLANTILLAS_POR_MUNDO} y no puede bajar de ${SUELO_AGREGADO}: ${detalle.join(', ')}`,
+      `la casteabilidad agregada es ${agregado} de ${casillas} y no puede bajar de ${SUELO_AGREGADO}: ${detalle.join(', ')}`,
     );
   });
 

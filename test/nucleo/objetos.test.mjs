@@ -145,10 +145,16 @@ describe('Los objetos son llaves, no requisitos', () => {
   });
 
   test('Ningún beat del catálogo se puede resolver solo llevando un objeto', () => {
-    assert.equal(TODOS_LOS_BEATS.length, 26, 'el catálogo del prototipo ha cambiado de tamaño y las cifras de este caso hay que volver a medirlas');
-    assert.equal(BEATS_CON_OBJETO.length, 2, 'el catálogo ya no tiene dos beats con objeto');
+    // Las dos cifras, remedidas sobre el catálogo de treinta plantillas de SPEC-017
+    // (§6s) y remedidas otra vez tras el reequilibrio que pide `personaje.md` §3:
+    // 147 beats escritos, de los cuales 3 disparan con objeto. Van clavadas y no como
+    // umbral porque son el denominador de la afirmación siguiente —**ninguno** de los
+    // beats del catálogo queda cerrado detrás de una llave—, y una lista vacía sobre
+    // un catálogo que se ha encogido sin que nadie lo mire no afirma nada.
+    assert.equal(TODOS_LOS_BEATS.length, 147, 'el catálogo ha cambiado de tamaño y las cifras de este caso hay que volver a medirlas');
+    assert.equal(BEATS_CON_OBJETO.length, 3, 'el catálogo ya no tiene tres beats con objeto');
 
-    // Ninguno queda cerrado: los dos declaran su vía alternativa.
+    // Ninguno queda cerrado: los tres declaran su vía alternativa.
     assert.deepEqual(TEMPLATES.flatMap((t) => beatsSinSalida(t.beats)), []);
     for (const { plantilla, beat } of BEATS_CON_OBJETO) {
       assert.ok(beat.disparador.viaAlternativa, `el beat con objeto de "${plantilla}" no declara otra manera de resolverse`);
