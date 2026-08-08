@@ -1295,3 +1295,42 @@ El andamiaje que sostiene las 441 pruebas era la única pieza del repo sin crite
 ## Verificado con
 
 `bash scripts/qa-tester-run.sh SPEC-008` → PASS, 441 casos, 438 pasan, 0 fallan, 3 saltados (`test/reports/SPEC-008-run-20260808T104759Z.md`). `node test/headless.mjs` → Todo OK. `node test/casting-report.mjs` contra el Overpass local → 131/132, los cuatro mundos reales a 6/6. `verifica-gherkin` (35 características, 183 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde.
+
+# 8 de agosto de 2026 — B2 cerrado
+
+Las ocho filas de **B2 · El mundo vivo** en `done`. Con B1, **dieciséis de cuarenta y dos**. La suite pasa de 441 a **1042 casos, 1039 en verde, 0 rojos, 3 saltados** (los tres se saltan solos desde que Maestro está instalado: afirmaban el comportamiento *con Maestro ausente*).
+
+## Lo que hay ahora
+
+Mundo congelado con esquema cerrado y recuperación sin red; casting de aventuras con motivo estructurado y distancias medidas sobre el grafo; motor de pasos donde el reloj son los kilómetros; propagación de rumores con deformación por saltos; prólogo que compone su par de núcleos; capa de NPCs perezosa que no consume anclaje; rango, oro y objetos-llave; y el diario con el estado y el registro de hechos.
+
+## El entregable del bloque, verificado a mano
+
+El PRD promete «simulación completa de partida en Node: pasos, rumores, rangos y diario, determinista». Con las ocho filas verdes y **1036 casos pasando**, monté esa simulación de punta a punta. La entrega existe —mundo, prólogo con par avalado, salidas casteadas, pasos, rumores llegando con su nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos distintos— **y salieron cuatro defectos que ninguna prueba unitaria veía**:
+
+- **Congelar la partida se rompía en su camino feliz.** `cierraSalidaDeProgresion` construía `procedencia` como objeto y el esquema la declaraba texto: bastaba con que un desenlace entregara un objeto para que la partida no se pudiera guardar. Las pruebas no lo veían porque llamaban a `congelaObjetos` directamente y **se saltaban el sobre**.
+- **`dia` tenía dos contratos incompatibles** en el mismo bloque: texto en la repisa, entero en el diario.
+- **El prólogo inflaba el rango antes de jugar.** Sus sucesos llegaban a todos y el rango contaba rumores sin mirar protagonista: **nueve de diez núcleos amanecían en nombradía el día 1**, con la jugadora sin haber hecho nada. Ahora los diez amanecen en forastería y suben solo con lo que ella provoca.
+- **Bytes NUL** dentro de literales de plantilla en dos módulos.
+
+**La lección, y es la más cara de la ejecución:** una suite verde de mil casos no demuestra que el producto funcione. Los cuatro defectos viven en las **costuras entre filas**, y cada fila probaba su lado con diligencia. El entregable por bloque del PRD no es ceremonia: es el único momento en que alguien recorre el camino entero.
+
+## Las tres veces que un indicador bajó, y por qué está bien
+
+La casteabilidad agregada sobre los ocho extractos: **32/48 → 31/48 → 30/48**.
+
+El primer descenso lo paga la cuantización de coordenadas a un metro, que es lo que hace que un mundo urbano quepa en el presupuesto (2953 KB → 1959 KB). El segundo lo paga medir las distancias **sobre el grafo** en vez de en línea recta: el lazo que desaparece tenía un trecho de **1688 m de caminata presentados como 126 m**. Antes se ofrecía porque la medida mentía.
+
+Un indicador solo sirve si mide lo mismo que el juego. Los dos descensos son el precio de que no mienta.
+
+## El patrón que ya va por cinco
+
+`pipeline/decisiones-orquestador.md` §6h lo bautizó: **una pieza que, al no estar, no protesta**. En B2 apareció dos veces más. Una, `test/casting-report.mjs` —el informe con el que se juzga la salud del generador— **no pedía el callejero**: llevaba desde la fila 7 midiendo un mundo que no juega nadie, y daba 113/132 en vez de 127/132. Otra, distinta y peor: un requisito **cumplido de forma vacía** — el prólogo componía su par de núcleos, pero ninguna aventura pasaba por él, así que el arranque que `arranque.md` §2 diseñó no ocurría nunca.
+
+De ahí sale la regla que ya vale para lo que queda: **un criterio que se cumple casi siempre no es un criterio**. Cuando un AC no puede ponerse rojo con un mundo real, no está midiendo nada.
+
+## Verificado con
+
+`bash scripts/qa-tester-run.sh SUITE` → **PASS, 1042 casos, 1039 pasan, 0 fallan, 3 saltados** (`test/reports/SUITE-run-20260808T203056Z.md`). `node test/headless.mjs` en verde. `node test/casting-report.mjs` contra el Overpass local: **127/132**, mundos reales 23/24. `verifica-gherkin` (35 características, 183 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde.
+
+**Sigue sin ejecutarse ni un flujo `@app`**, y ahora no es por falta de Maestro —está instalado— sino porque `test/app/` está vacío: B1 y B2 son núcleo entero. El primero llegará con B4.
