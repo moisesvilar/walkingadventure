@@ -19,6 +19,24 @@
 //     un cruce o un puente sostienen —emboscada, encuentro, vigilancia, peaje—,
 //     que son las únicas que existen en un mundo de tres calles sin un solo
 //     servicio.
+//   · **El local es la excepción, no la puerta de entrada.** Dos tercios de estas
+//     treinta pedían un servicio y `barrio-tres-calles` no tiene ninguno, así que
+//     el catálogo entero solo funcionaba donde había tiendas. El reequilibrio va
+//     por dos caminos, los dos declarados aquí y ninguno bajando la exigencia:
+//     **quien encarga pasa a ser gente y sitio** —una casa, una plaza, un taller,
+//     una cara con puesto— en todas las que no necesitaban mostrador; y **los roles
+//     de paraje con escena escasa declaran alternativa** —`['refugio',
+//     'encuentro']`, `['saber', 'vigilancia']`, `['ritual', 'encuentro']`—, porque
+//     donde no hay ermita se reza en el cruce y donde no hay cobertizo se para al
+//     resguardo del puente. Quedan **cinco** que sí piden local, y entre ellas
+//     cubren los seis servicios que el mundo sabe generar, para que ninguno se
+//     coloque sin que nadie lo visite.
+//   · **Dos núcleos seguidos no son un camino.** En un barrio pequeño los núcleos
+//     están más lejos entre sí que un tramo y los parajes caen sobre el viario,
+//     así que una cadena `núcleo → núcleo` no castea aunque los dos existan. Las
+//     que van de una casa a otra pasan por el paraje de en medio, y de ahí que la
+//     feria vuelva tres veces al cruce y el camino de la sal suba el alto cinco:
+//     no es relleno, es lo que hace la aventura andable donde el mundo es escaso.
 //   · **Cómico-cálido, y para leerse en voz alta** (`bucle-jugable.md` §6). El
 //     chiste está en el desajuste entre la ficción y el sitio, nunca a costa del
 //     sitio ni de quien lo regenta, y los personajes se toman en serio a sí mismos.
@@ -40,34 +58,35 @@ export const TEMPLATES = [
   {
     id: 'entrega-sospechosa',
     titulo: 'El paquete que no era nada',
-    gancho: 'Un bulto envuelto en hule cruza el mostrador de la taberna. «A la forja. No preguntes. Y si alguien te sale al paso, esto no salió de aquí».',
+    gancho: 'Un bulto envuelto en hule cambia de manos en la plaza. «Llévalo al cruce y déjalo donde te digan. No preguntes. Y si alguien te sale al paso, esto no salió de aquí».',
     tamano: 'paseo',
-    oficios: ['taberna', 'forja'],
+    oficios: ['taberna', 'forja', 'mercado'],
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'paquete-entregado', escala: { veces: 1 }, detalle: { con: 'forja', motivo: 'encargo-de-la-taberna' } },
+      semilla: { asunto: 'paquete-entregado', escala: { veces: 1 }, detalle: { con: 'destinataria', motivo: 'encargo-de-la-plaza' } },
     },
     mote: 'la-que-no-preguntó',
     desenlace: {
-      texto: 'Dentro había herraduras. Herraduras normales. La taberna paga igual y jura que la discreción tenía sentido, y nadie se atreve a discutirlo.',
+      texto: 'Dentro había herraduras. Herraduras normales. Te pagan igual y juran que la discreción tenía sentido, y nadie se atreve a discutirlo.',
       oro: 12,
       objetos: [{ id: 'hule-del-paquete', clase: 'recuerdo', procedencia: { plantilla: 'entrega-sospechosa' } }],
     },
     repuesto: {
-      sinTi: 'El paquete llegó a la forja por otras manos. Las herraduras ya cuelgan del clavo, y la historia se cuenta sin ti y con más misterio del que tuvo.',
+      sinTi: 'El paquete llegó al cruce por otras manos. Las herraduras ya cuelgan del clavo, y la historia se cuenta sin ti y con más misterio del que tuvo.',
       conLoConseguido: 'Te quedas con el hule vacío y con la sospecha. Bien mirado, es más de lo que tenía nadie al empezar.',
     },
     relacion: [
       { rol: 'origen', signo: 'feo', beat: 2, decision: 'vender-el-paquete-en-el-camino' },
-      { rol: 'destino', signo: 'reparador', beat: 3, decision: 'contar-la-verdad-del-encargo' },
+      { rol: 'quien_encarga', signo: 'reparador', beat: 4, decision: 'contar-la-verdad-del-encargo' },
     ],
-    revision: 'El desajuste está en la solemnidad del encargo contra lo que había dentro. La taberna no queda ridícula: queda cauta, y eso la respeta.',
-    orden: ['origen', 'riesgo', 'destino'],
+    revision: 'El desajuste está en la solemnidad del encargo contra lo que había dentro. Quien lo manda no queda en ridículo: queda cauta, y eso la respeta.',
+    orden: ['origen', 'quien_encarga', 'riesgo', 'destino'],
     roles: {
-      origen: { tipo: 'servicio', kind: 'taberna' },
-      riesgo: { tipo: 'paraje', escena: 'guarida' },
-      destino: { tipo: 'servicio', kind: 'armeria' },
+      origen: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad', 'granja'] },
+      quien_encarga: { tipo: 'humano', en: 'origen', puesto: 'regencia' },
+      riesgo: { tipo: 'paraje', escena: ['guarida', 'emboscada'] },
+      destino: { tipo: 'paraje', escena: 'encuentro' },
     },
     beats: [
       { rol: 'origen', escena: 'encargo', texto: 'Recoges el bulto y las señas. Nadie te mira a la cara mientras lo haces, lo cual ayuda poco a la tranquilidad.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'paquete' } },
@@ -75,21 +94,21 @@ export const TEMPLATES = [
       {
         rol: 'destino',
         escena: 'entrega',
-        texto: 'En la forja abren el hule, miran dentro y sueltan una carcajada corta. Tú tardas un poco más en entenderlo.',
+        texto: 'Quien espera abre el hule, mira dentro y suelta una carcajada corta. Tú tardas un poco más en entenderlo.',
         disparador: {
           tipo: 'con_objeto',
           objeto: 'paquete',
-          viaAlternativa: { texto: 'Llegas con las manos vacías. En la forja ya lo sabían y te cuentan qué había dentro para que cargues con ello de otra manera.' },
+          viaAlternativa: { texto: 'Llegas con las manos vacías. Quien esperaba ya lo sabía y te cuenta qué había dentro para que cargues con ello de otra manera.' },
         },
         resultado: { tipo: 'informacion' },
       },
-      { rol: 'origen', escena: 'recompensa', texto: 'De vuelta al mostrador te espera la paga y una explicación que no explica nada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'origen', escena: 'recompensa', texto: 'De vuelta a la plaza te espera la paga y una explicación que no explica nada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
     id: 'cita-en-la-fuente',
     titulo: 'La cita donde susurra el agua',
-    gancho: 'Una nota doblada bajo la puerta de la posada, con letra de quien escribe poco: «Ven donde susurra el agua cuando el sol se esconda. Ven {sola}».',
+    gancho: 'Una nota doblada bajo una puerta, con letra de quien escribe poco: «Ven donde susurra el agua cuando el sol se esconda. Ven {sola}».',
     tamano: 'paseo',
     oficios: ['taberna', 'mercado'],
     rumor: {
@@ -99,7 +118,7 @@ export const TEMPLATES = [
     },
     mote: 'la-de-la-nota',
     desenlace: {
-      texto: 'La verdad resulta ser pequeña y muy antigua, y aun así cambia cómo se saluda cierta gente en el mercado. Las cosas pequeñas pesan cuando llevan tiempo calladas.',
+      texto: 'La verdad resulta ser pequeña y muy antigua, y aun así cambia cómo se saluda cierta gente en la plaza. Las cosas pequeñas pesan cuando llevan tiempo calladas.',
       oro: 10,
       objetos: [],
     },
@@ -108,14 +127,14 @@ export const TEMPLATES = [
       conLoConseguido: 'Te vuelves con la nota en el bolsillo. Sigue sin decir gran cosa, pero ahora sabes de qué agua hablaba.',
     },
     relacion: [
-      { rol: 'confidente', signo: 'reparador', beat: 3, decision: 'guardar-el-nombre-que-falta' },
+      { rol: 'dador', signo: 'reparador', beat: 3, decision: 'guardar-el-nombre-que-falta' },
     ],
     revision: 'El humor está en el contraste entre el aparato de la cita secreta y lo menuda que resulta la verdad. Nadie queda en ridículo por ello.',
     orden: ['dador', 'cita', 'confidente'],
     roles: {
-      dador: { tipo: 'servicio', kind: 'posada' },
+      dador: { tipo: 'nucleo', types: ['aldea', 'pueblo', 'ciudad', 'granja'] },
       cita: { tipo: 'paraje', escena: 'encuentro' },
-      confidente: { tipo: 'servicio', kind: 'mercado' },
+      confidente: { tipo: 'paraje', escena: 'vigilancia' },
     },
     beats: [
       { rol: 'dador', escena: 'hallazgo', texto: 'Encuentras la nota, la relees por si acaso y decides ir. La curiosidad es más fuerte que la prudencia y lo sabes.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
@@ -126,8 +145,8 @@ export const TEMPLATES = [
         disparador: { tipo: 'franja', franja: 'atardecer', variante: 'Llegas cuando la luz se va y la ves colocarse la capucha a toda prisa, ensayando el momento.' },
         resultado: { tipo: 'informacion' },
       },
-      { rol: 'confidente', escena: 'verificación', texto: 'En el mercado confirman la historia sin levantar la vista del género, y añaden el nombre que faltaba como quien da el cambio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'dador', escena: 'decisión', texto: 'De vuelta en la posada decides qué hacer con lo que ya sabes. Nadie te mete prisa: aquí se cena tarde.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'confidente', escena: 'verificación', texto: 'Quien se pasa el día mirando el camino desde lo alto confirma la historia y añade el nombre que faltaba, sin darle importancia.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'dador', escena: 'decisión', texto: 'De vuelta bajo techo decides qué hacer con lo que ya sabes. Nadie te mete prisa: aquí se cena tarde.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -153,24 +172,24 @@ export const TEMPLATES = [
     },
     relacion: [
       { rol: 'origen', signo: 'reparador', beat: 6, decision: 'nombrar-a-quien-ayudo' },
-      { rol: 'pista3', signo: 'feo', beat: 4, decision: 'contar-lo-del-ungüento-en-la-plaza' },
+      { rol: 'quien_pregunta', signo: 'feo', beat: 4, decision: 'contar-lo-del-ungüento-en-la-plaza' },
     ],
     revision: 'La gracia está en que el pueblo entero lo sabía y nadie quería ser quien lo dijera. El chiste es sobre la costumbre, no sobre el sitio.',
-    orden: ['origen', 'pista1', 'pista2', 'pista3', 'resolucion'],
+    orden: ['origen', 'quien_pregunta', 'pista1', 'pista2', 'resolucion'],
     roles: {
-      origen: { tipo: 'servicio', kind: 'taberna' },
-      pista1: { tipo: 'paraje', escena: 'misterio' },
-      pista2: { tipo: 'nucleo', types: ['aldea', 'granja'] },
-      pista3: { tipo: 'servicio', kind: 'boticario' },
-      resolucion: { tipo: 'nucleo', types: ['ciudad', 'pueblo'] },
+      origen: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad', 'granja'] },
+      quien_pregunta: { tipo: 'humano', en: 'origen', puesto: 'vecindad' },
+      pista1: { tipo: 'paraje', escena: 'emboscada' },
+      pista2: { tipo: 'paraje', escena: 'encuentro' },
+      resolucion: { tipo: 'nucleo', types: ['ciudad', 'pueblo', 'aldea', 'granja'] },
     },
     beats: [
-      { rol: 'origen', escena: 'encargo', texto: 'En la taberna te sueltan los rumores en desorden y con nombres cambiados, por si acaso.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'pista1', escena: 'misterio', texto: 'Entre las piedras hay huellas que no deberían estar ahí, y encima están muy bien hechas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'origen', escena: 'encargo', texto: 'Te sueltan los rumores en desorden y con nombres cambiados, por si acaso.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'pista1', escena: 'rastro', texto: 'En el mal paso hay huellas que no deberían estar ahí, y encima están muy bien hechas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'pista2', escena: 'testigo', texto: 'Alguien asustado te dice a quién vio pasar de madrugada y luego pide que no digas que lo dijo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'pista3', escena: 'prueba', texto: 'En la botica reconocen el ungüento al olerlo. Solo lo compra una persona, y no por gusto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'frasco de ungüento' } },
-      { rol: 'resolucion', escena: 'resolución', texto: 'Pones las piezas encima de la mesa. Se hace un silencio incómodo del que todavía se habla.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'origen', escena: 'celebración', texto: 'De vuelta en la taberna corre la voz de que fuiste tú. Te sirven sin que pidas, que aquí es un honor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'resolucion', escena: 'prueba', texto: 'Reconocen el ungüento al olerlo. Solo lo compra una persona, y no por gusto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'frasco de ungüento' } },
+      { rol: 'pista2', escena: 'resolución', texto: 'Pones las piezas encima de una piedra del camino. Se hace un silencio incómodo del que todavía se habla.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'origen', escena: 'celebración', texto: 'De vuelta corre la voz de que fuiste tú. Te sirven de cenar sin que pidas, que aquí es un honor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -232,9 +251,12 @@ export const TEMPLATES = [
     revision: 'Sin ironía a costa de la creencia: el humor está en la solemnidad del trámite. Es exclusiva de botica y su desenlace no lo cuenta nadie, a propósito.',
     orden: ['origen', 'templo', 'antiguo'],
     roles: {
-      origen: { tipo: 'nucleo', types: ['aldea', 'pueblo'] },
-      templo: { tipo: 'paraje', escena: 'ritual' },
-      antiguo: { tipo: 'paraje', escena: 'misterio' },
+      origen: { tipo: 'nucleo', types: ['aldea', 'pueblo', 'ciudad', 'granja'] },
+      // Las dos escenas alternativas no son un apaño: donde no hay ermita se reza
+      // igual en el cruce y se deja la ofrenda bajo el puente, que es exactamente
+      // como se ha hecho siempre donde no había templo.
+      templo: { tipo: 'paraje', escena: ['ritual', 'encuentro'] },
+      antiguo: { tipo: 'paraje', escena: ['misterio', 'peaje'] },
     },
     beats: [
       { rol: 'origen', escena: 'súplica', texto: 'Te confían la ofrenda y las palabras exactas, repetidas hasta que las dices bien.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'ofrenda' } },
@@ -246,8 +268,8 @@ export const TEMPLATES = [
   {
     id: 'rescate-en-la-granja',
     titulo: 'El zagal que se escondió muy bien',
-    gancho: 'En la granja falta el zagal desde el alba. El perro volvió sin él y mirando al camino, que es la manera que tiene un perro de señalar.',
-    tamano: 'paseo',
+    gancho: 'Falta el zagal desde el alba y en casa ya no disimulan el susto. El perro volvió sin él y mirando al camino, que es la manera que tiene un perro de señalar.',
+    tamano: 'aventura',
     oficios: ['botica', 'forja'],
     rumor: {
       notable: true,
@@ -265,18 +287,21 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con el silbato y con el rastro. Alguien saldrá de nuevo con esa pista, y esta vez sabiendo dónde mirar.',
     },
     relacion: [
-      { rol: 'granja', signo: 'reparador', beat: 4, decision: 'quitarle-hierro-delante-del-zagal' },
-      { rol: 'botica', signo: 'feo', beat: 3, decision: 'regatear-el-precio-de-la-venda' },
+      { rol: 'casa', signo: 'reparador', beat: 6, decision: 'quitarle-hierro-delante-del-zagal' },
+      { rol: 'remedio', signo: 'feo', beat: 3, decision: 'regatear-el-precio-de-la-venda' },
     ],
-    revision: 'El humor va del lado del zagal y de su escondite excelente. La granja se toma en serio a sí misma y el susto no se banaliza.',
-    orden: ['granja', 'peligro', 'botica'],
+    revision: 'El humor va del lado del zagal y de su escondite excelente. La casa se toma en serio a sí misma y el susto no se banaliza.',
+    orden: ['casa', 'peligro', 'remedio'],
     roles: {
-      granja: { tipo: 'nucleo', types: ['granja'] },
+      casa: { tipo: 'nucleo', types: ['granja', 'aldea', 'pueblo'] },
       peligro: { tipo: 'paraje', escena: 'emboscada' },
-      botica: { tipo: 'servicio', kind: 'boticario' },
+      // Quien sabe de vendas no necesita tener botica: en un sitio pequeño es una
+      // casa concreta, y atar esta aventura a un local la dejaba sin castear
+      // justo donde el zagal es más fácil de perder.
+      remedio: { tipo: 'nucleo', types: ['aldea', 'pueblo', 'ciudad'] },
     },
     beats: [
-      { rol: 'granja', escena: 'súplica', texto: 'Te dan el silbato del zagal. «Lo reconocerá», dicen, con una fe en el silbato que ya quisiera el silbato.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'silbato del zagal' } },
+      { rol: 'casa', escena: 'súplica', texto: 'Te dan el silbato del zagal. «Lo reconocerá», dicen, con una fe en el silbato que ya quisiera el silbato.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'silbato del zagal' } },
       {
         rol: 'peligro',
         escena: 'rescate',
@@ -288,8 +313,10 @@ export const TEMPLATES = [
         },
         resultado: { tipo: 'estado' },
       },
-      { rol: 'botica', escena: 'curas', texto: 'En la botica vendan el tobillo y escuchan la versión del zagal con una ceja levantada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'granja', escena: 'reunión', texto: 'Vuelves con el zagal a cuestas. En la granja lloran, gritan y ponen la mesa, más o menos a la vez.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'remedio', escena: 'curas', texto: 'Donde saben de vendas atan el tobillo y escuchan la versión del zagal con una ceja levantada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'peligro', escena: 'vuelta', texto: 'Volvéis por el mal paso a plena luz. Ahora el zagal explica su escondite con orgullo de arquitecto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'peligro', escena: 'rastro', texto: 'Antes de seguir marcas la zarza con un trapo, por si a alguien le da otra vez por esconderse ahí.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'casa', escena: 'reunión', texto: 'Vuelves con el zagal a cuestas. En casa lloran, gritan y ponen la mesa, más o menos a la vez.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
 
@@ -457,7 +484,7 @@ export const TEMPLATES = [
     titulo: 'Lo que vive bajo el puente',
     gancho: 'Bajo el puente vive algo que cobra por pasar, según quien lo cuenta. Según quien lo desmiente, bajo el puente vive alguien que necesita ayuda. Baja a mirar si te ves {dispuesta}.',
     tamano: 'paseo',
-    oficios: ['taberna', 'mercado'],
+    oficios: ['taberna', 'mercado', 'forja'],
     rumor: {
       notable: true,
       signo: 'bueno',
@@ -495,7 +522,7 @@ export const TEMPLATES = [
     id: 'lo-que-dejo-la-crecida',
     titulo: 'Lo que dejó la crecida',
     gancho: 'El agua bajó y dejó cosas donde no estaban. Hay que ir a ver qué es de quién antes de que se decida por costumbre.',
-    tamano: 'paseo',
+    tamano: 'aventura',
     oficios: ['mercado', 'forja'],
     rumor: {
       notable: true,
@@ -513,19 +540,21 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con lo que sí tiene dueña clara. El resto tendrá que esperar a otra conversación.',
     },
     relacion: [
-      { rol: 'granja', signo: 'feo', beat: 2, decision: 'quedarse-con-lo-que-no-reclama-nadie' },
+      { rol: 'casa', signo: 'feo', beat: 3, decision: 'quedarse-con-lo-que-no-reclama-nadie' },
     ],
     revision: 'El humor está en el arte local de no decidir. Nadie queda como aprovechado salvo quien elige serlo, y eso lo elige quien juega.',
-    orden: ['pueblo', 'orilla', 'granja'],
+    orden: ['pueblo', 'orilla', 'casa'],
     roles: {
-      pueblo: { tipo: 'nucleo', types: ['pueblo', 'aldea'] },
+      pueblo: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad'] },
       orilla: { tipo: 'paraje', escena: 'encuentro' },
-      granja: { tipo: 'nucleo', types: ['granja', 'aldea'] },
+      casa: { tipo: 'nucleo', types: ['granja', 'aldea', 'pueblo'] },
     },
     beats: [
       { rol: 'pueblo', escena: 'encargo', texto: 'Te encargan bajar a ver qué dejó el agua, y sobre todo quién estaba ya mirándolo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'orilla', escena: 'hallazgo', texto: 'Entre el barro hay aperos, una cesta y algo con iniciales. Las iniciales complican el asunto entero.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'cesta con iniciales' } },
-      { rol: 'granja', escena: 'reclamo', texto: 'En la granja reconocen la cesta al instante y niegan lo demás con demasiada rapidez.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'casa', escena: 'reclamo', texto: 'Reconocen la cesta al instante y niegan lo demás con demasiada rapidez. Demasiada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'orilla', escena: 'comprobación', texto: 'Volvéis al barro a mirar lo que quedaba. Aparece otra cosa con iniciales distintas y vuelta a empezar.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'orilla', escena: 'acuerdo', texto: 'Se apila lo que no reclama nadie a la vista de quien pase. Es la manera de aquí de no decidir en voz alta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'pueblo', escena: 'reparto', texto: 'Vuelves y se reparte lo que se puede. La conversación dura más que la crecida.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
@@ -534,9 +563,9 @@ export const TEMPLATES = [
   {
     id: 'la-cuenta-pendiente',
     titulo: 'La cuenta que nadie salda',
-    gancho: 'Hay una deuda vieja anotada en una tabla de la taberna. La deben, la reconocen, y aun así lleva ahí más tiempo del que nadie recuerda.',
+    gancho: 'Hay una deuda vieja anotada en una tabla que cuelga a la vista de todo el mundo. La deben, la reconocen, y aun así lleva ahí más tiempo del que nadie recuerda.',
     tamano: 'paseo',
-    oficios: ['mercado', 'taberna'],
+    oficios: ['mercado'],
     rumor: {
       notable: true,
       signo: 'bueno',
@@ -557,18 +586,21 @@ export const TEMPLATES = [
       { rol: 'quien_cobra', signo: 'feo', beat: 2, decision: 'leer-la-cuenta-en-voz-alta' },
     ],
     revision: 'El chiste es la contabilidad sentimental, no la pobreza de nadie. Quien debe queda con dignidad intacta.',
-    orden: ['taberna', 'quien_cobra', 'casa', 'quien_debe'],
+    orden: ['plaza', 'quien_cobra', 'casa', 'quien_debe'],
     roles: {
-      taberna: { tipo: 'servicio', kind: 'taberna' },
-      quien_cobra: { tipo: 'humano', en: 'taberna', puesto: 'regencia' },
+      // La tabla cuelga donde se junta la gente, y eso lo hay en cualquier sitio:
+      // colgarla de un local dejaba la aventura fuera de los mundos pequeños, que
+      // son justo donde una deuda vieja se conoce mejor.
+      plaza: { tipo: 'nucleo', types: ['pueblo', 'ciudad', 'aldea'] },
+      quien_cobra: { tipo: 'humano', en: 'plaza', puesto: 'regencia' },
       casa: { tipo: 'nucleo', types: ['aldea', 'granja', 'pueblo'] },
       quien_debe: { tipo: 'humano', en: 'casa', puesto: 'vecindad' },
     },
     beats: [
-      { rol: 'taberna', escena: 'encargo', texto: 'Te enseñan la tabla con la cuenta. La letra es de otra época y el rencor está fresquísimo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'plaza', escena: 'encargo', texto: 'Te enseñan la tabla con la cuenta. La letra es de otra época y el rencor está fresquísimo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'casa', escena: 'reclamo', texto: 'Llegas a la casa y reconocen la deuda antes de que abras la boca. Llevan ensayándolo tiempo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'casa', escena: 'acuerdo', texto: 'Se acuerda pagar con lo que hay, que no es moneda pero pesa lo mismo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pago en especie' } },
-      { rol: 'taberna', escena: 'saldo', texto: 'Vuelves con el pago. Borrar la tabla cuesta un rato y da una pena rarísima.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'plaza', escena: 'saldo', texto: 'Vuelves con el pago. Borrar la tabla cuesta un rato y da una pena rarísima.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -631,18 +663,23 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con parte de la receta. Falta lo que le daba el color, que resulta ser lo importante.',
     },
     relacion: [
-      { rol: 'quien_atiende', signo: 'reparador', beat: 4, decision: 'decir-que-la-receta-era-suya' },
+      { rol: 'quien_atiende', signo: 'reparador', beat: 5, decision: 'decir-que-la-receta-era-suya' },
     ],
     revision: 'Cariño hacia la memoria que falla, sin burla. El desajuste está en tratar un jarabe como un secreto de estado.',
-    orden: ['botica', 'quien_atiende', 'vecindario'],
+    // Es una de las cinco que siguen pidiendo local, y la única que pide dos: entre
+    // las cinco cubren los seis servicios que el mundo sabe generar, y así el resto
+    // del catálogo queda libre para castear donde no hay ni uno.
+    orden: ['botica', 'quien_atiende', 'conjuria', 'vecindario'],
     roles: {
       botica: { tipo: 'servicio', kind: 'boticario' },
       quien_atiende: { tipo: 'humano', en: 'botica', puesto: 'regencia' },
+      conjuria: { tipo: 'servicio', kind: 'conjureria' },
       vecindario: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad', 'granja'] },
     },
     beats: [
       { rol: 'botica', escena: 'encargo', texto: 'Te cuentan el desastre en voz baja para que no cunda el pánico. Ya ha cundido.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'vecindario', escena: 'testigo', texto: 'Preguntas por las casas. Cada persona recuerda un ingrediente distinto y ninguno coincide.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'conjuria', escena: 'pesquisa', texto: 'Donde guardan lo escrito buscan entre cuadernos que nadie ordenó nunca. La receta no está, y el desorden queda peor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'vecindario', escena: 'prueba', texto: 'Alguien mayor recuerda el color exacto, y con el color aparece de golpe el ingrediente que faltaba.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'ingrediente olvidado' } },
       { rol: 'botica', escena: 'regreso', texto: 'Vuelves con la receta reconstruida. Se prueba allí mismo y se aprueba con cara de sospecha.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
@@ -652,7 +689,7 @@ export const TEMPLATES = [
     titulo: 'La posada que estaba llena',
     gancho: 'En la posada no queda sitio, y aun así hay gente que dormir. Alguien tiene que ir casa por casa a repartir invitados con mucha diplomacia.',
     tamano: 'paseo',
-    oficios: ['taberna', 'botica'],
+    oficios: ['taberna'],
     rumor: {
       notable: true,
       signo: 'bueno',
@@ -727,13 +764,13 @@ export const TEMPLATES = [
   {
     id: 'el-libro-que-no-se-presta',
     titulo: 'El libro que no sale de aquí',
-    gancho: 'En la conjuria hay un libro que no se presta a nadie. Alguien lo necesita hoy y va a hacer falta mucha labia y algo de caminar.',
+    gancho: 'En una casa de aquí hay un libro que no se presta a nadie. Alguien lo necesita hoy y va a hacer falta mucha labia y algo de caminar.',
     tamano: 'paseo',
     oficios: ['botica', 'forja'],
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'libro-consultado', escala: { veces: 1 }, detalle: { con: 'conjuria', motivo: 'préstamo-negado' } },
+      semilla: { asunto: 'libro-consultado', escala: { veces: 1 }, detalle: { con: 'custodia', motivo: 'préstamo-negado' } },
     },
     mote: 'la-que-abrió-el-libro',
     desenlace: {
@@ -750,17 +787,20 @@ export const TEMPLATES = [
       { rol: 'quien_guarda', signo: 'reparador', beat: 3, decision: 'devolverlo-antes-de-que-lo-echen-de-menos' },
     ],
     revision: 'El humor es el celo del custodio, tratado con respeto: su norma es razonable y su solución, generosa.',
-    orden: ['conjuria', 'quien_guarda', 'quien_pide'],
+    orden: ['custodia', 'quien_guarda', 'quien_pide'],
     roles: {
-      conjuria: { tipo: 'servicio', kind: 'conjureria' },
-      quien_guarda: { tipo: 'humano', en: 'conjuria', puesto: 'regencia' },
+      // Un libro que no sale de casa se guarda en una casa, no en un local: así la
+      // aventura existe también donde no hay ninguno, que es donde un libro escaso
+      // pesa más.
+      custodia: { tipo: 'nucleo', types: ['ciudad', 'pueblo', 'aldea'] },
+      quien_guarda: { tipo: 'humano', en: 'custodia', puesto: 'regencia' },
       quien_pide: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'granja', 'ciudad'] },
     },
     beats: [
-      { rol: 'conjuria', escena: 'negativa', texto: 'Te explican por qué el libro no sale. La explicación es larga, ordenada y, molestamente, razonable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'conjuria', escena: 'trato', texto: 'Se busca una salida. Copiar la página lleva su rato y se hace con una caligrafía admirable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'copia de la página' } },
+      { rol: 'custodia', escena: 'negativa', texto: 'Te explican por qué el libro no sale. La explicación es larga, ordenada y, molestamente, razonable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'custodia', escena: 'trato', texto: 'Se busca una salida. Copiar la página lleva su rato y se hace con una caligrafía admirable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'copia de la página' } },
       { rol: 'quien_pide', escena: 'entrega', texto: 'Llevas la copia a quien la necesitaba. La lee de pie y sin respirar, y luego da las gracias.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'conjuria', escena: 'regreso', texto: 'Vuelves a decir que funcionó. Se recibe con la calma de quien nunca lo dudó.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'custodia', escena: 'regreso', texto: 'Vuelves a decir que funcionó. Se recibe con la calma de quien nunca lo dudó.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -850,7 +890,7 @@ export const TEMPLATES = [
     },
     mote: 'la-de-los-recados',
     desenlace: {
-      texto: 'Todo llega a su sitio y sobra una cosa que nadie reclama. Se queda en la taberna, esperando dueña con mucha paciencia.',
+      texto: 'Todo llega a su sitio y sobra una cosa que nadie reclama. Se queda donde empezó el recado, esperando dueña con mucha paciencia.',
       oro: 18,
       objetos: [],
     },
@@ -864,7 +904,10 @@ export const TEMPLATES = [
     revision: 'El chiste es la bola de nieve del favor, cariñosa con quien pide. Ninguna casa queda retratada.',
     orden: ['origen', 'quien_manda', 'primera_casa', 'segunda_casa', 'tercera_casa'],
     roles: {
-      origen: { tipo: 'servicio', kind: 'taberna' },
+      // Un recado empieza donde hay gente, y eso no exige mostrador: pedirlo lo
+      // pedía un local y por eso la bola de nieve no rodaba en los sitios pequeños,
+      // que son donde de verdad te paran por la calle.
+      origen: { tipo: 'nucleo', types: ['pueblo', 'ciudad', 'aldea'] },
       quien_manda: { tipo: 'humano', en: 'origen', puesto: 'regencia' },
       primera_casa: { tipo: 'nucleo', types: ['aldea', 'granja'] },
       segunda_casa: { tipo: 'nucleo', types: ['pueblo', 'ciudad'] },
@@ -876,14 +919,14 @@ export const TEMPLATES = [
       { rol: 'segunda_casa', escena: 'entrega', texto: 'Aquí te esperaban antes de que existiera el encargo. Las noticias corren más que quien las lleva.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'tercera_casa', escena: 'entrega', texto: 'La entrega termina en merienda, que retrasa el recado y mejora la jornada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'segunda_casa', escena: 'vuelta', texto: 'Vuelves a pasar para devolver lo que sobraba. Se niegan a aceptarlo con mucha firmeza.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'origen', escena: 'cierre', texto: 'Dejas en la taberna lo que no quiso nadie. Ya tiene un sitio en la repisa y un nombre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'origen', escena: 'cierre', texto: 'Dejas donde empezó todo lo que no quiso nadie. Ya tiene un sitio en la repisa y un nombre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
     id: 'la-carta-sin-remite',
     titulo: 'La carta sin remite',
     gancho: 'Llega una carta sin remite y con una letra que aquí no reconoce nadie. Antes de abrirla, alguien quiere saber de dónde viene.',
-    tamano: 'paseo',
+    tamano: 'aventura',
     oficios: ['mercado', 'botica', 'taberna'],
     rumor: {
       notable: true,
@@ -901,19 +944,26 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con la letra reconocida. Con eso ya se sabe a qué casa hay que llevarla.',
     },
     relacion: [
-      { rol: 'mercado', signo: 'feo', beat: 2, decision: 'abrir-la-carta-para-mirar' },
+      { rol: 'plaza', signo: 'feo', beat: 2, decision: 'abrir-la-carta-para-mirar' },
     ],
     revision: 'El desajuste está en la investigación monumental de un sobre. Nadie sale mal parado y la noticia buena se respeta.',
-    orden: ['mercado', 'casa'],
+    orden: ['plaza', 'camino', 'casa', 'quien_recibe'],
     roles: {
-      mercado: { tipo: 'servicio', kind: 'mercado' },
+      // Donde se junta la gente a comparar letras, que es cualquier sitio con dos
+      // casas y una tarde larga. Y el camino de en medio no es adorno: una carta se
+      // rastrea preguntando a quien pasa, y eso pasa fuera del pueblo.
+      plaza: { tipo: 'nucleo', types: ['pueblo', 'ciudad', 'aldea', 'granja'] },
+      camino: { tipo: 'paraje', escena: 'encuentro' },
       casa: { tipo: 'nucleo', types: ['aldea', 'granja', 'pueblo', 'ciudad'] },
+      quien_recibe: { tipo: 'humano', en: 'casa', puesto: 'vecindad' },
     },
     beats: [
-      { rol: 'mercado', escena: 'encargo', texto: 'Te enseñan el sobre a contraluz, que aquí se considera un método de investigación serio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'carta sin remite' } },
-      { rol: 'mercado', escena: 'pesquisa', texto: 'Se compara la letra con otras. La comparación acaba en discusión y la discusión, en pista.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'plaza', escena: 'encargo', texto: 'Te enseñan el sobre a contraluz, que aquí se considera un método de investigación serio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'carta sin remite' } },
+      { rol: 'plaza', escena: 'pesquisa', texto: 'Se compara la letra con otras. La comparación acaba en discusión y la discusión, en pista.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'camino', escena: 'rastro', texto: 'Preguntas a quien pasa. Alguien reconoce la letra y señala con la barbilla hacia dónde vive.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'casa', escena: 'entrega', texto: 'Llamas a la puerta correcta. Reconocen la letra antes de tocar el sobre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'mercado', escena: 'regreso', texto: 'Vuelves con el desenlace. Se pide que lo cuentes entero, con pausas y todo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'camino', escena: 'vuelta', texto: 'De vuelta te paran otra vez a preguntar cómo acabó. Aquí las noticias se cobran en el sitio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'plaza', escena: 'regreso', texto: 'Vuelves con el desenlace. Se pide que lo cuentes entero, con pausas y todo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -940,17 +990,19 @@ export const TEMPLATES = [
     relacion: [
       { rol: 'quien_forja', signo: 'reparador', beat: 3, decision: 'pagar-la-pieza-de-tu-bolsillo' },
     ],
-    revision: 'El humor está en el apego a la avería. La forja queda como lo que es: gente que resuelve.',
-    orden: ['pueblo', 'forja', 'quien_forja'],
+    revision: 'El humor está en el apego a la avería. Quien trabaja el hierro queda como lo que es: gente que resuelve.',
+    orden: ['pueblo', 'taller', 'quien_forja'],
     roles: {
       pueblo: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad'] },
-      forja: { tipo: 'servicio', kind: 'armeria' },
-      quien_forja: { tipo: 'humano', en: 'forja', puesto: 'aprendizaje' },
+      // Quien sabe hacer la pieza vive en algún sitio, y ese sitio no tiene por qué
+      // ser una forja con rótulo: en una aldea es la casa de quien tiene el yunque.
+      taller: { tipo: 'nucleo', types: ['aldea', 'granja', 'pueblo', 'ciudad'] },
+      quien_forja: { tipo: 'humano', en: 'taller', puesto: 'vecindad' },
     },
     beats: [
       { rol: 'pueblo', escena: 'encargo', texto: 'Te explican la gotera con una precisión que solo da el hartazgo de años.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'forja', escena: 'encargo', texto: 'En la forja escuchan, miden en el aire con las manos y dicen que sí, que se puede.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pieza de repuesto' } },
-      { rol: 'forja', escena: 'trato', texto: 'Se discute el precio con mucho gusto. La discusión es parte del servicio y se disfruta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'taller', escena: 'encargo', texto: 'Quien trabaja el hierro escucha, mide en el aire con las manos y dice que sí, que se puede.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pieza de repuesto' } },
+      { rol: 'taller', escena: 'trato', texto: 'Se discute el precio con mucho gusto. La discusión es parte del trato y se disfruta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'pueblo', escena: 'arreglo', texto: 'La pieza encaja y la gotera para. Se hace un silencio raro que dura más de lo previsto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
@@ -998,13 +1050,13 @@ export const TEMPLATES = [
   {
     id: 'el-ungüento-que-huele-mal',
     titulo: 'El remedio que huele fatal',
-    gancho: 'Han preparado en la botica algo que cura de maravilla y huele espantoso. Hay que llevarlo lejos y explicarlo con mucha delicadeza.',
+    gancho: 'Han preparado un remedio que cura de maravilla y huele espantoso. Hay que llevarlo lejos y explicarlo con mucha delicadeza.',
     tamano: 'paseo',
     oficios: ['botica', 'mercado'],
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'remedio-entregado', escala: { veces: 1 }, detalle: { con: 'botica', motivo: 'remedio-maloliente' } },
+      semilla: { asunto: 'remedio-entregado', escala: { veces: 1 }, detalle: { con: 'obrador', motivo: 'remedio-maloliente' } },
     },
     mote: 'la-que-llevó-el-remedio',
     desenlace: {
@@ -1020,14 +1072,17 @@ export const TEMPLATES = [
       { rol: 'quien_prepara', signo: 'reparador', beat: 4, decision: 'defender-la-receta-delante-de-quien-la-critica' },
     ],
     revision: 'El chiste es el olor, no la clientela. Quien lo prepara está orgullosa con razón y así se cuenta.',
-    orden: ['botica', 'quien_prepara', 'atajo'],
+    orden: ['obrador', 'quien_prepara', 'atajo'],
     roles: {
-      botica: { tipo: 'servicio', kind: 'boticario' },
-      quien_prepara: { tipo: 'humano', en: 'botica', puesto: 'regencia' },
-      atajo: { tipo: 'paraje', escena: 'refugio' },
+      // El remedio se cuece en una cocina cualquiera cuando no hay botica, y el
+      // resguardo del camino puede ser un cruce: las dos escenas alternativas son
+      // lo que deja esta aventura viva en un sitio de tres calles.
+      obrador: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad', 'granja'] },
+      quien_prepara: { tipo: 'humano', en: 'obrador', puesto: 'regencia' },
+      atajo: { tipo: 'paraje', escena: ['refugio', 'encuentro'] },
     },
     beats: [
-      { rol: 'botica', escena: 'encargo', texto: 'Te dan el frasco sellado con cera y una lista de advertencias que empieza por el olor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'frasco sellado' } },
+      { rol: 'obrador', escena: 'encargo', texto: 'Te dan el frasco sellado con cera y una lista de advertencias que empieza por el olor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'frasco sellado' } },
       {
         rol: 'atajo',
         escena: 'refugio',
@@ -1040,7 +1095,7 @@ export const TEMPLATES = [
         resultado: { tipo: 'informacion' },
       },
       { rol: 'atajo', escena: 'espera', texto: 'Esperas a que amaine con el frasco a favor del viento, que resulta ser una ciencia.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'botica', escena: 'regreso', texto: 'Vuelves con el parte de la entrega. Se anota el olor como efecto conocido y aceptado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'obrador', escena: 'regreso', texto: 'Vuelves con el parte de la entrega. Se anota el olor como efecto conocido y aceptado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1052,7 +1107,7 @@ export const TEMPLATES = [
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'guarida-vacía', escala: { veces: 1 }, detalle: { con: 'guarida', motivo: 'leyenda-sin-dueño' } },
+      semilla: { asunto: 'guarida-vacía', escala: { veces: 1 }, detalle: { con: 'vecindario', motivo: 'leyenda-sin-dueño' } },
     },
     mote: 'la-que-entró-en-la-guarida',
     desenlace: {
@@ -1068,22 +1123,25 @@ export const TEMPLATES = [
       { rol: 'quien_manda', signo: 'reparador', beat: 7, decision: 'contarlo-sin-exagerar' },
     ],
     revision: 'El terror se desinfla en un detalle doméstico. Nadie del pueblo queda como crédulo: la leyenda se respeta.',
-    orden: ['taberna', 'quien_manda', 'boca', 'fondo', 'alto'],
+    orden: ['plaza', 'quien_manda', 'boca', 'fondo', 'alto'],
     roles: {
-      taberna: { tipo: 'servicio', kind: 'taberna' },
-      quien_manda: { tipo: 'humano', en: 'taberna', puesto: 'regencia' },
+      // Una leyenda se cuenta donde haya gente, con mostrador o sin él. Y el fondo
+      // admite un mal paso además de un sitio con misterio: la leyenda se desinfla
+      // igual de bien en los dos.
+      plaza: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad'] },
+      quien_manda: { tipo: 'humano', en: 'plaza', puesto: 'regencia' },
       boca: { tipo: 'paraje', escena: 'guarida' },
-      fondo: { tipo: 'paraje', escena: 'misterio' },
+      fondo: { tipo: 'paraje', escena: ['misterio', 'emboscada'] },
       alto: { tipo: 'paraje', escena: 'vigilancia' },
     },
     beats: [
-      { rol: 'taberna', escena: 'encargo', texto: 'Te cuentan lo de la guarida por turnos y cada versión es peor que la anterior.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'plaza', escena: 'encargo', texto: 'Te cuentan lo de la guarida por turnos y cada versión es peor que la anterior.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'alto', escena: 'vigilancia', texto: 'Antes de bajar vigilas la entrada desde arriba un buen rato, por si sale quien vive dentro. No sale.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'boca', escena: 'guarida', texto: 'Llegas a la boca. Está oscura, está callada y está sorprendentemente ordenada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'fondo', escena: 'misterio', texto: 'Al fondo no hay nada, y el nada está barrido. Eso sí que no lo esperaba nadie.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'escoba gastada' } },
-      { rol: 'alto', escena: 'vigilancia', texto: 'Desde arriba vigilas la entrada un buen rato por si aparece quien barre. No aparece.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'boca', escena: 'despedida', texto: 'Vuelves a asomarte antes de irte. Todo sigue igual de limpio y ahora resulta entrañable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'alto', escena: 'espera', texto: 'Esperas otro rato desde el alto. Sigue sin aparecer nadie, y ya lo esperabas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'taberna', escena: 'informe', texto: 'Vuelves con la escoba como prueba. La escoba impresiona más que cualquier cosa que hubieras traído.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'alto', escena: 'espera', texto: 'Esperas otro rato desde el alto por si aparece quien barre. Sigue sin aparecer, y ya lo esperabas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'plaza', escena: 'informe', texto: 'Vuelves con la escoba como prueba. La escoba impresiona más que cualquier cosa que hubieras traído.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1095,7 +1153,7 @@ export const TEMPLATES = [
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'feria-salvada', escala: { veces: 1 }, detalle: { con: 'mercado', motivo: 'feria-desbordada' } },
+      semilla: { asunto: 'feria-salvada', escala: { veces: 1 }, detalle: { con: 'feria', motivo: 'feria-desbordada' } },
     },
     mote: 'la-que-salvó-la-feria',
     desenlace: {
@@ -1108,37 +1166,40 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con el sitio nuevo apalabrado. Con eso la feria ya tiene por dónde crecer.',
     },
     relacion: [
-      { rol: 'quien_organiza', signo: 'reparador', beat: 6, decision: 'darle-el-mérito-a-quien-organiza' },
+      { rol: 'quien_organiza', signo: 'reparador', beat: 7, decision: 'darle-el-mérito-a-quien-organiza' },
       { rol: 'quien_organiza', signo: 'feo', beat: 3, decision: 'apalabrar-el-sitio-a-sus-espaldas' },
     ],
     revision: 'El desajuste es la épica del urbanismo improvisado. La feria y su gente salen bien: el problema es el éxito.',
-    orden: ['mercado', 'quien_organiza', 'campa', 'aldea', 'cruce'],
+    orden: ['feria', 'quien_organiza', 'campa', 'aldea', 'cruce'],
     roles: {
-      mercado: { tipo: 'servicio', kind: 'mercado' },
-      quien_organiza: { tipo: 'humano', en: 'mercado', puesto: 'regencia' },
+      // La feria es un día del año, no un local: se monta donde haya sitio, y así
+      // esta aventura existe también donde no hay plaza de abastos.
+      feria: { tipo: 'nucleo', types: ['pueblo', 'ciudad', 'aldea'] },
+      quien_organiza: { tipo: 'humano', en: 'feria', puesto: 'regencia' },
       campa: { tipo: 'nucleo', types: ['aldea', 'granja'] },
       aldea: { tipo: 'nucleo', types: ['pueblo', 'ciudad'] },
       cruce: { tipo: 'paraje', escena: 'encuentro' },
     },
     beats: [
-      { rol: 'mercado', escena: 'encargo', texto: 'Te explican el problema mientras esquivan carros. El problema es evidente y muy ruidoso.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'campa', escena: 'gestión', texto: 'Hay una campa que serviría. Quien la tiene pone condiciones razonables y una absurda.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'feria', escena: 'encargo', texto: 'Te explican el problema mientras esquivan carros. El problema es evidente y muy ruidoso.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'cruce', escena: 'encuentro', texto: 'En el cruce avisas a quien viene. La noticia se adelanta a la feria por el camino corto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'campa', escena: 'gestión', texto: 'Hay una campa que serviría. Quien la tiene pone condiciones razonables y una absurda.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'cruce', escena: 'aviso', texto: 'Otra vez el cruce, ahora en sentido contrario y con el plan aún sin cerrar. Aquí se entera todo el mundo antes que nadie.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'aldea', escena: 'permiso', texto: 'Quien manda escucha el plan y pone pegas por deporte. Luego dice que sí.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'campa', escena: 'trato', texto: 'Vuelves a cerrar el trato. La condición absurda se acepta y acaba siendo lo mejor de la feria.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'mercado', escena: 'cierre', texto: 'Vuelves con el sitio y el permiso. Se monta todo en un suspiro y con una eficacia sospechosa.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'cruce', escena: 'trato', texto: 'En el cruce se cierra el trato de pie, que es como se cierran los tratos que importan. La condición absurda se acepta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'feria', escena: 'cierre', texto: 'Vuelves con el sitio y el permiso. Se monta todo en un suspiro y con una eficacia sospechosa.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
     id: 'la-vigilia-del-monasterio',
     titulo: 'La vigilia que había que cubrir',
-    gancho: 'Alguien tiene que velar donde se guarda el saber, y quien lo hacía se ha puesto malo. La vigilia no se suspende: se traspasa.',
+    gancho: 'Alguien tiene que velar lo que aquí se guarda, y quien lo hacía se ha puesto malo. La vigilia no se suspende: se traspasa.',
     tamano: 'aventura',
     oficios: ['botica', 'forja'],
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'vigilia-cubierta', escala: { veces: 1 }, detalle: { con: 'monasterio', motivo: 'vela-traspasada' } },
+      semilla: { asunto: 'vigilia-cubierta', escala: { veces: 1 }, detalle: { con: 'custodia', motivo: 'vela-traspasada' } },
     },
     mote: 'la-que-veló-el-saber',
     desenlace: {
@@ -1151,24 +1212,28 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con parte de la vela cumplida. Se anota igual, con una nota al margen.',
     },
     relacion: [
-      { rol: 'quien_cuida', signo: 'reparador', beat: 6, decision: 'quedarte-hasta-el-relevo' },
+      { rol: 'quien_cuida', signo: 'reparador', beat: 5, decision: 'quedarte-hasta-el-relevo' },
     ],
     revision: 'Sin burla del rito. El humor está en el papeleo de la vigilia y en el orgullo de la letra de ocasión.',
-    orden: ['botica', 'quien_cuida', 'saber', 'descanso', 'aldea'],
+    orden: ['casa', 'quien_cuida', 'saber', 'descanso', 'aldea'],
     roles: {
-      botica: { tipo: 'servicio', kind: 'boticario' },
-      quien_cuida: { tipo: 'humano', en: 'botica', puesto: 'aprendizaje' },
-      saber: { tipo: 'paraje', escena: 'saber' },
-      descanso: { tipo: 'paraje', escena: 'refugio' },
-      aldea: { tipo: 'nucleo', types: ['aldea', 'pueblo', 'granja'] },
+      // Quien traspasa la vela vive en una casa, no detrás de un mostrador. Y donde
+      // no hay un sitio con libros se vela desde el alto que domina el camino: la
+      // vela es mirar toda la noche, y eso se puede hacer en los dos.
+      casa: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad'] },
+      quien_cuida: { tipo: 'humano', en: 'casa', puesto: 'vecindad' },
+      saber: { tipo: 'paraje', escena: ['saber', 'vigilancia'] },
+      descanso: { tipo: 'paraje', escena: ['refugio', 'encuentro'] },
+      aldea: { tipo: 'nucleo', types: ['aldea', 'granja'] },
     },
     beats: [
-      { rol: 'botica', escena: 'encargo', texto: 'Te explican la vigilia y sus reglas. Son pocas, muy antiguas y bastante razonables.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'casa', escena: 'encargo', texto: 'Te explican la vigilia y sus reglas. Son pocas, muy antiguas y bastante razonables.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'descanso', escena: 'refugio', texto: 'Paras al resguardo antes de subir, que es lo que hace todo el mundo y nadie cuenta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'aldea', escena: 'aviso', texto: 'Avisas de que esta noche velas tú. Se recibe con sorpresa y con una tortilla.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'cena de la vela' } },
-      { rol: 'saber', escena: 'saber', texto: 'Llegas donde se guarda lo escrito. Huele a papel viejo y a alguien que barrió hace poco.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'descanso', escena: 'refugio', texto: 'Sales a estirar las piernas al resguardo. La noche está tranquila y muy poblada de ruidos.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'saber', escena: 'vela', texto: 'Vuelves adentro y cumples la vela hasta el final. No pasa nada, con mucha intensidad.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'botica', escena: 'regreso', texto: 'Vuelves a dar el parte. Se anota en el libro y la letra queda para siempre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'saber', escena: 'saber', texto: 'Llegas al sitio de la vela. Está callado, muy limpio y con esa quietud que impone sin pedirlo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'saber', escena: 'vela', texto: 'Cumples la vela hasta el final sin moverte del sitio. No pasa nada, con mucha intensidad.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'descanso', escena: 'despedida', texto: 'De vuelta paras otra vez al resguardo, ya con la luz nueva. Sabe distinto y pesa menos.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'casa', escena: 'regreso', texto: 'Vuelves a dar el parte. Se anota en el libro y la letra queda para siempre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1180,7 +1245,7 @@ export const TEMPLATES = [
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'sal-repartida', escala: { veces: 4 }, detalle: { con: 'vecindario', motivo: 'camino-de-la-sal' } },
+      semilla: { asunto: 'sal-repartida', escala: { veces: 2 }, detalle: { con: 'vecindario', motivo: 'camino-de-la-sal' } },
     },
     mote: 'la-de-la-sal',
     desenlace: {
@@ -1194,30 +1259,33 @@ export const TEMPLATES = [
     },
     relacion: [
       { rol: 'quien_pesa', signo: 'reparador', beat: 11, decision: 'devolver-el-sobrante-al-común' },
-      { rol: 'quien_pesa', signo: 'feo', beat: 5, decision: 'aligerar-el-saco-por-el-camino' },
+      { rol: 'quien_pesa', signo: 'feo', beat: 7, decision: 'aligerar-el-saco-por-el-camino' },
     ],
     revision: 'Es la plantilla larga del catálogo y el humor va en las paradas, no en el esfuerzo. Ninguna aldea queda como paleta.',
-    orden: ['mercado', 'quien_pesa', 'salina', 'primera_parada', 'segunda_parada', 'alto'],
+    orden: ['reparto', 'quien_pesa', 'salina', 'primera_parada', 'segunda_parada', 'alto'],
     roles: {
-      mercado: { tipo: 'servicio', kind: 'mercado' },
-      quien_pesa: { tipo: 'humano', en: 'mercado', puesto: 'acarreo' },
-      salina: { tipo: 'nucleo', types: ['ciudad', 'pueblo'] },
+      // La lista de casas la lleva quien la lleva, con puesto de mercado o sin él:
+      // atar la jornada larga a una plaza de abastos la dejaba fuera justo de los
+      // sitios donde la sal se sigue repartiendo a pie.
+      reparto: { tipo: 'nucleo', types: ['ciudad', 'pueblo', 'aldea'] },
+      quien_pesa: { tipo: 'humano', en: 'reparto', puesto: 'vecindad' },
+      salina: { tipo: 'nucleo', types: ['ciudad', 'pueblo', 'aldea'] },
       primera_parada: { tipo: 'nucleo', types: ['aldea', 'granja'] },
       segunda_parada: { tipo: 'nucleo', types: ['granja', 'aldea', 'pueblo'] },
       alto: { tipo: 'paraje', escena: 'encuentro' },
     },
     beats: [
-      { rol: 'mercado', escena: 'encargo', texto: 'Te dan el saco vacío, la lista de casas y un consejo sobre el calzado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'salina', escena: 'carga', texto: 'Cargas la sal. Pesa exactamente lo que te habían prometido que no pesaría.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'saco de sal' } },
+      { rol: 'reparto', escena: 'encargo', texto: 'Te dan el saco vacío, la lista de casas y un consejo sobre el calzado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'alto', escena: 'encuentro', texto: 'En el alto te cruzas con quien va en sentido contrario y os contáis las novedades.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'salina', escena: 'carga', texto: 'Cargas la sal. Pesa exactamente lo que te habían prometido que no pesaría.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'saco de sal' } },
+      { rol: 'alto', escena: 'descanso', texto: 'Otra vez el alto, ahora con el saco a cuestas. Paras a respirar y a maldecir el consejo del calzado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'primera_parada', escena: 'entrega', texto: 'En la casa de la lista piden más de lo apuntado, con una sonrisa muy trabajada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'alto', escena: 'espera', texto: 'De nuevo el alto. Aquí se decide siempre lo mismo: seguir un poco más antes de parar.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'segunda_parada', escena: 'entrega', texto: 'Aquí ya sabían que venías. También sabían cuánto traías, cosa que inquieta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'alto', escena: 'descanso', texto: 'Vuelves a pasar por el alto y paras a respirar. El saco pesa menos y el camino, igual.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'alto', escena: 'vuelta', texto: 'El alto de vuelta, con el saco bastante más ligero. Ya conoces cada piedra y las saludas por costumbre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'salina', escena: 'recarga', texto: 'Vuelves a por lo que faltaba. Te reciben como a alguien de la familia y te cobran igual.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'sal de recarga' } },
-      { rol: 'primera_parada', escena: 'ajuste', texto: 'Vuelves a esa casa con lo que faltaba. Ahora dicen que era demasiado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'segunda_parada', escena: 'cierre', texto: 'Cierras el reparto aquí. Sale la cuenta y nadie se lo explica, ni tú.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'alto', escena: 'despedida', texto: 'Otra vez en el alto. Ya conoces cada piedra y las saludas por costumbre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'mercado', escena: 'cierre', texto: 'Vuelves con el saco casi vacío y con la lista tachada entera. Eso aquí es una hazaña.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'alto', escena: 'despedida', texto: 'El alto por fin de bajada. Da hasta pena, y eso que llevas el día entero subiéndolo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'reparto', escena: 'cierre', texto: 'Vuelves con el saco casi vacío y con la lista tachada entera. Eso aquí es una hazaña.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1225,11 +1293,11 @@ export const TEMPLATES = [
     titulo: 'El refugio que hay que dejar listo',
     gancho: 'Viene mal tiempo y el refugio del camino lleva tiempo sin que nadie lo mire. Conviene dejarlo listo antes de que haga falta.',
     tamano: 'paseo',
-    oficios: ['forja', 'botica'],
+    oficios: ['forja', 'botica', 'taberna'],
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'refugio-preparado', escala: { veces: 1 }, detalle: { con: 'refugio', motivo: 'mal-tiempo-que-viene' } },
+      semilla: { asunto: 'refugio-preparado', escala: { veces: 1 }, detalle: { con: 'quien-avisa', motivo: 'mal-tiempo-que-viene' } },
     },
     mote: 'la-que-dejó-listo-el-refugio',
     desenlace: {
@@ -1245,17 +1313,19 @@ export const TEMPLATES = [
       { rol: 'quien_avisa', signo: 'reparador', beat: 4, decision: 'no-firmar-la-nota' },
     ],
     revision: 'Sin sarcasmo: es la plantilla cálida del catálogo. El chiste, mínimo, está en la nota amable y anónima.',
-    orden: ['forja', 'quien_avisa', 'refugio'],
+    orden: ['taller', 'quien_avisa', 'refugio'],
     roles: {
-      forja: { tipo: 'servicio', kind: 'armeria' },
-      quien_avisa: { tipo: 'humano', en: 'forja', puesto: 'regencia' },
-      refugio: { tipo: 'paraje', escena: 'refugio' },
+      // La bisagra sale de donde haya un yunque, y el refugio del camino puede ser
+      // el cobertizo del cruce: en un sitio de tres calles es exactamente eso.
+      taller: { tipo: 'nucleo', types: ['pueblo', 'aldea', 'ciudad', 'granja'] },
+      quien_avisa: { tipo: 'humano', en: 'taller', puesto: 'regencia' },
+      refugio: { tipo: 'paraje', escena: ['refugio', 'encuentro'] },
     },
     beats: [
-      { rol: 'forja', escena: 'encargo', texto: 'Te dan una bisagra nueva y una advertencia sobre el viento que resulta ser exacta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'bisagra' } },
+      { rol: 'taller', escena: 'encargo', texto: 'Te dan una bisagra nueva y una advertencia sobre el viento que resulta ser exacta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'bisagra' } },
       { rol: 'refugio', escena: 'refugio', texto: 'El refugio está entero y desordenado. La puerta cuelga con una dignidad conmovedora.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'refugio', escena: 'arreglo', texto: 'Colocas la bisagra, apilas leña y dejas una nota. Todo tarda más de lo pensado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'forja', escena: 'regreso', texto: 'Vuelves a devolver las herramientas. No preguntan cómo fue, y aun así lo cuentas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'taller', escena: 'regreso', texto: 'Vuelves a devolver las herramientas. No preguntan cómo fue, y aun así lo cuentas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
 ];

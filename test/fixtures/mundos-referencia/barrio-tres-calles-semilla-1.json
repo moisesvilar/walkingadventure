@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-017",
-    "motivo_regeneracion": "Regenerado por SPEC-017: el catálogo pasa de 6 a 30 plantillas, así que el casting de cada extracto cambia de forma y de tamaño; con él sube el vocabulario de escenas de 7 a 10 y el suelo de parajes de 4 a 5. Y todo tramo difícil que OSM deja sin nombre se nombra ya al construir el grafo (deuda de §6i-a), lo que reserva esos nombres en el índice del mundo antes que las calzadas y los ramales y cambia por tanto los nombres que estos sortean."
+    "motivo_regeneracion": "Regenerado por SPEC-017: el reequilibrio del catálogo cambia qué plantillas castean en cada extracto. Dos tercios de las treinta pedían un servicio y este mundo no tiene ninguno, así que las que se apoyaban en un local pasan a apoyarse en núcleos, caras y parajes, y las que piden un paraje con escena escasa declaran una alternativa que un cruce o un puente sí sostienen. El mundo generado no cambia —mismo vocabulario de escenas, mismo suelo de parajes—: cambia solo la sección de casting."
   },
   "titulo": "Reinos do Carballo Eterno",
   "idioma": "gl",
@@ -156,7 +156,7 @@
     },
     {
       "plantilla": "cita-en-la-fuente",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "cuento-del-puente",
@@ -164,11 +164,11 @@
     },
     {
       "plantilla": "el-arreglo-de-la-fuente",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "el-camino-de-la-sal",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "el-encargo-de-la-forja",
@@ -180,7 +180,7 @@
     },
     {
       "plantilla": "el-libro-que-no-se-presta",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "el-recado-que-crece",
@@ -188,7 +188,7 @@
     },
     {
       "plantilla": "el-refugio-de-la-tormenta",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "el-relevo-de-la-guardia",
@@ -196,11 +196,11 @@
     },
     {
       "plantilla": "el-ungüento-que-huele-mal",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "entrega-sospechosa",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "la-apuesta-de-la-taberna",
@@ -208,19 +208,19 @@
     },
     {
       "plantilla": "la-carta-sin-remite",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "la-cuenta-pendiente",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "la-feria-que-no-cabe",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "la-guarida-de-nadie",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "la-posada-sin-sitio",
@@ -232,7 +232,7 @@
     },
     {
       "plantilla": "la-vigilia-del-monasterio",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "la-visita-que-toca",
@@ -248,7 +248,7 @@
     },
     {
       "plantilla": "peregrinaje",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "quien-vigila-al-vigia",
@@ -256,7 +256,7 @@
     },
     {
       "plantilla": "rescate-en-la-granja",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "ronda-del-vigia",
@@ -268,7 +268,7 @@
     },
     {
       "plantilla": "tres-pistas",
-      "castea": false
+      "castea": true
     }
   ]
 }
