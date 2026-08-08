@@ -245,7 +245,19 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   // El vocabulario decide el suelo y el techo por ritmo decide el máximo; cuando
   // chocan gana el suelo, porque un techo que se come el suelo devuelve el problema
   // que el suelo vino a resolver (`parajes.md`, 5-ago-2026).
-  const vocabulario = normalizaVocabulario(opciones.cupo?.vocabulario ?? opciones.vocabulario);
+  // Y sin vocabulario no se genera: recibir uno **vacío** es normal —no hay escenas
+  // que cubrir, el suelo es cero y manda el techo—, pero **no recibirlo** es un fallo
+  // de cableado. Asumirlo cero deja una celda sin parajes sin que nadie se entere,
+  // que es justo lo que la spec no quiere (SPEC-006, «El generador falla si no
+  // recibe vocabulario»).
+  const recibido = opciones.cupo?.vocabulario ?? opciones.vocabulario;
+  if (recibido == null) {
+    throw new Error(
+      'generateParajes necesita el vocabulario de escenas inyectado y no lo ha recibido: ' +
+      'pásalo en opciones.vocabulario, o dentro de opciones.cupo. Un vocabulario vacío se declara [].',
+    );
+  }
+  const vocabulario = normalizaVocabulario(recibido);
   const techo = opciones.cupo?.techo ?? parajeCountForRadius(radius);
   const suelo = opciones.cupo?.suelo ?? sueloDeVocabulario(vocabulario);
   const target = opciones.cupo?.cupo ?? Math.max(suelo, techo);

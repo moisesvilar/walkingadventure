@@ -31,9 +31,16 @@ export const PESO_MINIMO_DE_ESCENA = 0.2;
  *
  * Ordenado antes de salir porque de esta lista cuelga un número de generación: un
  * vocabulario que llegara en otro orden daría otro mundo.
+ *
+ * **No admite ausencia.** Una lista vacía es un vocabulario legítimo —no hay nada
+ * que cubrir, el suelo es cero—, pero `null` o `undefined` es que nadie lo inyectó,
+ * y devolver `[]` ahí hacía indistinguibles las dos cosas: un olvido de cableado
+ * salía como una celda con suelo cero y sin parajes, en silencio.
  */
 export function normalizaVocabulario(vocabulario) {
-  if (vocabulario == null) return [];
+  if (vocabulario == null) {
+    throw new Error('falta el vocabulario de escenas: llega inyectado y una lista vacía es [], no null ni undefined');
+  }
   if (!Array.isArray(vocabulario)) {
     throw new Error(`el vocabulario de escenas tiene que ser una lista de escenas y llegó ${typeof vocabulario}`);
   }
