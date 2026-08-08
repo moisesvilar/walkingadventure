@@ -1345,3 +1345,78 @@ Conviene que esté escrito, porque una suite que finge cubrirlo todo es peor que
 - **Reloj de mundo controlable**, que es distinto del reloj del sistema: hay que poder pedir «avanza siete pasos» sin andar.
 - **Doble del proxy** que devuelva respuestas fijas de LLM, de imágenes y de Places, más un modo que falle siempre, para los escenarios sin red.
 - **Inspector de tráfico saliente** en las pruebas de privacidad, que es la única manera de afirmar «esto no sale del móvil» en lugar de suponerlo.
+
+Y lo que este andamiaje tiene que cumplir, que hasta el 8-ago-2026 era la única pieza del repo sin criterios escritos antes que su código:
+
+```gherkin
+# language: es
+
+@nucleo @determinismo
+Característica: El andamiaje no puede dar por buena una ejecución que no ocurrió
+  Un verde que nadie vio fallar no es evidencia. El runner afirma el PASS en
+  lugar de suponerlo, y lo que no se pudo ejecutar se dice.
+  Fuente: RF-INFRA-007 · arquitectura.md
+
+  Escenario: Sin ninguna prueba que ejecutar el resultado no es verde
+    Dado un árbol sin ningún fichero de pruebas de núcleo
+    Cuando se ejecuta el runner
+    Entonces el resultado no es PASS
+    Y el report dice que no se ejecutó nada
+
+  Escenario: Una prueba en rojo se ve aunque el entorno venga sucio
+    Dada una prueba de núcleo que falla a propósito
+    Cuando se ejecuta el runner desde dentro de otra ejecución de pruebas
+    Entonces el resultado es FAIL
+    Y coincide con el que da una consola limpia
+
+  Escenario: Una salida que el runner no sabe leer no cuenta como verde
+    Dada una ejecución de pruebas cuya salida no trae el resumen esperado
+    Cuando se ejecuta el runner
+    Entonces el resultado no es PASS
+    Y el report dice que no se pudo afirmar nada de esa ejecución
+
+  Escenario: La herramienta que no llega a comprobar nada lo dice
+    Dada una comprobación del andamiaje invocada por una ruta con enlaces simbólicos
+    Cuando termina
+    Entonces emite su línea de veredicto
+    Y no termina en silencio dando a entender que todo está bien
+
+  Escenario: Maestro ausente no es una prueba en rojo
+    Dado que Maestro no está instalado
+    Cuando se ejecuta el runner con flujos de aplicación pendientes
+    Entonces el report los registra como infraestructura ausente
+    Y no los cuenta como fallos
+
+  Escenario: Dos ejecuciones seguidas sobre el mismo árbol dicen lo mismo
+    Dado un árbol de pruebas que no cambia
+    Cuando se ejecuta el runner dos veces
+    Entonces los dos reports coinciden salvo en el sello de tiempo y las duraciones
+```
+
+```gherkin
+# language: es
+
+@nucleo @determinismo @privacidad
+Característica: Los dobles del andamiaje son reproducibles y no tocan el mundo real
+  Un doble que sortea o que sale a la red deja de servir para afirmar nada.
+  Fuente: RF-INFRA-007 · seguridad-privacidad.md §1
+
+  Escenario: El mismo recorrido simulado dos veces da la misma secuencia
+    Dado un recorrido con una polilínea, una velocidad y un origen de tiempo
+    Cuando se simula dos veces
+    Entonces las dos secuencias de posiciones son idénticas
+
+  Escenario: El reloj de mundo no avanza con el reloj del sistema
+    Dado un reloj de mundo en el paso cero
+    Cuando pasa tiempo real sin pedirle nada
+    Entonces sigue en el paso cero
+
+  Escenario: El doble del proxy responde lo mismo a la misma petición
+    Dada una petición al doble del proxy
+    Cuando se repite la misma petición
+    Entonces la respuesta es la misma
+
+  Escenario: Ninguna pieza del andamiaje sale a la red al importarse
+    Dado el inspector de tráfico saliente en modo estricto
+    Cuando se importan todos los módulos del andamiaje
+    Entonces no se registra ninguna llamada saliente
