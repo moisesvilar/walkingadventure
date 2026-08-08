@@ -17,6 +17,7 @@
 import { makeProjector } from '../core/geo.js';
 import { claveOsm, ordenaPorClave } from './clave-osm.js';
 import { construyePool } from './anclajes.js';
+import { TAGS_QUE_HACEN_FALTA, bordilloDeTags } from './aptitud.js';
 
 export { claveOsm, comparaClaveOsm } from './clave-osm.js';
 
@@ -47,10 +48,25 @@ function nivelDeVia(t) {
 }
 
 /**
+ * Los tags con los que se marca la aptitud de una vía, conservados tal cual llegan.
+ *
+ * Se conservan y no se interpretan aquí a propósito: interpretar es de
+ * `aptitud.js`, que es donde están las listas y el umbral, y este módulo solo hace
+ * de puerta. Hasta SPEC-008 el parseo los tiraba todos, y sin ellos el marcado no
+ * tenía de qué salir.
+ */
+function tagsFiltrables(t) {
+  const out = {};
+  for (const tag of TAGS_QUE_HACEN_FALTA) if (typeof t[tag] === 'string') out[tag] = t[tag];
+  // La altura del bordillo no está en la lista de los seis porque no es un criterio
+  // suyo: afina el de bordillos cuando alguien se ha molestado en medirla.
+  if (typeof t['kerb:height'] === 'string') out['kerb:height'] = t['kerb:height'];
+  return out;
+}
+
+/**
  * El rasgo de una vía —`'escalones'`, `'tierra'`, `'estrecho'`— o nulo. Sesga el
- * nombre del ramal que la recorra. Los tags que lo alimentan no se piden todavía en
- * la consulta de callejero, así que hoy llega nulo casi siempre y el nombre sale
- * igual sin él.
+ * nombre del ramal que la recorra.
  */
 function rasgoDeVia(t) {
   if (t.highway === 'steps') return 'escalones';
@@ -97,6 +113,7 @@ export function parseGeo(json, lat0, lon0) {
         level: MAJOR_HIGHWAYS.includes(t.highway) ? 'principal' : 'pista',
         layer: nivelDeVia(t),
         rasgo: rasgoDeVia(t),
+        filtrables: tagsFiltrables(t),
         name: t.name || null,
         osmId,
       });
@@ -129,9 +146,34 @@ export function parseStreets(json, lat0, lon0) {
       level: STREET_KINDS.includes(t.highway) ? 'calle' : 'senda',
       layer: nivelDeVia(t),
       rasgo: rasgoDeVia(t),
+      filtrables: tagsFiltrables(t),
       name: t.name || null,
       osmId: claveOsm(el, pts),
     });
+  }
+  return ordenaPorClave(out);
+}
+
+/**
+ * Los bordillos de una respuesta de callejero: los **nodos** con `kerb` o
+ * `barrier=kerb`.
+ *
+ * Van aparte de las vías porque en OSM son otra cosa: el bordillo se mapea en el
+ * nodo del cruce, y `out geom` de un way no trae los tags de sus nodos. Se cruzan
+ * con la geometría por el identificador de nodo, que es lo que las vías traen en
+ * `nodes`; sin ids no hay cruce posible y el criterio se queda —honestamente— en
+ * «no se sabe».
+ */
+export function parseBordillos(json, lat0, lon0) {
+  const proj = makeProjector(lat0, lon0);
+  const out = [];
+  for (const el of json?.elements ?? []) {
+    if (el.type !== 'node') continue;
+    const t = el.tags || {};
+    const aptitud = bordilloDeTags(t);
+    if (aptitud == null) continue;
+    const p = proj.toXY(el.lat, el.lon);
+    out.push({ nodo: el.id, ...p, aptitud, osmId: claveOsm(el, [p]) });
   }
   return ordenaPorClave(out);
 }

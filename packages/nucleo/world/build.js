@@ -2,7 +2,7 @@
 // Tubería canónica del generador: la comparten la app y las herramientas
 // headless, y es la única. Misma tubería, mismos mundos.
 
-import { parseGeo, parseStreets } from './osm.js';
+import { parseBordillos, parseGeo, parseStreets } from './osm.js';
 import { construyePool } from './anclajes.js';
 import { buildSeaMask, computeDisplayRadius } from './seamask.js';
 import { generateSettlements, countsForRadius, SERVICES } from './settlements.js';
@@ -107,6 +107,9 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   // inyecta genera el mundo igual, solo que el grafo se queda con las carreteras.
   // Cuando llega, es la fuente principal de los huecos cortos que hay que coser.
   geo.callejero = data.callejeroJson ? parseStreets(data.callejeroJson, lat, lon) : [];
+  // Los bordillos llegan en la misma respuesta que el callejero pero son nodos, no
+  // vías: se guardan aparte y se cruzan con la geometría al construir el grafo.
+  geo.bordillos = data.callejeroJson ? parseBordillos(data.callejeroJson, lat, lon) : [];
 
   // Zona costera: consulta ampliada + máscara tierra/mar + radio dinámico,
   // para que el borde del mapa no corte bahías ni rías por la mitad.
@@ -121,6 +124,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     data = await fetchData(lat, lon, rFetch);
     geo = parseGeo(data.geoJson, lat, lon);
     geo.callejero = data.callejeroJson ? parseStreets(data.callejeroJson, lat, lon) : [];
+    geo.bordillos = data.callejeroJson ? parseBordillos(data.callejeroJson, lat, lon) : [];
     await onStatus('mask');
     seaMask = buildSeaMask(geo.coastlines, rFetch, Math.max(40, Math.min(200, rFetch / 140)));
     radius = computeDisplayRadius(seaMask, {
@@ -171,7 +175,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   // cosidos y tres oportunidades de divergir, y es además la fase más cara del
   // generador. El callejero entra aquí con las carreteras: es donde están los
   // huecos cortos que hay que coser antes de trazar.
-  const grafo = validaGrafo(construyeGrafo(viasDelGrafo(geo)));
+  const grafo = validaGrafo(construyeGrafo(viasDelGrafo(geo), { bordillos: geo.bordillos }));
   // pegar al viario ANTES de trazar: si un núcleo no cuelga de la red principal, el
   // trazado no tendría más remedio que unirlo con una recta por la que no se puede andar
   const movidos = pegarAViario(settlements, grafo);
@@ -219,6 +223,12 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     // aristas se cosieron y cuál es la separación mínima que quedó sin coser. Lo
     // último es lo que distingue un dato malo de una separación de verdad.
     grafo: grafo.informe,
+    // Y el grafo entero, marcado. Se queda con el mundo porque el trazado del lazo
+    // de una salida lo necesita completo —con sus aristas no aptas dentro, que el
+    // filtro evita pero nunca borra— y reconstruirlo al trazar sería generar dos
+    // veces lo que ya está generado. Se llama `viario` y no `grafo` para que el
+    // informe, que es lo que ya consumía todo el mundo, no cambie de sitio.
+    viario: grafo,
     // Y la lista de tramos que son suposición nuestra, para que el filtro y la
     // propagación de rumores no tengan que recorrer el grafo para saberlo.
     suposiciones: tramosSupuestos(routes),

@@ -102,11 +102,28 @@ out center 6000;`;
 }
 
 // Callejero local de un núcleo (se pide bajo demanda al hacer zoom).
+//
+// `out geom` ya devolvía los tags de cada vía, así que `surface`, `smoothness`,
+// `width` y `wheelchair` llegan sin pedir nada: lo que faltaba era conservarlos al
+// parsear, que es de packages/nucleo/world/osm.js. Los **bordillos** sí hay que
+// pedirlos aparte, porque en OSM viven en el nodo del cruce (`kerb=*`,
+// `barrier=kerb`) y `out geom` de un way no trae los tags de sus nodos: sin esta
+// segunda mitad de la consulta ese criterio se queda permanentemente en «no se
+// sabe», que es cumplir la especificación sin servir de nada.
+//
+// Cambiar este texto invalida la caché entera del proxy —la clave es el hash del
+// QL—, así que la primera ejecución después de tocarlo paga minutos contra los
+// mirrors públicos. Es esperado, no es un cuelgue.
 export async function fetchStreets(lat, lon, radius) {
   const a = `(around:${radius},${lat},${lon})`;
   const ql = `
 [out:json][timeout:60];
 way["highway"~"^(residential|living_street|pedestrian|service|unclassified|track|path|footway|cycleway|steps)$"]${a};
+out geom 3000;
+(
+  node["kerb"]${a};
+  node["barrier"="kerb"]${a};
+);
 out geom 3000;`;
   return runQuery(ql);
 }
