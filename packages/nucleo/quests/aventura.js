@@ -12,6 +12,7 @@
 // son los de la plantilla, tal cual, y este módulo no redacta ninguno.
 
 import { congelaHondo } from '../core/congelar.js';
+import { SIN_OBJETOS, exigeTenencia } from '../partida/objetos.js';
 import { IDS_DE_TAMANO } from '../partida/salida.js';
 
 /** Los tres tipos de disparador de `game-design/quests.md` §2. No hay un cuarto. */
@@ -224,8 +225,13 @@ export function guiadoDeBeat({ destino, tramos }) {
  * El resultado apunta al beat siguiente **por su número** y el último no apunta a
  * ninguno: eso es lo que hace de la cadena una cadena y no un grafo, que es lo que
  * `quests.md` §2 pide para la primera iteración.
+ *
+ * `tenencia` es la vista de solo lectura de los objetos de la partida (SPEC-015), y
+ * lo único que decide es **por cuál de las dos vías se atraviesa un beat
+ * `con_objeto`**: con objetos y sin ninguno salen los mismos beats, en el mismo
+ * orden y con el mismo lazo. Por defecto, quien no lleva nada.
  */
-export function beatCasteado({ n, plantillaBeat, lugar, escenaDelLugar, siguiente, tramos }) {
+export function beatCasteado({ n, plantillaBeat, lugar, escenaDelLugar, siguiente, tramos, tenencia = SIN_OBJETOS }) {
   const disparador = { tipo: plantillaBeat.disparador.tipo };
   if (disparador.tipo === 'franja') {
     const franja = franjaDe(plantillaBeat.disparador.franja);
@@ -239,6 +245,10 @@ export function beatCasteado({ n, plantillaBeat, lugar, escenaDelLugar, siguient
   if (disparador.tipo === 'con_objeto') {
     disparador.objeto = plantillaBeat.disparador.objeto;
     disparador.viaAlternativa = { texto: plantillaBeat.disparador.viaAlternativa.texto ?? null };
+    // Por dónde se pasa hoy. Las dos vías resuelven el beat y empujan al mismo
+    // siguiente: la llave abre **otra puerta al mismo sitio**, no una rama. Y no se
+    // gasta al usarse, porque aquí solo se pregunta si se tiene.
+    disparador.via = exigeTenencia(tenencia, `el beat ${n}`).tiene(plantillaBeat.disparador.objeto) ? 'objeto' : 'alternativa';
   }
   return {
     n,
