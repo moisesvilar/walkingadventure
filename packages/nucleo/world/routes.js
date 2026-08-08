@@ -118,18 +118,19 @@ export function validaTramos(routes) {
 }
 
 /**
- * settlements: núcleos generados. `viasOgrafo`: el grafo viario ya construido —lo
- * normal desde `build.js`— o las vías con las que construirlo. names: paquete de
- * nombres. indice: índice de nombres del mundo, compartido con las demás familias.
+ * settlements: núcleos generados. `grafoViario`: el grafo **ya construido** con
+ * `construyeGrafo`; pasar aquí una lista de vías es un error de construcción y falla
+ * nombrándolo. names: paquete de nombres. indice: índice de nombres del mundo,
+ * compartido con las demás familias.
  *
  * Devuelve rutas [{from, to, pts, nodos, tramos, suposiciones, fallback, name}] que
  * conectan todos los núcleos (tramo `fallback` = recta punteada si no hay camino).
  */
-export function buildRoutes(settlements, viasOgrafo, seedStr, names, indice = crearIndiceDeNombres()) {
+export function buildRoutes(settlements, grafoViario, seedStr, names, indice = crearIndiceDeNombres()) {
+  const grafo = exigeGrafo(grafoViario);
   if (settlements.length < 2) return [];
   const rng = makeRng(seedStr + SUFIJOS_DE_FASE.calzadas);
 
-  const grafo = exigeGrafo(viasOgrafo);
   const n = settlements.length;
   const snap = settlements.map((s) => nodoMasCercano(grafo, s, SNAP_MAX));
 
@@ -226,9 +227,9 @@ function rasgoDeRamal(tramos) {
  * paraje recibe como mucho un ramal. Nunca con un sufijo numérico, que rompe la voz
  * del mundo.
  */
-export function linkParajes(parajes, routes, settlements, viasOgrafo, seedStr, names, indice = crearIndiceDeNombres()) {
+export function linkParajes(parajes, routes, settlements, grafoViario, seedStr, names, indice = crearIndiceDeNombres()) {
+  const grafo = exigeGrafo(grafoViario);
   if (!parajes?.length) return [];
-  const grafo = exigeGrafo(viasOgrafo);
   if (!grafo.nodeIds.length) return [];
 
   // la red a la que hay que llegar: los nodos por los que ya pasa una calzada, más los

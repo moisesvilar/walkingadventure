@@ -26,8 +26,12 @@ const ORDEN_DE_NUCLEOS = ['ciudad', 'pueblo', 'aldea', 'granja'];
  * dos—, así que un way puede llegar dos veces; se descarta por su clave estable de
  * OSM y no por su geometría. El orden es el de las dos colecciones, que ya salen
  * ordenadas por esa misma clave desde el parseo.
+ *
+ * Se exporta para que nadie la vuelva a reescribir a mano: quien construya el grafo
+ * fuera de esta tubería —una herramienta, una prueba— tiene que meter las mismas
+ * vías, y una copia de esta unión es otra oportunidad de divergir.
  */
-function viasDelGrafo(geo) {
+export function viasDelGrafo(geo) {
   const vistas = new Set();
   const out = [];
   for (const via of [...geo.roads, ...(geo.callejero ?? [])]) {

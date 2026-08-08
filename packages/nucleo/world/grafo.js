@@ -438,16 +438,31 @@ export function validaGrafo(grafo) {
   return grafo;
 }
 
+/** Cómo se llama en un mensaje de error lo que ha llegado donde iba el grafo. */
+function describe(valor) {
+  if (valor === null) return 'null';
+  if (valor === undefined) return 'undefined';
+  if (Array.isArray(valor)) return `una lista de ${valor.length} vías`;
+  if (typeof valor !== 'object') return `un ${typeof valor}`;
+  return `un objeto sin adj (claves: ${Object.keys(valor).join(', ') || 'ninguna'})`;
+}
+
 /**
- * El grafo, venga ya construido o haya que construirlo de una lista de vías.
+ * El grafo viario ya construido, o un error que nombra lo que ha llegado.
  *
- * Existe para que el grafo se construya **una vez por celda** y se inyecte a las
- * tres fases que lo usan, sin romper a quien todavía le pasa el callejero: tres
- * cosidos del mismo callejero son tres oportunidades de divergir.
+ * **Exige el grafo y no lo construye**, y es deliberado. Aceptar también la lista
+ * de vías hacía que pasar `geo.roads` donde iba el grafo cosido no fallara nunca:
+ * degradaba en silencio a un grafo pobre, construido tres veces y sin el callejero.
+ * El mismo cableado a medias apareció tres veces en una semana y las tres pasó por
+ * verde. Es el mismo criterio que la marca de suposición de las aristas: con un
+ * contrato opcional, «lo he perdido» y «nunca lo tuve» son indistinguibles.
  */
-export function exigeGrafo(viasOgrafo, opciones = {}) {
-  if (viasOgrafo && !Array.isArray(viasOgrafo) && viasOgrafo.adj instanceof Map) return viasOgrafo;
-  return construyeGrafo(viasOgrafo ?? [], opciones);
+export function exigeGrafo(grafo) {
+  if (grafo && !Array.isArray(grafo) && grafo.adj instanceof Map) return grafo;
+  throw new Error(
+    `se esperaba el grafo viario ya construido y ha llegado ${describe(grafo)}: ` +
+    'constrúyelo una sola vez por celda con construyeGrafo(vias) y pásalo a las fases que lo usan',
+  );
 }
 
 /**
@@ -476,8 +491,8 @@ export function nodoMasCercano(grafo, p, max = SNAP_MAX) {
  *
  * Devuelve [{ punto, metros }] con lo que se ha movido, para poder contarlo.
  */
-export function pegarAViario(puntos, viasOgrafo, maxMove = MOVER_MAX) {
-  const grafo = exigeGrafo(viasOgrafo);
+export function pegarAViario(puntos, grafoViario, maxMove = MOVER_MAX) {
+  const grafo = exigeGrafo(grafoViario);
   if (!grafo.nodeIds.length) return [];
   const principales = grafo.nodeIds.filter((id) => grafo.de.get(id) === grafo.mayor);
   if (!principales.length) return [];
