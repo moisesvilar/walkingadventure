@@ -336,18 +336,18 @@ describe('El oro: una cifra que se gasta, y nada más', () => {
 
   test('Un desenlace que declara oro sube la bolsa en lo declarado', () => {
     const estado = { oro: estadoDeOro(), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
-    const cierre = cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', oro: 12 }, dia: '2026-08-08' });
+    const cierre = cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', oro: 12 }, dia: 8 });
     assert.equal(cierre.oro, 12);
     assert.equal(cierre.saldo, 12);
     assert.equal(saldoDe(estado.oro), 12);
 
-    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd2', oro: 8 }, dia: '2026-08-09' });
+    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd2', oro: 8 }, dia: 9 });
     assert.equal(saldoDe(estado.oro), 20);
   });
 
   test('Un desenlace que no declara oro no mueve la bolsa', () => {
     const estado = { oro: bolsaCon(5), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
-    const cierre = cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1' }, dia: '2026-08-08' });
+    const cierre = cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1' }, dia: 8 });
     assert.equal(cierre.oro, 0);
     assert.equal(saldoDe(estado.oro), 5);
   });
@@ -416,8 +416,8 @@ describe('El oro: una cifra que se gasta, y nada más', () => {
 
   test('La bolsa es una por partida y se consulta igual desde los dos mapas', () => {
     const estado = { oro: estadoDeOro(), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
-    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', oro: 20 }, dia: '2026-08-08' });
-    cierraSalidaDeProgresion({ ...estado, mapaId: OTRO_MAPA, desenlace: { id: 'd2', oro: 10 }, dia: '2026-08-09' });
+    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', oro: 20 }, dia: 8 });
+    cierraSalidaDeProgresion({ ...estado, mapaId: OTRO_MAPA, desenlace: { id: 'd2', oro: 10 }, dia: 9 });
 
     assert.equal(saldoDe(estado.oro), 30, 'el oro es lo que se lleva encima y no lo que un sitio piensa de ti');
     // No hay ninguna bolsa por mapa que consultar: la bolsa no sabe de mapas.
@@ -458,7 +458,7 @@ describe('Vacíos, entradas inválidas y errores del oro', () => {
     for (const malo of [-3, 1.5, '5', true]) {
       const estado = { oro: bolsaCon(7), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
       assert.throws(
-        () => cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', oro: malo }, dia: '2026-08-08' }),
+        () => cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', oro: malo }, dia: 8 }),
         new RegExp(JSON.stringify(malo) ?? String(malo)),
         `un desenlace con oro ${JSON.stringify(malo)} se acepta`,
       );
@@ -476,7 +476,7 @@ describe('Vacíos, entradas inválidas y errores del oro', () => {
         { id: 'llave-del-molino' }, // sin clase declarada: falla, y falla después del oro
       ],
     };
-    assert.throws(() => cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace, dia: '2026-08-08' }), /"llave-del-molino"/);
+    assert.throws(() => cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace, dia: 8 }), /"llave-del-molino"/);
     assert.equal(saldoDe(estado.oro), 5, 'el oro se ingresó y el cierre falló después');
     assert.deepEqual(objetosDe(estado.objetos), [], 'un objeto entró antes de que fallara el siguiente');
   });
@@ -512,7 +512,7 @@ describe('Lo generado no se resiembra jamás', () => {
       mapaId: MAPA,
       desenlace: { id: 'd1', oro: 25, objetos: [{ id: 'hebilla-de-laton', clase: 'llave' }], mote: 'la-del-paquete' },
       rumor: 'r1',
-      dia: '2026-08-08',
+      dia: 8,
     });
     compra({ oro: estado.oro, nucleos, mapaId: MAPA, mapa: arbol, informante: informanteDe(nucleo), catalogo: [ITEM_DE_SABER], item: ITEM_DE_SABER.id });
 
