@@ -1212,3 +1212,43 @@ Los tres estados están comprobados: 0 con una prueba que pasa, 1 con una que fa
 `docs/prompt-implementacion.md`, con preflight que para antes de empezar si falta algo, el bucle de ocho pasos, los criterios del veredicto —incluido el tercer caso que no es ni prueba ni código: infraestructura ausente, o un import de React Native colado en el núcleo— y un tope de tres iteraciones por spec antes de marcarla bloqueada y seguir. Un bucle desatendido que se atasca en la fila 3 desperdicia el resto de la noche.
 
 **Verificado**: el preflight del prompt ejecutado tal cual (Node 24, las cuatro skills, naming, los cuatro documentos, y `verifica-gherkin`, `verifica-flujo` y `headless` en verde); Maestro ausente, que es el caso que el diseño del runner ya contempla; el runner probado en sus tres estados; y `git check-ignore` sobre lo nuevo, por la trampa de siempre.
+
+# 8 de agosto de 2026 — La primera noche del bucle
+
+Primera ejecución desatendida de `docs/prompt-implementacion.md`. Se cerraron **cuatro filas del checklist**, se escribieron **catorce specs** y la suite quedó en **276 casos `@nucleo` en verde**. El detalle está en `pipeline/informe-2026-08-08.md`; aquí va lo que merece quedar en la bitácora.
+
+## Lo que se implementó
+
+`SPEC-001` el andamiaje (cuatro fixtures de OSM congelados, cinco dobles, el runner con sus tres códigos de salida), `SPEC-002` el porte del generador a `packages/nucleo/` con la E/S inyectada, `SPEC-003` la semilla y la rejilla de celdas, y `SPEC-004` el tramo personal. B1 va por la mitad: quedan las filas 5 a 8, con sus specs ya escritas.
+
+## Los dos defectos que justifican el diseño del runner
+
+La iteración de `SPEC-001` corrigió dos fallos de la misma familia —**verde que nunca se ejecutó**—, y los dos se descubrieron ejecutando, no leyendo:
+
+**El guardián de ejecución directa fallaba con enlaces simbólicos.** `process.argv[1] === fileURLToPath(import.meta.url)` es falso cuando la ruta atraviesa un symlink, porque `import.meta.url` los resuelve y `argv[1]` no. En macOS `/tmp` y `/var` lo son. Efecto: `valida-spec-test-map.mjs` invocado por una de esas rutas no imprimía nada, no validaba nada y **salía 0**. Un mapa de cobertura mentiroso pasaba por bueno.
+
+**El runner daba PASS con una prueba en rojo si heredaba `NODE_TEST_CONTEXT`.** Al lanzarse desde dentro de otro `node --test`, la salida del anidado cambia de forma, el parseo fallaba y el veredicto salía verde. Ahora el runner sanea el entorno y **afirma** el PASS: si no reconoce el resumen TAP, eso es código 2, nunca verde.
+
+## El determinismo, roto y arreglado
+
+La iteración de `SPEC-002` cerró un `@determinismo` bloqueante: **con los elementos de OSM llegando en otro orden, `costero` y `urbano-denso` generaban otro mundo**. La causa era que el parseo emitía en orden de llegada y nadie ordenaba, y que `parseGeo`/`parseStreets` ni siquiera guardaban el identificador por el que ordenar. Se cerró la clase entera con claves estables (`tipo/id`), no el caso.
+
+En la misma iteración se arregló que **la unicidad de nombres era por familia y no del mundo**: `farmName` y `poiName` no llevaban conjunto de usados, así que `costero#2` repetía «Casal da Colmea» y «Mercado do Dragón Bailador». Ahora hay un índice único compartido por las cinco familias y un `variantName` nuevo en la interfaz común de idiomas.
+
+Arreglarlo tuvo un precio medido y aceptado: los recuentos de `costero#2` cambian, porque quitar el duplicado consume un sorteo más. Se comprobó que **no lo movía la ordenación** —con solo ese cambio los ocho extractos salían byte a byte idénticos— y se decidió que un extracto de referencia no puede vetar un arreglo de determinismo. Está razonado en `pipeline/decisiones-orquestador.md` §6b.
+
+## El hallazgo que hay que atender antes de seguir
+
+**El mundo mínimo no es jugable hoy, y está medido.** Con el tramo en el suelo (250 m), las celdas de `barrio-tres-calles` y `suelo-250m` **no castean ni una sola plantilla con lazo cerrado**. La causa está localizada: `parajeCountForRadius` da 1 y 2 parajes donde el cociente del catálogo pide 3, porque **el suelo derivado del catálogo no está implementado** — hoy el cupo sale de una tabla por radio, que es el techo por ritmo, no el suelo.
+
+`SPEC-004` ya calcula el suelo (siete escenas ÷ dos = cuatro), pero **nadie lo consume**: `parajes.js` sigue generando por radio. Su dueña es la fila 6. Hasta entonces, el escenario «El mundo mínimo todavía compone un lazo» lleva dos filas seguidas sin poder cerrarse, y es el eje de variación 2.3 del PRD fallando justo en su extremo pobre.
+
+## ~~RF-MUNDO-002 sin escenario~~ → hecho
+
+Era uno de los quince huecos de cobertura que el PRD dejó marcados. `docs/testing.md` gana la característica **«La semilla es un dato de la partida, no una coordenada»** con tres escenarios —dos vecinos ven mundos distintos, una semilla mal copiada se rechaza, la semilla no contiene ninguna coordenada— y sus pruebas. Al implementarlos se vio que **ninguna de las tres afirmaciones estaba cubierta del todo** por lo que ya había: se completaron en vez de darlas por buenas. La batería pasa de 174 a 177 casos ejecutables.
+
+## Verificado con
+
+`bash scripts/qa-tester-run.sh SUITE` → **PASS, 276 de 276**, report en `test/reports/SUITE-run-20260808T013508Z.md`. `node test/headless.mjs` en verde. `node test/casting-report.mjs` ejecutado contra los cuatro mundos reales con Overpass local: Sanxenxo 6/6, Toledo 5/6, Madrid 6/6, A Coruña 6/6. `verifica-gherkin` (34 características, 177 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde.
+
+**Lo que no se pudo verificar: nada de nivel `@app`.** Maestro no está instalado en esta máquina, así que ningún flujo de simulador se ejecutó. El report lo registra como infraestructura ausente y nunca como verde, que era justamente el punto.
