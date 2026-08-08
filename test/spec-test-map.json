@@ -3599,6 +3599,570 @@
       "caso": "La fase de parajes siembra con su propio sufijo y no usa ninguna otra fuente de azar ni de tiempo",
       "hueco_de_bateria": true,
       "nota": "El escenario «No se usa ninguna fuente de azar ni de tiempo del sistema» cubre el paquete entero en test/nucleo/generacion.test.mjs."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el callejero de un mundo, cuando se genera ese mundo, entonces el grafo viario se construye una sola vez y lo comparten el pegado de puntos al viario, el trazado de calzadas y el enlace de parajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El grafo se construye una vez y lo comparten el pegado, el trazado y el enlace",
+      "hueco_de_bateria": true,
+      "nota": "Dos comprobaciones que se necesitan: la estática cuenta las construcciones de build.js y ve que las tres fases reciben el mismo grafo; la dinámica manipula un nodo del grafo antes de inyectarlo y comprueba que el trazado lo usa. Con solo la estática, una fase que se construyera el suyo dentro pasaría; con solo la dinámica, no se vería que se construye una vez."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el mismo callejero, cuando se construye el grafo dos veces, entonces los dos grafos tienen los mismos nodos, las mismas aristas, los mismos pesos y las mismas marcas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Construir dos veces el mismo callejero da el mismo grafo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un way del callejero con identificadores de nodo, cuando se construye el grafo, entonces cada par de nodos consecutivos del way produce una arista bidireccional cuyo peso es la distancia real entre ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Cada par de nodos consecutivos de un way da una arista bidireccional con la distancia real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos ways que comparten un identificador de nodo, cuando se construye el grafo, entonces comparten ese nodo y quedan en la misma componente sin necesidad de coser nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos ways que comparten identificador de nodo quedan en la misma componente sin coser nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un grafo construido, cuando se le pide su informe, entonces declara cuántos nodos tiene, cuántas componentes conexas quedan, cuántas aristas se cosieron y cuál es la separación mínima que quedó sin coser.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El informe declara nodos, componentes, cosidas y separación mínima sin coser",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un callejero con dos componentes separadas por 40 m, cuando se construye el grafo, entonces quedan conectadas por una arista cosida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Los huecos cortos se cosen",
+      "escenario": "Los huecos cortos se cosen"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el fixture barrio-tres-calles, cuyo manifiesto declara cuatro componentes conexas separadas por 239, 22, 104 y 22 m, cuando se construye el grafo, entonces los tres huecos por debajo del umbral quedan cosidos y el de 239 m no.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Los huecos cortos se cosen",
+      "escenario": "Los huecos cortos se cosen",
+      "nota": "Medido: sobre el callejero del fixture se cosen 21,9 m y 104,1 m, dos aristas y no tres. Las cuatro distancias del manifiesto son la del vecino más cercano de cada componente, y los dos 22 son la misma pareja contada por sus dos lados; huecos distintos por debajo del umbral hay dos. El criterio dice «los tres huecos» y la afirmación se hace sobre los dos que existen."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un callejero con dos componentes separadas por 400 m, cuando se construye el grafo, entonces no se cosen entre sí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Los huecos largos no se cosen",
+      "escenario": "Los huecos largos no se cosen"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo con componentes aisladas, cuando se pide el informe del grafo, entonces nombra la separación mínima que quedó sin coser, para que se pueda distinguir un dato malo de una separación de verdad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Los huecos largos no se cosen",
+      "escenario": "Los huecos largos no se cosen",
+      "nota": "Medido sobre el callejero del fixture: separacionMinimaSinCoserM = 239,46 m, el hueco que el manifiesto declara en 239."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo con aristas cosidas y con tramos fallback, cuando se inspecciona el grafo, entonces cada arista que no existe en OSM lleva su marca de suposición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Lo cosido y lo inventado queda marcado",
+      "escenario": "Lo cosido y lo inventado queda marcado"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado las dos marcas, cuando se comparan, entonces son valores distintos y distinguibles: cosida dice «esto está unido en la realidad y el dato no lo trae», fallback dice «por aquí no hay camino que conozcamos».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Lo cosido y lo inventado queda marcado",
+      "escenario": "Lo cosido y lo inventado queda marcado"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos componentes separadas exactamente por el umbral de 180 m, cuando se construye el grafo, entonces se cosen: el umbral es inclusivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El umbral es inclusivo: a 180 m se cose y a 180,01 no",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara hueco de la batería: los dos escenarios que hay usan 40 m y 400 m, holgadamente a los dos lados, y el borde no está cubierto."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos componentes separadas por 180,01 m, cuando se construye el grafo, entonces no se cosen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El umbral es inclusivo: a 180 m se cose y a 180,01 no",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos componentes que tienen varias parejas de nodos por debajo del umbral, cuando se construye el grafo, entonces se cosen por su pareja más próxima y por una sola arista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos componentes con varias parejas por debajo del umbral se cosen por la más próxima y una sola vez",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una arista cosida, cuando se lee su peso, entonces es la distancia real entre los dos nodos que une, no cero ni un valor de castigo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Los huecos cortos se cosen",
+      "escenario": "Los huecos cortos se cosen",
+      "nota": "El peso se afirma en el mismo caso que el cosido: el hueco sintético mide 40 m clavados y la arista cosida tiene que pesar eso."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos nodos que ya están en la misma componente, cuando se cose el grafo, entonces no se añade ninguna arista entre ellos aunque estén por debajo del umbral.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El cosido nunca crea un atajo dentro de una componente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos ways que declaran layer distinto —un puente por encima de una carretera—, cuando se cose el grafo, entonces no se cosen entre sí aunque sus nodos estén por debajo del umbral.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos ways con layer distinto no se cosen, y sin layer declarado se tratan al mismo nivel",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos ways sin layer declarado, cuando se cose el grafo, entonces se tratan como si estuvieran al mismo nivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos ways con layer distinto no se cosen, y sin layer declarado se tratan al mismo nivel",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos ways que se cruzan en el plano sin compartir ningún nodo y con todos sus nodos por encima del umbral, cuando se construye el grafo, entonces el cruce no los conecta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos ways que se cruzan en el plano sin compartir nodo no quedan conectados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el umbral de cosido, cuando se consulta, entonces está expresado en metros y no se redimensiona con el tramo del jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El umbral está en metros y no se redimensiona con el tramo del jugador",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre la constante y sobre los cuatro mundos generados, que tienen radios distintos: el umbral declarado en el informe es 180 en los cuatro."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un callejero cuyas componentes quedan separadas por más del umbral, cuando se construye el grafo, entonces el informe declara cuántas componentes siguen separadas y el tamaño de cada una.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "La componente que queda aislada se declara con su tamaño y su separación",
+      "hueco_de_bateria": true,
+      "nota": "Medido sobre el callejero del fixture barrio-tres-calles: componentesAisladas = [{ nodos: 144 }]. Es el hueco de cobertura que la spec anota: «Los huecos largos no se cosen» afirma que no se cosen, y nada afirmaba que la separación se declare."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un núcleo que cae sobre una componente que quedó aislada, cuando se pegan los puntos al viario, entonces se mueve a la red principal si está dentro del tope de desplazamiento, y el desplazamiento queda registrado en metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un núcleo sobre una componente aislada se mueve a la red principal y el desplazamiento queda registrado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un núcleo sobre una componente aislada y más lejos de la red principal que el tope de desplazamiento, cuando se pegan los puntos al viario, entonces se queda donde está y no se mueve a la fuerza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un núcleo más lejos que el tope de desplazamiento se queda donde está",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos núcleos que el grafo no puede conectar por ningún camino, cuando se trazan las calzadas, entonces se traza un tramo recto entre ellos marcado como suposición fallback, y no se presenta como calzada real en ningún dato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos núcleos que el grafo no puede conectar se unen con un tramo recto marcado fallback",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado cualquier arista del grafo, cuando se inspecciona, entonces lleva el campo de suposición declarado explícitamente, con valor nulo si la arista existe en OSM.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Toda arista lleva su marca declarada, y es nula si existe en OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una arista añadida por el cosido, cuando se inspecciona, entonces su marca es cosida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Toda arista lleva su marca declarada, y es nula si existe en OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una arista que viene de un par de nodos consecutivos de un way real, cuando se inspecciona, entonces su marca es nula.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Toda arista lleva su marca declarada, y es nula si existe en OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una arista construida sin el campo de suposición, cuando se valida el grafo, entonces la validación falla nombrando la arista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Una arista sin marca o con una marca desconocida hace fallar la validación nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Es lo que hace comprobable que ninguna capa la pierde en silencio, y por eso se prueban los dos desenlaces: el campo borrado y el campo con un valor que no es del enumerado (un booleano, que es justo la forma anterior de la marca)."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el campo de suposición, cuando se inspecciona, entonces es un enumerado de tres valores —null, cosida y fallback— y no un booleano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Las dos marcas son valores distintos y ninguna es un booleano",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una calzada trazada, cuando se recorren sus tramos, entonces cada tramo lleva su propia marca sin necesidad de volver a consultar el grafo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Cada tramo lleva su marca sin volver a consultar el grafo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo generado, cuando se valida, entonces todo tramo de toda calzada y de todo ramal lleva marca, y un tramo sin marca hace fallar la validación nombrándolo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un tramo sin marca hace fallar la validación nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una calzada cuyo camino atraviesa una arista cosida, cuando se inspecciona la calzada, entonces declara que contiene al menos una suposición cosida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Una calzada que atraviesa una arista cosida lo declara, y la que no atraviesa ninguna también",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una calzada cuyo camino no atraviesa ninguna arista inventada, cuando se inspecciona, entonces declara que no contiene ninguna suposición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Una calzada que atraviesa una arista cosida lo declara, y la que no atraviesa ninguna también",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un ramal cuyo camino atraviesa una arista cosida, cuando se inspecciona el ramal, entonces declara la suposición igual que lo haría una calzada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Cada tramo lleva su marca sin volver a consultar el grafo",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el mundo generado, que trae calzadas y ramales en la misma colección: el resumen de suposiciones se comprueba en todos, sin distinguir."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el mundo generado, cuando se pregunta por la lista de tramos que son suposición nuestra, entonces se obtiene sin recorrer ninguna estructura interna del módulo del grafo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "La lista de tramos supuestos del mundo se obtiene sin recorrer el grafo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos calzadas, una con un tramo fallback y otra con un tramo cosida, cuando se pregunta cuál de las dos cruza un trozo sin calzada real, entonces solo la primera lo declara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Solo la calzada con un tramo fallback declara que cruza un trozo sin calzada real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un jugador con cualquier filtro activo, cuando se traza un lazo, entonces ninguna arista cosida ni ningún tramo fallback se da por apto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Lo que nos inventamos no se promete como transitable",
+      "escenario": "Lo que nos inventamos no se promete como transitable",
+      "nota": "El escenario lo cierra la fila 8: aquí no hay filtro ni lazo que trazar. Lo que este caso afirma es la mitad que esta spec entrega y sin la cual ese escenario no se puede escribir: en los cuatro mundos, todo tramo que no viene de OSM lleva su marca, aparece en la lista de suposiciones del mundo y ninguna ruta con tramos inventados se declara real."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo con parajes enlazados, cuando se recorren todos sus ramales, entonces todos llevan nombre: ninguno queda nulo ni vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Todos los ramales de todos los mundos llevan nombre",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería declarado por la spec: RF-MUNDO-014 no tiene ningún escenario en docs/testing.md. Medido sobre los ocho extractos: 16 ramales, 0 sin nombre."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un ramal que se resolvió con un tramo recto porque no había camino, cuando se inspecciona, entonces también lleva nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un ramal resuelto en recta también lleva nombre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un paraje que no nació del grafo, cuando se enlazan los parajes, entonces recibe exactamente un ramal hasta la red de calzadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Cada paraje que no nace del grafo recibe exactamente un ramal, y el que nace del grafo ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un paraje nacido del grafo —un cruce o un puente—, cuando se enlazan los parajes, entonces no recibe ramal porque ya está sobre una calzada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Cada paraje que no nace del grafo recibe exactamente un ramal, y el que nace del grafo ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un ramal con nombre, cuando se compara con el índice de nombres del mundo, entonces su nombre no coincide con el de ningún núcleo, servicio, paraje ni calzada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo",
+      "nota": "El escenario ya estaba vivo desde SPEC-002, pero hasta ahora el mundo generado en pruebas no traía callejero y por tanto tampoco ramales: es el cableado del helper lo que lo pone a mirar de verdad lo que esta fila añade. Medido: 16 ramales en los ocho extractos, 0 repetidos."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo donde el sorteo de nombres de ramal agota sus formas libres, cuando se nombra el ramal que queda, entonces recibe la forma construida sobre el nombre del paraje al que lleva, que es única por construcción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Agotadas las formas libres, el ramal recibe la forma construida sobre el nombre del paraje",
+      "hueco_de_bateria": true,
+      "nota": "El agotamiento se fuerza con un índice de nombres de prueba que se salta el sorteo: provocarlo con nombres de verdad exigiría un mundo con decenas de ramales, que ningún fixture tiene."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo generado en Galicia, cuando se leen los nombres de los ramales, entonces salen del paquete de idioma gallego, el mismo que resolvió el resto de los nombres del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El idioma sale de la ubicación",
+      "nota": "Los prefijos de cada paquete se enumeran del propio paquete —sorteando ramalName sobre todas sus formas— y no de una lista escrita a mano: así la prueba sigue valiendo cuando se añada una forma nueva, y se comprueba además que ninguno sale del paquete del otro idioma. El escenario existe en docs/testing.md como «Esquema del escenario» con sus dos ejemplos, y el validador solo indexa las líneas «Escenario:»: por eso va marcado como hueco, igual que las entradas de SPEC-002 sobre el mismo esquema.",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo generado fuera de Galicia, cuando se leen los nombres de los ramales, entonces salen del paquete de idioma castellano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El idioma sale de la ubicación",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md como «Esquema del escenario» con sus dos ejemplos, y el validador solo indexa las líneas «Escenario:»: por eso va marcado como hueco, igual que las entradas de SPEC-002 sobre el mismo esquema."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un ramal, cuando se lee su nombre, entonces es un nombre propio de senda en la voz del mundo y no un identificador, un número de orden ni una descripción de su función.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El nombre de un ramal es un nombre propio de senda y no un identificador ni un número de orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un ramal cuyo callejero declara escalones, cuando se nombra, entonces el nombre puede recoger ese rasgo, y si el dato no está el nombre se genera igual sin él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El rasgo del callejero sesga el nombre del ramal y su ausencia no lo impide",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el paquete de idioma y no sobre un mundo generado: los tags que alimentan el rasgo todavía no se piden en la consulta de callejero (los añade la fila 8), así que hoy llega nulo en toda la tubería."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un paquete de idioma que no implementa la función de nombrar ramales, cuando se enlazan los parajes, entonces falla con un error que nombra la función que falta y el paquete que la incumple.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un paquete de idioma sin ramalName falla nombrando la función que falta y el paquete que la incumple",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo sembrado con \"42.40,-8.81#1\", cuando se genera dos veces con los mismos datos de OSM, entonces el grafo cosido, las marcas y los nombres de los ramales son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "El caso compara el mundo serializado entero, que desde el cableado del callejero incluye el informe del grafo, las marcas de cada tramo y los nombres de los ramales."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el mismo callejero servido en orden de llegada invertido, cuando se construye el grafo, entonces salen las mismas aristas cosidas, con las mismas marcas y los mismos pesos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El callejero en orden invertido da el mismo grafo cosido y los mismos nombres de ramal",
+      "escenario": "El orden de iteración no depende del orden de inserción"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el mismo mundo con el callejero en orden invertido, cuando se nombran los ramales, entonces cada paraje recibe el mismo nombre de ramal que antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El callejero en orden invertido da el mismo grafo cosido y los mismos nombres de ramal",
+      "escenario": "El orden de iteración no depende del orden de inserción"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos parejas de nodos candidatas a coser exactamente a la misma distancia, cuando se cose el grafo, entonces el desempate se resuelve por identificador de nodo y no por orden de llegada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "El desempate de cosido se resuelve por identificador de nodo y no por orden de llegada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos nodos del viario exactamente a la misma distancia de un punto que hay que pegar, cuando se elige a cuál pegarlo, entonces el desempate se resuelve por identificador de nodo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos nodos del viario a la misma distancia de un punto se desempatan por identificador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado la fase de nombres de ramal, cuando se inspecciona su fuente de azar, entonces usa un sufijo de semilla propio, distinto del de las calzadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "La fase de ramales siembra con su propio sufijo, distinto del de las calzadas",
+      "escenario": "Cada fase usa su propio sufijo de azar"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado que se cambia la implementación de la fase de ramales sin tocar las demás, cuando se genera otra vez con la misma semilla, entonces los nombres de las calzadas son idénticos a los de antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Cambiar la fase de ramales no renombra las calzadas",
+      "escenario": "Cada fase usa su propio sufijo de azar"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado el módulo del grafo y el de los ramales, cuando se inspecciona su implementación, entonces no aparece Math.random(), ni Date.now(), ni ninguna iteración cuyo resultado dependa del orden de inserción de un Set o un Map.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Ni el grafo ni los ramales usan azar ni reloj del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema"
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo cuyo callejero llega vacío, cuando se construye el grafo, entonces queda un grafo sin nodos, sin aristas cosidas, y la construcción no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un callejero vacío da un grafo sin nodos y sin cosidos, y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo sin callejero y con dos núcleos, cuando se trazan las calzadas, entonces todas salen marcadas fallback y ninguna se presenta como calzada real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Sin callejero, todas las calzadas salen marcadas fallback",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo con un solo núcleo, cuando se trazan las calzadas, entonces no se traza ninguna y no se produce ningún error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un mundo con un solo núcleo no traza ninguna calzada y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo sin ningún paraje, cuando se enlazan los parajes, entonces no se produce ningún ramal y no se pide ningún nombre al paquete de idioma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Sin parajes no se produce ningún ramal ni se le pide nada al paquete de idioma",
+      "hueco_de_bateria": true,
+      "nota": "El «no se le pide nada» se afirma con un paquete de idioma espía que cuenta las llamadas a ramalName: leerlo del código sería fe."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un mundo cuyos parajes son todos de origen grafo, cuando se enlazan, entonces no se produce ningún ramal.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un mundo cuyos parajes son todos de origen grafo no produce ningún ramal",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un callejero de una sola componente ya conexa, cuando se construye el grafo, entonces no se cose ninguna arista y el informe declara cero cosidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un callejero de una sola componente ya conexa no cose ninguna arista",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un umbral de cosido que no es un número positivo, cuando se construye el grafo, entonces falla nombrando el parámetro inválido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un umbral de cosido que no es un número positivo falla nombrando el parámetro",
+      "hueco_de_bateria": true,
+      "nota": "Se prueban cero, negativo, NaN, Infinity, una cadena, un booleano y un objeto. `null` y `undefined` quedan fuera a propósito: significan «no lo he aportado» y caen al umbral por defecto, que es lo que permite construir el grafo sin opciones."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un way con un solo punto, cuando se construye el grafo, entonces aporta su nodo y ninguna arista, sin fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un way de un solo punto aporta su nodo y ninguna arista",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un way con dos puntos en la misma coordenada, cuando se construye el grafo, entonces no se añade una arista de peso cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos puntos en la misma coordenada no producen una arista de peso cero",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre las aristas de OSM, que es lo que dice el criterio. Los dos nodos coincidentes quedan en componentes distintas y el cosido sí los une, con una arista marcada `cosida` de cero metros: no es una arista real presentada como tal, pero queda anotado como hallazgo del caso límite por si la fila 8 lo tuviera que mirar."
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado un way sin identificadores de nodo, cuando se construye el grafo, entonces sus nodos se identifican por coordenada de forma estable entre ejecuciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Un way sin identificadores de nodo se identifica por coordenada de forma estable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado dos ways distintos con el mismo identificador para nodos en coordenadas distintas, cuando se construye el grafo, entonces falla nombrando el identificador en conflicto en lugar de fusionar dos sitios que no son el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Dos ways con el mismo identificador en coordenadas distintas fallan nombrando el identificador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-007",
+      "criterio": "Dado una lista de parajes que llega nula, cuando se enlazan, entonces devuelve una lista vacía de ramales sin fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/grafo.test.mjs",
+      "caso": "Una lista de parajes nula devuelve una lista vacía de ramales sin fallar",
+      "hueco_de_bateria": true
     }
   ]
 }
