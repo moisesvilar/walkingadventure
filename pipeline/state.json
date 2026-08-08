@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-009",
+  "spec_actual": "SPEC-010",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -92,6 +92,16 @@
       "casos": "441 casos: 438 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio",
       "nota": "dos limites declarados: 4 de 16 lazos no se entregan por tramos dificiles sin nombre (deuda de SPEC-007) y los bordillos no se verifican sobre dato real (fixtures capturados solo con ways). Ver decisiones 6i."
+    },
+    {
+      "spec": "SPEC-009",
+      "slug": "serializacion-mundo-congelado",
+      "resultado": "verde",
+      "iteraciones": 1,
+      "report": "test/reports/SPEC-009-iter-1-run-20260808T130216Z.md",
+      "casos": "521 casos: 518 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio",
+      "nota": "la iteracion cuantizo a 1 m (decisiones 6k): casteabilidad baja a 31/48 y el criterio se rebaja a >=31. Dos regresiones destapadas y cerradas: indice que perdia titulo/idioma y caminoMinimo colgandose con aristas de peso cero."
     }
   ],
   "bloqueos": [],
