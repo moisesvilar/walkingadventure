@@ -8,7 +8,9 @@
 //
 // Y no se deja al azar: el prólogo **se compone**. Se resiembra entero, con tope de
 // intentos declarado, hasta que dos núcleos alcanzables hayan oído el mismo suceso
-// en niveles distintos, que es la puesta en escena del mejor truco del juego.
+// en niveles distintos **y exista una aventura del reparto que pase por los dos**,
+// que es la puesta en escena del mejor truco del juego. Sin esa última condición el
+// par se componía siempre y no lo recorría nadie.
 //
 // La frontera que este módulo existe para no romper, dicha en voz alta:
 // **resembrar el prólogo no es resembrar el mundo**. El prólogo es capa sobre el
@@ -21,7 +23,7 @@ import { congelaHondo } from '../core/congelar.js';
 import { makeRng } from '../core/rng.js';
 import { exigeSemilla, semillaDePasoDePrologo, semillaDePrologo } from '../core/semilla.js';
 import { medidorDeTrechos } from '../quests/casting.js';
-import { componeElPar, estadoDeArranque, exigePuntoDePartida, exigeViario, nucleosAlcanzables } from './arranque.js';
+import { TAMANO_DE_LA_PRIMERA_SALIDA, componeElPar, estadoDeArranque, exigePuntoDePartida, exigeViario, nucleosAlcanzables, nucleosConReparto, repartoDelMapa } from './arranque.js';
 import { normalizaCriterios } from './filtro.js';
 import { estadoDeNucleos, loQueSeCuentaEn } from './nucleos.js';
 import { creaMotorDePasos, estadoDePasos, exigeMapaId } from './pasos.js';
@@ -146,7 +148,9 @@ export function intentoDePrologo({
  *   corregirlo más tarde reescribiría un pasado ya asentado—; `partida` el punto de
  *   partida; `criterios` los caminos que se evitan, que deciden qué es alcanzable;
  *   `primerMapa` si este es el primero de la partida, que es lo único que activa la
- *   composición y la regla de la primera aventura; `sinContenidoJugable` la marca de
+ *   composición y la regla de la primera aventura; `tamano` el tamaño de salida con
+ *   el que se compondrá la primera lista, que es contra el que se valida el par;
+ *   `sinContenidoJugable` la marca de
  *   la celda; `arranque`, `rumores` y `nucleos` el estado de la partida donde se
  *   asienta.
  *
@@ -169,6 +173,7 @@ export function correPrologo({
   entregas = ENTREGAS_PROLOGO,
   topePasos = TOPE_PASOS_PROLOGO,
   intentos = INTENTOS_PROLOGO,
+  tamano = TAMANO_DE_LA_PRIMERA_SALIDA,
 } = {}) {
   const semillaPartida = exigeSemilla(semilla);
   const id = exigeMapaId(mapaId, 'el prólogo del mundo');
@@ -197,6 +202,21 @@ export function correPrologo({
   const medidor = medidorDeTrechos(grafo, activos);
   const alcanzables = nucleosAlcanzables({ mundo, partida: desde, criterios: activos, medidor });
 
+  // El reparto se traza **una sola vez y se comparte entre intentos**, por la misma
+  // razón por la que ya se comparte el medidor: el mundo no cambia entre intentos, y
+  // lo que la cuarta cláusula pregunta es del mundo y no del prólogo. Fuera del
+  // primer mapa no se compone nada, así que no se traza nada.
+  const reparto = primerMapa ? repartoDelMapa({ mundo, criterios: activos, tramoM: metrosPorTramo, tamano }) : [];
+  const conReparto = primerMapa ? nucleosConReparto({ mundo, reparto }) : [];
+  // Con menos de dos núcleos donde alguna aventura del reparto sitúe un beat, la
+  // condición es **inalcanzable por construcción**: ninguna resiembra la va a
+  // alcanzar, porque lo que falta está en el mundo y el mundo no se resiembra. Se
+  // corre un intento, se asienta y se termina sin par, con la misma degradación
+  // silenciosa que al agotar el tope. Gastar los ocho sería tiempo tirado en la
+  // pantalla más frágil del juego.
+  const puedeComponer = primerMapa && conReparto.length >= 2;
+  const tope = primerMapa && !puedeComponer ? 1 : intentos;
+
   const pasosPorIntento = [];
   let ultimo = null;
   let par = null;
@@ -204,15 +224,15 @@ export function correPrologo({
 
   // El número de intentos está acotado **por construcción**: es un `for` con tope, no
   // un bucle que dependa de que la condición acabe cumpliéndose.
-  for (let intento = 1; intento <= intentos; intento++) {
+  for (let intento = 1; intento <= tope; intento++) {
     gastados = intento;
     ultimo = intentoDePrologo({ semilla: semillaPartida, mapaId: id, arbol, alcanzables, tramoM: metrosPorTramo, intento, sucesos, entregas, topePasos });
     pasosPorIntento.push(ultimo.pasos);
     // La composición y la resiembra son **solo del primer mapa de la partida**: un
     // mapa nuevo por los bordes y un mundo efímero corren su prólogo igual, pero la
     // puesta en escena es del arranque y solo del arranque (`arranque.md` §2).
-    if (!primerMapa) break;
-    par = componeElPar({ rumores: ultimo.rumores, nucleos: ultimo.nucleos, mapaId: id, alcanzables, mundo, partida: desde, tramoM: metrosPorTramo, medidor, criterios: activos });
+    if (!puedeComponer) break;
+    par = componeElPar({ rumores: ultimo.rumores, nucleos: ultimo.nucleos, mapaId: id, alcanzables, mundo, tramoM: metrosPorTramo, criterios: activos, reparto, tamano });
     if (par) break;
   }
 
@@ -231,7 +251,17 @@ export function correPrologo({
     nucleos,
     entregas: ultimo.entregas,
     par,
-    diagnostico: { intentos: gastados, pasos: pasosPorIntento, compuesto: !!par, alcanzables: alcanzables.length },
+    diagnostico: {
+      intentos: gastados,
+      pasos: pasosPorIntento,
+      compuesto: !!par,
+      alcanzables: alcanzables.length,
+      // Las dos cifras que dicen si la puesta en escena era posible siquiera, para
+      // poder distinguir «no compuso» de «no podía componer». Diagnóstico: no se
+      // serializa y no llega a ninguna pantalla.
+      reparto: reparto.length,
+      conReparto: conReparto.length,
+    },
   });
 }
 

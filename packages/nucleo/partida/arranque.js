@@ -12,12 +12,12 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { medidorDeTrechos } from '../quests/casting.js';
+import { repartoDeAventuras } from './aventuras.js';
 import { PROTAGONISTAS } from './deformacion.js';
 import { normalizaCriterios } from './filtro.js';
 import { exigeMapaId } from './pasos.js';
 import { rumoresDeMapa } from './rumores.js';
 import { loQueSeCuentaEn } from './nucleos.js';
-import { TAMANOS_DE_SALIDA, dimensionaSalida } from './salida.js';
 import { exigeTramoM } from './tramo.js';
 
 /**
@@ -89,6 +89,58 @@ export function exigeViario(mundo) {
   return mundo.viario;
 }
 
+// --- El reparto del mapa, que es lo que decide si un par sirve ---------------
+
+/**
+ * El tamaño de salida **con el que se compone la primera lista de la partida**, y
+ * por tanto con el que se valida el par.
+ *
+ * Se valida contra este y no contra «alguno de los tres declarados»: un par que
+ * solo cabe en `jornada` no pone nada en escena para quien el día 1 sale a dar un
+ * paseo, así que validar contra el tamaño que se va a usar es lo que convierte la
+ * cuarta cláusula en una garantía en vez de en una probabilidad.
+ */
+export const TAMANO_DE_LA_PRIMERA_SALIDA = 'aventura';
+
+/**
+ * Las aventuras del reparto del mapa que **caben** en el tamaño de salida dado, en
+ * orden estable por identificador de plantilla.
+ *
+ * Se lee del casting que ya viaja con el mundo —`repartoDeAventuras` no castea
+ * nada, solo traza el lazo de lo ya casteado— y por eso la cuarta cláusula no
+ * reabre ninguna decisión del casting ni castea una vez por par evaluado.
+ *
+ * **Sin filtro de oficio**, a propósito: el oficio no puede entrar en la condición
+ * de composición, porque dos partidas con la misma semilla y distinto oficio tienen
+ * que componer el mismo par (`arranque.md` §1, el prólogo es propiedad del lugar).
+ */
+export function repartoDelMapa({ mundo, criterios = [], tramoM, tamano = TAMANO_DE_LA_PRIMERA_SALIDA }) {
+  const metrosPorTramo = exigeTramoM(tramoM, 'el reparto con el que se valida el par del prólogo');
+  exigeViario(mundo);
+  const reparto = repartoDeAventuras({ mundo, criterios: normalizaCriterios(criterios), tramo: metrosPorTramo, tamano });
+  if (!reparto.hayReparto) return [];
+  return reparto.aventuras
+    .filter((a) => a.cabe)
+    .sort((x, y) => (x.plantilla < y.plantilla ? -1 : x.plantilla > y.plantilla ? 1 : 0));
+}
+
+/**
+ * Los núcleos del mapa donde **alguna aventura del reparto sitúa un beat**, en
+ * orden estable.
+ *
+ * Es lo único que no miente sobre si un núcleo puede alojar la puesta en escena.
+ * Contar servicios o mirar si el tipo del núcleo aparece en algún rol del catálogo
+ * da falsos positivos medidos: hay **un solo rol de tipo granja**, así que dos
+ * granjas pasarían un filtro por tipo y jamás podrían alojar beats de una misma
+ * aventura.
+ */
+export function nucleosConReparto({ mundo, reparto = [] }) {
+  return (mundo?.settlements ?? [])
+    .map((s) => s.name)
+    .filter((nombre) => reparto.some((aventura) => pasaPorNucleo(aventura, nombre)))
+    .sort();
+}
+
 // --- El par compuesto -------------------------------------------------------
 
 /**
@@ -96,27 +148,35 @@ export function exigeViario(mundo) {
  *
  * Un intento cumple si existe un suceso `S` y dos núcleos `A ≠ B` tales que los dos
  * lo **oyeron** —sedimentado, no en vuelo hacia ellos—, en **niveles distintos**,
- * los dos son **alcanzables**, y existe un **recorrido que pasa por los dos y cabe
- * en alguno de los tamaños de salida declarados**. La cuarta cláusula no está en la
- * letra del PRD y sin ella RF-QUEST-014 puede ser imposible de cumplir con un par
- * perfectamente válido, cayéndose la puesta en escena sin que nada lo declare.
+ * los dos son **alcanzables**, y existe **una aventura del reparto del mapa con al
+ * menos un beat en cada uno de los dos**.
+ *
+ * La cuarta cláusula medía antes un recorrido sintético por el grafo, y eso lo
+ * cumplía casi cualquier pareja de un mapa pequeño: descartaba pares imposibles de
+ * andar, no pares imposibles de **usar**. Medido sobre los ocho extractos de
+ * referencia, el par se componía siempre y ninguna aventura pasaba por los dos, así
+ * que RF-QUEST-014 se cumplía de forma vacía. Ahora se pregunta contra el reparto
+ * real y con el **mismo** predicado `pasaPorNucleo` que aplica el filtro de la
+ * primera aventura: que sean el mismo es lo que hace que la condición garantice el
+ * resultado en vez de aproximarlo.
  *
  * Con varios pares se elige **por regla estable declarada** —el suceso de identidad
  * menor y, dentro de él, la pareja de identificadores de núcleo menor— y nunca por
- * orden de recorrido, que es la dependencia de orden que `CLAUDE.md` prohíbe.
+ * cuál tenga más aventuras que pasen por los dos ni por orden de recorrido, que es
+ * la dependencia de orden que `CLAUDE.md` prohíbe.
  */
-export function componeElPar({ rumores, nucleos, mapaId, alcanzables, mundo, partida, tramoM, medidor = null, criterios = [] }) {
+export function componeElPar({ rumores, nucleos, mapaId, alcanzables, mundo, tramoM, criterios = [], reparto = null, tamano = TAMANO_DE_LA_PRIMERA_SALIDA }) {
   const id = exigeMapaId(mapaId, 'la condición de composición del prólogo');
   const metrosPorTramo = exigeTramoM(tramoM, 'la condición de composición del prólogo');
-  const desde = exigePuntoDePartida(partida);
-  const grafo = exigeViario(mundo);
-  const medida = medidor ?? medidorDeTrechos(grafo, normalizaCriterios(criterios));
+  exigeViario(mundo);
 
   const sitios = alcanzables.slice().sort();
   if (sitios.length < 2) return null;
 
-  const posicion = new Map((mundo.settlements ?? []).map((s) => [s.name, { x: s.x, y: s.y }]));
-  const alcanceMaximoM = Math.max(...TAMANOS_DE_SALIDA.map((t) => dimensionaSalida(t.id, metrosPorTramo).metros));
+  // El reparto llega hecho cuando quien llama corre varios intentos —el mundo no
+  // cambia entre intentos y trazar sus lazos ocho veces sería tirar tiempo—, y se
+  // deriva aquí cuando esta función se usa suelta.
+  const aventuras = reparto ?? repartoDelMapa({ mundo, criterios, tramoM: metrosPorTramo, tamano });
 
   // Qué nivel oyó cada núcleo alcanzable de cada suceso, leído de lo sedimentado y
   // no de los frentes: un rumor en vuelo hacia un sitio no es un sitio que lo oyó.
@@ -141,31 +201,26 @@ export function componeElPar({ rumores, nucleos, mapaId, alcanzables, mundo, par
         const b = oyentes[j];
         // Mismo nivel no compone: la gracia es que las dos versiones se contradigan.
         if (a.nivel === b.nivel) continue;
-        const pa = posicion.get(a.nucleo);
-        const pb = posicion.get(b.nucleo);
-        if (!pa || !pb) continue;
-        const recorridoM = recorridoQuePasaPorLosDos(medida, desde, pa, pb);
-        if (recorridoM === null || recorridoM > alcanceMaximoM) continue;
+        // La cláusula es **de par y no de núcleo**: hace falta una sola aventura con
+        // un beat en A y otro en B. Dos aventuras distintas, una por núcleo, no
+        // componen, porque quien juega acepta una.
+        const avala = aventuras.find((aventura) => pasaPorNucleo(aventura, a.nucleo) && pasaPorNucleo(aventura, b.nucleo));
+        if (!avala) continue;
         return congelaHondo({
           suceso,
           nucleos: [a.nucleo, b.nucleo],
           niveles: { [a.nucleo]: a.nivel, [b.nucleo]: b.nivel },
-          recorridoM,
+          // Qué aventura avala el par: **diagnóstico y no estado**. Se anota, no se
+          // elige —sale del primer elemento de un reparto ordenado por plantilla— y
+          // `congelaArranque` no lo serializa, para no tener que decidir qué pasa
+          // cuando esa plantilla deja de castear.
+          avalada: avala.plantilla,
+          tamano,
         });
       }
     }
   }
   return null;
-}
-
-// Ida, trecho y vuelta, medidos **sobre el grafo**: es el mismo recorrido que
-// mediría el casting para un lazo de dos beats, y por eso se mide igual.
-function recorridoQuePasaPorLosDos(medida, desde, a, b) {
-  const ida = medida.metros(desde, a);
-  const entre = medida.metros(a, b);
-  const vuelta = medida.metros(b, desde);
-  if (ida === null || entre === null || vuelta === null) return null;
-  return ida + entre + vuelta;
 }
 
 /**
