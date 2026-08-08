@@ -10,7 +10,7 @@
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
   "spec_actual": null,
-  "fase": "B2-cerrado",
+  "fase": "B2-cerrado-y-verificado",
   "iteracion": 0,
   "historial": [
     {
@@ -218,9 +218,10 @@
     }
   ],
   "suite_final": {
-    "report": "test/reports/SPEC-016-run-20260808T194903Z.md",
-    "casos": "1036: 1033 pasan, 0 fallan, 3 saltados",
-    "app": "sin flujos"
+    "report": "test/reports/SUITE-run-20260808T203056Z.md",
+    "casos": "1042: 1039 pasan, 0 fallan, 3 saltados",
+    "app": "sin flujos: test/app/ vacio"
   },
-  "bloque": "B2"
+  "bloque": "B2",
+  "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos."
 }
