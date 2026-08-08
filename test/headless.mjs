@@ -12,7 +12,10 @@ import { vocabularioDeEscenas } from '../packages/nucleo/world/cupos.js';
 import { escenasQueCubre, sueloDeVocabulario } from '../packages/nucleo/world/escenas.js';
 import { localeFor, namesFor } from '../packages/nucleo/names/index.js';
 import { makeRng } from '../packages/nucleo/core/rng.js';
-import { castAll, castTemplate } from '../packages/nucleo/quests/casting.js';
+import { CERCA_DE_LA_PARTIDA_EN_TRAMOS, TOPE_DE_TRECHO_EN_TRAMOS, castAll, castTemplate } from '../packages/nucleo/quests/casting.js';
+import { CLAVES_DE_MOTIVO, MOTIVOS_DE_CASTING } from '../packages/nucleo/quests/motivos.js';
+import { DISPARADORES, RESULTADOS } from '../packages/nucleo/quests/aventura.js';
+import { TRAMO_DE_REFERENCIA_M } from '../packages/nucleo/world/cupos.js';
 import { TEMPLATES } from '../packages/nucleo/quests/templates.js';
 
 let failures = 0;
@@ -54,13 +57,17 @@ const SUELO = sueloDeVocabulario(VOCABULARIO);
 function generate(radius, seed, names) {
   const { anchors, geo } = syntheticWorld(radius);
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, names);
-  const routes = buildRoutes(settlements, construyeGrafo(viasDelGrafo(geo)), seed, names);
+  // El grafo, una sola vez y guardado: desde SPEC-010 el casting mide los trechos
+  // sobre él y no en línea recta, así que un mundo de prueba sin viario ya no es
+  // un mundo que se pueda castear.
+  const grafo = construyeGrafo(viasDelGrafo(geo));
+  const routes = buildRoutes(settlements, grafo, seed, names);
   const ficha = {};
   const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, names, undefined, null, null, {
     vocabulario: VOCABULARIO,
     ficha,
   });
-  return { settlements, routes, parajes, freeAnchors, ficha };
+  return { settlements, routes, parajes, freeAnchors, ficha, viario: grafo };
 }
 
 const es = namesFor('es');
@@ -139,27 +146,39 @@ console.log('— idiomas por ubicación —');
 console.log('— casting de quests —');
 {
   const w = generate(1200, 'cast#1', es);
-  const world = { seed: 'cast#1', radius: 1200, settlements: w.settlements, parajes: w.parajes, routes: w.routes };
+  // El encuadre del casteo viaja con el mundo, igual que en la tubería: tramo de
+  // referencia y el centro del mundo como punto de partida.
+  const casteo = { tramoM: TRAMO_DE_REFERENCIA_M, partida: { x: 0, y: 0 } };
+  const world = { seed: 'cast#1', radius: 1200, settlements: w.settlements, parajes: w.parajes, routes: w.routes, viario: w.viario, casteo };
   const results = castAll(world);
   const ok = results.filter((c) => c.ok);
   console.log(`    casteables: ${ok.length}/${results.length} — ${results.map((c) => `${c.tpl.id}${c.ok ? '✓' : '✗'}`).join(' ')}`);
   check('al menos la mitad del catálogo castea en un mundo "aventura"', ok.length >= Math.ceil(results.length / 2));
   for (const c of ok) {
+    const p = c.presupuesto;
     check(`${c.tpl.id}: beats completos y lugares distintos por rol`, c.beats.every((b) => b.lugar) && new Set(Object.values(c.asignacion).map((l) => `${l.x},${l.y}`)).size === Object.keys(c.asignacion).length);
-    check(`${c.tpl.id}: lazo (${(c.distancia / 1000).toFixed(1)} km, ~${c.minutos} min, ${c.encaja})`, c.beats[0].lugar === c.beats[c.beats.length - 1].lugar && c.encaja !== 'demasiado larga');
+    check(`${c.tpl.id}: lazo cerrado (${p.enTramos.recorrido.toFixed(2)} tramos, ${p.tamano})`,
+      c.beats[0].lugar === c.beats[c.beats.length - 1].lugar
+      && p.enTramos.ida <= CERCA_DE_LA_PARTIDA_EN_TRAMOS && p.enTramos.vuelta <= CERCA_DE_LA_PARTIDA_EN_TRAMOS
+      && p.enTramos.trechoMasLargo <= TOPE_DE_TRECHO_EN_TRAMOS && p.enTramos.recorrido <= p.enTramos.alcance);
+    check(`${c.tpl.id}: cada beat trae lugar, disparador, escena y resultado`,
+      c.beats.every((b) => b.lugar?.nombre && DISPARADORES.includes(b.disparador.tipo) && b.escena?.tipo && RESULTADOS.includes(b.resultado.tipo))
+      && c.beats[c.beats.length - 1].resultado.siguienteBeat === null);
     const rolesParaje = Object.entries(c.tpl.roles).filter(([, r]) => r.tipo === 'paraje');
     check(`${c.tpl.id}: parajes con la escena pedida`, rolesParaje.every(([rid, r]) => {
-      const p = w.parajes.find((x) => x.name === c.asignacion[rid].nombre);
+      const p2 = w.parajes.find((x) => x.name === c.asignacion[rid].nombre);
       const escenas = Array.isArray(r.escena) ? r.escena : [r.escena];
-      return p && escenas.some((e) => (p.scenes[e] ?? 0) >= 0.2);
+      return p2 && escenas.some((e) => (p2.scenes[e] ?? 0) >= 0.2);
     }));
   }
   const again = castAll(world);
   check('casting determinista', JSON.stringify(results.map((c) => c.ok && c.beats.map((b) => b.lugar.nombre))) === JSON.stringify(again.map((c) => c.ok && c.beats.map((b) => b.lugar.nombre))));
   const fracaso = results.find((c) => !c.ok);
-  if (fracaso) check(`los no casteables explican el motivo ("${fracaso.motivo}")`, typeof fracaso.motivo === 'string' && fracaso.motivo.length > 5);
-  const sinParajes = castTemplate({ seed: 'x', radius: 1200, settlements: w.settlements, parajes: [], routes: [] }, TEMPLATES.find((t) => t.id === 'entrega-sospechosa'));
-  check('mundo sin parajes → motivo claro', !sinParajes.ok && sinParajes.motivo.includes('paraje'));
+  if (fracaso) check(`los no casteables explican el motivo ("${fracaso.motivo.clave}")`, CLAVES_DE_MOTIVO.includes(fracaso.motivo.clave) && fracaso.motivo.roles.length >= 0);
+  const sinParajes = castTemplate({ ...world, parajes: [] }, TEMPLATES.find((t) => t.id === 'entrega-sospechosa'));
+  check('mundo sin parajes → motivo estructurado', !sinParajes.ok
+    && sinParajes.motivo.clave === MOTIVOS_DE_CASTING.SIN_CANDIDATOS
+    && sinParajes.motivo.requisito.tipo === 'paraje');
 }
 
 console.log('— determinismo —');

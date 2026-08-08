@@ -146,10 +146,10 @@ class Monticulo {
 }
 
 /**
- * El camino de coste lexicográfico mínimo entre dos nodos, o null si no hay
- * ninguno. Devuelve también qué arista se usó en cada paso: con aristas paralelas,
- * reconstruir el camino preguntando cuál es «la mejor» daría otra distinta de la
- * que se recorrió.
+ * El árbol de caminos de coste lexicográfico mínimo desde un nodo: coste a cada
+ * destino, predecesor y **qué arista** se usó en cada paso. Lo último importa: con
+ * aristas paralelas, reconstruir el camino preguntando cuál es «la mejor» daría
+ * otra distinta de la que se recorrió.
  *
  * El empate lo rompe el identificador del nodo anterior y no el orden de la lista
  * de adyacencia: dos callejeros con los mismos datos en otro orden tienen que dar
@@ -166,7 +166,7 @@ class Monticulo {
  * esté asentado y el sucesor no hace imposible que dos nodos lo sean el uno del
  * otro. De paso cierra que el origen reciba predecesor: es el primero en asentarse.
  */
-function caminoMinimo(grafo, src, dst, criterios) {
+export function arbolDeCaminos(grafo, src, criterios = []) {
   const coste = new Map([[src, [0, 0, 0]]]);
   const previo = new Map();
   const porDonde = new Map();
@@ -200,6 +200,18 @@ function caminoMinimo(grafo, src, dst, criterios) {
       }
     }
   }
+  return { src, coste, previo, porDonde };
+}
+
+/**
+ * El camino a un destino dentro de un árbol ya calculado, o null si no se llega.
+ *
+ * Separado del árbol porque **el árbol se reutiliza**: el casting mide decenas de
+ * parejas sobre el mismo grafo y recalcular un Dijkstra por pareja es la diferencia
+ * entre castear un mundo y castear un mundo veinte veces.
+ */
+export function caminoDesdeArbol(arbol, dst) {
+  const { src, coste, previo, porDonde } = arbol;
   if (!coste.has(dst)) return null;
 
   const nodos = [dst];
@@ -216,10 +228,15 @@ function caminoMinimo(grafo, src, dst, criterios) {
   return { nodos, aristas, coste: coste.get(dst) };
 }
 
+function caminoMinimo(grafo, src, dst, criterios) {
+  return caminoDesdeArbol(arbolDeCaminos(grafo, src, criterios), dst);
+}
+
 /** La clave de una arista sin dirección: es la identidad del tramo, ida o vuelta. */
 const claveDeTramo = (a, b) => (comparaNodo(a, b) <= 0 ? `${a}|${b}` : `${b}|${a}`);
 
-function tramosDelCamino(grafo, camino) {
+/** Los tramos de un camino, con su nombre, su marca de suposición y su aptitud. */
+export function tramosDelCamino(grafo, camino) {
   const tramos = [];
   for (let i = 0; i < camino.nodos.length - 1; i++) {
     const a = camino.nodos[i], b = camino.nodos[i + 1];

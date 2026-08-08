@@ -6,6 +6,7 @@
 import { congelaHondo } from '../core/congelar.js';
 import { exigeSemilla, semillaDeCelda } from '../core/semilla.js';
 import { castAll } from '../quests/casting.js';
+import { TRAMO_DE_REFERENCIA_M } from '../world/cupos.js';
 import { tramosSupuestos } from '../world/routes.js';
 import {
   CLASES,
@@ -623,6 +624,11 @@ export function levantaCelda(doc, { semilla } = {}) {
   // El casting no se congela: se recompone contra el mundo levantado, que es
   // determinista y no pide nada a nadie. Lo que hay que conservar es el resultado
   // **aceptado**, y eso es estado del jugador (fila 16).
+  //
+  // El encuadre tampoco se guarda, por lo mismo: es el que declara la tubería al
+  // generar (`world/build.js`), y repetirlo en el documento sería una segunda copia
+  // del mismo número esperando a desincronizarse.
+  mundo.casteo = { tramoM: TRAMO_DE_REFERENCIA_M, partida: { x: 0, y: 0 } };
   mundo.casting = castAll(mundo);
 
   const centro = { lat: d.celda.centro.lat, lon: d.celda.centro.lon };
