@@ -23,6 +23,18 @@
 //   Y cada beat, su `disparador` (`llegada` · `franja` · `con_objeto`) y su
 //   `resultado` (`informacion` · `objeto` · `estado`), que son los dos campos de
 //   `quests.md` §2 que hasta ahora estaban escritos y sin usar.
+//
+//   `rumor`   si su desenlace es notable, con qué semilla nace y cuál es el signo
+//             del acto (`quests.md` §6). **Se declara y no se deduce** del texto
+//             del desenlace ni de la recompensa: con una declaración opcional, «no
+//             es notable» y «se me olvidó decirlo» son indistinguibles, y media
+//             aventura se quedaría sin rumor sin que nadie se enterara. La semilla
+//             son **hechos estructurados** —asunto, escala y el detalle que
+//             importa— y no prosa: es lo que hace verificable que la deformación no
+//             invierte el signo sin un narrador delante. Los valores del detalle
+//             son identificadores del suceso, nunca texto que se enseñe.
+//             Mientras el catálogo de la fila 17 no exista, estas seis son la
+//             declaración viva.
 
 export const TEMPLATES = [
   {
@@ -30,6 +42,14 @@ export const TEMPLATES = [
     titulo: 'La entrega sospechosa',
     gancho: 'El tabernero desliza un paquete envuelto en hule por encima del mostrador: «Llévaselo al herrero. No preguntes. Y si alguien te sale al paso… no era mío».',
     tamano: 'paseo',
+    // El signo declarado es el del desenlace de la plantilla; si la partida ofrece
+    // otra salida —vender el paquete en el paraje— el desenlace trae el suyo y ese
+    // manda. Lo que nunca cambia es que el signo lo fija el código.
+    rumor: {
+      notable: true,
+      signo: 'bueno',
+      semilla: { asunto: 'paquete-entregado', escala: { veces: 1 }, detalle: { con: 'herrero', motivo: 'encargo-de-la-taberna' } },
+    },
     orden: ['origen', 'riesgo', 'destino'],
     roles: {
       origen: { tipo: 'servicio', kind: 'taberna' },
@@ -60,6 +80,11 @@ export const TEMPLATES = [
     titulo: 'La cita al caer la tarde',
     gancho: 'Una nota doblada bajo tu puerta en la posada: «Si quieres saber la verdad, ven donde susurra el agua cuando el sol se esconda. Ven sin compañía».',
     tamano: 'paseo',
+    rumor: {
+      notable: true,
+      signo: 'bueno',
+      semilla: { asunto: 'verdad-sacada-a-la-luz', escala: { veces: 1 }, detalle: { con: 'encapuchada', motivo: 'nota-bajo-la-puerta' } },
+    },
     orden: ['dador', 'cita', 'confidente'],
     roles: {
       dador: { tipo: 'servicio', kind: 'posada' },
@@ -88,6 +113,11 @@ export const TEMPLATES = [
     gancho: 'Ha desaparecido algo valioso y nadie vio nada. Tres rumores, tres lugares: alguien miente, y caminando se descubre a los mentirosos.',
     // Seis beats y cinco sitios: es la única del catálogo que no es un paseo.
     tamano: 'aventura',
+    rumor: {
+      notable: true,
+      signo: 'bueno',
+      semilla: { asunto: 'culpable-senalado', escala: { veces: 1 }, detalle: { con: 'culpable', motivo: 'robo-sin-testigos' } },
+    },
     orden: ['origen', 'pista1', 'pista2', 'pista3', 'resolucion'],
     roles: {
       origen: { tipo: 'servicio', kind: 'taberna' },
@@ -110,6 +140,11 @@ export const TEMPLATES = [
     titulo: 'La ronda del vigía',
     gancho: 'El vigía está viejo y la ronda es larga: «Hazla tú por mí esta vez. Mira desde lo alto, pasa por el cruce, y cuéntame TODO lo que veas. Todo».',
     tamano: 'paseo',
+    rumor: {
+      notable: true,
+      signo: 'bueno',
+      semilla: { asunto: 'ronda-cumplida', escala: { veces: 1 }, detalle: { con: 'vigia', motivo: 'emboscada-en-el-paso' } },
+    },
     orden: ['cuartel', 'alto', 'paso'],
     roles: {
       cuartel: { tipo: 'nucleo', types: ['pueblo', 'ciudad'] },
@@ -128,6 +163,11 @@ export const TEMPLATES = [
     titulo: 'El pequeño peregrinaje',
     gancho: 'Para curar lo que la botica no cura, el remedio antiguo: rezar donde se reza, y dejar una ofrenda donde los antiguos escuchaban.',
     tamano: 'paseo',
+    // La única del catálogo cuyo desenlace **no** es notable, y a propósito: un
+    // remedio que se pide en voz baja no lo cuenta nadie por los caminos. Existe
+    // para que «el rumor solo aparece si el desenlace era notable» tenga un caso
+    // vivo y no haya que fabricarlo.
+    rumor: { notable: false },
     orden: ['origen', 'templo', 'antiguo'],
     roles: {
       origen: { tipo: 'nucleo', types: ['aldea', 'pueblo'] },
@@ -146,6 +186,11 @@ export const TEMPLATES = [
     titulo: 'El zagal perdido',
     gancho: 'En la granja falta el zagal desde el alba. El perro volvió solo, mirando hacia el camino. La granjera no llora: aprieta los puños y te mira a ti.',
     tamano: 'paseo',
+    rumor: {
+      notable: true,
+      signo: 'bueno',
+      semilla: { asunto: 'zagal-rescatado', escala: { veces: 1 }, detalle: { con: 'zagal', motivo: 'desaparicion-al-alba' } },
+    },
     orden: ['granja', 'peligro', 'botica'],
     roles: {
       granja: { tipo: 'nucleo', types: ['granja'] },
