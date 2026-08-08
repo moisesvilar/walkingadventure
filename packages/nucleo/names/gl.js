@@ -61,6 +61,19 @@ const PARAJE_PARTS = {
   monasterio: [['O Mosteiro', 'O Priorado', 'A Abadía'], ['Gris', 'do Abrente', 'dos Calados', 'da Vide', 'do Eco'], { 'A Abadía': ['Gris', 'do Abrente', 'dos Calados', 'da Vide', 'do Eco'] }],
 };
 
+// Nombres de persona, con **repertorio equilibrado**: el mismo número en cada
+// género, por lo mismo que en `es`. Los epítetos son de carácter y de rasgo, nunca
+// de oficio: el oficio ya lo dice el puesto.
+const NOMBRES_DE_PERSONA = {
+  femenino: ['Aldara', 'Sabela', 'Uxía', 'Mariña', 'Estrela', 'Ledicia', 'Xoana', 'Antía', 'Amancia', 'Xacinta', 'Tareixa', 'Iria', 'Adosinda', 'Ilduara', 'Munia', 'Xela', 'Brisa', 'Erea', 'Noela', 'Sisenanda'],
+  masculino: ['Breogán', 'Xoán', 'Anxo', 'Suevo', 'Froilán', 'Ramiro', 'Xurxo', 'Paio', 'Mendo', 'Airas', 'Lourenzo', 'Estevo', 'Gonzalo', 'Farruco', 'Xacobe', 'Nuno', 'Bieito', 'Roi', 'Sisnando', 'Amaro'],
+};
+
+const EPITETOS_DE_PERSONA = {
+  femenino: ['a Zurda', 'a Calada', 'a Roxa', 'a Miúda', 'a do Norte', 'a Risoña', 'a Xorda', 'a Vella', 'a Lixeira', 'a Áspera', 'a Argalleira', 'a Madrugadora'],
+  masculino: ['o Zurdo', 'o Calado', 'o Roxo', 'o Miúdo', 'o do Norte', 'o Risoño', 'o Xordo', 'o Vello', 'o Lixeiro', 'o Áspero', 'o Argalleiro', 'o Madrugador'],
+};
+
 // Epítetos de sitio para desempatar nombres repetidos. Sintagmas preposicionales
 // y no adjetivos: valen igual para «O Pozo» y para «A Fonte», sin discordancias.
 const VARIANT_TAILS = ['de Arriba', 'de Abaixo', 'do Abrente', 'do Solpor', 'da Sombra', 'da Solaina', 'do Norte', 'do Sur', 'de Levante', 'de Poñente', 'do Camiño', 'do Val'];
@@ -125,6 +138,38 @@ export const gl = {
       k = Math.floor(k / VARIANT_TAILS.length);
     } while (k > 0);
     return nombre;
+  },
+
+  /**
+   * El nombre propio de una cara, con su género. Misma regla que en `es` y por el
+   * mismo motivo: un género sin repertorio **falla nombrando el idioma y el
+   * género** en lugar de caer en el otro, y sin `rng` devuelve la forma de
+   * desempate, que encadena epítetos y por eso siempre deja un nombre libre.
+   */
+  personName(rng, genero, { base = null, intento = 0 } = {}) {
+    const nombres = NOMBRES_DE_PERSONA[genero];
+    const epitetos = EPITETOS_DE_PERSONA[genero];
+    if (!nombres || !epitetos) {
+      throw new Error(
+        `el paquete de idioma "gl" no tiene repertorio de nombres de persona para el género ${JSON.stringify(genero) ?? String(genero)}: ` +
+        `los que declara son ${Object.keys(NOMBRES_DE_PERSONA).join(', ')}`,
+      );
+    }
+    if (!rng) {
+      if (typeof base !== 'string' || !base) {
+        throw new Error('el desempate de un nombre de persona necesita el nombre base sobre el que encadenar el epíteto');
+      }
+      let nombre = base;
+      let k = Math.max(0, Math.floor(intento) || 0);
+      do {
+        nombre += ` ${epitetos[k % epitetos.length]}`;
+        k = Math.floor(k / epitetos.length);
+      } while (k > 0);
+      return nombre;
+    }
+    const nombre = pick(rng, nombres);
+    const epiteto = pick(rng, epitetos);
+    return pick(rng, [nombre, `${nombre} ${epiteto}`, `${nombre} ${epiteto}`]);
   },
 
   worldTitle(rng) {
