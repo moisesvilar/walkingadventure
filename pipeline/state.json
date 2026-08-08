@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "AUSENTE — las pruebas @app no se pueden ejecutar en esta maquina"
   },
-  "spec_actual": "SPEC-004",
-  "fase": "pending",
+  "spec_actual": null,
+  "fase": "informe-final",
   "iteracion": 0,
   "historial": [
     {
@@ -42,6 +42,16 @@
       "casos": "217/217 @nucleo",
       "app": "no ejecutado: Maestro ausente",
       "nota": "dos casos reatribuidos a SPEC-006 por alcance (RF-MUNDO-007 es de las filas 4 y 6). El mundo minimo sigue sin lazo: ver decisiones-orquestador.md 6d."
+    },
+    {
+      "spec": "SPEC-004",
+      "slug": "tramo-personal",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-004-run-20260808T012930Z.md",
+      "casos": "275/275 @nucleo",
+      "app": "no ejecutado: Maestro ausente",
+      "nota": "el suelo de parajes se calcula (7 escenas / 2 = 4) pero nadie lo consume: parajes.js sigue con parajeCountForRadius. Duena: fila 6."
     }
   ],
   "bloqueos": [],
@@ -58,7 +68,9 @@
     "SPEC-009-serializacion-mundo-congelado",
     "SPEC-010-casting-quests",
     "SPEC-011-motor-pasos",
-    "SPEC-012-propagacion-rumores"
+    "SPEC-012-propagacion-rumores",
+    "SPEC-013-prologo-mundo",
+    "SPEC-014-npcs-capa"
   ],
   "veredictos": [
     {
