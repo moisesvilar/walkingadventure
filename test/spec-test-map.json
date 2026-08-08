@@ -3147,9 +3147,9 @@
       "criterio": "Dado los ocho extractos de referencia regenerados tras esta iteración, cuando se suman las plantillas que castean en todos ellos, entonces el total es al menos 21 de 48, que es el valor medido en `cec7d91`, el commit anterior a esta fila.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/reparto.test.mjs",
-      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 21 de 48",
+      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 31 de 48",
       "hueco_de_bateria": true,
-      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral es el número medido en cec7d91 y no el de hoy (24/48), para que una mejora no ponga rojo el caso."
+      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral vigente es 31/48, dictaminado en `pipeline/decisiones-orquestador.md` §6k: la cuantización de SPEC-009-iter-1 cuesta un lazo de `suelo-250m#1` y se aceptó a cambio de que el documento del mundo denso quepa en su presupuesto. La trayectoria del umbral desde que se escribió el caso es 21 (cec7d91) → 24 → 30 → 32 → 31. Sigue escrito como umbral y no como igualdad, para que una mejora no ponga rojo el caso."
     },
     {
       "spec": "SPEC-005-iter-1",
@@ -3696,7 +3696,7 @@
       "criterio": "Dado dos componentes separadas exactamente por el umbral de 180 m, cuando se construye el grafo, entonces se cosen: el umbral es inclusivo.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/grafo.test.mjs",
-      "caso": "El umbral es inclusivo: a 180 m se cose y a 180,01 no",
+      "caso": "El umbral es inclusivo: a 180 m se cose y a 181 no",
       "hueco_de_bateria": true,
       "nota": "La spec lo declara hueco de la batería: los dos escenarios que hay usan 40 m y 400 m, holgadamente a los dos lados, y el borde no está cubierto."
     },
@@ -3705,8 +3705,9 @@
       "criterio": "Dado dos componentes separadas por 180,01 m, cuando se construye el grafo, entonces no se cosen.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/grafo.test.mjs",
-      "caso": "El umbral es inclusivo: a 180 m se cose y a 180,01 no",
-      "hueco_de_bateria": true
+      "caso": "El umbral es inclusivo: a 180 m se cose y a 181 no",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se escribió con 180,01 y desde SPEC-009-iter-1 esa distancia ya no existe: los metros van en la rejilla de `PRECISION_M`, así que 180,01 y 180 son el mismo metro. El caso afirma lo mismo —el umbral es inclusivo, no estricto— con el primer valor por encima que la rejilla distingue, `COSER_MAX + PRECISION_M`."
     },
     {
       "spec": "SPEC-007",
@@ -4136,9 +4137,9 @@
       "criterio": "Dado un way con dos puntos en la misma coordenada, cuando se construye el grafo, entonces no se añade una arista de peso cero.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/grafo.test.mjs",
-      "caso": "Dos puntos en la misma coordenada no producen una arista de peso cero",
+      "caso": "El lazo sobre sí mismo no produce arista, y dos nodos distintos en la misma coordenada sí",
       "hueco_de_bateria": true,
-      "nota": "Se afirma sobre las aristas de OSM, que es lo que dice el criterio. Los dos nodos coincidentes quedan en componentes distintas y el cosido sí los une, con una arista marcada `cosida` de cero metros: no es una arista real presentada como tal, pero queda anotado como hallazgo del caso límite por si la fila 8 lo tuviera que mirar."
+      "nota": "SPEC-009-iter-1 derogó de hecho este criterio y `pipeline/decisiones-orquestador.md` §6l lo ratificó: con los metros en la rejilla de `PRECISION_M`, dos nodos de OSM distintos a menos de medio metro comparten coordenada y su arista de peso cero es la calle, no una arista espuria. Descartarla partía vías reales para que el cosido las reinventara como suposición nuestra. El caso pasa a afirmar lo que de la guarda sigue valiendo —un nodo repetido consigo mismo no es una arista— más lo que la iteración hizo legítimo: la arista existe, se declara real y no ensucia el camino mínimo. El criterio de SPEC-007 tal como está escrito ya no se cumple ni se puede cumplir; queda pendiente de que la spec lo actualice."
     },
     {
       "spec": "SPEC-007",
@@ -4713,6 +4714,140 @@
       "fichero": "test/nucleo/accesibilidad.test.mjs",
       "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
       "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema"
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mundo generado, cuando se mide la longitud de una arista entre dos puntos distintos, entonces no es cero: las longitudes se calculan sobre coordenadas ya cuantizadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Una arista de peso cero no deja el trazado dando vueltas",
+      "hueco_de_bateria": true,
+      "nota": "El reverso del criterio, que es donde estaba el defecto: dos puntos **coincidentes** sí dan cero —a la resolución del metro esa es la verdad— y `pipeline/decisiones-orquestador.md` §6l decidió conservar esa arista en lugar de descartarla. El caso afirma que conservarla no rompe el trazado. Estuvo en rojo mientras el desempate de `caminoMinimo` reasignaba `previo` en los dos sentidos de una arista de coste cero: la cadena de predecesores dejaba de ser un árbol y la reconstrucción del camino no terminaba. Cerrado el defecto, está en verde, y con él se pudo remedir «Un tramo difícil sin nombre propio hace fallar la entrega nombrando el tramo», que no podía medir urbano-denso mientras durase. El caso corre en otro proceso con el montón acotado —el fallo era un bucle que llena la memoria—, y su guion importa el paquete por ruta calculada en tiempo de ejecución: un literal con la raíz interpolada haría saltar la guarda «node --test test/nucleo/ arranca sin instalar ninguna dependencia», que no distingue —ni debe— un import de este módulo de uno escrito para otro proceso."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el paquete entregado, cuando se busca de dónde sale la precisión con la que se guardan los metros, entonces hay una sola constante, con su justificación escrita al lado, y ningún otro número de precisión repartido por el código.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La precisión sale de una sola constante, con su justificación al lado",
+      "hueco_de_bateria": true,
+      "nota": "Tres afirmaciones y las tres estáticas, porque el criterio es sobre el código y no sobre lo que produce: una sola declaración de `PRECISION_M` en todo el paquete y en `core/geo.js`, ninguna otra constante cuyo nombre suene a precisión, y la justificación en el comentario de al lado citando el presupuesto que la decidió. Un valor que se justifica en otro documento se cambia sin leerlo."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el paquete entregado, cuando se recorren las fases de generación, entonces todas cuantizan con esa constante y ninguna redondea por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La precisión sale de una sola constante, con su justificación al lado",
+      "hueco_de_bateria": true,
+      "nota": "La parte estática del criterio: las seis fases que la spec nombra como productoras de metros —`build`, `grafo`, `routes`, `settlements`, `parajes` y `costura`— toman `cuantizaM`, `cuantizaPunto` o `dist` de `core/geo.js`. La parte que de verdad muerde es la de después, sobre el documento: si una fase redondeara por su cuenta, el número saldría fuera de la rejilla y el otro caso lo vería. No se prohíbe todo `Math.round` en esas fases a propósito: hay redondeos legítimos que no son de metros —claves de nodo, cupos, pasos de rejilla— y una prohibición ciega los convertiría en falsos rojos."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el módulo de congelado, cuando se recorre lo que hace con los números, entonces no redondea ni uno: escribe lo que le llega, que es lo que hace afirmable el ida y vuelta exacto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El módulo de congelado no redondea ni un número",
+      "hueco_de_bateria": true,
+      "nota": "Es la mitad del contrato «se cuantiza al generar y nunca al volcar». Sobre `partida/mundo.js` y `partida/formato.js`: ni `Math.round`, ni `toFixed`, ni `toPrecision`, ni el cuantizador, ni la constante. Los `Math.floor`/`Math.ceil` que quedan se dejan pasar exigiendo que todos dividan entre 8, que es lo que son: contar bytes de la rejilla de bits de la máscara de mar."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un documento de celda, cuando se recorre cualquier número que esté en metros, entonces es múltiplo exacto de la constante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Todo número en metros del documento de una celda es múltiplo exacto de la constante",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre **todos** los números del documento de los cuatro mundos congelados y no sobre una lista de campos elegidos a mano, que es lo que dejaría entrar el que se olvide: lo enumerado es lo contrario, las dos únicas familias que no están en metros —los grados y los pesos de escena—, y el caso comprueba además que ninguna de las dos sale vacía, para que el filtro no pueda tragárselo todo en silencio. Con la rejilla del metro, «múltiplo exacto» es «entero». La comprobación va por el cociente y no por el resto: `-10000 % 1` es `-0`, y con igualdad estricta el resto pondría rojo todo metro negativo redondo."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un documento de celda, cuando se leen las coordenadas en grados de su cabecera —anclaje, centro, esquinas— y los extremos de las costuras del índice, entonces la constante no los ha tocado: gobierna los metros y solo los metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "La constante gobierna los metros y no toca los grados de la cabecera",
+      "hueco_de_bateria": true,
+      "nota": "La mitad del criterio que vive en el documento de una celda; la de las costuras del índice está en el caso «Los grados de las costuras del índice no los toca la rejilla del metro», de almacen.test.mjs. Se afirma de dos maneras: los grados del documento son exactamente los que calcula la rejilla, y conservan seis decimales o más —un metro de longitud son ~1,2e-5 grados—, que es la prueba de que nadie los ha llevado a la rejilla. Es el caso que impide el arreglo fácil de cuantizarlo todo: redondear el anclaje movería el identificador del mapa que fija SPEC-003."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa guardado con al menos una celda abierta, cuando se carga, se abre una celda y se vuelve a guardar, entonces el índice escrito es idéntico byte a byte al que había: no se ha perdido nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Cargar el mapa, abrir una celda y volver a guardarlo deja el índice idéntico byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "El ciclo entero y no la lectura de un campo, que es lo que pide la spec: guardar, cargar sin ninguna celda, cargar una, y volver a guardar. La versión con el defecto pasaba cualquier comprobación que no cargase el mapa antes, porque con las celdas en memoria el título sí estaba donde se buscaba."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa cargado cuyas celdas son todas fichas sin mundo, cuando se congela su índice, entonces declara el mismo título y el mismo idioma que declaraba antes de cargarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Un mapa cargado cuyas celdas son fichas sin mundo declara el mismo título y el mismo idioma",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba antes que nada que las celdas son fichas de verdad —`mundoDeCelda` falla nombrando la celda—, para que el caso no pueda pasar por accidente sobre un mapa con las celdas cargadas."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado el código que congela el índice, cuando se busca de dónde salen sus campos, entonces ninguno se deriva del mundo de una celda ni de ninguna otra estructura que la carga perezosa pueda dejar sin rellenar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Ningún campo del índice se deriva del mundo de una celda",
+      "hueco_de_bateria": true,
+      "nota": "De código, porque el fallo era de código: con las celdas cargadas la versión mala también producía el documento bueno. Se leen los cuerpos de `congelaIndice` y de `fichaDeCelda` con los comentarios quitados —esos comentarios nombran `celda.mundo` a propósito, para decir que de ahí no se saca nada—, y se exige además que el título y el idioma salgan de `exigeCampo(mapa, …)`."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa con al menos una celda abierta al que le falta el título o el idioma, cuando se congela su índice, entonces falla nombrando el campo, en lugar de escribir un documento con `null`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null",
+      "hueco_de_bateria": true,
+      "nota": "Cubre también el criterio general de la iteración —al escribir un documento, un campo ausente es un error y no un `null`— probándolo sobre un tercer campo que no es ninguno de los dos del defecto, `motivo` de una ficha de celda: si la guarda fuera solo para el título y el idioma, la clase seguiría abierta. Y el reverso, en el mismo caso: el nulo de un mapa recién creado sin ninguna celda sigue pasando, porque ahí sí es un estado del mundo."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado cualquier documento de esta capa, cuando se escribe leyendo un campo obligatorio que no está en el objeto de origen, entonces se falla nombrando el campo: al escribir un documento, un campo ausente es un error y no un `null`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null",
+      "hueco_de_bateria": true,
+      "nota": "Es el criterio que cierra la clase, y por eso se prueba sobre un campo ajeno al defecto (`motivo`) además de sobre los dos que lo tuvieron. Queda un hueco declarado: se afirma sobre la ruta de congelado del índice y no sobre la del documento de celda, que tiene sus propios casos de campo obligatorio en persistencia.test.mjs."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa recién creado sin ninguna celda congelada todavía, cuando se congela su índice, entonces el título y el idioma son nulos y no hay error: ahí el nulo sí es un estado del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null",
+      "hueco_de_bateria": true,
+      "nota": "Va en el mismo caso que el criterio anterior a propósito: la distinción entre el nulo legítimo y el nulo que sale de no haber cargado algo solo se ve afirmando los dos lados juntos. El escenario de SPEC-009 «Un mapa recién creado sin ninguna celda congelada se carga con cero celdas y ningún error» lo afirma también, por el lado de la carga."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa con varias celdas, cuando se abren en cualquier orden, entonces el título y el idioma del índice son siempre los de la celda que ordena primero por su clave.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "El título y el idioma del índice son los de la celda que ordena primero, se abran en el orden que se abran",
+      "hueco_de_bateria": true,
+      "nota": "Se abren las dos celdas en los dos órdenes y se comprueba antes que los dos mundos dan títulos distintos, que si no el caso no compararía nada. Se afirma además sobre el texto entero del índice, no solo sobre los dos campos: el orden de apertura no puede mover nada del documento."
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un mapa, cuando se guarda dos veces seguidas sin abrir ni cargar nada entre medias, entonces los dos índices escritos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Guardar dos veces seguidas sin tocar nada escribe el mismo índice byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-009-iter-1",
+      "criterio": "Dado un documento de celda, cuando se leen las coordenadas en grados de su cabecera —anclaje, centro, esquinas— y los extremos de las costuras del índice, entonces la constante no los ha tocado: gobierna los metros y solo los metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/almacen.test.mjs",
+      "caso": "Los grados de las costuras del índice no los toca la rejilla del metro",
+      "hueco_de_bateria": true,
+      "nota": "La mitad del criterio que vive en el índice: los extremos de una costura son grados y conservan precisión más fina que el metro, mientras que sus `metros` sí están en la rejilla. Redondearlos movería el punto donde dos celdas se cosen."
     },
     {
       "spec": "SPEC-009",

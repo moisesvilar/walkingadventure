@@ -12,6 +12,7 @@
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   CLAVES,
@@ -39,6 +40,7 @@ import { CLASES, VERSION_FORMATO, VERSION_GENERADOR, texto } from '../../package
 import { declaraTramo, cambiaTramo } from '../../packages/nucleo/partida/tramo.js';
 import { incorporaMedida, mideRitmoDeSalida } from '../../packages/nucleo/partida/ritmo.js';
 import { limitesDeCelda, proyectorDeRejilla } from '../../packages/nucleo/world/rejilla.js';
+import { PRECISION_M } from '../../packages/nucleo/core/geo.js';
 import { STYLES, getStyle } from '../../app/js/render/styles.js';
 import { creaInspectorDeRed } from '../dobles/inspector-red.mjs';
 import { simulaRecorrido } from '../dobles/gps-simulado.mjs';
@@ -479,5 +481,164 @@ describe('La red, solo en dos momentos', () => {
     } finally {
       inspector.suelta();
     }
+  });
+});
+
+// ── SPEC-009-iter-1 · El índice guarda lo suyo ──────────────────────────────────
+//
+// El defecto era de una celda que no estaba: `congelaIndice` sacaba el título y el
+// idioma de `primera?.mundo?.title`, y las celdas de un mapa cargado son fichas sin
+// mundo. El encadenamiento opcional atravesaba la ausencia sin ruido y el `?? null`
+// la escribía en disco como un valor legítimo. Bastaba abrir una celda para perder
+// el título del mapa, para siempre y sin una sola excepción.
+//
+// Es la degradación silenciosa de `pipeline/decisiones-orquestador.md` §6h por
+// quinta vez: una pieza que, al no estar, no protesta. Estos casos son los que
+// impiden que vuelva, y el que la cierra como clase es el último: al **escribir** un
+// documento, un campo ausente es un error y no un `null`.
+
+const FUENTE_DE_MAPA = readFileSync(new URL('../../packages/nucleo/partida/mapa.js', import.meta.url), 'utf8');
+
+/** Una copia de un objeto a la que le falta un campo, para probar la ausencia. */
+const sinCampo = (objeto, campo) => {
+  const copia = { ...objeto };
+  delete copia[campo];
+  return copia;
+};
+
+describe('El índice guarda lo suyo, y volver a guardarlo nunca lo empobrece', () => {
+  test('Cargar el mapa, abrir una celda y volver a guardarlo deja el índice idéntico byte a byte', async () => {
+    // La secuencia de todos los días, y la que producía la pérdida: se abre el
+    // juego, se carga el mapa sin ninguna celda, se pisa una que ya estaba abierta
+    // y algo llama a `guardaMapa`, que llama siempre a `guardaIndice`.
+    const { mapa, almacen } = await mapaConDosCeldas();
+    const original = almacen.datos.get(CLAVES.indice(mapa.id));
+
+    const cargado = await cargaMapa({ almacen, id: mapa.id, semilla: SEMILLA_A });
+    assert.equal(cargado.celdas.some(estaCargada), false, 'cargar el mapa ha leído alguna celda: el caso no reproduce la secuencia');
+
+    await cargaCelda(cargado, { i: 0, j: 0 }, { almacen });
+    assert.equal(estaCargada(celdaAbierta(cargado, { i: 0, j: 0 })), true, 'la celda no se ha cargado');
+    assert.equal(estaCargada(celdaAbierta(cargado, { i: 1, j: 0 })), false, 'se ha cargado una celda que nadie pidió');
+
+    await guardaMapa(cargado, { almacen });
+    assert.equal(almacen.datos.get(CLAVES.indice(mapa.id)), original, 'volver a guardar un mapa cargado ha empobrecido su índice');
+  });
+
+  test('Un mapa cargado cuyas celdas son fichas sin mundo declara el mismo título y el mismo idioma', async () => {
+    const { mapa, almacen } = await mapaConDosCeldas();
+    const antes = JSON.parse(almacen.datos.get(CLAVES.indice(mapa.id)));
+    assert.ok(antes.titulo && antes.idioma, 'el índice guardado no lleva título ni idioma: el caso no comprueba nada');
+
+    const cargado = await cargaMapa({ almacen, id: mapa.id, semilla: SEMILLA_A });
+    assert.equal(cargado.celdas.some(estaCargada), false, 'alguna celda ha llegado cargada');
+    assert.throws(() => mundoDeCelda(cargado, { i: 0, j: 0 }), /no se ha cargado/, 'las fichas no son fichas: el caso no prueba lo que dice');
+
+    const doc = congelaIndice(cargado);
+    assert.equal(doc.titulo, antes.titulo, 'el índice de un mapa de fichas ha perdido el título');
+    assert.equal(doc.idioma, antes.idioma, 'el índice de un mapa de fichas ha perdido el idioma');
+  });
+
+  test('Ningún campo del índice se deriva del mundo de una celda', async () => {
+    // Se lee el cuerpo de `congelaIndice` y de la ficha que construye: si un campo
+    // vuelve a derivarse atravesando `celda.mundo`, la carga perezosa vuelve a poder
+    // escribir un nulo. La comprobación es de código porque el fallo era de código:
+    // con las celdas cargadas, la versión mala también pasaba.
+    //
+    // Se afirma sobre el código y no sobre la prosa: los comentarios de ese módulo
+    // hablan de `celda.mundo` a propósito, para decir que de ahí no se saca nada.
+    const codigoDe = (nombre, declaracion) => {
+      const trozo = FUENTE_DE_MAPA.split(declaracion)[1];
+      assert.ok(trozo, `no se ha encontrado ${nombre}: el caso no lee lo que cree`);
+      return trozo.split('\n}')[0].replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    };
+
+    const cuerpo = codigoDe('congelaIndice', 'export function congelaIndice(');
+    assert.equal(/\.mundo\b/.test(cuerpo), false, 'congelaIndice vuelve a derivar un campo del mundo de una celda');
+    assert.equal(/\?\./.test(cuerpo.split('celdas')[1] ?? ''), false, 'congelaIndice atraviesa una ausencia con encadenamiento opcional');
+    for (const campo of ['titulo', 'idioma']) {
+      assert.match(cuerpo, new RegExp(`${campo}: exigeCampo\\(mapa, '${campo}'`), `congelaIndice no exige el campo ${campo} al propio mapa`);
+    }
+    assert.equal(/\.mundo\b/.test(codigoDe('fichaDeCelda', 'function fichaDeCelda(')), false, 'la ficha de una celda se deriva de su mundo');
+
+    // Y el efecto, medido: un mapa entero de fichas se congela sin error.
+    const { mapa, almacen } = await mapaConDosCeldas();
+    const cargado = await cargaMapa({ almacen, id: mapa.id, semilla: SEMILLA_A });
+    assert.doesNotThrow(() => congelaIndice(cargado), 'un mapa de fichas ya no se puede congelar');
+  });
+
+  test('Al escribir el índice, un campo ausente falla nombrándolo en vez de escribir un null', async () => {
+    const { mapa } = await mapaConDosCeldas();
+
+    for (const campo of ['titulo', 'idioma']) {
+      assert.throws(
+        () => congelaIndice(sinCampo(mapa, campo)),
+        (e) => new RegExp(`"${campo}"`).test(e.message) && /null/.test(e.message),
+        `un mapa con celdas abiertas y sin ${campo} escribe un documento en vez de fallar nombrando el campo`,
+      );
+    }
+
+    // Y no es una guarda solo para esos dos: cualquier campo obligatorio de la ruta
+    // de congelado se exige igual, que es lo que cierra la clase.
+    const conFichaRota = { ...mapa, celdas: [sinCampo(mapa.celdas[0], 'motivo'), ...mapa.celdas.slice(1)] };
+    assert.throws(() => congelaIndice(conFichaRota), /"motivo"/, 'una ficha sin motivo escribe un nulo en vez de fallar');
+
+    // Lo que sí sigue pasando es el nulo que es un estado del mundo: un mapa recién
+    // creado no tiene ninguna celda de la que sacar título, y ahí el nulo es verdad.
+    const recien = creaMapa({ semilla: SEMILLA_A, ...ARRANQUE, tramoM: 2000 });
+    const doc = congelaIndice(recien);
+    assert.deepEqual({ titulo: doc.titulo, idioma: doc.idioma, celdas: doc.celdas }, { titulo: null, idioma: null, celdas: [] });
+  });
+
+  test('El título y el idioma del índice son los de la celda que ordena primero, se abran en el orden que se abran', async () => {
+    const abriendo = async (orden) => {
+      const { mapa, consultaOsm } = mapaSintetico();
+      for (const celda of orden) await abreCelda(mapa, celda, { consultaOsm });
+      return mapa;
+    };
+    const enOrden = await abriendo([{ i: 0, j: 0 }, { i: 1, j: 0 }]);
+    const alReves = await abriendo([{ i: 1, j: 0 }, { i: 0, j: 0 }]);
+
+    // Que la comparación diga algo: las dos celdas tienen títulos distintos.
+    const titulos = enOrden.celdas.map((r) => r.mundo.title);
+    assert.notEqual(titulos[0], titulos[1], 'las dos celdas dan el mismo título: el caso no comprueba nada');
+
+    const primero = enOrden.celdas.find((r) => r.clave === '0,0').mundo;
+    for (const [donde, mapa] of [['abriendo en orden', enOrden], ['abriendo al revés', alReves]]) {
+      const doc = congelaIndice(mapa);
+      assert.equal(doc.titulo, primero.title, `${donde}: el título del índice no es el de la celda que ordena primero`);
+      assert.equal(doc.idioma, primero.locale, `${donde}: el idioma del índice no es el de la celda que ordena primero`);
+    }
+    assert.equal(textoDeIndice(enOrden), textoDeIndice(alReves), 'el orden de apertura cambia el índice');
+  });
+
+  test('Guardar dos veces seguidas sin tocar nada escribe el mismo índice byte a byte', async () => {
+    const { mapa, almacen } = await mapaConDosCeldas();
+    const primero = almacen.datos.get(CLAVES.indice(mapa.id));
+    await guardaMapa(mapa, { almacen });
+    assert.equal(almacen.datos.get(CLAVES.indice(mapa.id)), primero, 'guardar dos veces seguidas da dos índices distintos');
+  });
+
+  test('Los grados de las costuras del índice no los toca la rejilla del metro', async () => {
+    // El índice es el otro sitio donde viven grados, y por lo mismo que la cabecera
+    // de una celda: son los extremos reales de una costura y redondearlos movería el
+    // punto donde dos celdas se cosen. Sus metros sí están en la rejilla.
+    const { mapa } = await mapaConDosCeldas();
+    const doc = congelaIndice(mapa);
+    const aristas = doc.costuras.flatMap((c) => c.aristas);
+    assert.ok(aristas.length > 0, 'el índice no declara ninguna arista de costura: el caso no comprueba nada');
+
+    const decimalesDe = (v) => (String(v).split('.')[1] ?? '').length;
+    let finos = 0;
+    for (const a of aristas) {
+      for (const extremo of [a.desde, a.hasta]) {
+        // Un metro de longitud son ~1,2e-5 grados: con seis decimales o más, nadie
+        // los ha llevado a la rejilla.
+        if (decimalesDe(extremo.lat) >= 6 || decimalesDe(extremo.lon) >= 6) finos++;
+      }
+      assert.equal(a.metros / PRECISION_M, Math.round(a.metros / PRECISION_M), `los metros de la costura ${a.desde.clave} → ${a.hasta.clave} valen ${a.metros}, que no está en la rejilla`);
+    }
+    assert.ok(finos > 0, 'todos los grados de las costuras vienen redondeados a menos de un metro de precisión');
+    assert.deepEqual(doc.anclaje, { lat: mapa.anclaje.lat, lon: mapa.anclaje.lon }, 'el anclaje del índice no es el de la rejilla');
   });
 });

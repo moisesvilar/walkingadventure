@@ -34,6 +34,8 @@ import {
   texto,
 } from '../../packages/nucleo/partida/formato.js';
 import { castAll } from '../../packages/nucleo/quests/casting.js';
+import { PRECISION_M } from '../../packages/nucleo/core/geo.js';
+import { limitesDeCelda } from '../../packages/nucleo/world/rejilla.js';
 import { creaInspectorDeRed } from '../dobles/inspector-red.mjs';
 import { SEMILLA_A, SEMILLA_B, serializado } from './celda-de-prueba.mjs';
 import {
@@ -49,6 +51,7 @@ import {
   modificable,
   placesDePrueba,
   recorreDocumento,
+  rejillaDe,
   textosDe,
 } from './partida-de-prueba.mjs';
 
@@ -896,5 +899,155 @@ describe('Del móvil no sale nada del jugador', () => {
     assert.ok(cierre.size > 10, `el cierre de imports de partida/ tiene solo ${cierre.size} módulos: no se ha recorrido nada`);
     assert.deepEqual(externos, [], `partida/ importa módulos de fuera del paquete: ${externos.join(', ')}`);
     assert.deepEqual(sospechosos, [], `hay una salida a red en el cierre de partida/: ${sospechosos.join(', ')}`);
+  });
+});
+
+// ── SPEC-009-iter-1 · La precisión con la que se guardan los metros ─────────────
+//
+// La iteración no arregló un número: cerró una clase. El documento guardaba la
+// precisión de la aritmética de coma flotante, que no es una decisión de nadie, y
+// ahora guarda la que el juego necesita, que sí lo es. Estos casos son los que
+// impiden que la clase vuelva: que la precisión siga siendo **una** constante, que
+// se aplique al generar y nunca al volcar, y que gobierne los metros y solo los
+// metros.
+
+/** Todos los módulos del paquete, en orden estable y con su ruta desde la raíz. */
+function modulosDelPaquete(dir = 'packages/nucleo') {
+  const out = [];
+  for (const e of readdirSync(join(RAIZ, dir), { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    if (e.isDirectory()) out.push(...modulosDelPaquete(`${dir}/${e.name}`));
+    else if (e.name.endsWith('.js')) out.push(`${dir}/${e.name}`);
+  }
+  return out;
+}
+
+const fuenteDe = (ruta) => readFileSync(join(RAIZ, ruta), 'utf8');
+
+// Las fases que producen metros: las que la spec nombra como sitios donde un
+// redondeo propio se colaría sin que nadie lo viera.
+const FASES_QUE_PRODUCEN_METROS = [
+  'packages/nucleo/world/build.js',
+  'packages/nucleo/world/grafo.js',
+  'packages/nucleo/world/routes.js',
+  'packages/nucleo/world/settlements.js',
+  'packages/nucleo/world/parajes.js',
+  'packages/nucleo/world/costura.js',
+];
+
+/** Los decimales que trae escrito un número. Un metro de longitud son ~1,2e-5 grados. */
+const decimalesDe = (v) => (String(v).split('.')[1] ?? '').length;
+
+/**
+ * Si un número cae en la rejilla de `PRECISION_M`. Se compara con el cociente y no
+ * con el resto porque `-10000 % 1` es `-0`, y `-0 !== 0` en una igualdad estricta:
+ * el resto haría fallar a todo metro negativo redondo.
+ */
+const enLaRejilla = (v) => v / PRECISION_M === Math.round(v / PRECISION_M);
+
+/**
+ * Las rutas del documento cuyo número **no está en metros**, y por qué. Son las dos
+ * únicas familias: los grados, que la constante no toca por decisión escrita, y los
+ * pesos de escena, que son proporciones sin unidad.
+ */
+const EN_GRADOS = /\.(lat|lon|lng)$/;
+const SIN_UNIDAD = /\.scenes\.|\.pesoMinimo$/;
+
+describe('La precisión con la que se guardan los metros es una constante única', () => {
+  test('La precisión sale de una sola constante, con su justificación al lado', () => {
+    const declaran = modulosDelPaquete().filter((m) => /(?:^|\n)\s*export const PRECISION_M\s*=/.test(fuenteDe(m)));
+    assert.deepEqual(declaran, ['packages/nucleo/core/geo.js'], 'la precisión no sale de una sola constante, o no vive donde nacen los metros');
+
+    // Y nadie se guarda otra con otro nombre: dos precisiones son cero precisiones,
+    // porque la que manda pasa a ser la del último sitio que tocó el número.
+    const otras = [];
+    for (const modulo of modulosDelPaquete()) {
+      for (const m of fuenteDe(modulo).matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*=/g)) {
+        if (m[1] !== 'PRECISION_M' && /PRECISION|PRECISION|REDONDEO|DECIMALES/i.test(m[1])) otras.push(`${modulo} → ${m[1]}`);
+      }
+    }
+    assert.deepEqual(otras, [], 'hay otra constante de precisión repartida por el paquete');
+
+    // La justificación, al lado del número y no en otro documento: quien vaya a
+    // cambiarlo tiene que tropezarse con lo que se midió para elegirlo.
+    const previo = fuenteDe('packages/nucleo/core/geo.js').split(/export const PRECISION_M\s*=/)[0].split('/**').pop();
+    assert.ok(previo.split('\n').length >= 5, 'la constante de precisión no lleva su justificación escrita al lado');
+    assert.ok(previo.includes('2048'), 'la justificación de la precisión no cita el presupuesto que la decidió');
+
+    // Y las fases que producen metros la toman de ahí en vez de redondear a mano.
+    for (const fase of FASES_QUE_PRODUCEN_METROS) {
+      assert.match(
+        fuenteDe(fase),
+        /import\s*\{[^}]*\b(?:cuantizaM|cuantizaPunto|dist)\b[^}]*\}\s*from\s*'\.\.\/core\/geo\.js'/,
+        `${fase}: produce metros y no toma la cuantización de core/geo.js`,
+      );
+    }
+  });
+
+  test('El módulo de congelado no redondea ni un número', () => {
+    // Es la mitad del contrato que hace afirmable el ida y vuelta exacto: se
+    // cuantiza en la generación y **nunca al volcar**. Si el volcado redondeara,
+    // congelar y levantar dejarían de dar el mismo documento en cuanto un número
+    // cayera justo en la mitad de la rejilla.
+    for (const modulo of ['packages/nucleo/partida/mundo.js', 'packages/nucleo/partida/formato.js']) {
+      const src = fuenteDe(modulo);
+      for (const patron of [/\bMath\.round\s*\(/, /\bMath\.trunc\s*\(/, /\.toFixed\s*\(/, /\.toPrecision\s*\(/, /\bcuantiza(?:M|Punto)\b/, /\bPRECISION_M\b/]) {
+        assert.equal(patron.test(src), false, `${modulo}: la capa de congelado toca la precisión de un número (${patron})`);
+      }
+      // Los `floor`/`ceil` que quedan cuentan bytes de la rejilla de bits de la
+      // máscara de mar, y se comprueba que es eso: todos dividen entre 8.
+      for (const linea of src.split('\n')) {
+        if (/\bMath\.(?:floor|ceil)\s*\(/.test(linea)) {
+          assert.match(linea, /\/\s*8\b/, `${modulo}: hay un redondeo que no es contar bytes: ${linea.trim()}`);
+        }
+      }
+    }
+  });
+
+  test('Todo número en metros del documento de una celda es múltiplo exacto de la constante', async () => {
+    // Se afirma sobre **todos** los números del documento y no sobre una lista de
+    // campos elegidos a mano, que es lo que dejaría entrar el que se olvide: lo que
+    // se enumera es lo contrario, las dos familias que no están en metros. Con la
+    // rejilla del metro, «múltiplo exacto» es «entero», y los índices y recuentos
+    // pasan de largo por serlo ya.
+    for (const nombre of LOS_CUATRO) {
+      const doc = await documentoDe(nombre);
+      const fuera = [];
+      const grados = [];
+      const pesos = [];
+      recorreDocumento(doc, (ruta, valor) => {
+        if (typeof valor !== 'number') return;
+        if (EN_GRADOS.test(ruta)) return void grados.push(ruta);
+        if (SIN_UNIDAD.test(ruta)) return void pesos.push(ruta);
+        if (!enLaRejilla(valor)) fuera.push(`${ruta} = ${valor}`);
+      });
+      assert.deepEqual(fuera.slice(0, 5), [], `${nombre}: hay metros fuera de la rejilla de ${PRECISION_M} m (${fuera.length} en total)`);
+      assert.ok(grados.length > 0, `${nombre}: el filtro de grados no ha apartado ninguno, así que no está apartando lo que cree`);
+      assert.ok(pesos.length > 0, `${nombre}: el filtro de pesos no ha apartado ninguno, así que no está apartando lo que cree`);
+    }
+  });
+
+  test('La constante gobierna los metros y no toca los grados de la cabecera', async () => {
+    // El reverso del caso anterior, y el que impide el arreglo fácil de cuantizarlo
+    // todo: redondear el anclaje movería el identificador del mapa que fija
+    // SPEC-003, y redondear las esquinas movería el borde de la celda.
+    for (const nombre of ['costero', 'urbano-denso']) {
+      const rejilla = rejillaDe(nombre);
+      const doc = congelaCelda(await celdaDeFixture(nombre, { celda: DOS_CELDAS[1] }));
+      const limites = limitesDeCelda(rejilla, DOS_CELDAS[1]);
+
+      assert.deepEqual(doc.mapa.anclaje, { lat: rejilla.anclaje.lat, lon: rejilla.anclaje.lon }, `${nombre}: el anclaje del documento no es el de la rejilla`);
+      assert.deepEqual(doc.celda.esquinas, limites.esquinas, `${nombre}: las esquinas del documento no son las que calcula la rejilla`);
+      assert.deepEqual(doc.celda.centro, limites.centro, `${nombre}: el centro del documento no es el que calcula la rejilla`);
+
+      // Y siguen teniendo precisión más fina que un metro, que en longitud son unos
+      // 1,2e-5 grados: seis decimales o más es la prueba de que nadie los ha rozado.
+      const finos = doc.celda.esquinas.filter((e) => decimalesDe(e.lat) >= 6 && decimalesDe(e.lon) >= 6);
+      assert.equal(finos.length, doc.celda.esquinas.length, `${nombre}: las esquinas vienen redondeadas a menos de un metro de precisión`);
+
+      // Los metros de la misma cabecera sí están en la rejilla.
+      for (const [campo, valor] of Object.entries(doc.celda.metros)) {
+        assert.equal(enLaRejilla(valor), true, `${nombre}: celda.metros.${campo} vale ${valor}, que no está en la rejilla`);
+      }
+    }
   });
 });

@@ -24,6 +24,7 @@ import {
   limitesDeCelda,
   proyectorDeRejilla,
 } from '../../packages/nucleo/world/rejilla.js';
+import { PRECISION_M } from '../../packages/nucleo/core/geo.js';
 import { creaMapa } from '../../packages/nucleo/partida/mapa.js';
 import { SEMILLA_A, serializado } from './celda-de-prueba.mjs';
 import { fuente, modulosDelPaquete } from './mundo-de-prueba.mjs';
@@ -120,19 +121,24 @@ describe('La rejilla y su anclaje', () => {
     const borde = rejilla.ladoM / 2;
 
     // Regla declarada: intervalos semiabiertos, el borde es de la celda que
-    // empieza en él. Se comprueba a un milímetro a cada lado y no en el punto
-    // exacto porque el borde solo existe en metros: el viaje a coordenadas
-    // geográficas y vuelta pierde ~1e-10 m, y a esa escala el punto exacto cae al
-    // lado de abajo. No hay solape ni hueco —cada posición tiene una celda y solo
-    // una—, pero el caso exacto no se puede afirmar con una coordenada.
+    // empieza en él. Se comprueba **a un metro** a cada lado y no en el punto
+    // exacto porque el borde solo existe en metros y, desde que SPEC-009-iter-1
+    // cuantiza los metros a `PRECISION_M`, solo existe en esa rejilla: el
+    // milímetro con el que se comprobaba antes de la iteración **ya es el propio
+    // borde** al proyectar, así que el primer punto distinguible a cada lado está
+    // a `PRECISION_M`. No se afloja nada —la regla del borde se sigue afirmando a
+    // los dos lados y en las dos direcciones—; lo que cambia es la distancia más
+    // pequeña con la que se puede afirmar. No hay solape ni hueco —cada posición
+    // tiene una celda y solo una—, pero el caso exacto no se puede afirmar con
+    // una coordenada.
     const en = (x, y) => {
       const g = proy.toLatLon({ x, y });
       return celdaEnPosicion(rejilla, g.lat, g.lon);
     };
-    assert.deepEqual(en(borde - 0.001, 0), { i: 0, j: 0 }, 'un milímetro antes del borde este ya no es la celda 0,0');
-    assert.deepEqual(en(borde + 0.001, 0), { i: 1, j: 0 }, 'un milímetro después del borde este no es la celda 1,0');
-    assert.deepEqual(en(0, borde + 0.001), { i: 0, j: 1 });
-    assert.deepEqual(en(-borde - 0.001, 0), { i: -1, j: 0 });
+    assert.deepEqual(en(borde - PRECISION_M, 0), { i: 0, j: 0 }, 'un metro antes del borde este ya no es la celda 0,0');
+    assert.deepEqual(en(borde + PRECISION_M, 0), { i: 1, j: 0 }, 'un metro después del borde este no es la celda 1,0');
+    assert.deepEqual(en(0, borde + PRECISION_M), { i: 0, j: 1 });
+    assert.deepEqual(en(-borde - PRECISION_M, 0), { i: -1, j: 0 });
 
     // Una sola celda, y siempre la misma: barrido fino cruzando el borde. El punto
     // exacto queda fuera del barrido por lo dicho arriba, y se comprueba aparte:
