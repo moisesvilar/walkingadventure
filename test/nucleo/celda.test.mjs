@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 
 import { MARGEN_BORDE_M, generaCelda } from '../../packages/nucleo/world/celda.js';
 import { creaRejilla, limitesDeCelda } from '../../packages/nucleo/world/rejilla.js';
+import { cuposDeCelda } from '../../packages/nucleo/world/cupos.js';
 import { semillaDeCelda } from '../../packages/nucleo/core/semilla.js';
 import { abreCelda, celdasAbiertas, creaMapa } from '../../packages/nucleo/partida/mapa.js';
 import { parseGeo, parsePois } from '../../packages/nucleo/world/osm.js';
@@ -128,7 +129,13 @@ describe('La generación de una celda', () => {
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radio, semillaCelda, null, names);
     pegarAViario(settlements, geo.roads);
     const routes = buildRoutes(settlements, geo.roads, semillaCelda, names);
-    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semillaCelda}:otra-implementacion`, null, names);
+    // El cupo de parajes se rehace como lo hace la celda —del catálogo y del tamaño
+    // en tramos de la rejilla—, así que lo único que cambia respecto al registro es
+    // el flujo de azar de la fase, que es lo que este caso quiere aislar.
+    const cupos = cuposDeCelda({ radioEnTramos: rejilla.radioInscritoM / rejilla.tramoM });
+    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semillaCelda}:otra-implementacion`, null, names, undefined, null, null, {
+      cupo: cupos.parajes,
+    });
 
     assert.notDeepEqual(
       parajes.map((p) => p.name),

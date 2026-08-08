@@ -32,6 +32,7 @@ import { parseGeo, parsePois } from '../../packages/nucleo/world/osm.js';
 import { generateSettlements } from '../../packages/nucleo/world/settlements.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
 import { buildRoutes, pegarAViario } from '../../packages/nucleo/world/routes.js';
+import { vocabularioDeEscenas } from '../../packages/nucleo/world/cupos.js';
 import { isSea } from '../../packages/nucleo/world/seamask.js';
 import { localeFor, namesFor } from '../../packages/nucleo/names/index.js';
 
@@ -180,9 +181,12 @@ describe('El mundo es una función de la semilla y de los datos de OSM', () => {
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radio, semilla, null, names);
     pegarAViario(settlements, geo.roads);
     const routes = buildRoutes(settlements, geo.roads, semilla, names);
-    // La fase alterada: mismos datos, otro azar. Si compartiera flujo con las
-    // demás, lo de arriba habría salido distinto.
-    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semilla}:otra-implementacion`, null, names);
+    // La fase alterada: mismos datos, mismo vocabulario que usó la tubería real
+    // —el del catálogo, que es el valor de arranque de `buildWorld`— y otro azar.
+    // Si compartiera flujo con las demás, lo de arriba habría salido distinto.
+    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semilla}:otra-implementacion`, null, names, undefined, null, null, {
+      vocabulario: vocabularioDeEscenas(),
+    });
     assert.notDeepEqual(
       parajes.map((p) => p.name),
       real.parajes.map((p) => p.name),

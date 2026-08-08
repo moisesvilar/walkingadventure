@@ -261,7 +261,10 @@ describe('El tope actúa al repartir y solo sobre el excedente', () => {
     });
     const geo = { roads: [], rivers: [], forests: [], lakes: [], coastlines: [], peaks: [] };
     const reparto = { relajaciones: [] };
-    const parajes = generateParajes(libres, [], [], geo, radius, 'reparto#1', null, namesFor('es'), undefined, null, reparto);
+    // Vocabulario vacío y declarado: aquí no se mide cobertura de escenas sino la
+    // relajación de los topes, y con `[]` el suelo es cero y el cupo de la fase es
+    // el del radio, que es justo lo que afirma la comprobación de abajo.
+    const parajes = generateParajes(libres, [], [], geo, radius, 'reparto#1', null, namesFor('es'), undefined, null, reparto, { vocabulario: [] });
 
     assert.ok(parajes.length > 0, 'el mundo de prueba no ha colocado ni un paraje: no se está midiendo el reparto');
     assert.equal(reparto.relajaciones.length, 1, 'el reparto se saltó los topes y el mundo no lo declara');
@@ -348,9 +351,25 @@ describe('La casteabilidad no puede bajar', () => {
   });
 
   test('Cada extracto de referencia declara qué iteración lo regeneró y por qué', () => {
+    // Se relaja de clavar `SPEC-005-iter-1` a exigir una spec o iteración bien
+    // formada, y es un arreglo de la prueba y no una rebaja de la garantía: regenerar
+    // los extractos es una operación **normal**, obligatoria cada vez que una fila
+    // cambia la generación —SPEC-006 los regeneró, y con la comprobación anterior eso
+    // era rojo por hacer lo correcto—. Clavar el valor convertía en fallo justo lo que
+    // se quiere que pase.
+    //
+    // Lo que sigue cazando, que es lo que de verdad importaba: un extracto capturado
+    // a mano o heredado sin declarar de dónde viene (campo ausente, vacío o con un
+    // identificador que no es de este pipeline), y una regeneración sin explicación
+    // —el motivo tiene que ser prosa, no «actualizado»—. Lo que la prueba deja de
+    // afirmar es *cuál* es la última fila que los tocó, que por diseño cambia.
     for (const { nombre, semilla, clave } of LOS_OCHO) {
       const cabecera = leeExtracto(nombre, semilla).cabecera;
-      assert.equal(cabecera.regenerado_por, 'SPEC-005-iter-1', `${clave}: el extracto no declara qué iteración lo regeneró`);
+      assert.match(
+        cabecera.regenerado_por ?? '',
+        /^SPEC-\d{3}(-iter-\d+)?$/,
+        `${clave}: el extracto no declara con qué spec o iteración se regeneró`,
+      );
       assert.ok(
         typeof cabecera.motivo_regeneracion === 'string' && cabecera.motivo_regeneracion.length > 40,
         `${clave}: el extracto no explica por qué se regeneró`,
