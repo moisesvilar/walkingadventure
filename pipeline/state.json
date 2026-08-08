@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "AUSENTE — las pruebas @app no se pueden ejecutar en esta maquina"
   },
-  "spec_actual": "SPEC-003",
-  "fase": "dev",
+  "spec_actual": "SPEC-004",
+  "fase": "pending",
   "iteracion": 0,
   "historial": [
     {
@@ -32,6 +32,16 @@
       "casos": "151/151 @nucleo",
       "app": "no ejecutado: Maestro ausente",
       "nota": "la iteracion cerro 'El orden de iteracion no depende del orden de insercion' (bloqueante @determinismo) y 'No hay dos nombres iguales en un mundo'. 'El mundo minimo todavia compone un lazo' se reatribuyo a SPEC-006: sigue sin prueba viva."
+    },
+    {
+      "spec": "SPEC-003",
+      "slug": "rejilla-celdas-semilla",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-003-run-20260808T005756Z.md",
+      "casos": "217/217 @nucleo",
+      "app": "no ejecutado: Maestro ausente",
+      "nota": "dos casos reatribuidos a SPEC-006 por alcance (RF-MUNDO-007 es de las filas 4 y 6). El mundo minimo sigue sin lazo: ver decisiones-orquestador.md 6d."
     }
   ],
   "bloqueos": [],
@@ -47,7 +57,8 @@
     "SPEC-008-filtro-accesibilidad-grafo",
     "SPEC-009-serializacion-mundo-congelado",
     "SPEC-010-casting-quests",
-    "SPEC-011-motor-pasos"
+    "SPEC-011-motor-pasos",
+    "SPEC-012-propagacion-rumores"
   ],
   "veredictos": [
     {
