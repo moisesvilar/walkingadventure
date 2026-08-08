@@ -63,6 +63,25 @@ const PARAJE_PARTS = {
   monasterio: [['El Monasterio', 'El Priorato', 'La Abadía'], ['Gris', 'del Alba', 'de los Callados', 'de la Vid', 'del Eco'], {}],
 };
 
+// Nombres de persona, con **repertorio equilibrado**: el mismo número en cada
+// género (`game-design/lenguaje.md`, «reparto equilibrado por generación, no por
+// casualidad»). Que las dos listas midan lo mismo no es cosmético: el reparto de
+// la capa de NPCs se estratifica por puesto, y un repertorio corto en un género
+// haría que sus caras se repitieran mucho antes que las del otro.
+const NOMBRES_DE_PERSONA = {
+  femenino: ['Elvira', 'Ainara', 'Sancha', 'Berta', 'Xiomara', 'Urraca', 'Leonor', 'Marina', 'Aldara', 'Rosenda', 'Ginebra', 'Tecla', 'Fermina', 'Onega', 'Casilda', 'Mencía', 'Ilduara', 'Brígida', 'Nunila', 'Dulce'],
+  masculino: ['Bermudo', 'Rodrigo', 'Anselmo', 'Fruela', 'Nuño', 'Osorio', 'Gonzalo', 'Aldarico', 'Teodoro', 'Serapio', 'Bruno', 'Mendo', 'Suero', 'Ramiro', 'Vitorio', 'Cándido', 'Ordoño', 'Fabián', 'Blas', 'Lupo'],
+};
+
+// Epítetos de persona, concordados. Son de carácter y de rasgo, nunca de oficio:
+// el oficio ya lo dice el puesto, y meterlo aquí volvería a pegar el estereotipo al
+// nombre por la puerta de atrás. Sirven para dos cosas —agrandar el repertorio y
+// desempatar dos nombres iguales—, y por eso hay los mismos en cada género.
+const EPITETOS_DE_PERSONA = {
+  femenino: ['la Zurda', 'la Callada', 'la Templada', 'la Roja', 'la Menuda', 'la del Norte', 'la Risueña', 'la Sorda', 'la Vieja', 'la Ligera', 'la Áspera', 'la Madrugadora'],
+  masculino: ['el Zurdo', 'el Callado', 'el Templado', 'el Rojo', 'el Menudo', 'el del Norte', 'el Risueño', 'el Sordo', 'el Viejo', 'el Ligero', 'el Áspero', 'el Madrugador'],
+};
+
 // Epítetos de sitio para desempatar nombres repetidos. Todos son sintagmas
 // preposicionales y no adjetivos: valen igual para «El Pozo» y para «La Fuente»,
 // sin discordancias de género.
@@ -139,6 +158,50 @@ export const es = {
       k = Math.floor(k / VARIANT_TAILS.length);
     } while (k > 0);
     return nombre;
+  },
+
+  /**
+   * El nombre propio de una cara, con su género.
+   *
+   * Es la ampliación de la interfaz común que pide la capa de NPCs (SPEC-014): sin
+   * ella no hay nombres de persona, y un idioma nuevo nacería sin caras. Un paquete
+   * que no la implemente deja de cumplir la interfaz.
+   *
+   * **Un género sin repertorio falla nombrando el idioma y el género**, en lugar de
+   * caer en el otro: el equilibrio del reparto es un requisito y una degradación
+   * silenciosa lo rompería sin que ninguna prueba lo viera.
+   *
+   * **Sin `rng` devuelve la forma de desempate**, igual que `ramalName`: encadena
+   * epítetos sobre `base`, así que siempre hay un nombre libre por más caras que
+   * tenga el mapa. Se resuelve sin azar a propósito, para que desempatar no consuma
+   * el azar de la cara y dos generaciones desempaten igual.
+   */
+  personName(rng, genero, { base = null, intento = 0 } = {}) {
+    const nombres = NOMBRES_DE_PERSONA[genero];
+    const epitetos = EPITETOS_DE_PERSONA[genero];
+    if (!nombres || !epitetos) {
+      throw new Error(
+        `el paquete de idioma "es" no tiene repertorio de nombres de persona para el género ${JSON.stringify(genero) ?? String(genero)}: ` +
+        `los que declara son ${Object.keys(NOMBRES_DE_PERSONA).join(', ')}`,
+      );
+    }
+    if (!rng) {
+      if (typeof base !== 'string' || !base) {
+        throw new Error('el desempate de un nombre de persona necesita el nombre base sobre el que encadenar el epíteto');
+      }
+      let nombre = base;
+      let k = Math.max(0, Math.floor(intento) || 0);
+      do {
+        nombre += ` ${epitetos[k % epitetos.length]}`;
+        k = Math.floor(k / epitetos.length);
+      } while (k > 0);
+      return nombre;
+    }
+    const nombre = pick(rng, nombres);
+    const epiteto = pick(rng, epitetos);
+    // El nombre a secas sale menos que el nombre con epíteto: en un reparto de nueve
+    // personas, «Elvira» y «Elvira la Zurda» se distinguen mejor que dos Elviras.
+    return pick(rng, [nombre, `${nombre} ${epiteto}`, `${nombre} ${epiteto}`]);
   },
 
   worldTitle(rng) {

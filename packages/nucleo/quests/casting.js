@@ -28,7 +28,9 @@ import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { congelaHondo } from '../core/congelar.js';
 import { exigeGrafo, nodoMasCercano, SNAP_MAX } from '../world/grafo.js';
 import { PESO_MINIMO_DE_ESCENA } from '../world/escenas.js';
+import { namesFor } from '../names/index.js';
 import { arbolDeCaminos, caminoDesdeArbol, normalizaCriterios, tramosDelCamino } from '../partida/filtro.js';
+import { caraDeSitio } from '../partida/npcs.js';
 import { dimensionaSalida, rangoDeBeats } from '../partida/salida.js';
 import { exigeTramoM } from '../partida/tramo.js';
 import { MOTIVOS_DE_CASTING, motivoDeCasting } from './motivos.js';
@@ -119,28 +121,21 @@ export function candidatosDeRol(mundo, req) {
 }
 
 /**
- * El doble de la capa de NPCs (fila 14) mientras no exista.
+ * La resolución de un rol humano **sin estado de partida**: la identidad de la cara
+ * que produce el sitio, que es función pura de `semilla + sitio + puesto`.
  *
  * Devuelve **siempre** una persona para un sitio dado, que es exactamente lo que
  * promete RF-NPC-002, y **hereda el anclaje del sitio**: un NPC no consume uno
  * propio (`game-design/npcs.md`). Por eso un rol humano no puede aportar nunca un
  * motivo de fallo, y por eso el catálogo de `motivos.js` no tiene ninguno que
- * hable de gente. **Aquí está la frontera, no la capa**: quien la implemente
- * inyecta la suya y esto desaparece.
+ * hable de gente.
+ *
+ * Es la **por defecto** a propósito, y no despierta a nadie: castear una plantilla
+ * que luego nadie acepta no puede poblar una partida. Quien juega inyecta la de su
+ * capa (`creaCapaDeNpcs().resuelveRolHumano`), que sí apunta la cara como despierta.
  */
-export function rolHumanoDelSitio({ sitio, rol }) {
-  return {
-    tipo: 'humano',
-    kind: rol.puesto ?? null,
-    // Sin capa de NPCs todavía no hay nombre propio de persona: el sitio es lo que
-    // se nombra, y eso es lo que el guiado puede decir con verdad.
-    nombre: sitio.nombre,
-    x: sitio.x,
-    y: sitio.y,
-    en: sitio.nombre,
-    real: sitio.real,
-    trabajaEn: sitio,
-  };
+export function rolHumanoDelSitio({ sitio, rol, mundo, semilla = mundo?.seed }) {
+  return caraDeSitio({ mundo, semilla, sitio, rol, idioma: namesFor(mundo?.locale) });
 }
 
 /**
@@ -410,7 +405,7 @@ export function casteaPlantilla({
     if (roles[rid].tipo !== 'humano') continue;
     const sitio = asignacion[roles[rid].en];
     if (!sitio) throw new Error(`el rol humano "${rid}" de "${plantilla.id}" dice trabajar en "${roles[rid].en}", que no es un rol de sitio de esta plantilla`);
-    asignacion[rid] = resuelveRolHumano({ sitio, rol: roles[rid], plantilla, mundo });
+    asignacion[rid] = resuelveRolHumano({ sitio, rol: roles[rid], plantilla, mundo, semilla });
   }
 
   return exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla });

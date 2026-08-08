@@ -9280,6 +9280,623 @@
       "caso": "El prólogo de un mundo de referencia es idéntico corrido dos veces",
       "hueco_de_bateria": true,
       "nota": "Sobre costero#1; el determinismo del par y de los intentos sobre mundos sintéticos está además en «El mismo mundo y la misma semilla gastan los mismos intentos y componen el mismo par»."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mundo congelado, cuando se enumeran los sitios de una celda, entonces son sus núcleos y sus servicios, y ninguna otra cosa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Los sitios de una celda son sus núcleos y sus servicios, y ninguna otra cosa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un tipo de sitio, cuando se pide su plantilla de puestos, entonces devuelve una lista cerrada y ordenada cuyo primer elemento es el puesto titular.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La plantilla de un tipo de sitio es cerrada, ordenada, con el titular primero y sin género en sus claves",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una taberna, cuando se pide cuántas caras puede llegar a tener, entonces es exactamente la longitud de su plantilla de puestos, y ni una más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El tope de caras de un sitio es la longitud de su plantilla, y ni una más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una aldea sin ningún servicio, cuando se enumeran sus sitios, entonces el propio núcleo es un sitio y tiene su plantilla de puestos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Una aldea sin ningún servicio es un sitio y tiene su plantilla de puestos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado la plantilla de puestos de cualquier tipo de sitio, cuando se leen sus claves, entonces ninguna nombra un género.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La plantilla de un tipo de sitio es cerrada, ordenada, con el titular primero y sin género en sus claves",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mundo congelado recién abierto, cuando se consulta un sitio cualquiera, entonces su cara titular ya existe, sin haber jugado nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La cara titular existe desde el día 1 y su nombre no se entrega hasta conocerla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara titular que la jugadora no ha conocido, cuando se pide cómo nombrarla, entonces se la nombra por su puesto y su nombre propio no se entrega.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La cara titular existe desde el día 1 y su nombre no se entrega hasta conocerla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara titular con la que la jugadora acaba de hablar por primera vez, cuando se vuelve a pedir cómo nombrarla, entonces se entrega su nombre propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La cara titular existe desde el día 1 y su nombre no se entrega hasta conocerla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un sitio cuya única cara despierta es la titular, cuando una aventura pide otro puesto de ese sitio, entonces esa cara despierta y se queda despierta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Una cara despierta al pedirla, se queda despierta y no nace ninguna nueva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara ya despierta, cuando otra aventura vuelve a pedir el mismo sitio y el mismo puesto, entonces se devuelve la misma cara y no nace ninguna nueva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Una cara despierta al pedirla, se queda despierta y no nace ninguna nueva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un sitio con todos los puestos de su plantilla despiertos, cuando una aventura pide otro puesto más, entonces se resuelve con una de las caras existentes y no se inventa un puesto fuera de la plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El tope de caras de un sitio es la longitud de su plantilla, y ni una más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un nombre de cara recién generado, cuando se compara con los nombres del mapa, entonces es único en todo el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El nombre de una cara es único en todo el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado dos partidas sobre el mismo mundo que despiertan las mismas caras en orden distinto, cuando se comparan cara a cara, entonces son idénticas en nombre, género y puesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Tres órdenes de despertar dan las mismas caras en los ocho extractos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara, cuando se inspecciona de qué depende su generación, entonces depende de la semilla, del sitio y del puesto, y de nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La identidad de una cara sale de la semilla, del sitio y del puesto, y de nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara, cuando se busca en su generación un contador de aparición, una fecha o una posición en una lista de conocidos, entonces no interviene ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La identidad de una cara sale de la semilla, del sitio y del puesto, y de nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un sitio, cuando se despierta primero su tercer puesto y después el segundo, entonces ambas caras son las mismas que si se hubieran despertado al revés.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Despertar el tercer puesto antes que el segundo da exactamente las mismas dos caras",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado el mismo mundo y la misma semilla en dos instalaciones distintas, cuando se despierta la misma cara, entonces sale idéntica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La identidad de una cara sale de la semilla, del sitio y del puesto, y de nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una taberna anclada al bar «Casa Manuela», cuando se genera la tabernera que trabaja allí, entonces la tabernera hereda el anclaje de la taberna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un NPC no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una taberna anclada al bar «Casa Manuela», cuando se genera la tabernera que trabaja allí, entonces el número de anclajes tomados no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un NPC no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un sitio con cuatro caras despiertas, cuando se leen sus anclajes, entonces las cuatro llevan el mismo identificador nativo, el del sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un NPC no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mapa con todas sus caras despiertas, cuando se recogen los anclajes de núcleos, servicios y parajes, entonces ningún identificador aparece más de una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Ningún anclaje aparece dos veces",
+      "escenario": "Ningún anclaje aparece dos veces"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado la implementación de esta capa, cuando se inspecciona, entonces no toma anclajes del pool ni pide anclajes libres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un NPC no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio",
+      "nota": "Se comprueba desde fuera y desde dentro: el resumen del pool queda idéntico byte a byte tras despertar el mapa entero, y el código de npcs.js no contiene ni una toma, ni pide libres, ni importa anclajes.js."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un rol humano ligado a un sitio del mapa, cuando se pide resolverlo, entonces devuelve siempre una cara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un rol humano siempre devuelve una cara y ningún motivo de fallo habla de gente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un rol humano cuyo puesto afín no está en la plantilla de ese tipo de sitio, cuando se pide resolverlo, entonces devuelve la cara titular del sitio en lugar de fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un rol humano siempre devuelve una cara y ningún motivo de fallo habla de gente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mundo en el que todavía no se ha despertado ninguna cara, cuando se resuelven roles humanos, entonces se resuelven todos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un rol humano siempre devuelve una cara y ningún motivo de fallo habla de gente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una aventura que pide dos caras del mismo sitio, cuando se resuelven, entonces las dos declaran el mismo lugar, para que el casting lo trate como un solo lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Dos caras del mismo sitio declaran el mismo lugar y ninguna cara despierta hace falta antes",
+      "hueco_de_bateria": true,
+      "nota": "Cubierto también por el caso del rol humano, que castea el catálogo entero con dos roles humanos por cada rol de sitio y comprueba que los dos declaran el mismo lugar."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado la resolución de un rol humano, cuando devuelve una cara, entonces nunca devuelve vacío ni un motivo de fallo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un rol humano siempre devuelve una cara y ningún motivo de fallo habla de gente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mundo sembrado con `\"42.40,-8.81#1\"`, cuando se generan cien NPCs jugando, entonces el reparto por género está equilibrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El reparto de NPCs se equilibra por generación",
+      "escenario": "El reparto de NPCs se equilibra por generación",
+      "nota": "La batería dice «cien NPCs jugando»; la spec decide medir el equilibrio por mundo y no por partida, sobre el reparto potencial completo del mapa, que es lo único afirmable sin jugar. Lo que se percibe en una partida sigue siendo @manual."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mundo sembrado con `\"42.40,-8.81#1\"`, cuando se generan cien NPCs jugando, entonces ningún oficio queda poblado siempre por el mismo género.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El reparto de NPCs se equilibra por generación",
+      "escenario": "El reparto de NPCs se equilibra por generación",
+      "nota": "Mismo escenario: se afirma sobre los nueve puestos de los ocho extractos, con cero oficios monocolor entre los que tienen dos caras o más."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado el reparto potencial completo de un mapa, cuando se cuenta por puesto, entonces la diferencia entre géneros dentro de cada puesto no pasa de uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El reparto de NPCs se equilibra por generación",
+      "escenario": "El reparto de NPCs se equilibra por generación"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un puesto con un número impar de caras en el mapa, cuando se reparte el género, entonces la que desempata es femenina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "El reparto de NPCs se equilibra por generación",
+      "escenario": "El reparto de NPCs se equilibra por generación"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un puesto y su género asignado, cuando se compara con la clave del puesto, entonces el género no se deduce de ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Ni la clave del puesto ni los datos de una cara arrastran el género",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara femenina y una masculina del mismo puesto, cuando se leen sus datos, entonces ninguna de las dos lleva rasgos de carácter derivados del género.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Ni la clave del puesto ni los datos de una cara arrastran el género",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara que fue rol en una aventura terminada, cuando se cierra la salida, entonces ese hecho entra en su memoria.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Lo que una cara vivió entra en su memoria en nivel 0, y lo que no vivió no entra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara que no fue rol en una aventura, cuando se cierra la salida, entonces ese hecho no entra en su memoria.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Lo que una cara vivió entra en su memoria en nivel 0, y lo que no vivió no entra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un hecho en la memoria de una cara, cuando se lee, entonces está en versión nivel 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Lo que una cara vivió entra en su memoria en nivel 0, y lo que no vivió no entra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara con hechos en su memoria, cuando la jugadora le pregunta, entonces los cuenta sin cobrar oro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Lo que una cara vivió entra en su memoria en nivel 0, y lo que no vivió no entra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara con la memoria llena, cuando entra un hecho más, entonces se olvida el más antiguo por paso del mundo y la memoria sigue en su tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "La memoria se queda en cinco hechos y olvida el más antiguo por paso del mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara sin ningún hecho en su memoria, cuando la jugadora le pregunta, entonces no cuenta ningún hecho y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Una cara sin ningún hecho en su memoria no cuenta nada y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado lo que una cara entrega al recordar, cuando se inspecciona, entonces son hechos estructurados y ningún texto redactado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Lo que una cara vivió entra en su memoria en nivel 0, y lo que no vivió no entra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un NPC que estuvo presente cuando ocurrió y un rumor deformado circulando por su núcleo, cuando la jugadora habla con ese NPC, entonces el NPC cuenta la versión fiel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "El testigo directo es fiel y no corrige al pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un NPC que estuvo presente cuando ocurrió y un rumor deformado circulando por su núcleo, cuando la jugadora habla con ese NPC, entonces lo que se cuenta en el núcleo sigue siendo la versión deformada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "El testigo directo es fiel y no corrige al pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara consultada muchas veces, cuando se lee lo sedimentado en su núcleo, entonces no ha cambiado ni una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "El testigo directo es fiel y no corrige al pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un núcleo con una cara testigo, cuando un rumor sobre ese mismo hecho llega deformado, entonces la memoria de la cara sigue en nivel 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "El testigo directo es fiel y no corrige al pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo"
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara y un informante del mismo núcleo, cuando los dos cuentan el mismo hecho, entonces la cara devuelve la versión fiel y el informante la versión que a él le llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "El testigo directo es fiel y no corrige al pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo",
+      "nota": "El catálogo de informantes y su precio son de la fila 15 y no existen: el informante se modela con lo que su núcleo tiene sedimentado, que es lo que un informante vendería. Lo que se afirma es que las dos versiones conviven sin pisarse."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una cara recién despertada, cuando se consulta su relación, entonces está en el escalón de partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "La relación nace cordial, un acto feo la baja un escalón y no toca a nadie más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación cualquiera, cuando pasan cien pasos del mundo sin que la jugadora haga nada con esa cara, entonces la relación no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Cien pasos del mundo no mueven una relación",
+      "hueco_de_bateria": true,
+      "nota": "Los cien pasos son pasos de verdad: el motor de SPEC-011 con la propagación de rumores colgada. La ausencia de esta capa en la cola de productores se afirma aparte, como prueba estructural."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un desenlace que declara un acto feo hacia una cara concreta, cuando se cierra la salida, entonces la relación con esa cara baja un escalón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "La relación nace cordial, un acto feo la baja un escalón y no toca a nadie más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un acto feo hacia una cara, cuando se consultan las demás caras del mismo sitio, entonces ninguna ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "La relación nace cordial, un acto feo la baja un escalón y no toca a nadie más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación ya en el escalón más bajo, cuando llega otro acto feo, entonces se queda en el más bajo y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "La relación nace cordial, un acto feo la baja un escalón y no toca a nadie más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación rota, cuando se pide una aventura que necesita a esa cara, entonces se castea igual: la relación cambia el trato, nunca el catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Una cara rota sigue casteando: la relación cambia el trato, nunca el catálogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado el catálogo de mecanismos que esta entrega expone, cuando se enumeran los que pueden bajar, entonces el único es la relación por cara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "La relación nace cordial, un acto feo la baja un escalón y no toca a nadie más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación rota, cuando llega un acto declarado reparador hacia esa cara, entonces sube un escalón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Reparar sube un escalón, la cicatriz baja el techo para siempre y no sale ningún número",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación que llegó a estar rota, cuando se repara todo lo posible, entonces su techo queda por debajo del escalón más alto y consta la cicatriz.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Reparar sube un escalón, la cicatriz baja el techo para siempre y no sale ningún número",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación intacta, cuando llega un acto reparador, entonces no sube por encima de su techo y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Reparar sube un escalón, la cicatriz baja el techo para siempre y no sale ningún número",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una relación reparada, cuando se consulta, entonces no expone ningún número ni porcentaje, solo el escalón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Reparar sube un escalón, la cicatriz baja el techo para siempre y no sale ningún número",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mapa nuevo, cuando se consultan las relaciones, entonces están todas en el escalón de partida y ninguna cicatriz ha viajado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "En un mapa nuevo todas las relaciones están en el escalón de partida y ninguna cicatriz ha viajado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado el mismo mundo y la misma partida, cuando se despiertan las mismas caras dos veces desde cero, entonces salen idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Tres órdenes de despertar dan las mismas caras en los ocho extractos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado la generación de una cara, cuando consume azar, entonces sale de `makeRng` con un sufijo propio que incluye el sitio y el puesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La identidad de una cara sale de la semilla, del sitio y del puesto, y de nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado que se despierta una cara más en un sitio, cuando se vuelven a leer las caras ya despiertas de ese sitio, entonces ninguna ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Una cara despierta al pedirla, se queda despierta y no nace ninguna nueva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado una partida con caras despiertas, memorias y relaciones, cuando se serializa y se vuelve a cargar, entonces vuelven las mismas caras, con la misma memoria y las mismas relaciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Las caras despiertas, las conocidas, las memorias y las relaciones vuelven de su documento",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: «El registro basta para reconstruir» habla de reconstruir desde el registro de hechos, que es otro mecanismo. Aquí se afirma el ida y vuelta del estado de partida —caras despiertas, conocidas, memorias y relaciones—."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mundo congelado, cuando se despiertan todas las caras posibles del mapa, entonces el documento de cada celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Despertar todas las caras del mapa deja el documento de la celda idéntico byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: los tres escenarios de «Lo generado no se resiembra jamás» hablan de la celda vecina, del tramo y del estilo; ninguno de poblar el mapa de caras."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ninguna iteración cuyo resultado dependa del orden de inserción de un `Set` o un `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La capa no se registra como productor de paso ni importa ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspeccionan sus imports, entonces no importan `buildWorld` ni ninguna fase de la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La capa no se registra como productor de paso ni importa ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado el motor de pasos, cuando se enumeran sus productores, entonces esta capa no es ninguno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "La capa no se registra como productor de paso ni importa ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un sitio que no existe en el mapa activo, cuando se pide una cara suya, entonces falla nombrando el sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un sitio que no existe, un puesto fuera de plantilla o un tipo sin plantilla fallan nombrando qué les pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un puesto que no está en la plantilla de ese tipo de sitio, cuando se pide despertarlo, entonces falla nombrando el puesto y el tipo de sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un sitio que no existe, un puesto fuera de plantilla o un tipo sin plantilla fallan nombrando qué les pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un tipo de sitio sin plantilla de puestos declarada, cuando se pide una cara suya, entonces falla nombrando el tipo, en lugar de suponer una plantilla vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un sitio que no existe, un puesto fuera de plantilla o un tipo sin plantilla fallan nombrando qué les pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un paquete de idioma sin repertorio para el género pedido, cuando se genera el nombre, entonces falla nombrando el idioma y el género, en lugar de caer en el otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un paquete de idioma sin repertorio del género pedido falla nombrando el idioma y el género",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un hecho que se intenta guardar sin su versión fiel, cuando entra en la memoria, entonces falla nombrando el hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Un hecho sin versión fiel o de quien no participó falla nombrando el hecho y la cara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un hecho que se intenta guardar en la memoria de una cara que no participó, cuando entra, entonces falla nombrando la cara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Un hecho sin versión fiel o de quien no participó falla nombrando el hecho y la cara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un efecto de relación sin signo o con un signo fuera del enumerado, cuando se aplica, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Un efecto sin signo, con un signo de fuera o sobre una cara de otro mapa falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un efecto de relación sobre una cara de otro mapa, cuando se aplica, entonces falla nombrando el mapa, en lugar de crear la relación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "Un efecto sin signo, con un signo de fuera o sobre una cara de otro mapa falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un sitio sin anclaje, cuando se despierta una cara suya, entonces falla nombrando el sitio, en lugar de dejar la cara sin anclaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un núcleo sin anclaje real tiene cara igualmente y un servicio sin él falla nombrándose",
+      "hueco_de_bateria": true,
+      "nota": "Corregido por pipeline/decisiones-orquestador.md §6p: un núcleo sin anclaje real NO hace fallar la cara —manda RF-NPC-002—, y la capa lo declara con sitiosSinAnclajeReal(). En un servicio sí falla, porque ahí el anclaje es constitutivo."
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un cierre de salida en el que la aplicación de memorias y relaciones falla a mitad, cuando se lee el estado, entonces ni una sola memoria ni una sola relación han cambiado: se aplica entero o no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/testigo.test.mjs",
+      "caso": "El cierre de una salida se aplica entero o no se aplica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-014",
+      "criterio": "Dado un mapa sin ningún núcleo, cuando se enumeran sus sitios, entonces la lista está vacía y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/npcs.test.mjs",
+      "caso": "Un mapa sin ningún núcleo enumera cero sitios y no falla",
+      "hueco_de_bateria": true
     }
   ]
 }

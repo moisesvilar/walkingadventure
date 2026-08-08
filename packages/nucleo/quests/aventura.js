@@ -110,6 +110,24 @@ export function validaPlantilla(plantilla) {
       throw new Error(`el rol humano "${rid}" de la plantilla "${id}" no dice en qué sitio trabaja: un NPC hereda el anclaje del suyo y nunca consume uno propio`);
     }
   }
+  // Un rol humano cuelga de un **sitio**, y un sitio es un núcleo o uno de sus
+  // servicios: son las dos cosas del mundo con plantilla de puestos y con gente
+  // dentro (`game-design/npcs.md`). Colgarlo de un paraje es un error de quien
+  // escribió la plantilla —en una ruina no vive nadie—, y se dice aquí para que no
+  // salga como una excepción a mitad del reparto ni, peor, como un motivo de fallo
+  // que hablaría de falta de gente.
+  const CON_GENTE = ['nucleo', 'servicio'];
+  for (const rid of Object.keys(roles)) {
+    if (roles[rid]?.tipo !== 'humano') continue;
+    const donde = roles[rid].en;
+    const anfitrion = roles[donde];
+    if (anfitrion && !CON_GENTE.includes(anfitrion.tipo)) {
+      throw new Error(
+        `el rol humano "${rid}" de la plantilla "${id}" dice trabajar en "${donde}", que es un rol de tipo "${anfitrion.tipo}": ` +
+        `una cara pertenece a un sitio, y los sitios son ${CON_GENTE.join(' y ')}`,
+      );
+    }
+  }
 
   // El orden de resolución **se declara**. Sacarlo de `Object.keys` lo hacía
   // depender del orden de escritura del objeto, que es exactamente el patrón que

@@ -158,3 +158,11 @@ Es la quinta aparición de la familia de §6h, con una vuelta de tuerca: aquí n
 **Corregido**: la cláusula exige ahora **una aventura del reparto con un beat en cada núcleo del par**, resuelto contra el reparto real y no por tipo de núcleo —dos granjas pasarían un filtro por tipo y nunca comparten aventura, porque el catálogo tiene un solo rol de granja. Medido tras el arreglo: `costero`, `urbano-denso` y `suelo-250m` componen con candidata que pasa por los dos en sus dos semillas; `barrio-tres-calles` no compone y degrada abriendo, en silencio, que es lo que la spec quiere para un mundo de un solo núcleo.
 
 **Lección, que es distinta de la de §6h:** un criterio que se cumple casi siempre no es un criterio. Cuando un AC no puede ponerse rojo con un mundo real, no está midiendo nada.
+
+## 6p · Un AC de SPEC-014 contra RF-NPC-002: manda el requisito
+
+La spec pedía que un núcleo **sin anclaje real** hiciera fallar la creación de la cara. `wa-dev` midió que eso es incompatible con el mundo pequeño: **los cinco núcleos de `barrio-tres-calles` y tres de los cinco de `suelo-250m` se colocan por geometría**, sin anclaje. Aplicar el AC dejaría al mundo mínimo **sin una sola cara**, y con ello un rol humano allí sería excepción — o sea, **el casting fallando por gente**, que es exactamente lo que RF-NPC-002 prohíbe.
+
+**Decisión: manda el requisito.** La cara se ancla al sitio, `anclaje: null` queda declarado, y la capa expone `sitiosSinAnclajeReal()` para que nadie lo confunda con un olvido. En un **servicio** sí falla, porque ahí el anclaje es constitutivo. El AC de la spec queda corregido de hecho y anotado aquí.
+
+Nota de método: es la primera vez en toda la ejecución que un AC choca de frente con un RF, y se resuelve como manda `CLAUDE.md` — el diseño por encima de la spec, y la spec por encima del código.
