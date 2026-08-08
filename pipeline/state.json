@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-017",
-  "fase": "spec",
+  "spec_actual": "SPEC-018",
+  "fase": "dev",
   "iteracion": 0,
   "historial": [
     {
@@ -169,6 +169,16 @@
       "casos": "1036 casos: 1033 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio",
       "nota": "presupuesto por hecho subido a 500 B (decisiones 6q)."
+    },
+    {
+      "spec": "SPEC-017",
+      "slug": "catalogo-plantillas",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-017-run-20260808T235536Z.md",
+      "casos": "1059 casos: 1056 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos",
+      "nota": "cierra la deuda de tramos dificiles sin nombre (6i-a). Casteabilidad 30/48 -> 210/240."
     }
   ],
   "bloqueos": [],

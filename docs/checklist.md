@@ -32,8 +32,8 @@
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 17 | catalogo-plantillas | RF-QUEST-009, RF-LANG-001, RF-LANG-003, RF-LANG-004 | must | wip |
-| 18 | contrato-llm | RF-QUEST-006, RF-QUEST-007, RF-QUEST-008, RF-LANG-005, RF-PRIV-001 | must | pending |
+| 17 | catalogo-plantillas | RF-QUEST-009, RF-LANG-001, RF-LANG-003, RF-LANG-004 | must | done |
+| 18 | contrato-llm | RF-QUEST-006, RF-QUEST-007, RF-QUEST-008, RF-LANG-005, RF-PRIV-001 | must | wip |
 | 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | pending |
 
 ## B4 · La app y el mapa
