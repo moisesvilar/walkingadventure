@@ -10,7 +10,7 @@
 | 2 | paquete-compartido | RF-INFRA-001, RNF-DET-001, RNF-DET-003 | must | done |
 | 3 | rejilla-celdas-semilla | RF-MUNDO-001, RF-MUNDO-002, RF-MUNDO-003, RF-MUNDO-004, RF-MUNDO-005 | must | done |
 | 4 | tramo-personal | RF-PJ-004, RF-MUNDO-007, RNF-ACC-001, RNF-ACC-003 | must | done |
-| 5 | pool-anclajes-filtros | RF-MUNDO-006, RF-MUNDO-009, RF-MUNDO-010, RF-MUNDO-011 | must | pending |
+| 5 | pool-anclajes-filtros | RF-MUNDO-006, RF-MUNDO-009, RF-MUNDO-010, RF-MUNDO-011 | must | wip |
 | 6 | parajes-cobertura-escenas | RF-MUNDO-007, RF-MUNDO-008 | must | pending |
 | 7 | grafo-cosido-ramales | RF-MUNDO-013, RF-MUNDO-014 | must | pending |
 | 8 | filtro-accesibilidad-grafo | RF-MUNDO-017 | must | pending |

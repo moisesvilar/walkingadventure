@@ -7,10 +7,10 @@
     "verifica_flujo": "ok (40 pantallas, 83 aristas)",
     "headless": "ok",
     "git": "limpio",
-    "maestro": "AUSENTE — las pruebas @app no se pueden ejecutar en esta maquina"
+    "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": null,
-  "fase": "informe-final",
+  "spec_actual": "SPEC-005",
+  "fase": "dev",
   "iteracion": 0,
   "historial": [
     {
