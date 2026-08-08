@@ -13,7 +13,8 @@ import { creaRejilla, limitesDeCelda } from '../../packages/nucleo/world/rejilla
 import { cuposDeCelda } from '../../packages/nucleo/world/cupos.js';
 import { semillaDeCelda } from '../../packages/nucleo/core/semilla.js';
 import { abreCelda, celdasAbiertas, creaMapa } from '../../packages/nucleo/partida/mapa.js';
-import { parseGeo, parsePois } from '../../packages/nucleo/world/osm.js';
+import { parseGeo, parsePois, parseStreets } from '../../packages/nucleo/world/osm.js';
+import { construyeGrafo } from '../../packages/nucleo/world/grafo.js';
 import { generateSettlements } from '../../packages/nucleo/world/settlements.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
 import { buildRoutes, pegarAViario } from '../../packages/nucleo/world/routes.js';
@@ -127,14 +128,30 @@ describe('La generación de una celda', () => {
     const anchors = parsePois(congelado.pois, lat, lon);
 
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radio, semillaCelda, null, names);
-    pegarAViario(settlements, geo.roads);
-    const routes = buildRoutes(settlements, geo.roads, semillaCelda, names);
+    // Las mismas vías que arma la tubería: las carreteras del terreno **más el
+    // callejero**, sin repetir por clave de OSM. Reproducir la fase con solo las
+    // carreteras compararía dos grafos distintos y el escenario mediría el dato en
+    // vez del azar de las fases.
+    const claves = new Set();
+    const vias = [...geo.roads, ...parseStreets(congelado.callejero, lat, lon)].filter((v) => {
+      if (!v.osmId) return true;
+      if (claves.has(v.osmId)) return false;
+      claves.add(v.osmId);
+      return true;
+    });
+    const grafo = construyeGrafo(vias);
+    pegarAViario(settlements, grafo);
+    const routes = buildRoutes(settlements, grafo, semillaCelda, names);
     // El cupo de parajes se rehace como lo hace la celda —del catálogo y del tamaño
     // en tramos de la rejilla—, así que lo único que cambia respecto al registro es
     // el flujo de azar de la fase, que es lo que este caso quiere aislar.
     const cupos = cuposDeCelda({ radioEnTramos: rejilla.radioInscritoM / rejilla.tramoM });
     const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semillaCelda}:otra-implementacion`, null, names, undefined, null, null, {
       cupo: cupos.parajes,
+      // El mismo grafo que se pegó y se trazó, como hace la tubería: desde SPEC-007
+      // los cruces son bifurcaciones de la red viaria, así que una reconstrucción sin
+      // grafo dejaría fuera los parajes que nacen de ahí.
+      grafo,
     });
 
     assert.notDeepEqual(
