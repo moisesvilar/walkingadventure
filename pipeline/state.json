@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-016",
-  "fase": "dev",
+  "spec_actual": null,
+  "fase": "B2-cerrado",
   "iteracion": 0,
   "historial": [
     {
@@ -159,6 +159,16 @@
       "report": "test/reports/SPEC-015-run-20260808T184438Z.md",
       "casos": "965 casos: 962 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos"
+    },
+    {
+      "spec": "SPEC-016",
+      "slug": "diario-estado-hechos",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-016-run-20260808T194903Z.md",
+      "casos": "1036 casos: 1033 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio",
+      "nota": "presupuesto por hecho subido a 500 B (decisiones 6q)."
     }
   ],
   "bloqueos": [],
@@ -208,8 +218,8 @@
     }
   ],
   "suite_final": {
-    "report": "test/reports/SPEC-008-run-20260808T104759Z.md",
-    "casos": "441: 438 pasan, 0 fallan, 3 saltados",
+    "report": "test/reports/SPEC-016-run-20260808T194903Z.md",
+    "casos": "1036: 1033 pasan, 0 fallan, 3 saltados",
     "app": "sin flujos"
   },
   "bloque": "B2"
