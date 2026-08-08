@@ -109,10 +109,20 @@ describe('El paquete compartido y su disposición', () => {
     }
   });
 
-  test('packages/nucleo/partida/ todavía no existe', () => {
-    // Su contenido lo entrega la fila 9 del checklist, y git no versiona
-    // directorios vacíos: crearlo ahora sería código muerto que habría que borrar.
-    assert.equal(hay('packages/nucleo/partida'), false);
+  test('Ningún área del paquete es un directorio vacío', () => {
+    // Antes esta prueba decía «packages/nucleo/partida/ todavía no existe», y era
+    // verdad de SPEC-002: aquella entrega no tenía nada que poner ahí. Pero eso era
+    // una condición transitoria, no un invariante — el criterio de verdad es que el
+    // paquete no lleve directorios vacíos, porque git no los versiona y serían
+    // código muerto que habría que borrar. **SPEC-003 estrena `partida/` a
+    // propósito**: ahí vive el registro de celdas abiertas de un mapa
+    // (`partida/mapa.js`), y la spec lo declara en «Qué entrega esta spec».
+    const areas = readdirSync(NUCLEO, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+    for (const area of areas) {
+      const modulos = ficherosDe(join(NUCLEO, area), (n) => /\.(js|mjs)$/.test(n));
+      assert.ok(modulos.length > 0, `packages/nucleo/${area}/ está vacío: o lleva código o no existe`);
+    }
+    assert.equal(hay('packages/nucleo/partida/mapa.js'), true, 'falta el módulo que estrena el área partida/');
   });
 });
 

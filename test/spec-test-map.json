@@ -943,8 +943,9 @@
       "criterio": "Dado el paquete entregado, cuando se busca el directorio `packages/nucleo/partida/`, entonces no existe todavía, porque su contenido lo entrega la fila 9 del checklist.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/paquete.test.mjs",
-      "caso": "packages/nucleo/partida/ todavía no existe",
-      "hueco_de_bateria": true
+      "caso": "Ningún área del paquete es un directorio vacío",
+      "hueco_de_bateria": true,
+      "nota": "El caso cambió de nombre en SPEC-003. Lo que afirmaba —que partida/ no existía— era una condición transitoria de SPEC-002, no un invariante: SPEC-003 estrena esa área a propósito con partida/mapa.js. Lo que sí era criterio real, que el paquete no lleve directorios vacíos porque git no los versiona, se sigue afirmando, ahora sobre todas las áreas."
     },
     {
       "spec": "SPEC-002",
@@ -1378,6 +1379,609 @@
       "caso": "El casting es determinista",
       "escenario": "El casting es determinista",
       "nota": "Dos casteos del mismo catálogo sobre el mismo mundo dan el mismo reparto, beat a beat, y el casting que trae el mundo generado es ese mismo. De los dos escenarios que cita el criterio, este mapa solo cubre este: «El mundo mínimo todavía compone un lazo» estaba aquí y se ha retirado —afirma cupos y cobertura de escenas, que SPEC-002 excluye por escrito—, lo hereda SPEC-006 (docs/specs/SPEC-006-parajes-cobertura-escenas.md) y hoy no tiene ninguna prueba viva. El esquema no admite entrada sin prueba implementada, así que el hueco se ve por ausencia y no disfrazado de cobertura."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una partida nueva y una fuente de entropía inyectada, cuando se crea la semilla, entonces se obtiene una cadena de 16 símbolos del alfabeto declarado, presentada en cuatro grupos de cuatro separados por guiones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "La semilla son dieciséis símbolos del alfabeto declarado en cuatro grupos de cuatro",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos partidas creadas con entropía distinta en la misma calle, cuando se comparan sus semillas, entonces son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Dos partidas creadas con entropía distinta en la misma calle tienen semillas distintas",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos partidas con semillas distintas, el mismo anclaje y los mismos datos de OSM, cuando se genera la celda «0,0» de cada una, entonces difieren en los nombres de al menos un núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Dos partidas con semillas distintas, el mismo anclaje y los mismos datos difieren en los nombres de al menos un núcleo",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. Se genera la celda «0,0» sobre el mundo congelado urbano-denso con las dos semillas."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla creada, cuando se inspecciona su contenido, entonces no contiene ninguna coordenada, ninguna fecha ni ningún identificador del dispositivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "La semilla no contiene ninguna coordenada, ninguna fecha ni ningún identificador del dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. La afirmación fuerte no es que no se vea una coordenada dentro, sino que la semilla no depende de dónde ni de cuándo se crea."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla escrita en minúsculas, con espacios y sin guiones, cuando se normaliza, entonces da la misma semilla canónica que la escrita en su forma de presentación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Una semilla en minúsculas, con espacios y sin guiones da la misma semilla canónica",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla en la que se ha tecleado `I` por `1` o `O` por `0`, cuando se normaliza, entonces se acepta y da la misma semilla canónica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Una semilla con I por 1 o con O por 0 se acepta y da la misma semilla canónica",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una cadena con un símbolo fuera del alfabeto declarado, cuando se valida como semilla, entonces se rechaza nombrando el símbolo que sobra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Una cadena con un símbolo fuera del alfabeto se rechaza nombrando el símbolo que sobra",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una cadena del alfabeto y la longitud correctos pero con un símbolo cambiado, cuando se valida como semilla, entonces el dígito de control la rechaza como mal copiada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Una semilla mal copiada la rechaza el dígito de control",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. Se prueban las quince posiciones de dato, una a una."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una cadena más corta o más larga de 16 símbolos, cuando se valida como semilla, entonces se rechaza nombrando la longitud esperada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Una cadena más corta o más larga de dieciséis símbolos se rechaza nombrando la longitud esperada",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la creación de la semilla, cuando se inspecciona su implementación, entonces la entropía llega inyectada y no se usa `Math.random()` ni ninguna lectura del reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "La entropía de la semilla llega inyectada y no sale de Math.random() ni del reloj",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente. Dos comprobaciones: la estática sobre core/semilla.js y la dinámica, que sin entropía inyectada no hay semilla por defecto."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla y una celda, cuando se piden las semillas de fase, entonces cada fase de la tubería recibe un sufijo propio y estable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Cada fase de la tubería recibe un sufijo propio y estable",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos celdas distintas del mismo mapa, cuando se comparan sus semillas para la misma fase, entonces son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Dos celdas distintas del mismo mapa tienen semillas de fase distintas",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos mapas distintos de la misma partida, cuando se comparan las semillas de la misma celda y la misma fase, entonces son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Dos mapas distintos de la misma partida tienen semillas distintas para la misma celda y fase",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla ausente o vacía, cuando se pide generar una celda, entonces falla nombrando la semilla que falta, en lugar de generar con una semilla por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/semilla.test.mjs",
+      "caso": "Generar una celda sin semilla falla nombrando la semilla que falta",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre la semilla como dato, solo la usa como parámetro de los mundos sembrados. La propia spec lo declara (RF-MUNDO-002, marcado ⚠ en el PRD), así que la entrada va como hueco en lugar de citar un escenario inexistente."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la coordenada que llega de A1P4, cuando se levanta el mapa, entonces la rejilla queda anclada a esa coordenada redondeada al paso declarado y no a la coordenada recibida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "La rejilla se ancla a la coordenada redondeada al paso declarado, no a la recibida",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene escenario del anclaje de la rejilla: es material nuevo de esta spec."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos coordenadas distintas dentro del mismo paso de redondeo, cuando se levanta un mapa con cada una, entonces las dos rejillas quedan con el mismo anclaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Dos coordenadas dentro del mismo paso de redondeo dan el mismo anclaje",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Es la otra cara de la privacidad del anclaje: dos portales del mismo paso son indistinguibles."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa levantado, cuando se inspecciona todo lo que queda registrado de su rejilla, entonces no aparece la coordenada exacta con la que se levantó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "El escenario está redactado sobre la partida guardada; aquí se afirma sobre lo que la rejilla registra, que es la mitad que entrega esta spec. Además de buscar los dígitos exactos, se comprueba que dos arranques del mismo paso dejan un registro idéntico byte a byte."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa levantado, cuando se pregunta en qué celda cae una posición, entonces se obtiene un índice entero de dos componentes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Preguntar en qué celda cae una posición devuelve un índice entero de dos componentes",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la misma posición preguntada dos veces, cuando se resuelve su celda, entonces se obtiene siempre el mismo índice.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "La misma posición preguntada dos veces cae siempre en la misma celda",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una posición que cae exactamente sobre el borde entre dos celdas, cuando se resuelve su celda, entonces se obtiene una sola, según la regla declarada de bordes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Una posición sobre el borde entre dos celdas cae en una sola, según la regla declarada",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. La regla semiabierta se afirma a un milímetro de cada lado y con un barrido fino: el punto geográfico exacto pierde ~1e-10 m en el viaje a coordenadas y vuelta, y a esa escala cae al lado de abajo. Del punto exacto se afirma lo que sí se puede: una sola celda, siempre la misma."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos celdas contiguas, cuando se comparan sus límites, entonces comparten el borde exactamente, sin solape ni hueco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Dos celdas contiguas comparten el borde exactamente, sin solape ni hueco",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una rejilla anclada, cuando el jugador se mueve o cambia cualquier ajuste, entonces el anclaje no cambia nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "El anclaje no cambia porque el jugador se mueva ni porque cambie ningún ajuste",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se afirma además que la rejilla se entrega congelada: no hay ajuste que la pueda tocar."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un índice de celda, cuando se piden sus límites, entonces salen sus cuatro esquinas en coordenadas geográficas sin depender de dónde esté el jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Los límites de una celda salen de su índice y no de dónde esté el jugador",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un índice de celda que no es un par de enteros, cuando se piden sus límites, entonces falla nombrando el índice mal formado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Un índice de celda que no es un par de enteros falla nombrando el índice mal formado",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un tramo declarado, cuando se dimensiona la celda, entonces su lado mide los tramos que fija el parámetro de dimensionado y su radio inscrito mide un tramo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "El lado de la celda mide los tramos del parámetro y su radio inscrito mide un tramo",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería: el dimensionado en tramos es material nuevo de esta spec."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un jugador con un tramo de 2 km y otro con un tramo de 600 m, cuando se levantan sus mapas, entonces las dos celdas tienen la misma forma y distinto tamaño en metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Dos jugadores con tramos distintos reciben aventuras del mismo tamaño en pasos",
+      "escenario": "Dos jugadores con tramos distintos reciben aventuras del mismo tamaño en pasos",
+      "nota": "Del escenario solo se implementa aquí la mitad geométrica —misma forma, distinto tamaño en metros—. La mitad de los beats es de la fila 4 (tramo-personal) y sigue sin cubrir."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un tramo por debajo del suelo declarado, cuando se levanta el mapa, entonces la celda se dimensiona con el suelo y el núcleo lo declara al llamante, en vez de producir un mundo más pequeño de lo jugable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Un tramo por debajo del suelo dimensiona con el suelo y lo declara al llamante",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se afirma también que el suelo del tramo hace coincidir el radio inscrito con el suelo de mundo jugable de accesibilidad.md §4. Aquí al lado había dos entradas más del criterio «Dado una celda dimensionada con cualquier tramo por encima del suelo declarado, cuando se generan sus parajes, entonces su número es mayor o igual que el suelo derivado del catálogo», con los escenarios «El suelo de parajes cubre el vocabulario de escenas» y «El mundo mínimo todavía compone un lazo»: se han retirado, no ablandado. Ese criterio es RF-MUNDO-007, de las filas 4 (tramo-personal) y 6 (parajes-cobertura-escenas) del checklist, y lo hereda SPEC-006 (docs/specs/SPEC-006-parajes-cobertura-escenas.md); hoy ni el criterio ni los dos escenarios tienen prueba viva. La medida: con tramoM = 250 m, barrio-tres-calles y suelo-250m castean cero plantillas con lazo cerrado, y parajeCountForRadius da 1 paraje con el radio inscrito de esa celda y 2 a 500 m, donde el catálogo vivo pide 3. El esquema no admite entrada sin prueba implementada, así que el hueco se ve por ausencia y no disfrazado de cobertura, igual que en SPEC-002."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un tramo que no es un número positivo, cuando se levanta el mapa, entonces falla nombrando el parámetro inválido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Un tramo que no es un número positivo falla nombrando el parámetro inválido",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa levantado, cuando el tramo del jugador cambia, entonces el lado de celda de ese mapa no cambia, ni para las celdas abiertas ni para las que se abran después.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "El lado de celda de un mapa levantado no cambia aunque cambie el tramo del jugador",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "Este caso cubre la mitad de dimensionado del escenario (el lado de celda); la de «el mundo sigue idéntico byte a byte» la cubre el caso homónimo de test/nucleo/mapa.test.mjs."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa nuevo levantado más tarde, cuando se dimensiona, entonces usa el tramo vigente en ese momento y no el del mapa anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "Un mapa levantado más tarde se dimensiona con el tramo vigente en ese momento",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado el parámetro de dimensionado, cuando se lee el código, entonces aparece una sola vez, con su valor por defecto y su justificación escrita, y ninguna fase lo recalcula por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rejilla.test.mjs",
+      "caso": "El parámetro de dimensionado aparece una sola vez, con su justificación, y ninguna fase lo recalcula",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería: se afirma leyendo el paquete, no generando mundos."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla, un índice de celda y unos datos de OSM congelados, cuando se genera la celda dos veces, entonces las dos son idénticas byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "El escenario ya estaba vivo en SPEC-002 sobre un mundo suelto; aquí se afirma sobre la unidad que estrena esta spec, la celda, y sobre los cuatro mundos congelados con dos índices de celda."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado los mismos datos de OSM entregados en otro orden de llegada, cuando se genera la celda, entonces el resultado es idéntico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "El orden de iteración no depende del orden de inserción",
+      "escenario": "El orden de iteración no depende del orden de inserción",
+      "nota": "Mismo escenario que en SPEC-002, aplicado a la celda: los datos del mundo congelado se sirven en el orden contrario."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la generación de una celda, cuando se ejecuta con el reloj del sistema fijado en instantes distintos, entonces el resultado no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "Se congela el reloj del sistema en dos instantes muy separados y se compara la celda entera serializada."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la generación de una celda, cuando se cambia la implementación de una sola fase, entonces las demás fases salen idénticas a las de antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Cada fase usa su propio sufijo de azar",
+      "escenario": "Cada fase usa su propio sufijo de azar",
+      "nota": "Se rehacen las fases a mano con la semilla de la celda y se altera solo la de parajes: los núcleos y las calzadas tienen que salir idénticos."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda generada, cuando se inspecciona, entonces lleva registrados su índice, su lado en metros, el anclaje de la rejilla, la semilla de partida y el identificador del mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Una celda generada lleva registrados su índice, su lado, el anclaje, la semilla de partida y el mapa",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se comprueba además que la consulta de datos se pide por límites de celda más el margen de borde, que es el umbral de cosido."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado unos datos de OSM sin ninguna calle ni ningún anclaje dentro de la celda, cuando se genera, entonces la celda se crea igual, con sus límites, y queda marcada como sin contenido jugable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Una celda sin ninguna calle ni ningún anclaje dentro se crea igual y queda marcada como sin contenido jugable",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se comprueba también que una celda con datos NO se marca, para que la marca signifique algo."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una consulta de datos de OSM que falla a mitad, cuando se pide generar la celda, entonces no queda ninguna celda a medias registrada como abierta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Una consulta de datos que falla a mitad no deja ninguna celda a medias registrada como abierta",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se comprueba además que el mapa sigue usable después del fallo."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda ya generada, cuando se pide generarla otra vez, entonces se devuelve la que ya existe y no se genera nada nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Pedir otra vez una celda ya generada devuelve la que existe y no genera nada nuevo",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se cuenta lo que se le pidió a la consulta inyectada: es la manera de afirmar que no se ha generado nada."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda entregada al llamante, cuando este intenta modificar su contenido, entonces la celda registrada en el mapa no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Una celda entregada al llamante no se puede modificar por detrás",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se afirma la congelación honda —un mundo es hondo y Object.freeze solo protege el primer nivel—, con la excepción declarada en core/congelar.js: las vistas sobre ArrayBuffer (la máscara tierra/mar) no se congelan y quedan fuera de la garantía."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa con la celda «0,0» abierta, cuando el jugador pisa la celda «1,0», entonces se genera y queda registrada como abierta por pisarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia",
+      "nota": "Cubre la vía de pisarla y las dos mitades del escenario: la celda propia sigue idéntica y las dos comparten la costura del borde."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa con la celda «0,0» abierta, cuando llega la señal de que esa celda se ha completado, entonces se abre una celda contigua y queda registrada como abierta por acontecimiento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Completar una celda abre una vecina y la registra como abierta por acontecimiento",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: la apertura de celda por acontecimiento no tiene escenario en docs/testing.md. «Abrir una celda vecina no toca la celda propia» cubre solo la vía de pisarla."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la misma celda abierta por pisarla en una partida y por acontecimiento en otra con la misma semilla y los mismos datos, cuando se comparan, entonces su contenido es idéntico y solo difiere el motivo registrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "La misma celda abierta por las dos vías tiene el mismo contenido y solo difiere el motivo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: la apertura de celda por acontecimiento no tiene escenario en docs/testing.md. «Abrir una celda vecina no toca la celda propia» cubre solo la vía de pisarla."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda «0,0» ya generada, cuando se abre cualquier vecina, entonces la «0,0» sigue idéntica byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia",
+      "nota": "Mismo caso que el criterio de la apertura por pisarla: lo que afirma es justo la mitad de «la 0,0 sigue idéntica byte a byte», comparando la celda registrada y la entregada antes."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado la señal de celda completada, cuando se elige qué vecina se abre, entonces la elección sale de la semilla y es la misma en dos ejecuciones iguales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "La vecina que abre el acontecimiento la elige la semilla y sale igual en dos ejecuciones",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: la apertura de celda por acontecimiento no tiene escenario en docs/testing.md. «Abrir una celda vecina no toca la celda propia» cubre solo la vía de pisarla. Se comprueba además que la elección no depende del orden en que se abrieron otras celdas."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda cuyas cuatro vecinas ya están abiertas, cuando llega la señal de completada, entonces no se abre ninguna celda nueva y no se anuncia ningún acontecimiento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Una celda con las cuatro vecinas abiertas no anuncia ningún acontecimiento",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: la apertura de celda por acontecimiento no tiene escenario en docs/testing.md. «Abrir una celda vecina no toca la celda propia» cubre solo la vía de pisarla."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un jugador que entra en una celda ya abierta, cuando se pisa, entonces no se genera nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Entrar en una celda ya abierta no genera nada",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se cuenta lo que se le pidió a la consulta inyectada."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una posición que no cae en ninguna celda abierta ni en ninguna contigua a una abierta, cuando se resuelve, entonces el núcleo responde que ninguna celda de este mapa la contiene, sin abrir nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Una posición que este mapa no contiene se responde sin abrir nada",
+      "escenario": "Llegar a un sitio nuevo ofrece levantar un mapa",
+      "nota": "De ese escenario esta spec entrega solo la mitad de núcleo: responder que ninguna celda de este mapa contiene la posición. Ofrecer levantar otro mapa es de la fila 41 (mapas-multiples). Nota: con el mapa todavía sin ninguna celda abierta el estado es «inicial» y sí se abre, que es el arranque de A1P4."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa sin ninguna celda abierta todavía, cuando se consulta su lista de celdas, entonces se obtiene una lista vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Un mapa sin ninguna celda abierta devuelve una lista vacía y no un error",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda abierta, cuando se consulta su registro, entonces consta por cuál de las dos vías se abrió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "De una celda abierta consta por cuál de las dos vías se abrió",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: la apertura de celda por acontecimiento no tiene escenario en docs/testing.md. «Abrir una celda vecina no toca la celda propia» cubre solo la vía de pisarla. Se comprueba además que un motivo que no es ninguna de las dos vías no se registra en silencio."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos celdas contiguas abiertas, cuando se inspecciona el grafo, entonces sus calzadas quedan cosidas en el borde que comparten.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Los huecos cortos se cosen",
+      "escenario": "Los huecos cortos se cosen",
+      "nota": "El escenario del callejero troceado, aplicado al borde entre dos celdas como pide la spec. Datos sintéticos: los cuatro fixtures caben en menos de un kilómetro y ninguno llega al borde de una celda de cuatro."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos celdas contiguas, cuando se abren en un orden y después, en otra ejecución, en el orden inverso, entonces la costura resultante es idéntica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "La costura sale idéntica se abran las celdas en un orden o en el otro",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería: la simetría de la costura es material nuevo de esta spec."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos celdas contiguas, cuando se genera su costura, entonces ninguna de las dos celdas cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Generar la costura no cambia ninguna de las dos celdas",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Es lo que sostiene que la costura viva fuera de las dos celdas."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos calzadas a un lado y a otro del borde separadas por menos del umbral de cosido, cuando se cose, entonces quedan unidas por una arista marcada como suposición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Lo cosido y lo inventado queda marcado",
+      "escenario": "Lo cosido y lo inventado queda marcado",
+      "nota": "Aplicado al borde entre celdas: toda arista de costura lleva su marca de suposición y la costura declara con qué umbral se cosió."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos calzadas a un lado y a otro del borde separadas por más del umbral de cosido, cuando se cose, entonces no se unen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Los huecos largos no se cosen",
+      "escenario": "Los huecos largos no se cosen",
+      "nota": "Aplicado al borde entre celdas, con 500 m de hueco frente a un umbral de 180 m."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una celda abierta cuya vecina todavía no lo está, cuando se inspecciona su borde, entonces sus calzadas terminan en el borde sin ninguna arista inventada hacia fuera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Una celda cuya vecina no está abierta no inventa ninguna arista hacia fuera",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se comprueban los puntos de la celda llevados al marco métrico de la rejilla, que es el único común a dos celdas."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado dos celdas que no comparten borde, cuando se pide su costura, entonces se obtiene una costura vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Dos celdas que no comparten borde dan una costura vacía y no un error",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Cubre de paso la contigüidad por borde y no por diagonal."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una costura ya calculada, cuando se abre una tercera celda en otro borde, entonces la costura anterior no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/costura.test.mjs",
+      "caso": "Abrir una tercera celda en otro borde no cambia la costura anterior",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mundo generado con un tramo declarado de 2 km, cuando el jugador cambia su tramo a 600 m, entonces el mundo sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "La mitad de «el mundo sigue idéntico byte a byte». La otra mitad del escenario —que las aventuras que se ofrecen manden a sitios más cercanos— es de la fila 4 y sigue sin cubrir."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mundo generado y pintado en estilo «reino», cuando se cambia el estilo a «pergamino», entonces el mundo sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "nota": "El estilo es solo pintado y vive fuera del paquete, en app/js/render/styles.js: desde el núcleo se afirma que el mundo está congelado —el pintor no tiene por dónde tocarlo— y que ningún estilo entra en la generación. Que al repintar se vea lo mismo es @manual."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una partida guardada y vuelta a cargar, cuando se comparan sus celdas con las de antes de guardar, entonces son idénticas byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Una partida guardada y vuelta a cargar tiene las celdas idénticas byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. La persistencia de verdad es de la fila 9 (RF-PERS-001): aquí se afirma el ida y vuelta por JSON, que es por donde va a pasar, y que no hay nada colgado de un array que el guardado se lleve en silencio."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado cualquier operación del juego que no sea abrir una celda nueva, cuando se ejecuta, entonces ninguna celda ya generada se vuelve a generar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Ninguna operación que no sea abrir una celda nueva vuelve a generar nada",
+      "hueco_de_bateria": true,
+      "nota": "Sin escenario en la batería. Se recorren todas las operaciones que hoy tiene la partida contando lo que se le pide a la consulta inyectada."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa levantado, cuando se inspecciona todo lo que queda registrado de su rejilla, entonces no aparece la coordenada exacta con la que se levantó.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Generar una celda entera no abre ninguna conexión de red",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "Segunda entrada del criterio de privacidad del anclaje, por el otro lado: con el inspector de tráfico saliente en modo estricto, generar las celdas de los cuatro mundos congelados no produce ni una petición. Sin el inspector, «esto no sale del móvil» sería fe."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa levantado, cuando se inspecciona todo lo que queda registrado de su rejilla, entonces no aparece la coordenada exacta con la que se levantó.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Levantar y crecer un mapa entero no abre ninguna conexión de red",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "Levantar el mapa, completar una celda y pisar una vecina, con el inspector en modo estricto delante."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado un mapa levantado, cuando se inspecciona todo lo que queda registrado de su rejilla, entonces no aparece la coordenada exacta con la que se levantó.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "La versión del escenario que mira el mapa entero y no solo la rejilla: dos jugadores que arrancan en portales distintos del mismo paso de redondeo dejan el mismo registro, y el inspector no ve salir nada."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado los mismos datos de OSM entregados en otro orden de llegada, cuando se genera la celda, entonces el resultado es idéntico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Las celdas abiertas salen en un orden estable que no depende del de apertura",
+      "escenario": "El orden de iteración no depende del orden de inserción",
+      "nota": "El mismo escenario aplicado al registro de celdas abiertas: la lista sale ordenada por clave, no por orden de inserción."
+    },
+    {
+      "spec": "SPEC-003",
+      "criterio": "Dado una semilla, un índice de celda y unos datos de OSM congelados, cuando se genera la celda dos veces, entonces las dos son idénticas byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapa.test.mjs",
+      "caso": "Un mundo real generado en celda no cambia porque se vuelva a mirar",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "La misma afirmación de la celda, pero por el camino completo del mapa (creaMapa → pisa) y con datos reales del mundo congelado costero, que es el que ejercita la máscara de mar y la segunda vuelta de datos."
     }
   ]
 }

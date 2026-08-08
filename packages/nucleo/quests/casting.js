@@ -7,6 +7,7 @@
 
 import { dist } from '../core/geo.js';
 import { makeRng, shuffle } from '../core/rng.js';
+import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { TEMPLATES } from './templates.js';
 
 // Factor de rodeo (línea recta → calles reales) y ritmo a pie.
@@ -76,7 +77,7 @@ function legsOk(tpl, assign) {
  * determinista, y los mundos son pequeños (pools de unidades, no miles).
  */
 export function castTemplate(world, tpl, seedStr = world.seed) {
-  const rng = makeRng(`${seedStr}:cast:${tpl.id}`);
+  const rng = makeRng(seedStr + SUFIJOS_DE_FASE.casting + ':' + tpl.id);
 
   const roleIds = Object.keys(tpl.roles);
   const pools = {};

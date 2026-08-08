@@ -4,6 +4,7 @@
 
 import { dist } from '../core/geo.js';
 import { makeRng } from '../core/rng.js';
+import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { crearIndiceDeNombres } from '../names/index.js';
 
 // Orden estable de los nodos del grafo: los ids de OSM por número y las claves de
@@ -107,7 +108,9 @@ function buildGraph(roads) {
 }
 
 // Distancia máxima que se considera "hueco en los datos" y no separación real.
-const COSER_MAX = 180;
+// Se exporta porque la costura del borde entre celdas usa este mismo umbral: dos
+// umbrales distintos producirían costuras que dependen de por qué lado se miran.
+export const COSER_MAX = 180;
 
 /**
  * Cose los trozos sueltos del grafo viario.
@@ -255,7 +258,7 @@ export function pegarAViario(puntos, roads, maxMove = 1200) {
  */
 export function buildRoutes(settlements, roads, seedStr, names, indice = crearIndiceDeNombres()) {
   if (settlements.length < 2) return [];
-  const rng = makeRng(seedStr + ':routes');
+  const rng = makeRng(seedStr + SUFIJOS_DE_FASE.calzadas);
 
   const { coord, adj, nodeIds } = buildGraph(roads);
   const n = settlements.length;
