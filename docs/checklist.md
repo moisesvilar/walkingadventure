@@ -25,8 +25,8 @@
 | 12 | propagacion-rumores | RF-RUMOR-003, RF-RUMOR-004, RF-RUMOR-005 | must | done |
 | 13 | prologo-mundo | RF-MUNDO-015, RF-QUEST-014 | must | done |
 | 14 | npcs-capa | RF-NPC-001, RF-NPC-002, RF-NPC-003, RF-NPC-004, RF-NPC-005 | must | done |
-| 15 | progresion-rango-oro-objetos | RF-PROG-001, RF-PROG-002, RF-PROG-004, RF-PROG-006, RF-PROG-008 | must | wip |
-| 16 | diario-estado-hechos | RF-DIARIO-001, RF-PERS-003 | must | pending |
+| 15 | progresion-rango-oro-objetos | RF-PROG-001, RF-PROG-002, RF-PROG-004, RF-PROG-006, RF-PROG-008 | must | done |
+| 16 | diario-estado-hechos | RF-DIARIO-001, RF-PERS-003 | must | wip |
 
 ## B3 · La palabra
 

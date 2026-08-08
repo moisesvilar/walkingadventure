@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-015",
+  "spec_actual": "SPEC-016",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -150,6 +150,15 @@
       "casos": "883 casos: 880 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio",
       "nota": "un AC de la spec chocaba con RF-NPC-002 y se resolvio a favor del requisito (decisiones 6p)."
+    },
+    {
+      "spec": "SPEC-015",
+      "slug": "progresion-rango-oro-objetos",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-015-run-20260808T184438Z.md",
+      "casos": "965 casos: 962 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos"
     }
   ],
   "bloqueos": [],
