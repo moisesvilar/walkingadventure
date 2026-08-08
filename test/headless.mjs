@@ -6,6 +6,8 @@
 import { generateSettlements, countsForRadius } from '../packages/nucleo/world/settlements.js';
 import { buildRoutes } from '../packages/nucleo/world/routes.js';
 import { generateParajes, parajeCountForRadius, PARAJE_INFO } from '../packages/nucleo/world/parajes.js';
+import { vocabularioDeEscenas } from '../packages/nucleo/world/cupos.js';
+import { escenasQueCubre, sueloDeVocabulario } from '../packages/nucleo/world/escenas.js';
 import { localeFor, namesFor } from '../packages/nucleo/names/index.js';
 import { makeRng } from '../packages/nucleo/core/rng.js';
 import { castAll, castTemplate } from '../packages/nucleo/quests/casting.js';
@@ -41,12 +43,22 @@ function syntheticWorld(radius) {
   return { anchors, geo: { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads } };
 }
 
+// El vocabulario de escenas que el mundo tiene que saber decir. Llega inyectado a
+// la fase de parajes, igual que en la tubería: aquí se lee del catálogo porque es
+// lo que hace hoy quien orquesta, no porque la fase lo importe.
+const VOCABULARIO = vocabularioDeEscenas();
+const SUELO = sueloDeVocabulario(VOCABULARIO);
+
 function generate(radius, seed, names) {
   const { anchors, geo } = syntheticWorld(radius);
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, names);
   const routes = buildRoutes(settlements, geo.roads, seed, names);
-  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, names);
-  return { settlements, routes, parajes, freeAnchors };
+  const ficha = {};
+  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, names, undefined, null, null, {
+    vocabulario: VOCABULARIO,
+    ficha,
+  });
+  return { settlements, routes, parajes, freeAnchors, ficha };
 }
 
 const es = namesFor('es');
@@ -70,10 +82,14 @@ for (const [preset, r] of [['paseo', 700], ['aventura', 1200], ['jornada', 1900]
 
 console.log('— parajes —');
 {
-  check('cupo por radio: 250→1, 500→2, 1000→4, 2000→7, 10000→8', parajeCountForRadius(250) === 1 && parajeCountForRadius(500) === 2 && parajeCountForRadius(1000) === 4 && parajeCountForRadius(2000) === 7 && parajeCountForRadius(10000) === 8);
+  check('techo por ritmo: 250→1, 500→2, 1000→4, 2000→7, 10000→8', parajeCountForRadius(250) === 1 && parajeCountForRadius(500) === 2 && parajeCountForRadius(1000) === 4 && parajeCountForRadius(2000) === 7 && parajeCountForRadius(10000) === 8);
+  check(`el suelo sale del catálogo y no de una cifra escrita a mano (${VOCABULARIO.length} escenas → ${SUELO})`, SUELO === Math.ceil(VOCABULARIO.length / 2));
   const w = generate(1200, 'test#3', es);
-  const target = parajeCountForRadius(1200);
+  const target = Math.max(SUELO, parajeCountForRadius(1200));
   check(`cupo cumplido en 1200 m (${w.parajes.length}/${target})`, w.parajes.length === target);
+  check(`el cupo es el mayor entre suelo (${w.ficha.suelo}) y techo (${w.ficha.techo})`, w.ficha.cupo === Math.max(w.ficha.suelo, w.ficha.techo));
+  const cubiertas = new Set(w.parajes.flatMap((p) => escenasQueCubre(p.scenes, VOCABULARIO)));
+  check(`cobertura del vocabulario: ${cubiertas.size}/${VOCABULARIO.length} escenas`, w.ficha.deficit.length === 0, w.ficha.deficit.join(' | '));
   check('todos con tipo válido y escenas', w.parajes.every((p) => PARAJE_INFO[p.type] && Object.keys(p.scenes).length >= 2));
   const names = w.parajes.map((p) => p.name);
   check('nombres únicos', new Set(names).size === names.length, names.join(' | '));
@@ -94,7 +110,7 @@ console.log('— colchón del grafo sin anclajes —');
   const { geo } = syntheticWorld(1200);
   const { settlements } = generateSettlements([], geo, 1200, 'test#4', null, es);
   const routes = buildRoutes(settlements, geo.roads, 'test#4', es);
-  const parajes = generateParajes([], settlements, routes, geo, 1200, 'test#4', null, es);
+  const parajes = generateParajes([], settlements, routes, geo, 1200, 'test#4', null, es, undefined, null, null, { vocabulario: VOCABULARIO });
   check(`sin anclajes → parajes del grafo: ${parajes.length}`, parajes.length >= 1 && parajes.every((p) => p.origin === 'grafo'));
 }
 

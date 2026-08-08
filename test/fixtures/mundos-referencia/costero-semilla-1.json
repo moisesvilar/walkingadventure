@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-005-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-006",
+    "motivo_regeneracion": "Regenerado por SPEC-006: el cupo de parajes deja de ser solo el techo por ritmo y pasa a ser el mayor entre ese techo y el suelo derivado del catálogo, y los tipos se eligen por cobertura de escenas antes de mirar ningún anclaje real, así que los mundos generados cambian."
   },
   "titulo": "Reinos de Vaeloria",
   "idioma": "gl",
@@ -14,7 +14,7 @@
     "nucleos": 7,
     "servicios": 11,
     "parajes": 5,
-    "calzadas": 11
+    "calzadas": 10
   },
   "nucleos": [
     {
@@ -148,39 +148,39 @@
   ],
   "parajes": [
     {
-      "nombre": "A Torre Vixía da Fin",
+      "nombre": "A Atalaia da Espera",
       "tipo": "atalaya",
-      "x": -201,
-      "y": 599,
-      "anclaje": "node/4502883744"
-    },
-    {
-      "nombre": "A Capela do Monte",
-      "tipo": "ermita",
       "x": 367,
       "y": 433,
       "anclaje": "node/3689211743"
     },
     {
-      "nombre": "A Fonte Xeada",
+      "nombre": "A Encrucillada dos Xuramentos",
+      "tipo": "cruce",
+      "x": -279,
+      "y": 525,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Pozo do Marmurio",
       "tipo": "fuente",
+      "x": 151,
+      "y": 679,
+      "anclaje": "node/3689212319"
+    },
+    {
+      "nombre": "A Pedra das Runas",
+      "tipo": "piedra",
       "x": -395,
       "y": -36,
       "anclaje": "node/3648044334"
     },
     {
-      "nombre": "A Pedra das Runas",
-      "tipo": "piedra",
+      "nombre": "A Fortaleza dos Ecos",
+      "tipo": "ruina",
       "x": -139,
       "y": 6,
       "anclaje": "node/5844583387"
-    },
-    {
-      "nombre": "A Fortaleza dos Ecos",
-      "tipo": "ruina",
-      "x": 151,
-      "y": 679,
-      "anclaje": "node/3689212319"
     }
   ],
   "calzadas": [
@@ -280,20 +280,6 @@
         16
       ],
       "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        -201,
-        599
-      ],
-      "hasta": [
-        -277,
-        526
-      ],
-      "puntos": 10,
       "recta": false
     },
     {

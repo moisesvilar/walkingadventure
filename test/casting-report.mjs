@@ -14,6 +14,11 @@ const { generateParajes } = await import('../packages/nucleo/world/parajes.js');
 const { castAll } = await import('../packages/nucleo/quests/casting.js');
 const { TEMPLATES } = await import('../packages/nucleo/quests/templates.js');
 const { namesFor } = await import('../packages/nucleo/names/index.js');
+const { vocabularioDeEscenas } = await import('../packages/nucleo/world/cupos.js');
+
+// El vocabulario de escenas llega inyectado a la fase de parajes, igual que en la
+// tubería: se lee del catálogo aquí, que es quien orquesta, y no allí.
+const VOCABULARIO = vocabularioDeEscenas();
 
 const es = namesFor('es');
 const stats = new Map(TEMPLATES.map((t) => [t.id, { ok: 0, total: 0, motivos: new Map() }]));
@@ -55,7 +60,7 @@ function syntheticWorld(radius, seed) {
   const geo = { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads };
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, es);
   const routes = buildRoutes(settlements, geo.roads, seed, es);
-  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, es);
+  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, es, undefined, null, null, { vocabulario: VOCABULARIO });
   return { seed, radius, settlements, routes, parajes };
 }
 

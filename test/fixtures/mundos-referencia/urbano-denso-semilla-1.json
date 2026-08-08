@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-005-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-006",
+    "motivo_regeneracion": "Regenerado por SPEC-006: el cupo de parajes deja de ser solo el techo por ritmo y pasa a ser el mayor entre ese techo y el suelo derivado del catálogo, y los tipos se eligen por cobertura de escenas antes de mirar ningún anclaje real, así que los mundos generados cambian."
   },
   "titulo": "Marcas de Kaelun",
   "idioma": "es",
@@ -162,39 +162,39 @@
   ],
   "parajes": [
     {
-      "nombre": "La Atalaya del Fin",
+      "nombre": "La Torre Vigía de las Señales",
       "tipo": "atalaya",
-      "x": -303,
-      "y": 717,
-      "anclaje": "node/2681923270"
+      "x": -519,
+      "y": -231,
+      "anclaje": "way/629873316"
     },
     {
-      "nombre": "La Encrucijada de las Brujas",
+      "nombre": "El Cruce del Ahorcado",
       "tipo": "cruce",
       "x": -350,
       "y": 528,
       "anclaje": null
     },
     {
-      "nombre": "El Manantial de la Doncella",
-      "tipo": "fuente",
-      "x": -32,
-      "y": 315,
-      "anclaje": "node/13716868587"
+      "nombre": "El Crucero del Peregrino",
+      "tipo": "ermita",
+      "x": -714,
+      "y": -239,
+      "anclaje": "way/107465469"
     },
     {
-      "nombre": "La Abadía del Alba",
-      "tipo": "monasterio",
-      "x": -195,
-      "y": 517,
-      "anclaje": "node/13342702051"
+      "nombre": "El Altar de la Mora",
+      "tipo": "piedra",
+      "x": -917,
+      "y": -231,
+      "anclaje": "way/95564940"
     },
     {
-      "nombre": "La Torre Caída",
+      "nombre": "La Muralla Caída",
       "tipo": "ruina",
-      "x": 294,
-      "y": 622,
-      "anclaje": "node/2674514530"
+      "x": -303,
+      "y": 717,
+      "anclaje": "node/2681923270"
     }
   ],
   "calzadas": [
@@ -286,20 +286,6 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -195,
-        517
-      ],
-      "hasta": [
-        -252,
-        446
-      ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
         -303,
         717
       ],
@@ -314,12 +300,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -32,
-        315
+        -519,
+        -231
       ],
       "hasta": [
-        -22,
-        377
+        -550,
+        -136
       ],
       "puntos": 2,
       "recta": false
@@ -328,14 +314,28 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        294,
-        622
+        -714,
+        -239
       ],
       "hasta": [
-        295,
-        510
+        -737,
+        -181
       ],
-      "puntos": 4,
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -917,
+        -231
+      ],
+      "hasta": [
+        -826,
+        -194
+      ],
+      "puntos": 17,
       "recta": false
     }
   ],

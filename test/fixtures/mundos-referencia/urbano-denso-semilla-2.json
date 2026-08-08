@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-005-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-006",
+    "motivo_regeneracion": "Regenerado por SPEC-006: el cupo de parajes deja de ser solo el techo por ritmo y pasa a ser el mayor entre ese techo y el suelo derivado del catálogo, y los tipos se eligen por cobertura de escenas antes de mirar ningún anclaje real, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Miradia",
   "idioma": "es",
@@ -176,39 +176,39 @@
   ],
   "parajes": [
     {
-      "nombre": "La Torre Vigía de la Espera",
+      "nombre": "La Atalaya de la Espera",
       "tipo": "atalaya",
-      "x": -143,
-      "y": 351,
-      "anclaje": "node/2622900853"
+      "x": 420,
+      "y": 161,
+      "anclaje": "node/13232651719"
     },
     {
-      "nombre": "El Cruce del Mercader",
+      "nombre": "La Encrucijada del Ahorcado",
       "tipo": "cruce",
-      "x": 584,
-      "y": 208,
+      "x": -353,
+      "y": -353,
       "anclaje": null
     },
     {
-      "nombre": "El Crucero del Peregrino",
-      "tipo": "ermita",
-      "x": -359,
-      "y": -589,
-      "anclaje": "node/5448876987"
+      "nombre": "El Priorato del Eco",
+      "tipo": "monasterio",
+      "x": 894,
+      "y": 497,
+      "anclaje": "way/1331395569"
     },
     {
-      "nombre": "El Manantial del Susurro",
-      "tipo": "fuente",
-      "x": 1018,
-      "y": 398,
-      "anclaje": "node/12584781201"
+      "nombre": "Las Lajas de la Mora",
+      "tipo": "piedra",
+      "x": -917,
+      "y": -231,
+      "anclaje": "way/95564940"
     },
     {
-      "nombre": "El Caserón de los Ecos",
+      "nombre": "La Torre Quemada",
       "tipo": "ruina",
-      "x": -352,
-      "y": -260,
-      "anclaje": "node/510812830"
+      "x": -528,
+      "y": 609,
+      "anclaje": "node/4628381249"
     }
   ],
   "calzadas": [
@@ -300,40 +300,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -143,
-        351
+        -528,
+        609
       ],
       "hasta": [
-        -141,
-        388
-      ],
-      "puntos": 3,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        -352,
-        -260
-      ],
-      "hasta": [
-        -308,
-        -355
-      ],
-      "puntos": 10,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        -359,
-        -589
-      ],
-      "hasta": [
-        -372,
-        -590
+        -482,
+        638
       ],
       "puntos": 2,
       "recta": false
@@ -342,14 +314,42 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        1018,
-        398
+        -917,
+        -231
       ],
       "hasta": [
-        956,
-        404
+        -971,
+        -220
+      ],
+      "puntos": 5,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        420,
+        161
+      ],
+      "hasta": [
+        425,
+        145
       ],
       "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        894,
+        497
+      ],
+      "hasta": [
+        891,
+        301
+      ],
+      "puntos": 11,
       "recta": false
     }
   ],
