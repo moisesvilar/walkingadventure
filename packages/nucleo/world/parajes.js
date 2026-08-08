@@ -2,9 +2,11 @@
 //
 // Principios: el tipo fantástico está DESACOPLADO del anclaje real (un
 // chiringuito puede ser una ruina); el anclaje solo aporta coordenadas y tierra
-// firme. Asignación de tipo con sesgo suave, escenas como etiquetas con pesos,
-// selección puntuando cerca-de-ruta y lejos-de-núcleos, y cruces/puentes del
-// grafo viario como colchón garantizado en zonas pobres de datos.
+// firme. Desde el desempate del 5-ago-2026 el orden está invertido: **primero los
+// tipos que cubren el vocabulario de escenas y después el anclaje**, con sesgo
+// suave y sacrificando la afinidad —nunca la cobertura— cuando no hay afín.
+// Cruces y puentes del grafo viario participan en la cobertura en igualdad de
+// condiciones, y son el único colchón de una celda sin anclajes.
 
 import { dist, segIntersect, polygonBBox } from '../core/geo.js';
 import { isSea } from './seamask.js';
@@ -12,10 +14,14 @@ import { makeRng, pick, shuffle } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { footprintRadius } from './settlements.js';
 import { puntuaCandidatos, recortaPorTopes } from './anclajes.js';
+import { escenasQueCubre, normalizaVocabulario, sueloDeVocabulario } from './escenas.js';
 import { crearIndiceDeNombres } from '../names/index.js';
 
 // Tipos cuyo emplazamiento sale de un anclaje real; cruce y puente se derivan del grafo.
 export const ANCHORED_TYPES = ['ruina', 'piedra', 'ermita', 'fuente', 'atalaya', 'monasterio'];
+
+/** Los tipos cuya posición la da el grafo viario: su tipo viene dado por su origen. */
+export const GRAPH_TYPES = ['cruce', 'puente'];
 
 export const PARAJE_INFO = {
   ruina: { label: 'Ruina', scenes: { guarida: 0.4, emboscada: 0.2, misterio: 0.2, refugio: 0.2 } },
@@ -57,8 +63,21 @@ export function parajeCountForRadius(r) {
 }
 
 // --- candidatos derivados del grafo viario (existen en cualquier mundo con carreteras) ---
+//
+// Estar «en despoblado» dejó de ser un filtro duro y pasó a ser una preferencia,
+// por el mismo motivo por el que ya lo era para los anclajes: `parajes.md` dice
+// «se penalizan», y como corte dejaba sin ningún candidato a las celdas pequeñas
+// —medido en `suelo-250m`, donde los dos únicos cruces caen dentro de la huella
+// de un núcleo— que son justo las que dependen del colchón del grafo. Lo único
+// que sigue siendo corte es estar encima del glifo de un núcleo.
 
 const key = (p) => `${Math.round(p.x)},${Math.round(p.y)}`;
+
+/** Pegado a un núcleo: ni es un hito ni se distingue del propio pueblo. */
+const PEGADO_A_NUCLEO_M = 40;
+
+/** A partir de aquí un candidato del grafo se considera en despoblado y se prefiere. */
+const EN_DESPOBLADO_M = 80;
 
 // Cruces: puntos compartidos por 2+ rutas nombradas. Dentro del tramo común de
 // cada par se elige el punto más alejado de todo núcleo ("en despoblado").
@@ -95,8 +114,10 @@ function crossingCandidates(routes, settlements, radius) {
   const sep = Math.max(150, radius * 0.1);
   const out = [];
   for (const { p, d } of [...byPair.values()].sort((a, b) => b.d - a.d || (key(a.p) < key(b.p) ? -1 : 1))) {
-    if (d < 80) continue; // pegado a un núcleo: no es un cruce "en despoblado"
-    if (out.every((c) => dist(c, p) >= sep)) out.push({ x: p.x, y: p.y, type: 'cruce' });
+    if (d < PEGADO_A_NUCLEO_M) continue; // encima del glifo: no es un cruce, es el pueblo
+    if (out.every((c) => dist(c, p) >= sep)) {
+      out.push({ x: p.x, y: p.y, type: 'cruce', enDespoblado: d >= EN_DESPOBLADO_M });
+    }
   }
   return out;
 }
@@ -117,13 +138,85 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
         for (let j = 0; j < cauce.length - 1; j++) {
           const hit = segIntersect(a, b, cauce[j], cauce[j + 1]);
           if (!hit) continue;
-          if (settlements.some((s) => dist(hit, s) < 80)) continue;
-          if (out.every((c) => dist(c, hit) >= sep)) out.push({ x: hit.x, y: hit.y, type: 'puente' });
+          const dNucleo = Math.min(Infinity, ...settlements.map((s) => dist(hit, s)));
+          if (dNucleo < PEGADO_A_NUCLEO_M) continue;
+          if (out.every((c) => dist(c, hit) >= sep)) {
+            out.push({ x: hit.x, y: hit.y, type: 'puente', enDespoblado: dNucleo >= EN_DESPOBLADO_M });
+          }
         }
       }
     }
   }
   return out;
+}
+
+/**
+ * El orden de tipos de la taxonomía, estable y sin depender de ningún `Object.keys`
+ * de inserción: de esta lista sale a qué tipos se les pregunta qué cubren.
+ */
+const TIPOS_EN_ORDEN = [...ANCHORED_TYPES, ...GRAPH_TYPES].sort();
+
+/**
+ * Las escenas del vocabulario que ningún tipo de la taxonomía sabe decir.
+ *
+ * No es un fallo: es un hueco de taxonomía que se declara en la ficha de la celda
+ * y que el casting consume para no ofrecer plantillas imposibles. La generación
+ * continúa con el resto del vocabulario.
+ */
+function huecosDeTaxonomia(vocabulario) {
+  return vocabulario
+    .filter(({ escena, pesoMinimo }) => !TIPOS_EN_ORDEN.some((t) => (PARAJE_INFO[t].scenes[escena] ?? 0) >= pesoMinimo))
+    .map(({ escena }) => escena);
+}
+
+/**
+ * La secuencia de tipos que se va a colocar, **antes de mirar ningún anclaje real**.
+ *
+ * Gana el tipo que cubre más escenas todavía pendientes; los empates los rompe el
+ * azar de la fase y no el orden de la tabla. Cubierto el vocabulario, los huecos
+ * que quedan se reparten buscando diversidad, sin repetir ninguno mientras queden
+ * tipos sin usar. No consulta el pool: por eso permutarlo no cambia la secuencia.
+ *
+ * `disponibles` es cuántos huecos puede llenar cada origen —anclajes reales, cruces
+ * y puentes—, que es lo único del mundo que entra aquí.
+ */
+function secuenciaDeTipos(rng, cupo, vocabulario, disponibles) {
+  const quedan = { ...disponibles };
+  const usados = new Set();
+  const secuencia = [];
+  const hueco = (tipo) => (GRAPH_TYPES.includes(tipo) ? tipo : 'anclaje');
+
+  // Las escenas que ningún tipo sabe decir se apartan antes de empezar: dejarlas
+  // dentro haría que todos los tipos empataran a cero y el reparto se decidiera por
+  // azar puro en vez de por cobertura. Se declaran como hueco de taxonomía.
+  const sinTipo = new Set(huecosDeTaxonomia(vocabulario));
+  let porCubrir = vocabulario.filter(({ escena }) => !sinTipo.has(escena));
+
+  for (let i = 0; i < cupo; i++) {
+    const candidatos = TIPOS_EN_ORDEN.filter((t) => quedan[hueco(t)] > 0);
+    if (!candidatos.length) break;
+
+    const cubre = new Map(candidatos.map((t) => [t, escenasQueCubre(PARAJE_INFO[t].scenes, porCubrir).length]));
+    const mejor = Math.max(...candidatos.map((t) => cubre.get(t)));
+
+    let elegibles;
+    if (mejor > 0) {
+      elegibles = candidatos.filter((t) => cubre.get(t) === mejor);
+    } else {
+      // Vocabulario ya cubierto: los huecos restantes se reparten por diversidad.
+      const sinUsar = candidatos.filter((t) => !usados.has(t));
+      elegibles = sinUsar.length ? sinUsar : candidatos;
+    }
+
+    const tipo = pick(rng, elegibles);
+    const cubiertas = new Set(escenasQueCubre(PARAJE_INFO[tipo].scenes, porCubrir));
+    porCubrir = porCubrir.filter(({ escena }) => !cubiertas.has(escena));
+    usados.add(tipo);
+    quedan[hueco(tipo)] -= 1;
+    secuencia.push(tipo);
+  }
+
+  return secuencia;
 }
 
 /**
@@ -136,10 +229,38 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
  * reparto: dónde anotar que esta fase tuvo que saltarse los topes de diversidad,
  *   si quien genera lo lleva. Lo declara el mundo y no el pool, porque desde
  *   SPEC-005-iter-1 el pool no aplica topes y no puede declarar algo que no es suyo.
+ * opciones: la frontera de inyección de SPEC-006.
+ *   `vocabulario` las escenas que el catálogo le pide a un paraje, con su peso
+ *     mínimo. **Llega inyectado y no importado**: esta fase no depende del catálogo.
+ *   `cupo` la ficha de cupo ya resuelta —`{ cupo, suelo, techo }`—, calculada una
+ *     vez por celda y congelada con ella. Sin ella se deriva del vocabulario
+ *     recibido y del techo por ritmo del radio, que es la misma cuenta con el
+ *     tramo de referencia.
+ *   `ficha` objeto donde anotar suelo, techo, cupo y déficit de cobertura, si quien
+ *     genera lo lleva. Es dato interno: no sale a ninguna pantalla.
  */
-export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres(), pool = null, reparto = null) {
+export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres(), pool = null, reparto = null, opciones = {}) {
   const rng = makeRng(seedStr + SUFIJOS_DE_FASE.parajes);
-  const target = parajeCountForRadius(radius);
+
+  // El vocabulario decide el suelo y el techo por ritmo decide el máximo; cuando
+  // chocan gana el suelo, porque un techo que se come el suelo devuelve el problema
+  // que el suelo vino a resolver (`parajes.md`, 5-ago-2026).
+  // Y sin vocabulario no se genera: recibir uno **vacío** es normal —no hay escenas
+  // que cubrir, el suelo es cero y manda el techo—, pero **no recibirlo** es un fallo
+  // de cableado. Asumirlo cero deja una celda sin parajes sin que nadie se entere,
+  // que es justo lo que la spec no quiere (SPEC-006, «El generador falla si no
+  // recibe vocabulario»).
+  const recibido = opciones.cupo?.vocabulario ?? opciones.vocabulario;
+  if (recibido == null) {
+    throw new Error(
+      'generateParajes necesita el vocabulario de escenas inyectado y no lo ha recibido: ' +
+      'pásalo en opciones.vocabulario, o dentro de opciones.cupo. Un vocabulario vacío se declara [].',
+    );
+  }
+  const vocabulario = normalizaVocabulario(recibido);
+  const techo = opciones.cupo?.techo ?? parajeCountForRadius(radius);
+  const suelo = opciones.cupo?.suelo ?? sueloDeVocabulario(vocabulario);
+  const target = opciones.cupo?.cupo ?? Math.max(suelo, techo);
 
   // Elegibilidad de anclajes: en tierra y dentro del mundo. Estar dentro del radio
   // urbano de un núcleo ya NO excluye: `parajes.md` dice «se penalizan», y como
@@ -168,15 +289,19 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
     });
   }
 
-  // Candidatos del grafo (colchón garantizado sin Overpass).
-  const graphCands = shuffle(rng, [
+  // Candidatos del grafo. Ya no son una cuota fija de dos huecos: participan en la
+  // cobertura en igualdad de condiciones, y en una celda sin anclajes son lo único
+  // que hay. El mar sí excluye —no hay puente al que se pueda ir andando—; estar
+  // dentro de la huella de un núcleo solo posterga.
+  const delGrafo = shuffle(rng, [
     ...crossingCandidates(routes, settlements, radius),
     ...bridgeCandidates(routes, geo.rivers ?? [], settlements, radius),
-  ]).filter((c) => outsideTowns(c) && !isSea(seaMask, c));
+  ]).filter((c) => !isSea(seaMask, c));
+  const graphCands = [
+    ...delGrafo.filter((c) => c.enDespoblado && outsideTowns(c)),
+    ...delGrafo.filter((c) => !(c.enDespoblado && outsideTowns(c))),
+  ];
 
-  // Reparto: se reservan hasta 2 huecos para cruces/puentes; el resto, anclajes.
-  // Si faltan anclajes, el grafo rellena; si falta todo, se acepta el déficit.
-  const graphFloor = Math.min(2, graphCands.length, target);
   const sep = Math.max(120, radius * 0.1);
   const placed = [];
 
@@ -200,47 +325,79 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
     ...(a.fuente === 'places' ? { placeId: a.placeId ?? null, refrescable: a.refrescable ?? null } : {}),
   });
 
-  // 1) anclajes hasta (target - graphFloor), con tipo por sesgo suave + diversidad
-  let cycle = shuffle(rng, ANCHORED_TYPES);
-  const nextType = (biasType) => {
-    if (biasType && rng() < BIAS_P) {
-      cycle = cycle.filter((t) => t !== biasType);
-      if (!cycle.length) cycle = shuffle(rng, ANCHORED_TYPES.filter((t) => t !== biasType));
-      return biasType;
-    }
-    if (!cycle.length) cycle = shuffle(rng, ANCHORED_TYPES);
-    return cycle.shift();
-  };
-  // Los anclajes ya gastados por esta fase, para que la tercera vuelta no vuelva a
-  // ofrecer uno colocado: repetirlo sería consumir dos veces el mismo lugar real.
+  // 1) Los TIPOS, antes de mirar ningún anclaje. Es la inversión del desempate del
+  // 5-ago-2026: la cobertura manda sobre la afinidad.
+  const secuencia = secuenciaDeTipos(rng, target, vocabulario, {
+    anclaje: scored.length,
+    cruce: graphCands.filter((c) => c.type === 'cruce').length,
+    puente: graphCands.filter((c) => c.type === 'puente').length,
+  });
+
+  // 2) Y ahora el anclaje de cada uno. Los anclajes ya gastados por esta fase se
+  // marcan para no ofrecer dos veces el mismo lugar real.
   const usados = new Set();
-  const marca = (a) => usados.add(a.osmId ?? `${a.x},${a.y}`);
-  const gastado = (a) => usados.has(a.osmId ?? `${a.x},${a.y}`);
+  const clave = (a) => a.osmId ?? `${a.x},${a.y}`;
+  const disponibles = () => scored.filter(({ a }) => !usados.has(clave(a)));
+  const delGrafoLibres = new Set(graphCands);
 
-  for (const { a } of scored) {
-    if (placed.length >= target - graphFloor) break;
-    const type = nextType(BIAS[a.kind]);
-    if (tryPlace(a, type, fichaReal(a), 'anclaje')) marca(a);
-  }
+  const colocaEnGrafo = (tipo) => {
+    for (const c of graphCands) {
+      if (!delGrafoLibres.has(c) || c.type !== tipo) continue;
+      delGrafoLibres.delete(c);
+      if (tryPlace(c, tipo, null, 'grafo')) return true;
+    }
+    return false;
+  };
 
-  // 2) cruces/puentes del grafo hasta completar el cupo
-  for (const c of graphCands) {
-    if (placed.length >= target) break;
-    tryPlace(c, c.type, null, 'grafo');
-  }
+  // Sesgo suave: si hay algún anclaje real que «pega» con el tipo, gana peso en el
+  // sorteo (probabilidad BIAS_P) sin ganarlo siempre. Si no lo hay, se le da el
+  // mejor puntuado de los que quedan y **el tipo no cambia**: que una atalaya sea
+  // un bar es mejor que quedarse sin ningún sitio desde el que vigilar.
+  const colocaEnAnclaje = (tipo) => {
+    const libres = disponibles();
+    if (!libres.length) return false;
+    const afines = libres.filter(({ a }) => BIAS[a.kind] === tipo);
+    const orden = afines.length && rng() < BIAS_P
+      ? [...afines, ...libres.filter(({ a }) => BIAS[a.kind] !== tipo)]
+      : libres;
+    for (const { a } of orden) {
+      usados.add(clave(a));
+      if (tryPlace(a, tipo, fichaReal(a), 'anclaje')) return true;
+    }
+    return false;
+  };
 
-  // 3) si el grafo no dio y quedan anclajes, seguir con anclajes
-  for (const { a } of scored) {
-    if (placed.length >= target) break;
-    if (gastado(a)) continue;
-    if (tryPlace(a, nextType(BIAS[a.kind]), fichaReal(a), 'anclaje')) marca(a);
+  for (const tipo of secuencia) {
+    if (GRAPH_TYPES.includes(tipo)) colocaEnGrafo(tipo);
+    else colocaEnAnclaje(tipo);
   }
 
   // nombres únicos y ficha final; el conjunto de usados es el del mundo entero y
   // no uno local de la fase, que dejaba que un paraje se llamase como un núcleo
-  return placed.map((p) => {
+  const parajes = placed.map((p) => {
     const name = indice.fija(() => names.parajeName(rng, p.type), (base, k) => names.variantName(base, k), 8);
     const info = PARAJE_INFO[p.type];
     return { ...p, name, label: info.label, scenes: info.scenes };
   });
+
+  // 3) La ficha de cobertura de la celda: los tres números que la produjeron y lo
+  // que quedó sin cubrir. Es dato interno que consume el casting para no ofrecer
+  // plantillas imposibles, y no sale a ninguna pantalla.
+  if (opciones.ficha) {
+    const cubiertas = new Set(
+      parajes.flatMap((p) => escenasQueCubre(p.scenes, vocabulario)),
+    );
+    Object.assign(opciones.ficha, {
+      suelo,
+      techo,
+      cupo: target,
+      colocados: parajes.length,
+      escenasPedidas: vocabulario.map((e) => e.escena),
+      escenasCubiertas: [...cubiertas].sort(),
+      deficit: vocabulario.map((e) => e.escena).filter((e) => !cubiertas.has(e)),
+      huecosDeTaxonomia: huecosDeTaxonomia(vocabulario),
+    });
+  }
+
+  return parajes;
 }

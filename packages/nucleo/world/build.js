@@ -8,6 +8,8 @@ import { buildSeaMask, computeDisplayRadius } from './seamask.js';
 import { generateSettlements, countsForRadius, SERVICES } from './settlements.js';
 import { buildRoutes, linkParajes, pegarAViario } from './routes.js';
 import { generateParajes, parajeCountForRadius } from './parajes.js';
+import { TRAMO_DE_REFERENCIA_M, techoDeParajes, vocabularioDeEscenas } from './cupos.js';
+import { sueloDeVocabulario } from './escenas.js';
 import { castAll } from '../quests/casting.js';
 import { localeFor, namesFor, crearIndiceDeNombres } from '../names/index.js';
 import { makeRng } from '../core/rng.js';
@@ -23,12 +25,15 @@ const ORDEN_DE_NUCLEOS = ['ciudad', 'pueblo', 'aldea', 'granja'];
  * del radio del mundo y de nada más — nunca del tramo de quien juega, que
  * dimensiona los cupos de la celda pero jamás su contenido.
  */
-export function demandaDeAnclajes(radius) {
+export function demandaDeAnclajes(radius, cupoParajes = null) {
   const cuentas = countsForRadius(radius);
   const nucleos = cuentas.reduce((a, b) => a + b, 0);
   let servicios = 0;
   ORDEN_DE_NUCLEOS.forEach((tipo, i) => { servicios += SERVICES[tipo].fixed.length * cuentas[i]; });
-  const parajes = parajeCountForRadius(radius);
+  // El cupo de parajes ya no es solo el techo por ritmo: desde SPEC-006 lleva
+  // debajo el suelo derivado del catálogo, y pedir menos anclajes que huecos hay
+  // que llenar es pedir de menos justo en las celdas pobres.
+  const parajes = cupoParajes?.cupo ?? parajeCountForRadius(radius);
   return { total: nucleos + servicios + parajes, suelo: parajes };
 }
 
@@ -41,8 +46,18 @@ export function demandaDeAnclajes(radius) {
  * los cupos son de `cupos.js` y duplicarlos aquí garantizaría que las dos copias se
  * desincronicen. `places` es la fuente de relleno, **opcional**: su ausencia es un
  * caso normal y el mundo se genera igual, solo que con el pool de OSM.
+ *
+ * `radioEnTramos` es el alcance de la celda medido en tramos, con el que se calcula
+ * el techo de parajes por ritmo. Lo trae la **geometría de la rejilla**, que no se
+ * mueve nunca, y no el tramo de quien juega hoy: `accesibilidad.md` §1 dice que el
+ * tramo cambia hasta dónde te manda una quest, **nunca qué existe**. Sin él se
+ * deduce del radio con el tramo de referencia, que es la misma cuenta para quien
+ * anda 2 km. `vocabulario` son las escenas que el catálogo le pide a un paraje: es
+ * la frontera de inyección de SPEC-006 y su valor de arranque se lee de las
+ * plantillas hasta que exista el catálogo de verdad. Orquestar es pasarlo; la fase
+ * de parajes no lo importa.
  */
-export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = null, places = null, onStatus = async () => {} }) {
+export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = null, places = null, radioEnTramos = null, vocabulario = null, onStatus = async () => {} }) {
   // El núcleo no llama a la red por su cuenta: si nadie le inyecta `fetchData`,
   // el fallo tiene que decirlo por su nombre y antes de empezar. Con la frontera
   // ya comprobable, un TypeError a mitad de la primera fase esconde el motivo.
@@ -85,6 +100,16 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     });
   }
 
+  // El vocabulario de escenas y el cupo de parajes, resueltos antes del pool porque
+  // el cupo dice cuántos anclajes hay que pedir. El vocabulario inyectado manda; su
+  // valor de arranque sale de las plantillas del prototipo. El techo es por ritmo y
+  // el suelo por aritmética, y cuando chocan gana el suelo.
+  const vocabularioDeParajes = vocabulario ?? vocabularioDeEscenas();
+  const enTramos = Number.isFinite(radioEnTramos) && radioEnTramos > 0 ? radioEnTramos : radius / TRAMO_DE_REFERENCIA_M;
+  const suelo = sueloDeVocabulario(vocabularioDeParajes);
+  const techo = techoDeParajes(enTramos);
+  const cupoDeParajes = { cupo: Math.max(suelo, techo), suelo, techo, vocabulario: vocabularioDeParajes };
+
   // El pool se construye una sola vez y con los datos definitivos: en costa, eso es
   // después de la segunda vuelta y de la máscara. La máscara entra en la admisión
   // porque un local en el mar no es un sitio al que se pueda ir; el radio de dibujo
@@ -99,7 +124,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     // deduce del radio, que es la que las fases de abajo van a pedir de todas
     // formas. Sin ninguna, el déficit sería siempre cero y el relleno de Places no
     // sabría cuánto le toca cubrir.
-    demanda: demanda ?? demandaDeAnclajes(radius),
+    demanda: demanda ?? demandaDeAnclajes(radius, cupoDeParajes),
     places,
     seaMask,
   });
@@ -117,7 +142,14 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   // declara el mundo y no el pool: desde SPEC-005-iter-1 el pool no aplica topes,
   // y quien reparte es el único que sabe si le faltaban candidatos para su cupo.
   const reparto = { relajaciones: [] };
-  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names, indiceNombres, pool, reparto);
+  // La ficha de cobertura: suelo, techo, cupo y qué escenas quedaron sin cubrir.
+  // Dato interno que consume el casting; no sale a ninguna pantalla.
+  const coberturaParajes = {};
+  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names, indiceNombres, pool, reparto, {
+    cupo: cupoDeParajes,
+    vocabulario: vocabularioDeParajes,
+    ficha: coberturaParajes,
+  });
   // los parajes se enganchan a la red DESPUÉS de existir: hasta aquí no se sabe dónde
   // están, y algunos nacen precisamente de los cruces de las calzadas
   movidos.push(...pegarAViario(parajes.filter((p) => p.origin !== 'grafo'), geo.roads));
@@ -142,6 +174,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     // Y aparte, lo que el reparto tuvo que saltarse: vacío cuando los candidatos
     // sobraban, que es el caso normal.
     reparto,
+    coberturaParajes,
     seaMask,
     title: names.worldTitle(makeRng(seed + SUFIJOS_DE_FASE.titulo)),
   };

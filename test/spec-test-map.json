@@ -3202,6 +3202,403 @@
       "fichero": "test/nucleo/reparto.test.mjs",
       "caso": "Cada extracto de referencia declara qué iteración lo regeneró y por qué",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el vocabulario de escenas de paraje que piden los roles del catálogo, cuando se calcula el suelo de la celda, entonces es el cociente, redondeado hacia arriba, entre el número de escenas distintas del vocabulario y las escenas que se garantiza que cubre un paraje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas",
+      "nota": "La mitad aritmética del escenario la afirma SPEC-004 en test/nucleo/cupos.test.mjs, con el mismo nombre de caso: allí el número que entrega la celda, aquí el mundo que se monta con él."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un vocabulario al que se añade una escena que ningún paraje ya previsto cubre, cuando se recalcula el suelo, entonces sube sin tocar el código del generador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un vocabulario del que se retiran escenas hasta dejarlo por debajo del cociente anterior, cuando se recalcula el suelo, entonces baja en la misma proporción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el módulo que calcula el cupo, cuando se inspecciona, entonces no contiene ninguna cifra de suelo escrita a mano: el suelo siempre sale del vocabulario recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas",
+      "nota": "Se afirma de dos maneras: por inspección de escenas.js y parajes.js, y por comportamiento —ensanchar el vocabulario coloca más parajes sin tocar ninguna constante—."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el alcance de la celda expresado en tramos, cuando se calcula el techo por ritmo, entonces sale de la interpolación de `parametros-mundo.md` reexpresada en tramos, y satura en ocho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "El techo de parajes satura y no crece indefinidamente con el tamaño de la celda",
+      "hueco_de_bateria": true,
+      "nota": "Lo entrega SPEC-004 y esta fila lo consume tal cual: el techo que gasta el generador es el de la ficha de cupos de la celda."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el suelo y el techo de una celda, cuando se fija el cupo objetivo, entonces es el mayor de los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda cuyo techo por ritmo es menor que el suelo derivado, cuando se generan los parajes, entonces se colocan tantos como pide el suelo y no tantos como pide el techo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El cupo por ritmo es un techo, no un objetivo",
+      "escenario": "El cupo por ritmo es un techo, no un objetivo"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda pequeña con anclajes de sobra, cuando se generan los parajes, entonces su número queda entre el suelo derivado y el cupo objetivo, nunca por encima.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El cupo por ritmo es un techo, no un objetivo",
+      "escenario": "El cupo por ritmo es un techo, no un objetivo"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado dos jugadoras con tramos personales distintos y celdas del mismo tamaño en tramos, cuando se generan sus parajes, entonces las dos celdas reciben el mismo cupo aunque midan metros distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Los cupos de una celda dependen de su tamaño en tramos y no de un radio en metros absolutos",
+      "hueco_de_bateria": true,
+      "nota": "Cubierto por SPEC-004: el cupo de parajes viaja dentro de la misma ficha de cupos que se compara ahí."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda ya generada, cuando la jugadora cambia de tramo o el juego se lo corrige midiendo, entonces el cupo de esa celda no se recalcula y sus parajes no cambian.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "Escenario ya vivo desde SPEC-004; esta fila no lo mueve porque el cupo de parajes se congela con el resto de la ficha de la celda."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda, cuando se genera, entonces el cupo se calcula una sola vez y queda registrado en su ficha junto al suelo y al techo que lo produjeron.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas",
+      "nota": "Aquí se afirma que la ficha de cobertura declara suelo, techo, cupo y colocados. Que no se recalcule al leerla es de SPEC-004, en el caso «Leer los cupos de una celda abierta no los recalcula»."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un vocabulario de escenas y un cupo, cuando se generan los parajes, entonces los tipos se eligen antes de mirar ningún anclaje real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Los tipos se eligen antes de mirar ningún anclaje: permutar el pool no cambia la secuencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el mismo mundo con el pool de anclajes permutado, cuando se generan los parajes, entonces la secuencia de tipos elegida es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Los tipos se eligen antes de mirar ningún anclaje: permutar el pool no cambia la secuencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un cupo que alcanza para cubrir el vocabulario, cuando se generan los parajes, entonces toda escena del vocabulario aparece en al menos un paraje colocado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas",
+      "nota": "Se mide en los dos mundos con anclajes de sobra —costero y urbano denso—, donde el déficit declarado tiene que ser vacío."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado varios tipos candidatos para el mismo hueco, cuando se elige, entonces gana el que cubre más escenas todavía pendientes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Gana el tipo que cubre más escenas pendientes, y el empate lo rompe el azar de la fase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado dos tipos que cubren exactamente las mismas escenas pendientes, cuando se elige, entonces el empate lo rompe el azar de la fase y no el orden de la tabla de tipos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Gana el tipo que cubre más escenas pendientes, y el empate lo rompe el azar de la fase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un rol que declara un peso mínimo para su escena, cuando se comprueba la cobertura, entonces solo cuenta como cubierta por un tipo cuyo peso para esa escena alcanza ese mínimo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Una escena solo cuenta como cubierta por un tipo cuyo peso alcanza el mínimo que pide el rol",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un rol que declara escenas alternativas, cuando se construye el vocabulario, entonces cada alternativa cuenta como una escena distinta a cubrir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Un catálogo que se ensancha sube el suelo solo, sin tocar ninguna constante",
+      "hueco_de_bateria": true,
+      "nota": "El vocabulario lo construye cupos.js y lo comprueba SPEC-004 con un rol de dos alternativas que suma dos escenas."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el vocabulario ya cubierto y huecos libres hasta el cupo, cuando se eligen los tipos restantes, entonces se reparten buscando diversidad y no se repite ningún tipo mientras queden tipos sin usar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Con el vocabulario ya cubierto, los huecos restantes no repiten tipo mientras queden tipos sin usar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una escena del vocabulario que ningún tipo de la taxonomía cubre, cuando se generan los parajes, entonces se registra como hueco de taxonomía en la ficha de la celda y la generación continúa con el resto del vocabulario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Una escena que ningún tipo cubre se declara como hueco de taxonomía y la generación continúa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un vocabulario vacío, cuando se generan los parajes, entonces el suelo es cero y el cupo lo fija el techo por ritmo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Un vocabulario vacío deja el suelo en cero y el cupo lo fija el techo por ritmo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un tipo elegido y anclajes elegibles afines a ese tipo, cuando se le asigna anclaje, entonces el afín gana peso en el sorteo sin ganarlo siempre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Sin ningún anclaje afín, el anclaje se sacrifica y el tipo no cambia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un tipo elegido y ningún anclaje afín disponible, cuando se le asigna anclaje, entonces se le asigna el mejor puntuado de los que quedan y el tipo no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Sin ningún anclaje afín, el anclaje se sacrifica y el tipo no cambia",
+      "hueco_de_bateria": true,
+      "nota": "Es el hueco de batería que declara la spec: el escenario «La cobertura de escenas manda sobre la afinidad del anclaje» afirma el resultado, no el orden tipo → anclaje."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un mundo donde ningún anclaje real tiene afinidad con la vigilancia, cuando se generan los parajes, entonces existe al menos un paraje con escena de vigilancia y su anclaje real puede ser cualquier cosa, incluido un bar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "La cobertura de escenas manda sobre la afinidad del anclaje",
+      "escenario": "La cobertura de escenas manda sobre la afinidad del anclaje"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado dos anclajes reales de la misma clase en la misma celda, cuando se generan los parajes, entonces pueden salir con tipos distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Dos anclajes reales de la misma clase pueden salir con tipos distintos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda cuyo pool trae cincuenta anclajes de una misma clase, cuando se generan los parajes, entonces el reparto de tipos es el mismo que con un pool diverso del mismo tamaño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El reparto de tipos es el mismo con un pool de una sola clase que con un pool diverso del mismo tamaño",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la spec: el escenario «Un tag masivo no monopoliza un tipo de paraje» verifica el filtro del pool (SPEC-005, test/nucleo/anclajes.test.mjs), no el reparto de tipos."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el generador de parajes, cuando se inspecciona, entonces ninguna etiqueta de OSM ni tipo de lugar de Places determina por sí solo el tipo de un paraje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Ninguna etiqueta de OSM ni tipo de lugar de Places determina por sí solo el tipo de un paraje",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un anclaje consumido por un paraje, cuando se consulta el pool, entonces queda marcado como tomado y ninguna otra fase lo vuelve a usar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Ningún anclaje aparece dos veces",
+      "escenario": "Ningún anclaje aparece dos veces",
+      "nota": "Escenario ya vivo desde SPEC-002/SPEC-005. El reparto de lo que sobra lo afirma «Los parajes reparten lo que los núcleos no gastaron», en el mismo fichero."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un paraje anclado a un lugar real, cuando se lee su ficha, entonces conserva el nombre y la clase del lugar real, separados del nombre y el tipo fantásticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Un paraje anclado conserva el nombre y la clase del lugar real, separados de los fantásticos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda sin ningún anclaje elegible y con dos rutas nombradas que se cruzan, cuando se generan los parajes, entonces hay al menos un paraje de cruce.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Una celda sin ningún anclaje elegible y con dos rutas que se cruzan coloca un paraje de cruce",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un candidato salido del grafo, cuando se coloca, entonces su tipo viene dado por su origen —cruce o puente— y no pasa por el sorteo de tipos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El tipo de un candidato del grafo lo da su origen y no pasa por el sorteo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado que el tipo que más escenas pendientes cubre es cruce o puente y el grafo ofrece candidato, cuando se elige el hueco, entonces se coloca ahí antes que en un anclaje real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Cuando el tipo que más cubre es de grafo y el grafo ofrece candidato, se coloca ahí antes que en un anclaje",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el fixture del barrio de tres calles, cuando se generan los parajes, entonces se alcanza el suelo derivado usando cruces y puentes, sacrificando la afinidad del anclaje y nunca la cobertura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El barrio de tres calles llena sus parajes con cruces y puentes, y declara lo que no alcanza",
+      "hueco_de_bateria": true,
+      "nota": "Medido: con la semilla 1 el barrio llega al suelo (4 de 4, todos del grafo); con la 2 se queda en 3 y lo declara en su ficha. El criterio que se afirma es que se coloca todo lo que el callejero permite y el resto se declara, porque un barrio sin más cruces no puede dar un cuarto paraje."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda sin anclajes elegibles, sin cruces y sin puentes, cuando se generan los parajes, entonces la generación no falla: coloca los que puede y declara en la ficha de la celda las escenas que quedaron sin cubrir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Una celda sin anclajes, sin cruces y sin puentes no falla y declara las escenas sin cubrir",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado una celda con déficit de cobertura declarado, cuando se recorre la app entera, entonces ese déficit no aparece en ninguna pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El déficit de cobertura es dato interno y no lo lee nadie fuera de la generación",
+      "hueco_de_bateria": true,
+      "nota": "Solo la mitad afirmable hoy: la ficha no sale del núcleo. La mitad de pantalla es @app y queda pendiente hasta que exista la app de Expo; no hay pantalla que recorrer."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado los candidatos puntuados, cuando se ordenan, entonces puntúa más alto el que está cerca de una calzada nombrada que el que no lo está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Cerca de una calzada suma más que lejos",
+      "hueco_de_bateria": true,
+      "nota": "La puntuación es de SPEC-005 y esta fila la consume tal cual: `puntuaCandidatos` es la etapa 2 del pool."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un anclaje dentro del radio urbano de un núcleo, cuando se filtran los elegibles, entonces queda descartado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Estar dentro del radio urbano de un núcleo penaliza pero no excluye",
+      "hueco_de_bateria": true,
+      "nota": "CONTRADICCIÓN DECLARADA: el código penaliza sin excluir, y es una decisión cerrada de SPEC-005 —como filtro duro dejaba el pool vacío en celdas pequeñas y urbanas, y `parajes.md` dice «se penalizan»—. No se escribe una prueba que la contradiga; el criterio de aceptación es el que hay que corregir."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un anclaje que cae en el mar o fuera de la celda, cuando se filtran los elegibles, entonces queda descartado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Ningún paraje cae en el mar ni fuera de la celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado dos candidatos a menos de la separación mínima, cuando se colocan, entonces solo se coloca uno de los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Dos candidatos a menos de la separación mínima no se colocan los dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un paraje colocado, cuando se le pone nombre, entonces sale del paquete de idioma del mundo y no choca con ningún otro nombre del índice global.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo"
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado un paraje colocado, cuando se lee su ficha, entonces trae tipo, etiqueta visible, escenas con sus pesos, posición, origen —anclaje o grafo— y el anclaje real si lo tiene.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "La ficha de un paraje trae tipo, etiqueta visible, escenas con pesos, posición y origen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado los pesos de escena de un tipo, cuando se comparan con `game-design/parajes.md`, entonces coinciden exactamente para los ocho tipos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Los pesos de escena de los ocho tipos coinciden con game-design/parajes.md",
+      "hueco_de_bateria": true,
+      "nota": "La tabla se lee del documento de diseño en tiempo de prueba en vez de copiarse: una copia a mano deja de comprobar nada en cuanto alguien toca el documento."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado la misma semilla y los mismos datos de OSM, cuando se generan los parajes dos veces, entonces salen idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "Los mismos datos y la misma semilla dan los mismos parajes",
+      "hueco_de_bateria": true,
+      "nota": "El escenario de la batería «Dos generaciones con la misma semilla dan el mismo mundo» ya está vivo en test/nucleo/generacion.test.mjs y compara el mundo entero serializado, parajes incluidos."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el generador de parajes, cuando se inspecciona su azar, entonces usa un rng propio con el sufijo de fase de los parajes y ninguna otra fuente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "La fase de parajes siembra con su propio sufijo y no usa ninguna otra fuente de azar ni de tiempo",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «Cada fase usa su propio sufijo de azar» está vivo en test/nucleo/generacion.test.mjs para todas las fases; aquí se afirma de la de parajes en concreto."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el mismo fixture servido con el orden de llegada invertido, cuando se generan los parajes, entonces el resultado es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El orden de iteración no depende del orden de inserción",
+      "escenario": "El orden de iteración no depende del orden de inserción",
+      "nota": "Vivo desde SPEC-002 con `ordenInvertido`. En parajes.test.mjs se añade la mitad nueva de esta fila: permutar el vocabulario inyectado tampoco cambia el mundo."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el generador sin vocabulario de escenas inyectado, cuando se le pide generar, entonces falla con un error que nombra la dependencia que falta, en lugar de asumir un suelo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "El generador sin vocabulario inyectado falla nombrando la dependencia que falta",
+      "hueco_de_bateria": true,
+      "nota": "ROJO ESPERADO, defecto de código: `normalizaVocabulario(null)` devuelve [] y el generador asume suelo cero en vez de fallar, así que no distingue «vocabulario vacío» (caso normal) de «vocabulario sin inyectar» (fallo de cableado)."
+    },
+    {
+      "spec": "SPEC-006",
+      "criterio": "Dado el generador de parajes, cuando se inspecciona, entonces no usa `Math.random`, ni el reloj del sistema, ni ninguna iteración cuyo orden dependa del orden de inserción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/parajes.test.mjs",
+      "caso": "La fase de parajes siembra con su propio sufijo y no usa ninguna otra fuente de azar ni de tiempo",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «No se usa ninguna fuente de azar ni de tiempo del sistema» cubre el paquete entero en test/nucleo/generacion.test.mjs."
     }
   ]
 }

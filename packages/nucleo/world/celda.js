@@ -78,6 +78,14 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
     // la misma semilla y tramos distintos generan el mismo mundo (SPEC-004)—. Un
     // pool alimentado por los cupos ataría lo segundo a lo primero.
     ...(demanda ? { demanda } : {}),
+    // El alcance de la celda **en tramos de la rejilla**, que es de lo que sale el
+    // techo de parajes por ritmo. Sale de la geometría —lado entre tramo con el que
+    // se levantó el mapa, una constante de la rejilla— y no del tramo de quien juega
+    // hoy, a propósito: `accesibilidad.md` §1 dice que el tramo cambia hasta dónde
+    // te manda una quest y **nunca qué existe**, así que recalibrar no puede añadir
+    // ni quitar un paraje. El suelo, en cambio, sale del catálogo y no del tamaño.
+    radioEnTramos: rejilla.radioInscritoM / rejilla.tramoM,
+    vocabulario: cupos.parajes.vocabulario,
     // La fuente de relleno es opcional y su ausencia es el caso normal: sin ella la
     // celda se genera igual y queda registrada como generada sin relleno.
     ...(places ? { places } : {}),

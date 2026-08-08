@@ -5,6 +5,7 @@ import { parseStreets } from '../../packages/nucleo/world/osm.js';
 import { generateSettlements, footprintRadius } from '../../packages/nucleo/world/settlements.js';
 import { buildRoutes, linkParajes } from '../../packages/nucleo/world/routes.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
+import { vocabularioDeEscenas } from '../../packages/nucleo/world/cupos.js';
 import { buildSeaMask } from '../../packages/nucleo/world/seamask.js';
 import { buildWorld } from '../../packages/nucleo/world/build.js';
 import { castAll } from '../../packages/nucleo/quests/casting.js';
@@ -579,7 +580,7 @@ window.__wa = {
     const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, 'demo#0', null, names);
     settlements.forEach((s) => { s.streets = []; });
     const routes = buildRoutes(settlements, roads, 'demo#0', names);
-    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names);
+    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names, undefined, null, null, { vocabulario: vocabularioDeEscenas() });
     routes.push(...linkParajes(parajes, routes, settlements, roads));
     const seaMask = buildSeaMask(coastlines, radius * 1.5, 60);
     world = { seed: 'demo', radius, baseRadius: radius, origin: { lat: 0, lon: 0 }, locale: 'es', geo, anchors, settlements, routes, parajes, seaMask, title: 'Tierras de Prueba' };

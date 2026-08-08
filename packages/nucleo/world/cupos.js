@@ -5,7 +5,13 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { TEMPLATES } from '../quests/templates.js';
+import { ESCENAS_POR_PARAJE, PESO_MINIMO_DE_ESCENA, normalizaVocabulario, sueloDeVocabulario } from './escenas.js';
 import { SERVICES } from './settlements.js';
+
+// El suelo y la forma del vocabulario viven en `escenas.js` y se reexportan desde
+// aquí: quien pide cupos no tiene por qué saber que son dos módulos, y el
+// generador de parajes importa el de abajo para no arrastrar el catálogo.
+export { ESCENAS_POR_PARAJE, PESO_MINIMO_DE_ESCENA };
 
 /**
  * El tramo con el que `parametros-mundo.md` calibró las tablas de hoy. Es el factor
@@ -36,23 +42,19 @@ const NUCLEOS_BAJO_MEDIO = [1, 1, 1, 2];
  * Techo de parajes **por ritmo**, en tramos de radio: más hitos no añaden beats a
  * una salida, así que satura. No es el cupo final — el suelo no está en esta tabla
  * porque no se elige, sale de contar el catálogo.
+ *
+ * Es la tabla de `parametros-mundo.md` (250 m → 1, 500 → 2, 1000 → 4, 2000 → 7,
+ * saturando en 8) **dividida por el tramo de referencia**, no una tabla nueva: la
+ * escala cambia de unidad y no de forma, y por eso el techo de una celda coincide
+ * al número con el cupo por radio del prototipo cuando quien juega anda 2 km.
  */
 const TECHO_PARAJES_POR_TRAMOS = [
   [0.125, 1],
   [0.25, 2],
   [0.5, 4],
-  [1, 6],
-  [2, 8],
+  [1, 7],
+  [2.5, 8],
 ];
-
-/**
- * Escenas que se le pueden pedir a un paraje al derivar el suelo: dos.
- *
- * Es el mínimo garantizado que declara `parajes.md` («cada paraje lleva dos o
- * más»), no el mínimo que hoy tiene el catálogo de tipos. Contar los de hoy daría
- * un suelo más bajo y optimista, y el documento manda.
- */
-export const ESCENAS_POR_PARAJE = 2;
 
 const ORDEN_DE_NUCLEOS = ['ciudad', 'pueblo', 'aldea', 'granja'];
 
@@ -80,31 +82,61 @@ function interpola(tabla, x, minimoBajoTabla) {
  * suelo sube solo, sin tocar ninguna constante.
  */
 export function sueloDeParajes(plantillas = TEMPLATES) {
+  const vocabulario = vocabularioDeEscenas(plantillas);
+  return { suelo: sueloDeVocabulario(vocabulario), escenas: vocabulario.map((e) => e.escena), vocabulario };
+}
+
+/**
+ * El vocabulario de escenas de paraje que pide un catálogo, con el peso mínimo que
+ * cada rol le exige.
+ *
+ * Es el **valor de arranque** de la frontera de inyección de SPEC-006: mientras la
+ * fila del catálogo no exista, quien orquesta la tubería lo construye leyendo las
+ * plantillas de aquí. El generador de parajes no llama a esta función: recibe ya
+ * el vocabulario.
+ */
+export function vocabularioDeEscenas(plantillas = TEMPLATES) {
   if (!Array.isArray(plantillas) || plantillas.length === 0) {
     throw new Error('el catálogo de plantillas está vacío: sin plantillas no hay escenas que contar y el suelo de parajes no se puede derivar');
   }
-  const escenas = escenasPedidasPorElCatalogo(plantillas);
-  if (escenas.length === 0) {
-    throw new Error('el catálogo de plantillas no pide ni una escena de paraje: el suelo de parajes no se puede derivar de él');
-  }
-  return { suelo: Math.ceil(escenas.length / ESCENAS_POR_PARAJE), escenas };
-}
-
-/** Las escenas distintas que los roles del catálogo piden a un paraje, en orden alfabético. */
-export function escenasPedidasPorElCatalogo(plantillas = TEMPLATES) {
-  const vistas = new Set();
+  const pedidas = [];
   for (const plantilla of plantillas) {
     for (const clave of Object.keys(plantilla?.roles ?? {}).sort()) {
       const rol = plantilla.roles[clave];
       if (rol?.tipo !== 'paraje' || !rol.escena) continue;
       // Un rol admite alternativa (`['vigilancia', 'revelación']`), y las dos son
       // vocabulario que el mundo tiene que saber decir: cuentan las dos.
-      for (const escena of Array.isArray(rol.escena) ? rol.escena : [rol.escena]) vistas.add(escena);
+      for (const escena of Array.isArray(rol.escena) ? rol.escena : [rol.escena]) {
+        pedidas.push({ escena, pesoMinimo: rol.minPeso ?? PESO_MINIMO_DE_ESCENA });
+      }
     }
   }
-  // Ordenado antes de salir: de un Set no se recorre por orden de inserción, y de
-  // esta lista cuelga un número de generación.
-  return [...vistas].sort();
+  if (pedidas.length === 0) {
+    throw new Error('el catálogo de plantillas no pide ni una escena de paraje: el suelo de parajes no se puede derivar de él');
+  }
+  // Normalizar ordena y funde repetidas quedándose con el peso más exigente.
+  return normalizaVocabulario(pedidas);
+}
+
+/** Las escenas distintas que los roles del catálogo piden a un paraje, en orden alfabético. */
+export function escenasPedidasPorElCatalogo(plantillas = TEMPLATES) {
+  return vocabularioDeEscenas(plantillas).map((e) => e.escena);
+}
+
+/**
+ * El techo de parajes **por ritmo** de una celda de ese radio en tramos.
+ *
+ * Se exporta suelto porque quien genera el mundo lo necesita sin pedir la ficha
+ * entera de cupos: los cupos son de la celda y los calcula `celda.js` una sola vez,
+ * mientras que lo que existe dentro del mundo se dimensiona con la geometría de la
+ * rejilla, que no se mueve nunca (`accesibilidad.md` §1: el tramo cambia hasta
+ * dónde te manda una quest, nunca qué existe).
+ */
+export function techoDeParajes(radioEnTramos) {
+  if (!Number.isFinite(radioEnTramos) || radioEnTramos <= 0) {
+    throw new Error(`el techo de parajes necesita el radio de la celda en tramos y llegó ${radioEnTramos}`);
+  }
+  return interpola(TECHO_PARAJES_POR_TRAMOS, radioEnTramos, TECHO_PARAJES_POR_TRAMOS[0][1]);
 }
 
 function exigeRadioEnTramos({ radioEnTramos, ladoEnTramos }) {
@@ -121,10 +153,14 @@ function exigeRadioEnTramos({ radioEnTramos, ladoEnTramos }) {
  * No consume azar y no depende de ningún radio en metros absolutos: dos celdas del
  * mismo tamaño en tramos tienen los mismos cupos, ande lo que ande quien juega.
  */
-export function cuposDeCelda({ radioEnTramos, ladoEnTramos, plantillas = TEMPLATES } = {}) {
+export function cuposDeCelda({ radioEnTramos, ladoEnTramos, plantillas = TEMPLATES, vocabulario = null } = {}) {
   // El catálogo antes que el tamaño: un catálogo vacío es un fallo del que se sale
   // arreglando el catálogo, y verlo tapado por «falta el tamaño» cuesta una tarde.
-  const { suelo, escenas } = sueloDeParajes(plantillas);
+  // El vocabulario inyectado manda sobre el catálogo cuando llega: es la frontera
+  // que deja al generador sin depender de quién declara las escenas.
+  const vocab = vocabulario == null ? vocabularioDeEscenas(plantillas) : normalizaVocabulario(vocabulario);
+  const suelo = sueloDeVocabulario(vocab);
+  const escenas = vocab.map((e) => e.escena);
   const radio = exigeRadioEnTramos({ radioEnTramos, ladoEnTramos });
 
   const bajoTabla = radio < 0.125 ? NUCLEOS_MINIMO_ABSOLUTO : NUCLEOS_BAJO_MEDIO;
@@ -133,7 +169,7 @@ export function cuposDeCelda({ radioEnTramos, ladoEnTramos, plantillas = TEMPLAT
   ORDEN_DE_NUCLEOS.forEach((tipo, i) => { nucleos[tipo] = cuentas[i]; });
   nucleos.total = cuentas.reduce((a, b) => a + b, 0);
 
-  const techo = interpola(TECHO_PARAJES_POR_TRAMOS, radio, TECHO_PARAJES_POR_TRAMOS[0][1]);
+  const techo = techoDeParajes(radio);
 
   return congelaHondo({
     radioEnTramos: radio,
@@ -147,6 +183,9 @@ export function cuposDeCelda({ radioEnTramos, ladoEnTramos, plantillas = TEMPLAT
       techo,
       escenasPedidas: escenas.length,
       escenasPorParaje: ESCENAS_POR_PARAJE,
+      // El vocabulario viaja con el cupo porque quien reparte lo necesita entero:
+      // el número dice cuántos parajes, y esta lista, de qué tipo tienen que ser.
+      vocabulario: vocab,
     },
   });
 }

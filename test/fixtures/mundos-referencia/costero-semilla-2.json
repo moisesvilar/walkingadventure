@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-005-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-006",
+    "motivo_regeneracion": "Regenerado por SPEC-006: el cupo de parajes deja de ser solo el techo por ritmo y pasa a ser el mayor entre ese techo y el suelo derivado del catálogo, y los tipos se eligen por cobertura de escenas antes de mirar ningún anclaje real, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
@@ -14,7 +14,7 @@
     "nucleos": 7,
     "servicios": 12,
     "parajes": 5,
-    "calzadas": 9
+    "calzadas": 10
   },
   "nucleos": [
     {
@@ -155,39 +155,39 @@
   ],
   "parajes": [
     {
-      "nombre": "A Torre Vixía do Solpor",
-      "tipo": "atalaya",
-      "x": -58,
-      "y": 417,
-      "anclaje": "way/551279363"
-    },
-    {
-      "nombre": "A Encrucillada do Can Negro",
+      "nombre": "O Cruce do Aforcado",
       "tipo": "cruce",
       "x": 27,
       "y": 83,
       "anclaje": null
     },
     {
-      "nombre": "O Cruce dos Xuramentos",
-      "tipo": "cruce",
-      "x": -287,
-      "y": 466,
-      "anclaje": null
-    },
-    {
-      "nombre": "O Mosteiro da Vide",
-      "tipo": "monasterio",
-      "x": -395,
-      "y": -36,
-      "anclaje": "node/3648044334"
-    },
-    {
-      "nombre": "A Anta do Trono",
-      "tipo": "piedra",
+      "nombre": "A Poza Clara",
+      "tipo": "fuente",
       "x": -201,
       "y": 599,
       "anclaje": "node/4502883744"
+    },
+    {
+      "nombre": "A Abadía da Vide",
+      "tipo": "monasterio",
+      "x": -139,
+      "y": 6,
+      "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "As Laxes da Moura",
+      "tipo": "piedra",
+      "x": -58,
+      "y": 417,
+      "anclaje": "way/551279363"
+    },
+    {
+      "nombre": "O Pazo Queimado",
+      "tipo": "ruina",
+      "x": -395,
+      "y": -36,
+      "anclaje": "node/3648044334"
     }
   ],
   "calzadas": [
@@ -279,6 +279,20 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
+        -139,
+        6
+      ],
+      "hasta": [
+        -316,
+        16
+      ],
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
         -201,
         599
       ],
@@ -325,7 +339,7 @@
     },
     {
       "plantilla": "entrega-sospechosa",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "peregrinaje",

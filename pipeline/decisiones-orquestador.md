@@ -71,3 +71,17 @@ Eso es exactamente RF-MUNDO-007, que el checklist asigna a las **filas 4 y 6**, 
 **Decisión: se acepta la lectura por el conjunto de entrada.** La otra es insatisfacible cuando un solo `kind` domina el pool —no hay reparto posible que baje del 25 % si el 60 % de lo disponible es restaurante— y el criterio de `parajes.md` no es un porcentaje, es «ningún tag masivo monopoliza un tipo de paraje». Ese fin se cumple y está medido: 769 locales de adultos fuera, `drinking_water` fuera, `amenity=fountain` dentro, y la casteabilidad **sube** de 21/48 a 24/48 con `costero` recuperando sus cinco parajes.
 
 No merece iteración. Queda anotado aquí y en la nota de esa entrada del mapa de cobertura, para que quien afine los números en `parajes.md` sepa qué se midió.
+
+## 6f · La contradicción del radio urbano, entre SPEC-006 y SPEC-005
+
+`wa-qa-dev` señaló que un AC de SPEC-006 pide que «un anclaje dentro del radio urbano queda descartado», y eso choca con una decisión ya cerrada y medida de SPEC-005: `outsideTowns` **penaliza sin excluir**, porque como filtro duro vaciaba el pool en celdas urbanas pequeñas.
+
+**Decisión: manda SPEC-005.** Es la posterior, está medida y su alternativa está descartada con número delante. El AC de SPEC-006 queda como redacción heredada del prototipo y **hay que corregirlo en la spec, no en el código**. No se ha escrito prueba que lo afirme; queda anotado en el mapa de cobertura.
+
+## 6g · El mundo mínimo, cerrado
+
+Lo que §6d dejaba abierto ya está hecho. Con SPEC-006, `barrio-tres-calles` castea 1/6 con las dos semillas y `suelo-250m` castea 2/6 con las dos, **con lazo cerrado**. Venían de cero.
+
+La casteabilidad agregada sobre los ocho extractos: **21/48 antes de la fila 5 → 17/48 con la primera entrega de SPEC-005 (regresión, corregida por iteración) → 24/48 → 30/48 con SPEC-006.**
+
+El escenario **«El mundo mínimo todavía compone un lazo»**, que llevaba tres filas seguidas sin poder cerrarse y se reatribuyó dos veces (§6c y §6d), **está vivo y en verde**.
