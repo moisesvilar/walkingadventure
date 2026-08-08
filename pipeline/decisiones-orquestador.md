@@ -48,6 +48,16 @@ Así que la iteración se contradecía: pedía que `Casal da Colmea` dejara de r
 
 «El mundo mínimo todavía compone un lazo» falla porque en el mundo de 250 m no nace ningún paraje. **Es defecto de prueba respecto a SPEC-002**, que excluye por escrito cupos y cobertura de escenas: la prueba afirma algo que su spec no promete. Se reatribuye a SPEC-006 y se deja declarada como pendiente de esa fila. No se ha tocado su redacción ni su exigencia.
 
+## 6d · El mundo mínimo no es jugable hoy, y está medido
+
+El hallazgo más importante de la noche, y no lo entierro. Al probar SPEC-003 con el tramo en el suelo (250 m), las celdas de `barrio-tres-calles` y `suelo-250m` **no castean ni una sola plantilla con lazo cerrado**. La causa está localizada: `parajeCountForRadius` da 1 paraje con el radio inscrito del tramo suelo y 2 a 500 m, cuando el cociente del catálogo vivo pide 3 (4 según `parajes.md`, que divide entre dos). O sea, **el suelo de parajes derivado del catálogo no está implementado**: hoy el cupo sale de una tabla por radio, que es el techo por ritmo, no el suelo.
+
+Eso es exactamente RF-MUNDO-007, que el checklist asigna a las **filas 4 y 6**, no a la 3. La spec de SPEC-003 llegó a tener un AC que lo afirmaba — culpa del encargo con que se pidió, que quería evitar clavar el número del pendiente de diseño y acabó afirmando una propiedad que la entrega el vecino de dos filas más allá.
+
+**Decisión: es defecto de alcance de la prueba, no de código de SPEC-003.** Los dos casos se reatribuyen a SPEC-006, con el mismo criterio que ya se aplicó a «El mundo mínimo todavía compone un lazo» en SPEC-002 (§6c). No se ablandan ni se marcan como pendientes: siguen sin prueba viva y el hueco se ve.
+
+**Lo que esto significa para quien lea esto mañana:** el escenario «El mundo mínimo todavía compone un lazo» lleva dos filas seguidas sin poder cerrarse, y las dos veces por la misma razón. No es mala suerte: es que el suelo derivado del catálogo es una pieza real que aún no existe, y hasta que las filas 4 y 6 la entreguen, **el barrio de tres calles no tiene juego**. Es el eje de variación 2.3 del PRD entero fallando en su extremo pobre.
+
 ## 6 · El script que la skill de QA da por hecho
 
 `wa-qa-tester` ejecuta `scripts/qa-tester-run.sh`, que no existe en el repo. No es un olvido: es exactamente lo que pide la fila 1 del checklist (`andamiaje-pruebas`, RF-INFRA-007).
