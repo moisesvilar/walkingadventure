@@ -4,6 +4,7 @@
 
 import { buildWorld } from './build.js';
 import { COSER_MAX } from './routes.js';
+import { cuposDeCelda } from './cupos.js';
 import { centroDeCelda, exigeCelda, claveDeCelda, limitesDeCelda } from './rejilla.js';
 import { congelaHondo } from '../core/congelar.js';
 import { exigeSemilla, semillaDeCelda } from '../core/semilla.js';
@@ -28,10 +29,11 @@ export const MOTIVOS_DE_APERTURA = ['pisada', 'acontecimiento'];
  *   del mapa (su anclaje); `celda` el índice `{ i, j }`; `motivo` por cuál de las
  *   dos vías se abre; `consultaOsm({ celda, limites, margenM })` la consulta de
  *   datos inyectada —el llamante decide caché y red—; `onStatus` se pasa tal cual
- *   a la tubería.
+ *   a la tubería; `tramoM` el tramo de quien juega **hoy**, con el que se
+ *   dimensionan los cupos de esta celda y solo de esta.
  * @returns el registro de la celda, congelado.
  */
-export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'pisada', consultaOsm, onStatus }) {
+export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'pisada', consultaOsm, onStatus, tramoM }) {
   if (!rejilla) throw new Error('generaCelda necesita la rejilla del mapa');
   exigeCelda(celda);
   const semillaPartida = exigeSemilla(semilla);
@@ -45,6 +47,14 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
   const limites = limitesDeCelda(rejilla, celda);
   const centro = centroDeCelda(rejilla, celda);
   const semillaCelda = semillaDeCelda(semillaPartida, mapaId, celda);
+
+  // Los cupos se calculan **aquí y una sola vez**, con el tramo de hoy: la
+  // geometría de la rejilla no se mueve nunca —eso rompería los índices y las
+  // costuras—, pero una celda abierta después de recalibrar el tramo mide otra cosa
+  // en tramos y por eso le tocan otros cupos. Los de las celdas ya abiertas no se
+  // vuelven a mirar jamás.
+  const tramoDeLaCelda = Number.isFinite(tramoM) && tramoM > 0 ? tramoM : rejilla.tramoM;
+  const cupos = cuposDeCelda({ radioEnTramos: rejilla.radioInscritoM / tramoDeLaCelda });
 
   // La frontera de datos cambia de forma sin cambiar de naturaleza: la tubería
   // sigue pidiendo por centro y radio, y aquí se traduce a los límites de la celda
@@ -79,6 +89,8 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
     motivo,
     limites,
     centro,
+    tramoM: tramoDeLaCelda,
+    cupos,
     sinContenidoJugable,
     mundo,
   });
