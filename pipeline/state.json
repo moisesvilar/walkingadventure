@@ -55,7 +55,19 @@
     }
   ],
   "bloqueos": [],
-  "escenarios_anadidos": [],
+  "escenarios_anadidos": [
+    {
+      "caracteristica": "La semilla es un dato de la partida, no una coordenada",
+      "hueco": "RF-MUNDO-002 (uno de los quince ⚠ del PRD)",
+      "spec": "SPEC-003",
+      "escenarios": [
+        "Dos vecinos ven mundos distintos",
+        "Una semilla mal copiada se rechaza en vez de generar otro mundo",
+        "La semilla no contiene ninguna coordenada"
+      ],
+      "estado": "implementados y en verde; verifica-gherkin ok (34 caracteristicas, 177 casos)"
+    }
+  ],
   "specs_escritas": [
     "SPEC-001-andamiaje-pruebas",
     "SPEC-002-paquete-compartido",
@@ -87,5 +99,10 @@
         "test/nucleo/andamiaje-gps.test.mjs, caso 'Un recorrido emite posiciones a cadencia fija y sin saltos entre puntos consecutivos': tolerancia absoluta de 1e-6 m sobre distancias medidas con una formula distinta a la del productor. El exceso real medido es de 2.0e-5 m sobre 1.389 m (0.0015%), puro desajuste de proyeccion. El criterio de aceptacion se cumple; la tolerancia no es afirmable."
       ]
     }
-  ]
+  ],
+  "suite_final": {
+    "report": "test/reports/SUITE-run-20260808T013508Z.md",
+    "casos": "276/276 @nucleo",
+    "app": "no ejecutado: Maestro ausente"
+  }
 }
