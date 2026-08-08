@@ -207,6 +207,50 @@ export function semillaDePaso(semilla, mapaId, n) {
   return `${semillaDeMapa(semilla, mapaId)}${SUFIJO_DE_PASO}${n}`;
 }
 
+/**
+ * El sufijo del prólogo del mundo, declarado aquí por lo mismo que el del paso: un
+ * sufijo propio para que su azar no desplace el de nada más.
+ *
+ * Va **aparte de `SUFIJOS_DE_FASE`** porque el prólogo no es una fase de la tubería
+ * —es una capa sobre el mundo ya generado, igual que el motor de pasos— y meterlo
+ * allí haría que `semillasDeFase` prometiera una semilla de prólogo por celda que
+ * nadie debe usar.
+ */
+export const SUFIJO_DE_PROLOGO = ':prologo:';
+
+/**
+ * La semilla del intento `intento` del prólogo de un mapa.
+ *
+ * Cuelga de la semilla del **mapa**, que es lo mismo de lo que cuelga el mundo, y
+ * no del estado de la partida: `game-design/arranque.md` §1 dice que dos personas
+ * con la misma semilla oirían el mismo pasado, «es una propiedad del lugar, como
+ * los nombres». Por eso aquí no entra ni el oficio, ni el nombre, ni una fecha.
+ *
+ * El número de intento entra en la derivación porque **resembrar el prólogo tiene
+ * que dar otro prólogo**: sin él, los ocho intentos del tope saldrían idénticos y
+ * el bucle de composición no compondría nada.
+ */
+export function semillaDePrologo(semilla, mapaId, intento) {
+  if (!Number.isInteger(intento) || intento < 1) {
+    throw new Error(`número de intento de prólogo inválido ${JSON.stringify(intento) ?? String(intento)}: los intentos se numeran desde uno con enteros positivos`);
+  }
+  return `${semillaDeMapa(semilla, mapaId)}${SUFIJO_DE_PROLOGO}${intento}`;
+}
+
+/**
+ * La semilla del paso `n` del intento `intento` del prólogo.
+ *
+ * Es lo que se le inyecta al motor de SPEC-011 como base de siembra propia: mismo
+ * mecanismo que `semillaDePaso`, otra rama del azar, y el contador de la partida
+ * intacto en cero.
+ */
+export function semillaDePasoDePrologo(semilla, mapaId, intento, n) {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new Error(`número de paso de prólogo inválido ${JSON.stringify(n) ?? String(n)}: la semilla de un paso se deriva de su número, un entero no negativo`);
+  }
+  return `${semillaDePrologo(semilla, mapaId, intento)}${SUFIJO_DE_PASO}${n}`;
+}
+
 /** La semilla de una celda concreta de un mapa. */
 export function semillaDeCelda(semilla, mapaId, celda) {
   return `${semillaDeMapa(semilla, mapaId)}#${celda.i},${celda.j}`;

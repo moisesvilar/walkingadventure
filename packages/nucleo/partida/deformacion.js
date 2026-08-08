@@ -45,6 +45,22 @@ export const IDS_DE_NIVEL = congelaHondo(NIVELES.map((n) => n.id));
 export const NIVEL_MAXIMO = NIVELES.length - 1;
 
 /**
+ * Quién protagoniza unos hechos. **Enumerado cerrado**, y existe por una razón
+ * concreta: el hito de fin de arranque se cumple cuando lo que se cuenta en un
+ * núcleo **es la jugadora**, contado por otros (`game-design/arranque.md` §3), y
+ * los sucesos del prólogo no pueden dispararlo. Con el protagonista como texto
+ * libre, distinguir «lo hizo ella» de «lo hizo el pueblo» dependería de acertar a
+ * escribir la misma cadena en dos módulos.
+ *
+ * `otro` es a quien el nivel 3 le atribuye lo que no hizo; `vecindario` es de quién
+ * son las cosas que pasaron antes de que llegaras.
+ */
+export const PROTAGONISTAS = Object.freeze({ JUGADORA: 'jugadora', OTRO: 'otro', VECINDARIO: 'vecindario' });
+
+/** Los tipos de protagonista admitidos, en orden estable. */
+export const IDS_DE_PROTAGONISTA = congelaHondo(Object.values(PROTAGONISTAS).sort());
+
+/**
  * Los ejes que la deformación puede tocar. **Catálogo cerrado, y el signo no es
  * uno de ellos**: esa ausencia es la invariante, no una convención.
  */
@@ -173,7 +189,7 @@ function sinSignoDentro(valor, ruta, quien) {
  * Que esta pieza exista es la razón de que la invariante sea comprobable: la
  * deformación es una función sobre datos con ejes cerrados, no sobre prosa.
  */
-export function hechosFieles(semilla, { lugar = null, quien = 'la semilla del rumor' } = {}) {
+export function hechosFieles(semilla, { lugar = null, protagonista = null, quien = 'la semilla del rumor' } = {}) {
   if (!semilla || typeof semilla !== 'object' || Array.isArray(semilla)) {
     throw new Error(`${quien} llega como ${JSON.stringify(semilla) ?? String(semilla)}: se espera la semilla estructurada del rumor, con su asunto`);
   }
@@ -186,12 +202,23 @@ export function hechosFieles(semilla, { lugar = null, quien = 'la semilla del ru
     throw new Error(`${quien} declara una escala de ${JSON.stringify(veces) ?? String(veces)} veces: se espera un entero positivo`);
   }
   const detalle = exigeDetalle(semilla.detalle, quien);
+  // El protagonista fiel por defecto es la jugadora, porque un rumor nace del
+  // desenlace de una aventura suya. El prólogo del mundo entra por aquí con otro
+  // (`PROTAGONISTAS.VECINDARIO`): lo que pasó antes de que llegaras no lo hizo
+  // ella, y de eso depende que el hito de fin de arranque no se dispare el día 1.
+  const quienLoHizo = protagonista == null ? PROTAGONISTAS.JUGADORA : protagonista;
+  if (!IDS_DE_PROTAGONISTA.includes(quienLoHizo)) {
+    throw new Error(
+      `${quien} declara el protagonista ${JSON.stringify(protagonista) ?? String(protagonista)}, que no está en el enumerado cerrado: ` +
+      `los declarados son ${IDS_DE_PROTAGONISTA.join(', ')}`,
+    );
+  }
   return congelaHondo({
     asunto: semilla.asunto,
     escala: { veces },
     // El protagonista fiel es siempre quien lo hizo. Lo que el nivel 3 cambia es
     // esto, y por eso nace declarado en lugar de deducirse por ausencia.
-    protagonista: { tipo: 'jugadora', ref: null },
+    protagonista: { tipo: quienLoHizo, ref: null },
     detalle: {
       con: detalle.con ?? null,
       lugar: detalle.lugar ?? lugar,
@@ -311,9 +338,9 @@ export function deforma({ hechos, signo, nivel, rng = null, rumor = '(sin identi
     if (viejos.length) {
       const viejo = eligeDe(viejos, rng, quien);
       fundidoCon = viejo.rumor;
-      protagonista = { ...(viejo.hechos?.protagonista ?? { tipo: 'otro', ref: null }) };
+      protagonista = { ...(viejo.hechos?.protagonista ?? { tipo: PROTAGONISTAS.OTRO, ref: null }) };
     } else {
-      protagonista = { tipo: 'otro', ref: null };
+      protagonista = { tipo: PROTAGONISTAS.OTRO, ref: null };
     }
     ejes.push('protagonista');
   }

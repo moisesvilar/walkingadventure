@@ -148,3 +148,13 @@ Trayectoria completa, para leerla entera: **21/48 → 17/48 (regresión, corregi
 O sea: el instrumento con el que se juzga la salud del generador llevaba desde SPEC-007 midiendo un mundo que no es el que juega nadie, y nadie se enteró porque el número que daba era plausible. Es la cuarta aparición de la misma forma de fallo, y la más incómoda, porque las otras tres las cazó una prueba y esta la cazó alguien mirando de reojo.
 
 **Lección que anoto para el informe final:** los instrumentos de medida necesitan las mismas garantías que el código que miden. Un informe que se alimenta a mano de la tubería es un cableado a medias esperando su turno.
+
+## 6o · Quinta aparición: un requisito cumplido de forma vacía
+
+SPEC-013 componía su par de núcleos —los ocho extractos lo conseguían al primer intento— pero **ninguna candidata pasaba por él**: el par salía casi siempre en granjas y aldeas sin beats. RF-QUEST-014 quedaba satisfecho **de forma vacía**, y el arranque que `arranque.md` §2 diseñó no ocurría nunca.
+
+Es la quinta aparición de la familia de §6h, con una vuelta de tuerca: aquí no faltaba un cableado, faltaba **exigencia**. La cláusula decía «existe un recorrido que pasa por los dos y cabe», que es cierto casi siempre y no garantiza nada.
+
+**Corregido**: la cláusula exige ahora **una aventura del reparto con un beat en cada núcleo del par**, resuelto contra el reparto real y no por tipo de núcleo —dos granjas pasarían un filtro por tipo y nunca comparten aventura, porque el catálogo tiene un solo rol de granja. Medido tras el arreglo: `costero`, `urbano-denso` y `suelo-250m` componen con candidata que pasa por los dos en sus dos semillas; `barrio-tres-calles` no compone y degrada abriendo, en silencio, que es lo que la spec quiere para un mundo de un solo núcleo.
+
+**Lección, que es distinta de la de §6h:** un criterio que se cumple casi siempre no es un criterio. Cuando un AC no puede ponerse rojo con un mundo real, no está midiendo nada.
