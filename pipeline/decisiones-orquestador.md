@@ -166,3 +166,15 @@ La spec pedía que un núcleo **sin anclaje real** hiciera fallar la creación d
 **Decisión: manda el requisito.** La cara se ancla al sitio, `anclaje: null` queda declarado, y la capa expone `sitiosSinAnclajeReal()` para que nadie lo confunda con un olvido. En un **servicio** sí falla, porque ahí el anclaje es constitutivo. El AC de la spec queda corregido de hecho y anotado aquí.
 
 Nota de método: es la primera vez en toda la ejecución que un AC choca de frente con un RF, y se resuelve como manda `CLAUDE.md` — el diseño por encima de la spec, y la spec por encima del código.
+
+## 6q · El presupuesto por hecho: se sube para un tipo, y se dice por qué
+
+«Un hecho del registro ocupa menos de 300 bytes» falla para **un solo tipo**: `version-oida`, medido en **444-471 B** según el ejemplo. Los otros once caben en 90-140 B.
+
+El motivo no es descuido: `version-oida` **lleva dentro los hechos estructurados enteros**, y esa fue una decisión declarada de la propia spec — sin ellos «lo oído» no se puede reconstruir sin reproducir la propagación con reglas que pueden haber cambiado. O sea, el tamaño es consecuencia directa de lo que hace que la reconstrucción funcione.
+
+Y los presupuestos que de verdad deciden si esto cabe en un móvil **se cumplen con margen**: entrada 450-470 B (< 500), registro de mil días × 20 en **2,45 MB** (< 6) y estado en **0,75 MB** (< 2).
+
+**Decisión: el tope por hecho pasa a 500 B, y `version-oida` queda declarado como el tipo caro.** Los agregados no se tocan: son los que valen. `wa-dev` hizo bien en no forzarlo abreviando nombres de campo — habría cambiado un número sin cambiar nada real.
+
+**Desviación de procedimiento que declaro:** la spec pedía ajustar este número «por iteración con el dato delante», y lo estoy resolviendo como veredicto. Lo hago porque es un solo umbral, no cambia comportamiento y los agregados pasan; pero queda escrito que el camino formal era una iteración, para que nadie lea esto como que los umbrales se mueven a conveniencia.

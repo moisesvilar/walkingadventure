@@ -10739,6 +10739,625 @@
       "fichero": "test/nucleo/objetos.test.mjs",
       "caso": "Una partida sin ningún objeto devuelve la repisa vacía y no falla",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una partida recién creada, cuando se guarda su estado, entonces el documento lleva la versión de formato de la constante única de SPEC-009, y no una constante propia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El estado lleva la versión de formato de la constante única y no una propia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado guardado, cuando se lee su cabecera, entonces declara la semilla de la partida y la versión de las reglas con la que se escribió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "La cabecera declara la semilla de la partida y la versión de las reglas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado guardado, cuando se leen sus áreas, entonces cada una es la de la spec que la posee —el contador de pasos, lo que se cuenta en cada núcleo, las caras conocidas con su memoria y su relación, el diario— y ninguna se declara aquí por segunda vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Cada área del estado es la de la spec que la posee y ninguna se declara dos veces",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado con un campo que ninguna área declara, cuando se valida, entonces falla nombrando el campo: el esquema es cerrado, como el de SPEC-009.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un campo que ninguna área declara hace fallar la validación nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el mismo estado, cuando se escribe dos veces, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Dos escrituras del mismo estado dan el mismo documento byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado sin campo de versión de formato, cuando se intenta abrir, entonces se rechaza nombrando el campo que falta, antes de interpretar nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un estado sin campo de versión de formato se rechaza nombrando el campo que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado con una versión de formato mayor que la que el juego entiende, cuando se intenta abrir, entonces no se abre y el error declara la versión que trae y la que se esperaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un estado de una versión mayor no se abre y el error declara las dos versiones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado con una versión de formato menor que la actual, cuando se intenta abrir, entonces el error declara que hace falta migrarlo, sin intentar interpretarlo con las reglas nuevas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un estado de una versión menor declara que hace falta migrarlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el estado y el documento congelado de una celda, cuando se comparan, entonces ningún dato de la jugadora está en el documento de celda y ningún dato del mundo está en el estado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Ningún dato de la jugadora está en el documento de celda y ningún dato del mundo en el estado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una jugadora que ha andado cien salidas, cuando se comparan los documentos congelados del mundo antes y después, entonces son idénticos byte a byte y todo lo que ha crecido está en el estado y en el registro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Cien salidas no mueven el documento congelado del mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un rumor que llega a «Monfrida» en nivel 1, hablando de tres campanas, cuando la jugadora llega a «Monfrida», entonces su diario guarda la versión de tres campanas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Se guarda la versión deformada",
+      "escenario": "Se guarda la versión deformada",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado esa misma entrada, cuando se lee, entonces declara el lugar y el momento en que se oyó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Se guarda la versión deformada",
+      "escenario": "Se guarda la versión deformada",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada del diario, cuando se lee su lugar, entonces es el identificador de un sitio del mundo congelado y nunca una coordenada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "La entrada declara el lugar y el momento en que se oyó, y nunca una coordenada ni un reloj",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada del diario, cuando se lee su momento, entonces es el día de diario y el paso del mundo en que se oyó, y nunca una marca del reloj real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "La entrada declara el lugar y el momento en que se oyó, y nunca una coordenada ni un reloj",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada del diario, cuando se compara su versión con lo que sedimentó en ese núcleo, entonces son la misma: el diario copia lo que llegó, no lo que ocurrió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "El diario copia lo que sedimentó en ese núcleo, no lo que ocurrió",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una versión contada por un testigo directo, cuando se apunta, entonces entra como una entrada más, con su lugar y su momento, y no se marca como correcta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "La versión de un testigo directo entra como una entrada más y no corrige la del pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería. De este escenario, aquí solo se sostiene que la versión del testigo entra en el diario como entrada aparte y no corrige la anterior; el resto es de las filas 12 y 14."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada cuyo texto del narrador todavía no existe, cuando se lee, entonces los hechos, el nivel y el signo están completos y la entrada cae al texto de la plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una entrada sin texto del narrador tiene el dato completo y cae al texto de su plantilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un núcleo donde no se cuenta nada de la jugadora, cuando llega a él, entonces no se apunta ninguna entrada y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Un núcleo donde no se cuenta nada no apunta ninguna entrada y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un núcleo que ya le contó su versión, cuando la jugadora vuelve y se la vuelven a contar, entonces no se añade una segunda entrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Volver al mismo núcleo que ya contó su versión no añade una segunda entrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada del diario, cuando se lee de qué mapa es, entonces lo declara, y al leer el diario de otro mapa no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una entrada declara de qué mapa es y no aparece en el diario de otro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un diario sin ninguna entrada, cuando se lee, entonces se obtiene una lista vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Un diario sin ninguna entrada se lee como lista vacía y no como un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un diario con la versión de tres campanas oída en «Monfrida», cuando la jugadora oye en «Vilanova» la versión fiel, de una campana, entonces el diario contiene las dos entradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una entrada no se sobrescribe con otra más veraz",
+      "escenario": "Una entrada no se sobrescribe con otra más veraz",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado ese mismo diario, cuando se leen las dos entradas, entonces ninguna se marca como correcta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una entrada no se sobrescribe con otra más veraz",
+      "escenario": "Una entrada no se sobrescribe con otra más veraz",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado ese mismo diario, cuando se lee la entrada anterior, entonces sigue idéntica: ni su versión, ni su lugar, ni su momento han cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una entrada no se sobrescribe con otra más veraz",
+      "escenario": "Una entrada no se sobrescribe con otra más veraz",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado dos entradas del mismo suceso, cuando se leen, entonces las dos declaran la misma identidad de suceso, y agruparlas no exige comparar textos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Dos entradas del mismo suceso declaran la misma identidad y se agrupan sin comparar textos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado tres versiones de un suceso, oídas en los días 22, 23 y 29, cuando se piden las de ese suceso, entonces salen en el orden 22, 23, 29.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Las versiones se ordenan por cuándo se oyeron",
+      "escenario": "Las versiones se ordenan por cuándo se oyeron",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería. Aquí vive la mitad de dato del escenario: el orden es por momento y no existe otro. La mitad de pantalla es de la fila 37."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado esas tres versiones, cuando se busca en la superficie pública un orden por fidelidad o por nivel, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "En la superficie pública no existe ningún orden por fidelidad ni por nivel",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un diario, cuando se pregunta si algún suceso tiene ya dos versiones apuntadas, entonces se responde por identidad de suceso, sin leer ningún texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Dos entradas del mismo suceso declaran la misma identidad y se agrupan sin comparar textos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un suceso del que la jugadora oye una tercera versión, cuando se apunta, entonces las tres conviven y ninguna sustituye a otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una tercera versión del mismo suceso convive con las dos anteriores",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada del diario, cuando se lee el dato interno, entonces lleva el nivel y el signo con los que llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "El dato interno de una entrada lleva el nivel y el signo con los que llegó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado la proyección de lectura que consumen las pantallas del diario, cuando se inspecciona una entrada, entonces no lleva el nivel, ni ningún porcentaje, ni ninguna etiqueta de fiabilidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "El nivel de deformación no sale nunca a pantalla",
+      "escenario": "El nivel de deformación no sale nunca a pantalla",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un diario con versiones de niveles 0, 1 y 3, cuando se recorre entero por días y por sucesos, entonces ninguna entrada de la proyección expone un nivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "El nivel de deformación no sale nunca a pantalla",
+      "escenario": "El nivel de deformación no sale nunca a pantalla",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre el dato guardado: es el nivel al que hoy se puede ejecutar (Maestro ausente). Recolocar la etiqueta es de quien mantiene la batería."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado la proyección de lectura, cuando se ordena, entonces el criterio es cuándo se oyó y no hay ningún otro disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "La proyección solo se puede ordenar por cuándo se oyó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un nivel recibido fuera del rango de cero a tres, cuando se intenta apuntar la entrada, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Un nivel fuera del rango de cero a tres falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una partida recién creada, cuando se lee su registro, entonces está vacío y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Una partida recién creada tiene el registro vacío y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el catálogo de tipos de hecho, cuando se compara con la lista de partida-guardada.md §2, entonces están los pasos ejecutados, los sitios pisados, las aventuras aceptadas, cerradas y abandonadas, las decisiones dentro de una aventura, las entregas atendidas o ignoradas, los anclajes descartados, las caras conocidas y los objetos obtenidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El catálogo de tipos de hecho es el de partida-guardada.md §2, más la versión oída",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una versión que la jugadora oye en un sitio, cuando se apunta en el diario, entonces deja también su hecho en el registro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Lo que se oye en un sitio deja también su hecho en el registro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho, cuando se lee, entonces declara su tipo, su mapa, su momento —día y paso— y su carga inerte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho declara su tipo, su mapa, su momento y su carga inerte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho recién escrito, cuando se lee el registro, entonces está al final y ningún hecho anterior ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho recién escrito queda al final y ningún hecho anterior cambia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho ya escrito, cuando el estado cambia después por cualquier motivo, entonces el hecho no se reescribe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho ya escrito no se reescribe cuando el estado cambia después",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado dos hechos producidos en el mismo paso, cuando se leen, entonces su orden entre ellos es estable y sale de un criterio declarado, no del orden en que se insertaron.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Dos hechos del mismo paso salen en un orden declarado y no en el de inserción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho de un tipo que ninguna área declara, cuando se valida el registro, entonces falla nombrando el tipo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho de un tipo que ninguna área declara falla nombrando el tipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho sin momento, cuando se valida, entonces falla nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho sin momento falla nombrando el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un cierre de salida cuya escritura de hechos falla a mitad, cuando se lee el registro, entonces no hay hechos a medias: se anexan todos o ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Una escritura de hechos que falla a mitad no deja hechos a medias",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un almacén que falla al escribir, cuando se cierra la salida, entonces el error se propaga y el estado y el registro anteriores siguen intactos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un almacén que falla al escribir deja el estado y el registro anteriores intactos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el módulo sin almacén inyectado, cuando se cierra una salida, entonces todo ocurre en memoria y no se escribe nada en ningún sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Sin almacén inyectado todo ocurre en memoria y no se escribe nada en ningún sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una partida cuyo registro de hechos reconstruye un rango distinto al guardado, cuando se carga, entonces vale el estado guardado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El estado manda sobre el registro",
+      "escenario": "El estado manda sobre el registro"
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado esa misma partida, cuando se pide el diagnóstico de la discrepancia, entonces se obtiene qué campo difiere y con qué valor en cada lado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El diagnóstico de la discrepancia dice qué campo difiere y con qué valor a cada lado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado esa misma partida, cuando se consulta el diagnóstico, entonces ni el estado ni el registro cambian.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Consultar el diagnóstico no cambia ni el estado ni el registro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado que se puede leer, cuando se carga la partida, entonces el registro no se reproduce.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El estado manda sobre el registro",
+      "escenario": "El estado manda sobre el registro"
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado que declara estar aplicado hasta el hecho N y un registro con hechos posteriores a N, cuando se carga, entonces se aplican los posteriores y el estado queda al día.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un apagón entre el registro y el estado deja una cola que se termina al cargar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado ese mismo caso, cuando se aplica, entonces ningún hecho anterior o igual a N se vuelve a aplicar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un apagón entre el registro y el estado deja una cola que se termina al cargar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado legible y un registro ilegible, cuando se carga, entonces la partida se abre con el estado y el fallo del registro se declara sin impedir jugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un estado legible con el registro ilegible abre la partida y declara el fallo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una partida cuyo estado se ha corrompido, cuando se reconstruye desde el registro de hechos, entonces se recuperan los rangos, lo oído, la repisa y los NPCs conocidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El registro basta para reconstruir",
+      "escenario": "El registro basta para reconstruir"
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado esa misma reconstrucción, cuando termina, entonces se avisa de que el resultado puede diferir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El registro basta para reconstruir",
+      "escenario": "El registro basta para reconstruir"
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una reconstrucción cuya versión de reglas actual no es la que el registro tiene grabada, cuando termina, entonces el aviso declara las dos versiones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El aviso declara las dos versiones de reglas cuando el registro trae otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado corrompido, cuando se carga la partida sin pedir reconstrucción, entonces falla declarando que el estado no se puede leer y cuántos hechos tiene el registro, y no reconstruye por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Con el estado corrompido la carga falla, dice cuántos hechos hay y no reconstruye sola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una reconstrucción terminada, cuando se lee el registro, entonces sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Una reconstrucción no toca el registro y dos reconstrucciones dan el mismo estado byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado la misma partida, cuando se reconstruye dos veces, entonces los dos estados reconstruidos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Una reconstrucción no toca el registro y dos reconstrucciones dan el mismo estado byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un registro vacío, cuando se reconstruye, entonces se obtiene el estado inicial de una partida y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un registro vacío se reconstruye como el estado inicial de una partida y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un registro con un hecho corrupto a la mitad, cuando se reconstruye, entonces falla nombrando el hecho y no devuelve ningún estado a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un registro con un hecho corrupto a la mitad falla nombrando el hecho",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un registro con hechos de un área que esta versión del juego ya no tiene, cuando se reconstruye, entonces falla nombrando el tipo, en lugar de saltárselos en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho de un área que esta versión del juego ya no tiene falla nombrando el tipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado corrompido y un registro corrompido, cuando se intenta abrir la partida, entonces falla declarando las dos cosas y no se ofrece ninguna partida a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Con el estado y el registro corrompidos no se ofrece ninguna partida a medias",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado reconstruido, cuando se guarda, entonces declara que salió de una reconstrucción y con qué versión de reglas se hizo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un estado reconstruido declara de dónde salió y con qué versión de reglas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el estado y el registro de una jugadora que ha andado cien salidas, cuando se recorren todos sus campos, entonces no contienen ningún histórico de posiciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho de sitio pisado, cuando se lee, entonces declara el identificador del sitio y el momento, y ninguna coordenada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho de sitio pisado declara el sitio y el momento, y ninguna coordenada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el registro entero, cuando se busca por dónde fue la jugadora de un sitio a otro, entonces no aparece: no se guarda ningún camino recorrido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El registro no guarda por dónde se fue de un sitio a otro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un estado o un registro al que se le añade un campo con una posición de la jugadora, cuando se valida, entonces el esquema cerrado lo rechaza nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un campo con la posición de la jugadora lo rechaza el esquema cerrado nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el estado y el registro, cuando se buscan marcas de tiempo del reloj real, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el estado, cuando se lee la semilla de la partida, entonces es la de SPEC-003 tal cual, y la coordenada de la que salió no está en ningún campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "La semilla de la partida vive en el estado y no arrastra ninguna coordenada",
+      "escenario": "La semilla no contiene ninguna coordenada",
+      "nota": "De este escenario, aquí solo se sostiene que la semilla vive en el estado y en ningún otro sitio; su forma la verifica SPEC-003."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado las rutas que entrega esta spec, cuando se inspeccionan sus imports, entonces ninguno lee un sensor, el reloj o la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Las cuatro rutas de esta capa no leen ningún sensor, el reloj ni la red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una entrada de diario ya escrita, cuando se mide en su forma canónica y sin el texto que la cuenta, entonces ocupa menos de 500 bytes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Una entrada de diario ocupa menos de 500 bytes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un hecho del registro, cuando se mide en su forma canónica, entonces ocupa menos de 500 bytes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho del registro ocupa menos de 500 bytes",
+      "hueco_de_bateria": true,
+      "nota": "El tope es 500 y no los 300 de la spec por el veredicto §6q de pipeline/decisiones-orquestador.md. El tipo caro es \"version-oida\", 444-471 B contra los 90-140 B de los otros once, y lo es porque lleva dentro los hechos estructurados enteros: decisión declarada de la spec, sin la cual \"lo oído\" no se puede reconstruir sin reproducir la propagación con reglas que pueden haber cambiado. No es un olvido ni un número ajustado a lo medido: sigue siendo un tope, y si un tipo engorda hasta 500 este caso se pone rojo. Los presupuestos agregados (entrada < 500 B, registro < 6 MB, estado < 2 MB) no se tocaron: son los que deciden si esto cabe en un móvil y pasan con margen."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado una partida de mil días con veinte hechos por día, cuando se mide su registro, entonces ocupa menos de 6 MB sin comprimir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El registro de una partida de mil días con veinte hechos por día ocupa menos de 6 MB",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado esa misma partida, cuando se mide su estado sin los textos del narrador, entonces ocupa menos de 2 MB sin comprimir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El estado de esa partida sin los textos del narrador ocupa menos de 2 MB",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado un texto del narrador citado por varias entradas, cuando se mide el estado, entonces aparece una sola vez, por su clave, y ninguna entrada lo copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/diario.test.mjs",
+      "caso": "Un texto citado por varias entradas se guarda una sola vez y por su clave",
+      "hueco_de_bateria": true
     }
   ]
 }
