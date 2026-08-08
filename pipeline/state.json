@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "AUSENTE — las pruebas @app no se pueden ejecutar en esta maquina"
   },
-  "spec_actual": "SPEC-002",
+  "spec_actual": "SPEC-003",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -22,6 +22,16 @@
       "casos": "100/100 @nucleo",
       "app": "no ejecutado: Maestro ausente",
       "merge": "b483e4e"
+    },
+    {
+      "spec": "SPEC-002",
+      "slug": "paquete-compartido",
+      "resultado": "verde",
+      "iteraciones": 1,
+      "report": "test/reports/SPEC-002-iter-1-run-20260807T235949Z.md",
+      "casos": "151/151 @nucleo",
+      "app": "no ejecutado: Maestro ausente",
+      "nota": "la iteracion cerro 'El orden de iteracion no depende del orden de insercion' (bloqueante @determinismo) y 'No hay dos nombres iguales en un mundo'. 'El mundo minimo todavia compone un lazo' se reatribuyo a SPEC-006: sigue sin prueba viva."
     }
   ],
   "bloqueos": [],
@@ -34,7 +44,10 @@
     "SPEC-005-pool-anclajes-filtros",
     "SPEC-006-parajes-cobertura-escenas",
     "SPEC-007-grafo-cosido-ramales",
-    "SPEC-008-filtro-accesibilidad-grafo"
+    "SPEC-008-filtro-accesibilidad-grafo",
+    "SPEC-009-serializacion-mundo-congelado",
+    "SPEC-010-casting-quests",
+    "SPEC-011-motor-pasos"
   ],
   "veredictos": [
     {
