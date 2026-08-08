@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-006",
-  "fase": "dev",
+  "spec_actual": "SPEC-007",
+  "fase": "pending",
   "iteracion": 0,
   "historial": [
     {
@@ -62,6 +62,16 @@
       "casos": "332 casos: 329 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio (Maestro ya presente)",
       "nota": "la iteracion corrigio una regresion de salud del generador: los topes en la admision bajaban la casteabilidad de 21/48 a 17/48. Ahora 24/48."
+    },
+    {
+      "spec": "SPEC-006",
+      "slug": "parajes-cobertura-escenas",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-006-run-20260808T082557Z.md",
+      "casos": "361 casos: 358 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio",
+      "nota": "cierra el mundo minimo. barrio-tres-calles 1/6 y suelo-250m 2/6 con lazo cerrado, viniendo de cero. Casteabilidad 24/48 -> 30/48. El escenario 'El mundo minimo todavia compone un lazo' queda vivo tras tres filas atascado."
     }
   ],
   "bloqueos": [],
