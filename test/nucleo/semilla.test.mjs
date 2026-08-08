@@ -1,11 +1,12 @@
 // SPEC-003 · La semilla de la partida: su forma, su normalización, su validación
 // y las semillas de fase que cuelgan de ella.
 //
-// docs/testing.md **no tiene ni una característica sobre la semilla como dato**:
-// la usa como parámetro de los mundos sembrados y nada más. La propia spec lo
-// declara como hueco de la batería (RF-MUNDO-002, marcado ⚠ en el PRD), así que
-// todos los casos de este fichero van marcados como hueco en
-// test/spec-test-map.json en lugar de citar un escenario que no existe.
+// El hueco de batería que declaraba la spec (RF-MUNDO-002, marcado ⚠ en el PRD)
+// ya está cerrado: docs/testing.md tiene la característica «La semilla es un dato
+// de la partida, no una coordenada» con tres escenarios. Los tres casos que los
+// implementan llevan su nombre literal y citan el escenario en el mapa; el resto
+// de este fichero sigue siendo hueco, porque afirma la forma y la normalización de
+// la semilla, que la batería no describe.
 //
 // Nada de aquí toca la red ni el reloj: la entropía llega inyectada y escrita.
 
@@ -65,8 +66,11 @@ describe('La semilla de la partida', () => {
     }
   });
 
-  test('Dos partidas con semillas distintas, el mismo anclaje y los mismos datos difieren en los nombres de al menos un núcleo', async () => {
-    const { lat, lon } = coordenadaDe('urbano-denso');
+  // Los dos vecinos son dos partidas con semillas distintas sobre la misma
+  // coordenada y los mismos datos de OSM: lo único que puede separar sus mundos es
+  // la semilla, que es justo lo que afirma el escenario.
+  test('Dos vecinos ven mundos distintos', async () => {
+    const [lat, lon] = [42.40, -8.81];
     const mundos = [];
     for (const semilla of [SEMILLA_A, SEMILLA_B]) {
       const mapa = creaMapa({ semilla, lat, lon, tramoM: 2000 });
@@ -75,22 +79,53 @@ describe('La semilla de la partida', () => {
         semilla,
         mapaId: mapa.id,
         celda: { i: 0, j: 0 },
-        consultaOsm: consultaDeFixture('urbano-denso'),
+        // El fixture costero es el que se capturó junto a esta coordenada: sus
+        // anclajes caen dentro de la celda y por eso hay parajes que comparar.
+        consultaOsm: consultaDeFixture('costero'),
       });
-      mundos.push({ mapaId: mapa.id, nucleos: registro.mundo.settlements.map((s) => s.name) });
+      mundos.push({
+        mapaId: mapa.id,
+        nucleos: registro.mundo.settlements.map((s) => s.name),
+        // La colocación, no el nombre: dos parajes pueden llamarse igual y caer en
+        // sitios distintos, y es la caída la que hace que el mapa se vea distinto.
+        parajes: registro.mundo.parajes.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`),
+      });
     }
     assert.equal(mundos[0].mapaId, mundos[1].mapaId, 'las dos partidas tenían que compartir anclaje');
     assert.notDeepEqual(mundos[0].nucleos, mundos[1].nucleos, 'ningún núcleo cambia de nombre al cambiar la semilla de partida');
+    assert.ok(mundos[0].parajes.length, 'sin parajes no se puede afirmar nada sobre su colocación');
+    assert.notDeepEqual(mundos[0].parajes, mundos[1].parajes, 'ningún paraje cambia de sitio al cambiar la semilla de partida');
   });
 
-  test('La semilla no contiene ninguna coordenada, ninguna fecha ni ningún identificador del dispositivo', () => {
-    // La afirmación fuerte no es que no se vea una coordenada dentro: es que la
-    // semilla no depende de dónde ni de cuándo se crea. Con la misma entropía en
-    // dos sitios y dos momentos sale la misma cadena, así que no lleva nada de eso.
-    assert.equal(creaSemilla(ENTROPIA_A), SEMILLA_A);
+  test('La semilla no contiene ninguna coordenada', () => {
+    // Un mundo levantado en una coordenada concreta: ni la exacta que tecleó el
+    // jugador ni la redondeada del anclaje pueden asomar por la semilla, ni entera
+    // ni troceada. Y la afirmación fuerte no es que no se vea dentro, es que la
+    // semilla no depende de dónde se crea: la misma entropía en dos sitios da la
+    // misma cadena.
+    const [lat, lon] = [42.40231, -8.80917];
+    const mapa = creaMapa({ semilla: SEMILLA_A, lat, lon, tramoM: 2000 });
+    assert.equal(mapa.semilla, SEMILLA_A, 'levantar el mapa ha cambiado la semilla de la partida');
+    assert.equal(creaSemilla(ENTROPIA_A), SEMILLA_A, 'la semilla depende de dónde se crea');
+
+    const dentro = (aguja) => mapa.semilla.includes(aguja.toUpperCase());
+    for (const numero of [lat, lon, mapa.anclaje.lat, mapa.anclaje.lon]) {
+      const cifras = String(numero).replace(/[^0-9]/g, '');
+      assert.equal(dentro(cifras), false, `la semilla lleva las cifras de ${numero}`);
+      // Y tampoco por trozos: cualquier tirada de cuatro cifras seguidas de la
+      // coordenada sería suficiente para reconocer el portal de alguien.
+      for (let i = 0; i + 4 <= cifras.length; i++) {
+        assert.equal(dentro(cifras.slice(i, i + 4)), false, `la semilla lleva "${cifras.slice(i, i + 4)}", un trozo de ${numero}`);
+      }
+    }
+    assert.equal(dentro(mapa.id), false, `la semilla lleva el identificador del mapa "${mapa.id}"`);
+    assert.doesNotMatch(SEMILLA_A, /[.,:@/#-]/, 'la semilla lleva separadores de coordenada o de ruta');
+  });
+
+  test('La semilla no contiene ninguna fecha ni ningún identificador del dispositivo', () => {
     assert.match(SEMILLA_A, new RegExp(`^[${ALFABETO_SEMILLA}]{${LONGITUD_SEMILLA}}$`));
-    assert.doesNotMatch(SEMILLA_A, /[.,:@/#-]/, 'la semilla lleva separadores de coordenada, de fecha o de ruta');
-    // Ni el módulo tiene por dónde colarlos: no lee el entorno ni el reloj.
+    // El módulo no tiene por dónde colarlos: no lee el entorno, ni el reloj, ni
+    // ninguna fuente de identidad del aparato.
     const texto = fuente('packages/nucleo/core/semilla.js');
     for (const puerta of [/\bDate\b/, /\bprocess\b/, /\bnavigator\b/, /\bgetRandomValues\b/, /\brandomUUID\b/]) {
       assert.doesNotMatch(texto, puerta, `core/semilla.js usa ${puerta}`);
@@ -127,7 +162,7 @@ describe('La semilla de la partida', () => {
     }
   });
 
-  test('Una semilla mal copiada la rechaza el dígito de control', () => {
+  test('Una semilla mal copiada se rechaza en vez de generar otro mundo', async () => {
     // Cada una de las quince posiciones de dato, con un símbolo del alfabeto
     // distinto del que había: un cambio de un solo símbolo no puede colarse.
     for (let i = 0; i < SIMBOLOS_DE_DATO; i++) {
@@ -136,9 +171,26 @@ describe('La semilla de la partida', () => {
       const mala = SEMILLA_A.slice(0, i) + otro + SEMILLA_A.slice(i + 1);
       const r = validaSemilla(mala);
       assert.equal(r.ok, false, `"${mala}" (posición ${i}) se ha aceptado con un símbolo cambiado`);
+      assert.equal(r.semilla, null, `"${mala}" ha devuelto una semilla utilizable pese a rechazarse`);
       assert.match(r.motivo, /mal copiada|control/, `el motivo no dice que está mal copiada: ${r.motivo}`);
     }
     assert.equal(digitoDeControl(SEMILLA_A.slice(0, SIMBOLOS_DE_DATO)), SEMILLA_A[SIMBOLOS_DE_DATO]);
+
+    // Y el rechazo no se queda en la validación: con una semilla mal copiada no se
+    // levanta ningún mapa ni se genera ninguna celda. Generar otro mundo en
+    // silencio es exactamente lo que hay que evitar.
+    const otro = ALFABETO_SEMILLA[(ALFABETO_SEMILLA.indexOf(SEMILLA_A[0]) + 7) % 32];
+    const malCopiada = otro + SEMILLA_A.slice(1);
+    assert.throws(() => creaMapa({ semilla: malCopiada, lat: 42.40, lon: -8.81, tramoM: 2000 }), /semilla inválida/);
+
+    const rejilla = creaRejilla({ lat: 42.40, lon: -8.81, tramoM: 2000 });
+    const consulta = consultaDeFixture('urbano-denso');
+    await assert.rejects(
+      () => generaCelda({ rejilla, semilla: malCopiada, mapaId: rejilla.id, celda: { i: 0, j: 0 }, consultaOsm: consulta }),
+      /semilla inválida/,
+      'generar con una semilla mal copiada ha devuelto un mundo',
+    );
+    assert.equal(consulta.llamadas.length, 0, 'se han pedido datos de OSM pese a que la semilla no cuadra');
   });
 
   test('Una cadena más corta o más larga de dieciséis símbolos se rechaza nombrando la longitud esperada', () => {
