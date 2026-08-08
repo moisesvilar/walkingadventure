@@ -23,8 +23,21 @@ export const VERSION_FORMATO = 1;
  */
 export const VERSION_GENERADOR = '0.1.0';
 
-/** Las dos clases de documento que escribe esta entrega. */
-export const CLASES = Object.freeze({ INDICE: 'indice-de-mapa', CELDA: 'celda' });
+/**
+ * Las clases de documento de la partida.
+ *
+ * Las dos primeras son el mundo congelado de SPEC-009. **El estado y el registro son
+ * dos más de esta misma familia y no una familia nueva**: comparten la constante de
+ * versión, el lenguaje de esquemas y la escritura canónica. Dos cadenas de versión
+ * sobre ficheros que se guardan y se exportan juntos es la primera puerta por la que
+ * entra una migración a medias (SPEC-016).
+ */
+export const CLASES = Object.freeze({
+  INDICE: 'indice-de-mapa',
+  CELDA: 'celda',
+  ESTADO: 'estado-de-partida',
+  REGISTRO: 'registro-de-hechos',
+});
 
 // --- El lenguaje del esquema ------------------------------------------------
 //
@@ -237,6 +250,46 @@ export function exigeSerializable(valor, ruta = 'mundo', vistos = new Set()) {
     return valor;
   }
   for (const clave of Object.keys(valor)) exigeSerializable(valor[clave], `${ruta}.${clave}`, vistos);
+  return valor;
+}
+
+// --- Ni un rastro de ubicación ni un reloj real ------------------------------
+//
+// Los nombres por los que se colaría una posición de quien juega o una marca del
+// reloj. El esquema cerrado ya rechaza un campo que nadie declare, pero un nombre
+// así dentro de un valor inerte —donde el esquema no fija la forma a propósito—
+// pasaría. Es la segunda red del mismo argumento de `efectos.js`: el campo ya
+// fallaría por otro sitio, pero el error diría «campo desconocido» y no lo que de
+// verdad ocurre, que es que alguien intentó guardar por dónde fue alguien.
+
+const NOMBRES_DE_POSICION = /^(lat|lon|lng|latitud|longitud|coord|coords|coordenada|coordenadas|posicion|posiciones|gps|rastro|traza|trayecto|recorrido)$/i;
+const NOMBRES_DE_RELOJ = /^(timestamp|epoch|reloj|hora|ahora|now|fechaReal|capturado|capturadoEn|capturadaEn|utc)$/i;
+
+/**
+ * Recorre un documento de la partida y falla **nombrando el campo** si lleva un
+ * rastro de ubicación o una marca del reloj real.
+ *
+ * Es bloqueante (RF-PRIV-002, `@privacidad`) y por eso se llama al escribir el
+ * estado y el registro, no solo desde las pruebas: una guarda que nadie invoca es
+ * decoración. **No se aplica a los documentos del mundo**, que sí llevan coordenadas
+ * por definición: lo que RF-PRIV-002 prohíbe es el histórico de posiciones de quien
+ * juega, y ese solo cabría aquí.
+ */
+export function sinRastroDeUbicacion(valor, ruta = 'documento') {
+  if (valor === null || typeof valor !== 'object') return valor;
+  if (Array.isArray(valor)) {
+    valor.forEach((v, i) => sinRastroDeUbicacion(v, `${ruta}[${i}]`));
+    return valor;
+  }
+  for (const clave of Object.keys(valor)) {
+    if (NOMBRES_DE_POSICION.test(clave)) {
+      throw new Error(`${ruta}.${clave}: el estado y el registro de la partida no guardan ninguna posición de quien juega, y "${clave}" es una (RF-PRIV-002)`);
+    }
+    if (NOMBRES_DE_RELOJ.test(clave)) {
+      throw new Error(`${ruta}.${clave}: el momento de la partida es el día de diario y el paso del mundo, nunca una marca del reloj real`);
+    }
+    sinRastroDeUbicacion(valor[clave], `${ruta}.${clave}`);
+  }
   return valor;
 }
 
@@ -615,6 +668,41 @@ export const ESQUEMA_INDICE = campos({
 });
 
 const ESQUEMAS = { [CLASES.CELDA]: ESQUEMA_CELDA, [CLASES.INDICE]: ESQUEMA_INDICE };
+
+/**
+ * Un valor inerte cualquiera: nulo, texto, número, booleano, lista de inertes o
+ * diccionario de inertes. **Se define por recursión sobre sí mismo**, que es lo que
+ * permite describir una carga que este módulo no interpreta —la semilla estructurada
+ * que declara una plantilla, por ejemplo— sin abrir el esquema a cualquier cosa.
+ *
+ * Sigue rechazando lo que de verdad importa rechazar: `undefined`, `NaN`, un `Map`,
+ * un `Set`, una `Date`, una función y una propiedad colgada de un array. Lo que no
+ * hace es fijar la forma, y por eso solo se usa donde la forma es de otro.
+ */
+export const VALOR_INERTE = { forma: 'uno', alternativas: ['nulo', 'texto', 'numero', 'booleano'] };
+VALOR_INERTE.alternativas.push(lista(VALOR_INERTE), dic(VALOR_INERTE));
+Object.freeze(VALOR_INERTE.alternativas);
+Object.freeze(VALOR_INERTE);
+
+/**
+ * Declara el esquema de una clase de documento desde el módulo que la posee.
+ *
+ * Existe para que el estado y el registro de SPEC-016 sean documentos de esta misma
+ * familia **sin que este módulo tenga que importarlos**: si los esquemas vivieran
+ * aquí, `formato.js` importaría media partida y el ciclo de imports sería inmediato.
+ * Redeclarar una clase con otro esquema es un error y no un reemplazo: dos esquemas
+ * para la misma clase es exactamente el bug que la constante única evita.
+ */
+export function declaraEsquema(clase, esquema) {
+  if (typeof clase !== 'string' || !clase) {
+    throw new Error(`una clase de documento se declara con su nombre y llegó ${describeValor(clase)}`);
+  }
+  if (ESQUEMAS[clase] && ESQUEMAS[clase] !== esquema) {
+    throw new Error(`la clase de documento "${clase}" ya tiene un esquema declarado: dos esquemas para la misma clase escribirían dos documentos distintos con el mismo nombre`);
+  }
+  ESQUEMAS[clase] = esquema;
+  return esquema;
+}
 
 /** El esquema de una clase de documento, o un error que nombra las declaradas. */
 export function esquemaDe(clase) {
