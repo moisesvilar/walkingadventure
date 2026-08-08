@@ -4,8 +4,8 @@
     "semilla": "42.18,-7.82#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-009-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
+    "regenerado_por": "SPEC-017",
+    "motivo_regeneracion": "Regenerado por SPEC-017: el reequilibrio del catálogo cambia qué plantillas castean en cada extracto. Dos tercios de las treinta pedían un servicio y este mundo no tiene ninguno, así que las que se apoyaban en un local pasan a apoyarse en núcleos, caras y parajes, y las que piden un paraje con escena escasa declaran una alternativa que un cruce o un puente sí sostienen. El mundo generado no cambia —mismo vocabulario de escenas, mismo suelo de parajes—: cambia solo la sección de casting."
   },
   "titulo": "Comarcas do Vento Norte",
   "idioma": "gl",
@@ -13,7 +13,7 @@
   "recuentos": {
     "nucleos": 5,
     "servicios": 0,
-    "parajes": 4,
+    "parajes": 5,
     "calzadas": 4
   },
   "nucleos": [
@@ -56,28 +56,35 @@
   "servicios": [],
   "parajes": [
     {
-      "nombre": "A Encrucillada do Mercador",
+      "nombre": "A Encrucillada do Aforcado",
       "tipo": "cruce",
       "x": -159,
       "y": 163,
       "anclaje": null
     },
     {
-      "nombre": "O Cruce do Aforcado",
-      "tipo": "cruce",
-      "x": 402,
-      "y": -254,
-      "anclaje": null
-    },
-    {
-      "nombre": "O Cruce dos Xuramentos",
+      "nombre": "A Encrucillada do Mercador",
       "tipo": "cruce",
       "x": 486,
       "y": 376,
       "anclaje": null
     },
     {
-      "nombre": "O Vao da Peaxe",
+      "nombre": "A Encrucillada dos Xuramentos",
+      "tipo": "cruce",
+      "x": 444,
+      "y": 222,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Cruce do Mercador",
+      "tipo": "cruce",
+      "x": 402,
+      "y": -254,
+      "anclaje": null
+    },
+    {
+      "nombre": "A Ponte da Derradeira Moeda",
       "tipo": "puente",
       "x": -141,
       "y": 26,
@@ -144,28 +151,124 @@
   ],
   "casting": [
     {
+      "plantilla": "cita-adelantada",
+      "castea": true
+    },
+    {
       "plantilla": "cita-en-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "cuento-del-puente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-arreglo-de-la-fuente",
       "castea": false
+    },
+    {
+      "plantilla": "el-camino-de-la-sal",
+      "castea": true
+    },
+    {
+      "plantilla": "el-encargo-de-la-forja",
+      "castea": false
+    },
+    {
+      "plantilla": "el-inventario-del-mercado",
+      "castea": false
+    },
+    {
+      "plantilla": "el-libro-que-no-se-presta",
+      "castea": false
+    },
+    {
+      "plantilla": "el-recado-que-crece",
+      "castea": false
+    },
+    {
+      "plantilla": "el-refugio-de-la-tormenta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-relevo-de-la-guardia",
+      "castea": false
+    },
+    {
+      "plantilla": "el-ungüento-que-huele-mal",
+      "castea": true
     },
     {
       "plantilla": "entrega-sospechosa",
+      "castea": true
+    },
+    {
+      "plantilla": "la-apuesta-de-la-taberna",
       "castea": false
+    },
+    {
+      "plantilla": "la-carta-sin-remite",
+      "castea": true
+    },
+    {
+      "plantilla": "la-cuenta-pendiente",
+      "castea": false
+    },
+    {
+      "plantilla": "la-feria-que-no-cabe",
+      "castea": true
+    },
+    {
+      "plantilla": "la-guarida-de-nadie",
+      "castea": true
+    },
+    {
+      "plantilla": "la-posada-sin-sitio",
+      "castea": false
+    },
+    {
+      "plantilla": "la-receta-perdida",
+      "castea": false
+    },
+    {
+      "plantilla": "la-vigilia-del-monasterio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-visita-que-toca",
+      "castea": true
+    },
+    {
+      "plantilla": "lo-que-dejo-la-crecida",
+      "castea": true
+    },
+    {
+      "plantilla": "peaje-de-la-costumbre",
+      "castea": true
     },
     {
       "plantilla": "peregrinaje",
-      "castea": false
+      "castea": true
+    },
+    {
+      "plantilla": "quien-vigila-al-vigia",
+      "castea": true
     },
     {
       "plantilla": "rescate-en-la-granja",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "ronda-del-vigia",
       "castea": true
     },
     {
+      "plantilla": "susto-del-camino",
+      "castea": true
+    },
+    {
       "plantilla": "tres-pistas",
-      "castea": false
+      "castea": true
     }
   ]
 }

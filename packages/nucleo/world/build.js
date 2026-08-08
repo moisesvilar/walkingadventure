@@ -7,7 +7,7 @@ import { construyePool } from './anclajes.js';
 import { buildSeaMask, computeDisplayRadius } from './seamask.js';
 import { generateSettlements, countsForRadius, SERVICES } from './settlements.js';
 import { buildRoutes, linkParajes, tramosSupuestos, validaTramos } from './routes.js';
-import { construyeGrafo, pegarAViario, validaGrafo } from './grafo.js';
+import { construyeGrafo, exigeTramosDificilesNombrados, pegarAViario, validaGrafo } from './grafo.js';
 import { generateParajes, parajeCountForRadius } from './parajes.js';
 import { TRAMO_DE_REFERENCIA_M, techoDeParajes, vocabularioDeEscenas } from './cupos.js';
 import { sueloDeVocabulario } from './escenas.js';
@@ -179,7 +179,16 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   // cosidos y tres oportunidades de divergir, y es además la fase más cara del
   // generador. El callejero entra aquí con las carreteras: es donde están los
   // huecos cortos que hay que coser antes de trazar.
-  const grafo = validaGrafo(construyeGrafo(viasDelGrafo(geo), { bordillos: geo.bordillos }));
+  // `nombres` es lo que cierra la deuda de SPEC-007: toda vía anónima con algún
+  // tramo difícil sale de aquí con nombre propio del idioma del mundo, para que
+  // declarar lo que se evita nunca tenga que elegir entre romper y decir «un tramo
+  // del camino». El índice es el del mundo entero, así que un tramo tampoco puede
+  // llamarse como un núcleo. Y se comprueba, en vez de confiarse: un tramo difícil
+  // anónimo que se colara reaparecería como excepción a mitad del reparto.
+  const grafo = exigeTramosDificilesNombrados(validaGrafo(construyeGrafo(viasDelGrafo(geo), {
+    bordillos: geo.bordillos,
+    nombres: { names, semilla: seed, indice: indiceNombres },
+  })));
   // pegar al viario ANTES de trazar: si un núcleo no cuelga de la red principal, el
   // trazado no tendría más remedio que unirlo con una recta por la que no se puede andar
   const movidos = pegarAViario(settlements, grafo);

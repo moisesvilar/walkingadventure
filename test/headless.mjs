@@ -156,7 +156,13 @@ console.log('— casting de quests —');
   check('al menos la mitad del catálogo castea en un mundo "aventura"', ok.length >= Math.ceil(results.length / 2));
   for (const c of ok) {
     const p = c.presupuesto;
-    check(`${c.tpl.id}: beats completos y lugares distintos por rol`, c.beats.every((b) => b.lugar) && new Set(Object.values(c.asignacion).map((l) => `${l.x},${l.y}`)).size === Object.keys(c.asignacion).length);
+    // La unicidad se afirma sobre los **lugares**, no sobre el reparto entero: un rol
+    // humano no consume anclaje propio y hereda el del sitio donde trabaja
+    // (`game-design/npcs.md`), así que su posición coincide a propósito con la de su
+    // sitio y contarla aquí convertiría esa herencia en un fallo.
+    const lugaresDeRol = Object.entries(c.asignacion).filter(([rid]) => c.tpl.roles[rid].tipo !== 'humano');
+    check(`${c.tpl.id}: beats completos y lugares distintos por rol`, c.beats.every((b) => b.lugar)
+      && new Set(lugaresDeRol.map(([, l]) => `${l.x},${l.y}`)).size === lugaresDeRol.length);
     check(`${c.tpl.id}: lazo cerrado (${p.enTramos.recorrido.toFixed(2)} tramos, ${p.tamano})`,
       c.beats[0].lugar === c.beats[c.beats.length - 1].lugar
       && p.enTramos.ida <= CERCA_DE_LA_PARTIDA_EN_TRAMOS && p.enTramos.vuelta <= CERCA_DE_LA_PARTIDA_EN_TRAMOS

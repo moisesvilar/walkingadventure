@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-009-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-009-iter-1: los metros se cuantizan a la rejilla de un metro al proyectar y al medir (PRECISION_M en core/geo.js), así que las coordenadas de todo el mundo y las longitudes del grafo se mueven hasta medio metro y con ellas los desempates de Dijkstra, el cosido y la colocación."
+    "regenerado_por": "SPEC-017",
+    "motivo_regeneracion": "Regenerado por SPEC-017: el reequilibrio del catálogo cambia qué plantillas castean en cada extracto. Dos tercios de las treinta pedían un servicio y este mundo no tiene ninguno, así que las que se apoyaban en un local pasan a apoyarse en núcleos, caras y parajes, y las que piden un paraje con escena escasa declaran una alternativa que un cruce o un puente sí sostienen. El mundo generado no cambia —mismo vocabulario de escenas, mismo suelo de parajes—: cambia solo la sección de casting."
   },
   "titulo": "Marcas de Kaelun",
   "idioma": "es",
@@ -162,7 +162,7 @@
   ],
   "parajes": [
     {
-      "nombre": "El Faro del Ocaso",
+      "nombre": "La Torre Vigía de las Señales",
       "tipo": "atalaya",
       "x": -505,
       "y": -286,
@@ -176,25 +176,25 @@
       "anclaje": null
     },
     {
-      "nombre": "La Capilla del Silencio",
+      "nombre": "La Capilla Blanca",
       "tipo": "ermita",
+      "x": -86,
+      "y": 651,
+      "anclaje": "way/1270426081"
+    },
+    {
+      "nombre": "El Monasterio del Alba",
+      "tipo": "monasterio",
       "x": -195,
       "y": 517,
       "anclaje": "node/13342702051"
     },
     {
-      "nombre": "El Altar del Alba",
-      "tipo": "piedra",
+      "nombre": "El Caserón Roto",
+      "tipo": "ruina",
       "x": -390,
       "y": -131,
       "anclaje": "node/2631124674"
-    },
-    {
-      "nombre": "La Torre Caída",
-      "tipo": "ruina",
-      "x": -148,
-      "y": -193,
-      "anclaje": "node/6896343088"
     }
   ],
   "calzadas": [
@@ -283,7 +283,7 @@
       "recta": false
     },
     {
-      "nombre": "El Sendero del Alba",
+      "nombre": "La Vereda de El Caserón Roto",
       "tipo": "ramal",
       "desde": [
         -390,
@@ -297,7 +297,7 @@
       "recta": false
     },
     {
-      "nombre": "La Vereda de La Capilla del Silencio",
+      "nombre": "La Vereda de El Monasterio del Alba",
       "tipo": "ramal",
       "desde": [
         -195,
@@ -311,21 +311,21 @@
       "recta": false
     },
     {
-      "nombre": "La Vereda de La Torre Caída",
+      "nombre": "La Vereda de La Capilla Blanca",
       "tipo": "ramal",
       "desde": [
-        -148,
-        -193
+        -86,
+        651
       ],
       "hasta": [
-        -152,
-        -200
+        -41,
+        684
       ],
-      "puntos": 2,
+      "puntos": 3,
       "recta": false
     },
     {
-      "nombre": "La Vereda del Nordeste",
+      "nombre": "La Vereda de La Torre Vigía de las Señales",
       "tipo": "ramal",
       "desde": [
         -505,
@@ -341,7 +341,51 @@
   ],
   "casting": [
     {
+      "plantilla": "cita-adelantada",
+      "castea": true
+    },
+    {
       "plantilla": "cita-en-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "cuento-del-puente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-arreglo-de-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "el-camino-de-la-sal",
+      "castea": true
+    },
+    {
+      "plantilla": "el-encargo-de-la-forja",
+      "castea": true
+    },
+    {
+      "plantilla": "el-inventario-del-mercado",
+      "castea": true
+    },
+    {
+      "plantilla": "el-libro-que-no-se-presta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-recado-que-crece",
+      "castea": true
+    },
+    {
+      "plantilla": "el-refugio-de-la-tormenta",
+      "castea": true
+    },
+    {
+      "plantilla": "el-relevo-de-la-guardia",
+      "castea": true
+    },
+    {
+      "plantilla": "el-ungüento-que-huele-mal",
       "castea": true
     },
     {
@@ -349,7 +393,55 @@
       "castea": true
     },
     {
+      "plantilla": "la-apuesta-de-la-taberna",
+      "castea": true
+    },
+    {
+      "plantilla": "la-carta-sin-remite",
+      "castea": true
+    },
+    {
+      "plantilla": "la-cuenta-pendiente",
+      "castea": true
+    },
+    {
+      "plantilla": "la-feria-que-no-cabe",
+      "castea": true
+    },
+    {
+      "plantilla": "la-guarida-de-nadie",
+      "castea": true
+    },
+    {
+      "plantilla": "la-posada-sin-sitio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-receta-perdida",
+      "castea": true
+    },
+    {
+      "plantilla": "la-vigilia-del-monasterio",
+      "castea": true
+    },
+    {
+      "plantilla": "la-visita-que-toca",
+      "castea": true
+    },
+    {
+      "plantilla": "lo-que-dejo-la-crecida",
+      "castea": true
+    },
+    {
+      "plantilla": "peaje-de-la-costumbre",
+      "castea": true
+    },
+    {
       "plantilla": "peregrinaje",
+      "castea": true
+    },
+    {
+      "plantilla": "quien-vigila-al-vigia",
       "castea": true
     },
     {
@@ -358,6 +450,10 @@
     },
     {
       "plantilla": "ronda-del-vigia",
+      "castea": true
+    },
+    {
+      "plantilla": "susto-del-camino",
       "castea": true
     },
     {

@@ -194,3 +194,18 @@ El PRD promete para B2 «simulación completa de partida en Node: pasos, rumores
 **La lección, y es la más cara de la ejecución:** una suite verde de mil casos **no es una demostración de que el producto funciona**. Los cuatro defectos viven en las costuras entre filas, y cada fila probaba su lado. El entregable por bloque del PRD no es ceremonia: es el único momento en que alguien recorre el camino entero.
 
 Lo que **no** son defectos y quedan como frontera correcta: no hay motor de salida (aceptar, recorrer y cerrar es de las filas 34 y 36, B5), no hay textos (B3 sin empezar) y la cola de entregas se siembra pero no la consume nadie (fila 19).
+
+## 6s · B3 arranca y destapa la deuda de §6i-a agrandada
+
+SPEC-017 sube el catálogo de 6 a **30 plantillas**. Efectos medidos, todos esperados:
+
+- **El vocabulario de escenas pasa de 7 a 10**, y con él el **suelo de parajes de 4 a 5**: `barrio-tres-calles` gana un paraje. Es exactamente la relación que SPEC-006 diseñó — ensanchar el catálogo sube el suelo solo.
+- **Casteabilidad 30/48 → 172/240 (71,7 %)**; informe **585/600**.
+- **El suelo de diez esqueletos por oficio de `personaje.md` §3 no se cumple en `barrio-tres-calles`**: 3-5 por oficio, porque ese mundo **no tiene ni un servicio** y 20 de las 30 plantillas piden uno. Es hueco de diseño, no de código, y queda declarado.
+
+Y destapa lo que ya estaba escrito como deuda en §6i-a: **un tramo difícil sin nombre hace lanzar `repartoDeAventuras`**. Con 6 plantillas se topaba poco; con 30 se topa constantemente, y tumba incluso «El mundo mínimo todavía compone un lazo». Deja de ser deuda tolerable: **una excepción es peor respuesta que una ruta declarada**, y contradice el principio de SPEC-008 —evitar y declarar, nunca romper.
+
+**Decisiones:**
+
+1. **Se arregla la deuda ahora**, nombrando todo tramo difícil al generar, que es lo que §6i-a dejó con dueño en SPEC-007.
+2. **Se regeneran los extractos de referencia.** Eran la instantánea del prototipo de seis plantillas; con treinta, esa línea base ya no describe el juego. El instrumento se actualiza cuando lo que mide cambia — como en §6b.

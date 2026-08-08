@@ -6,12 +6,12 @@
 // que esta suite fija, y que se moverán si la capa cambia de comportamiento:
 //
 //   · **anclajes tomados, antes y después de despertar el mapa entero**: 0, 0, 22,
-//     24, 8, 8, 24 y 26, y el resumen del pool idéntico byte a byte en los ocho.
-//   · **el casting con gente y sin ella**: 30 lazos de 48 en los dos casos, 116 de
-//     116 roles humanos resueltos y ni una clave del histograma que hable de gente.
+//     23, 8, 8, 24 y 26, y el resumen del pool idéntico byte a byte en los ocho.
+//   · **el casting con gente y sin ella**: 210 lazos de 240 en los dos casos, 905 de
+//     905 roles humanos resueltos y ni una clave del histograma que hable de gente.
 //     El caso **no puede ser vacuo** y lo demuestra dentro: con un resolutor ingenuo
 //     —el que solo sabe resolver un puesto que ya esté en la plantilla— los mismos
-//     116 roles caen a 58, y esas 58 caras que faltan son las que RF-NPC-002 exige.
+//     905 roles caen a 529, y esas 376 caras que faltan son las que RF-NPC-002 exige.
 //   · **el género**: diferencia de uno como mucho dentro de cada uno de los nueve
 //     puestos, desempate femenino y **cero oficios monocolor** con dos caras o más.
 //
@@ -357,7 +357,13 @@ describe('Los anclajes reales son de uso único', () => {
       assert.ok(reparto.caras.length > 0, `${clave}: no se ha despertado ni una cara`);
       tomados.push(`${JSON.parse(antes).tomados.length}→${JSON.parse(despues).tomados.length}`);
     }
-    assert.deepEqual(tomados, ['0→0', '0→0', '22→22', '24→24', '8→8', '8→8', '24→24', '26→26'], 'el número de anclajes tomados se ha movido al poblar los mundos');
+    // Remedido con SPEC-017: los ocho extractos se regeneraron —nombrar todo tramo
+    // difícil al construir el grafo reserva esos nombres en el índice del mundo
+    // antes que las calzadas, así que el sorteo de nombres cambia— y `costero#2`
+    // pasa de 24 anclajes tomados a 23. Lo que este caso afirma no es el número:
+    // es que **poblar el mapa entero no mueve ni uno**, y eso sigue siendo cierto
+    // en los ocho, que es lo que dicen las ocho igualdades.
+    assert.deepEqual(tomados, ['0→0', '0→0', '22→22', '23→23', '8→8', '8→8', '24→24', '26→26'], 'el número de anclajes tomados se ha movido al poblar los mundos');
 
     // Y en el código no hay ni una toma: búscalo, no está.
     const codigo = codigoDe(fuente('packages/nucleo/partida/npcs.js'));
@@ -458,19 +464,25 @@ describe('El casting no falla por gente', () => {
         }
       }
     }
-    assert.equal(sinGente, 30, `sin gente castean ${sinGente} de 48 y el suelo dictaminado son 30`);
-    assert.equal(gente, 30, `con gente castean ${gente} de 48: añadir personas ha estrechado el casting`);
+    // Las cuatro cifras, en la escala de treinta plantillas reequilibradas (§6s). La
+    // que de verdad afirma algo es la igualdad entre las dos primeras: añadir gente a
+    // cada rol de sitio del catálogo entero **no estrecha el casting ni en una
+    // plantilla**. Las otras dos son el denominador, y suben con el catálogo: más
+    // plantillas que castean son más roles de sitio, y cada rol de sitio son dos
+    // roles humanos más que hay que resolver.
+    assert.equal(sinGente, 210, `sin gente castean ${sinGente} de 240 y el suelo remedido son 210`);
+    assert.equal(gente, 210, `con gente castean ${gente} de 240: añadir personas ha estrechado el casting`);
     assert.equal(resueltos, humanos, `${humanos - resueltos} roles humanos sin cara`);
-    assert.equal(humanos, 116, `los roles humanos de los ocho extractos son 116 y han salido ${humanos}`);
-    assert.equal(titulares, 58, 'los puestos afines fuera de plantilla no son los 58 que se resuelven con la titular');
+    assert.equal(humanos, 905, `los roles humanos de los ocho extractos son 905 y han salido ${humanos}`);
+    assert.equal(titulares, 376, 'los puestos afines fuera de plantilla no son los 376 que se resuelven con la titular');
     for (const clave of motivos.keys()) {
       assert.doesNotMatch(clave, /gente|persona|humano|npc|cara/i, `el histograma de fallos habla de gente: "${clave}"`);
     }
 
     // **Y la prueba no puede ser vacua.** Con un resolutor ingenuo —el que solo sabe
-    // resolver un puesto que ya esté en la plantilla del sitio— los mismos 116 roles
-    // caen a 58, y este mismo caso se pondría rojo. Lo que RF-NPC-002 exige es
-    // exactamente esas 58 caras que el ingenuo no da.
+    // resolver un puesto que ya esté en la plantilla del sitio— 376 de los mismos 905
+    // roles se quedan sin cara, y este mismo caso se pondría rojo. Lo que RF-NPC-002
+    // exige es exactamente esas 376 caras que el ingenuo no da.
     const ingenuo = ({ sitio, rol, mundo }) => {
       const suyo = sitiosDeMapa(mundo).find((s) => s.id === sitio.nombre);
       if (!suyo || !rol?.puesto || !plantillaDePuestos(suyo.tipo).includes(rol.puesto)) return null;
@@ -488,7 +500,7 @@ describe('El casting no falla por gente', () => {
       }
     }
     assert.equal(conIngenuo, humanos, 'el resolutor ingenuo no ha mirado los mismos roles');
-    assert.equal(sinCara, 58, `con el resolutor ingenuo quedan ${sinCara} roles sin cara y la medida son 58: si esto llega a cero, el caso de arriba ya no comprueba nada`);
+    assert.equal(sinCara, 376, `con el resolutor ingenuo quedan ${sinCara} roles sin cara y la medida son 376: si esto llega a cero, el caso de arriba ya no comprueba nada`);
   });
 
   test('Dos caras del mismo sitio declaran el mismo lugar y ninguna cara despierta hace falta antes', async () => {

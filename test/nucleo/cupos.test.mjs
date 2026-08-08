@@ -61,9 +61,14 @@ describe('Los cupos de la celda, calculados una vez', () => {
     const cociente = Math.ceil(escenas.length / ESCENAS_POR_PARAJE);
     const { suelo } = sueloDeParajes();
     assert.equal(suelo, cociente, 'el suelo no es el cociente del catálogo');
-    // Con el catálogo de hoy: siete escenas distintas entre dos por paraje, cuatro.
-    assert.equal(escenas.length, 7, `el catálogo vivo pide ${escenas.length} escenas y no las siete de las que sale el 4`);
-    assert.equal(suelo, 4);
+    // Con el catálogo de hoy: **diez** escenas distintas entre dos por paraje,
+    // cinco. Eran siete y cuatro con las seis plantillas del prototipo, y la subida
+    // es lo que esta fila afirma de verdad: SPEC-017 ensancha el catálogo y el suelo
+    // sube **solo**, sin que nadie toque una constante del generador. Los números se
+    // clavan, no se relajan a un `>=`: si el catálogo crece, el suelo tiene que
+    // moverse aquí y verse, que es la propiedad viva que pide `parajes.md`.
+    assert.equal(escenas.length, 10, `el catálogo vivo pide ${escenas.length} escenas y no las diez de las que sale el 5`);
+    assert.equal(suelo, 5);
 
     for (const radioEnTramos of RADIOS_EN_TRAMOS) {
       const { parajes } = cuposDeCelda({ radioEnTramos });

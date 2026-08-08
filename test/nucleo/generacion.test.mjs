@@ -473,32 +473,22 @@ describe('Los nombres son únicos y del idioma del sitio', () => {
 });
 
 /**
- * La única divergencia entre el casting commiteado en los extractos y el que el
- * paquete produce hoy, declarada una a una y con dueño.
+ * El casting que el extracto commiteado predice. **Sin excepciones**, y esa es la
+ * novedad de SPEC-017.
  *
- * SPEC-010 mide los trechos **sobre el grafo cosido y filtrado** en lugar de en
- * línea recta con un factor de rodeo, y el orquestador lo dictaminó en
- * `pipeline/decisiones-orquestador.md` §6m: `barrio-tres-calles#2 ·
- * ronda-del-vigía` deja de castear porque el único pueblo del mundo está a 1688 m
- * de grafo del centro aunque en línea recta sean 126 —un callejero casi en árbol—,
- * y con ida y vuelta el lazo no cabe en un paseo. Antes se ofrecía **mintiendo**.
- *
- * Va como lista cerrada y no como «el casting queda fuera de la comparación» a
- * propósito: lo que se afirma sigue siendo la igualdad exacta con el extracto en
- * las otras 47 casillas, y cualquier deriva que no sea esta se pone roja. Los
- * extractos no se regeneran aquí: eso es de quien orquesta, y hasta que lo haga la
- * excepción vive escrita en la prueba, donde se ve.
+ * Aquí vivía `DIVERGENCIAS_DEL_GRAFO`, una lista cerrada con la única casilla en la
+ * que el paquete y el extracto no coincidían: `barrio-tres-calles#2 ·
+ * ronda-del-vigía` dejó de castear cuando SPEC-010 pasó a medir los trechos sobre el
+ * grafo cosido en vez de en línea recta con un factor de rodeo, y el orquestador lo
+ * dictaminó en `pipeline/decisiones-orquestador.md` §6m. Aquel comentario decía que
+ * la excepción viviría escrita en la prueba «hasta que quien orquesta regenere los
+ * extractos»: SPEC-017 los ha regenerado —el catálogo pasa de 6 a 30 plantillas y la
+ * línea base de seis ya no describe el juego (§6s)—, así que la excepción se retira.
+ * Retirarla **endurece** el caso: vuelven a compararse las 240 casillas con igualdad
+ * exacta y sin ninguna trampilla.
  */
-const DIVERGENCIAS_DEL_GRAFO = {
-  'barrio-tres-calles#2': { 'ronda-del-vigia': false },
-};
-
-/** El casting que el extracto commiteado predice, con las divergencias de §6m aplicadas. */
 function castingEsperado(nombre, n) {
-  const cambios = DIVERGENCIAS_DEL_GRAFO[`${nombre}#${n}`] ?? {};
-  return leeExtracto(nombre, n).casting.map((c) => (
-    Object.prototype.hasOwnProperty.call(cambios, c.plantilla) ? { ...c, castea: cambios[c.plantilla] } : c
-  ));
+  return leeExtracto(nombre, n).casting;
 }
 
 describe('Equivalencia con el prototipo', () => {
@@ -563,18 +553,18 @@ describe('Equivalencia con el prototipo', () => {
         const real = extraeReferencia(w).casting;
         assert.deepEqual(real, castingEsperado(nombre, n), `${nombre}#${n}`);
 
-        // Y la divergencia de §6m solo puede ir en un sentido: **perder** un lazo
-        // que la línea recta regalaba, nunca ganar uno. Ganar sería medir de menos,
-        // que es exactamente el defecto del que se venía.
+        // Y ninguna casilla puede divergir en ningún sentido: los extractos son de
+        // este catálogo y de esta medida, así que ni se pierde un lazo ni se gana.
         for (let k = 0; k < real.length; k++) {
           assert.equal(real[k].plantilla, commiteado[k].plantilla, `${nombre}#${n}: el catálogo ha cambiado de orden o de contenido`);
           if (real[k].castea === commiteado[k].castea) continue;
-          assert.equal(commiteado[k].castea, true, `${nombre}#${n} · ${real[k].plantilla}: el paquete castea un lazo que el prototipo no casteaba`);
           divergencias += 1;
         }
+        assert.equal(real.length, 30, `${nombre}#${n}: el extracto no trae las treinta plantillas del catálogo de SPEC-017`);
       }
     }
-    // Una, y solo una, en los ocho extractos: la que §6m dictaminó.
-    assert.equal(divergencias, 1, 'el número de lazos que la medida sobre el grafo retira ha cambiado respecto de lo que dictaminó §6m');
+    // Ninguna, en las 240 casillas de los ocho extractos: la divergencia de §6m se
+    // absorbió al regenerarlos en SPEC-017 y no quedan excepciones vivas.
+    assert.equal(divergencias, 0, 'el paquete y los extractos regenerados ya no coinciden: o hay que regenerarlos otra vez, o alguien ha movido la generación sin declararlo');
   });
 });
