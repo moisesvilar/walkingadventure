@@ -1982,6 +1982,534 @@
       "caso": "Un mundo real generado en celda no cambia porque se vuelva a mirar",
       "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
       "nota": "La misma afirmación de la celda, pero por el camino completo del mapa (creaMapa → pisa) y con datos reales del mundo congelado costero, que es el que ejercita la máscara de mar y la segunda vuelta de datos."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el catálogo de respuestas del arranque, cuando se enumera, entonces son cuatro y cada una está expresada como un sitio al que se llega, sin ninguna cifra de distancia ni de tiempo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "El catálogo del arranque son cuatro sitios a los que se llega, sin ninguna cifra",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre el catálogo de las cuatro respuestas del arranque —ni su número, ni el orden, ni el suelo—, y la propia spec lo declara como hueco de la batería."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado cada una de las cuatro respuestas, cuando se traduce a tramo, entonces devuelve un número de metros por media hora, y las cuatro están ordenadas de menor a mayor sin empates.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Las cuatro respuestas se traducen a metros por media hora, ordenadas de menor a mayor sin empates",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre el catálogo de las cuatro respuestas del arranque —ni su número, ni el orden, ni el suelo—, y la propia spec lo declara como hueco de la batería."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado la respuesta más corta del catálogo, cuando se traduce a tramo, entonces su valor es mayor o igual que el suelo declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La respuesta más corta no baja del suelo declarado",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre el catálogo de las cuatro respuestas del arranque —ni su número, ni el orden, ni el suelo—, y la propia spec lo declara como hueco de la batería."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una respuesta que no está en el catálogo, cuando se traduce a tramo, entonces falla con un error que nombra lo recibido y enumera las cuatro válidas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Una respuesta fuera del catálogo falla nombrando lo recibido y enumerando las cuatro válidas",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre el catálogo de las cuatro respuestas del arranque —ni su número, ni el orden, ni el suelo—, y la propia spec lo declara como hueco de la batería."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una partida recién creada sin respuesta declarada, cuando se pide el tramo, entonces falla nombrando el dato que falta, en lugar de devolver un valor por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Una partida sin respuesta declarada falla nombrando el dato que falta en vez de suponer uno",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ninguna característica sobre el catálogo de las cuatro respuestas del arranque —ni su número, ni el orden, ni el suelo—, y la propia spec lo declara como hueco de la batería."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el tramo de una partida, cuando se serializa la partida, entonces viaja con el personaje y no con el mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "El tramo viaja con el personaje y no con el mundo",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por ausencia: en el registro de una celda no aparece ninguno de los campos del estado del tramo. El `tramoM` que sí aparece es la dimensión con la que se generó lo que hay, que es otro dato."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado dos partidas con la misma semilla de mundo y tramos distintos, cuando se comparan sus mundos generados con el mismo tamaño de celda en metros, entonces los mundos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Dos partidas con la misma semilla y tramos distintos generan el mismo mundo",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «Cambiar el tramo del jugador no redimensiona un mundo ya generado» afirma que un mundo ya generado no cambia; esto es lo otro: que con el mismo tamaño de celda en metros dos tramos distintos generan lo mismo. No hay escenario que lo diga."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una traza de una salida con sus segmentos clasificados, cuando se mide el ritmo, entonces solo entran en la media los segmentos clasificados como andando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Solo los segmentos clasificados como andando entran en la media",
+      "hueco_de_bateria": true,
+      "nota": "La batería cubre las paradas y lo ambiguo con dos escenarios propios; que la regla sea general —solo andando entra— no lo dice ninguno."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una salida con veinte minutos parados en medio y el mismo ritmo antes y después, cuando se mide el ritmo, entonces el resultado es el mismo que el de la salida sin la parada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Las paradas no cuentan para medir el ritmo",
+      "escenario": "Las paradas no cuentan para medir el ritmo",
+      "nota": "La traza sale del GPS simulado: los dos recorridos son la misma calle a 4 km/h y el único cambio es la parada de veinte minutos."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un segmento cuya velocidad está por debajo del umbral de andar, cuando se mide el ritmo, entonces se trata como parada y no entra en la media, aunque llegue clasificado como andando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Un segmento por debajo del umbral de andar se trata como parada aunque llegue clasificado como andando",
+      "hueco_de_bateria": true,
+      "nota": "El escenario de las paradas da por buena la clasificación de fuera; que el umbral se aplique además de ella es decisión de esta spec y no tiene escenario."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una traza con un tramo a velocidad de vehículo, cuando se mide el ritmo, entonces esos metros no entran en la media.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La medición del tramo sí excluye la velocidad ambigua",
+      "escenario": "La medición del tramo sí excluye la velocidad ambigua",
+      "nota": "El escenario habla de la velocidad ambigua; el vehículo es el otro lado de la misma decisión y se afirma en el mismo caso."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una traza con 800 m a velocidad ambigua, cuando se mide el ritmo, entonces esos 800 m no entran en la media.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La medición del tramo sí excluye la velocidad ambigua",
+      "escenario": "La medición del tramo sí excluye la velocidad ambigua",
+      "nota": "El escenario está etiquetado @app en la batería porque allí se recorre andando; lo que se afirma en @nucleo es la mitad que la spec acota: dada una traza clasificada, qué entra en la media."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado los mismos 800 m ambiguos, cuando se pregunta al núcleo si cuentan para el motor de pasos y para validar geofences, entonces la respuesta es que sí, y es la contraria a la de la medición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "En la duda, cuenta",
+      "escenario": "En la duda, cuenta",
+      "nota": "Escenario @app en la batería; aquí se afirma la asimetría entera sobre las tres respuestas del módulo, más que la regla no está reimplementada en ningún otro módulo del paquete."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una salida entera en autobús, cuando se mide el ritmo, entonces la salida no aporta ninguna medida y no se registra como salida medida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una salida entera en autobús no aporta ninguna medida y no se registra como salida medida",
+      "hueco_de_bateria": true,
+      "nota": "La batería tiene «Volver a casa en autobús echa el telón igual», que es del telón y del reloj del mundo, no de la medida del tramo."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una traza sin ningún segmento, cuando se mide el ritmo, entonces devuelve que no hay medida, no un cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una traza sin ningún segmento devuelve que no hay medida, no un cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una traza con un segmento sin clasificar, cuando se mide el ritmo, entonces falla nombrando el segmento en lugar de suponer que se andaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una traza con un segmento sin clasificar falla nombrando el segmento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una traza con marcas de tiempo desordenadas o con una duración negativa, cuando se mide el ritmo, entonces falla con un error explícito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una traza con marcas de tiempo desordenadas o con duración negativa falla con un error explícito",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una salida cuyos metros andando quedan por debajo del mínimo útil, cuando se mide el ritmo, entonces la salida no aporta medida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una salida por debajo del mínimo útil no aporta medida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado la misma traza, cuando se mide dos veces, entonces las dos medidas son idénticas y ninguna lee el reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La misma traza medida dos veces da la misma medida y no lee el reloj del sistema",
+      "hueco_de_bateria": true,
+      "nota": "Dos afirmaciones: la de fuera —dos medidas idénticas— y la que dice por qué se cumple, que el módulo no tiene reloj al que preguntar."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un tramo declarado de 2 km y una salida medida en 1,2 km por media hora, cuando se incorpora la medida, entonces el tramo estimado baja y queda entre los dos valores, nunca fuera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Incorporar una medida mueve el tramo estimado hacia ella sin pasarse",
+      "escenario": "El tramo se ajusta con lo andado",
+      "nota": "El escenario pide que baje *hacia* el valor medido; la convergencia con cinco salidas va en el caso que lleva su nombre."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un tramo declarado de 2 km, cuando se completan cinco salidas medidas en 1,2 km por media hora, entonces el tramo estimado queda a menos de un 10 % de 1,2 km.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "El tramo se ajusta con lo andado",
+      "escenario": "El tramo se ajusta con lo andado",
+      "nota": "El escenario dice «baja hacia 1,2 km» sin fijar cuánto: el número —menos de un 10 %— lo pone esta spec, como ella misma declara."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una partida sin ninguna salida medida, cuando se pide el tramo estimado, entonces devuelve exactamente el declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Una partida sin ninguna salida medida estima exactamente el tramo declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una serie de medidas, cuando se incorporan en el mismo orden dos veces, entonces el tramo estimado resultante es idéntico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La misma serie de medidas incorporada dos veces da el mismo tramo estimado",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba además que el orden importa: si diera igual, la afirmación de determinismo no estaría diciendo nada."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una medida por debajo del suelo, cuando se incorpora, entonces el tramo estimado se queda en el suelo y no baja de ahí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La estimación no baja del suelo ni sube del techo",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara hueco: nada en la batería verifica el suelo ni el techo de la estimación, que es donde una media móvil se va de madre. El mismo caso cubre el criterio del techo."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una medida por encima del techo, cuando se incorpora, entonces el tramo estimado se queda en el techo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La estimación no baja del suelo ni sube del techo",
+      "hueco_de_bateria": true,
+      "nota": "Cubierto por el mismo caso que el suelo: son los dos extremos del mismo recorte."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una jugadora cuyo tramo acaba de bajar, cuando se recorren todos los textos que el núcleo puede producir, entonces ninguno menciona el tramo, ni su cambio, ni cuánto se ha andado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "El ajuste no se comenta nunca",
+      "escenario": "El ajuste no se comenta nunca",
+      "nota": "El escenario recorre pantallas, que es @app; la mitad de @nucleo es esta: se recogen todos los textos que exportan los módulos del paquete más los que salen de generar dos mundos, y ninguno menciona el tramo, el ritmo, la media hora ni una cifra de distancia o de tiempo."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el módulo del tramo, cuando se inspecciona su superficie pública, entonces no exporta ningún texto destinado a mostrarse dentro del juego.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "El módulo del tramo no exporta ningún texto destinado a mostrarse dentro del juego",
+      "hueco_de_bateria": true,
+      "nota": "Lo único que puede llevar prosa es la declaración del suelo, y se comprueba que declara su destino de fuera del juego."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el tramo estimado, cuando se busca dónde se expone, entonces ninguna consulta del núcleo devuelve su valor en metros a una capa de presentación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Ninguna consulta del núcleo devuelve el tramo en metros a una capa de presentación",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre lo que devuelven las dos consultas públicas —salidas dimensionadas y cupos— y sobre quién lee el tramo del personaje: solo módulos del área partida/."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el paquete, cuando se lee el suelo, entonces es una constante única de la que salen tanto el mínimo del tramo como el mínimo de la celda, y no hay dos números distintos que digan lo mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "El suelo es una constante única de la que salen el mínimo del tramo y el mínimo de la celda",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba además que el 250 solo está escrito a mano en un módulo del paquete."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado la declaración del suelo que consume la ficha de la tienda, cuando se lee, entonces dice el límite concreto y dice que por debajo de ahí no hay juego que montar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La declaración del suelo dice el límite y que por debajo no hay juego, y no promete nada sobre las cuestas",
+      "hueco_de_bateria": true,
+      "nota": "RNF-ACC-003 no tiene escenario y la spec lo declara: lo más cerca que se llega en automático es afirmar que la declaración existe en el paquete y qué dice. Que se lea antes de instalar es @manual y sigue sin caso."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado la misma declaración, cuando se lee, entonces no promete nada sobre las cuestas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La declaración del suelo dice el límite y que por debajo no hay juego, y no promete nada sobre las cuestas",
+      "hueco_de_bateria": true,
+      "nota": "Cubierto por el mismo caso: se afirma que habla de las cuestas para decir que no se prometen y que no promete manejarlas."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado cualquier texto que el núcleo produce para mostrarse dentro del juego, cuando se busca la declaración del suelo, entonces no aparece en ninguno: se dice antes de instalar y no dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La declaración del suelo se dice antes de instalar y no aparece en ningún texto de dentro del juego",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado cualquier texto que el núcleo produce para mostrarse dentro del juego, cuando se busca la palabra «accesibilidad», entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "La palabra «accesibilidad» no aparece en ningún texto que el núcleo produce",
+      "hueco_de_bateria": true,
+      "nota": "RNF-ACC-001 no tiene característica propia: la única aserción escrita de esto vive dentro de «El camino evitado se declara con nombre propio», que es de otra spec y de otro momento del juego. Esta prueba lo sostiene por el lado de los textos del núcleo."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un tramo en el suelo, cuando se dimensiona una celda y se calculan sus cupos, entonces salen el mínimo absoluto de núcleos y el suelo de parajes, y la celda sigue siendo jugable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Un tramo en el suelo dimensiona una celda jugable y una salida con los mismos beats",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre los cupos que esta fila entrega —hay al menos un núcleo de cada tipo y el cupo de parajes llega al suelo derivado—, no sobre el mundo generado con ellos: que el mundo mínimo componga un lazo depende de que los parajes honren el suelo, y eso es la fila 6."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un tramo en el suelo, cuando se dimensiona una salida de cualquier tamaño, entonces la salida se dimensiona igual que para cualquier otro tramo, con el mismo número de beats.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/tramo.test.mjs",
+      "caso": "Un tramo en el suelo dimensiona una celda jugable y una salida con los mismos beats",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado los tamaños de salida, cuando se enumeran, entonces son tres, cada uno con una palabra del mundo y su medida en tramos, y ninguno lleva metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Los tres tamaños de salida son palabras del mundo con su medida en tramos, sin metros",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara: nada en la batería verifica que las dos perillas estén separadas, que es su requisito más caro."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un tamaño de salida y un tramo, cuando se dimensiona la salida, entonces devuelve el número de tramos, el número de beats y los metros que le corresponden a ese tramo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Las tres salidas ofrecidas se dimensionan con el tramo de quien pregunta y se entregan congeladas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado dos jugadoras con tramos de 2 km y de 600 m, cuando cada una pide una salida de tamaño «paseo», entonces las dos salidas tienen el mismo número de beats.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Dos jugadores con tramos distintos reciben aventuras del mismo tamaño en pasos",
+      "escenario": "Dos jugadores con tramos distintos reciben aventuras del mismo tamaño en pasos",
+      "nota": "La mitad geométrica del escenario ya la afirma test/nucleo/rejilla.test.mjs, con el mismo nombre, sobre el tamaño de la celda: hasta esta fila no existía la de los beats."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado las mismas dos salidas, cuando se comparan sus metros, entonces la de 600 m mide aproximadamente la tercera parte de la otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Dos jugadores con tramos distintos reciben aventuras del mismo tamaño en pasos",
+      "escenario": "Dos jugadores con tramos distintos reciben aventuras del mismo tamaño en pasos",
+      "nota": "Es la segunda mitad del mismo escenario y va en el mismo caso."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una salida dimensionada, cuando se mira la separación entre dos beats consecutivos, entonces ninguna supera media hora al ritmo de esa jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Ninguna separación entre dos beats consecutivos supera media hora al ritmo de esa jugadora",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un tamaño de salida que no está en el catálogo, cuando se dimensiona, entonces falla enumerando los tres válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Un tamaño de salida fuera del catálogo falla enumerando los tres válidos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el dimensionado de una salida, cuando se le pasa un tramo ausente o no numérico, entonces falla nombrando el dato que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Dimensionar una salida con un tramo ausente o no numérico falla nombrando el dato que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el paquete entero, cuando se busca una función que reciba a la vez el tamaño de la celda y el tamaño de la salida como si fueran lo mismo, entonces no existe: son dos entradas distintas con dos nombres distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "No existe ninguna función que reciba el tamaño de la celda y el tamaño de la salida como si fueran lo mismo",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba sobre las firmas de todos los módulos del paquete, más que PRESETS no ha vuelto y que los dos catálogos no comparten ni un identificador."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado dos jugadores con tramos muy distintos, cuando los dos completan la misma aventura, entonces ninguna opción del catálogo da menos juego que otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salida.test.mjs",
+      "caso": "Avanza igual quien anda 6 km y quien anda 900 m",
+      "escenario": "Avanza igual quien anda 6 km y quien anda 900 m",
+      "nota": "No es un criterio literal de la spec: es la parte del escenario que esta fila puede sostener —las cuatro respuestas del arranque dan los mismos beats y los mismos tramos, y solo cambian los metros—. Que además suban lo mismo de rango es de la fila del rango social, que no existe."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda con su tamaño declarado en tramos, cuando se calculan sus cupos, entonces el cálculo depende del tamaño en tramos y nunca de un radio en metros absolutos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Los cupos de una celda dependen de su tamaño en tramos y no de un radio en metros absolutos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el catálogo de plantillas, cuando se cuentan las escenas distintas que piden sus roles y se dividen entre las escenas que lleva un paraje, entonces el suelo de parajes de cualquier celda es mayor o igual que ese cociente, redondeado hacia arriba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "El suelo de parajes cubre el vocabulario de escenas",
+      "escenario": "El suelo de parajes cubre el vocabulario de escenas",
+      "nota": "Solo la mitad que esta fila entrega: que el número salga bien del catálogo vivo (siete escenas entre dos por paraje, cuatro). Que los parajes generados lleguen a ese suelo es la fila 6 (SPEC-006), y por eso ningún caso de este fichero cuenta parajes generados."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un catálogo de plantillas que se ensancha con escenas nuevas, cuando se recalculan los cupos de una celda nueva, entonces el suelo de parajes sube solo, sin tocar ninguna constante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Un catálogo que se ensancha sube el suelo solo, sin tocar ninguna constante",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda pequeña con anclajes de sobra, cuando se calculan sus cupos, entonces el cupo de parajes queda entre el suelo derivado y el techo por ritmo, ambos incluidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "El cupo por ritmo es un techo, no un objetivo",
+      "escenario": "El cupo por ritmo es un techo, no un objetivo",
+      "nota": "El escenario mira los parajes generados, que es la fila 6; aquí se afirma sobre el número que se les pide, que es lo que entrega esta fila."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda cuyo techo por ritmo queda por debajo del suelo derivado, cuando se calculan sus cupos, entonces manda el suelo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Una celda cuyo techo por ritmo queda por debajo del suelo derivado se queda con el suelo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda grande, cuando se calculan sus cupos de parajes, entonces el techo satura y no crece indefinidamente con el tamaño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "El techo de parajes satura y no crece indefinidamente con el tamaño de la celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda dimensionada con el tramo de referencia, cuando se calculan sus cupos de núcleos, entonces coinciden con los que da hoy la tabla del prototipo para el radio equivalente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Los cupos de núcleos con el tramo de referencia coinciden con la tabla del prototipo",
+      "hueco_de_bateria": true,
+      "nota": "Se comparan contra countsForRadius del propio paquete en diecisiete radios, incluidos los dos escalones de por debajo de la tabla."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado los mismos parámetros de celda, cuando se calculan los cupos dos veces, entonces los dos resultados son idénticos y el cálculo no consume azar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Los cupos calculados dos veces son idénticos y el cálculo no consume azar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda ya generada, cuando se lee su registro, entonces sus cupos están guardados en él y no se vuelven a calcular al leerlos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Leer los cupos de una celda abierta no los recalcula",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara hueco: «Cambiar el tramo del jugador no redimensiona un mundo ya generado» comprueba el mundo byte a byte, que es la consecuencia, pero no que los cupos guardados no se recalculen."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un catálogo de plantillas vacío, cuando se calculan los cupos, entonces falla nombrando el catálogo en lugar de devolver un suelo de cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Un catálogo de plantillas vacío falla nombrando el catálogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una celda sin tamaño declarado, cuando se piden sus cupos, entonces falla nombrando el dato que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Una celda sin tamaño declarado falla nombrando el dato que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado un mundo generado con un tramo declarado de 2 km, cuando la jugadora cambia su tramo a 600 m, entonces el mundo sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado"
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el mismo cambio, cuando se leen los cupos de la celda ya generada, entonces son los que se congelaron al generarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "El escenario solo afirma el mundo; los cupos congelados se afirman en el mismo caso porque son el mismo cambio."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el mismo cambio, cuando se dimensionan las salidas que se ofrecen, entonces mandan a sitios más cercanos que antes del cambio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "Es el «Pero» del escenario: las aventuras que se ofrecen mandan a sitios más cercanos, con el mismo número de beats."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el mismo cambio, cuando se genera una celda nueva, entonces la celda nueva se dimensiona con el tramo nuevo, y la vieja sigue con el suyo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Una celda nueva se dimensiona con el tramo nuevo y la vieja sigue con el suyo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado una partida con celdas dimensionadas con tramos distintos, cuando se serializa y se vuelve a cargar, entonces cada celda conserva el tamaño y los cupos con los que se generó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "Las celdas conservan su tamaño y sus cupos al serializar y volver a cargar la partida",
+      "hueco_de_bateria": true,
+      "nota": "La partida se guarda y se carga de verdad —serialización completa y vuelta—, no se compara campo a campo."
+    },
+    {
+      "spec": "SPEC-004",
+      "criterio": "Dado el módulo de cupos, cuando se inspecciona quién lo llama, entonces solo se invoca al crear una celda, nunca al abrir una partida, al cambiar el tramo ni al pintar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cupos.test.mjs",
+      "caso": "El módulo de cupos solo se invoca al crear una celda",
+      "hueco_de_bateria": true
     }
   ]
 }
