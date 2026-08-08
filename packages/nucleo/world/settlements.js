@@ -8,8 +8,10 @@ import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { POI_LABELS, crearIndiceDeNombres } from '../names/index.js';
 import { comparaClaveOsm } from './osm.js';
 
-// Servicios de cada tipo de núcleo (fixed siempre; extra según tamaño).
-const SERVICES = {
+// Servicios de cada tipo de núcleo (fixed siempre; extra según tamaño). Exportada
+// para que `cupos.js` cuente servicios leyendo esta declaración en vez de copiarla:
+// dos tablas que dicen lo mismo se desincronizan a la primera.
+export const SERVICES = {
   ciudad: { fixed: ['posada', 'taberna', 'boticario', 'armeria', 'conjureria', 'mercado'], extra: [] },
   pueblo: { fixed: ['posada', 'taberna'], extra: ['boticario', 'armeria', 'conjureria', 'mercado'] },
   aldea: { fixed: ['taberna'], extra: ['posada', 'boticario'] },

@@ -99,7 +99,7 @@ function registra(mapa, registro) {
  * de datos falla, se propaga el error y **no queda ninguna celda a medias**: el
  * registro solo se toca cuando hay un mundo entero que registrar.
  */
-export async function abreCelda(mapa, celda, { motivo = 'pisada', consultaOsm, onStatus } = {}) {
+export async function abreCelda(mapa, celda, { motivo = 'pisada', consultaOsm, onStatus, tramoM } = {}) {
   exigeCelda(celda);
   const yaEstaba = celdaAbierta(mapa, celda);
   if (yaEstaba) return { registro: yaEstaba, generada: false };
@@ -112,6 +112,7 @@ export async function abreCelda(mapa, celda, { motivo = 'pisada', consultaOsm, o
     motivo,
     consultaOsm,
     onStatus,
+    tramoM,
   });
   return { registro: registra(mapa, registro), generada: true };
 }
@@ -123,13 +124,13 @@ export async function abreCelda(mapa, celda, { motivo = 'pisada', consultaOsm, o
  * cubre a quien vive pegado a un borde—. Si la posición no la contiene este mapa,
  * no se genera nada y se dice.
  */
-export async function pisa(mapa, lat, lon, { consultaOsm, onStatus } = {}) {
+export async function pisa(mapa, lat, lon, { consultaOsm, onStatus, tramoM } = {}) {
   const donde = resuelvePosicion(mapa, lat, lon);
   if (donde.estado === 'abierta') return { ...donde, registro: celdaAbierta(mapa, donde.celda), generada: false };
   if (donde.estado === 'fuera') {
     return { ...donde, registro: null, generada: false, mensaje: `ninguna celda de este mapa contiene esa posición (sería la ${donde.clave})` };
   }
-  const { registro, generada } = await abreCelda(mapa, donde.celda, { motivo: 'pisada', consultaOsm, onStatus });
+  const { registro, generada } = await abreCelda(mapa, donde.celda, { motivo: 'pisada', consultaOsm, onStatus, tramoM });
   return { ...donde, registro, generada };
 }
 
@@ -141,7 +142,7 @@ export async function pisa(mapa, lat, lon, { consultaOsm, onStatus } = {}) {
  * ejecuciones iguales. Si no queda ninguna vecina cerrada, no hay acontecimiento
  * que anunciar y no se genera nada.
  */
-export async function completaCelda(mapa, celda, { consultaOsm, onStatus } = {}) {
+export async function completaCelda(mapa, celda, { consultaOsm, onStatus, tramoM } = {}) {
   exigeCelda(celda);
   const cerradas = celdasContiguas(celda).filter((v) => !celdaAbierta(mapa, v));
   if (!cerradas.length) return { acontecimiento: false, registro: null, celda: null };
@@ -151,6 +152,6 @@ export async function completaCelda(mapa, celda, { consultaOsm, onStatus } = {})
   // Las contiguas llegan ya en orden canónico, así que el sorteo no depende de en
   // qué orden se abrieron las demás.
   const elegida = cerradas[Math.floor(rng() * cerradas.length)];
-  const { registro } = await abreCelda(mapa, elegida, { motivo: 'acontecimiento', consultaOsm, onStatus });
+  const { registro } = await abreCelda(mapa, elegida, { motivo: 'acontecimiento', consultaOsm, onStatus, tramoM });
   return { acontecimiento: true, registro, celda: elegida };
 }
