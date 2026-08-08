@@ -11358,6 +11358,69 @@
       "fichero": "test/nucleo/diario.test.mjs",
       "caso": "Un texto citado por varias entradas se guarda una sola vez y por su clave",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dada una partida en la que un desenlace entregó un objeto sin declarar su procedencia, cuando se congela el estado y se vuelve a levantar, entonces el sobre se escribe sin fallar y el objeto vuelve con su procedencia estructurada, su día y la bolsa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "Una partida en la que un desenlace entregó un objeto se congela y se levanta entera",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. Es el caso que habría cazado el defecto (a): las pruebas de la fila 15 llamaban a congelaObjetos directamente y se saltaban el sobre, que es donde chocaban los dos contratos de procedencia."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dada la repisa de una partida, cuando se congela por su cuenta, entonces no demuestra nada sobre el guardado: es el sobre quien valida contra el esquema cerrado y quien rechaza una procedencia que no sea la estructurada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "Congelar la repisa por su cuenta no demuestra que la partida se pueda guardar",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. Escrito como afirmación para que la lección de §6r quede en el código: probar la pieza no es probar el camino."
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado el día en que se obtuvo un objeto, cuando se construye un objeto persistente, entonces es el día del calendario de la partida —un entero no negativo, el mismo que cuenta el diario— y una fecha del reloj real se rechaza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "El día es un entero no negativo en los dos consumidores",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. El mismo caso cubre los dos consumidores a la vez —objetoPersistente y entradaDeDiario—, que es la única manera de que «un solo contrato» signifique algo: el defecto (b) era que cada uno lo declaraba por su cuenta. La otra mitad va declarada en la entrada de SPEC-016."
+    },
+    {
+      "spec": "SPEC-016",
+      "criterio": "Dado el día de una entrada del diario, cuando se apunta, entonces es un entero no negativo y el documento del estado lo declara igual que el día de un objeto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "El día es un entero no negativo en los dos consumidores",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. Segunda mitad del contrato del día: el mismo caso lo afirma en los dos consumidores. La primera va declarada en la entrada de SPEC-015."
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un mapa recién generado con su prólogo corrido, cuando se pregunta el rango de sus núcleos el día 1, entonces los diez están en el escalón de partida, porque nada de lo que se cuenta es de la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "Los diez núcleos amanecen en el escalón de partida el día 1",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. Cierra el defecto (c), que vivía entre SPEC-013 y SPEC-015: el prólogo siembra sucesos que llegan a todos y el rango los contaba sin mirar protagonista. La cifra sin filtrar —{forasteria: 0, nombradia: 9, pertenencia: 1}— se mide en el mismo caso, para que quitar el filtro lo ponga rojo en vez de dejarlo afirmando dos veces lo mismo."
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado ese mismo mapa, cuando la jugadora cierra una salida y la noticia viaja por las calzadas, entonces el rango sube donde ocurrió y en los núcleos a los que llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "El rango sube solo después de un desenlace de la jugadora",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. La otra mitad de (c): sin este caso, «el prólogo no sube el rango» se cumpliría también con un rango que no subiera nunca."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier fichero de packages/, cuando se leen sus bytes, entonces no contiene ningún byte NUL.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-completa.test.mjs",
+      "caso": "Ningún fichero de packages/ contiene un byte NUL",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6r). No sale de un criterio de la spec sino del entregable de B2 verificado a mano, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura porque una costura no es de nadie. Cierra el defecto (d): los NUL dentro de literales de plantilla de partida/rumores.js y partida/puestos.js hacían que file y grep tratasen los módulos como binarios, y ninguna prueba de comportamiento se pone roja por eso. Se comprueba el paquete entero y no los dos módulos donde apareció."
     }
   ]
 }

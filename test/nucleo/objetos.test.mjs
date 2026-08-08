@@ -67,8 +67,13 @@ function beatDeLlave({ tenencia = SIN_OBJETOS, objeto = 'paquete', siguienteBeat
   };
 }
 
+// El día de un objeto es **el del calendario de la partida**: un entero no negativo,
+// el mismo que cuenta el diario. Nunca una fecha del reloj real, que es lo que aquí
+// se escribía cuando `objetoPersistente` y `entradaDeDiario` tenían dos contratos
+// distintos del mismo dato.
+
 /** Una repisa con los objetos que se le pidan, todos del mismo día. */
-function repisaCon(objetos, dia = '2026-08-08') {
+function repisaCon(objetos, dia = 8) {
   const estado = estadoDeObjetos();
   for (const o of objetos) guarda(estado, { dia, ...o });
   return estado;
@@ -175,7 +180,7 @@ describe('Los objetos son llaves, no requisitos', () => {
     const repisa = repisaCon([
       { id: 'hebilla-de-laton', clase: 'recuerdo', procedencia: { desenlace: 'd1', lugar: 'A Furna' } },
       { id: 'paquete', clase: 'llave', procedencia: { desenlace: 'd2', lugar: 'Monfrida' } },
-    ], '2026-08-01');
+    ], 1);
 
     // Ni peso, ni huecos, ni manera de tirar nada.
     for (const objeto of objetosDe(repisa)) {
@@ -185,7 +190,7 @@ describe('Los objetos son llaves, no requisitos', () => {
       }
       // Y cada objeto dice de quién viene y de qué día.
       assert.ok(objeto.procedencia, `el objeto "${objeto.id}" no dice de dónde vino`);
-      assert.equal(objeto.dia, '2026-08-01');
+      assert.equal(objeto.dia, 1);
       assert.ok(CLASES_DE_OBJETO.includes(objeto.clase));
     }
     assert.deepEqual(CLASES_DE_OBJETO, ['llave', 'recuerdo']);
@@ -214,29 +219,29 @@ describe('Los objetos son llaves, no requisitos', () => {
   test('Un objeto que ya se tiene no se apila al volver a entregarlo', () => {
     const estado = { oro: estadoDeOro(), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
     const desenlace = { id: 'd1', objetos: [{ id: 'paquete', clase: 'llave' }] };
-    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace, dia: '2026-08-01' });
-    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { ...desenlace, id: 'd2' }, dia: '2026-09-30' });
+    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace, dia: 1 });
+    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { ...desenlace, id: 'd2' }, dia: 60 });
 
     const repisa = objetosDe(estado.objetos);
     assert.equal(repisa.length, 1, 'el objeto se ha apilado');
-    assert.equal(repisa[0].dia, '2026-08-01', 'la procedencia es la de la primera vez, que es de cuando viene');
+    assert.equal(repisa[0].dia, 1, 'la procedencia es la de la primera vez, que es de cuando viene');
     assert.equal(tieneObjeto(estado.objetos, 'paquete'), true);
   });
 
   test('Un objeto sin clase declarada falla nombrando el objeto', () => {
-    assert.throws(() => objetoPersistente({ id: 'llave-del-molino', dia: '2026-08-08' }), /"llave-del-molino"/);
-    assert.throws(() => objetoPersistente({ id: 'llave-del-molino', clase: 'reliquia', dia: '2026-08-08' }), /"llave-del-molino"/);
-    assert.throws(() => guarda(estadoDeObjetos(), { id: 'llave-del-molino', dia: '2026-08-08' }), /"llave-del-molino"/);
+    assert.throws(() => objetoPersistente({ id: 'llave-del-molino', dia: 8 }), /"llave-del-molino"/);
+    assert.throws(() => objetoPersistente({ id: 'llave-del-molino', clase: 'reliquia', dia: 8 }), /"llave-del-molino"/);
+    assert.throws(() => guarda(estadoDeObjetos(), { id: 'llave-del-molino', dia: 8 }), /"llave-del-molino"/);
     // Y no se supone que sea un recuerdo, que es lo que dejaría muda una llave.
     assert.throws(() => exigeClaseDeObjeto(undefined), /llave y recuerdo/);
   });
 
   test('Los objetos viajan con la jugadora al levantar otro mapa', () => {
     const estado = { oro: estadoDeOro(), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
-    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', objetos: [{ id: 'paquete', clase: 'llave' }] }, dia: '2026-08-01' });
+    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', objetos: [{ id: 'paquete', clase: 'llave' }] }, dia: 1 });
 
     // Se levanta otro mapa: la repisa no sabe de mapas, así que sigue entera.
-    cierraSalidaDeProgresion({ ...estado, mapaId: OTRO_MAPA, desenlace: { id: 'd2', objetos: [{ id: 'hebilla-de-laton', clase: 'recuerdo' }] }, dia: '2026-08-02' });
+    cierraSalidaDeProgresion({ ...estado, mapaId: OTRO_MAPA, desenlace: { id: 'd2', objetos: [{ id: 'hebilla-de-laton', clase: 'recuerdo' }] }, dia: 2 });
     assert.deepEqual(objetosDe(estado.objetos).map((o) => o.id), ['paquete', 'hebilla-de-laton']);
     assert.equal(tieneObjeto(estado.objetos, 'paquete'), true, 'levantar otro mapa ha confiscado un objeto');
     assert.equal(codigoDe(fuente('packages/nucleo/partida/objetos.js')).includes('mapaId'), false, 'la repisa se guarda por mapa');
@@ -268,8 +273,11 @@ describe('La procedencia de un objeto y su vuelta del documento', () => {
     // Sin día no se puede guardar, y el día no se lee dentro del núcleo.
     assert.throws(() => objetoPersistente({ id: 'paquete', clase: 'llave' }), /de qué día/);
     const estado = { oro: estadoDeOro(), objetos: estadoDeObjetos(), motes: estadoDeMotes() };
-    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', objetos: [{ id: 'paquete', clase: 'llave' }] }, dia: '2026-08-08' });
-    assert.equal(objetosDe(estado.objetos)[0].dia, '2026-08-08');
+    cierraSalidaDeProgresion({ ...estado, mapaId: MAPA, desenlace: { id: 'd1', objetos: [{ id: 'paquete', clase: 'llave' }] }, dia: 8 });
+    assert.equal(objetosDe(estado.objetos)[0].dia, 8);
+    // Y el día es un entero del calendario de la partida, no una fecha del reloj.
+    assert.equal(Number.isInteger(objetosDe(estado.objetos)[0].dia), true);
+    assert.throws(() => objetoPersistente({ id: 'paquete', clase: 'llave', dia: '2026-08-08' }), /entero no negativo/);
 
     for (const ruta of ['packages/nucleo/partida/objetos.js', 'packages/nucleo/partida/oro.js']) {
       const codigo = codigoDe(fuente(ruta));
@@ -290,7 +298,7 @@ describe('La procedencia de un objeto y su vuelta del documento', () => {
         lugar: { id: 'A Furna' },
         objetos: [{ id: 'hebilla-de-laton', clase: 'recuerdo' }, { id: 'paquete', clase: 'llave' }],
       },
-      dia: '2026-08-08',
+      dia: 8,
     });
 
     const doc = JSON.parse(JSON.stringify({ oro: congelaOro(estado.oro), objetos: congelaObjetos(estado.objetos) }));
@@ -301,7 +309,7 @@ describe('La procedencia de un objeto y su vuelta del documento', () => {
     assert.deepEqual(objetosDe(repisa), objetosDe(estado.objetos));
     for (const objeto of objetosDe(repisa)) {
       assert.deepEqual(objeto.procedencia, { desenlace: 'd1', plantilla: null, lugar: 'A Furna' }, `el objeto "${objeto.id}" ha perdido su procedencia`);
-      assert.equal(objeto.dia, '2026-08-08');
+      assert.equal(objeto.dia, 8);
     }
     // La repisa y la bolsa son estado guardado: no se derivan de nada.
     assert.ok(JSON.stringify(doc).includes('procedencia'));

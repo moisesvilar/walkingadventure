@@ -48,6 +48,53 @@ export function exigeClaseDeObjeto(clase, quien = 'la clase del objeto') {
 }
 
 /**
+ * Los tres campos de la procedencia, en orden declarado. **La procedencia es
+ * estructurada y no una frase**: RF-PROG-007 pide que cada objeto diga «de quién
+ * viene y de qué día», y con un texto libre el «de quién» habría que volver a
+ * sacarlo de la prosa cada vez que alguien quisiera preguntarlo.
+ */
+export const CAMPOS_DE_PROCEDENCIA = congelaHondo(['desenlace', 'plantilla', 'lugar']);
+
+/**
+ * La procedencia de un objeto, normalizada: **de qué desenlace, de qué plantilla y
+ * de qué lugar viene**, los tres declarados y ninguno deducido de un texto.
+ *
+ * Los tres pueden faltar por separado —un hallazgo sin plantilla es un caso real— y
+ * la procedencia entera puede ser nula, pero **lo que no se admite es otra forma**:
+ * una cadena suelta se rechaza nombrándola en lugar de colarse como procedencia, que
+ * es exactamente la costura por la que una partida perfectamente jugada no se podía
+ * congelar.
+ */
+export function procedenciaDeObjeto(procedencia, quien = 'la procedencia del objeto') {
+  if (procedencia == null) return null;
+  if (typeof procedencia !== 'object' || Array.isArray(procedencia)) {
+    throw new Error(
+      `${quien} llega como ${JSON.stringify(procedencia) ?? String(procedencia)}: la procedencia es estructurada ` +
+      `(${CAMPOS_DE_PROCEDENCIA.join(', ')}), y un texto suelto no dice de quién viene el objeto sin volver a leerlo`,
+    );
+  }
+  // Por claves ordenadas y no por el orden de llegada: el mensaje de error es parte
+  // del contrato y dos objetos con los mismos campos de más tienen que dar la misma
+  // frase.
+  const sobran = [];
+  for (const campo of Object.keys(procedencia).sort()) {
+    if (!CAMPOS_DE_PROCEDENCIA.includes(campo)) sobran.push(campo);
+  }
+  if (sobran.length) {
+    throw new Error(`${quien} declara ${sobran.map((k) => `"${k}"`).join(', ')}, que no está entre sus campos: los tres son ${CAMPOS_DE_PROCEDENCIA.join(', ')}`);
+  }
+  const suya = {};
+  for (const campo of CAMPOS_DE_PROCEDENCIA) {
+    const valor = procedencia[campo] ?? null;
+    if (valor !== null && (typeof valor !== 'string' || !valor)) {
+      throw new Error(`${quien} declara "${campo}" como ${JSON.stringify(valor) ?? String(valor)}: es el identificador de algo, o nada`);
+    }
+    suya[campo] = valor;
+  }
+  return suya;
+}
+
+/**
  * Un objeto persistente bien formado: su identidad, su clase, su procedencia y **el
  * día en que se obtuvo**.
  *
@@ -55,19 +102,25 @@ export function exigeClaseDeObjeto(clase, quien = 'la clase del objeto') {
  * que prohíbe leer el reloj del sistema en la generación, aplicada a un dato que sí
  * es del calendario. Sin él, RF-PROG-007 —«cada objeto dice de quién viene y de qué
  * día»— no se podría cumplir, así que su ausencia es un error y no un hueco.
+ *
+ * Y es **el día del calendario de la partida, un entero no negativo**: el mismo que
+ * cuenta el diario, porque el momento de este proyecto es día más paso y nunca una
+ * marca del reloj real. Con el día como texto convivían dos contratos del mismo dato
+ * en el mismo bloque, y el primero que cruzara de un lado al otro se rompía.
  */
 export function objetoPersistente({ id, clase, procedencia = null, dia }) {
   if (typeof id !== 'string' || !id) {
     throw new Error(`un objeto sin identidad no se puede guardar: llegó ${JSON.stringify(id) ?? String(id)}, y sin ella no se sabe qué puerta abre`);
   }
   const laClase = exigeClaseDeObjeto(clase, `la clase del objeto "${id}"`);
-  if (typeof dia !== 'string' || !dia) {
+  if (!Number.isInteger(dia) || dia < 0) {
     throw new Error(
-      `el objeto "${id}" no dice de qué día es: llegó ${JSON.stringify(dia) ?? String(dia)}. El día entra como argumento de quien cierra ` +
-      'la salida porque el núcleo no puede leer el reloj, y la repisa lo enseña',
+      `el objeto "${id}" no dice de qué día es: llegó ${JSON.stringify(dia) ?? String(dia)}. El día es el del calendario de la partida ` +
+      '—un entero no negativo, el mismo que cuenta el diario—, entra como argumento de quien cierra la salida porque el núcleo no ' +
+      'puede leer el reloj, y la repisa lo enseña',
     );
   }
-  return congelaHondo({ id, clase: laClase, procedencia, dia });
+  return congelaHondo({ id, clase: laClase, procedencia: procedenciaDeObjeto(procedencia, `la procedencia del objeto "${id}"`), dia });
 }
 
 /** Si se tiene un objeto. Es todo lo que el juego pregunta de una llave. */
@@ -85,7 +138,7 @@ function laRepisa(estado) {
 // El orden de la repisa es **declarado** —por día y, dentro del día, por identidad—
 // y nunca el de llegada: dos partidas que obtuvieran lo mismo en otro orden tienen
 // que enseñar la misma repisa.
-const porDiaYNombre = (a, b) => (a.dia !== b.dia ? (a.dia < b.dia ? -1 : 1) : a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+const porDiaYNombre = (a, b) => (a.dia !== b.dia ? a.dia - b.dia : a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 /**
  * Cómo quedaría la repisa al guardar un objeto, **sin tocar nada**. Existe para que

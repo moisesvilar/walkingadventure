@@ -46,6 +46,16 @@ export const ESQUEMA_HECHOS_DE_RUMOR = campos({
   fundidoCon: 'texto?',
 });
 
+/**
+ * La procedencia de un objeto persistente, tal como la deja la fila 15.
+ *
+ * Vive aquí por el mismo motivo que la de arriba —es esquema de documento y
+ * `objetos.js` no conoce el formato— y se exporta porque la citan el área de objetos
+ * del estado y la carga de `objeto-obtenido`, que son las dos caras del mismo dato:
+ * declararla dos veces es cómo el registro y el estado dejarían de decir lo mismo.
+ */
+export const ESQUEMA_PROCEDENCIA_DE_OBJETO = uno(['nulo', campos({ desenlace: 'texto?', plantilla: 'texto?', lugar: 'texto?' })]);
+
 // --- El catálogo, declarado por área ----------------------------------------
 //
 // La alternativa —enumerar aquí los campos de todos los hechos de todas las filas—
@@ -111,10 +121,11 @@ declaraTiposDeHecho('npcs', {
 });
 
 declaraTiposDeHecho('objetos', {
-  // `diaDeRepisa` es el día con el que la fila 15 enseña un objeto y es un texto
-  // suyo; se nombra distinto del `dia` del hecho a propósito, porque no son lo mismo
-  // y compartir nombre invitaría a derivar uno del otro.
-  'objeto-obtenido': campos({ id: 'texto', clase: 'texto', procedencia: 'texto?', diaDeRepisa: 'texto' }),
+  // `diaDeRepisa` es el día con el que la fila 15 enseña un objeto. Es del mismo
+  // calendario que el `dia` del hecho —día de partida, entero no negativo, nunca una
+  // marca del reloj— y se sigue nombrando distinto a propósito: son dos datos que
+  // pueden no coincidir, y compartir nombre invitaría a derivar uno del otro.
+  'objeto-obtenido': campos({ id: 'texto', clase: 'texto', procedencia: ESQUEMA_PROCEDENCIA_DE_OBJETO, diaDeRepisa: 'entero' }),
 });
 
 declaraTiposDeHecho('diario', {

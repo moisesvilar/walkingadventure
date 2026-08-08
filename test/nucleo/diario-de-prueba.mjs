@@ -116,9 +116,24 @@ export function hechoDeCaraConocida({ mapa = MAPA, dia = 1, paso = 1, sitio = 'M
   return { tipo: 'cara-conocida', mapa, dia, paso, carga: { sitio, puesto } };
 }
 
-/** Un hecho de objeto obtenido, que es lo que devuelve la repisa al reconstruir. */
-export function hechoDeObjeto({ mapa = MAPA, dia = 1, paso = 1, id = 'farol-de-la-ermita', clase = 'recuerdo' } = {}) {
-  return { tipo: 'objeto-obtenido', mapa, dia, paso, carga: { id, clase, procedencia: 'Monfrida', diaDeRepisa: 'día 1' } };
+/**
+ * Un hecho de objeto obtenido, que es lo que devuelve la repisa al reconstruir.
+ *
+ * La procedencia es **estructurada** —`{ desenlace, plantilla, lugar }`, la misma
+ * declaración que usan `objetos.js` y el esquema del estado— y el día de la repisa es
+ * el entero del calendario de la partida. Es el único contrato que hay de las dos
+ * cosas: una cadena suelta aquí era el hecho que el registro no podía escribir.
+ */
+export function hechoDeObjeto({
+  mapa = MAPA,
+  dia = 1,
+  paso = 1,
+  id = 'farol-de-la-ermita',
+  clase = 'recuerdo',
+  procedencia = { desenlace: 'd1', plantilla: null, lugar: 'Monfrida' },
+  diaDeRepisa = 1,
+} = {}) {
+  return { tipo: 'objeto-obtenido', mapa, dia, paso, carga: { id, clase, procedencia, diaDeRepisa } };
 }
 
 /**
