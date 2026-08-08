@@ -1,5 +1,7 @@
 // El rango social de un núcleo: tres escalones con nombre, sin un solo número, y
-// **derivados de lo que ese sitio ha oído** en lugar de guardados.
+// **derivados de lo que ese sitio ha oído de ti** en lugar de guardados. De ti, y no
+// de cualquier cosa: lo que el pueblo ya contaba antes de que llegaras no dice nada
+// de quién eres, y contarlo dejaba la partida empezada el día 1.
 //
 // De ahí sale la propiedad que esta fila afirma en voz alta y que es lo más fácil
 // de romper: **aquí no baja nada, y no porque un guardián lo vigile**. El rango es
@@ -16,6 +18,7 @@
 // baja porque el mundo avance—.
 
 import { congelaHondo } from '../core/congelar.js';
+import { PROTAGONISTAS } from './deformacion.js';
 import { loQueSeCuentaEn } from './nucleos.js';
 import { exigeMapaId } from './pasos.js';
 
@@ -163,9 +166,23 @@ export function exigeMapaDeNucleos(mapa, quien = 'el rango de un núcleo') {
 }
 
 /**
- * Cuántos rumores distintos han llegado a un núcleo. **No sale de esta capa**: es la
- * entrada del cálculo y no un dato que nadie pueda pintar, por el mismo argumento
- * con el que SPEC-011 no expone el contador de pasos.
+ * Cuántos rumores distintos **de la jugadora** han llegado a un núcleo. **No sale de
+ * esta capa**: es la entrada del cálculo y no un dato que nadie pueda pintar, por el
+ * mismo argumento con el que SPEC-011 no expone el contador de pasos.
+ *
+ * El filtro por protagonista es la misma cautela que SPEC-014 cerró para el hito de
+ * fin de arranque, y hace falta por lo mismo: los sucesos del prólogo llegan a todos
+ * los núcleos antes de que la jugadora haga nada, así que sin mirar de quién se
+ * habla los diez pueblos amanecerían en nombradía o pertenencia el día 1. Eso choca
+ * de frente con `progresion.md` §1 —«un pueblo al que no llega nada **tuyo** te
+ * sigue tratando de forastera»— y con el arranque, que dedica un documento entero a
+ * que el juego no esté en su punto más rico justo antes de jugarlo.
+ *
+ * Se lee de **la versión que ese núcleo oyó** y no del registro de rumores, porque
+ * el rango es lo que ese pueblo piensa y el pueblo solo tiene lo que le contaron: si
+ * lo que llegó atribuye el suceso a otro, allí no te conocen por él. Y sigue sin
+ * poder bajar, que es la propiedad de esta capa: lo sedimentado no se reescribe, así
+ * que el recuento filtrado solo crece.
  */
 function cuantosHanLlegado(nucleos, { mapaId, nucleo }) {
   const versiones = loQueSeCuentaEn(nucleos, { mapaId, nucleo });
@@ -174,7 +191,17 @@ function cuantosHanLlegado(nucleos, { mapaId, nucleo }) {
   // una segunda versión del mismo rumor, contarla dos veces subiría el rango sin que
   // llegara nada nuevo.
   const vistos = [];
-  for (const v of versiones) if (!vistos.includes(v.rumor)) vistos.push(v.rumor);
+  for (const v of versiones) {
+    const quien = v?.hechos?.protagonista?.tipo;
+    if (typeof quien !== 'string' || !quien) {
+      throw new Error(
+        `lo que se cuenta del rumor "${v?.rumor ?? '(sin identidad)'}" en "${nucleo}" no declara protagonista: ` +
+        'sin él no se puede saber si se habla de la jugadora, y suponer que sí subiría el rango con lo que contó el prólogo',
+      );
+    }
+    if (quien !== PROTAGONISTAS.JUGADORA) continue;
+    if (!vistos.includes(v.rumor)) vistos.push(v.rumor);
+  }
   return vistos.length;
 }
 

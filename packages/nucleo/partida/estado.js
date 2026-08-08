@@ -43,7 +43,7 @@ import {
   texto as textoCanonico,
   uno,
 } from './formato.js';
-import { ESQUEMA_HECHOS_DE_RUMOR, tiposDelArea } from './hechos.js';
+import { ESQUEMA_HECHOS_DE_RUMOR, ESQUEMA_PROCEDENCIA_DE_OBJETO, tiposDelArea } from './hechos.js';
 import { congelaMemorias, estadoDeMemorias, levantaMemorias } from './memoria.js';
 import { congelaMotes, estadoDeMotes, levantaMotes } from './motes.js';
 import { congelaNpcs, estadoDeNpcs, levantaNpcs } from './npcs.js';
@@ -150,8 +150,12 @@ const AREA_ARRANQUE = campos({
 
 const AREA_ORO = campos({ saldo: 'entero' });
 
+// La procedencia sale estructurada de `objetos.js` y el día es el del calendario de
+// la partida, entero: el esquema lo dice igual que la carga del hecho equivalente,
+// desde la misma declaración. Que aquí pusiera `texto?` y allí un objeto es lo que
+// impedía congelar una partida en la que un desenlace había entregado algo.
 const AREA_OBJETOS = campos({
-  objetos: lista(campos({ id: 'texto', clase: 'texto', procedencia: 'texto?', dia: 'texto' })),
+  objetos: lista(campos({ id: 'texto', clase: 'texto', procedencia: ESQUEMA_PROCEDENCIA_DE_OBJETO, dia: 'entero' })),
 });
 
 /**

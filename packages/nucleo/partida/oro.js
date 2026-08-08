@@ -107,8 +107,8 @@ export function cobra(estado, { precio, quien }) {
  *   —los motes son suyos, la bolsa y la repisa no—; `desenlace` lo que SPEC-010
  *   entrega al terminar una aventura, con lo que la plantilla declare; `rumor` la
  *   identidad del rumor que acaba de nacer, o `null` si no ha nacido ninguno; `dia`
- *   el día del calendario, que **llega como argumento** porque el núcleo no lee el
- *   reloj.
+ *   el día del calendario de la partida —entero no negativo, el mismo que cuenta el
+ *   diario—, que **llega como argumento** porque el núcleo no lee el reloj.
  */
 export function cierraSalidaDeProgresion({ oro, objetos, motes, mapaId, desenlace, rumor = null, dia = null }) {
   if (!desenlace || typeof desenlace !== 'object') {

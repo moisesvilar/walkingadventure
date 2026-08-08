@@ -167,7 +167,7 @@ export function claveDeCara(cara) {
 
 /** La cara que hay detrás de una clave. Es la inversa exacta de `claveDeCara`. */
 export function caraDeClave(clave) {
-  const i = typeof clave === 'string' ? clave.indexOf(' ') : -1;
+  const i = typeof clave === 'string' ? clave.indexOf(SEPARADOR_DE_CLAVE) : -1;
   if (i < 0) {
     throw new Error(`${JSON.stringify(clave) ?? String(clave)} no es la clave de una cara: se espera lo que devuelve claveDeCara({ sitio, puesto })`);
   }
