@@ -1252,3 +1252,46 @@ Era uno de los quince huecos de cobertura que el PRD dejó marcados. `docs/testi
 `bash scripts/qa-tester-run.sh SUITE` → **PASS, 276 de 276**, report en `test/reports/SUITE-run-20260808T013508Z.md`. `node test/headless.mjs` en verde. `node test/casting-report.mjs` ejecutado contra los cuatro mundos reales con Overpass local: Sanxenxo 6/6, Toledo 5/6, Madrid 6/6, A Coruña 6/6. `verifica-gherkin` (34 características, 177 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde.
 
 **Lo que no se pudo verificar: nada de nivel `@app`.** Maestro no está instalado en esta máquina, así que ningún flujo de simulador se ejecutó. El report lo registra como infraestructura ausente y nunca como verde, que era justamente el punto.
+
+# 8 de agosto de 2026 — B1 cerrado
+
+Las ocho filas de **B1 · El núcleo portado** quedan en `done`. La suite pasa de no existir a **441 casos, 438 en verde, 0 rojos, 3 saltados**. El entregable que el PRD pedía para el bloque —«`headless` y `casting-report` en verde sobre el paquete nuevo, con celdas y tramos»— está verificado: `test/headless.mjs` en verde y el informe de casting en **131 de 132**, con los cuatro mundos reales (Sanxenxo, Toledo, Madrid centro, A Coruña) a **6/6**.
+
+## La medida que importa
+
+La casteabilidad agregada sobre los ocho extractos de referencia es la salud del generador, y es una de las cuatro cosas que este proyecto sí mide. Su trayectoria:
+
+**21/48 al empezar → 17/48 → 24/48 → 30/48 → 32/48.**
+
+El 17 es una regresión que introdujo la primera entrega de la fila 5 y que se corrigió por iteración: los topes de diversidad recortaban el pool en la **admisión** y estrangulaban mundos pequeños — `costero` pasaba de 45 anclajes a 26. Moverlos al **reparto**, donde solo actúan cuando sobra pool, devolvió el 24. El salto a 30 es la fila 6, y a 32 la 7.
+
+## El mundo mínimo, que era el agujero
+
+`barrio-tres-calles` y `suelo-250m` **no casteaban ni una plantilla con lazo cerrado**. El escenario «El mundo mínimo todavía compone un lazo» llevaba tres filas muerto y se reatribuyó dos veces, porque el cupo de parajes salía de una tabla por radio —el techo por ritmo— y **el suelo derivado del catálogo no lo consumía nadie**.
+
+Lo cierra la fila 6, invirtiendo el orden de generación: primero los tipos que cubren el vocabulario de escenas, después el anclaje, sacrificándolo sin cambiar el tipo. Hoy `barrio-tres-calles` castea 1/6 y `suelo-250m` 3/6, con lazo cerrado.
+
+## La forma de fallo que salió cuatro veces
+
+Merece nombre porque es la lección del bloque: **una pieza que, al no estar, no protesta.**
+
+- El validador del mapa **salía 0 sin validar nada** cuando su ruta pasaba por un enlace simbólico.
+- El runner **daba PASS con una prueba en rojo** si heredaba `NODE_TEST_CONTEXT`.
+- `generateParajes` **asumía suelo cero** cuando no le inyectaban el vocabulario, sin distinguirlo de un vocabulario vacío legítimo.
+- `buildRoutes` aceptaba **una lista de vías o un grafo** en el mismo parámetro, así que pasarle lo viejo degradaba en silencio. Ese último causó el mismo bug **tres veces** —el `fetchData` de la app, y los dos helpers de pruebas—, y la tercera destapó una regresión real: `crossingCandidates` definía cruce como «punto compartido por dos calzadas», que solo funciona con un grafo pobre.
+
+Las cuatro se cerraron por contrato y no por vigilancia: la cosa exigida, y su ausencia error de construcción. Es el mismo criterio que SPEC-007 aplica a la marca de suposición, y por la misma razón — con un campo opcional, «perderlo» y «no haberlo tenido nunca» son indistinguibles.
+
+## ~~RF-INFRA-007 sin escenarios~~ → hecho
+
+El andamiaje que sostiene las 441 pruebas era la única pieza del repo sin criterios escritos antes que su código: su ancla era una lista de viñetas, no Gherkin. Ahora son dos características y diez escenarios, derivados de los dos defectos que la iteración de la fila 1 tuvo que corregir. Con los tres de la semilla (RF-MUNDO-002), la batería pasa de 174 a **183 casos ejecutables**.
+
+## Lo que queda declarado y sin resolver
+
+- **4 de 16 lazos no se entregan** bajo el filtro de accesibilidad, porque un tramo difícil no tiene nombre en el grafo. Es lo que la spec exige —antes fallar que declarar un camino anónimo— y la solución, nombrar todo tramo difícil al generar, es deuda de la fila 7.
+- **El criterio de bordillos no está verificado sobre dato real**: los cuatro fixtures se capturaron pidiendo solo ways y no traen ni un nodo de bordillo. Probado con datos sintéticos, y con un caso que se pondrá rojo el día que alguien los recapture.
+- **`test/app/` sigue vacío.** Maestro ya está instalado (2.8.0, con la analítica desactivada), pero ninguna spec de B1 ha pedido un flujo de simulador: son todas de núcleo. El primer `@app` llegará con B4.
+
+## Verificado con
+
+`bash scripts/qa-tester-run.sh SPEC-008` → PASS, 441 casos, 438 pasan, 0 fallan, 3 saltados (`test/reports/SPEC-008-run-20260808T104759Z.md`). `node test/headless.mjs` → Todo OK. `node test/casting-report.mjs` contra el Overpass local → 131/132, los cuatro mundos reales a 6/6. `verifica-gherkin` (35 características, 183 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde.
