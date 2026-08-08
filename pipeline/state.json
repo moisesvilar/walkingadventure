@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-007",
-  "fase": "pending",
+  "spec_actual": "SPEC-008",
+  "fase": "dev",
   "iteracion": 0,
   "historial": [
     {
@@ -72,6 +72,16 @@
       "casos": "361 casos: 358 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio",
       "nota": "cierra el mundo minimo. barrio-tres-calles 1/6 y suelo-250m 2/6 con lazo cerrado, viniendo de cero. Casteabilidad 24/48 -> 30/48. El escenario 'El mundo minimo todavia compone un lazo' queda vivo tras tres filas atascado."
+    },
+    {
+      "spec": "SPEC-007",
+      "slug": "grafo-cosido-ramales",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-007-run-20260808T095414Z.md",
+      "casos": "415 casos: 412 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio",
+      "nota": "la sesion se corto a mitad por caducidad de sesion y se retomo sobre trabajo sin validar. Destapo la degradacion silenciosa del grafo (decisiones 6h) y una regresion real en crossingCandidates. Casteabilidad 30/48 -> 32/48."
     }
   ],
   "bloqueos": [],

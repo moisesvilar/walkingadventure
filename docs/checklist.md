@@ -12,8 +12,8 @@
 | 4 | tramo-personal | RF-PJ-004, RF-MUNDO-007, RNF-ACC-001, RNF-ACC-003 | must | done |
 | 5 | pool-anclajes-filtros | RF-MUNDO-006, RF-MUNDO-009, RF-MUNDO-010, RF-MUNDO-011 | must | done |
 | 6 | parajes-cobertura-escenas | RF-MUNDO-007, RF-MUNDO-008 | must | done |
-| 7 | grafo-cosido-ramales | RF-MUNDO-013, RF-MUNDO-014 | must | wip |
-| 8 | filtro-accesibilidad-grafo | RF-MUNDO-017 | must | pending |
+| 7 | grafo-cosido-ramales | RF-MUNDO-013, RF-MUNDO-014 | must | done |
+| 8 | filtro-accesibilidad-grafo | RF-MUNDO-017 | must | wip |
 
 ## B2 · El mundo vivo
 
