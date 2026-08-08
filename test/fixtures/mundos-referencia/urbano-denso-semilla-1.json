@@ -1,0 +1,354 @@
+{
+  "cabecera": {
+    "mundo_congelado": "urbano-denso",
+    "semilla": "40.42,-3.70#1",
+    "revision_prototipo": "07f1c41",
+    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
+    "regenerado_por": "SPEC-002-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-002-iter-1: la entrada de datos del núcleo pasa a ordenarse por la clave estable de OSM y la unicidad de nombre pasa a ser del mundo entero, así que los mundos generados cambian."
+  },
+  "titulo": "Marcas de Kaelun",
+  "idioma": "es",
+  "radio_dibujo_m": 1200,
+  "recuentos": {
+    "nucleos": 7,
+    "servicios": 13,
+    "parajes": 5,
+    "calzadas": 9
+  },
+  "nucleos": [
+    {
+      "nombre": "Torrelira",
+      "tipo": "aldea",
+      "x": -202,
+      "y": 549,
+      "anclaje": "way/376246107"
+    },
+    {
+      "nombre": "Vegalor",
+      "tipo": "aldea",
+      "x": 845,
+      "y": 273,
+      "anclaje": "node/9066413403"
+    },
+    {
+      "nombre": "Ribadora",
+      "tipo": "ciudad",
+      "x": -711,
+      "y": 170,
+      "anclaje": "node/623776661"
+    },
+    {
+      "nombre": "Granja de los Cuervos",
+      "tipo": "granja",
+      "x": -411,
+      "y": -144,
+      "anclaje": "node/2696236506"
+    },
+    {
+      "nombre": "Granja de los Manzanos",
+      "tipo": "granja",
+      "x": -335,
+      "y": -590,
+      "anclaje": "way/690830070"
+    },
+    {
+      "nombre": "Granja de los Tres Robles",
+      "tipo": "granja",
+      "x": -6,
+      "y": 1094,
+      "anclaje": "node/2583985475"
+    },
+    {
+      "nombre": "Albalor del Roble",
+      "tipo": "pueblo",
+      "x": 271,
+      "y": -265,
+      "anclaje": "node/2723834809"
+    }
+  ],
+  "servicios": [
+    {
+      "nombre": "Forja del Zorro Astuto",
+      "tipo": "armeria",
+      "x": -759,
+      "y": 106,
+      "anclaje": "node/9595953054"
+    },
+    {
+      "nombre": "Botica del Caldero Plateado",
+      "tipo": "boticario",
+      "x": -690,
+      "y": 107,
+      "anclaje": "node/9595953061"
+    },
+    {
+      "nombre": "Botica del Roble Encantado",
+      "tipo": "boticario",
+      "x": -195,
+      "y": 578,
+      "anclaje": "node/4699185075"
+    },
+    {
+      "nombre": "Arcana de la Espada Risueña",
+      "tipo": "conjureria",
+      "x": -762,
+      "y": 238,
+      "anclaje": "node/6895672176"
+    },
+    {
+      "nombre": "Mercado del Gato Dorado",
+      "tipo": "mercado",
+      "x": 256,
+      "y": -315,
+      "anclaje": "node/13429616602"
+    },
+    {
+      "nombre": "Mercado del Yunque Alegre",
+      "tipo": "mercado",
+      "x": -626,
+      "y": 201,
+      "anclaje": "node/4671064646"
+    },
+    {
+      "nombre": "Posada de la Espada Errante",
+      "tipo": "posada",
+      "x": 262,
+      "y": -267,
+      "anclaje": "node/2723834799"
+    },
+    {
+      "nombre": "Posada de la Luna Roja",
+      "tipo": "posada",
+      "x": -330,
+      "y": -587,
+      "anclaje": "way/690830069"
+    },
+    {
+      "nombre": "Posada de la Rosa Dormida",
+      "tipo": "posada",
+      "x": -712,
+      "y": 170,
+      "anclaje": "way/1042066798"
+    },
+    {
+      "nombre": "Taberna de la Estrella Errante",
+      "tipo": "taberna",
+      "x": 313,
+      "y": -273,
+      "anclaje": "node/4975520980"
+    },
+    {
+      "nombre": "Taberna de la Luna Risueña",
+      "tipo": "taberna",
+      "x": -690,
+      "y": 232,
+      "anclaje": "node/6895672170"
+    },
+    {
+      "nombre": "Taberna del Yunque Alegre",
+      "tipo": "taberna",
+      "x": -179,
+      "y": 547,
+      "anclaje": "node/2694514295"
+    },
+    {
+      "nombre": "Taberna del Zorro Risueño",
+      "tipo": "taberna",
+      "x": 908,
+      "y": 282,
+      "anclaje": "way/1346140195"
+    }
+  ],
+  "parajes": [
+    {
+      "nombre": "El Cruce de los Juramentos",
+      "tipo": "cruce",
+      "x": -308,
+      "y": -355,
+      "anclaje": null
+    },
+    {
+      "nombre": "La Encrucijada del Mercader",
+      "tipo": "cruce",
+      "x": 225,
+      "y": 356,
+      "anclaje": null
+    },
+    {
+      "nombre": "El Santuario Blanco",
+      "tipo": "ermita",
+      "x": -842,
+      "y": 583,
+      "anclaje": "node/12902402681"
+    },
+    {
+      "nombre": "La Fuente de los Deseos",
+      "tipo": "fuente",
+      "x": -400,
+      "y": -263,
+      "anclaje": "node/11282154335"
+    },
+    {
+      "nombre": "La Torre de los Ecos",
+      "tipo": "ruina",
+      "x": 400,
+      "y": 563,
+      "anclaje": "node/4185299207"
+    }
+  ],
+  "calzadas": [
+    {
+      "nombre": "El Camino de Albalor del Roble",
+      "tipo": "calzada",
+      "desde": [
+        -335,
+        -590
+      ],
+      "hasta": [
+        271,
+        -265
+      ],
+      "puntos": 76,
+      "recta": false
+    },
+    {
+      "nombre": "El Camino de la Solana",
+      "tipo": "calzada",
+      "desde": [
+        -711,
+        170
+      ],
+      "hasta": [
+        -411,
+        -144
+      ],
+      "puntos": 31,
+      "recta": false
+    },
+    {
+      "nombre": "El Camino del Nordeste",
+      "tipo": "calzada",
+      "desde": [
+        -711,
+        170
+      ],
+      "hasta": [
+        -202,
+        549
+      ],
+      "puntos": 66,
+      "recta": false
+    },
+    {
+      "nombre": "El Paso del Norte",
+      "tipo": "calzada",
+      "desde": [
+        -202,
+        549
+      ],
+      "hasta": [
+        -6,
+        1094
+      ],
+      "puntos": 119,
+      "recta": false
+    },
+    {
+      "nombre": "La Calzada del Sur",
+      "tipo": "calzada",
+      "desde": [
+        -411,
+        -144
+      ],
+      "hasta": [
+        -335,
+        -590
+      ],
+      "puntos": 77,
+      "recta": false
+    },
+    {
+      "nombre": "La Vieja Ruta de Levante",
+      "tipo": "calzada",
+      "desde": [
+        -202,
+        549
+      ],
+      "hasta": [
+        845,
+        273
+      ],
+      "puntos": 89,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -400,
+        -263
+      ],
+      "hasta": [
+        -308,
+        -355
+      ],
+      "puntos": 22,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -842,
+        583
+      ],
+      "hasta": [
+        -793,
+        562
+      ],
+      "puntos": 9,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        400,
+        563
+      ],
+      "hasta": [
+        349,
+        603
+      ],
+      "puntos": 2,
+      "recta": false
+    }
+  ],
+  "casting": [
+    {
+      "plantilla": "cita-en-la-fuente",
+      "castea": true
+    },
+    {
+      "plantilla": "entrega-sospechosa",
+      "castea": true
+    },
+    {
+      "plantilla": "peregrinaje",
+      "castea": true
+    },
+    {
+      "plantilla": "rescate-en-la-granja",
+      "castea": true
+    },
+    {
+      "plantilla": "ronda-del-vigia",
+      "castea": true
+    },
+    {
+      "plantilla": "tres-pistas",
+      "castea": true
+    }
+  ]
+}

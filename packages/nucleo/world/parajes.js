@@ -10,6 +10,8 @@ import { dist, pointPolylineDist, segIntersect, polygonBBox } from '../core/geo.
 import { isSea } from './seamask.js';
 import { makeRng, pick, shuffle } from '../core/rng.js';
 import { footprintRadius } from './settlements.js';
+import { comparaClaveOsm } from './osm.js';
+import { crearIndiceDeNombres } from '../names/index.js';
 
 // Tipos cuyo emplazamiento sale de un anclaje real; cruce y puente se derivan del grafo.
 export const ANCHORED_TYPES = ['ruina', 'piedra', 'ermita', 'fuente', 'atalaya', 'monasterio'];
@@ -73,7 +75,10 @@ function crossingCandidates(routes, settlements, radius) {
 
   const minSettDist = (p) => Math.min(Infinity, ...settlements.map((s) => dist(p, s)));
   const byPair = new Map();
-  for (const { p, routes: rs } of byKey.values()) {
+  // Por clave y no por orden de inserción: de este recorrido sale qué punto
+  // representa a cada par de calzadas, que es una decisión de generación.
+  const puntos = [...byKey.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([, v]) => v);
+  for (const { p, routes: rs } of puntos) {
     if (rs.size < 2) continue;
     const ids = [...rs].sort((a, b) => a - b);
     for (let i = 0; i < ids.length - 1; i++) {
@@ -88,7 +93,7 @@ function crossingCandidates(routes, settlements, radius) {
 
   const sep = Math.max(150, radius * 0.1);
   const out = [];
-  for (const { p, d } of [...byPair.values()].sort((a, b) => b.d - a.d)) {
+  for (const { p, d } of [...byPair.values()].sort((a, b) => b.d - a.d || (key(a.p) < key(b.p) ? -1 : 1))) {
     if (d < 80) continue; // pegado a un núcleo: no es un cruce "en despoblado"
     if (out.every((c) => dist(c, p) >= sep)) out.push({ x: p.x, y: p.y, type: 'cruce' });
   }
@@ -105,11 +110,11 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
     for (let i = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1];
       const bb = { minX: Math.min(a.x, b.x), maxX: Math.max(a.x, b.x), minY: Math.min(a.y, b.y), maxY: Math.max(a.y, b.y) };
-      for (const river of rivers) {
-        const rb = polygonBBox(river);
+      for (const { pts: cauce } of rivers) {
+        const rb = polygonBBox(cauce);
         if (rb.minX > bb.maxX || rb.maxX < bb.minX || rb.minY > bb.maxY || rb.maxY < bb.minY) continue;
-        for (let j = 0; j < river.length - 1; j++) {
-          const hit = segIntersect(a, b, river[j], river[j + 1]);
+        for (let j = 0; j < cauce.length - 1; j++) {
+          const hit = segIntersect(a, b, cauce[j], cauce[j + 1]);
           if (!hit) continue;
           if (settlements.some((s) => dist(hit, s) < 80)) continue;
           if (out.every((c) => dist(c, hit) >= sep)) out.push({ x: hit.x, y: hit.y, type: 'puente' });
@@ -124,8 +129,9 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
  * freeAnchors: POIs reales no consumidos por núcleos/servicios.
  * settlements, routes, geo, radius, seaMask: mundo ya generado.
  * names: paquete de nombres del idioma del mundo.
+ * indice: índice de nombres del mundo, compartido con las demás familias.
  */
-export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names) {
+export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres()) {
   const rng = makeRng(seedStr + ':parajes');
   const target = parajeCountForRadius(radius);
   const routePls = routes.filter((r) => !r.fallback).map((r) => r.pts);
@@ -142,7 +148,8 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
       const dRoute = routePls.length ? Math.min(...routePls.map((pts) => pointPolylineDist(a, pts))) : Infinity;
       return { a, score: (dRoute < 100 ? 2 : dRoute < 300 ? 1 : 0) + rng() * 0.8 };
     })
-    .sort((x, y) => y.score - x.score);
+    // el empate lo rompe la clave estable de OSM, nunca el orden de llegada
+    .sort((x, y) => y.score - x.score || comparaClaveOsm(x.a.osmId, y.a.osmId));
 
   // Candidatos del grafo (colchón garantizado sin Overpass).
   const graphCands = shuffle(rng, [
@@ -176,7 +183,7 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   for (const { a } of scored) {
     if (placed.length >= target - graphFloor) break;
     const type = nextType(BIAS[a.kind]);
-    tryPlace(a, type, { name: a.name, kind: a.kind }, 'anclaje');
+    tryPlace(a, type, { name: a.name, kind: a.kind, osmId: a.osmId ?? null }, 'anclaje');
   }
 
   // 2) cruces/puentes del grafo hasta completar el cupo
@@ -189,18 +196,13 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   for (const { a } of scored) {
     if (placed.length >= target) break;
     if (placed.some((p) => p.real && p.x === a.x && p.y === a.y)) continue;
-    tryPlace(a, nextType(BIAS[a.kind]), { name: a.name, kind: a.kind }, 'anclaje');
+    tryPlace(a, nextType(BIAS[a.kind]), { name: a.name, kind: a.kind, osmId: a.osmId ?? null }, 'anclaje');
   }
 
-  // nombres únicos y ficha final
-  const used = new Set();
+  // nombres únicos y ficha final; el conjunto de usados es el del mundo entero y
+  // no uno local de la fase, que dejaba que un paraje se llamase como un núcleo
   return placed.map((p) => {
-    let name = '';
-    for (let t = 0; t < 8; t++) {
-      name = names.parajeName(rng, p.type);
-      if (!used.has(name)) break;
-    }
-    used.add(name);
+    const name = indice.fija(() => names.parajeName(rng, p.type), (base, k) => names.variantName(base, k), 8);
     const info = PARAJE_INFO[p.type];
     return { ...p, name, label: info.label, scenes: info.scenes };
   });

@@ -32,6 +32,22 @@ Las cuatro skills tienen fronteras duras entre sí (`wa-dev` no toca `test/**`, 
 
 **Decisión:** cada invocación de `wa-spec`, `wa-dev`, `wa-qa-dev` y `wa-qa-tester` se ejecuta como subagente con su propio contexto, cargando la skill del repo. El orquestador no escribe código ni pruebas: lee, juzga, mergea y registra.
 
+## 6b · El escalado de SPEC-002-iter-1: los recuentos de `costero#2`
+
+`wa-dev` escaló en lugar de ajustar un extracto, que es lo que la iteración le mandaba hacer. El hecho: al cerrar los dos defectos, `costero#2` pasa de `{7 núcleos, 12 servicios, 5 parajes, 10 calzadas}` a `{7, 11, 3, 9}`, y la iteración exigía que los recuentos por tipo cuadrasen.
+
+Lo que el dev demostró, y es lo que decide: **no lo mueve la ordenación**. Aplicando solo el cambio de orden, los ocho extractos salen byte a byte idénticos a los commiteados — el orden natural de los fixtures ya coincidía con la clave estable. Lo mueve el arreglo de los nombres duplicados: quitar el duplicado obliga a un sorteo más en la cadena de azar de la fase de núcleos, y ese sorteo desplaza todo lo que viene después.
+
+Así que la iteración se contradecía: pedía que `Casal da Colmea` dejara de repetirse en `costero#2` y a la vez que los recuentos no cambiaran. No caben las dos.
+
+**Decisión: se aceptan los recuentos nuevos.** La unicidad de nombres es un requisito de diseño con escenario en la batería («No hay dos nombres iguales en un mundo»); los extractos de referencia son un instrumento de verificación del porte, no un contrato de contenido. Un extracto no puede vetar un arreglo de determinismo.
+
+**Y una observación que no entierro:** los parajes de `costero#2` bajan de 5 a 3. No es una regresión que corregir aquí — cualquier cambio en el consumo de azar recoloca el mundo entero —, pero es exactamente la clase de accidente que la fila 6 (`parajes-cobertura-escenas`) existe para impedir, haciendo que el suelo de parajes salga del catálogo y no de lo que sobre. Queda como evidencia medida a favor de esa fila.
+
+## 6c · El tercer rojo de SPEC-002: reatribuido, no ablandado
+
+«El mundo mínimo todavía compone un lazo» falla porque en el mundo de 250 m no nace ningún paraje. **Es defecto de prueba respecto a SPEC-002**, que excluye por escrito cupos y cobertura de escenas: la prueba afirma algo que su spec no promete. Se reatribuye a SPEC-006 y se deja declarada como pendiente de esa fila. No se ha tocado su redacción ni su exigencia.
+
 ## 6 · El script que la skill de QA da por hecho
 
 `wa-qa-tester` ejecuta `scripts/qa-tester-run.sh`, que no existe en el repo. No es un olvido: es exactamente lo que pide la fila 1 del checklist (`andamiaje-pruebas`, RF-INFRA-007).

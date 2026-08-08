@@ -1,0 +1,185 @@
+{
+  "cabecera": {
+    "mundo_congelado": "suelo-250m",
+    "semilla": "42.40,-8.81#2",
+    "revision_prototipo": "07f1c41",
+    "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
+    "regenerado_por": "SPEC-002-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-002-iter-1: la entrada de datos del núcleo pasa a ordenarse por la clave estable de OSM y la unicidad de nombre pasa a ser del mundo entero, así que los mundos generados cambian."
+  },
+  "titulo": "Dominios de Nharem",
+  "idioma": "gl",
+  "radio_dibujo_m": 250,
+  "recuentos": {
+    "nucleos": 5,
+    "servicios": 6,
+    "parajes": 0,
+    "calzadas": 4
+  },
+  "nucleos": [
+    {
+      "nombre": "Lamiño",
+      "tipo": "aldea",
+      "x": -2,
+      "y": -45,
+      "anclaje": null
+    },
+    {
+      "nombre": "Soutozán da Brétema",
+      "tipo": "ciudad",
+      "x": -32,
+      "y": -118,
+      "anclaje": "node/5323941422"
+    },
+    {
+      "nombre": "Casal da Néboa",
+      "tipo": "granja",
+      "x": 20,
+      "y": 191,
+      "anclaje": null
+    },
+    {
+      "nombre": "Casal do Arado",
+      "tipo": "granja",
+      "x": -79,
+      "y": 25,
+      "anclaje": null
+    },
+    {
+      "nombre": "Miramar da Brétema",
+      "tipo": "pueblo",
+      "x": 27,
+      "y": -142,
+      "anclaje": "node/3648044335"
+    }
+  ],
+  "servicios": [
+    {
+      "nombre": "Forxa do Caldeiro Feiticeiro",
+      "tipo": "armeria",
+      "x": 102,
+      "y": -178,
+      "anclaje": "node/13742917501"
+    },
+    {
+      "nombre": "Botica da Serea Dourada",
+      "tipo": "boticario",
+      "x": -169,
+      "y": -67,
+      "anclaje": "node/3648044338"
+    },
+    {
+      "nombre": "Arcana da Espada Errante",
+      "tipo": "conjureria",
+      "x": -139,
+      "y": 6,
+      "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "Mercado do Dragón Bailador",
+      "tipo": "mercado",
+      "x": 130,
+      "y": -183,
+      "anclaje": "node/3643421606"
+    },
+    {
+      "nombre": "Pousada do Caldeiro Feiticeiro",
+      "tipo": "posada",
+      "x": 4,
+      "y": -116,
+      "anclaje": "node/3648044332"
+    },
+    {
+      "nombre": "Taberna do Moucho Dourado",
+      "tipo": "taberna",
+      "x": 17,
+      "y": -135,
+      "anclaje": "node/3648044330"
+    }
+  ],
+  "parajes": [],
+  "calzadas": [
+    {
+      "nombre": "A Calzada do Abrente Frío",
+      "tipo": "calzada",
+      "desde": [
+        -79,
+        25
+      ],
+      "hasta": [
+        20,
+        191
+      ],
+      "puntos": 15,
+      "recta": false
+    },
+    {
+      "nombre": "A Calzada do Leste",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        27,
+        -142
+      ],
+      "puntos": 4,
+      "recta": false
+    },
+    {
+      "nombre": "A Corredoira das Neves",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        -79,
+        25
+      ],
+      "puntos": 10,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Abrente Frío",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        -2,
+        -45
+      ],
+      "puntos": 3,
+      "recta": false
+    }
+  ],
+  "casting": [
+    {
+      "plantilla": "cita-en-la-fuente",
+      "castea": false
+    },
+    {
+      "plantilla": "entrega-sospechosa",
+      "castea": false
+    },
+    {
+      "plantilla": "peregrinaje",
+      "castea": false
+    },
+    {
+      "plantilla": "rescate-en-la-granja",
+      "castea": false
+    },
+    {
+      "plantilla": "ronda-del-vigia",
+      "castea": false
+    },
+    {
+      "plantilla": "tres-pistas",
+      "castea": false
+    }
+  ]
+}

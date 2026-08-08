@@ -4,6 +4,17 @@
 
 import { dist } from '../core/geo.js';
 import { makeRng } from '../core/rng.js';
+import { crearIndiceDeNombres } from '../names/index.js';
+
+// Orden estable de los nodos del grafo: los ids de OSM por número y las claves de
+// coordenada por texto. Recorrer las claves de un Map en orden de inserción dejaba
+// que el orden de llegada de los ways decidiera los empates de distancia.
+function comparaNodo(a, b) {
+  const na = typeof a === 'number', nb = typeof b === 'number';
+  if (na !== nb) return na ? -1 : 1;
+  if (na) return a - b;
+  return a < b ? -1 : a > b ? 1 : 0;
+}
 
 class MinHeap {
   constructor() { this.a = []; }
@@ -90,7 +101,7 @@ function buildGraph(roads) {
       addAdj(ids[i + 1], ids[i], w);
     }
   }
-  const nodeIds = [...coord.keys()];
+  const nodeIds = [...coord.keys()].sort(comparaNodo);
   coserHuecos(coord, adj, addAdj, nodeIds);
   return { coord, adj, nodeIds };
 }
@@ -166,7 +177,8 @@ function snapTo(nodeIds, coord, p, max) {
   let best = null, bd = Infinity;
   for (const id of nodeIds) {
     const d = dist(coord.get(id), p);
-    if (d < bd) { bd = d; best = id; }
+    // el empate a distancia lo rompe el propio nodo, no el orden de la lista
+    if (d < bd || (d === bd && comparaNodo(id, best) < 0)) { bd = d; best = id; }
   }
   return bd <= max ? best : null;
 }
@@ -223,7 +235,7 @@ export function pegarAViario(puntos, roads, maxMove = 1200) {
     let mejor = null, md = Infinity;
     for (const id of principales) {
       const d = dist(coord.get(id), p);
-      if (d < md) { md = d; mejor = id; }
+      if (d < md || (d === md && comparaNodo(id, mejor) < 0)) { md = d; mejor = id; }
     }
     if (mejor == null || md > maxMove) continue; // demasiado lejos: se queda como está
 
@@ -237,10 +249,11 @@ export function pegarAViario(puntos, roads, maxMove = 1200) {
 
 /**
  * settlements: núcleos generados. roads: ways viarios de parseGeo. names:
- * paquete de nombres. Devuelve rutas [{from, to, pts, nodos, fallback, name}] que
+ * paquete de nombres. indice: índice de nombres del mundo, compartido con las
+ * demás familias. Devuelve rutas [{from, to, pts, nodos, fallback, name}] que
  * conectan todos los núcleos (fallback = recta punteada si no hay camino).
  */
-export function buildRoutes(settlements, roads, seedStr, names) {
+export function buildRoutes(settlements, roads, seedStr, names, indice = crearIndiceDeNombres()) {
   if (settlements.length < 2) return [];
   const rng = makeRng(seedStr + ':routes');
 
@@ -292,17 +305,15 @@ export function buildRoutes(settlements, roads, seedStr, names) {
     inTree[bj] = true;
   }
 
-  // nombres únicos: dirección predominante o destino
-  const used = new Set();
+  // nombres únicos: dirección predominante o destino. El conjunto de usados es el
+  // del mundo entero, así que una calzada tampoco puede llamarse como un servicio.
   for (const r of routes) {
     const dx = r.to.x - r.from.x, dy = r.to.y - r.from.y;
-    let name = '';
-    for (let t = 0; t < 10; t++) {
-      name = names.roadName(rng, names.directionWord(rng, dx, dy), r.to.type !== 'granja' ? r.to.name : null);
-      if (!used.has(name)) break;
-    }
-    used.add(name);
-    r.name = name;
+    r.name = indice.fija(
+      () => names.roadName(rng, names.directionWord(rng, dx, dy), r.to.type !== 'granja' ? r.to.name : null),
+      (base, k) => names.variantName(base, k),
+      10,
+    );
   }
   return routes;
 }
@@ -341,7 +352,9 @@ export function linkParajes(parajes, routes, settlements, roads) {
     if (desde != null) {
       const { dist: d, prev } = dijkstra(adj, desde);
       let mejor = null, md = Infinity;
-      for (const id of enRed) {
+      // el recorrido del conjunto va ordenado: de él sale a qué punto de la red se
+      // engancha el paraje, y eso no puede depender del orden de inserción
+      for (const id of [...enRed].sort(comparaNodo)) {
         const v = d.get(id);
         if (v != null && v < md) { md = v; mejor = id; }
       }

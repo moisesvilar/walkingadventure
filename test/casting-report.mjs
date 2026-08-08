@@ -1,19 +1,19 @@
 // Informe de casting (pendiente 6 de game-design/quests.md): mide qué
-// plantillas castean poco y por qué, sobre una batería de mundos sintéticos y
-// de mundos REALES construidos con la misma tubería que la app (app/js/world/build.js).
+// plantillas castean poco y por qué, sobre una batería de mundos sintéticos y de
+// mundos REALES construidos con la tubería canónica (packages/nucleo/world/build.js).
 //
 //   node test/casting-report.mjs        (los mundos reales requieren `node server.mjs` corriendo)
 
 globalThis.__WA_PROXY__ = process.env.WA_PROXY ?? 'http://localhost:8137/api/overpass';
 
-const { buildWorld } = await import('../app/js/world/build.js');
+const { buildWorld } = await import('../packages/nucleo/world/build.js');
 const { fetchGeoFeatures, fetchPois } = await import('../app/js/data/overpass.js');
-const { generateSettlements } = await import('../app/js/world/settlements.js');
-const { buildRoutes } = await import('../app/js/world/routes.js');
-const { generateParajes } = await import('../app/js/world/parajes.js');
-const { castAll } = await import('../app/js/quests/casting.js');
-const { TEMPLATES } = await import('../app/js/quests/templates.js');
-const { namesFor } = await import('../app/js/names/index.js');
+const { generateSettlements } = await import('../packages/nucleo/world/settlements.js');
+const { buildRoutes } = await import('../packages/nucleo/world/routes.js');
+const { generateParajes } = await import('../packages/nucleo/world/parajes.js');
+const { castAll } = await import('../packages/nucleo/quests/casting.js');
+const { TEMPLATES } = await import('../packages/nucleo/quests/templates.js');
+const { namesFor } = await import('../packages/nucleo/names/index.js');
 
 const es = namesFor('es');
 const stats = new Map(TEMPLATES.map((t) => [t.id, { ok: 0, total: 0, motivos: new Map() }]));
@@ -51,7 +51,7 @@ function syntheticWorld(radius, seed) {
     { pts: mkLine(() => 0, (k) => k * step), nodes: null, level: 'principal', name: null },
     { pts: mkLine((k) => k * step, (k) => k * step), nodes: null, level: 'pista', name: null },
   ];
-  const rivers = [mkLine((k) => k * step + step / 2, (k) => -k * step + radius * 0.4)];
+  const rivers = [{ pts: mkLine((k) => k * step + step / 2, (k) => -k * step + radius * 0.4), kind: 'river' }];
   const geo = { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads };
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, es);
   const routes = buildRoutes(settlements, geo.roads, seed, es);

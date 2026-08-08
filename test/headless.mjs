@@ -3,13 +3,13 @@
 // Mundo sintético con anclajes, carreteras y un río; comprueba cupos, servicios,
 // rutas, parajes, idiomas y determinismo.
 
-import { generateSettlements, countsForRadius } from '../app/js/world/settlements.js';
-import { buildRoutes } from '../app/js/world/routes.js';
-import { generateParajes, parajeCountForRadius, PARAJE_INFO } from '../app/js/world/parajes.js';
-import { localeFor, namesFor } from '../app/js/names/index.js';
-import { makeRng } from '../app/js/core/rng.js';
-import { castAll, castTemplate } from '../app/js/quests/casting.js';
-import { TEMPLATES } from '../app/js/quests/templates.js';
+import { generateSettlements, countsForRadius } from '../packages/nucleo/world/settlements.js';
+import { buildRoutes } from '../packages/nucleo/world/routes.js';
+import { generateParajes, parajeCountForRadius, PARAJE_INFO } from '../packages/nucleo/world/parajes.js';
+import { localeFor, namesFor } from '../packages/nucleo/names/index.js';
+import { makeRng } from '../packages/nucleo/core/rng.js';
+import { castAll, castTemplate } from '../packages/nucleo/quests/casting.js';
+import { TEMPLATES } from '../packages/nucleo/quests/templates.js';
 
 let failures = 0;
 function check(name, cond, extra = '') {
@@ -37,7 +37,7 @@ function syntheticWorld(radius) {
     { pts: mkLine(() => 0, (k) => k * step), nodes: null, level: 'principal', name: null },
     { pts: mkLine((k) => k * step, (k) => k * step), nodes: null, level: 'pista', name: null },
   ];
-  const rivers = [mkLine((k) => k * step + step / 2, (k) => -k * step + radius * 0.4)];
+  const rivers = [{ pts: mkLine((k) => k * step + step / 2, (k) => -k * step + radius * 0.4), kind: 'river' }];
   return { anchors, geo: { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads } };
 }
 

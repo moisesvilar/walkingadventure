@@ -870,6 +870,514 @@
       "caso": "Todos los scripts ejecutables del andamiaje deciden que son el programa principal de la misma manera",
       "hueco_de_bateria": true,
       "nota": "Mismo caso que el primer criterio del bloque del guardián. La lista enumerada son los tres .mjs del andamiaje: overpass-setup.sh y los verifica-*.mjs son herramientas del prototipo y la spec los deja fuera; qa-tester-run.sh es bash y no comparte guardián."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un clon limpio del repositorio, cuando se listan los directorios de `packages/nucleo/`, entonces existen `core/`, `world/`, `names/` y `quests/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "El paquete tiene las cuatro áreas: core, world, names y quests",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un clon limpio del repositorio, cuando se ejecuta cualquier módulo del paquete desde Node, entonces arranca sin instalar ninguna dependencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Cualquier módulo del paquete arranca en Node sin instalar ninguna dependencia",
+      "hueco_de_bateria": true,
+      "nota": "Se importan los trece módulos en un Node aparte, con el repo por cwd, y se comprueba además que no hay node_modules ni en el paquete ni en la raíz."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `packages/nucleo/package.json`, cuando se lee, entonces declara `\"type\": \"module\"`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "packages/nucleo/package.json declara \"type\": \"module\"",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `packages/nucleo/package.json`, cuando se lee, entonces no declara ninguna dependencia de runtime.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "packages/nucleo/package.json no declara ninguna dependencia de runtime",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el paquete entregado, cuando se listan los ficheros versionados con `git ls-files packages/nucleo`, entonces aparecen todos los módulos portados y ninguno queda fuera por una regla de `.gitignore`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "git ls-files trae todos los módulos del paquete: ninguna regla de .gitignore se traga uno",
+      "hueco_de_bateria": true,
+      "nota": "El precedente es real: una regla sin anclar se tragó app/js/data/overpass.js y ningún test lo detectó."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el paquete entregado, cuando se buscan ficheros con extensión `.ts` o `.tsx`, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "No hay ningún fichero .ts ni .tsx en el paquete",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo del paquete, cuando se leen sus imports, entonces todos citan la extensión del fichero de forma explícita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Todos los imports del paquete citan la extensión del fichero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo del paquete, cuando se leen sus comentarios y sus nombres de dominio, entonces están en español, con el inglés reservado a los identificadores técnicos genéricos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Cada módulo del paquete abre explicando qué hace, en español",
+      "hueco_de_bateria": true,
+      "nota": "Cubre la mitad automatizable: que el módulo abra con su comentario de cabecera y que ese comentario esté en español. Que los nombres de dominio lo estén no lo afirma ninguna prueba y se queda en revisión a ojo."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el paquete entregado, cuando se busca el directorio `packages/nucleo/partida/`, entonces no existe todavía, porque su contenido lo entrega la fila 9 del checklist.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "packages/nucleo/partida/ todavía no existe",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se inspeccionan sus imports, entonces ninguno importa de React Native, de Expo ni de un paquete cuyo nombre empiece por `react-native` o `expo`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Ningún módulo del paquete importa de React Native ni de Expo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se inspeccionan sus imports, entonces ninguno importa un builtin de Node.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Ningún módulo del paquete importa un builtin de Node",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se inspeccionan sus imports, entonces ninguno importa de `app/`, de `server.mjs`, de `scripts/` ni de `test/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Ningún módulo del paquete importa de app/, server.mjs, scripts/ ni test/",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se busca en su código, entonces no aparece ninguna de las puertas de la plataforma: `fetch`, `XMLHttpRequest`, `WebSocket`, `localStorage`, `document` ni `window`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "En el paquete no aparece ninguna puerta de la plataforma: fetch, XMLHttpRequest, WebSocket, localStorage, document ni window",
+      "hueco_de_bateria": true,
+      "nota": "`fetch` se busca como llamada y no como palabra: `fetchData` es la dependencia inyectada y tiene que seguir pudiendo llamarse así."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el repositorio con el paquete ya portado, cuando se ejecuta `node scripts/comprueba-nucleo.mjs`, entonces deja de informar de que el paquete no existe y termina con código 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "scripts/comprueba-nucleo.mjs ya no informa de que el paquete no existe y termina con código 0",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el runner de pruebas, cuando se ejecuta sobre el repositorio con el paquete portado, entonces el report ya no registra la frontera del núcleo como comprobación saltada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "El veredicto de la frontera del núcleo deja de ser una comprobación saltada",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre la línea VEREDICTO que el runner recoge y publica, no ejecutando el runner: `scripts/qa-tester-run.sh` ejecuta todo test/nucleo/, así que una prueba que lo invoque desde ahí se llama a sí misma sin fondo."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `buildWorld`, cuando se le llama sin `fetchData`, entonces falla con un error que nombra la dependencia que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "buildWorld sin fetchData falla nombrando la dependencia que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el inspector de tráfico saliente en modo estricto, cuando se genera un mundo entero con un `fetchData` construido sobre un mundo congelado, entonces no se registra ninguna petición de red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El núcleo no abre ninguna conexión de red al generar un mundo entero",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "Cubre solo la mitad que corresponde al núcleo del escenario bloqueante de privacidad —que del paquete no sale ninguna petición por su cuenta—, con el inspector en modo estricto. La otra mitad, la de los treinta días de juego, necesita la app."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado, cuando se genera un mundo, entonces la única entrada de datos externos que el núcleo consume son las llamadas al `fetchData` que recibió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "La única entrada de datos externos del núcleo son las llamadas al fetchData que recibió",
+      "hueco_de_bateria": true,
+      "nota": "Se le sirve un mundo congelado recortado: si el núcleo tuviera otra puerta, los picos, la costa y los POIs seguirían apareciendo."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se busca en su código, entonces no aparece `Math.random()`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "La mitad estática del caso: se busca Math.random en los trece módulos."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se busca en su código, entonces no aparece ninguna lectura del reloj del sistema: ni `Date.now()`, ni `new Date()`, ni `performance.now()`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "La mitad estática del caso: Date.now, new Date y performance.now."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se busca en su código, entonces no aparece ningún generador de identificadores aleatorios del entorno, como `crypto.randomUUID()`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "La mitad estática del caso: randomUUID y getRandomValues."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado y la semilla `\"42.40,-8.81#1\"`, cuando se genera dos veces, entonces los dos mundos son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "Comparación por serialización completa, sobre los cuatro mundos congelados."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado y una semilla, cuando se genera con el reloj del sistema fijado en instantes distintos, entonces el mundo resultante no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "La mitad dinámica: los ocho mundos de referencia generados con Date y performance congelados en dos instantes distintos."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado, cuando se genera con sus elementos servidos en orden invertido, entonces el mundo es idéntico al generado con el orden natural.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El orden de iteración no depende del orden de inserción",
+      "escenario": "El orden de iteración no depende del orden de inserción",
+      "nota": "ROJO ESPERADO. En costero y urbano-denso el mundo generado cambia si los elementos de OSM llegan en orden invertido: cambian anclajes de núcleos, servicios, parajes y calzadas. Es un defecto de código contra un escenario bloqueante de @determinismo, no un fallo de la prueba."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado, cuando se genera con `\"42.40,-8.81#1\"` y con `\"42.40,-8.81#2\"`, entonces difieren en el nombre de al menos un núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Cambiar la semilla cambia el mundo",
+      "escenario": "Cambiar la semilla cambia el mundo"
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado, cuando se genera con `\"42.40,-8.81#1\"` y con `\"42.40,-8.81#2\"`, entonces difieren en la colocación de al menos un paraje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Cambiar la semilla cambia el mundo",
+      "escenario": "Cambiar la semilla cambia el mundo"
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el paquete, cuando se enumeran las cadenas de semilla con las que cada fase deriva su generador, entonces no hay dos fases que compartan la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Cada fase usa su propio sufijo de azar",
+      "escenario": "Cada fase usa su propio sufijo de azar",
+      "nota": "Primera mitad del caso: se enumeran las cadenas de todas las llamadas a makeRng del paquete y se afirma que no hay dos iguales."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo generado, cuando se altera la implementación de la fase de parajes y se vuelve a generar con la misma semilla, entonces los núcleos y las calzadas siguen siendo idénticos a los de antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Cada fase usa su propio sufijo de azar",
+      "escenario": "Cada fase usa su propio sufijo de azar",
+      "nota": "Segunda mitad: se rehace la tubería a mano con la fase de parajes alterada —otro flujo de azar— y los núcleos y las calzadas tienen que salir idénticos."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo del paquete, cuando se inspecciona el recorrido de un `Set` o de un `Map` cuyo resultado alimenta una decisión de generación, entonces va precedido de una ordenación explícita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El orden de iteración no depende del orden de inserción",
+      "escenario": "El orden de iteración no depende del orden de inserción",
+      "nota": "Se cubre por comportamiento, que es lo que el criterio protege. La forma estática —que todo recorrido de un Set o un Map vaya precedido de una ordenación explícita— no la afirma ninguna prueba: distinguir qué recorrido alimenta una decisión de generación no se puede hacer con un patrón sin llenarlo de falsos positivos."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo generado, cuando se serializa a JSON y se vuelve a leer, entonces no se pierde ningún dato por venir colgado de un array en lugar de en una propiedad de objeto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Un mundo generado sobrevive al ida y vuelta por JSON sin perder nada colgado de un array",
+      "hueco_de_bateria": true,
+      "nota": "Recorre el mundo entero buscando arrays con propiedades propias, y comprueba además que el tipo del cauce viaja como campo del objeto."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el paquete entregado, cuando se busca la orquestación de la generación, entonces hay una sola función `buildWorld` y vive en `packages/nucleo/world/build.js`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Hay una sola función buildWorld y vive en packages/nucleo/world/build.js",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `buildWorld`, cuando se genera un mundo, entonces las fases se ejecutan en el orden declarado: datos, terreno, costa, máscara, núcleos, calzadas y parajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Las fases se ejecutan en el orden declarado: datos, terreno, costa, máscara, núcleos, calzadas y parajes",
+      "hueco_de_bateria": true,
+      "nota": "Sobre el mundo costero, que es el único que ejecuta las siete."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `buildWorld` con `onStatus` inyectado, cuando se genera un mundo, entonces `onStatus` recibe una clave por cada fase ejecutada, en ese orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "onStatus recibe una clave por cada fase ejecutada, en ese orden",
+      "hueco_de_bateria": true,
+      "nota": "Sobre un mundo sin costa: cinco claves, ninguna repetida y en el orden declarado."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `buildWorld` sin `onStatus`, cuando se genera un mundo, entonces la generación termina igual y sin error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Generar sin onStatus termina igual y sin error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un `fetchData` que falla, cuando se genera un mundo, entonces el error se propaga a quien llamó y no se devuelve ningún mundo a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Un fetchData que falla propaga el error y no devuelve ningún mundo a medias",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo congelado sin línea de costa, cuando se genera un mundo, entonces no se pide una segunda vuelta de datos ni se construye máscara de mar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Un mundo congelado sin línea de costa no pide una segunda vuelta de datos ni construye máscara de mar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el mundo congelado costero, cuando se genera un mundo, entonces se construye la máscara de mar y el radio de dibujo resultante es distinto del radio base.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El mundo congelado costero construye la máscara de mar y ensancha el radio de dibujo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el mundo congelado del suelo de 250 m, cuando se genera un mundo, entonces se construye un mundo completo, con su título y su casting, sin fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El mundo congelado del suelo de 250 m se construye entero, con su título y su casting",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un nombre de mundo congelado que no existe, cuando se intenta generar con él, entonces falla antes de generar nada, con el error del andamiaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Pedir un mundo congelado que no existe falla antes de generar nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `test/fixtures/mundos-referencia/`, cuando se enumeran sus extractos, entonces hay uno por cada combinación de los cuatro mundos congelados con las dos semillas de referencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Hay un extracto de referencia por cada mundo congelado y cada semilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un extracto de referencia, cuando se lee su cabecera, entonces declara de qué mundo congelado sale, con qué semilla y contra qué revisión del prototipo se capturó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Cada extracto de referencia declara de qué mundo sale, con qué semilla y contra qué revisión del prototipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un extracto de referencia, cuando el paquete genera ese mismo mundo y se extrae de él lo mismo, entonces el resultado es idéntico al extracto commiteado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El paquete regenera cada extracto de referencia idéntico al commiteado",
+      "hueco_de_bateria": true,
+      "nota": "La extracción vive en test/nucleo/mundo-de-prueba.mjs y reproduce la forma del extracto: orden estable por tipo, nombre y posición."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cada mundo congelado, cuando se comparan con el prototipo los recuentos de núcleos, servicios, parajes y calzadas, entonces son los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Los recuentos de núcleos, servicios, parajes y calzadas son los del prototipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cada mundo congelado, cuando se comparan con el prototipo el título del mundo y el idioma elegido, entonces son los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El título del mundo y el idioma son los del prototipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cada mundo congelado, cuando se comparan con el prototipo las plantillas que castean y las que no, entonces son las mismas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Las plantillas que castean y las que no son las del prototipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo generado, cuando se recogen los anclajes de todos los núcleos, servicios y parajes, entonces ningún identificador de OSM aparece más de una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Ningún anclaje aparece dos veces",
+      "escenario": "Ningún anclaje aparece dos veces",
+      "nota": "Los cuatro mundos por las dos semillas. Solo hay identificadores de OSM: los de Places llegan con la app."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo generado, cuando se comparan los anclajes libres que reciben los parajes con los que los núcleos no tomaron, entonces son exactamente los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Los parajes reparten lo que los núcleos no gastaron",
+      "escenario": "Los parajes reparten lo que los núcleos no gastaron",
+      "nota": "Se reproduce en la prueba el pool del que sale el reparto —dentro del radio dibujado y en tierra—, porque libres más tomados solo significa algo comparado contra ese total."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo generado, cuando se recogen los nombres de núcleos, servicios, parajes y calzadas, entonces no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo",
+      "nota": "ROJO ESPERADO, y es el defecto que wa-dev reportó y quien orquesta aceptó: farmName y poiName no llevan conjunto de nombres usados, mientras parajes y calzadas sí reintentan. Se repite \"Casal da Colmea\" y \"Mercado do Dragón Bailador\" en costero#2 y \"Casal do Espiño\" en suelo-250m#1. Es anterior al porte y la prueba está escrita como el escenario, sin ablandar."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo sembrado en 42.40, -8.81, cuando se generan los nombres, entonces salen del paquete de idioma `gl`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El idioma sale de la ubicación",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md, pero como «Esquema del escenario» con sus dos ejemplos, y el validador solo indexa las líneas «Escenario:». Por eso la entrada va marcada como hueco: no es que falte de la batería, es que no se puede citar sin que el mapa se rompa."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado un mundo sembrado en 39.86, -4.02, cuando se generan los nombres, entonces salen del paquete de idioma `es`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El idioma sale de la ubicación",
+      "hueco_de_bateria": true,
+      "nota": "El segundo ejemplo del esquema, 39.86,-4.02 en castellano. Mismo motivo de marcado que el anterior."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el repositorio tras el porte, cuando se listan los directorios de `app/js/`, entonces ya no existen `core/`, `world/`, `names/` ni `quests/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "app/js ya no tiene core, world, names ni quests",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado cualquier módulo de `app/`, cuando se inspeccionan los imports con los que consume el generador, entonces todos apuntan a `packages/nucleo/` y ninguno a una copia dentro de `app/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Los imports con los que app/ consume el generador apuntan todos a packages/nucleo/",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `app/js/data/overpass.js`, cuando se leen sus exportaciones, entonces conserva la construcción de las consultas y el transporte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "app/js/data/overpass.js conserva la construcción de las consultas y el transporte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `app/js/data/overpass.js`, cuando se lee su código, entonces ya no contiene el parseo de la respuesta de OSM, que ha pasado al paquete.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "app/js/data/overpass.js ya no contiene el parseo de la respuesta de OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado `packages/nucleo/`, cuando se busca en su código, entonces no aparece ningún texto de consulta de Overpass.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "En el paquete no aparece ningún texto de consulta de Overpass",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el repositorio tras el porte, cuando se ejecuta `node test/headless.mjs`, entonces termina en verde, con las mismas comprobaciones que antes del porte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "node test/headless.mjs sigue terminando en verde",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el servidor de desarrollo levantado, cuando se ejecuta `node test/casting-report.mjs`, entonces produce su informe igual que antes del porte.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "node test/casting-report.mjs produce su informe igual que antes del porte",
+      "hueco_de_bateria": true,
+      "nota": "Sin prueba automática: el informe necesita el servidor de desarrollo levantado y consultas reales a Overpass, y ninguna prueba de este repo puede necesitar red. Queda como comprobación de una persona."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el prototipo abierto en el navegador con `node server.mjs`, cuando se genera un mundo, entonces se dibuja como antes del porte.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El prototipo abierto en el navegador dibuja el mundo como antes del porte",
+      "hueco_de_bateria": true,
+      "nota": "Sin prueba automática hasta que exista el nivel @app: el render en canvas no lo ejercita ningún runner de los que hay."
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Dado el directorio `archive/`, cuando se compara con su estado anterior, entonces no ha cambiado ni un fichero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "El porte no ha tocado ni un fichero de archive/",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-002",
+      "criterio": "Escenarios de la batería que este porte tiene que dejar en pie — Casting → «El casting es determinista», «El mundo mínimo todavía compone un lazo».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista",
+      "nota": "Dos casteos del mismo catálogo sobre el mismo mundo dan el mismo reparto, beat a beat, y el casting que trae el mundo generado es ese mismo. De los dos escenarios que cita el criterio, este mapa solo cubre este: «El mundo mínimo todavía compone un lazo» estaba aquí y se ha retirado —afirma cupos y cobertura de escenas, que SPEC-002 excluye por escrito—, lo hereda SPEC-006 (docs/specs/SPEC-006-parajes-cobertura-escenas.md) y hoy no tiene ninguna prueba viva. El esquema no admite entrada sin prueba implementada, así que el hueco se ve por ausencia y no disfrazado de cobertura."
     }
   ]
 }
