@@ -97,3 +97,17 @@ Es la misma forma de fallo que los dos defectos de SPEC-001 y que el `parajes.js
 **Decisión: se cierra por contrato, no por vigilancia.** `exigeGrafo` falla nombrando lo que llegó, el parámetro pasa a llamarse `grafoViario`, y `viasDelGrafo` se exporta para que nadie tenga que reconstruir la tubería a mano. Es el mismo criterio que la propia SPEC-007 aplica a la marca de suposición: obligatoria, y su ausencia error de construcción, porque con un campo opcional «perderla» y «no haberla tenido nunca» son indistinguibles.
 
 Efecto medido del arreglo completo: casteabilidad **30/48 → 32/48**, `suelo-250m` de 2/6 a **3/6**, `barrio-tres-calles` de 4 a 6 parajes.
+
+## 6i · Los cuatro lazos que no se entregan, y los bordillos que no se verifican
+
+Dos límites que SPEC-008 deja abiertos y que **no se han disimulado**:
+
+**a · 4 de 16 lazos no se pueden entregar** con los cuatro criterios del filtro, porque un tramo difícil **no tiene nombre** en el grafo (costero 3/6, urbano-denso 1/6). Eso es exactamente lo que la spec exige —un tramo difícil sin nombre hace fallar la entrega en lugar de declarar un camino anónimo en silencio— y su hueco 5 lo anota. **La solución real es nombrar todo tramo difícil al generar, y es de SPEC-007.** Queda como deuda con dueño: cuando se haga, el caso que hoy afirma el fallo se pondrá rojo y habrá que actualizarlo. Es la única regresión esperada del repo.
+
+**b · El criterio de bordillos queda al 100 % en «no se sabe» sobre dato real.** Los cuatro fixtures se capturaron pidiendo solo ways, así que no traen ni un nodo de bordillo. El criterio está probado con datos sintéticos y **no verificado contra OSM**. `wa-dev` cambió la consulta para pedirlos, así que una recaptura los traería —pero recapturar mueve la línea base de ocho extractos y de media suite, y eso no se hace al final de un bloque. Hay un caso que **se pondrá rojo el día que alguien recapture**, para que el límite no se olvide.
+
+## 6j · B1 cerrado
+
+Las ocho filas en `done`. La suite pasa de 0 a **441 casos, 438 en verde, 0 rojos, 3 saltados**.
+
+Trayectoria de la casteabilidad agregada sobre los ocho extractos, que es la medida de salud del generador: **21/48 al empezar → 17/48 (regresión de SPEC-005, corregida por iteración) → 24/48 → 30/48 (SPEC-006) → 32/48 (SPEC-007)**. SPEC-008 no la mueve.

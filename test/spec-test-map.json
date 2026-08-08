@@ -4163,6 +4163,556 @@
       "fichero": "test/nucleo/grafo.test.mjs",
       "caso": "Una lista de parajes nula devuelve una lista vacía de ramales sin fallar",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el mundo de una celda, cuando se pide su callejero, entonces la consulta trae los tags `highway`, `surface`, `smoothness`, `width`, `kerb` y `wheelchair` de cada vía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "La consulta de callejero pide los tags de las vías y los nodos de bordillo",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el texto de la consulta de app/js/data/overpass.js —que `out geom` ya devuelve los tags— y sobre el parseo, que es donde se tiraban. Los cuatro fixtures se capturaron con la consulta vieja, así que la respuesta real de esta consulta no está verificada."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el mundo de una celda, cuando se pide su callejero, entonces la consulta trae también los nodos con `kerb` o `barrier=kerb`, que es donde OSM mapea los bordillos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "La consulta de callejero pide los tags de las vías y los nodos de bordillo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el callejero recibido, cuando se parsea, entonces cada tramo del grafo conserva los tags de accesibilidad de su vía de origen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Cada tramo del grafo conserva los tags de accesibilidad de su vía de origen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo cuyo `width` viene con unidad (`0.9 m`, `90 cm`), cuando se parsea, entonces se interpreta como metros y no se descarta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "La anchura con unidad se interpreta en metros y la que no es un número se trata como si no viniera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo cuyo `width` no es un número interpretable, cuando se parsea, entonces se trata como si el tag no viniera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "La anchura con unidad se interpreta en metros y la que no es un número se trata como si no viniera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con `highway=steps`, cuando se marca su aptitud, entonces queda no apto para el criterio de escalones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con cualquier otro valor de `highway`, cuando se marca su aptitud, entonces queda apto para el criterio de escalones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con `surface` de la lista dura o `smoothness` bueno, cuando se marca su aptitud, entonces queda apto para el criterio de firme.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con `surface` de la lista blanda o `smoothness` malo, cuando se marca su aptitud, entonces queda no apto para el criterio de firme.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo sin `surface` ni `smoothness`, cuando se marca su aptitud, entonces queda en no se sabe para el criterio de firme, que no es ni apto ni no apto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con un bordillo rebajado o a ras, cuando se marca su aptitud, entonces queda apto para el criterio de bordillos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se prueba también desde el nodo del cruce, en «El bordillo del nodo del cruce baja a las dos aristas que lo tocan». Sobre dato real no está verificado: ver la entrada del límite."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con un bordillo levantado o de más de tres centímetros, cuando se marca su aptitud, entonces queda no apto para el criterio de bordillos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El bordillo del nodo del cruce baja a las dos aristas que lo tocan",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo sin ningún dato de bordillo, cuando se marca su aptitud, entonces queda en no se sabe para el criterio de bordillos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con un bordillo levantado o de más de tres centímetros, cuando se marca su aptitud, entonces queda no apto para el criterio de bordillos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Sobre los cuatro mundos congelados el criterio de bordillos no se puede verificar",
+      "hueco_de_bateria": true,
+      "nota": "Límite declarado, no cobertura: los cuatro fixtures de SPEC-001 se capturaron pidiendo solo ways y no traen ni un nodo de bordillo (bordillosDeNodo = 0 en los cuatro). El criterio queda probado con datos sintéticos y sin verificar sobre dato real. La única evidencia real es un tag de vía en urbano-denso: 1 arista apta de 14.734."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con `wheelchair=no` o con una anchura menor de noventa centímetros, cuando se marca su aptitud, entonces queda no apto para el criterio de paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con `wheelchair=limited`, cuando se marca su aptitud, entonces queda en no se sabe para el criterio de paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con un valor que no está en ninguna de las listas conocidas, cuando se marca su aptitud, entonces queda en no se sabe para ese criterio y no se inventa una aptitud.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado cualquier tramo del grafo, cuando se lee su marca, entonces los cuatro criterios tienen uno de exactamente tres valores y ninguno queda sin marcar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Los cuatro criterios tienen tres valores y la ausencia de tag solo afirma en escalones",
+      "hueco_de_bateria": true,
+      "nota": "Y sobre dato real: en «El trazado rodea lo que el filtro evita» se afirma que el reparto de los cuatro criterios suma las 14.734 aristas de urbano-denso, que es lo que hace comprobable que ninguna queda sin marcar. Reparto medido con semilla 1: escalones 14294/421/19, firme 11073/318/3343, paso 1338/109/13287, bordillos 1/0/14733."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo con marca de suposición —cosido o `fallback`—, cuando se marca su aptitud, entonces queda en no se sabe para los cuatro criterios.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Lo cosido y lo inventado queda marcado",
+      "escenario": "Lo cosido y lo inventado queda marcado",
+      "nota": "Sobre los cuatro mundos congelados. El mismo escenario está implementado en test/nucleo/grafo.test.mjs desde SPEC-007 por el otro lado —que la marca de suposición existe—; aquí se afirma que se traduce a «no se sabe» en los cuatro criterios."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo cosido que une dos vías asfaltadas y anchas, cuando se marca su aptitud, entonces sigue en no se sabe y no hereda la aptitud de ninguna de las dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Lo que nos inventamos no se promete como transitable",
+      "escenario": "Lo que nos inventamos no se promete como transitable"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador con cualquier criterio activo, cuando se traza un lazo que atraviesa un tramo de suposición, entonces ese tramo no cuenta como apto en ningún punto del trazado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Lo que nos inventamos no se promete como transitable",
+      "escenario": "Lo que nos inventamos no se promete como transitable"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un lazo trazado enteramente por tramos de suposición, cuando se entrega, entonces llega con todos ellos declarados como no prometidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Lo que nos inventamos no se promete como transitable",
+      "escenario": "Lo que nos inventamos no se promete como transitable"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador que evita escalones y un mundo donde el camino corto pasa por unas escaleras, cuando se traza el lazo de una aventura, entonces la ruta entregada no pasa por las escaleras.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El trazado rodea lo que el filtro evita",
+      "escenario": "El trazado rodea lo que el filtro evita"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el mismo mundo y el mismo jugador, cuando se inspecciona el grafo después de trazar, entonces el tramo de las escaleras sigue en el grafo con su peso real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El trazado rodea lo que el filtro evita",
+      "escenario": "El trazado rodea lo que el filtro evita",
+      "nota": "Con número sobre dato real: urbano-denso conserva sus 14.734 aristas con 728 no aptas después de trazar con los cuatro criterios."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el mismo mundo y el mismo jugador, cuando se pide qué hay que dibujar, entonces las escaleras siguen entre lo que se dibuja, igual que sin filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El trazado rodea lo que el filtro evita",
+      "escenario": "El trazado rodea lo que el filtro evita",
+      "nota": "Se afirma que el callejero del mundo sigue trayendo vías con highway=steps y que el grafo no se toca al trazar. La comparación completa de lo dibujado con y sin criterios está en «Ninguna opción es peor juego»."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador con criterios activos, cuando existe una ruta sin ningún tramo no apto, entonces se entrega esa ruta aunque sea más larga que la corta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El trazado elige por orden lexicográfico y no por una constante de penalización",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado dos rutas sin tramos no aptos, cuando se elige entre ellas, entonces se entrega la que atraviesa menos tramos en «no se sabe».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El trazado elige por orden lexicográfico y no por una constante de penalización",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado dos rutas sin tramos no aptos y con los mismos tramos en «no se sabe», cuando se elige entre ellas, entonces se entrega la más corta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El trazado elige por orden lexicográfico y no por una constante de penalización",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un rodeo que evita todo lo no apto pero alarga el lazo más de medio tramo del jugador, cuando se traza, entonces se entrega la ruta corta con sus tramos difíciles declarados, y no el rodeo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Pasado el tope, se pasa por el camino difícil y se declara",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería anotado por la propia spec (hueco 2): «El trazado rodea lo que el filtro evita» cubre que se rodea, y nada cubría qué pasa cuando rodear es absurdo. Merece escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un núcleo cuya única salida es una escalera, cuando se traza un lazo que pasa por él, entonces el lazo se traza por la escalera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El núcleo cuya única salida es una escalera sigue siendo alcanzable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado ese mismo lazo, cuando se entrega, entonces el núcleo sigue siendo alcanzable y no ha quedado descolgado del reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El núcleo cuya única salida es una escalera sigue siendo alcanzable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador sin ningún criterio marcado, cuando se traza un lazo, entonces la ruta es exactamente la misma que sin filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Sin ningún criterio marcado la ruta es la de siempre y no lleva ninguna declaración",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador sin ningún criterio marcado, cuando se entrega el lazo, entonces no lleva ninguna declaración de camino evitado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Sin ningún criterio marcado la ruta es la de siempre y no lleva ninguna declaración",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un conjunto de criterios que contiene uno desconocido, cuando se pide un trazado, entonces falla con un error que nombra el criterio recibido y enumera los válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Un criterio desconocido, un tramo personal ausente y un grafo vacío se distinguen entre sí",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador sin tramo personal declarado ni estimado, cuando se pide un trazado con criterios activos, entonces falla con un error que nombra la dependencia que falta, en lugar de suponer un tope de rodeo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Un criterio desconocido, un tramo personal ausente y un grafo vacío se distinguen entre sí",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un grafo sin ningún tramo, cuando se pide un trazado, entonces se devuelve que no hay reparto en lugar de un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Un criterio desconocido, un tramo personal ausente y un grafo vacío se distinguen entre sí",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un lazo que rodea un tramo no apto, cuando se entrega, entonces lleva una declaración por cada tramo evitado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El camino evitado se declara con nombre propio",
+      "escenario": "El camino evitado se declara con nombre propio"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado una declaración de tramo evitado, cuando se lee, entonces trae el nombre propio del camino evitado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El camino evitado se declara con nombre propio",
+      "escenario": "El camino evitado se declara con nombre propio"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado una declaración de tramo evitado, cuando se lee, entonces trae el motivo en clave —escalones, firme, bordillo o paso— y no un texto redactado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El camino evitado se declara con nombre propio",
+      "escenario": "El camino evitado se declara con nombre propio"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado una declaración de tramo evitado, cuando se lee, entonces trae el punto del recorrido en el que la ruta se separa de lo evitado, para que el desvío se pueda ofrecer donde toca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El camino evitado se declara con nombre propio",
+      "escenario": "El camino evitado se declara con nombre propio"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo no apto que el lazo atraviesa porque no había rodeo, cuando se entrega el lazo, entonces ese tramo llega declarado con su nombre y su motivo, igual que uno evitado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El núcleo cuya única salida es una escalera sigue siendo alcanzable",
+      "hueco_de_bateria": true,
+      "nota": "Los dos caminos por los que se atraviesa a la fuerza: sin alternativa («El núcleo cuya única salida es una escalera sigue siendo alcanzable») y con el rodeo pasado de tope («Pasado el tope, se pasa por el camino difícil y se declara»)."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo no apto que el lazo atraviesa porque no había rodeo, cuando se entrega el lazo, entonces ese tramo llega declarado con su nombre y su motivo, igual que uno evitado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Pasado el tope, se pasa por el camino difícil y se declara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo de suposición que el lazo atraviesa, cuando se entrega el lazo, entonces llega declarado como no prometido, distinguible de un tramo declarado por no apto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Lo que nos inventamos no se promete como transitable",
+      "escenario": "Lo que nos inventamos no se promete como transitable"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un tramo difícil sin nombre propio en el grafo, cuando se va a declarar, entonces la entrega falla nombrando el tramo sin nombre, en vez de declarar un camino que no se puede nombrar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Un tramo difícil sin nombre propio hace fallar la entrega nombrando el tramo",
+      "hueco_de_bateria": true,
+      "nota": "Es el comportamiento que la spec exige, no un defecto de la prueba. Medido sobre dato real: de los 16 lazos que castean en los cuatro mundos congelados, 4 no se pueden entregar con los cuatro criterios (costero 3 de 6, urbano-denso 1 de 6). La solución de verdad —nombrar todo tramo difícil al generar— es de SPEC-007 y la propia spec lo anota en su hueco 5."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un lazo sin nada que evitar ni nada que no prometer, cuando se entrega, entonces sus dos listas de declaración llegan vacías y no ausentes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Sin ningún criterio marcado la ruta es la de siempre y no lleva ninguna declaración",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo con datos de OSM que traen `incline` en algunas vías, cuando se marca la aptitud del grafo, entonces ningún criterio se deriva de `incline`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ningún criterio se deriva de incline y ninguno es la pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado cualquier tramo del grafo, cuando se lee su marca de aptitud, entonces no existe ningún criterio de pendiente, cuesta ni desnivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ningún criterio se deriva de incline y ninguno es la pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado cualquier lazo entregado, cuando se leen sus declaraciones, entonces ningún motivo en clave se refiere a la pendiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ningún criterio se deriva de incline y ninguno es la pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el conjunto de criterios que el filtro admite, cuando se enumera, entonces son exactamente cuatro y ninguno es la pendiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ningún criterio se deriva de incline y ninguno es la pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo donde el filtro deja menos de un lazo posible, cuando el jugador pide aventuras, entonces se entrega que no hay reparto, con el filtro como motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "nota": "Con mundo sintético y no de fixture: ninguno de los cuatro congelados se queda sin reparto por el filtro, y atribuir la falta al filtro exige poder afirmar que sin él sí había lazo."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado ese mismo caso, cuando se lee lo entregado, entonces trae la oferta de alejarse un tramo más, con cuántos tramos se sugiere alejarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado ese mismo caso, cuando no se responde nada a la oferta, entonces el alcance de la salida sigue siendo el mismo y nada se ha ampliado solo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado ese mismo caso, cuando se acepta la oferta, entonces se vuelve a repartir con el alcance ampliado y el filtro sigue igual de activo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo sin reparto por el filtro, cuando se entrega la falta de reparto, entonces no se genera ni se resiembra nada del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo del suelo de 250 m con criterios activos que dejan fuera casi todo, cuando el jugador pide aventuras, entonces se ofrece el estirón en vez de devolver una lista vacía sin explicación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "nota": "Cubierto en su mitad afirmable: el fixture del suelo de 250 m sí reparte con los cuatro criterios («El mundo mínimo todavía compone un lazo»), así que «dejan fuera casi todo» se construye sintético. Un fixture de 250 m donde el filtro mate el reparto no existe y no se puede fabricar recapturando: eso es un hueco de fixture, no de prueba."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo donde el filtro sí deja al menos un lazo, cuando el jugador pide aventuras, entonces no se ofrece ningún estirón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El mundo mínimo todavía compone un lazo",
+      "escenario": "El mundo mínimo todavía compone un lazo"
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado todo lo que esta capa entrega hacia fuera —claves, valores, motivos y nombres—, cuando se inspecciona, entonces no aparece la palabra «accesibilidad» en ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "La palabra «accesibilidad» no aparece en nada de lo que el núcleo entrega",
+      "hueco_de_bateria": true,
+      "nota": "Se inspecciona lo entregado —lazo, declaraciones, falta de reparto, catálogos y mensajes de error—, no el código fuente, que sí cita game-design/accesibilidad.md en sus comentarios. Se comprueba además que no aparecen «silla», «wheelchair» ni «discapac»: un criterio llamado silla reintroduciría el modo aparte por la puerta de atrás."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el mismo mundo y el mismo jugador con y sin criterios activos, cuando se pide el reparto de aventuras, entonces el número de aventuras ofrecidas es el mismo salvo que se dispare la falta de reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ninguna opción es peor juego: mismas aventuras, mismos beats y el mismo mundo",
+      "hueco_de_bateria": true,
+      "nota": "Sobre barrio-tres-calles y suelo-250m. Costero y urbano-denso no se pueden usar aquí: su entrega falla por el tramo difícil sin nombre, que es el comportamiento que la spec exige y tiene caso propio."
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el mismo mundo y la misma aventura con y sin criterios activos, cuando se castea, entonces tiene el mismo número de beats.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ninguna opción es peor juego: mismas aventuras, mismos beats y el mismo mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador con criterios activos, cuando se lee el mundo generado, entonces tiene los mismos núcleos, parajes, servicios y nombres que el de un jugador sin criterios.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ninguna opción es peor juego: mismas aventuras, mismos beats y el mismo mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un jugador con criterios activos, cuando se enumera lo que se dibuja del mapa, entonces es idéntico a lo que se dibuja sin criterios.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Ninguna opción es peor juego: mismas aventuras, mismos beats y el mismo mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado una misma semilla, unos mismos datos de OSM y un mismo conjunto de criterios, cuando se traza el mismo lazo dos veces, entonces las dos rutas son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Dos trazados con la misma semilla, los mismos datos y los mismos criterios son idénticos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mismo conjunto de criterios recibido en distinto orden, cuando se traza el mismo lazo, entonces la ruta es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El orden de llegada de los criterios no cambia la ruta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo ya generado, cuando el jugador cambia sus criterios, entonces el mundo no se resiembra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Cambiar los criterios no resiembra el mundo ni renombra las calzadas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado un mundo ya generado, cuando el jugador cambia sus criterios, entonces las calzadas dibujadas y sus nombres siguen siendo los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "Cambiar los criterios no resiembra el mundo ni renombra las calzadas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el marcado de aptitud del grafo, cuando se ejecuta, entonces no consulta el conjunto de criterios del jugador en ningún punto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "El marcado de aptitud es del mundo y no consulta el conjunto de criterios",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-008",
+      "criterio": "Dado el filtro, cuando se inspecciona su implementación, entonces no usa ninguna fuente de azar ni de tiempo del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/accesibilidad.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema"
     }
   ]
 }

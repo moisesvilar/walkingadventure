@@ -4,6 +4,7 @@
 // trazado de calzadas y el enlace de parajes.
 
 import { dist } from '../core/geo.js';
+import { APTITUD_SUPUESTA, aptitudDeVia, combinaBordillos, conBordillos, cuentaAptitudes, validaAptitud } from './aptitud.js';
 
 /**
  * Distancia máxima que se considera «hueco en los datos» y no separación real.
@@ -185,6 +186,23 @@ function rejillaDeNodos(coord, nodeIds, lado) {
 }
 
 /**
+ * Los bordillos de OSM por identificador de nodo.
+ *
+ * Se combinan cuando un nodo llega dos veces con valores distintos, y la
+ * combinación no depende del orden de llegada: el no apto gana siempre, así que
+ * servir los mismos bordillos al revés da el mismo índice.
+ */
+function indiceDeBordillos(bordillos) {
+  const idx = new Map();
+  for (const b of bordillos ?? []) {
+    if (b?.nodo == null || b.aptitud == null) continue;
+    const ya = idx.get(b.nodo);
+    idx.set(b.nodo, ya == null ? b.aptitud : combinaBordillos(ya, b.aptitud));
+  }
+  return idx;
+}
+
+/**
  * Cose los trozos sueltos del grafo viario.
  *
  * Se unen por orden de menor a mayor hueco (Kruskal), así que dos trozos se cosen
@@ -225,7 +243,10 @@ function coseHuecos({ coord, capas, nodeIds, umbralM, une, find, anade }) {
   const cosidas = [];
   for (const [d, a, b] of pares) {
     if (!une(a, b)) continue;
-    anade(a, b, d, SUPOSICIONES.COSIDA, null);
+    // Lo cosido nace en «no se sabe» en los cuatro criterios y **no hereda** la
+    // aptitud de las dos vías que une: es suposición nuestra, y una suposición no
+    // se promete transitable por muy asfaltado que esté lo de al lado.
+    anade(a, b, { metros: d, suposicion: SUPOSICIONES.COSIDA, rasgo: null, nombre: null, aptitud: APTITUD_SUPUESTA });
     cosidas.push({ desde: a, hasta: b, metros: d });
   }
   return cosidas;
@@ -313,11 +334,15 @@ function separacionMinima({ coord, nodeIds, de, mayor, umbralM }) {
  * coordenada redondeada al metro, que es estable entre ejecuciones.
  *
  * @param {Array} vias
- * @param {{ umbralM?: number }} [opciones]
- * @returns el grafo, con su informe. **Toda arista lleva su marca de suposición**:
- *   nula si viene de dos nodos consecutivos de un way real, `'cosida'` si la puso
- *   el cosido. Que el campo sea obligatorio es todo el mecanismo que impide que la
- *   marca se pierda aguas abajo.
+ * @param {{ umbralM?: number, bordillos?: Array }} [opciones]  `bordillos` son los
+ *   nodos de bordillo de OSM ya parseados (`parseBordillos`), que se cruzan con los
+ *   nodos de las vías. Sin ellos el criterio de bordillos se queda en «no se sabe»,
+ *   que es la verdad y no un fallo: nadie ha dicho nada de ese cruce.
+ * @returns el grafo, con su informe. **Toda arista lleva su marca de suposición y
+ *   su marca de aptitud**: la primera nula si viene de dos nodos consecutivos de un
+ *   way real y `'cosida'` si la puso el cosido; la segunda con los cuatro criterios
+ *   siempre presentes. Que los dos campos sean obligatorios es todo el mecanismo
+ *   que impide que se pierdan aguas abajo.
  */
 export function construyeGrafo(vias, opciones = {}) {
   const umbralM = opciones.umbralM ?? COSER_MAX;
@@ -325,18 +350,22 @@ export function construyeGrafo(vias, opciones = {}) {
     throw new Error(`umbralM inválido (${umbralM}): el umbral de cosido es un número positivo de metros`);
   }
 
+  const bordillos = indiceDeBordillos(opciones.bordillos);
+
   const coord = new Map();
   const capas = new Map();
   const adj = new Map();
   let aristas = 0;
-  const anade = (a, b, metros, suposicion, rasgo) => {
+  const marcas = [];
+  const anade = (a, b, datos) => {
     if (!adj.has(a)) adj.set(a, []);
-    adj.get(a).push({ hasta: b, metros, suposicion, rasgo: rasgo ?? null });
+    adj.get(a).push({ hasta: b, ...datos });
   };
-  const anadeAmbos = (a, b, metros, suposicion, rasgo) => {
-    anade(a, b, metros, suposicion, rasgo);
-    anade(b, a, metros, suposicion, rasgo);
+  const anadeAmbos = (a, b, datos) => {
+    anade(a, b, datos);
+    anade(b, a, datos);
     aristas++;
+    marcas.push(datos.aptitud);
   };
 
   for (const via of vias ?? []) {
@@ -371,10 +400,26 @@ export function construyeGrafo(vias, opciones = {}) {
         if (!lista.includes(nivel)) { lista.push(nivel); lista.sort((x, y) => x - y); }
       }
     }
+    // La marca de la vía se calcula una vez por vía y no una vez por arista: los
+    // tags son de la vía entera. Lo único que baja al tramo son los bordillos, que
+    // en OSM viven en el nodo del cruce y por eso solo afectan a las dos aristas
+    // que lo tocan.
+    const marcaDeLaVia = aptitudDeVia(via.filtrables);
+    const nombre = via.name ?? null;
     for (let i = 0; i < ids.length - 1; i++) {
       const metros = dist(pts[i], pts[i + 1]);
       if (metros <= 0) continue; // dos puntos en la misma coordenada no son una arista
-      anadeAmbos(ids[i], ids[i + 1], metros, SUPOSICIONES.NINGUNA, via.rasgo ?? null);
+      const enExtremos = [bordillos.get(ids[i]) ?? null, bordillos.get(ids[i + 1]) ?? null];
+      anadeAmbos(ids[i], ids[i + 1], {
+        metros,
+        suposicion: SUPOSICIONES.NINGUNA,
+        rasgo: via.rasgo ?? null,
+        // El nombre propio del camino, que es lo que hace declarable un tramo
+        // difícil: sin él no se puede nombrar lo que se evita, y declarar «un
+        // tramo del camino» es no declarar nada.
+        nombre,
+        aptitud: conBordillos(marcaDeLaVia, enExtremos),
+      });
     }
   }
 
@@ -409,6 +454,12 @@ export function construyeGrafo(vias, opciones = {}) {
       cosidas: cosidas.length,
       metrosCosidos: cosidas.map((c) => c.metros),
       componentesAisladas: aisladas,
+      // El reparto de la marca sobre las aristas: cuánto del mundo es dato y
+      // cuánto es silencio de OSM. Se declara porque «no se sabe» es el estado
+      // masivo en el callejero real, y un mundo que no lo enseñe invita a
+      // confundirlo con apto.
+      aptitud: cuentaAptitudes(marcas),
+      bordillosDeNodo: bordillos.size,
       separacionMinimaSinCoserM: separacionMinima({ coord, nodeIds, de, mayor, umbralM }),
       alcanceDeBusquedaM: ANILLOS_DE_BUSQUEDA * umbralM,
       umbralM,
@@ -433,6 +484,10 @@ export function validaGrafo(grafo) {
       if (!MARCAS_DE_SUPOSICION.includes(arista.suposicion)) {
         throw new Error(`la arista ${id} ↔ ${arista.hasta} declara una marca de suposición desconocida: ${JSON.stringify(arista.suposicion)}`);
       }
+      // Y su marca de aptitud, por lo mismo: los cuatro criterios con uno de los
+      // tres valores, o error de construcción. Un criterio que falta no es un «no
+      // lo sé», es una pieza que se perdió por el camino.
+      validaAptitud(arista.aptitud, `la arista ${id} ↔ ${arista.hasta}`);
     }
   }
   return grafo;

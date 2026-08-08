@@ -7,6 +7,7 @@ import { dist } from '../core/geo.js';
 import { makeRng } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { crearIndiceDeNombres } from '../names/index.js';
+import { APTITUD_SUPUESTA } from './aptitud.js';
 import {
   COSER_MAX,
   MARCAS_DE_SUPOSICION,
@@ -45,6 +46,11 @@ function tramosDeCamino(grafo, ids) {
       metros: arista ? arista.metros : dist(pa, pb),
       suposicion: arista ? arista.suposicion : SUPOSICIONES.FALLBACK,
       rasgo: arista ? arista.rasgo : null,
+      // El nombre y la marca de aptitud viajan con el tramo, no se le vuelven a
+      // preguntar al grafo: quien declara un camino evitado necesita las dos y no
+      // tiene por qué conocer la estructura interna del grafo.
+      nombre: arista ? arista.nombre ?? null : null,
+      aptitud: arista ? arista.aptitud : APTITUD_SUPUESTA,
     });
   }
   return tramos;
@@ -59,6 +65,8 @@ function tramoRecto(desde, hasta) {
     metros: dist(desde, hasta),
     suposicion: SUPOSICIONES.FALLBACK,
     rasgo: null,
+    nombre: null,
+    aptitud: APTITUD_SUPUESTA,
   }];
 }
 
