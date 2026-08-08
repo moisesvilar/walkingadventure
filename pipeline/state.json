@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-014",
+  "spec_actual": "SPEC-015",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -140,6 +140,16 @@
       "casos": "848 casos: 845 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio",
       "nota": "la iteracion corrigio un requisito cumplido de forma vacia (decisiones 6o): el par se componia pero ninguna candidata pasaba por el."
+    },
+    {
+      "spec": "SPEC-014",
+      "slug": "npcs-capa",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-014-run-20260808T175929Z.md",
+      "casos": "883 casos: 880 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio",
+      "nota": "un AC de la spec chocaba con RF-NPC-002 y se resolvio a favor del requisito (decisiones 6p)."
     }
   ],
   "bloqueos": [],
