@@ -4,6 +4,7 @@
 import { dist, pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
 import { isSea } from './seamask.js';
 import { makeRng, randInt, shuffle } from '../core/rng.js';
+import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { POI_LABELS, crearIndiceDeNombres } from '../names/index.js';
 import { comparaClaveOsm } from './osm.js';
 
@@ -98,7 +99,11 @@ export function countsForRadius(r) {
  * disponibles para los parajes.
  */
 export function generateSettlements(anchors, geo, radius, seedStr, seaMask = null, names, indice = crearIndiceDeNombres()) {
-  const rng = makeRng(seedStr);
+  // Con sufijo de fase, como las demás. Hasta aquí esta fase derivaba su generador
+  // de la semilla pelada: no era un fallo de determinismo, pero la dejaba compartir
+  // flujo con cualquiera que llegara con la misma cadena y contradecía la regla de
+  // que tocar una fase no desplaza el azar de las otras (RNF-DET-001).
+  const rng = makeRng(seedStr + SUFIJOS_DE_FASE.nucleos);
   const settlements = [];
   const lakes = geo.lakes.filter((l) => polygonArea(l.pts) > 40000); // ignora estanques
 

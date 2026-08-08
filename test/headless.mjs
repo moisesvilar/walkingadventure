@@ -80,8 +80,13 @@ console.log('— parajes —');
   check('todos con coordenadas', w.parajes.every((p) => Number.isFinite(p.x) && Number.isFinite(p.y)));
   const anchored = w.parajes.filter((p) => p.origin === 'anclaje');
   check(`anclados a lugares reales: ${anchored.length}`, anchored.every((p) => p.real));
+  // Cuántos salen del grafo depende del mundo: los cruces y puentes que caen
+  // dentro del radio urbano de un núcleo se descartan a propósito (parajes.md, un
+  // paraje pegado a la ciudad no se siente paraje), y en este mundo sintético eso
+  // pasa o no según dónde hayan caído los núcleos. Lo que sí es garantía —que el
+  // colchón aparece cuando no hay anclajes— lo afirma el bloque de abajo.
   const graph = w.parajes.filter((p) => p.origin === 'grafo');
-  check(`del grafo (cruces/puentes): ${graph.length}`, graph.length >= 1 && graph.every((p) => p.type === 'cruce' || p.type === 'puente'));
+  check(`del grafo (cruces/puentes): ${graph.length}`, graph.every((p) => p.type === 'cruce' || p.type === 'puente'));
 }
 
 console.log('— colchón del grafo sin anclajes —');

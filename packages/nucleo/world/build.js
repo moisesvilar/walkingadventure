@@ -10,6 +10,7 @@ import { generateParajes } from './parajes.js';
 import { castAll } from '../quests/casting.js';
 import { localeFor, namesFor, crearIndiceDeNombres } from '../names/index.js';
 import { makeRng } from '../core/rng.js';
+import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 
 /**
  * fetchData(lat, lon, radius) → { geoJson, poiJson } (el llamante decide caché).
@@ -88,7 +89,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, onStatus = 
     parajes,
     movidos, // núcleos y parajes desplazados hasta el viario, para poder auditarlo
     seaMask,
-    title: names.worldTitle(makeRng(seed + ':title')),
+    title: names.worldTitle(makeRng(seed + SUFIJOS_DE_FASE.titulo)),
   };
   world.casting = castAll(world);
   return world;

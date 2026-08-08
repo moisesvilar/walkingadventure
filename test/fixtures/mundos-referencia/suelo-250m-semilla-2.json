@@ -4,8 +4,8 @@
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-002-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-002-iter-1: la entrada de datos del núcleo pasa a ordenarse por la clave estable de OSM y la unicidad de nombre pasa a ser del mundo entero, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-003",
+    "motivo_regeneracion": "Regenerado por SPEC-003: la fase de núcleos pasa a derivar su azar con sufijo propio (:nucleos) como el resto de las fases, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
@@ -18,35 +18,35 @@
   },
   "nucleos": [
     {
-      "nombre": "Lamiño",
+      "nombre": "Mirathar do Carballo",
       "tipo": "aldea",
-      "x": -2,
-      "y": -45,
+      "x": 141,
+      "y": 117,
       "anclaje": null
     },
     {
-      "nombre": "Soutozán da Brétema",
+      "nombre": "Soutozán",
       "tipo": "ciudad",
       "x": -32,
       "y": -118,
       "anclaje": "node/5323941422"
     },
     {
-      "nombre": "Casal da Néboa",
+      "nombre": "Casal do Carballo Torto",
       "tipo": "granja",
-      "x": 20,
-      "y": 191,
+      "x": 152,
+      "y": 96,
       "anclaje": null
     },
     {
-      "nombre": "Casal do Arado",
+      "nombre": "Casal do Espiño",
       "tipo": "granja",
-      "x": -79,
-      "y": 25,
+      "x": 11,
+      "y": 30,
       "anclaje": null
     },
     {
-      "nombre": "Miramar da Brétema",
+      "nombre": "Outeidre do Vento",
       "tipo": "pueblo",
       "x": 27,
       "y": -142,
@@ -55,42 +55,42 @@
   ],
   "servicios": [
     {
-      "nombre": "Forxa do Caldeiro Feiticeiro",
+      "nombre": "Forxa da Serea Feiticeira",
       "tipo": "armeria",
       "x": 102,
       "y": -178,
       "anclaje": "node/13742917501"
     },
     {
-      "nombre": "Botica da Serea Dourada",
+      "nombre": "Botica do Moucho Ledo",
       "tipo": "boticario",
       "x": -169,
       "y": -67,
       "anclaje": "node/3648044338"
     },
     {
-      "nombre": "Arcana da Espada Errante",
+      "nombre": "Arcana do Zafre Dourado",
       "tipo": "conjureria",
       "x": -139,
       "y": 6,
       "anclaje": "node/5844583387"
     },
     {
-      "nombre": "Mercado do Dragón Bailador",
+      "nombre": "Mercado do Carballo Dourado",
       "tipo": "mercado",
       "x": 130,
       "y": -183,
       "anclaje": "node/3643421606"
     },
     {
-      "nombre": "Pousada do Caldeiro Feiticeiro",
+      "nombre": "Pousada do Gato Argalleiro",
       "tipo": "posada",
       "x": 4,
       "y": -116,
       "anclaje": "node/3648044332"
     },
     {
-      "nombre": "Taberna do Moucho Dourado",
+      "nombre": "Taberna da Serea Dourada",
       "tipo": "taberna",
       "x": 17,
       "y": -135,
@@ -100,21 +100,49 @@
   "parajes": [],
   "calzadas": [
     {
-      "nombre": "A Calzada do Abrente Frío",
+      "nombre": "A Calzada da Solaina",
       "tipo": "calzada",
       "desde": [
-        -79,
-        25
+        141,
+        117
       ],
       "hasta": [
-        20,
-        191
+        152,
+        96
       ],
-      "puntos": 15,
+      "puntos": 3,
       "recta": false
     },
     {
-      "nombre": "A Calzada do Leste",
+      "nombre": "A Calzada do Norte",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        11,
+        30
+      ],
+      "puntos": 5,
+      "recta": false
+    },
+    {
+      "nombre": "A Senda de Mirathar do Carballo",
+      "tipo": "calzada",
+      "desde": [
+        27,
+        -142
+      ],
+      "hasta": [
+        141,
+        117
+      ],
+      "puntos": 9,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Abrente",
       "tipo": "calzada",
       "desde": [
         -32,
@@ -125,34 +153,6 @@
         -142
       ],
       "puntos": 4,
-      "recta": false
-    },
-    {
-      "nombre": "A Corredoira das Neves",
-      "tipo": "calzada",
-      "desde": [
-        -32,
-        -118
-      ],
-      "hasta": [
-        -79,
-        25
-      ],
-      "puntos": 10,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño do Abrente Frío",
-      "tipo": "calzada",
-      "desde": [
-        -32,
-        -118
-      ],
-      "hasta": [
-        -2,
-        -45
-      ],
-      "puntos": 3,
       "recta": false
     }
   ],

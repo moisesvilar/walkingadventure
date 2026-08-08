@@ -4,63 +4,63 @@
     "semilla": "42.40,-8.81#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-002-iter-1",
-    "motivo_regeneracion": "Regenerado por SPEC-002-iter-1: la entrada de datos del núcleo pasa a ordenarse por la clave estable de OSM y la unicidad de nombre pasa a ser del mundo entero, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-003",
+    "motivo_regeneracion": "Regenerado por SPEC-003: la fase de núcleos pasa a derivar su azar con sufijo propio (:nucleos) como el resto de las fases, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
   "radio_dibujo_m": 1200,
   "recuentos": {
     "nucleos": 7,
-    "servicios": 11,
-    "parajes": 3,
+    "servicios": 12,
+    "parajes": 5,
     "calzadas": 9
   },
   "nucleos": [
     {
-      "nombre": "Miratoño do Carballo",
-      "tipo": "aldea",
-      "x": -594,
-      "y": -129,
-      "anclaje": "node/5323981960"
-    },
-    {
-      "nombre": "Valtoño do Dragón",
+      "nombre": "Ferreimar da Moura",
       "tipo": "aldea",
       "x": -32,
       "y": -118,
       "anclaje": "node/5323941422"
     },
     {
-      "nombre": "Soutozán da Brétema",
+      "nombre": "Lamincelle do Corvo",
+      "tipo": "aldea",
+      "x": -594,
+      "y": -129,
+      "anclaje": "node/5323981960"
+    },
+    {
+      "nombre": "Soutozán",
       "tipo": "ciudad",
       "x": 229,
       "y": -244,
       "anclaje": "node/662618011"
     },
     {
-      "nombre": "Casal da Pedra Gris",
+      "nombre": "Casal do Arado",
       "tipo": "granja",
-      "x": 367,
-      "y": 433,
-      "anclaje": "node/3689211743"
+      "x": -230,
+      "y": -35,
+      "anclaje": "node/2897243760"
     },
     {
-      "nombre": "Casal do Carballo Torto",
-      "tipo": "granja",
-      "x": -201,
-      "y": 599,
-      "anclaje": "node/4502883744"
-    },
-    {
-      "nombre": "Casal dos Vagalumes",
+      "nombre": "Casal do Muíño Roto",
       "tipo": "granja",
       "x": 151,
       "y": 679,
       "anclaje": "node/3689212319"
     },
     {
-      "nombre": "Miramar da Brétema",
+      "nombre": "Casal dos Vagalumes",
+      "tipo": "granja",
+      "x": 235,
+      "y": -577,
+      "anclaje": "node/11598411069"
+    },
+    {
+      "nombre": "Outeidre do Vento",
       "tipo": "pueblo",
       "x": 495,
       "y": -115,
@@ -69,101 +69,122 @@
   ],
   "servicios": [
     {
-      "nombre": "Forxa do Caldeiro Feiticeiro",
+      "nombre": "Forxa da Serea Feiticeira",
       "tipo": "armeria",
       "x": 141,
       "y": -186,
       "anclaje": "node/5323999387"
     },
     {
-      "nombre": "Botica da Serea Dourada",
+      "nombre": "Botica do Moucho Ledo",
       "tipo": "boticario",
       "x": 326,
       "y": -210,
       "anclaje": "node/5026323093"
     },
     {
-      "nombre": "Arcana da Espada Errante",
+      "nombre": "Arcana do Zafre Dourado",
       "tipo": "conjureria",
       "x": 143,
       "y": -328,
       "anclaje": "node/5323989706"
     },
     {
-      "nombre": "Mercado do Cervo Durmido",
-      "tipo": "mercado",
+      "nombre": "Arcana do Zafre Durmido",
+      "tipo": "conjureria",
       "x": 513,
       "y": 15,
       "anclaje": "way/51954982"
     },
     {
-      "nombre": "Mercado do Dragón Bailador",
+      "nombre": "Mercado da Estrela Dourada",
+      "tipo": "mercado",
+      "x": 363,
+      "y": -210,
+      "anclaje": "node/3689211112"
+    },
+    {
+      "nombre": "Mercado do Carballo Dourado",
       "tipo": "mercado",
       "x": 27,
       "y": -142,
       "anclaje": "node/3648044335"
     },
     {
-      "nombre": "Pousada da Serea Dourada",
-      "tipo": "posada",
-      "x": 504,
-      "y": -156,
-      "anclaje": "way/25582680"
-    },
-    {
-      "nombre": "Pousada do Caldeiro Feiticeiro",
+      "nombre": "Pousada do Gato Argalleiro",
       "tipo": "posada",
       "x": 239,
       "y": -237,
       "anclaje": "node/3643421657"
     },
     {
-      "nombre": "Taberna da Coroa Bailadora",
-      "tipo": "taberna",
-      "x": 432,
-      "y": -118,
-      "anclaje": "node/7343578083"
+      "nombre": "Pousada do Grifo Vermello",
+      "tipo": "posada",
+      "x": 504,
+      "y": -156,
+      "anclaje": "way/25582680"
     },
     {
-      "nombre": "Taberna do Corvo Ledo",
+      "nombre": "Taberna da Serea Dourada",
       "tipo": "taberna",
-      "x": 4,
-      "y": -116,
-      "anclaje": "node/3648044332"
+      "x": 180,
+      "y": -271,
+      "anclaje": "node/662618417"
     },
     {
-      "nombre": "Taberna do Dragón Argalleiro",
+      "nombre": "Taberna do Corvo Durmido",
       "tipo": "taberna",
       "x": -626,
       "y": -267,
       "anclaje": "node/3648044336"
     },
     {
-      "nombre": "Taberna do Moucho Dourado",
+      "nombre": "Taberna do Grifo Feiticeiro",
       "tipo": "taberna",
-      "x": 180,
-      "y": -271,
-      "anclaje": "node/662618417"
+      "x": 4,
+      "y": -116,
+      "anclaje": "node/3648044332"
+    },
+    {
+      "nombre": "Taberna do Moucho Vermello",
+      "tipo": "taberna",
+      "x": 432,
+      "y": -118,
+      "anclaje": "node/7343578083"
     }
   ],
   "parajes": [
     {
-      "nombre": "A Torre Vixía do Solpor",
+      "nombre": "A Torre Vixía da Espera",
       "tipo": "atalaya",
       "x": -395,
       "y": -36,
       "anclaje": "node/3648044334"
     },
     {
-      "nombre": "A Capela do Peregrino",
-      "tipo": "ermita",
-      "x": -230,
-      "y": -35,
-      "anclaje": "node/2897243760"
+      "nombre": "A Encrucillada do Can Negro",
+      "tipo": "cruce",
+      "x": 27,
+      "y": 83,
+      "anclaje": null
     },
     {
-      "nombre": "O Pazo Queimado",
-      "tipo": "ruina",
+      "nombre": "O Cruce do Aforcado",
+      "tipo": "cruce",
+      "x": -287,
+      "y": 466,
+      "anclaje": null
+    },
+    {
+      "nombre": "A Capela da Candea",
+      "tipo": "ermita",
+      "x": -139,
+      "y": 6,
+      "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "A Poza Clara",
+      "tipo": "fuente",
       "x": -58,
       "y": 417,
       "anclaje": "way/551279363"
@@ -171,77 +192,21 @@
   ],
   "calzadas": [
     {
-      "nombre": "A Calzada do Nordés",
-      "tipo": "calzada",
-      "desde": [
-        229,
-        -244
-      ],
-      "hasta": [
-        495,
-        -115
-      ],
-      "puntos": 14,
-      "recta": false
-    },
-    {
-      "nombre": "A Calzada dos Ventos",
-      "tipo": "calzada",
-      "desde": [
-        367,
-        433
-      ],
-      "hasta": [
-        151,
-        679
-      ],
-      "puntos": 31,
-      "recta": false
-    },
-    {
-      "nombre": "A Corredoira das Neves",
-      "tipo": "calzada",
-      "desde": [
-        229,
-        -244
-      ],
-      "hasta": [
-        367,
-        433
-      ],
-      "puntos": 23,
-      "recta": false
-    },
-    {
-      "nombre": "A Senda de Miratoño do Carballo",
-      "tipo": "calzada",
-      "desde": [
-        -201,
-        599
-      ],
-      "hasta": [
-        -594,
-        -129
-      ],
-      "puntos": 36,
-      "recta": false
-    },
-    {
-      "nombre": "A Vella Ruta do Norte",
+      "nombre": "A Calzada das Neves",
       "tipo": "calzada",
       "desde": [
         -32,
         -118
       ],
       "hasta": [
-        -201,
-        599
+        151,
+        679
       ],
-      "puntos": 42,
+      "puntos": 54,
       "recta": false
     },
     {
-      "nombre": "O Camiño dos Ventos",
+      "nombre": "A Calzada do Noroeste",
       "tipo": "calzada",
       "desde": [
         229,
@@ -255,17 +220,73 @@
       "recta": false
     },
     {
-      "nombre": null,
-      "tipo": "ramal",
+      "nombre": "A Corredoira dos Ventos",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        -230,
+        -35
+      ],
+      "puntos": 55,
+      "recta": false
+    },
+    {
+      "nombre": "A Senda de Outeidre do Vento",
+      "tipo": "calzada",
+      "desde": [
+        229,
+        -244
+      ],
+      "hasta": [
+        495,
+        -115
+      ],
+      "puntos": 14,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño de Lamincelle do Corvo",
+      "tipo": "calzada",
       "desde": [
         -230,
         -35
       ],
       "hasta": [
-        -271,
-        534
+        -594,
+        -129
       ],
-      "puntos": 23,
+      "puntos": 48,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Mediodía",
+      "tipo": "calzada",
+      "desde": [
+        229,
+        -244
+      ],
+      "hasta": [
+        235,
+        -577
+      ],
+      "puntos": 3,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -139,
+        6
+      ],
+      "hasta": [
+        -316,
+        16
+      ],
+      "puntos": 2,
       "recta": false
     },
     {
@@ -276,10 +297,10 @@
         -36
       ],
       "hasta": [
-        -271,
-        534
+        -320,
+        -41
       ],
-      "puntos": 23,
+      "puntos": 2,
       "recta": false
     },
     {
@@ -290,10 +311,10 @@
         417
       ],
       "hasta": [
-        -176,
-        315
+        -90,
+        413
       ],
-      "puntos": 12,
+      "puntos": 2,
       "recta": false
     }
   ],
@@ -304,7 +325,7 @@
     },
     {
       "plantilla": "entrega-sospechosa",
-      "castea": true
+      "castea": false
     },
     {
       "plantilla": "peregrinaje",

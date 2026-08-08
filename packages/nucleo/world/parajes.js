@@ -9,6 +9,7 @@
 import { dist, pointPolylineDist, segIntersect, polygonBBox } from '../core/geo.js';
 import { isSea } from './seamask.js';
 import { makeRng, pick, shuffle } from '../core/rng.js';
+import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { footprintRadius } from './settlements.js';
 import { comparaClaveOsm } from './osm.js';
 import { crearIndiceDeNombres } from '../names/index.js';
@@ -132,7 +133,7 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
  * indice: índice de nombres del mundo, compartido con las demás familias.
  */
 export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres()) {
-  const rng = makeRng(seedStr + ':parajes');
+  const rng = makeRng(seedStr + SUFIJOS_DE_FASE.parajes);
   const target = parajeCountForRadius(radius);
   const routePls = routes.filter((r) => !r.fallback).map((r) => r.pts);
 
