@@ -72,6 +72,36 @@ Característica: El mundo es una función de la semilla y de los datos de OSM
 ```gherkin
 # language: es
 
+@nucleo @determinismo @privacidad
+Característica: La semilla es un dato de la partida, no una coordenada
+  La semilla lleva al jugador dentro, es corta y copiable, y de ella no se
+  puede deducir dónde vive nadie.
+  Fuente: alcance-del-mundo.md §1 · seguridad-privacidad.md §1
+  Hueco cerrado: RF-MUNDO-002, marcado «⚠ sin escenario» en docs/prd.md §4.1.
+
+  Escenario: Dos vecinos ven mundos distintos
+    Dado un jugador que levanta un mapa en "42.40,-8.81"
+    Y otro jugador que levanta un mapa en la misma coordenada
+    Cuando se comparan los dos mundos
+    Entonces difieren en los nombres de al menos un núcleo
+    Y difieren en la colocación de al menos un paraje
+
+  Escenario: Una semilla mal copiada se rechaza en vez de generar otro mundo
+    Dado un jugador que teclea una semilla con un símbolo cambiado
+    Cuando se valida la semilla
+    Entonces se rechaza nombrando que no cuadra
+    Y no se genera ningún mundo
+
+  Escenario: La semilla no contiene ninguna coordenada
+    Dado un mundo levantado en "42.40231,-8.80917"
+    Cuando se inspecciona la semilla de la partida
+    Entonces no aparece la coordenada exacta del jugador
+    Y no aparece la coordenada redondeada del anclaje
+```
+
+```gherkin
+# language: es
+
 @nucleo @determinismo
 Característica: Lo generado no se resiembra jamás
   Crecer es generar otra celda, nunca regenerar la tuya.
