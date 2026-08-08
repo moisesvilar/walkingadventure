@@ -6979,6 +6979,1118 @@
       "caso": "Un tramo declarado con el catálogo del arranque sirve igual que un número de metros",
       "hueco_de_bateria": true,
       "nota": "Segundo caso del mismo criterio: exigeTramoM es la única puerta y acepta tanto los metros ya resueltos como el estado del tramo del personaje, que es como llega de verdad."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable en el núcleo «Monfrida», cuando se cierra la salida, entonces existe un rumor en «Monfrida» en nivel 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Nace fiel y en el sitio",
+      "escenario": "Nace fiel y en el sitio"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo desenlace, cuando se revisan los demás núcleos del mapa, entonces no existe en ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Nace fiel y en el sitio",
+      "escenario": "Nace fiel y en el sitio"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una aventura terminada cuyo desenlace no es notable, cuando se cierra la salida, entonces no nace ningún rumor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El rumor solo aparece si el desenlace era notable",
+      "escenario": "El rumor solo aparece si el desenlace era notable",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 36."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una aventura cerrada en corto, cuando se cierra la salida, entonces no nace ningún rumor, aunque el desenlace de repuesto de su plantilla estuviera declarado notable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un cierre en corto no genera rumor",
+      "escenario": "Un cierre en corto no genera rumor",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 36."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una salida en la que no se cogió ninguna aventura, cuando se cierra, entonces no nace ningún rumor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un paseo sin aventura tiene telón completo menos desenlace",
+      "escenario": "Un paseo sin aventura tiene telón completo menos desenlace",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 36."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una plantilla, cuando se pregunta si su desenlace es notable, entonces la respuesta sale de la declaración de la plantilla y no se deduce del texto del desenlace ni de la recompensa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Si una plantilla es notable lo dice su declaración y no se deduce del texto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable, cuando nace su rumor, entonces lleva identidad propia, núcleo de origen, signo moral, nivel 0, los hechos en su versión fiel y la semilla con la que nació.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor recién nacido lleva identidad, origen, signo, nivel 0, los hechos fieles y su semilla",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable, cuando nace su rumor, entonces lleva identidad propia, núcleo de origen, signo moral, nivel 0, los hechos en su versión fiel y la semilla con la que nació.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Los hechos fieles salen de la semilla declarada por la plantilla",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable, cuando nace su rumor, entonces lleva identidad propia, núcleo de origen, signo moral, nivel 0, los hechos en su versión fiel y la semilla con la que nació.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Una semilla sin asunto o mal formada falla diciendo qué le falta",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable ocurrido en un paraje que no es núcleo, cuando nace su rumor, entonces nace en el núcleo del que cuelga ese paraje por el árbol de calzadas, en nivel 0, y ese enganche no cuenta como salto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un desenlace en un paraje nace en el núcleo del que cuelga y el enganche no cuenta como salto",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable ocurrido en un paraje que no es núcleo, cuando nace su rumor, entonces nace en el núcleo del que cuelga ese paraje por el árbol de calzadas, en nivel 0, y ese enganche no cuenta como salto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un paraje del mundo real cuelga del núcleo al que se llega por menos metros de calzada",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable, cuando se lee el signo del rumor, entonces es uno de los dos valores del enumerado cerrado y lo fija el código a partir del desenlace, nunca un texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El signo lo fija el código a partir del desenlace y nunca un texto",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable, cuando se lee el signo del rumor, entonces es uno de los dos valores del enumerado cerrado y lo fija el código a partir del desenlace, nunca un texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El signo es un enumerado cerrado de dos valores",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el rumor recién nacido, cuando se compara su versión con lo que ocurrió, entonces son la misma: en nivel 0 no hay ninguna deformación aplicada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Nace fiel y en el sitio",
+      "escenario": "Nace fiel y en el sitio",
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el rumor recién nacido, cuando se compara su versión con lo que ocurrió, entonces son la misma: en nivel 0 no hay ninguna deformación aplicada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "En nivel 0 no hay ninguna deformación aplicada",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos aventuras notables terminadas en la misma salida, cuando se cierra, entonces nacen dos rumores con identidades distintas y cada uno viaja por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos aventuras notables de la misma salida nacen con identidades distintas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor recién nacido, cuando se busca dónde se ha escrito, entonces está en el estado de la partida y el documento congelado de la celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor recién nacido se escribe en la partida y no en el documento de la celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en «Monfrida» y un núcleo vecino a dos tramos por calzada, cuando el mundo avanza un paso, entonces el rumor no ha llegado al vecino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Avanza un tramo por paso del mundo",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo caso, cuando el mundo avanza dos pasos, entonces el rumor ha llegado al vecino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Avanza un tramo por paso del mundo",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor, cuando el mundo da un paso, entonces su frente avanza exactamente un tramo de la jugadora, el mismo con el que ese paso se contó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El frente avanza el tramo con el que se contó ese paso, no una distancia fija",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una jugadora con un tramo de 600 m y otra con uno de 2 km, cuando las dos avanzan el mismo número de pasos, entonces sus rumores han recorrido el mismo número de tramos de sus mundos respectivos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El frente avanza el tramo con el que se contó ese paso, no una distancia fija",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor cuyo frente avanza, cuando la distancia recorrida no completa el trecho hasta el siguiente núcleo, entonces el resto se conserva y se suma en el paso siguiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El resto de metros del frente se conserva y se suma en el paso siguiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor, cuando se mide la distancia hasta un núcleo, entonces se mide sobre la longitud real de las calzadas del árbol y no en línea recta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "La distancia se mide sobre la longitud real de las calzadas y no en línea recta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor recién nacido en «Monfrida», cuando la jugadora va derecho al núcleo vecino sin entretenerse, entonces llega a la vez que la noticia o antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El jugador se puede adelantar a su propia fama",
+      "escenario": "El jugador se puede adelantar a su propia fama"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor y una salida en curso, cuando se completan los metros de un paso, entonces el rumor avanza durante la caminata y no al echar el telón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor avanza durante la caminata y no al echar el telón",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor, cuando el mundo no da ningún paso, entonces no avanza ni un metro, por mucho tiempo real que pase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Sin ningún paso del mundo el rumor no avanza ni un metro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el árbol de calzadas, cuando se pregunta por el camino entre dos núcleos, entonces hay exactamente uno, y es por el que viaja el rumor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Entre dos núcleos del árbol hay exactamente un camino, y es por el que viaja",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que se bifurca en un núcleo con tres calzadas, cuando avanza, entonces sigue por las tres ramas a la vez y cada una lleva su propio frente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor que se bifurca sigue por todas las ramas a la vez, cada una con su frente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo que ya oyó el rumor, cuando el frente vuelve a alcanzarlo por otra rama, entonces no lo vuelve a oír y su versión no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un núcleo que ya oyó el rumor no lo vuelve a oír por otra rama",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo que ya oyó el rumor, cuando el frente vuelve a alcanzarlo por otra rama, entonces no lo vuelve a oír y su versión no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Una entrada no se sobrescribe con otra más veraz",
+      "escenario": "Una entrada no se sobrescribe con otra más veraz",
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo al que el árbol no ofrece ningún camino desde el origen, cuando el rumor viaja indefinidamente, entonces nunca lo oye, y eso no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un núcleo al que el árbol no ofrece camino nunca lo oye, y eso no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos núcleos que el frente alcanza en el mismo paso, cuando se resuelve el orden en que se les entrega, entonces se resuelve por identificador de núcleo y no por orden de recorrido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos núcleos alcanzados en el mismo paso se entregan por identificador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor nacido en «Monfrida», cuando se pregunta el nivel que corresponde a 0 saltos por calzada real, entonces es 0.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La deformación cuenta saltos, no kilómetros",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente. Además, su fila «| 5 | 3 |» contradice a quests.md §6 —el frente deja de viajar al entregar en nivel 3— y la spec la reexpresa como propiedad de la función de nivel: se prueba que nivelDeSaltos(5) es 3, no que un núcleo a cinco saltos llegue a oírlo. Queda declarado como hueco: hay que resolverlo en la batería o en quests.md, no en el código."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo rumor, cuando se pregunta el nivel que corresponde a 1 salto, entonces es 1.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La deformación cuenta saltos, no kilómetros",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente. Además, su fila «| 5 | 3 |» contradice a quests.md §6 —el frente deja de viajar al entregar en nivel 3— y la spec la reexpresa como propiedad de la función de nivel: se prueba que nivelDeSaltos(5) es 3, no que un núcleo a cinco saltos llegue a oírlo. Queda declarado como hueco: hay que resolverlo en la batería o en quests.md, no en el código."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo rumor, cuando se pregunta el nivel que corresponde a 2 saltos, entonces es 2.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La deformación cuenta saltos, no kilómetros",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente. Además, su fila «| 5 | 3 |» contradice a quests.md §6 —el frente deja de viajar al entregar en nivel 3— y la spec la reexpresa como propiedad de la función de nivel: se prueba que nivelDeSaltos(5) es 3, no que un núcleo a cinco saltos llegue a oírlo. Queda declarado como hueco: hay que resolverlo en la batería o en quests.md, no en el código."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo rumor, cuando se pregunta el nivel que corresponde a 3 saltos, entonces es 3.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La deformación cuenta saltos, no kilómetros",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente. Además, su fila «| 5 | 3 |» contradice a quests.md §6 —el frente deja de viajar al entregar en nivel 3— y la spec la reexpresa como propiedad de la función de nivel: se prueba que nivelDeSaltos(5) es 3, no que un núcleo a cinco saltos llegue a oírlo. Queda declarado como hueco: hay que resolverlo en la batería o en quests.md, no en el código."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo rumor, cuando se pregunta el nivel que corresponde a 5 saltos, entonces es 3: el tope no se rebasa nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La deformación cuenta saltos, no kilómetros",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md pero como «Esquema del escenario», que scripts/valida-spec-test-map.mjs no indexa: solo reconoce las líneas «Escenario:». El caso lleva su nombre literal igualmente. Además, su fila «| 5 | 3 |» contradice a quests.md §6 —el frente deja de viajar al entregar en nivel 3— y la spec la reexpresa como propiedad de la función de nivel: se prueba que nivelDeSaltos(5) es 3, no que un núcleo a cinco saltos llegue a oírlo. Queda declarado como hueco: hay que resolverlo en la batería o en quests.md, no en el código."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor nacido en «Monfrida», cuando llega a un núcleo a un salto cruzando un tramo de calzada marcado `fallback`, entonces su nivel es 2.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Cruzar un tramo sin calzada real cuesta un nivel más",
+      "escenario": "Cruzar un tramo sin calzada real cuesta un nivel más",
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor nacido en «Monfrida», cuando llega a un núcleo a un salto cruzando un tramo de calzada marcado `fallback`, entonces su nivel es 2.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Un salto que cruza el monte suma un nivel sobre el salto",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor nacido en «Monfrida», cuando llega a un núcleo a un salto cruzando un tramo de calzada marcado `fallback`, entonces su nivel es 2.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Una calzada cosida de 1553 m entrega en nivel 1 y una fallback de 2153 m en nivel 2",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un salto cuyo camino contiene dos tramos de calzada `fallback`, cuando se calcula el nivel, entonces ese salto suma uno solo por el trozo sin calzada real, no uno por tramo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un salto con dos tramos fallback suma uno solo, no uno por tramo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un salto cuyo camino contiene una arista marcada `cosida`, cuando se calcula el nivel, entonces no suma nada: lo cosido no penaliza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Una arista cosida no penaliza y una fallback sí",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un salto cuyo camino contiene una arista marcada `cosida`, cuando se calcula el nivel, entonces no suma nada: lo cosido no penaliza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos caminos de un salto, uno cosido y otro sin ninguna suposición, llegan en el mismo nivel",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos caminos de un salto, uno con una arista `cosida` y otro sin ninguna suposición, cuando el rumor los recorre, entonces los dos núcleos lo reciben en el mismo nivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos caminos de un salto, uno cosido y otro sin ninguna suposición, llegan en el mismo nivel",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos caminos de un salto, uno con una arista `cosida` y otro sin ninguna suposición, cuando el rumor los recorre, entonces los dos núcleos lo reciben en el mismo nivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Una calzada cosida de 1553 m entrega en nivel 1 y una fallback de 2153 m en nivel 2",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos núcleos a 6 km de «Monfrida», y que al primero se llega por dos aldeas intermedias y al segundo directo, cuando el rumor alcanza a los dos, entonces el primero lo recibe más deformado que el segundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos núcleos a la misma distancia pueden recibir versiones distintas",
+      "escenario": "Dos núcleos a la misma distancia pueden recibir versiones distintas"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo que oye el rumor, cuando se compara su nivel con los kilómetros que el rumor recorrió hasta él, entonces el nivel no depende de esa distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El nivel no depende de los kilómetros recorridos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo que ya oyó el rumor en un nivel, cuando el mundo sigue avanzando pasos, entonces su nivel no cambia: se fija al llegar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El nivel de un núcleo se fija al llegar y no cambia después",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un tramo de calzada del camino sin marca de suposición declarada, cuando se calcula el nivel, entonces falla nombrando el tramo, en lugar de suponer que es calzada real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un tramo de calzada sin marca de suposición falla nombrando el tramo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un tramo de calzada del camino sin marca de suposición declarada, cuando se calcula el nivel, entonces falla nombrando el tramo, en lugar de suponer que es calzada real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Un tramo sin marca de suposición falla en lugar de pasar por calzada real",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un tramo de calzada del camino sin marca de suposición declarada, cuando se calcula el nivel, entonces falla nombrando el tramo, en lugar de suponer que es calzada real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El número de saltos tiene que ser un entero no negativo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la escalera de deformación, cuando se enumera, entonces tiene exactamente cuatro niveles con nombre: fiel, abultado, trastocado y leyenda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La escalera tiene exactamente cuatro peldaños con nombre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la escalera, cuando se busca un valor intermedio entre dos niveles, entonces no existe: es enumerada y no continua.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Entre dos niveles no hay ningún valor intermedio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en nivel 1, cuando se compara su versión con la fiel, entonces lo que ha cambiado es la escala de lo ocurrido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El nivel 1 cambia la escala de lo ocurrido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en nivel 2, cuando se compara con la fiel, entonces ha cambiado además el detalle que importa: el motivo, el lugar o con quién.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El nivel 2 cambia además el detalle que importa",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en nivel 2, cuando se compara con la fiel, entonces ha cambiado además el detalle que importa: el motivo, el lugar o con quién.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El detalle que importa son el motivo, el lugar y con quién",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en nivel 2, cuando se compara con la fiel, entonces ha cambiado además el detalle que importa: el motivo, el lugar o con quién.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Con un solo detalle conocido el nivel 2 lo pierde en lugar de fallar",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en nivel 3, cuando se compara con la fiel, entonces el hecho se atribuye a otra persona o se ha fundido con un rumor viejo del mismo núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El nivel 3 atribuye el hecho a otra persona o lo funde con un rumor viejo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor en nivel 3 en un núcleo donde no ha sedimentado ningún rumor anterior, cuando se deforma, entonces se resuelve por atribución a otra persona y no falla por no tener con qué fundirse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El nivel 3 sin ningún rumor viejo se resuelve por atribución y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una versión deformada, cuando se inspecciona, entonces los ejes que la deformación puede tocar son un catálogo cerrado y el signo moral no es uno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Los ejes deformables son un catálogo cerrado y el signo no es uno de ellos",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una versión deformada, cuando se inspecciona, entonces los ejes que la deformación puede tocar son un catálogo cerrado y el signo moral no es uno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Unos hechos que llevan el signo dentro se rechazan",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que llega a un núcleo, cuando se lee lo que allí se cuenta, entonces son hechos estructurados y un nivel, y el texto que los cuenta viaja aparte y puede no existir todavía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Lo que se cuenta son hechos estructurados y un nivel, y el texto viaja aparte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor cuyo texto no se ha podido redactar, cuando se lee lo que se cuenta en un núcleo, entonces el nivel, el signo y los hechos están completos igual y se puede caer al texto de la plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Una versión sin identidad de rumor, sin nivel o con un signo inválido no se puede guardar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el módulo de la deformación, cuando se inspecciona su implementación, entonces no llama a ningún narrador ni depende de que exista uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La comprobación del signo se resuelve sobre los datos y sin red, narrador ni texto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un nivel recibido fuera del rango de cero a tres, cuando se aplica la deformación, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Un nivel fuera del rango de cero a tres falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace en el que la jugadora ayudó a alguien, cuando el rumor llega a nivel 3, entonces la versión sigue siendo de un acto bueno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La versión de nivel 3 de un acto bueno sigue siendo de un acto bueno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo caso, cuando se compara la versión de nivel 3 con la fiel, entonces pueden haber cambiado la escala, el protagonista o el detalle.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La versión de nivel 3 de un acto bueno sigue siendo de un acto bueno",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo caso, cuando se compara la versión de nivel 3 con la fiel, entonces pueden haber cambiado la escala, el protagonista o el detalle.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La escalera es acumulativa y monótona en los ejes que toca",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace en el que la jugadora se portó mal, cuando el rumor llega a nivel 3, entonces la versión sigue siendo de un acto feo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La versión de nivel 3 de un acto feo sigue siendo de un acto feo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor, cuando se recorren todos los núcleos que lo han oído en todos los niveles, entonces el signo de cada versión es el del origen, sin ninguna excepción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La deformación no invierte el signo moral",
+      "escenario": "La deformación no invierte el signo moral"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el signo de un rumor, cuando se busca alguna operación que lo modifique, entonces no existe: se fija al nacer y es de solo lectura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "No existe ninguna operación que cambie el signo de un rumor ya nacido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una deformación que devolviera una versión con el signo cambiado, cuando se aplica, entonces se rechaza nombrando el rumor y el núcleo, y lo que allí se cuenta no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Una versión con el signo cambiado se rechaza nombrando el rumor y el núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la comprobación del signo, cuando se ejecuta, entonces se resuelve sobre los datos estructurados y sin ninguna red, ningún narrador y ningún texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "La comprobación del signo se resuelve sobre los datos y sin red, narrador ni texto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor nacido en «Monfrida», cuando el mundo avanza cincuenta pasos, entonces el rumor ya no viaja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El rumor se agota solo",
+      "escenario": "El rumor se agota solo"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo rumor, cuando se revisan los núcleos que lo oyeron, entonces ha sedimentado en lo que se cuenta en cada uno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El rumor se agota solo",
+      "escenario": "El rumor se agota solo"
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un frente que entrega el rumor a un núcleo en nivel 3, cuando el mundo sigue avanzando, entonces ese frente deja de viajar y los núcleos que quedaban más allá por esa rama no lo oyen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "La cadena de seis núcleos recibe 0, 1, 2 y 3, y los dos últimos no lo oyen nunca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que ya ha alcanzado todos los núcleos que el árbol le permite alcanzar, cuando el mundo avanza otro paso, entonces el rumor queda agotado y no se vuelve a recorrer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor que ya alcanzó todo lo que el árbol permite queda agotado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor agotado, cuando se ejecutan más pasos, entonces no produce ningún efecto y no consume ningún azar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "La cadena de seis núcleos recibe 0, 1, 2 y 3, y los dos últimos no lo oyen nunca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado lo que ha sedimentado en un núcleo, cuando pasan cien pasos más, entonces sigue siendo lo mismo: no caduca, no se olvida y no se degrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "La cadena de seis núcleos recibe 0, 1, 2 y 3, y los dos últimos no lo oyen nunca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mundo con veinte rumores activos a la vez, cuando el mundo avanza un paso, entonces los veinte avanzan y no hay ningún tope de rumores activos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Veinte rumores a la vez avanzan todos y no hay ningún tope",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor nuevo sobre un núcleo donde ya sedimentó otro, cuando llega, entonces los dos conviven y ninguno sustituye al otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor nuevo sobre un núcleo donde ya sedimentó otro convive con él",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la versión fiel de un rumor, cuando el rumor ha sedimentado deformado en varios núcleos, entonces la versión fiel se conserva y sigue siendo consultable para quien estuvo presente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "La versión fiel se conserva aunque haya sedimentado deformada en varios núcleos",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la versión fiel de un rumor, cuando el rumor ha sedimentado deformado en varios núcleos, entonces la versión fiel se conserva y sigue siendo consultable para quien estuvo presente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "El testigo directo es fiel y no corrige al pueblo",
+      "escenario": "El testigo directo es fiel y no corrige al pueblo",
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor agotado, cuando se serializa la partida y se vuelve a cargar, entonces vuelve agotado y no reanuda el viaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor agotado vuelve agotado y no reanuda el viaje",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo, cuando se pregunta qué se cuenta allí de la jugadora, entonces se obtienen las versiones que ese núcleo oyó, cada una con su nivel y su signo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Se pregunta núcleo a núcleo y cada uno devuelve su propia versión",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo, cuando se pregunta qué se cuenta allí de la jugadora, entonces se obtienen las versiones que ese núcleo oyó, cada una con su nivel y su signo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Se guarda la versión deformada",
+      "escenario": "Se guarda la versión deformada",
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo, cuando se pregunta qué se cuenta allí de la jugadora, entonces se obtienen las versiones que ese núcleo oyó, cada una con su nivel y su signo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Lo que se cuenta en un núcleo se devuelve congelado y no se puede reescribir por fuera",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos núcleos que oyeron el mismo suceso en niveles distintos, cuando se pregunta a cada uno, entonces cada uno devuelve su propia versión y no la del otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Se pregunta núcleo a núcleo y cada uno devuelve su propia versión",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado dos núcleos que oyeron el mismo suceso en niveles distintos, cuando se pregunta a cada uno, entonces cada uno devuelve su propia versión y no la del otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Lo que compras es la versión que ese informante oyó",
+      "escenario": "Lo que compras es la versión que ese informante oyó",
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable en «Monfrida» y un núcleo vecino al que llega el rumor, cuando se pregunta qué se cuenta en ese vecino, entonces allí ya saben quién es, aunque la jugadora no haya estado nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Se puede ser alguien en un pueblo donde no has estado",
+      "escenario": "Se puede ser alguien en un pueblo donde no has estado",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 15."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una jugadora que pasa por «Vilanova» cada día sin hacer nada allí, cuando el mundo avanza veinte pasos, entonces en «Vilanova» no ha llegado nada suyo y lo que allí se cuenta sigue vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "El rango sube por lo que llega, no por lo que se pisa",
+      "escenario": "El rango sube por lo que llega, no por lo que se pisa",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 15."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo que no ha oído nada, cuando se le pregunta, entonces devuelve que no hay nada que contar, y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Un núcleo que no ha oído nada devuelve que no hay nada que contar, y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la superficie pública de esta entrega, cuando se busca una consulta que devuelva el estado de todos los núcleos del mapa a la vez, entonces no existe: se pregunta núcleo a núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "No existe ninguna consulta que devuelva el estado de todos los núcleos del mapa",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la superficie pública de esta entrega, cuando se busca una consulta que devuelva el estado de todos los núcleos del mapa a la vez, entonces no existe: se pregunta núcleo a núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "El módulo dice en voz alta que no exporta ninguna consulta por mapa",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado lo que se entrega a la capa que pinta, cuando se inspecciona, entonces no lleva el nivel de deformación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "El nivel de deformación no sale nunca a pantalla",
+      "escenario": "El nivel de deformación no sale nunca a pantalla",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 16."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que llega a un núcleo, cuando se mira el efecto que el paso produce, entonces es de un tipo del catálogo cerrado de SPEC-011 y añade: no resta oro, ni baja ningún rango, ni retira nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Los efectos de un paso son del catálogo cerrado de SPEC-011 y solo añaden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una partida con dos mapas, cuando un rumor viaja en uno, entonces los núcleos del otro no oyen nada y su estado no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "El rango no viaja entre mapas",
+      "escenario": "El rango no viaja entre mapas",
+      "nota": "El escenario de la batería mira la pantalla; aquí se sostiene su mitad @nucleo, el dato del que cuelga. La pantalla es de la fila 15."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mapa nuevo levantado en otro sitio, cuando se pregunta qué se cuenta en sus núcleos, entonces no se cuenta nada de la jugadora en ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "En un mapa nuevo levantado en otro sitio no se cuenta nada de la jugadora",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que llega a dos núcleos con distinto nivel, cuando se lee lo que llegó a cada uno, entonces los dos datos permiten que la jugadora tenga un mote distinto en cada sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Lo que llega a dos núcleos con distinto nivel permite un mote distinto en cada sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el estado de un núcleo, cuando se busca dónde se guarda, entonces viaja con la partida y nunca dentro del documento congelado de ninguna celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Lo que se cuenta viaja con la partida y nunca dentro del documento de una celda",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el estado de un núcleo, cuando se busca dónde se guarda, entonces viaja con la partida y nunca dentro del documento congelado de ninguna celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Lo sedimentado vuelve de la partida con su nivel y su signo intactos",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo mundo, la misma partida y los mismos pasos, cuando se propaga dos veces desde cero, entonces los núcleos alcanzados, los niveles y las versiones son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Propagar dos veces desde cero da exactamente lo mismo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo mundo, la misma partida y los mismos pasos, cuando se propaga dos veces desde cero, entonces los núcleos alcanzados, los niveles y las versiones son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos partidas con semillas distintas cuentan cosas distintas del mismo suceso",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado el mismo mundo, la misma partida y los mismos pasos, cuando se propaga dos veces desde cero, entonces los núcleos alcanzados, los niveles y las versiones son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Deformar dos veces con la misma siembra da exactamente lo mismo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un paso, cuando la propagación consume azar, entonces lo deriva del azar que el motor le entrega para ese paso, con un sufijo propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Añadir otro productor de paso no desplaza los rumores ya sembrados",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un paso, cuando la propagación consume azar, entonces lo deriva del azar que el motor le entrega para ese paso, con un sufijo propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor avanza durante la caminata y no al echar el telón",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado que se añade otro productor de paso al motor, cuando se vuelve a propagar la misma partida, entonces los rumores salen idénticos a los de antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Añadir otro productor de paso no desplaza los rumores ya sembrados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado la deformación de un rumor en un núcleo, cuando se inspecciona su siembra, entonces depende del paso, del rumor y del núcleo, de modo que alcanzar un núcleo más no cambia lo que se contó en los anteriores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "La deformación se siembra por paso, rumor y núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ninguna iteración cuyo resultado dependa del orden de inserción de un `Set` o un `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Los módulos de la propagación no usan azar del sistema, ni el reloj, ni orden de inserción",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ninguna iteración cuyo resultado dependa del orden de inserción de un `Set` o un `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El orden en que se enteraron los núcleos no cambia lo que se escribe",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ninguna iteración cuyo resultado dependa del orden de inserción de un `Set` o un `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "Los módulos de la escalera no usan azar del sistema ni el reloj",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor a mitad de viaje, cuando se serializa la partida y se vuelve a cargar, entonces vuelve con su frente, su resto, sus núcleos alcanzados y sus niveles, y sigue exactamente donde estaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor a mitad de viaje vuelve de la partida exactamente donde estaba",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor a mitad de viaje, cuando se serializa la partida y se vuelve a cargar, entonces vuelve con su frente, su resto, sus núcleos alcanzados y sus niveles, y sigue exactamente donde estaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un rumor guardado sin identidad o con un signo inválido se rechaza al levantarlo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mundo congelado, cuando un rumor lo recorre entero durante cincuenta pasos, entonces el documento de cada celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un mundo congelado recorrido entero durante cincuenta pasos sigue idéntico byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspeccionan sus imports, entonces no importan `buildWorld` ni ninguna fase de la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Los módulos de la propagación no importan buildWorld ni ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un paso ejecutado sin ningún rumor activo, cuando se invoca este productor, entonces no produce ningún efecto y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un paso sin ningún rumor activo no produce nada y no falla",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un paso ejecutado sin ningún rumor activo, cuando se invoca este productor, entonces no produce ningún efecto y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un número de paso que no es un entero no negativo falla nombrándolo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mundo con un solo núcleo, cuando nace un rumor, entonces sedimenta ahí y no viaja a ninguna parte, sin error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un mundo de un solo núcleo sedimenta ahí y no viaja a ninguna parte",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mundo con un solo núcleo, cuando nace un rumor, entonces sedimenta ahí y no viaja a ninguna parte, sin error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reputacion.test.mjs",
+      "caso": "Un mundo de un solo núcleo también responde a la consulta, con lo suyo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mundo sin ninguna calzada real, donde todas están marcadas `fallback`, cuando el rumor viaja, entonces viaja igual y cada salto suma dos niveles.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "En un mundo sin ninguna calzada real cada salto suma dos niveles",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace cuya plantilla no declara si es notable, cuando se cierra la salida, entonces falla nombrando la plantilla, en lugar de suponer que no lo es.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Si una plantilla es notable lo dice su declaración y no se deduce del texto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que se intenta crear sin signo o con un signo fuera del enumerado, cuando nace, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El signo lo fija el código a partir del desenlace y nunca un texto",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un rumor que se intenta crear sin signo o con un signo fuera del enumerado, cuando nace, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/deformacion.test.mjs",
+      "caso": "El signo es un enumerado cerrado de dos valores",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 2 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo de origen que no existe en el mapa activo, cuando nace el rumor, entonces falla nombrando el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un núcleo de origen que no existe en el mapa activo falla nombrándolo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo de origen que no existe en el mapa activo, cuando nace el rumor, entonces falla nombrando el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Dos núcleos del mapa con el mismo nombre se rechazan al leer el árbol",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un núcleo de origen que no existe en el mapa activo, cuando nace el rumor, entonces falla nombrando el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "El estado de rumores mal formado y el mapa ausente fallan diciéndolo",
+      "hueco_de_bateria": true,
+      "nota": "El criterio se cubre con 3 casos: cada uno afirma una parte de lo que dice."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado una calzada del árbol sin longitud declarada, cuando el frente intenta avanzar por ella, entonces falla nombrando la calzada, en lugar de suponer una distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Una calzada sin longitud o sin tramos declarados falla nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un paso que llega sin el tramo con el que medir, cuando el rumor intenta avanzar, entonces falla nombrando el tramo que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un paso que llega sin el tramo con el que medir falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un paso en el que la propagación falla a mitad, cuando se lee el estado, entonces ni el contador ni lo que se cuenta en ningún núcleo han cambiado: el paso se aplica entero o no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un paso que falla a mitad no cambia ni el contador ni lo que se cuenta en ningún núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un mapa sin ningún núcleo, cuando se propaga, entonces no ocurre nada y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rumores.test.mjs",
+      "caso": "Un mapa sin ningún núcleo no hace nada y no falla",
+      "hueco_de_bateria": true
     }
   ]
 }
