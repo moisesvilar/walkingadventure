@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-012",
-  "fase": "dev",
+  "spec_actual": null,
+  "fase": "B2-en-curso",
   "iteracion": 0,
   "historial": [
     {
@@ -120,6 +120,15 @@
       "iteraciones": 0,
       "report": "test/reports/SPEC-011-run-20260808T143623Z.md",
       "casos": "618 casos: 615 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio"
+    },
+    {
+      "spec": "SPEC-012",
+      "slug": "propagacion-rumores",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-012-run-20260808T154710Z.md",
+      "casos": "727 casos: 724 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos: test/app/ vacio"
     }
   ],
