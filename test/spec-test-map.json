@@ -8091,6 +8091,1195 @@
       "fichero": "test/nucleo/rumores.test.mjs",
       "caso": "Un mapa sin ningún núcleo no hace nada y no falla",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa recién generado y todavía sin partida, cuando termina la generación, entonces el prólogo se ejecuta antes de que la partida quede disponible para jugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El prólogo deja algo que contar en al menos un núcleo alcanzable",
+      "hueco_de_bateria": true,
+      "nota": "Lo que el núcleo puede afirmar es que el prólogo deja el mapa listo antes de que la partida empiece: quién lo llama al terminar la generación es de la pantalla A1P5, fila 27."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se revisan los núcleos alcanzables del mapa, entonces en al menos uno de ellos hay algo que contar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El prólogo deja algo que contar en al menos un núcleo alcanzable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se lee el contador de pasos de la partida para ese mapa, entonces marca cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El contador de pasos de la partida sigue en cero al terminar el prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se lee el diario de la jugadora, entonces está vacío: el pasado del mundo está en los núcleos y solo entra en el diario yendo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El diario de la jugadora arranca vacío aunque el mundo tenga pasado",
+      "hueco_de_bateria": true,
+      "nota": "El diario es de la fila 16 y todavía no existe; se afirma lo que esta entrega puede afirmar: que el prólogo no devuelve ninguna entrada de diario."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se revisan los rumores del mapa, entonces puede haber rumores todavía en vuelo, y siguen viajando con los pasos que la jugadora ande.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un rumor que quedó en vuelo avanza con los pasos de la jugadora, sin trato especial",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un rumor que quedó en vuelo al terminar el prólogo, cuando la jugadora anda un paso, entonces ese rumor avanza como cualquier otro, sin ningún trato especial.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un rumor que quedó en vuelo avanza con los pasos de la jugadora, sin trato especial",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se busca alguna cifra suya expuesta a la capa de presentación —pasos ejecutados, intentos gastados, sucesos sembrados—, entonces no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El prólogo no expone ninguna cifra suya a la capa de presentación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo, cuando se inspecciona su implementación, entonces no llama a ningún narrador, no pide ninguna imagen y no necesita red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El prólogo no llama a ningún narrador, no pide ninguna imagen y no necesita red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un dispositivo sin cobertura una vez descargados los datos de OSM, cuando corre el prólogo, entonces termina entero y sin degradación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Sin cobertura, una vez descargados los datos de OSM, el prólogo termina entero",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por construcción: el núcleo no llama a nadie y el mundo congelado ya está en memoria, así que no hay red que apagar. La prueba con el inspector de red es de @red y vive en sin-red.test.mjs."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el paso `n` del intento `i` del prólogo, cuando se pide su semilla, entonces se deriva de lo mismo que sembró el mundo, con el mecanismo de semillas de fase de SPEC-003 y un sufijo propio que incluye el número de intento y el número de paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "La semilla de un paso del prólogo lleva el mapa, el intento y el número de paso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos partidas creadas con la misma semilla, en el mismo sitio y con el mismo tramo, cuando se comparan sus prólogos, entonces son idénticos: los mismos sucesos, en los mismos núcleos y en los mismos niveles.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Dos partidas con la misma semilla, sitio y tramo tienen prólogos idénticos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos partidas con la misma semilla y distinto oficio, cuando se comparan sus prólogos, entonces son idénticos: el oficio no entra en la siembra del prólogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El oficio y el nombre del personaje no entran en la siembra del prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos partidas con la misma semilla y distinto nombre o género gramatical del personaje, cuando se comparan sus prólogos, entonces son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El oficio y el nombre del personaje no entran en la siembra del prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo, cuando se inspecciona lo que entra en su siembra, entonces no entra ninguna fecha, ninguna hora, ningún dato del dispositivo ni ningún estado de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "En la siembra del prólogo no entra ninguna fecha, ni el dispositivo, ni el estado de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo de un mapa, cuando se compara con el prólogo de otro mapa de la misma partida, entonces sus semillas son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Dos mapas de la misma partida tienen semillas de prólogo distintas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el frente de un rumor del prólogo, cuando avanza, entonces avanza el tramo con el que se dimensionó el mapa y no el tramo vivo de la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El frente del prólogo avanza el tramo con el que se dimensionó el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa con su prólogo ya corrido, cuando el tramo de la jugadora cambia, entonces el prólogo no se recalcula ni se reescribe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Cambiar el tramo de la jugadora no recalcula ni reescribe un prólogo ya corrido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspecciona su implementación, entonces no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ninguna iteración cuyo resultado dependa del orden de inserción de un `Set` o un `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "En la siembra del prólogo no entra ninguna fecha, ni el dispositivo, ni el estado de la partida",
+      "hueco_de_bateria": true,
+      "nota": "El orden de inserción se cubre además con los recorridos ordenados de rumores.test.mjs y con el desempate estable del par, en arranque.test.mjs."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo, cuando se siembran sus sucesos, entonces cada uno nace en un núcleo del mapa, en nivel 0, y con la misma forma de rumor que fija SPEC-012.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Cada suceso nace en un núcleo del mapa, en nivel cero y con la forma de rumor de SPEC-012",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado los sucesos de un prólogo, cuando se pregunta quién los protagoniza, entonces ninguno los protagoniza la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Ningún suceso del prólogo lo protagoniza la jugadora",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se pregunta a cualquier núcleo qué se cuenta allí de la jugadora, entonces no se cuenta nada de ella en ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Ningún suceso del prólogo lo protagoniza la jugadora",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado los sucesos de un prólogo, cuando se leen sus signos morales, entonces cada uno es uno de los dos valores del enumerado cerrado de SPEC-012 y lo fija el código, nunca un texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Los signos de los sucesos salen del enumerado cerrado y los fija el código",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un suceso del prólogo, cuando viaja y se deforma, entonces usa la misma escalera de cuatro niveles y la misma invariante de signo que cualquier rumor de la partida, sin ninguna excepción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un suceso del prólogo se deforma con la misma escalera y la misma invariante de signo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado los sucesos de un prólogo, cuando se cuentan, entonces su número sale del parámetro declarado y nacen en núcleos distintos mientras haya núcleos donde repartirlos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Se siembran los sucesos del parámetro y nacen en núcleos distintos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa con menos núcleos que sucesos a sembrar, cuando corre el prólogo, entonces se siembran los que caben y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Con menos núcleos que sucesos se siembran los que caben y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un suceso del prólogo, cuando se lee su texto, entonces puede no existir todavía y el nivel, el signo y los hechos están completos igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un suceso puede no tener texto todavía y su nivel, su signo y sus hechos están completos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el catálogo de sucesos del prólogo, cuando se enumera, entonces es cerrado, y ninguno de sus miembros contradice el contenido apto para menores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El catálogo de sucesos del prólogo es cerrado y apto para menores",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un prólogo terminado que cumple la condición, cuando se lee el par compuesto, entonces son dos núcleos distintos, los dos alcanzables, que oyeron el mismo suceso en niveles distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El par compuesto son dos núcleos distintos, alcanzables, con el mismo suceso en niveles distintos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un prólogo terminado que cumple la condición, cuando se lee el par compuesto, entonces son dos núcleos distintos, los dos alcanzables, que oyeron el mismo suceso en niveles distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un rumor en vuelo hacia un núcleo no cuenta como que ese núcleo lo oyó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un intento de prólogo que no deja ningún par así, cuando se evalúa la condición, entonces el prólogo entero se resiembra y se vuelve a ejecutar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mundo en el que la condición no se cumple nunca gasta como mucho el tope y termina",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un intento resembrado, cuando se compara con el anterior, entonces difiere, porque el número de intento entra en la siembra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un intento resembrado difiere del anterior, porque el intento entra en la siembra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una resiembra, cuando se mira qué se conserva del intento anterior, entonces no se conserva nada: lo que quedó en los núcleos y en los rumores del intento fallido se descarta entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Una resiembra no conserva nada del intento anterior",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el primer intento que cumple la condición, cuando se evalúa, entonces el prólogo termina ahí y no se ejecuta ningún intento más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El primer intento que cumple la condición termina el prólogo y no se ejecuta ninguno más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos parejas de núcleos que cumplen la condición en el mismo intento, cuando se elige el par compuesto, entonces se elige una sola, por una regla declarada y estable que no depende del orden de recorrido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Con varios pares se elige por regla estable y no por orden de recorrido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un suceso que alcanzó dos núcleos en el mismo nivel, cuando se evalúa la condición con ese par, entonces no la cumple: hacen falta niveles distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Dos núcleos que oyeron el mismo suceso en el mismo nivel no componen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos núcleos que oyeron sucesos distintos, cuando se evalúa la condición con ese par, entonces no la cumple: tiene que ser el mismo suceso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Dos núcleos que oyeron sucesos distintos no componen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos núcleos que oyeron el mismo suceso en niveles distintos, pero uno de ellos no es alcanzable, cuando se evalúa la condición, entonces no la cumple.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un par con un núcleo que no es alcanzable no compone",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el par compuesto elegido, cuando se busca dónde queda registrado, entonces queda en el estado de la partida, con la identidad de los dos núcleos y la del suceso que comparten.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El par compuesto queda registrado en el estado de la partida con sus núcleos y su suceso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el mismo mundo congelado y la misma semilla, cuando se compone el prólogo dos veces desde cero, entonces se gasta el mismo número de intentos y sale el mismo par compuesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mismo mundo y la misma semilla gastan los mismos intentos y componen el mismo par",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un núcleo, cuando se pregunta si es alcanzable, entonces la respuesta sale de si existe camino por el grafo de calzadas desde el punto de partida de la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un núcleo es alcanzable si existe camino por el grafo desde el punto de partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un núcleo a 400 m en línea recta al otro lado de una ría, sin ningún camino por el grafo, cuando se pregunta si es alcanzable, entonces no lo es.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un núcleo a 400 m en línea recta al otro lado de una ría, sin camino por el grafo, no es alcanzable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un núcleo a varios kilómetros pero unido por calzada, cuando se pregunta si es alcanzable, entonces lo es.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un núcleo a varios kilómetros pero unido por calzada es alcanzable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el filtro de accesibilidad de la jugadora, cuando se resuelve la alcanzabilidad, entonces se resuelve sobre el grafo que ese filtro deja transitable, y no sobre el grafo entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La alcanzabilidad se resuelve sobre el grafo que el filtro deja transitable",
+      "hueco_de_bateria": true,
+      "nota": "El filtro de SPEC-008 evita y declara: penaliza el tramo no apto en vez de borrarlo, así que ningún criterio deja un núcleo sin camino. Lo verificable es que los criterios llegan hasta el medidor —uno inventado se rechaza nombrándolo— y que el prólogo le pasa los de la jugadora."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado la resolución de la alcanzabilidad, cuando se inspecciona su implementación, entonces no usa ninguna distancia en línea recta entre núcleos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La resolución de la alcanzabilidad no usa ninguna distancia en línea recta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el tope de intentos, cuando se busca de dónde sale, entonces hay una sola constante declarada, con su valor por defecto y su justificación escrita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Los cuatro parámetros del prólogo son constantes declaradas con su justificación escrita",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mundo en el que la condición no se cumple nunca, cuando corre el prólogo, entonces se ejecutan como mucho los intentos del tope y el proceso termina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mundo en el que la condición no se cumple nunca gasta como mucho el tope y termina",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el tope agotado, cuando se lee el estado del mapa, entonces conserva el prólogo del último intento: el mundo tiene pasado igualmente, solo que sin par compuesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Con el tope agotado el mapa conserva el prólogo del último intento y no hay par",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el tope agotado, cuando se lee el par compuesto, entonces no hay ninguno, y eso es un valor declarado y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Con el tope agotado el mapa conserva el prólogo del último intento y no hay par",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el tope agotado, cuando se mira lo que ve la jugadora, entonces no hay ningún aviso, ningún texto y ninguna pantalla que mencione que faltó algo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Con el tope agotado no hay ningún texto que mencione que faltó algo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el tope agotado, cuando se compone la lista de la primera aventura, entonces se compone con la regla normal del casting y el día no se queda vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Los mundos de referencia sin par componen su lista con la regla normal y sin ningún aviso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un tope que no es un entero positivo, cuando se lanza el prólogo, entonces falla nombrando el valor recibido, en lugar de correr sin tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un tope que no es un entero positivo falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo, cuando se busca en su implementación un bucle que dependa de que la condición acabe cumpliéndose, entonces no existe: el número de intentos está acotado por construcción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El número de intentos está acotado por construcción y no por que la condición se cumpla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mundo congelado, cuando el prólogo se resiembra ocho veces, entonces el documento de cada celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Ocho resiembras y el documento congelado de la celda sigue idéntico byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el mismo caso, cuando se comparan los nombres de núcleos, calzadas y parajes, entonces son los mismos después de la última resiembra que antes de la primera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Tras ocho resiembras los nombres, los anclajes y el grafo son los mismos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el mismo caso, cuando se comparan los anclajes reales gastados y los libres, entonces son los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Tras ocho resiembras los nombres, los anclajes y el grafo son los mismos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el mismo caso, cuando se compara el grafo de calzadas con sus marcas de suposición, entonces es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Tras ocho resiembras los nombres, los anclajes y el grafo son los mismos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado los módulos de esta entrega, cuando se inspeccionan sus imports, entonces no importan `buildWorld` ni ninguna fase de la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Los módulos del prólogo no importan buildWorld ni ninguna fase de la generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado la tubería de generación, cuando se enumeran sus fases, entonces el prólogo no es una de ellas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El prólogo no es una fase de la tubería de generación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un prólogo ejecutado, cuando se inspecciona lo que ha escrito, entonces escribe solo en el estado de la partida y nunca en el mundo congelado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Volver a generar la celda tras el prólogo la devuelve idéntica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un prólogo ejecutado, cuando se inspecciona lo que ha escrito, entonces escribe solo en el estado de la partida y nunca en el mundo congelado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Ocho resiembras y el documento congelado de la celda sigue idéntico byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa con su prólogo corrido, cuando se vuelve a generar la celda con la misma semilla y los mismos datos de OSM, entonces sale idéntica: el prólogo no entra en la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Volver a generar la celda tras el prólogo la devuelve idéntica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo de un intento, cuando todos los núcleos alcanzables han oído al menos un suceso, entonces el intento deja de dar pasos, aunque queden pasos de su tope sin gastar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El intento para en cuanto todos los núcleos alcanzables han oído algo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa en el que algún núcleo alcanzable nunca llega a oír nada, cuando el intento agota su tope de pasos, entonces termina ahí y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Si algún núcleo alcanzable nunca oye nada, el intento agota su tope y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el tope de pasos del prólogo, cuando se busca de dónde sale, entonces hay una sola constante declarada, con su valor por defecto y su justificación escrita, y ninguna fase lo recalcula por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Los cuatro parámetros del prólogo son constantes declaradas con su justificación escrita",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un prólogo terminado, cuando se revisan los niveles de lo que sedimentó en los núcleos alcanzables que oyeron algo, entonces al menos uno lo oyó por debajo del nivel máximo: el mundo no suena entero a leyenda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Al menos un núcleo que oyó algo lo oyó por debajo del nivel máximo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado dos mapas de tamaños distintos, cuando corren sus prólogos, entonces el número de pasos gastado puede ser distinto, porque el criterio es la cobertura y no la cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Dos mapas de tamaños distintos pueden gastar un número de pasos distinto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo, cuando se mide lo que tarda sobre un mundo congelado, entonces cabe holgadamente dentro del presupuesto de la generación de un mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El trabajo del prólogo está acotado por sus dos topes y no por lo que tarde",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma la cota de trabajo y no los milisegundos: una prueba de duración mediría la máquina y necesitaría el reloj real, que estas pruebas no tocan. El presupuesto de RNF-PER-001 se mide de verdad en @manual."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo terminado, cuando se lee la cola de entregas del mapa, entonces no está vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "La cola de entregas del mapa no está vacía tras el prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado las entradas sembradas, cuando se leen, entonces tienen la misma forma que las que la cola produce durante la partida, sin ningún campo propio del prólogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Las entradas sembradas tienen la forma de la cola y ningún campo propio del prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el número de entradas sembradas, cuando se busca de dónde sale, entonces hay una sola constante declarada con su valor por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Los cuatro parámetros del prólogo son constantes declaradas con su justificación escrita",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado las entradas sembradas, cuando se cuenta cuántas son de cada tipo, entonces hay al menos un encargo suelto, para que un día sin aventura del oficio no sea un día vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Entre las entradas sembradas hay al menos un encargo suelto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una entrada sembrada por el prólogo, cuando se comprueba si sigue su ciclo normal, entonces lo sigue: se ofrece, se puede ignorar y sedimenta como cualquier otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Las entradas sembradas tienen la forma de la cola y ningún campo propio del prólogo",
+      "hueco_de_bateria": true,
+      "nota": "El ciclo de vida de la cola es de la fila 19 y todavía no existe: lo verificable hoy es que la entrada sembrada es indistinguible de una normal, que es lo que hace que siga el ciclo cuando lo haya."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo, cuando se revisa qué aventuras ha dejado, entonces no ha dejado ninguna: las aventuras salen de castear plantillas contra el mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "El prólogo no deja ninguna aventura preparada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una cola de entregas que nadie consume todavía, cuando se lee, entonces devuelve sus entradas y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Una cola de entregas que nadie consume devuelve sus entradas y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un par compuesto y la primera lista de aventuras de la partida, cuando se compone, entonces sus candidatas son las que castean y además pasan por los dos núcleos del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Las candidatas de la primera lista son las que castean y además pasan por los dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una aventura candidata, cuando se comprueba si pasa por un núcleo del par, entonces la respuesta es que tiene al menos un beat situado en ese núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Pasar por un núcleo es tener al menos un beat allí, también por servicio o persona",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una aventura cuyo recorrido cruza un núcleo del par sin ningún beat allí, cuando se comprueba si pasa por él, entonces no pasa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Una aventura cuyo recorrido cruza un núcleo sin ningún beat allí no pasa por él",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mundo donde castean ocho plantillas y solo dos pasan por los dos núcleos, cuando se compone la primera lista, entonces las candidatas son esas dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Con ocho que castean y dos que pasan por los dos, las candidatas son esas dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mundo donde ninguna plantilla casteada pasa por los dos núcleos, cuando se compone la primera lista, entonces se compone con la regla normal del casting y el día no se queda vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Si ninguna pasa por los dos, la lista se compone con la regla normal y el día no se queda vacío",
+      "hueco_de_bateria": true,
+      "nota": "Sigue vigente tras la iteración 1, y ahora solo se alcanza por dos vías: el filtro de oficio, o un tamaño de salida menor que aquel con el que se validó el par."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mundo donde ninguna plantilla casteada pasa por los dos núcleos, cuando se compone la primera lista, entonces se compone con la regla normal del casting y el día no se queda vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Los mundos de referencia sin par componen su lista con la regla normal y sin ningún aviso",
+      "hueco_de_bateria": true,
+      "nota": "Sigue vigente tras la iteración 1, y ahora solo se alcanza por dos vías: el filtro de oficio, o un tamaño de salida menor que aquel con el que se validó el par."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el mismo caso, cuando se mira lo que ve la jugadora, entonces ningún texto menciona que la puesta en escena no se pudo hacer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Los mundos de referencia sin par componen su lista con la regla normal y sin ningún aviso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado la primera aventura ya aceptada, cuando se compone la segunda lista de la partida, entonces la regla de paso ya no se aplica y las candidatas son las que castean, sin más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Aceptar la primera aventura consume la regla y la segunda lista vuelve a ser la completa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una salida sin aceptar ninguna aventura, cuando se compone la lista siguiente, entonces la regla de paso sigue vigente: no la consume salir a andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Salir a andar sin aceptar ninguna aventura no consume la regla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una primera aventura aceptada y abandonada a mitad, cuando se compone la lista siguiente, entonces la regla de paso ya no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Una primera aventura aceptada y abandonada a mitad no reimpone la regla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa sin par compuesto, cuando se compone su primera lista, entonces la regla de paso no se aplica en absoluto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Sin par compuesto la regla de paso no se aplica en absoluto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el filtro de la primera aventura, cuando se comprueba con qué se combina, entonces se aplica encima del filtro de oficio y del casting, y no los sustituye ni los relaja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El filtro se aplica encima del casting y del filtro de oficio, y no los sustituye",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una aventura que dice pasar por un núcleo que no está en su cadena de beats, cuando se valida el filtro, entonces falla nombrando el núcleo, en lugar de aceptarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Una aventura que dice pasar por un núcleo que no está en su cadena de beats falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una partida recién creada con su prólogo corrido, cuando se lee el estado del arranque, entonces está abierto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Una partida recién creada con su prólogo corrido tiene el arranque abierto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el arranque abierto, cuando la jugadora llega a un núcleo donde lo que se cuenta es ella, contado por otros, entonces la condición de fin de arranque queda cumplida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Llegar a un núcleo donde lo que se cuenta es ella, contado por otros, cumple la condición",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado la condición cumplida, cuando se vuelve a llegar a ese núcleo o a cualquier otro donde se cuente algo suyo, entonces no se vuelve a cumplir: se marca una sola vez y no vuelve.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La condición se marca una sola vez y no vuelve",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el arranque abierto y un núcleo donde lo único que se cuenta son sucesos del prólogo, cuando la jugadora llega, entonces la condición no se cumple: los sucesos del prólogo no la protagonizan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un núcleo donde solo se cuentan sucesos del prólogo no cumple la condición",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el arranque abierto y un núcleo donde lo que se cuenta es la versión fiel que ella misma vio ocurrir, cuando llega, entonces la condición no se cumple: hace falta que se lo cuenten otros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La versión fiel que ella misma vio ocurrir no cumple la condición",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado la condición cumplida, cuando se busca qué entrega esta spec al respecto, entonces entrega el estado y su marca única, y ningún texto, ninguna cartela y ninguna página de diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La condición entrega el estado y su marca, y ningún texto ni cartela ni página de diario",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el estado del arranque, cuando se serializa la partida y se vuelve a cargar, entonces vuelve con el mismo valor y el hito no se vuelve a marcar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El estado del arranque se serializa y vuelve con el mismo valor, y el hito no se remarca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el estado del arranque, cuando se busca alguna forma de reabrirlo, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "No existe ninguna forma de reabrir el arranque",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el estado del arranque, cuando se busca alguna forma de reabrirlo, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La vía de cierre es un enumerado, para que la segunda del pendiente 1 quepa sin cambiar de forma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa nuevo levantado cuando el mundo crece por los bordes, cuando se genera, entonces también corre su prólogo y sus núcleos nacen con algo que contar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa que no es el primero corre su prólogo igual y sus núcleos nacen con algo que contar",
+      "hueco_de_bateria": true,
+      "nota": "Los tres arranques —partida, mapa nuevo por los bordes y mundo efímero— entran por la misma puerta: `primerMapa: false`. Quién levanta cada uno es de las filas 20 y 26."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mundo efímero levantado de vacaciones, cuando se genera, entonces también corre su prólogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa que no es el primero corre su prólogo igual y sus núcleos nacen con algo que contar",
+      "hueco_de_bateria": true,
+      "nota": "Mismo caso que el del mapa nuevo por los bordes: para el prólogo, un mundo efímero es un mapa que no es el primero."
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa que no es el primero de la partida, cuando corre su prólogo, entonces no se evalúa la condición de composición y no hay resiembra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "En un mapa que no es el primero no se evalúa la condición y no hay resiembra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa que no es el primero, cuando se compone su primera lista de aventuras, entonces la regla de paso no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Sin par compuesto la regla de paso no se aplica en absoluto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa que no es el primero, cuando se lee el estado del arranque, entonces no lo reabre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa que no es el primero no reabre el arranque",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el prólogo de un mapa, cuando siembra sus sucesos, entonces ninguno alcanza los núcleos de otro mapa de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Los sucesos del prólogo de un mapa no alcanzan los núcleos de otro mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado el mismo mundo congelado y la misma semilla, cuando se corre el prólogo dos veces desde cero, entonces los sucesos, los núcleos alcanzados, los niveles, el par compuesto y la cola sembrada son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Dos prólogos del mismo mundo con la misma semilla son idénticos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un prólogo corrido, cuando se serializa la partida y se vuelve a cargar, entonces vuelven lo sedimentado en cada núcleo, los rumores en vuelo con su frente, el par compuesto, la cola sembrada y el estado del arranque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un prólogo serializado y vuelto a cargar devuelve lo sedimentado, los frentes y el arranque",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado una partida cargada de un respaldo, cuando se lee su prólogo, entonces no se vuelve a ejecutar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Una partida cargada de un respaldo no vuelve a ejecutar su prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un paso del prólogo que falla al aplicarse, cuando se lee el estado del intento, entonces no ha avanzado: un paso se aplica entero o no se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un intento que falla a mitad no deja un prólogo a medias asentado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un intento que falla a mitad, cuando se lee el mapa, entonces el mundo congelado sigue intacto y el fallo se nombra sin dejar un prólogo a medias asentado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un intento que falla a mitad no deja un prólogo a medias asentado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa sin punto de partida declarado, cuando se lanza el prólogo, entonces falla nombrando el punto que falta, en lugar de suponer el centro del mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa sin punto de partida falla nombrando el punto que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa sin grafo de calzadas, cuando se lanza el prólogo, entonces falla nombrando lo que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa sin grafo de calzadas falla nombrando lo que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa sin el tramo con el que se dimensionó, cuando se lanza el prólogo, entonces falla nombrando el tramo que falta, en lugar de suponer uno por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa sin el tramo con el que se dimensionó falla nombrando el tramo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un par recibido con un núcleo que no existe en el mapa activo, cuando se valida, entonces falla nombrando el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un par recibido con un núcleo que no existe en el mapa activo falla nombrando el núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un par recibido con un núcleo que no existe en el mapa activo, cuando se valida, entonces falla nombrando el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un par que cita un núcleo que no existe en el mapa activo falla al filtrar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa con un solo núcleo, cuando corre el prólogo, entonces se siembra un suceso, no hay par compuesto y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa con un solo núcleo siembra un suceso, no compone par y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa sin ningún núcleo alcanzable desde el punto de partida, cuando corre el prólogo, entonces termina sin par compuesto y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa sin ningún núcleo alcanzable termina sin par y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013",
+      "criterio": "Dado un mapa marcado como sin contenido jugable, cuando corre el prólogo, entonces no siembra nada y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Un mapa marcado como sin contenido jugable no siembra nada y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado un par de núcleos alcanzables que oyeron el mismo suceso en niveles distintos, cuando se evalúa la condición de composición, entonces se exige además que exista una aventura del reparto del mapa con al menos un beat en cada uno de los dos, y sin ella el par no vale.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Sin una aventura del reparto con un beat en cada núcleo, el par no vale",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado «una aventura del reparto», cuando se resuelve qué significa en esa cláusula, entonces es una plantilla que castea sobre ese mundo y cuyo lazo cabe en el tamaño de salida con el que se compone la primera lista de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "«Aventura del reparto» es la que castea y cuyo lazo cabe en el tamaño de la primera salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado «pasa por el núcleo» en la condición de composición, cuando se compara con el predicado del filtro de la primera aventura, entonces es el mismo y no otro parecido: tener al menos un beat situado en ese núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "«Pasa por el núcleo» es el mismo predicado que aplica el filtro de la primera aventura",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado un par cuyos dos núcleos alojan beats pero en aventuras distintas, cuando se evalúa la condición, entonces no la cumple: hace falta una sola aventura que pase por los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Dos núcleos que alojan beats en aventuras distintas no componen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado un par de núcleos en los que ninguna aventura del reparto sitúa un beat —granjas y aldeas sin servicios, que es el caso medido—, cuando se evalúa la condición, entonces no la cumple y el prólogo se resiembra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Un par de núcleos donde ninguna aventura del reparto sitúa un beat no compone y el prólogo resiembra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado un par que cumple las tres primeras cláusulas y la cuarta, cuando se lee el par compuesto, entonces trae, además de los dos núcleos y el suceso que comparten, la identidad de la aventura que pasa por los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El par compuesto trae la identidad de la aventura que pasa por los dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado varios pares que cumplen las cuatro cláusulas en el mismo intento, cuando se elige uno, entonces se elige por la regla estable ya declarada —el suceso de identidad menor y, dentro de él, la pareja de identificadores de núcleo menor— y no por cuál tenga más aventuras que pasen por los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Con varios pares que cumplen las cuatro cláusulas se elige por la regla estable, no por cuál tenga más aventuras",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado la comprobación de la cláusula nueva, cuando se inspecciona de dónde saca las aventuras, entonces las saca del casting que ya viaja con el mundo, sin castear de nuevo por cada par evaluado y sin reabrir ninguna decisión del casting.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "La cláusula lee el casting que ya viaja con el mundo y no castea de nuevo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado dos partidas con la misma semilla y distinto oficio, cuando se comparan sus pares compuestos, entonces son el mismo: el filtro de oficio no entra en la condición de composición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El filtro de oficio no entra en la condición de composición",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por las dos vías: que el oficio no aparece en la composición, y que dos prólogos con distinto oficio son idénticos («El oficio y el nombre del personaje no entran en la siembra del prólogo», en prologo.test.mjs)."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado un mapa con menos de dos núcleos en los que alguna aventura del reparto sitúe un beat, cuando corre el prólogo, entonces la condición es inalcanzable por construcción, se corre un solo intento y se termina sin par compuesto, sin gastar el tope entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Con menos de dos núcleos con reparto se corre un solo intento y se termina sin par",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado ese mismo caso, cuando se mira lo que ve la jugadora, entonces no hay aviso, ni texto, ni pantalla que mencione que faltó algo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo.test.mjs",
+      "caso": "Con el tope agotado no hay ningún texto que mencione que faltó algo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado el mundo congelado `costero`, con cualquiera de sus dos semillas de referencia, cuando corre el prólogo y se compone la primera lista con el tamaño de salida con el que se validó el par, entonces hay par compuesto y al menos una candidata de la lista pasa por los dos núcleos del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado costero#1 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado el mundo congelado `costero`, con cualquiera de sus dos semillas de referencia, cuando corre el prólogo y se compone la primera lista con el tamaño de salida con el que se validó el par, entonces hay par compuesto y al menos una candidata de la lista pasa por los dos núcleos del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado costero#2 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado el mundo congelado `urbano-denso`, con cualquiera de sus dos semillas de referencia, cuando corre el prólogo y se compone la primera lista con ese mismo tamaño, entonces hay par compuesto y al menos una candidata pasa por los dos núcleos del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado urbano-denso#1 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado el mundo congelado `urbano-denso`, con cualquiera de sus dos semillas de referencia, cuando corre el prólogo y se compone la primera lista con ese mismo tamaño, entonces hay par compuesto y al menos una candidata pasa por los dos núcleos del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado urbano-denso#2 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquiera de esos cuatro casos, cuando se comprueba si la lista entregada es la degradada, entonces no lo es: el filtro se aplicó, dejó candidatas y la lista es un subconjunto en el que toda candidata tiene un beat en cada núcleo del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado costero#1 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquiera de esos cuatro casos, cuando se comprueba si la lista entregada es la degradada, entonces no lo es: el filtro se aplicó, dejó candidatas y la lista es un subconjunto en el que toda candidata tiene un beat en cada núcleo del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado costero#2 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquiera de esos cuatro casos, cuando se comprueba si la lista entregada es la degradada, entonces no lo es: el filtro se aplicó, dejó candidatas y la lista es un subconjunto en el que toda candidata tiene un beat en cada núcleo del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado urbano-denso#1 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquiera de esos cuatro casos, cuando se comprueba si la lista entregada es la degradada, entonces no lo es: el filtro se aplicó, dejó candidatas y la lista es un subconjunto en el que toda candidata tiene un beat en cada núcleo del par.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El mundo congelado urbano-denso#2 compone su par y pone la escena de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado los mundos congelados `barrio-tres-calles` y `suelo-250m`, cuando corre el prólogo, entonces se acepta que no haya par compuesto: no tienen reparto suficiente y la degradación es el comportamiento correcto, no un fallo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Los mundos de referencia sin par componen su lista con la regla normal y sin ningún aviso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado esos dos mundos sin par compuesto, cuando se compone su primera lista, entonces se compone con la regla normal del casting, no se queda vacía mientras el mundo tenga alguna aventura que quepa, y ningún texto menciona que la puesta en escena no se pudo hacer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Los mundos de referencia sin par componen su lista con la regla normal y sin ningún aviso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En barrio-tres-calles#1 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En barrio-tres-calles#2 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En costero#1 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En costero#2 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En suelo-250m#1 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En suelo-250m#2 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En urbano-denso#1 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquier mapa con par compuesto, cuando se compone la primera lista con el tamaño con el que se validó el par y sin filtro de oficio, entonces hay al menos una candidata que pasa por los dos por construcción, y el único camino por el que ese caso puede degradar es que el filtro de oficio las quite todas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "En urbano-denso#2 un par compuesto trae siempre una candidata que pasa por los dos",
+      "hueco_de_bateria": true,
+      "nota": "Es el caso que impide que la vacuidad vuelva: se corre sobre los ocho extractos y pone en rojo cualquier par compuesto por el que no pase ninguna candidata. Medido: en costero#1 hay parejas de núcleos sin ninguna aventura que pase por los dos, así que la afirmación no es trivialmente cierta."
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado un mapa con par compuesto, cuando se compone la primera lista con un tamaño de salida menor que aquel con el que se validó el par, entonces puede que ninguna candidata pase por los dos, y entonces degrada abriendo y en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Con un tamaño de salida menor que aquel con el que se validó el par, puede degradar en silencio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-013-iter-1",
+      "criterio": "Dado cualquiera de los cuatro mundos congelados y la misma semilla, cuando se corre el prólogo dos veces desde cero, entonces el par compuesto o su ausencia, la aventura que lo avala y el número de intentos gastados son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "El prólogo de un mundo de referencia es idéntico corrido dos veces",
+      "hueco_de_bateria": true,
+      "nota": "Sobre costero#1; el determinismo del par y de los intentos sobre mundos sintéticos está además en «El mismo mundo y la misma semilla gastan los mismos intentos y componen el mismo par»."
     }
   ]
 }
