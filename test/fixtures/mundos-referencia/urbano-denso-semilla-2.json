@@ -4,32 +4,32 @@
     "semilla": "40.42,-3.70#2",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-003",
-    "motivo_regeneracion": "Regenerado por SPEC-003: la fase de núcleos pasa a derivar su azar con sufijo propio (:nucleos) como el resto de las fases, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-005-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
   },
   "titulo": "Dominios de Miradia",
   "idioma": "es",
   "radio_dibujo_m": 1200,
   "recuentos": {
     "nucleos": 7,
-    "servicios": 14,
+    "servicios": 15,
     "parajes": 5,
-    "calzadas": 9
+    "calzadas": 10
   },
   "nucleos": [
     {
-      "nombre": "Calafrida la Vieja",
+      "nombre": "Ribaluna de los Vientos",
       "tipo": "aldea",
-      "x": -15,
-      "y": 781,
-      "anclaje": "node/5222964917"
+      "x": 701,
+      "y": 692,
+      "anclaje": "node/5029214892"
     },
     {
-      "nombre": "Torrecez del Alba",
+      "nombre": "Villacades",
       "tipo": "aldea",
-      "x": -383,
-      "y": -578,
-      "anclaje": "node/4957138051"
+      "x": -606,
+      "y": -260,
+      "anclaje": "node/5383807279"
     },
     {
       "nombre": "Albabriga del Roble",
@@ -41,30 +41,30 @@
     {
       "nombre": "Granja de la Colmena",
       "tipo": "granja",
-      "x": -776,
-      "y": -765,
-      "anclaje": "node/2077053455"
+      "x": -279,
+      "y": -775,
+      "anclaje": "node/11836002693"
     },
     {
-      "nombre": "Granja de la Niebla",
+      "nombre": "Granja de la Encina Torcida",
       "tipo": "granja",
-      "x": 101,
-      "y": 916,
-      "anclaje": "node/4293162917"
+      "x": 441,
+      "y": -206,
+      "anclaje": "node/3351649082"
     },
     {
-      "nombre": "Granja del Arado",
+      "nombre": "Granja de los Manzanos",
       "tipo": "granja",
-      "x": -584,
-      "y": -35,
-      "anclaje": "node/178821006"
+      "x": 132,
+      "y": -85,
+      "anclaje": "node/4177215773"
     },
     {
       "nombre": "Ferravento",
       "tipo": "pueblo",
-      "x": 388,
-      "y": -477,
-      "anclaje": "node/5325719508"
+      "x": 271,
+      "y": -265,
+      "anclaje": "node/2723834809"
     }
   ],
   "servicios": [
@@ -78,9 +78,9 @@
     {
       "nombre": "Forja del Yunque Rojo",
       "tipo": "armeria",
-      "x": 334,
-      "y": -502,
-      "anclaje": "node/5329727676"
+      "x": 217,
+      "y": -238,
+      "anclaje": "node/926177482"
     },
     {
       "nombre": "Botica de la Espada Dorada",
@@ -92,9 +92,9 @@
     {
       "nombre": "Botica del Farol Dorado",
       "tipo": "boticario",
-      "x": 334,
-      "y": -458,
-      "anclaje": "node/12810197250"
+      "x": 256,
+      "y": -315,
+      "anclaje": "node/13429616602"
     },
     {
       "nombre": "Arcana de la Luna Errante",
@@ -111,6 +111,13 @@
       "anclaje": "node/4671064646"
     },
     {
+      "nombre": "Posada de la Espada Astuta",
+      "tipo": "posada",
+      "x": 451,
+      "y": -201,
+      "anclaje": "node/4953243721"
+    },
+    {
       "nombre": "Posada de la Espada Dorada",
       "tipo": "posada",
       "x": -712,
@@ -118,46 +125,46 @@
       "anclaje": "way/1042066798"
     },
     {
-      "nombre": "Posada de la Estrella Errante",
+      "nombre": "Posada del Caldero Astuto",
       "tipo": "posada",
-      "x": -724,
-      "y": -752,
-      "anclaje": "node/2077053450"
-    },
-    {
-      "nombre": "Posada de la Sirena Risueña",
-      "tipo": "posada",
-      "x": -397,
-      "y": -598,
-      "anclaje": "node/5064733412"
+      "x": 136,
+      "y": -83,
+      "anclaje": "node/4171202754"
     },
     {
       "nombre": "Posada del Cuervo Risueño",
       "tipo": "posada",
-      "x": 380,
-      "y": -469,
-      "anclaje": "way/686207618"
+      "x": 262,
+      "y": -267,
+      "anclaje": "node/2723834799"
     },
     {
-      "nombre": "Taberna de la Luna Dormida",
-      "tipo": "taberna",
-      "x": -382,
-      "y": -576,
-      "anclaje": "node/5284621588"
+      "nombre": "Posada del Gato Plateado",
+      "tipo": "posada",
+      "x": -639,
+      "y": -311,
+      "anclaje": "node/9993666139"
     },
     {
-      "nombre": "Taberna del Búho Rojo",
+      "nombre": "Taberna de la Luna Errante",
       "tipo": "taberna",
-      "x": 2,
-      "y": 822,
-      "anclaje": "node/1388332887"
+      "x": -575,
+      "y": -266,
+      "anclaje": "node/4671411213"
     },
     {
       "nombre": "Taberna del Gato Danzarín",
       "tipo": "taberna",
-      "x": 396,
-      "y": -509,
-      "anclaje": "node/2546777613"
+      "x": 313,
+      "y": -273,
+      "anclaje": "node/4975520980"
+    },
+    {
+      "nombre": "Taberna del Grifo Encantado",
+      "tipo": "taberna",
+      "x": 702,
+      "y": 695,
+      "anclaje": "node/9050560233"
     },
     {
       "nombre": "Taberna del Roble Danzarín",
@@ -169,136 +176,136 @@
   ],
   "parajes": [
     {
-      "nombre": "La Atalaya del Ocaso",
+      "nombre": "La Torre Vigía de la Espera",
       "tipo": "atalaya",
-      "x": -368,
-      "y": -216,
-      "anclaje": "node/510812876"
+      "x": -143,
+      "y": 351,
+      "anclaje": "node/2622900853"
     },
     {
-      "nombre": "El Cruce del Perro Negro",
+      "nombre": "El Cruce del Mercader",
       "tipo": "cruce",
-      "x": -308,
-      "y": -355,
+      "x": 584,
+      "y": 208,
       "anclaje": null
     },
     {
-      "nombre": "La Encrucijada de las Brujas",
-      "tipo": "cruce",
-      "x": -350,
-      "y": 528,
-      "anclaje": null
-    },
-    {
-      "nombre": "El Santuario del Monte",
+      "nombre": "El Crucero del Peregrino",
       "tipo": "ermita",
-      "x": -447,
-      "y": -114,
-      "anclaje": "node/4660642942"
+      "x": -359,
+      "y": -589,
+      "anclaje": "node/5448876987"
     },
     {
-      "nombre": "El Monasterio de los Callados",
-      "tipo": "monasterio",
-      "x": -295,
-      "y": 829,
-      "anclaje": "node/2632228956"
+      "nombre": "El Manantial del Susurro",
+      "tipo": "fuente",
+      "x": 1018,
+      "y": 398,
+      "anclaje": "node/12584781201"
+    },
+    {
+      "nombre": "El Caserón de los Ecos",
+      "tipo": "ruina",
+      "x": -352,
+      "y": -260,
+      "anclaje": "node/510812830"
     }
   ],
   "calzadas": [
     {
-      "nombre": "El Camino de Ferravento",
+      "nombre": "El Camino de Ribaluna de los Vientos",
       "tipo": "calzada",
       "desde": [
-        -383,
-        -578
+        132,
+        -85
       ],
       "hasta": [
-        388,
-        -477
+        701,
+        692
       ],
-      "puntos": 84,
+      "puntos": 89,
       "recta": false
     },
     {
-      "nombre": "El Camino de las Brumas",
-      "tipo": "calzada",
-      "desde": [
-        -383,
-        -578
-      ],
-      "hasta": [
-        -776,
-        -765
-      ],
-      "puntos": 45,
-      "recta": false
-    },
-    {
-      "nombre": "El Paso del Sur",
-      "tipo": "calzada",
-      "desde": [
-        -584,
-        -35
-      ],
-      "hasta": [
-        -383,
-        -578
-      ],
-      "puntos": 88,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta de la Solana",
+      "nombre": "El Camino de Villacades",
       "tipo": "calzada",
       "desde": [
         -711,
         170
       ],
       "hasta": [
-        -584,
-        -35
+        -606,
+        -260
       ],
-      "puntos": 20,
+      "puntos": 76,
       "recta": false
     },
     {
-      "nombre": "La Vieja Ruta del Alba Fría",
+      "nombre": "El Camino del Alba",
+      "tipo": "calzada",
+      "desde": [
+        -606,
+        -260
+      ],
+      "hasta": [
+        271,
+        -265
+      ],
+      "puntos": 101,
+      "recta": false
+    },
+    {
+      "nombre": "El Paso del Este",
       "tipo": "calzada",
       "desde": [
         -711,
         170
       ],
       "hasta": [
-        -15,
-        781
+        132,
+        -85
       ],
-      "puntos": 72,
+      "puntos": 169,
       "recta": false
     },
     {
-      "nombre": "La Vieja Ruta del Nordeste",
+      "nombre": "La Calzada del Alba",
       "tipo": "calzada",
       "desde": [
-        -15,
-        781
+        132,
+        -85
       ],
       "hasta": [
-        101,
-        916
+        441,
+        -206
       ],
-      "puntos": 137,
+      "puntos": 17,
+      "recta": false
+    },
+    {
+      "nombre": "La Vieja Ruta del Sureste",
+      "tipo": "calzada",
+      "desde": [
+        -606,
+        -260
+      ],
+      "hasta": [
+        -279,
+        -775
+      ],
+      "puntos": 64,
       "recta": false
     },
     {
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -295,
-        829
+        -143,
+        351
       ],
       "hasta": [
-        -308,
-        794
+        -141,
+        388
       ],
       "puntos": 3,
       "recta": false
@@ -307,12 +314,26 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -368,
-        -216
+        -352,
+        -260
       ],
       "hasta": [
-        -327,
-        -202
+        -308,
+        -355
+      ],
+      "puntos": 10,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -359,
+        -589
+      ],
+      "hasta": [
+        -372,
+        -590
       ],
       "puntos": 2,
       "recta": false
@@ -321,12 +342,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -447,
-        -114
+        1018,
+        398
       ],
       "hasta": [
-        -445,
-        -101
+        956,
+        404
       ],
       "puntos": 2,
       "recta": false
@@ -339,11 +360,11 @@
     },
     {
       "plantilla": "entrega-sospechosa",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "peregrinaje",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "rescate-en-la-granja",
@@ -355,7 +376,7 @@
     },
     {
       "plantilla": "tres-pistas",
-      "castea": false
+      "castea": true
     }
   ]
 }

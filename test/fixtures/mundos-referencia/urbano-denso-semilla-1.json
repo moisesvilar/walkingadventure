@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-003",
-    "motivo_regeneracion": "Regenerado por SPEC-003: la fase de núcleos pasa a derivar su azar con sufijo propio (:nucleos) como el resto de las fases, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-005-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
   },
   "titulo": "Marcas de Kaelun",
   "idioma": "es",
@@ -18,18 +18,18 @@
   },
   "nucleos": [
     {
-      "nombre": "Hozbriga",
+      "nombre": "Castrocades",
       "tipo": "aldea",
-      "x": 435,
-      "y": -279,
-      "anclaje": "node/4907944788"
+      "x": -363,
+      "y": 310,
+      "anclaje": "node/5325719513"
     },
     {
-      "nombre": "Vegaverde del Alba",
+      "nombre": "Ferraverde",
       "tipo": "aldea",
-      "x": -781,
-      "y": -173,
-      "anclaje": "node/927878116"
+      "x": -272,
+      "y": 29,
+      "anclaje": "relation/18316567"
     },
     {
       "nombre": "Valmora",
@@ -39,32 +39,32 @@
       "anclaje": "node/623776661"
     },
     {
-      "nombre": "Granja de los Manzanos",
+      "nombre": "Granja de la Colmena",
       "tipo": "granja",
-      "x": 235,
-      "y": 1077,
-      "anclaje": "node/363997551"
+      "x": 60,
+      "y": 674,
+      "anclaje": "node/2717079169"
     },
     {
-      "nombre": "Granja del Arado",
+      "nombre": "Granja de la Niebla",
       "tipo": "granja",
-      "x": 192,
-      "y": 522,
-      "anclaje": "node/4224135949"
+      "x": -365,
+      "y": -195,
+      "anclaje": "node/2631133126"
     },
     {
-      "nombre": "Granja del Brezal",
+      "nombre": "Granja de las Cabras",
       "tipo": "granja",
-      "x": 459,
-      "y": 503,
-      "anclaje": "node/3636501443"
+      "x": 2,
+      "y": 822,
+      "anclaje": "node/1388332887"
     },
     {
       "nombre": "Ferrabriga de los Vientos",
       "tipo": "pueblo",
-      "x": 388,
-      "y": -477,
-      "anclaje": "node/5325719508"
+      "x": 271,
+      "y": -265,
+      "anclaje": "node/2723834809"
     }
   ],
   "servicios": [
@@ -78,9 +78,16 @@
     {
       "nombre": "Forja del Gato Rojo",
       "tipo": "armeria",
-      "x": 334,
-      "y": -458,
-      "anclaje": "node/12810197250"
+      "x": 256,
+      "y": -315,
+      "anclaje": "node/13429616602"
+    },
+    {
+      "nombre": "Botica del Cuervo Plateado",
+      "tipo": "boticario",
+      "x": -283,
+      "y": -6,
+      "anclaje": "node/3670167557"
     },
     {
       "nombre": "Botica del Roble Astuto",
@@ -92,9 +99,9 @@
     {
       "nombre": "Arcana de la Luna Danzarina",
       "tipo": "conjureria",
-      "x": 334,
-      "y": -502,
-      "anclaje": "node/5329727676"
+      "x": 217,
+      "y": -238,
+      "anclaje": "node/926177482"
     },
     {
       "nombre": "Arcana del Grifo Alegre",
@@ -111,18 +118,11 @@
       "anclaje": "node/4671064646"
     },
     {
-      "nombre": "Posada de la Luna Risueña",
-      "tipo": "posada",
-      "x": 197,
-      "y": 520,
-      "anclaje": "node/5064733418"
-    },
-    {
       "nombre": "Posada de la Sirena Danzarina",
       "tipo": "posada",
-      "x": 380,
-      "y": -469,
-      "anclaje": "way/686207618"
+      "x": 262,
+      "y": -267,
+      "anclaje": "node/2723834799"
     },
     {
       "nombre": "Posada del Caldero Errante",
@@ -134,16 +134,16 @@
     {
       "nombre": "Taberna de la Espada Alegre",
       "tipo": "taberna",
-      "x": 396,
-      "y": -509,
-      "anclaje": "node/2546777613"
+      "x": 313,
+      "y": -273,
+      "anclaje": "node/4975520980"
     },
     {
       "nombre": "Taberna del Caldero Dormido",
       "tipo": "taberna",
-      "x": 439,
-      "y": -268,
-      "anclaje": "node/8568795617"
+      "x": -362,
+      "y": 311,
+      "anclaje": "node/3237847436"
     },
     {
       "nombre": "Taberna del Ciervo Rojo",
@@ -153,145 +153,145 @@
       "anclaje": "node/6895672170"
     },
     {
-      "nombre": "Taberna del Yunque Dorado",
+      "nombre": "Taberna del Dragón Alegre",
       "tipo": "taberna",
-      "x": -782,
-      "y": -175,
-      "anclaje": "node/4660686396"
+      "x": -286,
+      "y": 38,
+      "anclaje": "node/9071663152"
     }
   ],
   "parajes": [
     {
-      "nombre": "El Cruce del Perro Negro",
+      "nombre": "La Atalaya del Fin",
+      "tipo": "atalaya",
+      "x": -303,
+      "y": 717,
+      "anclaje": "node/2681923270"
+    },
+    {
+      "nombre": "La Encrucijada de las Brujas",
       "tipo": "cruce",
-      "x": 328,
-      "y": 567,
+      "x": -350,
+      "y": 528,
       "anclaje": null
     },
     {
-      "nombre": "La Fuente del Susurro",
+      "nombre": "El Manantial de la Doncella",
       "tipo": "fuente",
-      "x": 472,
-      "y": 859,
-      "anclaje": "way/1545706579"
+      "x": -32,
+      "y": 315,
+      "anclaje": "node/13716868587"
     },
     {
-      "nombre": "La Abadía Gris",
+      "nombre": "La Abadía del Alba",
       "tipo": "monasterio",
-      "x": -464,
-      "y": -156,
-      "anclaje": "node/2569444822"
+      "x": -195,
+      "y": 517,
+      "anclaje": "node/13342702051"
     },
     {
-      "nombre": "El Torreón Olvidado",
+      "nombre": "La Torre Caída",
       "tipo": "ruina",
-      "x": -368,
-      "y": -71,
-      "anclaje": "node/5370215785"
-    },
-    {
-      "nombre": "El Torreón de los Ecos",
-      "tipo": "ruina",
-      "x": 206,
-      "y": -296,
-      "anclaje": "node/2955144792"
+      "x": 294,
+      "y": 622,
+      "anclaje": "node/2674514530"
     }
   ],
   "calzadas": [
     {
-      "nombre": "El Camino de Levante",
-      "tipo": "calzada",
-      "desde": [
-        -781,
-        -173
-      ],
-      "hasta": [
-        435,
-        -279
-      ],
-      "puntos": 119,
-      "recta": false
-    },
-    {
-      "nombre": "El Camino del Sur",
+      "nombre": "El Camino de Ferraverde",
       "tipo": "calzada",
       "desde": [
         -711,
         170
       ],
       "hasta": [
-        -781,
-        -173
+        -272,
+        29
       ],
-      "puntos": 12,
+      "puntos": 55,
       "recta": false
     },
     {
-      "nombre": "El Paso del Norte",
+      "nombre": "El Camino del Alba Fría",
       "tipo": "calzada",
       "desde": [
-        459,
-        503
+        -363,
+        310
       ],
       "hasta": [
-        235,
-        1077
+        2,
+        822
+      ],
+      "puntos": 32,
+      "recta": false
+    },
+    {
+      "nombre": "El Camino del Alba",
+      "tipo": "calzada",
+      "desde": [
+        -711,
+        170
+      ],
+      "hasta": [
+        -363,
+        310
+      ],
+      "puntos": 68,
+      "recta": false
+    },
+    {
+      "nombre": "La Calzada de las Brumas",
+      "tipo": "calzada",
+      "desde": [
+        -272,
+        29
+      ],
+      "hasta": [
+        -365,
+        -195
+      ],
+      "puntos": 26,
+      "recta": false
+    },
+    {
+      "nombre": "La Calzada del Nordeste",
+      "tipo": "calzada",
+      "desde": [
+        -363,
+        310
+      ],
+      "hasta": [
+        60,
+        674
+      ],
+      "puntos": 56,
+      "recta": false
+    },
+    {
+      "nombre": "La Senda de Ferrabriga de los Vientos",
+      "tipo": "calzada",
+      "desde": [
+        -365,
+        -195
+      ],
+      "hasta": [
+        271,
+        -265
       ],
       "puntos": 54,
       "recta": false
     },
     {
-      "nombre": "La Calzada de Levante",
-      "tipo": "calzada",
-      "desde": [
-        192,
-        522
-      ],
-      "hasta": [
-        459,
-        503
-      ],
-      "puntos": 5,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta del Este",
-      "tipo": "calzada",
-      "desde": [
-        -711,
-        170
-      ],
-      "hasta": [
-        192,
-        522
-      ],
-      "puntos": 120,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta del Sur",
-      "tipo": "calzada",
-      "desde": [
-        435,
-        -279
-      ],
-      "hasta": [
-        388,
-        -477
-      ],
-      "puntos": 6,
-      "recta": false
-    },
-    {
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -368,
-        -71
+        -195,
+        517
       ],
       "hasta": [
-        -363,
-        -65
+        -252,
+        446
       ],
       "puntos": 2,
       "recta": false
@@ -300,12 +300,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -464,
-        -156
+        -303,
+        717
       ],
       "hasta": [
-        -476,
-        -111
+        -314,
+        711
       ],
       "puntos": 2,
       "recta": false
@@ -314,12 +314,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        206,
-        -296
+        -32,
+        315
       ],
       "hasta": [
-        178,
-        -364
+        -22,
+        377
       ],
       "puntos": 2,
       "recta": false
@@ -328,14 +328,14 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        472,
-        859
+        294,
+        622
       ],
       "hasta": [
-        484,
-        866
+        295,
+        510
       ],
-      "puntos": 2,
+      "puntos": 4,
       "recta": false
     }
   ],

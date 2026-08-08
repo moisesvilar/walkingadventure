@@ -97,8 +97,8 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     semilla: seed,
     // La demanda llega inyectada si quien construye la sabe; si no, la que se
     // deduce del radio, que es la que las fases de abajo van a pedir de todas
-    // formas. Sin ninguna, el déficit sería siempre cero y los topes no tendrían
-    // contra qué relajarse.
+    // formas. Sin ninguna, el déficit sería siempre cero y el relleno de Places no
+    // sabría cuánto le toca cubrir.
     demanda: demanda ?? demandaDeAnclajes(radius),
     places,
     seaMask,
@@ -113,7 +113,11 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
   const movidos = pegarAViario(settlements, geo.roads);
   const routes = buildRoutes(settlements, geo.roads, seed, names, indiceNombres);
   await onStatus('parajes');
-  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names, indiceNombres, pool);
+  // Dónde se anota que una fase tuvo que saltarse los topes de diversidad. Lo
+  // declara el mundo y no el pool: desde SPEC-005-iter-1 el pool no aplica topes,
+  // y quien reparte es el único que sabe si le faltaban candidatos para su cupo.
+  const reparto = { relajaciones: [] };
+  const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, seaMask, names, indiceNombres, pool, reparto);
   // los parajes se enganchan a la red DESPUÉS de existir: hasta aquí no se sabe dónde
   // están, y algunos nacen precisamente de los cruces de las calzadas
   movidos.push(...pegarAViario(parajes.filter((p) => p.origin !== 'grafo'), geo.roads));
@@ -132,9 +136,12 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     parajes,
     movidos, // núcleos y parajes desplazados hasta el viario, para poder auditarlo
     // El pool, ya con lo que cada fase consumió: cuántos anclajes se admitieron, qué
-    // se descartó y por qué, si los topes hubo que relajarlos y si la celda se generó
-    // sin relleno de Places. Va como dato plano y se calcula al final a propósito.
+    // se descartó y por qué, y si la celda se generó sin relleno de Places. Va como
+    // dato plano y se calcula al final a propósito.
     pool: pool.resumen(),
+    // Y aparte, lo que el reparto tuvo que saltarse: vacío cuando los candidatos
+    // sobraban, que es el caso normal.
+    reparto,
     seaMask,
     title: names.worldTitle(makeRng(seed + SUFIJOS_DE_FASE.titulo)),
   };

@@ -1,7 +1,8 @@
 // El pool de anclajes reales de una celda: qué lugar del mundo real entra en el
 // juego, cuál se cae por no ser apto o por no aportar reconocimiento, y quién se
-// lo lleva. Dos etapas, porque la tubería las obliga: la admisión ocurre antes de
-// los núcleos y la puntuación cuando ya hay núcleos y calzadas.
+// lo lleva. Tres etapas, y el orden lo obliga la tubería: la admisión ocurre antes
+// de los núcleos, la puntuación cuando ya hay núcleos y calzadas, y el tope de
+// diversidad al final, sobre los candidatos que se le ofrecen a la fase que reparte.
 
 import { makeProjector, dist, pointPolylineDist } from '../core/geo.js';
 import { makeRng } from '../core/rng.js';
@@ -22,8 +23,7 @@ import { isSea } from './seamask.js';
  *            y clave del sesgo suave de tipo de paraje (BIAS en parajes.js).
  *   cat    — 'emplazamiento' | 'local': las aldeas prefieren emplazamientos y
  *            las granjas locales (settlements.js).
- *   weight — peso en el clúster que decide dónde nacen ciudades y pueblos, y
- *            también la preferencia al recortar por los topes.
+ *   weight — peso en el clúster que decide dónde nacen ciudades y pueblos.
  *
  * Nota de dimensionado: fuentes y manantiales entran con peso bajo a propósito.
  * Son anclaje de paraje, no motivo para fundar una ciudad, y en casco urbano hay
@@ -114,25 +114,18 @@ export const TIPOS_PROBLEMATICOS = [
  */
 export const ETIQUETAS_SIN_RECONOCIMIENTO = ['amenity=drinking_water'];
 
-/** Tope de cuántos anclajes puede aportar una sola etiqueta `clave=valor`. */
+/**
+ * Tope de cuántos candidatos puede aportar una sola etiqueta `clave=valor`.
+ *
+ * **No recorta el pool**, y eso es lo que cambió en SPEC-005-iter-1: aplicado en la
+ * admisión amputaba la materia prima del mundo antes de que existieran núcleos y
+ * calzadas —45 anclajes a 26 en el costero— y la casteabilidad se hundía. El tope
+ * vive ahora en el reparto, sobre los candidatos que se le ofrecen a cada fase.
+ */
 export const TOPE_POR_ETIQUETA = 0.25;
 
 /** Tope por `kind`, más laxo a propósito: varias etiquetas legítimas lo comparten. */
 export const TOPE_POR_KIND = 0.40;
-
-/**
- * Los escalones por los que se relajan los topes cuando el pool no llega al suelo.
- *
- * La diversidad es una preferencia; la jugabilidad de la celda no lo es
- * (`parajes.md`, el suelo de parajes es condición de que la celda sea jugable).
- * El último escalón es no aplicar tope ninguno.
- */
-const ESCALONES_DE_TOPE = [
-  [TOPE_POR_ETIQUETA, TOPE_POR_KIND],
-  [0.40, 0.60],
-  [0.60, 0.80],
-  [1, 1],
-];
 
 /** Descarte de una etiqueta entera: más de estas entradas y menos de esa fracción nombradas. */
 export const ENTRADAS_PARA_EXIGIR_NOMBRE = 20;
@@ -358,45 +351,6 @@ function descartaEtiquetasSinNombre(anclajes, cuenta) {
   return anclajes.filter((a) => !fuera.has(a.etiqueta));
 }
 
-// Preferencia al recortar: primero los mejor puntuados —el peso del catálogo, que
-// es lo único que se puede puntuar antes de que existan núcleos y calzadas—, a
-// igualdad los que tienen nombre, y el empate final lo rompe la clave estable.
-function ordenDePreferencia(a, b) {
-  if (a.weight !== b.weight) return b.weight - a.weight;
-  const na = a.name ? 1 : 0, nb = b.name ? 1 : 0;
-  if (na !== nb) return nb - na;
-  return comparaClaveOsm(a.osmId, b.osmId);
-}
-
-function recorta(anclajes, limiteEtiqueta, limiteKind) {
-  const porEtiqueta = new Map();
-  const porKind = new Map();
-  const vivos = [];
-  for (const a of [...anclajes].sort(ordenDePreferencia)) {
-    const ne = porEtiqueta.get(a.etiqueta) ?? 0;
-    const nk = porKind.get(a.kind) ?? 0;
-    if (ne >= limiteEtiqueta || nk >= limiteKind) continue;
-    porEtiqueta.set(a.etiqueta, ne + 1);
-    porKind.set(a.kind, nk + 1);
-    vivos.push(a);
-  }
-  return ordenaPorClave(vivos);
-}
-
-// Recortar baja el total y con él los topes, así que se itera hasta que el pool no
-// se mueve: si no, «el 25 % del total» sería el 25 % de un total que ya no existe.
-// El mínimo de uno evita que un pool de una sola etiqueta se quede en cero.
-function aplicaTopes(anclajes, topeEtiqueta, topeKind) {
-  let actual = anclajes;
-  for (let vuelta = 0; vuelta < 32 && actual.length; vuelta++) {
-    const total = actual.length;
-    const siguiente = recorta(actual, Math.max(1, Math.floor(total * topeEtiqueta)), Math.max(1, Math.floor(total * topeKind)));
-    if (siguiente.length === total) return siguiente;
-    actual = siguiente;
-  }
-  return actual;
-}
-
 function normalizaDemanda(demanda) {
   if (demanda == null) return { total: 0, suelo: 0 };
   if (typeof demanda === 'number') return { total: Math.max(0, demanda), suelo: Math.max(0, demanda) };
@@ -470,19 +424,10 @@ export function construyePool({ poiJson, lat0, lon0, semilla = null, demanda = n
     anclajes = [...anclajes, ...rellenados];
   }
 
-  // Los topes, y su relajación: la diversidad se recorta antes que la jugabilidad,
-  // pero no al revés. El pool declara si tuvo que relajarlos.
-  let escalon = 0;
-  let conTopes = aplicaTopes(anclajes, ESCALONES_DE_TOPE[0][0], ESCALONES_DE_TOPE[0][1]);
-  // Se relaja mientras falte para el suelo **y quede algo que recuperar**: un pool
-  // que ya está entero no llega al suelo por más que se aflojen los topes, y
-  // declarar que se relajaron ahí sería mentir sobre por qué la celda es pobre.
-  while (conTopes.length < exigido.suelo && conTopes.length < anclajes.length && escalon < ESCALONES_DE_TOPE.length - 1) {
-    escalon += 1;
-    conTopes = aplicaTopes(anclajes, ESCALONES_DE_TOPE[escalon][0], ESCALONES_DE_TOPE[escalon][1]);
-  }
-  cuenta.recortadosPorTope = anclajes.length - conTopes.length;
-  anclajes = conTopes;
+  // Aquí ya no se recorta nada: lo que pasó el filtro de tipos problemáticos, el
+  // catálogo, el descarte por falta de nombre, el radio y la máscara entra entero.
+  // El pool sigue contando cuánto aporta cada etiqueta y cada `kind` —es lo que
+  // consume quien reparte—, pero no decide con ello.
   deOsm = anclajes.filter((a) => a.fuente === 'osm').length;
   admitidosDePlaces = anclajes.length - deOsm;
 
@@ -496,8 +441,6 @@ export function construyePool({ poiJson, lat0, lon0, semilla = null, demanda = n
   return creaPool({
     anclajes,
     demanda: exigido,
-    topes: { etiqueta: ESCALONES_DE_TOPE[escalon][0], kind: ESCALONES_DE_TOPE[escalon][1] },
-    topesRelajados: escalon > 0,
     relleno: { fuente: ofreceRelleno ? 'places' : null, admitidos: admitidosDePlaces, sinRelleno: !ofreceRelleno || admitidosDePlaces === 0 },
     deOsm,
     descartes: cuenta,
@@ -518,7 +461,7 @@ function cuentaPor(anclajes, campo) {
  * error y no un no-op silencioso. Un fallo silencioso ahí produce mundos con el
  * mismo bar de taberna y de ruina sin que nada se ponga rojo.
  */
-export function creaPool({ anclajes = [], demanda = { total: 0, suelo: 0 }, topes = null, topesRelajados = false, relleno = null, deOsm = null, descartes = null } = {}) {
+export function creaPool({ anclajes = [], demanda = { total: 0, suelo: 0 }, relleno = null, deOsm = null, descartes = null } = {}) {
   const consumidos = new Map();
   const excluidos = new Set();
 
@@ -527,8 +470,6 @@ export function creaPool({ anclajes = [], demanda = { total: 0, suelo: 0 }, tope
   const pool = {
     anclajes,
     demanda,
-    topes,
-    topesRelajados,
     relleno,
     descartes,
     get deficit() {
@@ -582,8 +523,6 @@ export function creaPool({ anclajes = [], demanda = { total: 0, suelo: 0 }, tope
         dePlaces: anclajes.filter((a) => a.fuente === 'places').length,
         demanda,
         deficit: pool.deficit,
-        topes,
-        topesRelajados,
         relleno,
         porEtiqueta: cuentaPor(anclajes, 'etiqueta'),
         porKind: cuentaPor(anclajes, 'kind'),
@@ -641,4 +580,74 @@ export function puntuaCandidatos(anclajes, { settlements = [], routes = [], radi
     })
     // el empate lo rompe la clave estable de OSM, nunca el orden de llegada
     .sort((x, y) => y.puntos - x.puntos || comparaClaveOsm(x.a.osmId, y.a.osmId));
+}
+
+// Preferencia al recortar: primero los mejor puntuados, a igualdad los que tienen
+// nombre —el punto por nombre ya lo premia, pero a igualdad de puntos manda
+// explícitamente— y el empate final lo rompe la clave estable, nunca el orden de
+// llegada.
+function ordenDelRecorte(x, y) {
+  if (x.puntos !== y.puntos) return y.puntos - x.puntos;
+  const nx = x.a.name ? 1 : 0, ny = y.a.name ? 1 : 0;
+  if (nx !== ny) return ny - nx;
+  return comparaClaveOsm(x.a.osmId, y.a.osmId);
+}
+
+/**
+ * Etapa 3: el tope de diversidad, aplicado sobre los candidatos que se le ofrecen a
+ * una fase que reparte y **solo sobre su excedente**.
+ *
+ * Tres decisiones, y las tres salen de que aplicarlo antes hacía daño:
+ *   - se mide sobre los candidatos ofrecidos, no sobre los que la fase elige: con
+ *     cupos de 4 o 5, el 25 % de lo elegido es un anclaje por etiqueta, un tope
+ *     tan duro que volvería a competir con la jugabilidad;
+ *   - si los candidatos no llegan al cupo no se descarta ninguno: recortar donde
+ *     ya falta es exactamente el defecto que esta iteración corrige;
+ *   - la relajación es inmediata y sin escalera: se recuperan los mejores
+ *     descartados hasta cubrir el cupo, y quien reparte lo declara. La escalera de
+ *     escalones anterior recortaba otra vez antes de comprobar, así que relajaba
+ *     tarde y no relajaba nunca.
+ *
+ * @param {Array<{a: object, puntos: number}>} candidatos los de `puntuaCandidatos`.
+ * @param {number} cupo cuántos elementos va a colocar la fase.
+ * @returns `{ candidatos, relajado, recortados, recuperados }`, con los
+ *   supervivientes **en el orden en que llegaron**: recortar ordena a quién se
+ *   conserva, no en qué orden se reparte.
+ */
+export function recortaPorTopes(candidatos, cupo, { topeEtiqueta = TOPE_POR_ETIQUETA, topeKind = TOPE_POR_KIND } = {}) {
+  const n = candidatos.length;
+  const sinRecorte = { candidatos, relajado: false, recortados: 0, recuperados: 0 };
+  if (n === 0 || n <= cupo) return sinRecorte;
+
+  const limiteEtiqueta = Math.max(1, Math.floor(n * topeEtiqueta));
+  const limiteKind = Math.max(1, Math.floor(n * topeKind));
+
+  const porEtiqueta = new Map();
+  const porKind = new Map();
+  const vivos = new Set();
+  const descartados = [];
+  for (const c of [...candidatos].sort(ordenDelRecorte)) {
+    const ne = porEtiqueta.get(c.a.etiqueta) ?? 0;
+    const nk = porKind.get(c.a.kind) ?? 0;
+    if (ne >= limiteEtiqueta || nk >= limiteKind) { descartados.push(c); continue; }
+    porEtiqueta.set(c.a.etiqueta, ne + 1);
+    porKind.set(c.a.kind, nk + 1);
+    vivos.add(c.a.osmId);
+  }
+
+  // El recorte se detiene en el cupo: los descartados vienen ya en orden de
+  // preferencia, así que recuperar es recorrerlos hasta cubrirlo.
+  let recuperados = 0;
+  for (const c of descartados) {
+    if (vivos.size >= cupo) break;
+    vivos.add(c.a.osmId);
+    recuperados += 1;
+  }
+
+  return {
+    candidatos: candidatos.filter((c) => vivos.has(c.a.osmId)),
+    relajado: recuperados > 0,
+    recortados: n - vivos.size,
+    recuperados,
+  };
 }

@@ -11,7 +11,7 @@ import { isSea } from './seamask.js';
 import { makeRng, pick, shuffle } from '../core/rng.js';
 import { SUFIJOS_DE_FASE } from '../core/semilla.js';
 import { footprintRadius } from './settlements.js';
-import { puntuaCandidatos } from './anclajes.js';
+import { puntuaCandidatos, recortaPorTopes } from './anclajes.js';
 import { crearIndiceDeNombres } from '../names/index.js';
 
 // Tipos cuyo emplazamiento sale de un anclaje real; cruce y puente se derivan del grafo.
@@ -133,8 +133,11 @@ function bridgeCandidates(routes, rivers, settlements, radius) {
  * indice: índice de nombres del mundo, compartido con las demás familias.
  * pool: el registro de uso único de la celda, si quien genera lo lleva; los
  *   parajes anclados avisan de lo que consumen para que conste quién se lo llevó.
+ * reparto: dónde anotar que esta fase tuvo que saltarse los topes de diversidad,
+ *   si quien genera lo lleva. Lo declara el mundo y no el pool, porque desde
+ *   SPEC-005-iter-1 el pool no aplica topes y no puede declarar algo que no es suyo.
  */
-export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres(), pool = null) {
+export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres(), pool = null, reparto = null) {
   const rng = makeRng(seedStr + SUFIJOS_DE_FASE.parajes);
   const target = parajeCountForRadius(radius);
 
@@ -148,7 +151,22 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   // Etapa 2 del pool: cerca de ruta suma, dentro del radio urbano resta y el nombre
   // propio desempata. No consume azar de esta fase — el desempate lo trae cada
   // anclaje de la suya —, así que puntuar dos veces da el mismo orden.
-  const scored = puntuaCandidatos(eligible, { settlements, routes, radius });
+  const puntuados = puntuaCandidatos(eligible, { settlements, routes, radius });
+
+  // Etapa 3: el tope de diversidad, sobre los candidatos que se le ofrecen a esta
+  // fase y solo si sobran. Aquí es donde tiene sentido —hay un cupo con el que
+  // compararse—; en la admisión del pool recortaba materia prima del mundo entero.
+  const recorte = recortaPorTopes(puntuados, target);
+  const scored = recorte.candidatos;
+  if (reparto && recorte.relajado) {
+    reparto.relajaciones.push({
+      fase: 'parajes',
+      cupo: target,
+      candidatos: puntuados.length,
+      recuperados: recorte.recuperados,
+      motivo: 'respetar los topes de diversidad dejaba menos candidatos que el cupo de la fase',
+    });
+  }
 
   // Candidatos del grafo (colchón garantizado sin Overpass).
   const graphCands = shuffle(rng, [

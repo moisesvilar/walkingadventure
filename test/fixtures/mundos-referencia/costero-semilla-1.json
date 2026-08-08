@@ -4,32 +4,32 @@
     "semilla": "42.40,-8.81#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-003",
-    "motivo_regeneracion": "Regenerado por SPEC-003: la fase de núcleos pasa a derivar su azar con sufijo propio (:nucleos) como el resto de las fases, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-005-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
   },
   "titulo": "Reinos de Vaeloria",
   "idioma": "gl",
   "radio_dibujo_m": 1200,
   "recuentos": {
     "nucleos": 7,
-    "servicios": 10,
-    "parajes": 3,
-    "calzadas": 9
+    "servicios": 11,
+    "parajes": 5,
+    "calzadas": 11
   },
   "nucleos": [
     {
-      "nombre": "Ferreiño a Vella",
-      "tipo": "aldea",
-      "x": -58,
-      "y": 417,
-      "anclaje": "way/551279363"
-    },
-    {
-      "nombre": "Outeiláns da Moura",
+      "nombre": "Castronova do Vento",
       "tipo": "aldea",
       "x": -594,
       "y": -129,
       "anclaje": "node/5323981960"
+    },
+    {
+      "nombre": "Sabrenova do Vento",
+      "tipo": "aldea",
+      "x": -58,
+      "y": 417,
+      "anclaje": "way/551279363"
     },
     {
       "nombre": "Lamivella do Corvo",
@@ -39,69 +39,69 @@
       "anclaje": "node/662618011"
     },
     {
-      "nombre": "Casal das Cabras",
+      "nombre": "Casal da Pedra Gris",
       "tipo": "granja",
-      "x": 504,
-      "y": -156,
-      "anclaje": "way/25582680"
+      "x": -230,
+      "y": -35,
+      "anclaje": "node/2897243760"
     },
     {
-      "nombre": "Casal do Espiño",
+      "nombre": "Casal do Carballo Torto",
       "tipo": "granja",
-      "x": 513,
-      "y": 15,
-      "anclaje": "way/51954982"
+      "x": 4,
+      "y": -116,
+      "anclaje": "node/3648044332"
     },
     {
       "nombre": "Casal dos Salgueiros",
       "tipo": "granja",
-      "x": -126,
-      "y": 589,
-      "anclaje": null
+      "x": 235,
+      "y": -577,
+      "anclaje": "node/11598411069"
     },
     {
       "nombre": "Castroláns a Vella",
       "tipo": "pueblo",
-      "x": 17,
-      "y": -135,
-      "anclaje": "node/3648044330"
+      "x": 495,
+      "y": -115,
+      "anclaje": "node/7343578013"
     }
   ],
   "servicios": [
     {
       "nombre": "Forxa do Corvo Ledo",
       "tipo": "armeria",
+      "x": 141,
+      "y": -186,
+      "anclaje": "node/5323999387"
+    },
+    {
+      "nombre": "Botica da Estrela Argalleira",
+      "tipo": "boticario",
+      "x": 326,
+      "y": -210,
+      "anclaje": "node/5026323093"
+    },
+    {
+      "nombre": "Arcana da Espada Feiticeira",
+      "tipo": "conjureria",
+      "x": 363,
+      "y": -210,
+      "anclaje": "node/3689211112"
+    },
+    {
+      "nombre": "Arcana do Farol Argalleiro",
+      "tipo": "conjureria",
       "x": 143,
       "y": -328,
       "anclaje": "node/5323989706"
     },
     {
-      "nombre": "Botica da Estrela Argalleira",
-      "tipo": "boticario",
-      "x": 140,
-      "y": -240,
-      "anclaje": "node/5323998615"
-    },
-    {
-      "nombre": "Arcana da Espada Feiticeira",
-      "tipo": "conjureria",
-      "x": 212,
-      "y": -210,
-      "anclaje": "node/6144955636"
-    },
-    {
-      "nombre": "Arcana do Farol Argalleiro",
-      "tipo": "conjureria",
-      "x": 102,
-      "y": -178,
-      "anclaje": "node/13742917501"
-    },
-    {
       "nombre": "Mercado da Estrela Durmida",
       "tipo": "mercado",
-      "x": 157,
-      "y": -247,
-      "anclaje": "node/662618475"
+      "x": 513,
+      "y": 15,
+      "anclaje": "way/51954982"
     },
     {
       "nombre": "Mercado do Xabarín Ledo",
@@ -113,53 +113,74 @@
     {
       "nombre": "Pousada da Serea Prateada",
       "tipo": "posada",
-      "x": 4,
-      "y": -116,
-      "anclaje": "node/3648044332"
+      "x": 504,
+      "y": -156,
+      "anclaje": "way/25582680"
     },
     {
       "nombre": "Pousada do Caldeiro Durmido",
       "tipo": "posada",
-      "x": 216,
-      "y": -253,
-      "anclaje": "node/662617847"
+      "x": 239,
+      "y": -237,
+      "anclaje": "node/3643421657"
+    },
+    {
+      "nombre": "Taberna da Serea Argalleira",
+      "tipo": "taberna",
+      "x": -626,
+      "y": -267,
+      "anclaje": "node/3648044336"
     },
     {
       "nombre": "Taberna do Farol Ledo",
       "tipo": "taberna",
-      "x": 130,
-      "y": -183,
-      "anclaje": "node/3643421606"
+      "x": 432,
+      "y": -118,
+      "anclaje": "node/7343578083"
     },
     {
       "nombre": "Taberna do Gato Prateado",
       "tipo": "taberna",
-      "x": 295,
-      "y": -208,
-      "anclaje": "node/3689211114"
+      "x": 180,
+      "y": -271,
+      "anclaje": "node/662618417"
     }
   ],
   "parajes": [
     {
-      "nombre": "A Atalaia do Solpor",
+      "nombre": "A Torre Vixía da Fin",
       "tipo": "atalaya",
-      "x": -32,
-      "y": -118,
-      "anclaje": "node/5323941422"
+      "x": -201,
+      "y": 599,
+      "anclaje": "node/4502883744"
     },
     {
-      "nombre": "A Poza do Marmurio",
-      "tipo": "fuente",
-      "x": 342,
-      "y": -210,
-      "anclaje": "node/5026323233"
+      "nombre": "A Capela do Monte",
+      "tipo": "ermita",
+      "x": 367,
+      "y": 433,
+      "anclaje": "node/3689211743"
     },
     {
-      "nombre": "O Pozo Xeado",
+      "nombre": "A Fonte Xeada",
       "tipo": "fuente",
-      "x": 187,
-      "y": -224,
-      "anclaje": "node/2629000605"
+      "x": -395,
+      "y": -36,
+      "anclaje": "node/3648044334"
+    },
+    {
+      "nombre": "A Pedra das Runas",
+      "tipo": "piedra",
+      "x": -139,
+      "y": 6,
+      "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "A Fortaleza dos Ecos",
+      "tipo": "ruina",
+      "x": 151,
+      "y": 679,
+      "anclaje": "node/3689212319"
     }
   ],
   "calzadas": [
@@ -167,8 +188,8 @@
       "nombre": "A Calzada das Neves",
       "tipo": "calzada",
       "desde": [
-        17,
-        -135
+        4,
+        -116
       ],
       "hasta": [
         -58,
@@ -178,49 +199,49 @@
       "recta": false
     },
     {
-      "nombre": "A Calzada do Leste",
+      "nombre": "A Calzada do Noroeste",
       "tipo": "calzada",
       "desde": [
         229,
         -244
       ],
       "hasta": [
-        504,
-        -156
+        4,
+        -116
       ],
-      "puntos": 14,
+      "puntos": 7,
       "recta": false
     },
     {
-      "nombre": "A Calzada do Norte",
+      "nombre": "A Calzada do Sur",
       "tipo": "calzada",
       "desde": [
         -58,
         417
       ],
       "hasta": [
-        -126,
-        589
+        -230,
+        -35
       ],
-      "puntos": 9,
+      "puntos": 41,
       "recta": false
     },
     {
-      "nombre": "O Camiño de Castroláns a Vella",
+      "nombre": "A Vella Ruta do Mediodía",
       "tipo": "calzada",
       "desde": [
         229,
         -244
       ],
       "hasta": [
-        17,
-        -135
+        235,
+        -577
       ],
-      "puntos": 7,
+      "puntos": 3,
       "recta": false
     },
     {
-      "nombre": "O Camiño de Outeiláns da Moura",
+      "nombre": "O Camiño de Castronova do Vento",
       "tipo": "calzada",
       "desde": [
         -58,
@@ -234,29 +255,29 @@
       "recta": false
     },
     {
-      "nombre": "O Camiño do Norte",
+      "nombre": "O Camiño do Nordés",
       "tipo": "calzada",
       "desde": [
-        504,
-        -156
+        229,
+        -244
       ],
       "hasta": [
-        513,
-        15
+        495,
+        -115
       ],
-      "puntos": 4,
+      "puntos": 14,
       "recta": false
     },
     {
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -32,
-        -118
+        -139,
+        6
       ],
       "hasta": [
-        83,
-        -15
+        -316,
+        16
       ],
       "puntos": 2,
       "recta": false
@@ -265,28 +286,56 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        187,
-        -224
+        -201,
+        599
       ],
       "hasta": [
-        157,
+        -277,
+        526
+      ],
+      "puntos": 10,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        -395,
+        -36
+      ],
+      "hasta": [
+        -320,
+        -41
+      ],
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        151,
+        679
+      ],
+      "hasta": [
+        -90,
+        413
+      ],
+      "puntos": 23,
+      "recta": false
+    },
+    {
+      "nombre": null,
+      "tipo": "ramal",
+      "desde": [
+        367,
+        433
+      ],
+      "hasta": [
+        149,
         -59
       ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": null,
-      "tipo": "ramal",
-      "desde": [
-        342,
-        -210
-      ],
-      "hasta": [
-        320,
-        -44
-      ],
-      "puntos": 2,
+      "puntos": 20,
       "recta": false
     }
   ],
@@ -297,19 +346,19 @@
     },
     {
       "plantilla": "entrega-sospechosa",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "peregrinaje",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "rescate-en-la-granja",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "ronda-del-vigia",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "tres-pistas",
