@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: los ramales a parajes dejan de nacer sin nombre y la marca de suposición baja al nivel de tramo, así que el orden estable del extracto (tipo|nombre|posición) cambia para los ramales y su recuento en el índice de nombres desplaza el azar de las fases posteriores."
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Reinos do Carballo Eterno",
   "idioma": "gl",
@@ -58,29 +58,29 @@
     {
       "nombre": "A Encrucillada do Mercador",
       "tipo": "cruce",
-      "x": 315,
-      "y": 39,
+      "x": -94,
+      "y": -458,
       "anclaje": null
     },
     {
-      "nombre": "A Encrucillada dos Xuramentos",
+      "nombre": "O Cruce das Meigas",
       "tipo": "cruce",
-      "x": -107,
-      "y": -391,
+      "x": -159,
+      "y": 163,
       "anclaje": null
     },
     {
       "nombre": "O Cruce do Mercador",
       "tipo": "cruce",
-      "x": 187,
-      "y": -229,
+      "x": 207,
+      "y": 341,
       "anclaje": null
     },
     {
-      "nombre": "A Ponte da Peaxe",
+      "nombre": "A Ponte Vella",
       "tipo": "puente",
-      "x": -141,
-      "y": 26,
+      "x": 95,
+      "y": -416,
       "anclaje": null
     }
   ],
@@ -110,7 +110,7 @@
         -264,
         72
       ],
-      "puntos": 79,
+      "puntos": 83,
       "recta": false
     },
     {

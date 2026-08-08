@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: los ramales a parajes dejan de nacer sin nombre y la marca de suposición baja al nivel de tramo, así que el orden estable del extracto (tipo|nombre|posición) cambia para los ramales y su recuento en el índice de nombres desplaza el azar de las fases posteriores."
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Marcas de Kaelun",
   "idioma": "es",
@@ -162,68 +162,54 @@
   ],
   "parajes": [
     {
-      "nombre": "La Torre Vigía de las Señales",
+      "nombre": "La Atalaya del Fin",
       "tipo": "atalaya",
-      "x": -519,
-      "y": -231,
-      "anclaje": "way/629873316"
+      "x": -505,
+      "y": -286,
+      "anclaje": "way/629874170"
     },
     {
-      "nombre": "El Cruce del Ahorcado",
+      "nombre": "La Encrucijada de los Juramentos",
       "tipo": "cruce",
-      "x": -350,
-      "y": 528,
+      "x": -232,
+      "y": -186,
       "anclaje": null
     },
     {
-      "nombre": "El Crucero del Peregrino",
-      "tipo": "ermita",
-      "x": -714,
-      "y": -239,
-      "anclaje": "way/107465469"
+      "nombre": "El Monasterio de los Callados",
+      "tipo": "monasterio",
+      "x": -76,
+      "y": 668,
+      "anclaje": "way/1270441425"
     },
     {
-      "nombre": "El Altar de la Mora",
+      "nombre": "El Menhir del Alba",
       "tipo": "piedra",
-      "x": -917,
-      "y": -231,
-      "anclaje": "way/95564940"
+      "x": -76,
+      "y": -223,
+      "anclaje": "node/13730222901"
     },
     {
-      "nombre": "La Muralla Caída",
+      "nombre": "La Fortaleza Caída",
       "tipo": "ruina",
-      "x": -303,
-      "y": 717,
-      "anclaje": "node/2681923270"
+      "x": -195,
+      "y": 517,
+      "anclaje": "node/13342702051"
     }
   ],
   "calzadas": [
     {
-      "nombre": "El Camino de Ferraverde",
+      "nombre": "El Camino de Ferrabriga de los Vientos",
       "tipo": "calzada",
       "desde": [
-        -711,
-        170
+        -365,
+        -195
       ],
       "hasta": [
-        -272,
-        29
+        271,
+        -265
       ],
-      "puntos": 55,
-      "recta": false
-    },
-    {
-      "nombre": "El Camino del Alba Fría",
-      "tipo": "calzada",
-      "desde": [
-        -363,
-        310
-      ],
-      "hasta": [
-        2,
-        822
-      ],
-      "puntos": 32,
+      "puntos": 40,
       "recta": false
     },
     {
@@ -237,25 +223,39 @@
         -363,
         310
       ],
-      "puntos": 68,
+      "puntos": 24,
       "recta": false
     },
     {
-      "nombre": "La Calzada de las Brumas",
+      "nombre": "El Camino del Mediodía",
       "tipo": "calzada",
       "desde": [
+        -363,
+        310
+      ],
+      "hasta": [
         -272,
         29
       ],
-      "hasta": [
-        -365,
-        -195
-      ],
-      "puntos": 26,
+      "puntos": 32,
       "recta": false
     },
     {
-      "nombre": "La Calzada del Nordeste",
+      "nombre": "El Paso del Norte",
+      "tipo": "calzada",
+      "desde": [
+        60,
+        674
+      ],
+      "hasta": [
+        2,
+        822
+      ],
+      "puntos": 7,
+      "recta": false
+    },
+    {
+      "nombre": "La Calzada del Alba Fría",
       "tipo": "calzada",
       "desde": [
         -363,
@@ -265,77 +265,77 @@
         60,
         674
       ],
-      "puntos": 56,
+      "puntos": 27,
       "recta": false
     },
     {
-      "nombre": "La Senda de Ferrabriga de los Vientos",
+      "nombre": "La Calzada del Suroeste",
       "tipo": "calzada",
       "desde": [
+        -272,
+        29
+      ],
+      "hasta": [
         -365,
         -195
       ],
-      "hasta": [
-        271,
-        -265
-      ],
-      "puntos": 54,
+      "puntos": 24,
       "recta": false
     },
     {
-      "nombre": "El Sendero del Nordeste",
+      "nombre": "La Senda del Este",
       "tipo": "ramal",
       "desde": [
-        -917,
-        -231
+        -76,
+        -223
       ],
       "hasta": [
-        -826,
-        -194
-      ],
-      "puntos": 17,
-      "recta": false
-    },
-    {
-      "nombre": "La Senda del Norte",
-      "tipo": "ramal",
-      "desde": [
-        -519,
-        -231
-      ],
-      "hasta": [
-        -550,
-        -136
+        -52,
+        -218
       ],
       "puntos": 2,
       "recta": false
     },
     {
-      "nombre": "La Vereda de El Crucero del Peregrino",
+      "nombre": "La Trocha del Nordeste",
       "tipo": "ramal",
       "desde": [
-        -714,
-        -239
+        -505,
+        -286
       ],
       "hasta": [
-        -737,
-        -181
+        -359,
+        -202
       ],
-      "puntos": 2,
+      "puntos": 30,
       "recta": false
     },
     {
-      "nombre": "La Vereda de La Muralla Caída",
+      "nombre": "La Vereda de El Monasterio de los Callados",
       "tipo": "ramal",
       "desde": [
-        -303,
-        717
+        -76,
+        668
       ],
       "hasta": [
-        -314,
-        711
+        -41,
+        684
       ],
-      "puntos": 2,
+      "puntos": 3,
+      "recta": false
+    },
+    {
+      "nombre": "La Vereda de La Fortaleza Caída",
+      "tipo": "ramal",
+      "desde": [
+        -195,
+        517
+      ],
+      "hasta": [
+        -170,
+        548
+      ],
+      "puntos": 3,
       "recta": false
     }
   ],

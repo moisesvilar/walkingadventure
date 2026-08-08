@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: los ramales a parajes dejan de nacer sin nombre y la marca de suposición baja al nivel de tramo, así que el orden estable del extracto (tipo|nombre|posición) cambia para los ramales y su recuento en el índice de nombres desplaza el azar de las fases posteriores."
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Dominios de Nharem",
   "idioma": "gl",
@@ -14,7 +14,7 @@
     "nucleos": 7,
     "servicios": 12,
     "parajes": 5,
-    "calzadas": 10
+    "calzadas": 11
   },
   "nucleos": [
     {
@@ -155,54 +155,54 @@
   ],
   "parajes": [
     {
-      "nombre": "O Cruce do Aforcado",
-      "tipo": "cruce",
-      "x": 27,
-      "y": 83,
-      "anclaje": null
-    },
-    {
-      "nombre": "A Poza Clara",
-      "tipo": "fuente",
-      "x": -201,
-      "y": 599,
-      "anclaje": "node/4502883744"
-    },
-    {
-      "nombre": "A Abadía da Vide",
-      "tipo": "monasterio",
-      "x": -139,
-      "y": 6,
-      "anclaje": "node/5844583387"
-    },
-    {
-      "nombre": "As Laxes da Moura",
-      "tipo": "piedra",
+      "nombre": "A Torre Vixía da Fin",
+      "tipo": "atalaya",
       "x": -58,
       "y": 417,
       "anclaje": "way/551279363"
     },
     {
-      "nombre": "O Pazo Queimado",
-      "tipo": "ruina",
+      "nombre": "A Capela do Monte",
+      "tipo": "ermita",
+      "x": 178,
+      "y": -257,
+      "anclaje": "way/232937500"
+    },
+    {
+      "nombre": "O Priorado Gris",
+      "tipo": "monasterio",
       "x": -395,
       "y": -36,
       "anclaje": "node/3648044334"
+    },
+    {
+      "nombre": "A Anta do Abrente",
+      "tipo": "piedra",
+      "x": -201,
+      "y": 599,
+      "anclaje": "node/4502883744"
+    },
+    {
+      "nombre": "O Torreón Roto",
+      "tipo": "ruina",
+      "x": -139,
+      "y": 6,
+      "anclaje": "node/5844583387"
     }
   ],
   "calzadas": [
     {
-      "nombre": "A Calzada das Neves",
+      "nombre": "A Calzada do Mediodía",
       "tipo": "calzada",
       "desde": [
-        -32,
-        -118
+        229,
+        -244
       ],
       "hasta": [
-        151,
-        679
+        235,
+        -577
       ],
-      "puntos": 54,
+      "puntos": 31,
       "recta": false
     },
     {
@@ -216,7 +216,7 @@
         -32,
         -118
       ],
-      "puntos": 8,
+      "puntos": 33,
       "recta": false
     },
     {
@@ -230,25 +230,11 @@
         -230,
         -35
       ],
-      "puntos": 55,
+      "puntos": 12,
       "recta": false
     },
     {
-      "nombre": "A Senda de Outeidre do Vento",
-      "tipo": "calzada",
-      "desde": [
-        229,
-        -244
-      ],
-      "hasta": [
-        495,
-        -115
-      ],
-      "puntos": 14,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño de Lamincelle do Corvo",
+      "nombre": "A Senda de Lamincelle do Corvo",
       "tipo": "calzada",
       "desde": [
         -230,
@@ -258,49 +244,63 @@
         -594,
         -129
       ],
-      "puntos": 48,
+      "puntos": 26,
       "recta": false
     },
     {
-      "nombre": "O Camiño do Mediodía",
+      "nombre": "A Vella Ruta do Norte",
+      "tipo": "calzada",
+      "desde": [
+        -32,
+        -118
+      ],
+      "hasta": [
+        151,
+        679
+      ],
+      "puntos": 66,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Abrente Frío",
       "tipo": "calzada",
       "desde": [
         229,
         -244
       ],
       "hasta": [
-        235,
-        -577
+        495,
+        -115
       ],
-      "puntos": 3,
+      "puntos": 25,
       "recta": false
     },
     {
       "nombre": "A Congostra do Leste",
       "tipo": "ramal",
       "desde": [
-        -395,
-        -36
-      ],
-      "hasta": [
-        -320,
-        -41
-      ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": "A Senda de A Abadía da Vide",
-      "tipo": "ramal",
-      "desde": [
         -139,
         6
       ],
       "hasta": [
-        -316,
-        16
+        -58,
+        11
       ],
-      "puntos": 2,
+      "puntos": 6,
+      "recta": false
+    },
+    {
+      "nombre": "A Corredoira do Leste",
+      "tipo": "ramal",
+      "desde": [
+        -201,
+        599
+      ],
+      "hasta": [
+        -100,
+        577
+      ],
+      "puntos": 4,
       "recta": false
     },
     {
@@ -318,17 +318,31 @@
       "recta": false
     },
     {
-      "nombre": "O Carreiro das Brétemas",
+      "nombre": "O Carreiro de Poñente",
       "tipo": "ramal",
       "desde": [
-        -201,
-        599
+        178,
+        -257
       ],
       "hasta": [
-        -277,
-        526
+        162,
+        -260
       ],
-      "puntos": 10,
+      "puntos": 5,
+      "recta": false
+    },
+    {
+      "nombre": "O Paso Angosto do Sur",
+      "tipo": "ramal",
+      "desde": [
+        -395,
+        -36
+      ],
+      "hasta": [
+        -390,
+        -57
+      ],
+      "puntos": 4,
       "recta": false
     }
   ],

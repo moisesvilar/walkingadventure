@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: los ramales a parajes dejan de nacer sin nombre y la marca de suposición baja al nivel de tramo, así que el orden estable del extracto (tipo|nombre|posición) cambia para los ramales y su recuento en el índice de nombres desplaza el azar de las fases posteriores."
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Dominios de Miradia",
   "idioma": "es",
@@ -176,54 +176,68 @@
   ],
   "parajes": [
     {
-      "nombre": "La Atalaya de la Espera",
+      "nombre": "La Atalaya del Cuervo",
       "tipo": "atalaya",
-      "x": 420,
-      "y": 161,
-      "anclaje": "node/13232651719"
+      "x": -360,
+      "y": -114,
+      "anclaje": "node/2631128250"
     },
     {
-      "nombre": "La Encrucijada del Ahorcado",
+      "nombre": "La Encrucijada del Perro Negro",
       "tipo": "cruce",
-      "x": -353,
-      "y": -353,
+      "x": -433,
+      "y": -327,
       "anclaje": null
     },
     {
-      "nombre": "El Priorato del Eco",
+      "nombre": "La Abadía de los Callados",
       "tipo": "monasterio",
-      "x": 894,
-      "y": 497,
-      "anclaje": "way/1331395569"
+      "x": -359,
+      "y": -589,
+      "anclaje": "node/5448876987"
     },
     {
-      "nombre": "Las Lajas de la Mora",
+      "nombre": "El Dolmen Cantor",
       "tipo": "piedra",
       "x": -917,
       "y": -231,
       "anclaje": "way/95564940"
     },
     {
-      "nombre": "La Torre Quemada",
+      "nombre": "La Muralla Quemada",
       "tipo": "ruina",
-      "x": -528,
-      "y": 609,
-      "anclaje": "node/4628381249"
+      "x": -1,
+      "y": -19,
+      "anclaje": "node/574669230"
     }
   ],
   "calzadas": [
     {
-      "nombre": "El Camino de Ribaluna de los Vientos",
+      "nombre": "El Camino de Ferravento",
       "tipo": "calzada",
       "desde": [
         132,
         -85
       ],
       "hasta": [
+        271,
+        -265
+      ],
+      "puntos": 18,
+      "recta": false
+    },
+    {
+      "nombre": "El Camino de Ribaluna de los Vientos",
+      "tipo": "calzada",
+      "desde": [
+        441,
+        -206
+      ],
+      "hasta": [
         701,
         692
       ],
-      "puntos": 89,
+      "puntos": 54,
       "recta": false
     },
     {
@@ -237,7 +251,7 @@
         -606,
         -260
       ],
-      "puntos": 76,
+      "puntos": 48,
       "recta": false
     },
     {
@@ -248,38 +262,24 @@
         -260
       ],
       "hasta": [
-        271,
-        -265
-      ],
-      "puntos": 101,
-      "recta": false
-    },
-    {
-      "nombre": "El Paso del Este",
-      "tipo": "calzada",
-      "desde": [
-        -711,
-        170
-      ],
-      "hasta": [
         132,
         -85
       ],
-      "puntos": 169,
+      "puntos": 65,
       "recta": false
     },
     {
       "nombre": "La Calzada del Alba",
       "tipo": "calzada",
       "desde": [
-        132,
-        -85
+        271,
+        -265
       ],
       "hasta": [
         441,
         -206
       ],
-      "puntos": 17,
+      "puntos": 14,
       "recta": false
     },
     {
@@ -293,63 +293,63 @@
         -279,
         -775
       ],
-      "puntos": 64,
+      "puntos": 61,
       "recta": false
     },
     {
-      "nombre": "La Senda de Las Lajas de la Mora",
+      "nombre": "La Senda de La Abadía de los Callados",
+      "tipo": "ramal",
+      "desde": [
+        -359,
+        -589
+      ],
+      "hasta": [
+        -292,
+        -588
+      ],
+      "puntos": 14,
+      "recta": false
+    },
+    {
+      "nombre": "La Trocha del Nordeste",
+      "tipo": "ramal",
+      "desde": [
+        -1,
+        -19
+      ],
+      "hasta": [
+        6,
+        -14
+      ],
+      "puntos": 2,
+      "recta": false
+    },
+    {
+      "nombre": "La Vereda de El Dolmen Cantor",
       "tipo": "ramal",
       "desde": [
         -917,
         -231
       ],
       "hasta": [
-        -971,
-        -220
+        -600,
+        -259
+      ],
+      "puntos": 24,
+      "recta": false
+    },
+    {
+      "nombre": "La Vereda de las Nieves",
+      "tipo": "ramal",
+      "desde": [
+        -360,
+        -114
+      ],
+      "hasta": [
+        -358,
+        -75
       ],
       "puntos": 5,
-      "recta": false
-    },
-    {
-      "nombre": "La Senda del Alba Fría",
-      "tipo": "ramal",
-      "desde": [
-        -528,
-        609
-      ],
-      "hasta": [
-        -482,
-        638
-      ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": "La Trocha del Sur",
-      "tipo": "ramal",
-      "desde": [
-        420,
-        161
-      ],
-      "hasta": [
-        425,
-        145
-      ],
-      "puntos": 2,
-      "recta": false
-    },
-    {
-      "nombre": "La Vereda de El Priorato del Eco",
-      "tipo": "ramal",
-      "desde": [
-        894,
-        497
-      ],
-      "hasta": [
-        891,
-        301
-      ],
-      "puntos": 11,
       "recta": false
     }
   ],

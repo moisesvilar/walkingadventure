@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: los ramales a parajes dejan de nacer sin nombre y la marca de suposición baja al nivel de tramo, así que el orden estable del extracto (tipo|nombre|posición) cambia para los ramales y su recuento en el índice de nombres desplaza el azar de las fases posteriores."
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Reinos de Vaeloria",
   "idioma": "gl",
@@ -13,7 +13,7 @@
   "recuentos": {
     "nucleos": 5,
     "servicios": 6,
-    "parajes": 1,
+    "parajes": 2,
     "calzadas": 4
   },
   "nucleos": [
@@ -99,26 +99,33 @@
   ],
   "parajes": [
     {
-      "nombre": "A Encrucillada do Mercador",
+      "nombre": "A Encrucillada do Aforcado",
       "tipo": "cruce",
-      "x": 83,
-      "y": -15,
+      "x": 53,
+      "y": -74,
+      "anclaje": null
+    },
+    {
+      "nombre": "O Cruce dos Xuramentos",
+      "tipo": "cruce",
+      "x": -138,
+      "y": -83,
       "anclaje": null
     }
   ],
   "calzadas": [
     {
-      "nombre": "A Calzada do Nordés",
+      "nombre": "A Calzada do Leste",
       "tipo": "calzada",
       "desde": [
-        27,
-        -142
+        -32,
+        -118
       ],
       "hasta": [
         104,
         -74
       ],
-      "puntos": 3,
+      "puntos": 19,
       "recta": false
     },
     {
@@ -132,7 +139,7 @@
         -132,
         50
       ],
-      "puntos": 11,
+      "puntos": 18,
       "recta": false
     },
     {
@@ -146,15 +153,15 @@
         27,
         -142
       ],
-      "puntos": 4,
+      "puntos": 12,
       "recta": false
     },
     {
-      "nombre": "O Camiño do Nordés",
+      "nombre": "O Camiño do Sur",
       "tipo": "calzada",
       "desde": [
-        27,
-        -142
+        104,
+        -74
       ],
       "hasta": [
         112,
@@ -183,7 +190,7 @@
     },
     {
       "plantilla": "ronda-del-vigia",
-      "castea": false
+      "castea": true
     },
     {
       "plantilla": "tres-pistas",

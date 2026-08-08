@@ -5,7 +5,7 @@
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
     "regenerado_por": "SPEC-007",
-    "motivo_regeneracion": "Regenerado por SPEC-007: los ramales a parajes dejan de nacer sin nombre y la marca de suposición baja al nivel de tramo, así que el orden estable del extracto (tipo|nombre|posición) cambia para los ramales y su recuento en el índice de nombres desplaza el azar de las fases posteriores."
+    "motivo_regeneracion": "Regenerado por SPEC-007: el callejero entra en el grafo, así que los ramales nacen con nombre —lo que cambia su orden estable en el extracto y su paso por el índice de nombres— y los cruces pasan a salir de las bifurcaciones del grafo viario y no de las coincidencias entre calzadas dibujadas, que con el callejero dentro se quedaban pegadas al glifo del núcleo."
   },
   "titulo": "Reinos de Vaeloria",
   "idioma": "gl",
@@ -148,56 +148,42 @@
   ],
   "parajes": [
     {
-      "nombre": "A Atalaia da Espera",
-      "tipo": "atalaya",
-      "x": 367,
-      "y": 433,
-      "anclaje": "node/3689211743"
-    },
-    {
-      "nombre": "A Encrucillada dos Xuramentos",
+      "nombre": "A Encrucillada do Aforcado",
       "tipo": "cruce",
-      "x": -279,
-      "y": 525,
+      "x": -405,
+      "y": -58,
       "anclaje": null
     },
     {
-      "nombre": "O Pozo do Marmurio",
+      "nombre": "O Cruceiro Branco",
+      "tipo": "ermita",
+      "x": 178,
+      "y": -257,
+      "anclaje": "way/232937500"
+    },
+    {
+      "nombre": "O Manancial do Marmurio",
       "tipo": "fuente",
       "x": 151,
       "y": 679,
       "anclaje": "node/3689212319"
     },
     {
-      "nombre": "A Pedra das Runas",
+      "nombre": "O Altar do Trono",
       "tipo": "piedra",
-      "x": -395,
-      "y": -36,
-      "anclaje": "node/3648044334"
-    },
-    {
-      "nombre": "A Fortaleza dos Ecos",
-      "tipo": "ruina",
       "x": -139,
       "y": 6,
       "anclaje": "node/5844583387"
+    },
+    {
+      "nombre": "O Pazo Roto",
+      "tipo": "ruina",
+      "x": -201,
+      "y": 599,
+      "anclaje": "node/4502883744"
     }
   ],
   "calzadas": [
-    {
-      "nombre": "A Calzada das Neves",
-      "tipo": "calzada",
-      "desde": [
-        4,
-        -116
-      ],
-      "hasta": [
-        -58,
-        417
-      ],
-      "puntos": 34,
-      "recta": false
-    },
     {
       "nombre": "A Calzada do Noroeste",
       "tipo": "calzada",
@@ -209,53 +195,25 @@
         4,
         -116
       ],
-      "puntos": 7,
+      "puntos": 32,
       "recta": false
     },
     {
-      "nombre": "A Calzada do Sur",
+      "nombre": "A Vella Ruta do Oeste",
       "tipo": "calzada",
       "desde": [
-        -58,
-        417
-      ],
-      "hasta": [
         -230,
         -35
-      ],
-      "puntos": 41,
-      "recta": false
-    },
-    {
-      "nombre": "A Vella Ruta do Mediodía",
-      "tipo": "calzada",
-      "desde": [
-        229,
-        -244
-      ],
-      "hasta": [
-        235,
-        -577
-      ],
-      "puntos": 3,
-      "recta": false
-    },
-    {
-      "nombre": "O Camiño de Castronova do Vento",
-      "tipo": "calzada",
-      "desde": [
-        -58,
-        417
       ],
       "hasta": [
         -594,
         -129
       ],
-      "puntos": 55,
+      "puntos": 26,
       "recta": false
     },
     {
-      "nombre": "O Camiño do Nordés",
+      "nombre": "O Camiño de Castroláns a Vella",
       "tipo": "calzada",
       "desde": [
         229,
@@ -265,21 +223,63 @@
         495,
         -115
       ],
-      "puntos": 14,
+      "puntos": 25,
       "recta": false
     },
     {
-      "nombre": "A Congostra do Oeste",
-      "tipo": "ramal",
+      "nombre": "O Camiño de Sabrenova do Vento",
+      "tipo": "calzada",
       "desde": [
-        -139,
-        6
+        4,
+        -116
       ],
       "hasta": [
-        -316,
-        16
+        -58,
+        417
       ],
-      "puntos": 2,
+      "puntos": 49,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Mediodía",
+      "tipo": "calzada",
+      "desde": [
+        229,
+        -244
+      ],
+      "hasta": [
+        235,
+        -577
+      ],
+      "puntos": 31,
+      "recta": false
+    },
+    {
+      "nombre": "O Camiño do Oeste",
+      "tipo": "calzada",
+      "desde": [
+        4,
+        -116
+      ],
+      "hasta": [
+        -230,
+        -35
+      ],
+      "puntos": 15,
+      "recta": false
+    },
+    {
+      "nombre": "A Congostra do Sueste",
+      "tipo": "ramal",
+      "desde": [
+        -201,
+        599
+      ],
+      "hasta": [
+        -94,
+        383
+      ],
+      "puntos": 13,
       "recta": false
     },
     {
@@ -297,31 +297,31 @@
       "recta": false
     },
     {
-      "nombre": "O Carreiro de A Atalaia da Espera",
+      "nombre": "O Carreiro de O Altar do Trono",
       "tipo": "ramal",
       "desde": [
-        367,
-        433
+        -139,
+        6
       ],
       "hasta": [
-        149,
-        -59
+        -138,
+        -83
       ],
-      "puntos": 20,
+      "puntos": 4,
       "recta": false
     },
     {
-      "nombre": "O Carreiro de A Pedra das Runas",
+      "nombre": "O Carreiro de O Cruceiro Branco",
       "tipo": "ramal",
       "desde": [
-        -395,
-        -36
+        178,
+        -257
       ],
       "hasta": [
-        -320,
-        -41
+        190,
+        -244
       ],
-      "puntos": 2,
+      "puntos": 3,
       "recta": false
     }
   ],

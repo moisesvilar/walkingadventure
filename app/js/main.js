@@ -592,7 +592,7 @@ window.__wa = {
     // ejecuta dos veces sobre el mismo callejero
     const grafo = construyeGrafo(roads);
     const routes = buildRoutes(settlements, grafo, 'demo#0', names);
-    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names, undefined, null, null, { vocabulario: vocabularioDeEscenas() });
+    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, 'demo#0', null, names, undefined, null, null, { vocabulario: vocabularioDeEscenas(), grafo });
     // los ramales nacen con nombre y del paquete de idioma, así que la fase pide
     // semilla y nombres como cualquier otra que nombre algo
     routes.push(...linkParajes(parajes, routes, settlements, grafo, 'demo#0', names));

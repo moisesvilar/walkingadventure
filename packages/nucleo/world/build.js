@@ -184,6 +184,11 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     cupo: cupoDeParajes,
     vocabulario: vocabularioDeParajes,
     ficha: coberturaParajes,
+    // El mismo grafo que se pegó y se trazó, y por la misma razón: los cruces son
+    // bifurcaciones de la red viaria, no coincidencias entre las calzadas que
+    // acabamos de dibujar. Con el callejero dentro del grafo, dos calzadas dejan de
+    // compartir tramo salvo a la salida del pueblo.
+    grafo,
   });
   // los parajes se enganchan a la red DESPUÉS de existir: hasta aquí no se sabe dónde
   // están, y algunos nacen precisamente de los cruces de las calzadas

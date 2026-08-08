@@ -79,41 +79,73 @@ const PEGADO_A_NUCLEO_M = 40;
 /** A partir de aquí un candidato del grafo se considera en despoblado y se prefiere. */
 const EN_DESPOBLADO_M = 80;
 
-// Cruces: puntos compartidos por 2+ rutas nombradas. Dentro del tramo común de
-// cada par se elige el punto más alejado de todo núcleo ("en despoblado").
-function crossingCandidates(routes, settlements, radius) {
+/**
+ * Cuántas ramas salen de cada punto, por clave de coordenada al metro.
+ *
+ * Las cuenta **el grafo viario** cuando quien genera lo lleva, y solo si no, las
+ * propias calzadas. La diferencia no es cosmética: hasta SPEC-007 el grafo se
+ * construía únicamente con las carreteras del terreno, así que dos calzadas
+ * compartían tramo durante cientos de metros y el punto donde se separaban caía en
+ * pleno campo. Con el callejero dentro del grafo cada calzada se va por su calle y
+ * lo único que comparten es la salida del pueblo: medido en `suelo-250m`, los
+ * puntos compartidos pasaron de estar a 63 y 30 m del núcleo más cercano a estar a
+ * 13 m o menos, todos por debajo del corte del glifo. O sea, ninguno.
+ *
+ * Contar las ramas sobre el grafo devuelve lo que el dato nuevo trae de verdad: una
+ * bifurcación de la red viaria es un cruce de caminos aunque solo pase por ella una
+ * calzada. Y no pierde nada de lo de antes, porque un punto donde dos calzadas se
+ * separan tiene tres ramas en el grafo por construcción.
+ */
+function ramasPorPunto(real, grafo) {
+  const ramas = new Map();
+  const une = (a, b) => {
+    if (a === b) return; // dos nodos dentro del mismo metro no son dos ramas
+    if (!ramas.has(a)) ramas.set(a, new Set());
+    ramas.get(a).add(b);
+  };
+  if (grafo) {
+    for (const id of grafo.nodeIds) {
+      const desde = key(grafo.coord.get(id));
+      for (const arista of grafo.adj.get(id) ?? []) une(desde, key(grafo.coord.get(arista.hasta)));
+    }
+  } else {
+    for (const r of real) {
+      for (let i = 0; i < r.pts.length - 1; i++) {
+        une(key(r.pts[i]), key(r.pts[i + 1]));
+        une(key(r.pts[i + 1]), key(r.pts[i]));
+      }
+    }
+  }
+  return ramas;
+}
+
+// Cruces: puntos por los que pasa una calzada y de los que salen tres o más ramas.
+// Se recorren de más lejos a más cerca de todo núcleo, para que el que se quede sea
+// siempre el más "en despoblado" de su entorno.
+function crossingCandidates(routes, settlements, radius, grafo = null) {
   const real = routes.filter((r) => !r.fallback);
-  const byKey = new Map();
-  real.forEach((r, ri) => {
+  const ramas = ramasPorPunto(real, grafo);
+
+  const minSettDist = (p) => Math.min(Infinity, ...settlements.map((s) => dist(p, s)));
+  // Por clave y no por orden de inserción: de este recorrido sale qué puntos son
+  // cruces, que es una decisión de generación.
+  const puntos = new Map();
+  for (const r of real) {
     // se excluyen los extremos: son las posiciones de los glifos de los núcleos
     for (const p of r.pts.slice(1, -1)) {
       const k = key(p);
-      if (!byKey.has(k)) byKey.set(k, { p, routes: new Set() });
-      byKey.get(k).routes.add(ri);
-    }
-  });
-
-  const minSettDist = (p) => Math.min(Infinity, ...settlements.map((s) => dist(p, s)));
-  const byPair = new Map();
-  // Por clave y no por orden de inserción: de este recorrido sale qué punto
-  // representa a cada par de calzadas, que es una decisión de generación.
-  const puntos = [...byKey.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([, v]) => v);
-  for (const { p, routes: rs } of puntos) {
-    if (rs.size < 2) continue;
-    const ids = [...rs].sort((a, b) => a - b);
-    for (let i = 0; i < ids.length - 1; i++) {
-      for (let j = i + 1; j < ids.length; j++) {
-        const pk = `${ids[i]}-${ids[j]}`;
-        const d = minSettDist(p);
-        const cur = byPair.get(pk);
-        if (!cur || d > cur.d) byPair.set(pk, { p, d });
-      }
+      if ((ramas.get(k)?.size ?? 0) < 3) continue;
+      if (!puntos.has(k)) puntos.set(k, p);
     }
   }
 
   const sep = Math.max(150, radius * 0.1);
   const out = [];
-  for (const { p, d } of [...byPair.values()].sort((a, b) => b.d - a.d || (key(a.p) < key(b.p) ? -1 : 1))) {
+  const ordenados = [...puntos.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([, p]) => ({ p, d: minSettDist(p) }))
+    .sort((a, b) => b.d - a.d); // estable: los empates los rompe la clave de arriba
+  for (const { p, d } of ordenados) {
     if (d < PEGADO_A_NUCLEO_M) continue; // encima del glifo: no es un cruce, es el pueblo
     if (out.every((c) => dist(c, p) >= sep)) {
       out.push({ x: p.x, y: p.y, type: 'cruce', enDespoblado: d >= EN_DESPOBLADO_M });
@@ -238,6 +270,10 @@ function secuenciaDeTipos(rng, cupo, vocabulario, disponibles) {
  *     tramo de referencia.
  *   `ficha` objeto donde anotar suelo, techo, cupo y déficit de cobertura, si quien
  *     genera lo lleva. Es dato interno: no sale a ninguna pantalla.
+ *   `grafo` el grafo viario ya construido de la celda, el mismo que se pegó y se
+ *     trazó. Es de donde salen las bifurcaciones que hacen a un cruce un cruce;
+ *     sin él se cuentan sobre las calzadas dibujadas, que es lo único que había
+ *     antes de que el grafo fuera un objeto compartido (SPEC-007).
  */
 export function generateParajes(freeAnchors, settlements, routes, geo, radius, seedStr, seaMask, names, indice = crearIndiceDeNombres(), pool = null, reparto = null, opciones = {}) {
   const rng = makeRng(seedStr + SUFIJOS_DE_FASE.parajes);
@@ -294,7 +330,7 @@ export function generateParajes(freeAnchors, settlements, routes, geo, radius, s
   // que hay. El mar sí excluye —no hay puente al que se pueda ir andando—; estar
   // dentro de la huella de un núcleo solo posterga.
   const delGrafo = shuffle(rng, [
-    ...crossingCandidates(routes, settlements, radius),
+    ...crossingCandidates(routes, settlements, radius, opciones.grafo ?? null),
     ...bridgeCandidates(routes, geo.rivers ?? [], settlements, radius),
   ]).filter((c) => !isSea(seaMask, c));
   const graphCands = [
