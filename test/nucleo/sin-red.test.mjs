@@ -249,7 +249,11 @@ describe('Qué falta para jugar sin red', () => {
       }));
       const placeId = beat.lugar.real?.placeId ?? null;
       if (placeId) recursos.fotos.push(declaraFoto({ placeId, recurso: `local/fotos/${placeId}.webp`, reloj: RELOJ }));
-      recursos.textos.push(declaraTexto({ clave: claveDeTextoDeBeat(aventura.plantilla, beat.n), texto: beat.texto, origen: 'plantilla' }));
+      // SPEC-010 mueve el texto de plantilla dentro de la escena del beat, que pasa
+      // de ser el nombre de la escena a ser el dato entero —tipo, afinidad usada y
+      // texto—. Lo que se declara aquí es el mismo texto de siempre, leído donde
+      // ahora vive.
+      recursos.textos.push(declaraTexto({ clave: claveDeTextoDeBeat(aventura.plantilla, beat.n), texto: beat.escena.texto, origen: 'plantilla' }));
     }
 
     const inspector = creaInspectorDeRed({ estricto: true });
@@ -277,11 +281,15 @@ describe('Qué falta para jugar sin red', () => {
 
       // Lo que falta se enumera, **no se rechaza**: cada beat conserva su texto de
       // plantilla y su lugar, así que el paraje se juega igual.
+      // SPEC-010: la escena del beat deja de ser el nombre a secas y pasa a ser el
+      // dato entero —`tipo`, `afinidadUsada` y `texto`—. Se comprueban las tres
+      // piezas en vez de la cadena de antes: se lee donde ahora vive y se afirma
+      // más, no menos.
       for (const beat of aventura.beats) {
-        assert.equal(typeof beat.texto, 'string', `el beat ${beat.n} no trae texto de plantilla`);
-        assert.ok(beat.texto.length > 0, `el beat ${beat.n} trae un texto de plantilla vacío`);
+        assert.equal(typeof beat.escena.texto, 'string', `el beat ${beat.n} no trae texto de plantilla`);
+        assert.ok(beat.escena.texto.length > 0, `el beat ${beat.n} trae un texto de plantilla vacío`);
         assert.equal(typeof beat.lugar.nombre, 'string');
-        assert.equal(typeof beat.escena, 'string');
+        assert.equal(typeof beat.escena.tipo, 'string', `el beat ${beat.n} no dice de qué escena es`);
       }
       assert.equal(aventura.cabe || aventura.lazo.trazado, true, 'la aventura sin ilustraciones no se puede recorrer');
 
@@ -341,7 +349,8 @@ describe('El mundo se congela entero', () => {
       const enElRecorrido = (lugar) => aventura.lazo.recorrido.some((p) => Math.hypot(p.x - lugar.x, p.y - lugar.y) < 1);
       for (const beat of aventura.beats) {
         assert.ok(enElRecorrido(beat.lugar), `el beat ${beat.n} (${beat.lugar.nombre}) no está en el recorrido de la salida`);
-        assert.ok(beat.texto.length > 0, `el beat ${beat.n} se queda sin texto sin red`);
+        // SPEC-010: el texto de plantilla viaja dentro de la escena del beat.
+        assert.ok(beat.escena.texto.length > 0, `el beat ${beat.n} se queda sin texto sin red`);
       }
       const primero = aventura.lazo.recorrido[0];
       const ultimo = aventura.lazo.recorrido[aventura.lazo.recorrido.length - 1];
@@ -378,7 +387,8 @@ describe('El árbitro es el código y el narrador es el LLM', () => {
       // declarado, que es lo que permite saber después cuáles se pueden reescribir.
       const recursos = recursosVacios();
       for (const beat of aventura.beats) {
-        recursos.textos.push(declaraTexto({ clave: claveDeTextoDeBeat(aventura.plantilla, beat.n), texto: beat.texto, origen: 'plantilla' }));
+        // SPEC-010: el texto de plantilla viaja dentro de la escena del beat.
+        recursos.textos.push(declaraTexto({ clave: claveDeTextoDeBeat(aventura.plantilla, beat.n), texto: beat.escena.texto, origen: 'plantilla' }));
       }
       const doc = congelaCelda(registro, { recursos });
       assert.equal(doc.recursos.textos.length, aventura.beats.length);

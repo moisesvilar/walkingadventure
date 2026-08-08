@@ -247,6 +247,18 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     seaMask,
     title: names.worldTitle(makeRng(seed + SUFIJOS_DE_FASE.titulo)),
   };
+  // El encuadre con el que se castea **este** mundo, declarado aquí y no supuesto
+  // dentro del motor, que falla si no le llega. Son dos decisiones de orquestación:
+  //
+  //   · el tramo es el de **referencia** y no el de quien juega hoy, porque
+  //     `world.casting` es la medida de reparto de la celda —una propiedad del
+  //     mundo, y `accesibilidad.md` §1 dice que el tramo nunca cambia qué existe—.
+  //     El casteo de una salida real lo pide quien la ofrece, con su tramo y desde
+  //     donde esté, llamando a `casteaCatalogo`.
+  //   · el punto de partida es el centro de la celda, que es el origen de la
+  //     proyección local. Medir el lazo desde el centro es lo que hace de esto una
+  //     medida de la celda entera y no de una esquina.
+  world.casteo = { tramoM: TRAMO_DE_REFERENCIA_M, partida: { x: 0, y: 0 } };
   world.casting = castAll(world);
   return world;
 }

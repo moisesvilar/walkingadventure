@@ -6,10 +6,11 @@ import { generateSettlements, footprintRadius } from '../../packages/nucleo/worl
 import { buildRoutes, linkParajes } from '../../packages/nucleo/world/routes.js';
 import { construyeGrafo } from '../../packages/nucleo/world/grafo.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
-import { vocabularioDeEscenas } from '../../packages/nucleo/world/cupos.js';
+import { TRAMO_DE_REFERENCIA_M, vocabularioDeEscenas } from '../../packages/nucleo/world/cupos.js';
 import { buildSeaMask } from '../../packages/nucleo/world/seamask.js';
 import { buildWorld } from '../../packages/nucleo/world/build.js';
 import { castAll } from '../../packages/nucleo/quests/casting.js';
+import { MOTIVOS_DE_CASTING } from '../../packages/nucleo/quests/motivos.js';
 import { renderMap } from './render/map.js';
 import { STYLES, DEFAULT_STYLE, getStyle, styleFonts } from './render/styles.js';
 import { namesFor } from '../../packages/nucleo/names/index.js';
@@ -336,6 +337,34 @@ async function fetchData(lat, lon, radius) {
 
 const TYPE_LABEL = { ciudad: 'Ciudad', pueblo: 'Pueblos', aldea: 'Aldeas', granja: 'Granjas' };
 
+// La frase del motivo se compone **aquí**, no en el casting: el motor entrega
+// clave, roles y requisito, y quien pinta decide cómo se leen. Es la misma frontera
+// que separa al árbitro del narrador, aplicada a la herramienta de diagnóstico.
+function describeMotivo(m) {
+  const roles = m.roles.join(' ↔ ');
+  const r = m.requisito ?? {};
+  switch (m.clave) {
+    case MOTIVOS_DE_CASTING.SIN_CANDIDATOS:
+      return `sin candidatos para ${roles}: ${r.tipo === 'servicio' ? `un servicio "${r.kind}"` : r.tipo === 'nucleo' ? `un núcleo (${r.types.join('/')})` : `un paraje con escena "${r.escenas.join('/')}"`}`;
+    case MOTIVOS_DE_CASTING.SIN_RUTA_EN_EL_GRAFO:
+      return `sin ruta en el grafo entre ${roles}`;
+    case MOTIVOS_DE_CASTING.TRECHO_FUERA_DEL_TOPE:
+      return `el trecho ${roles} pasa del tope (${r.enTramos.toFixed(2)} tramos, tope ${r.topeEnTramos})`;
+    case MOTIVOS_DE_CASTING.TRECHO_POR_DEBAJO_DEL_MINIMO:
+      return `el trecho ${roles} deja los beats pegados (${r.enTramos.toFixed(3)} tramos)`;
+    case MOTIVOS_DE_CASTING.RECORRIDO_FUERA_DEL_TAMANO:
+      return `el recorrido no cabe en un ${r.tamano} (${r.enTramos.toFixed(2)} tramos, alcance ${r.alcanceEnTramos})`;
+    case MOTIVOS_DE_CASTING.BEATS_FUERA_DEL_TAMANO:
+      return `${r.beats} beats no caben en un ${r.tamano} (${r.minimo}-${r.maximo})`;
+    case MOTIVOS_DE_CASTING.LAZO_QUE_NO_CIERRA:
+      return `el lazo no cierra: ${roles} queda a ${r.enTramos.toFixed(2)} tramos del punto de partida`;
+    case MOTIVOS_DE_CASTING.FRANJA_INCOMPATIBLE:
+      return `la franja "${r.franja}" de ${roles} cae fuera del horario diurno`;
+    default:
+      return m.clave;
+  }
+}
+
 function buildSidebar(world) {
   const list = $('settlement-list');
   list.innerHTML = '';
@@ -378,8 +407,8 @@ function buildSidebar(world) {
       const div = document.createElement('div');
       div.className = 'settlement-item' + (c.ok ? '' : ' quest-no');
       div.innerHTML = c.ok
-        ? `<strong>${c.tpl.titulo}</strong><div class="anchor">✓ ${c.beats.length} beats · ${(c.distancia / 1000).toFixed(1)} km · ~${c.minutos} min (${c.encaja})</div>`
-        : `<strong>${c.tpl.titulo}</strong><div class="anchor">✗ ${c.motivo}</div>`;
+        ? `<strong>${c.tpl.titulo}</strong><div class="anchor">✓ ${c.beats.length} beats · ${c.presupuesto.enTramos.recorrido.toFixed(2)} tramos (${c.presupuesto.tamano})</div>`
+        : `<strong>${c.tpl.titulo}</strong><div class="anchor">✗ ${describeMotivo(c.motivo)}</div>`;
       if (c.ok) div.addEventListener('click', () => showQuestDetail(c, div));
       list.appendChild(div);
     }
@@ -459,10 +488,10 @@ function showQuestDetail(c, itemEl) {
   card.hidden = false;
   const lugarLine = (l) => `${l.nombre}${l.en ? ` (en ${l.en})` : ''}${l.real?.name ? ` · 📍 ${l.real.name}` : ''}`;
   card.innerHTML = `
-    <div class="type">quest · ${c.encaja} · ${(c.distancia / 1000).toFixed(1)} km · ~${c.minutos} min</div>
+    <div class="type">quest · ${c.presupuesto.tamano} · ${c.presupuesto.enTramos.recorrido.toFixed(2)} tramos · trecho mayor ${c.presupuesto.enTramos.trechoMasLargo.toFixed(2)}</div>
     <h2>${c.tpl.titulo}</h2>
     <div class="anchor">${c.tpl.gancho}</div>
-    <ol class="quest-beats">${c.beats.map((b) => `<li><strong>${b.lugar.nombre}</strong><br><span class="poi-kind">${b.texto}</span>${b.lugar.real?.name ? `<br><span class="poi-real">📍 ${b.lugar.real.name}</span>` : ''}</li>`).join('')}</ol>
+    <ol class="quest-beats">${c.beats.map((b) => `<li><strong>${b.lugar.nombre}</strong><br><span class="poi-kind">${b.escena.texto}</span>${b.lugar.real?.name ? `<br><span class="poi-real">📍 ${b.lugar.real.name}</span>` : ''}</li>`).join('')}</ol>
   `;
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
@@ -597,7 +626,10 @@ window.__wa = {
     // semilla y nombres como cualquier otra que nombre algo
     routes.push(...linkParajes(parajes, routes, settlements, grafo, 'demo#0', names));
     const seaMask = buildSeaMask(coastlines, radius * 1.5, 60);
-    world = { seed: 'demo', radius, baseRadius: radius, origin: { lat: 0, lon: 0 }, locale: 'es', geo, anchors, settlements, routes, parajes, seaMask, title: 'Tierras de Prueba' };
+    world = { seed: 'demo', radius, baseRadius: radius, origin: { lat: 0, lon: 0 }, locale: 'es', geo, anchors, settlements, routes, parajes, seaMask, title: 'Tierras de Prueba', viario: grafo };
+    // El mismo encuadre que declara la tubería: el casting mide sobre el grafo y
+    // desde el centro del mundo, así que el mundo de demostración también lo trae.
+    world.casteo = { tramoM: TRAMO_DE_REFERENCIA_M, partida: { x: 0, y: 0 } };
     world.casting = castAll(world);
     phasePick.hidden = true;
     phaseMap.hidden = false;

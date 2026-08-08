@@ -130,3 +130,21 @@ La pérdida es concreta y pequeña: `suelo-250m#1` baja de 3/6 a 2/6 porque un c
 Efecto colateral que `wa-dev` encontró y arregló: `construyeGrafo` descartaba **la arista de longitud cero**, y con la rejilla del metro eso empezó a partir vías reales que el cosido volvía a unir **como suposición nuestra** (urbano-denso: −71 aristas, cosidas 19 → 62). O sea, el mapa se llenaba de tramos marcados «nos lo hemos inventado» que eran calle de verdad.
 
 La guarda quería decir «descarta el lazo sobre sí mismo» y decía otra cosa. Corregido, vuelve a 14.734 aristas y 19 cosidas. Es la clase de error que solo aparece cuando cambias la escala del dato.
+
+## 6m · La casteabilidad baja a 30/48 y el criterio se rebaja, porque ahora no miente
+
+SPEC-010 mide las distancias **sobre el grafo cosido y filtrado** en lugar de en línea recta con un factor de rodeo, que es lo que la spec pide y lo que un jugador anda de verdad. Efecto: **31/48 → 30/48**.
+
+El lazo perdido es `barrio-tres-calles#2 · ronda-del-vigía`, y su ficha lo explica sola: el único pueblo de ese mundo está a **1688 m de grafo** del centro, aunque en línea recta sean **126 m** — un callejero casi en árbol. Con ida y vuelta son 3376 m, que tampoco caben en los 4000 m de un paseo.
+
+**Decisión: se acepta 30/48 y el criterio pasa a ≥ 30.** No es una regresión: antes ese lazo se ofrecía porque la medida mentía. Una casteabilidad más baja y honesta vale más que una más alta que manda al jugador a andar trece veces lo que le dijo. El indicador solo sirve si mide lo mismo que el juego.
+
+Trayectoria completa, para leerla entera: **21/48 → 17/48 (regresión, corregida) → 24/48 → 30/48 → 32/48 → 31/48 (cuantización, §6k) → 30/48 (medida sobre el grafo)**. Los dos últimos descensos son precio pagado a cambio de que el mundo quepa en un móvil y de que la distancia no mienta.
+
+## 6n · Cuarta aparición de §6h, y esta se estaba mirando todos los días
+
+`test/casting-report.mjs` —el informe de salud del generador, una de las cuatro cosas que este proyecto sí mide— **nunca pedía el callejero** para los mundos reales. Sin él daba **113/132 y 9/24 en los mundos reales**; con él, **127/132**.
+
+O sea: el instrumento con el que se juzga la salud del generador llevaba desde SPEC-007 midiendo un mundo que no es el que juega nadie, y nadie se enteró porque el número que daba era plausible. Es la cuarta aparición de la misma forma de fallo, y la más incómoda, porque las otras tres las cazó una prueba y esta la cazó alguien mirando de reojo.
+
+**Lección que anoto para el informe final:** los instrumentos de medida necesitan las mismas garantías que el código que miden. Un informe que se alimenta a mano de la tubería es un cableado a medias esperando su turno.

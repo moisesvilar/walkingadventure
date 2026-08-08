@@ -50,7 +50,15 @@ import { isSea } from '../../packages/nucleo/world/seamask.js';
  */
 const ANTES_DE_LA_FILA = {
   'barrio-tres-calles#1': { castea: 0, parajes: 2, servicios: 0 },
-  'barrio-tres-calles#2': { castea: 1, parajes: 2, servicios: 0 },
+  // El único valor de esta tabla que se ha bajado, y por un veredicto explícito:
+  // `pipeline/decisiones-orquestador.md` §6m. SPEC-010 mide los trechos **sobre el
+  // grafo cosido y filtrado** en lugar de en línea recta por un factor de rodeo, y
+  // `ronda-del-vigía` deja de castear aquí porque el único pueblo del mundo está a
+  // 1688 m de grafo del centro aunque en línea recta sean 126: ida y vuelta son
+  // 3376 m y un paseo alcanza 4000... con el resto del lazo dentro, no cabe. No es
+  // una regresión: antes ese lazo se ofrecía porque la medida mentía. Los otros
+  // siete valores siguen intactos y siguen siendo suelo.
+  'barrio-tres-calles#2': { castea: 0, parajes: 2, servicios: 0 },
   'costero#1': { castea: 3, parajes: 5, servicios: 11 },
   'costero#2': { castea: 5, parajes: 5, servicios: 12 },
   'suelo-250m#1': { castea: 0, parajes: 0, servicios: 6 },
@@ -61,19 +69,26 @@ const ANTES_DE_LA_FILA = {
 
 /**
  * El suelo agregado de casteabilidad **vigente**, que es el que dictaminó el
- * orquestador en `pipeline/decisiones-orquestador.md` §6k: 31 de 48. Venía siendo
- * 21 —lo medido en `cec7d91`— y la trayectoria desde entonces fue 24 → 30 → 32.
- * SPEC-009-iter-1 lo deja en 31: cuantizar los metros al metro deja un candidato a
- * cruce de `suelo-250m#1` a 139,8 m del elegido, con 150 de separación mínima, y esa
- * plantilla deja de castear. Se aceptó porque el precio de conservar el lazo era
- * incumplir el presupuesto de tamaño del documento —2326 KB contra 2048—, que es
- * una restricción dura: el mundo congelado vive en un móvil.
+ * orquestador en `pipeline/decisiones-orquestador.md` §6m: 30 de 48.
+ *
+ * Trayectoria completa, para leerla entera: 21 —lo medido en `cec7d91`— → 17
+ * (regresión, corregida) → 24 → 30 → 32 → 31 (SPEC-009-iter-1, §6k: cuantizar los
+ * metros al metro deja un candidato a cruce de `suelo-250m#1` a 139,8 m del
+ * elegido con 150 de separación mínima) → **30** (SPEC-010, §6m: los trechos se
+ * miden sobre el grafo cosido y filtrado y no en línea recta por un factor de
+ * rodeo).
+ *
+ * El último descenso no es una regresión y por eso se acepta: el lazo que se
+ * pierde —`barrio-tres-calles#2 · ronda-del-vigía`— antes se ofrecía **mintiendo**,
+ * con 1688 m de grafo presentados como 126 m de recta. Una casteabilidad más baja
+ * y honesta vale más que una más alta que manda a andar trece veces lo dicho: el
+ * indicador solo sirve si mide lo mismo que el juego.
  *
  * Sigue escrito como umbral y no como cifra exacta, y a propósito: una igualdad
  * pondría rojo el caso cuando el generador mejore, que es lo contrario de lo que
  * este caso vigila. Subirlo cuando mejore es una decisión explícita.
  */
-const SUELO_AGREGADO = 31;
+const SUELO_AGREGADO = 30;
 const PLANTILLAS_POR_MUNDO = 6;
 
 const LOS_OCHO = LOS_CUATRO.flatMap((nombre) => LAS_DOS_SEMILLAS.map((semilla) => ({ nombre, semilla, clave: `${nombre}#${semilla}` })));
@@ -326,7 +341,7 @@ describe('El tope actúa al repartir y solo sobre el excedente', () => {
 });
 
 describe('La casteabilidad no puede bajar', () => {
-  test('La casteabilidad agregada de los ocho extractos de referencia no baja de 31 de 48', async () => {
+  test('La casteabilidad agregada de los ocho extractos de referencia no baja de 30 de 48', async () => {
     let agregado = 0;
     const detalle = [];
     for (const { nombre, semilla, clave } of LOS_OCHO) {

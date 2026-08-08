@@ -8,14 +8,15 @@ globalThis.__WA_PROXY__ = process.env.WA_PROXY ?? 'http://localhost:8137/api/ove
 
 const { buildWorld, viasDelGrafo } = await import('../packages/nucleo/world/build.js');
 const { construyeGrafo } = await import('../packages/nucleo/world/grafo.js');
-const { fetchGeoFeatures, fetchPois } = await import('../app/js/data/overpass.js');
+const { fetchGeoFeatures, fetchPois, fetchStreets } = await import('../app/js/data/overpass.js');
 const { generateSettlements } = await import('../packages/nucleo/world/settlements.js');
 const { buildRoutes } = await import('../packages/nucleo/world/routes.js');
 const { generateParajes } = await import('../packages/nucleo/world/parajes.js');
 const { castAll } = await import('../packages/nucleo/quests/casting.js');
+const { CLAVES_DE_MOTIVO } = await import('../packages/nucleo/quests/motivos.js');
 const { TEMPLATES } = await import('../packages/nucleo/quests/templates.js');
 const { namesFor } = await import('../packages/nucleo/names/index.js');
-const { vocabularioDeEscenas } = await import('../packages/nucleo/world/cupos.js');
+const { TRAMO_DE_REFERENCIA_M, vocabularioDeEscenas } = await import('../packages/nucleo/world/cupos.js');
 
 // El vocabulario de escenas llega inyectado a la fase de parajes, igual que en la
 // tubería: se lee del catálogo aquí, que es quien orquesta, y no allí.
@@ -23,6 +24,10 @@ const VOCABULARIO = vocabularioDeEscenas();
 
 const es = namesFor('es');
 const stats = new Map(TEMPLATES.map((t) => [t.id, { ok: 0, total: 0, motivos: new Map() }]));
+// El histograma global por clave. Se cuenta **sin parsear ninguna frase**: desde
+// SPEC-010 el motivo es clave, roles y requisito, y eso es lo que hace del informe
+// de salud una medida y no una lectura.
+const histograma = new Map(CLAVES_DE_MOTIVO.map((c) => [c, 0]));
 
 function record(worldName, results) {
   const line = results.map((c) => `${c.tpl.id.slice(0, 14)}${c.ok ? '✓' : '✗'}`).join(' ');
@@ -31,10 +36,16 @@ function record(worldName, results) {
   for (const c of results) {
     const s = stats.get(c.tpl.id);
     s.total++;
-    if (c.ok) s.ok++;
-    else s.motivos.set(c.motivo, (s.motivos.get(c.motivo) ?? 0) + 1);
+    if (c.ok) { s.ok++; continue; }
+    const clave = c.motivo.clave;
+    s.motivos.set(clave, (s.motivos.get(clave) ?? 0) + 1);
+    histograma.set(clave, histograma.get(clave) + 1);
   }
 }
+
+// El encuadre del casteo de los mundos sintéticos, el mismo que declara la tubería:
+// tramo de referencia y el centro del mundo como punto de partida.
+const CASTEO = { tramoM: TRAMO_DE_REFERENCIA_M, partida: { x: 0, y: 0 } };
 
 // --- mundos sintéticos (mismo generador que test/headless.mjs) ---
 
@@ -60,9 +71,11 @@ function syntheticWorld(radius, seed) {
   const rivers = [{ pts: mkLine((k) => k * step + step / 2, (k) => -k * step + radius * 0.4), kind: 'river' }];
   const geo = { coastlines: [], lakes: [], rivers, forests: [], peaks: [], roads };
   const { settlements, freeAnchors } = generateSettlements(anchors, geo, radius, seed, null, es);
-  const routes = buildRoutes(settlements, construyeGrafo(viasDelGrafo(geo)), seed, es);
+  // El grafo se guarda: el casting mide los trechos sobre él, no en línea recta.
+  const grafo = construyeGrafo(viasDelGrafo(geo));
+  const routes = buildRoutes(settlements, grafo, seed, es);
   const parajes = generateParajes(freeAnchors, settlements, routes, geo, radius, seed, null, es, undefined, null, null, { vocabulario: VOCABULARIO });
-  return { seed, radius, settlements, routes, parajes };
+  return { seed, radius, settlements, routes, parajes, viario: grafo, casteo: CASTEO };
 }
 
 console.log('— mundos sintéticos (radios × semillas) —');
@@ -83,9 +96,17 @@ const REAL = [
 ];
 
 console.log('— mundos reales —');
+// El callejero entra **también aquí**. Sin él la tubería construía el grafo solo
+// con las carreteras del terreno y el informe medía un mundo peor conectado que el
+// que la app genera: es la cuarta vez que aparece la misma forma de fallo
+// (`pipeline/decisiones-orquestador.md` §6h), una pieza que al no estar no protesta.
 const fetchData = async (lat, lon, radius) => {
-  const [geoJson, poiJson] = await Promise.all([fetchGeoFeatures(lat, lon, radius), fetchPois(lat, lon, radius)]);
-  return { geoJson, poiJson };
+  const [geoJson, poiJson, callejeroJson] = await Promise.all([
+    fetchGeoFeatures(lat, lon, radius),
+    fetchPois(lat, lon, radius),
+    fetchStreets(lat, lon, radius),
+  ]);
+  return { geoJson, poiJson, callejeroJson };
 };
 for (const r of REAL) {
   try {
@@ -100,10 +121,18 @@ for (const r of REAL) {
 // --- agregado ---
 
 console.log('\n— casteabilidad por plantilla —');
+let ok = 0, total = 0;
 for (const [id, s] of stats) {
   const pct = s.total ? Math.round((100 * s.ok) / s.total) : 0;
+  ok += s.ok; total += s.total;
   console.log(`  ${id.padEnd(22)} ${String(s.ok).padStart(2)}/${s.total}  (${pct}%)`);
   for (const [motivo, n] of [...s.motivos.entries()].sort((a, b) => b[1] - a[1])) {
     console.log(`      ✗×${n}  ${motivo}`);
   }
 }
+console.log(`  ${'AGREGADO'.padEnd(22)} ${ok}/${total}`);
+
+// El histograma por clave, en el orden del catálogo cerrado y con las claves que
+// nunca salieron a cero: una clave que no aparece nunca también es información.
+console.log('\n— histograma de motivos (catálogo cerrado, sin parsear frases) —');
+for (const clave of CLAVES_DE_MOTIVO) console.log(`  ${clave.padEnd(30)} ${histograma.get(clave)}`);

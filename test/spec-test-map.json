@@ -3147,9 +3147,9 @@
       "criterio": "Dado los ocho extractos de referencia regenerados tras esta iteración, cuando se suman las plantillas que castean en todos ellos, entonces el total es al menos 21 de 48, que es el valor medido en `cec7d91`, el commit anterior a esta fila.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/reparto.test.mjs",
-      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 31 de 48",
+      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 30 de 48",
       "hueco_de_bateria": true,
-      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral vigente es 31/48, dictaminado en `pipeline/decisiones-orquestador.md` §6k: la cuantización de SPEC-009-iter-1 cuesta un lazo de `suelo-250m#1` y se aceptó a cambio de que el documento del mundo denso quepa en su presupuesto. La trayectoria del umbral desde que se escribió el caso es 21 (cec7d91) → 24 → 30 → 32 → 31. Sigue escrito como umbral y no como igualdad, para que una mejora no ponga rojo el caso."
+      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral vigente es 30/48, dictaminado en `pipeline/decisiones-orquestador.md` §6m: SPEC-010 mide los trechos sobre el grafo cosido y filtrado en lugar de en línea recta con un factor de rodeo, y `barrio-tres-calles#2 · ronda-del-vigía` deja de castear porque su único pueblo está a 1688 m de grafo del centro aunque en línea recta sean 126. No es una regresión: antes ese lazo se ofrecía mintiendo. La trayectoria del umbral desde que se escribió el caso es 21 (cec7d91) → 24 → 30 → 32 → 31 (§6k, la cuantización) → 30 (§6m, la medida sobre el grafo). Sigue escrito como umbral y no como igualdad, para que una mejora no ponga rojo el caso."
     },
     {
       "spec": "SPEC-005-iter-1",
@@ -5519,6 +5519,779 @@
       "caso": "Sin red, la aventura funciona entera",
       "escenario": "Sin red, la aventura funciona entera",
       "nota": "lo que sostiene el escenario son los huecos de textos con su origen declarado."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mismo mundo y dos estados de conocimiento —uno sin nada descubierto y otro con todo descubierto—, cuando se castea el catálogo con cada uno, entonces salen las mismas plantillas con el mismo reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting no mira lo descubierto",
+      "escenario": "El casting no mira lo descubierto"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el motor de casting, cuando se inspecciona lo que recibe, entonces el estado de conocimiento del mapa no está entre sus entradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting no mira lo descubierto",
+      "escenario": "El casting no mira lo descubierto"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el motor de casting, cuando se inspecciona su implementación, entonces no consulta el nivel de conocimiento de ningún elemento del mundo en ningún punto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting no mira lo descubierto",
+      "escenario": "El casting no mira lo descubierto"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un jugador que no ha pisado ningún paraje, cuando se castea una plantilla que pide un paraje, entonces los parajes sin pisar son candidatos igual que los demás.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting no mira lo descubierto",
+      "escenario": "El casting no mira lo descubierto"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada sobre lugares no visitados, cuando se leen sus beats, entonces cada lugar trae su nombre propio, porque a un sitio al que te mandan te lo nombran aunque no hayas ido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting no mira lo descubierto",
+      "escenario": "El casting no mira lo descubierto"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla y un mundo, cuando castea, entonces cada uno de sus roles queda asignado a un lugar concreto del mundo que cumple el requisito del rol.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la característica del casting afirma que una plantilla sin candidatos no se ofrece, pero ninguno de sus escenarios describe cómo se resuelve un rol que sí tiene candidatos. Se afirma sobre los ocho extractos de referencia y sobre los tres tipos de rol de sitio."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un rol de tipo servicio, cuando se buscan sus candidatos, entonces son los servicios del mundo del tipo pedido, con su núcleo anotado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un rol de tipo núcleo, cuando se buscan sus candidatos, entonces son los núcleos cuyo tipo está entre los pedidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un rol de tipo paraje con una escena, cuando se buscan sus candidatos, entonces son los parajes cuyo peso para esa escena alcanza el mínimo que el rol pide.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un rol de paraje que admite escenas alternativas, cuando se resuelve, entonces basta con que el lugar cubra una de ellas, y la aventura casteada anota cuál se usó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado dos roles distintos de una misma plantilla, cuando se resuelven, entonces no caen en el mismo lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla cuyo primer y último beat comparten rol, cuando castea, entonces los dos beats caen en el mismo lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla sin ningún candidato para uno de sus roles, cuando se castea, entonces no se ofrece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Una plantilla sin candidatos no se ofrece",
+      "escenario": "Una plantilla sin candidatos no se ofrece"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo con candidatos de sobra para todos los roles, cuando ninguna combinación cumple el presupuesto, entonces la plantilla tampoco se ofrece, y el motivo distingue ese caso del de no tener candidatos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Con candidatos de sobra pero sin ninguna combinación que quepa, el motivo distingue el caso",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: distinguir «no hay candidatos» de «hay candidatos y ninguna combinación cabe» no tiene escenario, y es justo la distinción que hace del histograma de motivos una medida útil."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el catálogo completo, cuando se castea, entonces el resultado incluye una entrada por plantilla, casteen o no, y ninguna se omite de la lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Una plantilla sin candidatos no se ofrece",
+      "escenario": "Una plantilla sin candidatos no se ofrece"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla que no castea, cuando se lee su resultado, entonces trae un motivo cuya clave pertenece a un catálogo cerrado y enumerable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la propia spec (hueco 3): «El motivo del fallo queda explicado» es un paso dentro de «Una plantilla sin candidatos no se ofrece» y no dice nada de su forma. Sin escenario, nada impide volver a la cadena de texto y que el histograma siga funcionando a base de parsear. El caso lo afirma con número: sobre los ocho extractos de referencia, sin-candidatos 17 y lazo-que-no-cierra 1."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un motivo de fallo, cuando se lee, entonces nombra el rol que no se pudo resolver y el requisito que ese rol pedía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un motivo de fallo, cuando se lee, entonces su clave no es un texto redactado y no cambia con el idioma del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el catálogo de motivos, cuando se enumera, entonces cubre al menos: sin candidatos para un rol, trecho fuera del tope, recorrido total fuera del tamaño declarado, número de beats fuera del tamaño declarado, lazo que no cierra y franja incompatible con el horario diurno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un fallo cuya causa no está en el catálogo de motivos, cuando se va a entregar, entonces la entrega falla nombrando la causa desconocida, en vez de devolver una clave genérica que enmascare el caso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el casteo del catálogo sobre muchos mundos, cuando se agregan los fallos por clave para el histograma, entonces el recuento sale sin parsear ninguna frase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un motivo de fallo por trechos, cuando se lee, entonces nombra los dos roles cuyo trecho no casó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un trecho en el tope se acepta, uno por encima se descarta y uno pegado también",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Se castea con el medidor de trechos **inyectado**, que es un parámetro del motor: es la única manera de poner un trecho exactamente en el tope —o exactamente un metro por encima— sin buscar dos calles reales que casualmente disten eso."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla que sí castea, cuando se lee su resultado, entonces no trae ningún motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla que declara su tamaño, cuando castea, entonces el número de beats está dentro del rango de ese tamaño: paseo entre 4 y 6, aventura entre 6 y 10, jornada entre 10 y 14.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El presupuesto de beats sale del tamaño declarado",
+      "hueco_de_bateria": true,
+      "nota": "El escenario existe en docs/testing.md como «Esquema del escenario» con sus tres ejemplos —paseo 4-6, aventura 6-10, jornada 10-14— y el validador solo indexa los que empiezan por «Escenario:», así que la entrada se marca como hueco para no citar un nombre que no puede comprobar. Los tres ejemplos se afirman a la vez, leyendo el rango del módulo de tamaños de salida."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado esos rangos, cuando se leen, entonces salen del módulo de tamaños de salida y no hay ninguna cifra de beats escrita a mano en el casting.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El presupuesto de beats sale del tamaño declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado dos beats consecutivos, cuando se mide el trecho entre ellos, entonces se mide sobre el grafo de calzadas ya cosido y filtrado, y no en línea recta con un factor de rodeo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El presupuesto de beats sale del tamaño declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un trecho entre dos beats consecutivos que supera un tramo del jugador, cuando se castea, entonces ese reparto se descarta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un trecho en el tope se acepta, uno por encima se descarta y uno pegado también",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un trecho exactamente igual a un tramo del jugador, cuando se castea, entonces se acepta, porque el tope es media hora andando y no menos de media hora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un trecho en el tope se acepta, uno por encima se descarta y uno pegado también",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado dos jugadores con tramos distintos, cuando castean la misma plantilla en el mismo mundo, entonces ninguno recibe un trecho de más de media hora a su propio ritmo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Dos jugadores con tramos distintos no reciben ningún trecho de más de media hora a su propio ritmo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el esquema del presupuesto dice «ningún tramo entre beats supera media hora al ritmo del jugador» pero no lo mide con dos jugadores distintos, que es donde se ve la diferencia entre un tope en tramos y uno en metros absolutos."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un trecho por debajo del mínimo, cuando se castea, entonces ese reparto se descarta, para que dos beats no caigan pegados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un trecho en el tope se acepta, uno por encima se descarta y uno pegado también",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un reparto cuyo recorrido total supera el alcance del tamaño declarado, cuando se castea, entonces se descarta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El lazo que no cierra y el recorrido que no cabe se descartan con su motivo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. «Todo lazo casteado se cierra» afirma el caso feliz; el reverso —qué pasa cuando no cierra, y qué motivo sale— no está en la batería. Mismo medidor inyectado que el caso anterior."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el casting, cuando se inspecciona, entonces no contiene ningún ritmo en metros por minuto ni ninguna distancia en metros escrita a mano: los topes se expresan en tramos del jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El presupuesto de beats sale del tamaño declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se lee su presupuesto, entonces viene en tramos, y los metros del recorrido son el dato del trazado y no la unidad del tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Dos jugadores con tramos distintos no reciben ningún trecho de más de media hora a su propio ritmo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se lee su tamaño, entonces es el que declaró la plantilla y no uno deducido de lo que salió al medir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El presupuesto de beats sale del tamaño declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un casteo, cuando se pide, entonces recibe el punto de partida del jugador entre sus entradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin tramo, sin punto de partida o con la plantilla mal escrita, la entrega falla nombrando qué le pasa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la validación de entradas y de plantillas mal escritas no tiene escenario en docs/testing.md. Se afirma que cada fallo nombra lo recibido y enumera lo válido, que es lo que deja arreglar una plantilla sin abrir el motor."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se mide el trecho entre el punto de partida y el primer beat, entonces no supera medio tramo del jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se mide el trecho entre el último beat y el punto de partida, entonces no supera medio tramo del jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el recorrido total de una aventura casteada, cuando se calcula, entonces incluye la ida desde el punto de partida y la vuelta a él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla cuyo último beat no puede caer cerca del punto de partida en este mundo, cuando se castea, entonces no se ofrece, con el motivo de lazo que no cierra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El lazo que no cierra y el recorrido que no cabe se descartan con su motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un motivo de lazo que no cierra, cuando se lee, entonces nombra el rol del beat que quedó lejos, para que se pueda distinguir si lo que falla es la plantilla o el mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El lazo que no cierra y el recorrido que no cabe se descartan con su motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado todas las plantillas que castean en un mundo, cuando se leen sus lazos, entonces todas empiezan y terminan cerca del punto de partida, sin excepciones por tamaño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se leen sus beats, entonces forman una cadena lineal, sin bifurcaciones ni beats sin encadenar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat, cuando se lee, entonces trae lugar, disparador, escena y resultado, y ninguno de los cuatro falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el lugar de un beat, cuando se lee, entonces es una referencia a una localización del mundo con nombre propio y anclaje real, nunca unas coordenadas sueltas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el disparador de un beat, cuando se lee, entonces su tipo es exactamente uno de `llegada`, `franja` o `con_objeto`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla con un tipo de disparador que no está en esos tres, cuando se castea, entonces falla nombrando el tipo recibido y enumerando los válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin tramo, sin punto de partida o con la plantilla mal escrita, la entrega falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat resuelto sobre un paraje, cuando se lee su escena, entonces está entre las que ese lugar cubre con peso suficiente, y la afinidad usada queda anotada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Cada rol cae en un lugar del mundo que cumple su requisito, y dos roles nunca en el mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el resultado de un beat, cuando se lee, entonces es de tipo información, objeto o cambio de estado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat que no es el último, cuando se lee su resultado, entonces apunta al beat siguiente de la cadena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el último beat, cuando se lee su resultado, entonces no apunta a ningún beat siguiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat con disparador `con_objeto`, cuando se lee, entonces declara otra manera de resolver ese mismo beat sin llevar el objeto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla cuyo beat `con_objeto` no declara esa otra manera, cuando se castea, entonces no se ofrece, porque un objeto es una llave y no un requisito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat con disparador de franja, cuando se lee, entonces la franja es propiedad del beat y no de ninguna persona del reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la propia spec (hueco 1) y ya marcado con ⚠ en el PRD para RF-QUEST-004: nada en docs/testing.md afirma que la franja es propiedad del beat, que llegar tarde no cancela nada ni que el horario diurno acota las franjas casteables. Es el hueco más grande de esta spec y merece característica propia en la batería."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat con franja, cuando el jugador llega fuera de ella, entonces el beat se resuelve igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado ese mismo beat, cuando el jugador llega fuera de la franja, entonces el resultado que empuja al siguiente beat es el mismo que llegando dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat con franja, cuando el jugador llega dentro de ella, entonces lo que cambia es la variante de escena y nunca el resultado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el horario diurno activo, cuando se castea una plantilla con una franja que cae fuera de él, entonces no se ofrece, con el motivo de franja incompatible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el horario diurno activo, cuando se lee cualquier franja de una aventura casteada, entonces cae entera dentro de él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el horario diurno desactivado, cuando se castea esa misma plantilla, entonces castea con su franja intacta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Llegar fuera de la franja resuelve el beat igual y solo cambia la variante de escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se buscan tiempos límite en cualquiera de sus beats, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura aceptada, cuando el jugador tarda el triple de lo previsto en llegar a cada beat, entonces ningún beat se pierde por tiempo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se inspeccionan sus beats, entonces ninguno lleva fecha ni hora del reloj real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se busca alguna condición que la dé por fallida sin una decisión del jugador, entonces no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se lee su estimación de tiempo, entonces es informativa y ninguna regla bifurca por ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat, cuando se lee su guiado, entonces nombra el lugar de destino con su nombre propio del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El guiado nombra lo que tiene nombre, no inventa lo que no lo tiene y trae la marca del mapa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la propia spec (hueco 4): RF-QUEST-005 ancla el nodo A3P2, que es una pantalla y por tanto @app; la parte @nucleo —que el guiado nombra las calzadas del trecho, no inventa las que no tienen nombre y trae la marca— no está en la batería."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat cuyo trecho recorre calzadas con nombre, cuando se lee su guiado, entonces trae los nombres de esas calzadas, en el orden en que se recorren.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El guiado nombra lo que tiene nombre, no inventa lo que no lo tiene y trae la marca del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat cuyo trecho pasa por un tramo sin nombre propio, cuando se lee su guiado, entonces ese tramo no se nombra y no se inventa ningún nombre para él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El guiado nombra lo que tiene nombre, no inventa lo que no lo tiene y trae la marca del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un beat, cuando se lee su guiado, entonces trae la marca del destino para que el mapa la pueda pintar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El guiado nombra lo que tiene nombre, no inventa lo que no lo tiene y trae la marca del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se leen todos sus guiados, entonces no contienen ninguna cifra de distancia, de tiempo, de ritmo ni de progreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo cuyo idioma es el gallego, cuando se lee el guiado, entonces los nombres son los que produjo el paquete de idioma de ese mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El guiado nombra lo que tiene nombre, no inventa lo que no lo tiene y trae la marca del mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el motor de casting, cuando se inspecciona, entonces no redacta ningún texto: los que entrega salen de la plantilla y de los nombres del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla con un rol humano ligado a un sitio ya asignado, cuando se castea, entonces el rol humano queda resuelto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un rol humano lo produce el sitio donde trabaja y no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio",
+      "nota": "El escenario de la batería cubre el anclaje; la promesa de RF-NPC-002 de que un rol humano nunca haga fallar el casting no tiene escenario propio (⚠ en el PRD) y aquí se afirma también por el catálogo de motivos, que no tiene ninguna clave sobre la falta de gente."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo en el que todavía no se ha generado ninguna persona, cuando se castea una plantilla con roles humanos, entonces castea igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un rol humano lo produce el sitio donde trabaja y no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el catálogo de motivos de fallo, cuando se enumera, entonces ninguno se refiere a la falta de gente: lo que estrecha el casting son los lugares.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El motivo del fallo es un dato y el histograma se agrega sin parsear ninguna frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un rol humano resuelto, cuando se lee su asignación, entonces hereda el anclaje del sitio donde trabaja y no consume uno propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un rol humano lo produce el sitio donde trabaja y no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo sembrado con `\"42.40,-8.81#1\"`, cuando se castea el catálogo dos veces, entonces las dos veces salen las mismas plantillas con el mismo reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla, cuando se castea, entonces su azar sale de `makeRng` con el sufijo de fase del casting y el identificador de la plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado dos plantillas del catálogo, cuando se castea una sola de ellas, entonces el reparto que obtiene es el mismo que obtendría casteando el catálogo entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el catálogo recibido en distinto orden, cuando se castea, entonces cada plantilla obtiene el mismo reparto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado los roles de una plantilla, cuando se recorren para resolverlos, entonces el orden es uno declarado explícitamente y no el de inserción de una estructura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el casting, cuando se inspecciona, entonces no usa ninguna fuente de azar ni de tiempo del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo ya generado, cuando se castea sobre él, entonces no se genera ni se resiembra nada del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El casting es determinista",
+      "escenario": "El casting es determinista"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mismo mundo y una misma plantilla, cuando se castea con el LLM disponible y se castea sin red, entonces las dos veces salen el mismo reparto, los mismos beats en el mismo orden y el mismo lazo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado el motor de casting, cuando se inspecciona, entonces no llama al LLM ni recibe ningún texto suyo entre sus entradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada, cuando se enumeran los datos por los que alguna regla bifurca —lugares, disparadores, franjas, resultados, presupuesto y lazo—, entonces todos los fija el casting.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una aventura casteada sin red, cuando se recorre entera, entonces se puede completar de principio a fin con los textos de plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "Ya estaba viva desde SPEC-009 y esta spec la sostiene por su lado: los textos que la aventura recorre son los de plantilla, que SPEC-010 mueve dentro de la escena del beat."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo sin ningún núcleo, servicio ni paraje, cuando se castea el catálogo, entonces ninguna plantilla se ofrece y cada una trae su motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Una plantilla sin candidatos no se ofrece",
+      "escenario": "Una plantilla sin candidatos no se ofrece"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un catálogo vacío, cuando se castea, entonces se devuelve una lista vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Una plantilla sin candidatos no se ofrece",
+      "escenario": "Una plantilla sin candidatos no se ofrece"
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un casteo sin el tramo del jugador, cuando se pide, entonces falla nombrando la dependencia que falta, en vez de suponer un ritmo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin tramo, sin punto de partida o con la plantilla mal escrita, la entrega falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un casteo sin punto de partida, cuando se pide, entonces falla nombrando la dependencia que falta, en vez de suponer el centro de la celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin tramo, sin punto de partida o con la plantilla mal escrita, la entrega falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla con un tipo de rol desconocido, cuando se castea, entonces falla nombrando el tipo recibido y enumerando los válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin tramo, sin punto de partida o con la plantilla mal escrita, la entrega falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla que declara un tamaño que no existe, cuando se castea, entonces falla nombrando el tamaño recibido y enumerando los tres válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "El presupuesto de beats sale del tamaño declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado una plantilla con un beat cuyo rol no está declarado en sus roles, cuando se castea, entonces falla nombrando el rol huérfano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sin tramo, sin punto de partida o con la plantilla mal escrita, la entrega falla nombrando qué le pasa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado dos lugares candidatos sin ninguna ruta entre ellos en el grafo, cuando se mide el trecho, entonces la pareja no casa y no se sustituye por una distancia en línea recta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Un trecho en el tope se acepta, uno por encima se descarta y uno pegado también",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo mínimo de 250 m, cuando se castea el catálogo, entonces cada plantilla que no castea trae su motivo y ninguna queda fuera del resultado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/casting.test.mjs",
+      "caso": "Sobre el mundo mínimo de 250 m ninguna plantilla queda fuera del resultado",
+      "escenario": "El mundo mínimo todavía compone un lazo",
+      "nota": "La garantía es de SPEC-006 y esta spec la consume sin poder contradecirla. Lo que se afirma aquí es la mitad que le toca al casting: ninguna plantilla queda fuera del resultado y cada una que no castea trae su motivo del catálogo."
     }
   ]
 }

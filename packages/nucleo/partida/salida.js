@@ -20,6 +20,22 @@ export const TAMANOS_DE_SALIDA = congelaHondo([
   { id: 'jornada', tramos: 6, beats: 12 },
 ]);
 
+/**
+ * Cuántos beats admite cada tamaño: paseo 4-6, aventura 6-10, jornada 10-14,
+ * literalmente los de `game-design/quests.md` §3.
+ *
+ * Va **aparte del catálogo** y no como dos campos más de cada entrada: el catálogo
+ * es lo que se ofrece —una palabra, sus tramos y sus beats— y el rango es lo que
+ * verifica quien castea. Pero vive en este módulo a propósito, para que el casting
+ * no tenga ninguna cifra de beats escrita a mano: dos tablas del mismo número en
+ * dos ficheros es como se desincronizan.
+ */
+export const RANGO_DE_BEATS = congelaHondo({
+  paseo: { minimo: 4, maximo: 6 },
+  aventura: { minimo: 6, maximo: 10 },
+  jornada: { minimo: 10, maximo: 14 },
+});
+
 /** Los identificadores válidos, en el orden del catálogo. */
 export const IDS_DE_TAMANO = congelaHondo(TAMANOS_DE_SALIDA.map((t) => t.id));
 
@@ -54,6 +70,17 @@ export function dimensionaSalida(tamano, tramo) {
     metrosPorBeat: metros / declarado.beats,
     tramosPorBeat: declarado.tramos / declarado.beats,
   });
+}
+
+/**
+ * Cuántos beats admite un tamaño: `{ minimo, maximo }`.
+ *
+ * Es lo que el casting comprueba contra la plantilla, y sale de aquí a propósito:
+ * el tamaño lo declara la plantilla y quien lo verifica no puede tener su propia
+ * tabla de rangos.
+ */
+export function rangoDeBeats(tamano) {
+  return RANGO_DE_BEATS[exigeTamano(tamano).id];
 }
 
 /**
