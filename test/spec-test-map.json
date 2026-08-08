@@ -2519,6 +2519,689 @@
       "fichero": "test/nucleo/cupos.test.mjs",
       "caso": "El módulo de cupos solo se invoca al crear una celda",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado los datos crudos de una fuente OSM, cuando se construye el pool de la celda, entonces cada anclaje admitido lleva identificador estable, fuente, posición en metros, nombre (o su ausencia declarada), la etiqueta `clave=valor` que lo admitió, su `kind` y su peso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Cada anclaje admitido lleva identificador, fuente, posición, nombre, etiqueta, kind y peso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un elemento de OSM, cuando se admite en el pool, entonces su identificador es el del elemento real (`tipo` y `id` de OSM), no una posición en la lista ni un índice de recorrido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El identificador de un anclaje es el del elemento real de OSM y no su posición en la lista",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un elemento cuya etiqueta no está en el catálogo de admisión, cuando se construye el pool, entonces no entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Lo que no está en el catálogo de admisión no entra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el catálogo de admisión, cuando se inspecciona, entonces es una lista cerrada de etiquetas `clave=valor`, sin comodines que admitan una clave entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El catálogo de admisión es una lista cerrada de etiquetas clave=valor, sin comodines",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un elemento sin coordenada utilizable (ni propia ni de centro), cuando se construye el pool, entonces se descarta sin interrumpir la construcción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un elemento sin coordenada utilizable se descarta sin interrumpir la construcción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado urbano denso, cuando se construye el pool, entonces ningún anclaje admitido cae fuera del radio de la celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Ningún anclaje admitido cae fuera del radio de la celda",
+      "hueco_de_bateria": true,
+      "nota": "Se construye el pool con y sin radio: sin él entran más, así que el filtro no pasa por ser un adorno."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado costero, cuando se construye el pool, entonces ningún anclaje admitido cae en mar según la máscara tierra/mar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Ningún anclaje admitido cae en mar",
+      "hueco_de_bateria": true,
+      "nota": "La máscara la construye la tubería en costa, así que el mundo se genera entero y se comprueba sobre world.anchors."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado urbano denso, que trae 769 locales de adultos y bares de copas, cuando se construye el pool, entonces ninguno de ellos aparece en el pool.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Los anclajes de adultos se excluyen del pool",
+      "escenario": "Los anclajes de adultos se excluyen del pool",
+      "nota": "Se afirma primero que el fixture sigue trayendo los 769: si dejara de traerlos, el caso pasaría sin medir nada."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado urbano denso, cuando se genera el mundo entero, entonces ningún núcleo, servicio ni paraje queda anclado a un local de adultos o a un bar de copas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Los anclajes de adultos se excluyen del pool",
+      "escenario": "Los anclajes de adultos se excluyen del pool",
+      "nota": "Segunda mitad del mismo caso: los cuatro mundos congelados por sus dos semillas, mirando lo que consumen núcleos, servicios y parajes."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente que trae `amenity=bar`, `pub`, `nightclub`, `stripclub`, `casino`, `gambling`, `brothel` o `leisure=adult_gaming_centre`, cuando se construye el pool, entonces ninguno entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Las cuatro familias del filtro se caen: adultos, industria, obras y propiedad privada",
+      "escenario": "Los anclajes de adultos se excluyen del pool"
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente que trae `shop=erotic`, `alcohol`, `tobacco` o `bookmaker`, cuando se construye el pool, entonces ninguno entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Las cuatro familias del filtro se caen: adultos, industria, obras y propiedad privada",
+      "escenario": "Los anclajes de adultos se excluyen del pool"
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente que trae industria (`landuse=industrial` o `quarry`, `man_made=works`, `wastewater_plant`, `silo` o `chimney`, `amenity=fuel`), cuando se construye el pool, entonces ninguno entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Las cuatro familias del filtro se caen: adultos, industria, obras y propiedad privada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco declarado por la propia spec: la batería solo afirma los locales de adultos."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente que trae obras (`landuse=construction`, `building=construction`, `highway=construction` o cualquier `demolished:*`), cuando se construye el pool, entonces ninguno entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Las cuatro familias del filtro se caen: adultos, industria, obras y propiedad privada",
+      "hueco_de_bateria": true,
+      "nota": "Íd.: obras no tiene escenario en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente que trae propiedad privada o vivienda (`access=private`, `access=no`, `building=house`, `residential` o `apartments`), cuando se construye el pool, entonces ninguno entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Las cuatro familias del filtro se caen: adultos, industria, obras y propiedad privada",
+      "hueco_de_bateria": true,
+      "nota": "Íd.: propiedad privada y vivienda no tienen escenario en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un elemento con `abandoned:*`, cuando se construye el pool, entonces sí entra, porque es material de ruina y no una obra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Lo abandonado entra porque es material de ruina y lo demolido no",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un elemento que casa a la vez con el catálogo de admisión y con el filtro de tipos problemáticos, cuando se construye el pool, entonces manda el filtro y el elemento no entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Las cuatro familias del filtro se caen: adultos, industria, obras y propiedad privada",
+      "hueco_de_bateria": true,
+      "nota": "Cada elemento del caso lleva encima historic=ruins, que sí está en el catálogo: si mandara la admisión, entrarían todos."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una entrada de la fuente de Places que es un local de adultos, cuando se construye el pool, entonces se descarta con el mismo filtro que las de OSM.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una entrada de Places que es un local de adultos se descarta con el mismo filtro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el filtro de tipos problemáticos, cuando se inspecciona dónde se aplica, entonces se aplica al construir el pool y no depende de que la consulta de datos haya evitado pedir esas etiquetas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El filtro se aplica al construir el pool y no depende de que la consulta evitara pedir esas etiquetas",
+      "hueco_de_bateria": true,
+      "nota": "La demostración es el dato: el fixture pide bares y agua potable a propósito, así que la consulta no los está evitando."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una celda cuyos datos traen cincuenta fuentes de agua potable, cuando se construye el pool, entonces ninguna se usa como anclaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un tag masivo no monopoliza un tipo de paraje",
+      "escenario": "Un tag masivo no monopoliza un tipo de paraje",
+      "nota": "El fixture trae 86 fuentes de agua potable, más de las cincuenta del escenario."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado urbano denso, que trae 86 `amenity=drinking_water`, cuando se construye el pool, entonces el pool no contiene ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un tag masivo no monopoliza un tipo de paraje",
+      "escenario": "Un tag masivo no monopoliza un tipo de paraje"
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una etiqueta con más de veinte entradas en la celda de las que menos del 10 % tiene nombre, cuando se construye el pool, entonces esa etiqueta se descarta entera para esa celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un tag masivo no monopoliza un tipo de paraje",
+      "hueco_de_bateria": true,
+      "nota": "La regla general —más de veinte entradas y menos del 10 % nombradas— no tiene escenario propio en la batería y ningún mundo congelado la dispara, así que se afirma sobre datos sintéticos dentro del mismo caso."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado urbano denso, que trae 78 `amenity=fountain` con 27 nombradas, cuando se construye el pool, entonces la etiqueta no se descarta por la regla anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una etiqueta masiva pero nombrada no se descarta: las fuentes ornamentales se quedan",
+      "hueco_de_bateria": true,
+      "nota": "El corte del 10 % se comprueba por los dos lados: 0/50 se cae y 27/78 se queda."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una etiqueta que excede su tope, cuando se recorta, entonces los que se conservan son los mejor puntuados y, a igualdad, los que tienen nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Los candidatos que se recuperan y los que se conservan son los mejor puntuados y, a igualdad, los que tienen nombre",
+      "hueco_de_bateria": true,
+      "nota": "Desde SPEC-005-iter-1 el tope vive en el reparto, así que la preferencia al recortar se afirma sobre recortaPorTopes y no sobre la admisión."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado urbano denso, cuando se generan los parajes sobre el pool, entonces los tipos de paraje siguen repartidos y ninguno se lleva más de la mitad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un tag masivo no monopoliza un tipo de paraje",
+      "escenario": "Un tag masivo no monopoliza un tipo de paraje"
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un mundo generado entero, cuando se recogen los anclajes de todos los núcleos, servicios y parajes, entonces ningún identificador de OSM ni de Places aparece más de una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Ningún anclaje aparece dos veces",
+      "escenario": "Ningún anclaje aparece dos veces",
+      "nota": "El caso ya existe desde SPEC-002 y cubre este criterio palabra por palabra: se mapea en lugar de duplicarlo, que es lo que permite ver que la batería ya está viva ahí."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un anclaje que un núcleo acaba de tomar, cuando se piden los anclajes libres, entonces ese anclaje ya no está entre ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un anclaje tomado deja de estar libre y consta quién lo consumió",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado los núcleos y servicios ya generados, cuando se pasan los anclajes libres a los parajes, entonces son exactamente los no tomados, ni uno más ni uno menos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "Los parajes reparten lo que los núcleos no gastaron",
+      "escenario": "Los parajes reparten lo que los núcleos no gastaron",
+      "nota": "El caso ya existe desde SPEC-002 y cubre este criterio palabra por palabra: se mapea en lugar de duplicarlo, que es lo que permite ver que la batería ya está viva ahí."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un anclaje ya tomado, cuando otro consumidor intenta tomarlo, entonces la toma falla con un error que nombra el anclaje y a quién lo tenía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Tomar dos veces el mismo anclaje falla nombrando el anclaje y a quién lo tenía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un anclaje tomado, cuando se consulta el pool, entonces consta quién lo consumió: núcleo, servicio o paraje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un anclaje tomado deja de estar libre y consta quién lo consumió",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una taberna anclada al bar «Casa Manuela», cuando se genera la tabernera que trabaja allí, entonces el número de anclajes tomados no cambia, porque heredar no es consumir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un NPC no consume anclaje propio",
+      "escenario": "Un NPC no consume anclaje propio",
+      "nota": "Los NPC no existen todavía en el paquete, así que se afirma el contrato del pool del que el escenario depende: heredar la ficha no pasa por tomar, y «npc» no es un rol consumidor declarado."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un cruce o un puente derivado del grafo viario, cuando se coloca como paraje, entonces no toma ningún anclaje del pool.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un cruce o un puente derivado del grafo no toma ningún anclaje",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el pool de una celda, cuando se pide excluir un anclaje por su identificador, entonces deja de estar disponible sin que se regenere nada de lo ya colocado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Excluir un anclaje por su identificador lo saca del reparto sin resembrar nada",
+      "hueco_de_bateria": true,
+      "nota": "Frontera dejada preparada para SPEC-035: se comprueba además que lo ya colocado no se mueve."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un anclaje libre a menos de 100 m de una calzada nombrada, cuando se puntúa, entonces recibe más puntos que uno equivalente a más de 300 m.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Cerca de una calzada suma más que lejos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un anclaje libre dentro del radio urbano de un núcleo, cuando se puntúa, entonces recibe una penalización frente a uno equivalente fuera de él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Estar dentro del radio urbano de un núcleo penaliza pero no excluye",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado dos anclajes libres con la misma distancia a ruta y a núcleo, cuando se puntúan, entonces el que tiene nombre propio queda por delante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "A igualdad de distancias, el que tiene nombre propio va por delante",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un anclaje dentro del radio urbano de un núcleo, cuando es el único candidato que queda, entonces se puede usar igual: la penalización ordena, no excluye.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Estar dentro del radio urbano de un núcleo penaliza pero no excluye",
+      "hueco_de_bateria": true,
+      "nota": "Segunda mitad del caso: siendo el único candidato sigue estando, que es lo que distingue penalizar de excluir."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una celda sin ninguna calzada trazada todavía, cuando se puntúan los anclajes libres, entonces la puntuación se calcula sin fallar y la distancia a ruta no aporta nada a ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una celda sin ninguna calzada trazada se puntúa sin fallar y la distancia a ruta no aporta nada",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba también con una recta de emergencia, que tampoco cuenta como calzada trazada."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mismo pool y el mismo mundo, cuando se puntúa dos veces, entonces el orden resultante es idéntico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Puntuar dos veces el mismo pool da exactamente el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una celda sin fuente de Places inyectada, cuando se construye el pool, entonces se construye solo con OSM y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Sin fuente de Places el pool se construye solo con OSM y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una celda generada sin Places y la misma celda generada con Places disponible pero sin déficit que cubrir, cuando se comparan los dos mundos, entonces son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Con Places disponible pero sin déficit que cubrir, la celda sale idéntica a la generada sin Places",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una celda cuyo pool de OSM ya cubre la demanda, cuando se ofrece una fuente de Places, entonces no se admite ninguna entrada de Places.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Con Places disponible pero sin déficit que cubrir, la celda sale idéntica a la generada sin Places",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una celda cuyo pool de OSM se queda corto para la demanda, cuando se ofrece una fuente de Places, entonces entran como mucho las entradas que faltan para alcanzar la demanda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Places entra como mucho hasta cubrir el déficit",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una entrada de Places admitida, cuando se persiste el mundo, entonces su `place_id` se guarda como campo estable de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una entrada de Places viaja con su place_id y con su contenido refrescable fechado",
+      "hueco_de_bateria": true,
+      "nota": "La capa de partida es la fila 9 y no existe: se afirma sobre el mundo generado y su ida y vuelta por JSON, que es lo que se persistirá."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una entrada de Places admitida, cuando se persiste el mundo, entonces su nombre y su coordenada quedan marcados como contenido refrescable, con la fecha en que se capturaron.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una entrada de Places viaja con su place_id y con su contenido refrescable fechado",
+      "hueco_de_bateria": true,
+      "nota": "La fecha de captura llega inyectada con la fuente: el núcleo no lee el reloj."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una entrada de Places refrescada más tarde, cuando se compara el mundo antes y después, entonces la capa de ficción —nombres, tipos, posiciones en el mapa— no ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una entrada de Places viaja con su place_id y con su contenido refrescable fechado",
+      "hueco_de_bateria": true,
+      "nota": "Se generan dos mundos que solo se diferencian en el nombre real del sitio y se compara la capa de ficción."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una entrada de Places a menos de 25 m de un anclaje de OSM ya admitido y de tipo compatible, cuando se construye el pool, entonces se considera el mismo lugar y no entra por segunda vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una entrada de Places a menos de 25 m de un anclaje de OSM compatible no entra dos veces",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba por los dos lados del radio: a ~10 m se funde y a ~100 m no."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente de Places que falla o llega vacía, cuando se construye el pool, entonces el mundo se genera con el pool de OSM y la celda queda registrada como generada sin relleno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una fuente de Places que falla o llega vacía deja la celda generada sin relleno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una entrada de Places sin `place_id`, cuando se construye el pool, entonces se descarta, porque sin identificador estable no se puede garantizar el uso único.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una entrada de Places sin place_id se descarta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado los mismos datos crudos y la misma semilla, cuando se construye el pool dos veces, entonces los dos pools son idénticos elemento a elemento y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Construir el pool dos veces con los mismos datos y la misma semilla da el mismo pool",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "El escenario de la batería es del mundo entero; aquí se afirma sobre el pool, que es la fase que entrega esta spec."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado los mismos datos crudos con los elementos en otro orden de llegada, cuando se construye el pool, entonces el pool resultante es idéntico al anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El orden de llegada de los elementos no cambia el pool",
+      "escenario": "El orden de iteración no depende del orden de inserción"
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado la construcción del pool, cuando se inspecciona su implementación, entonces no usa `Math.random`, ni el reloj del sistema, ni recorre ningún `Set` o `Map` cuyo orden dependa de la inserción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El pool no usa ninguna fuente de azar ni de tiempo del sistema y siembra con su propio sufijo de fase",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema"
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado la construcción del pool, cuando se inspecciona qué azar usa, entonces usa un generador sembrado con su propio sufijo de fase, distinto del de núcleos, rutas y parajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El pool no usa ninguna fuente de azar ni de tiempo del sistema y siembra con su propio sufijo de fase",
+      "escenario": "Cada fase usa su propio sufijo de azar",
+      "nota": "La enumeración de que ninguna otra fase comparte cadena de semilla vive en el caso homónimo de SPEC-002, que recorre todos los módulos del paquete."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado dos semillas distintas sobre los mismos datos crudos, cuando se construyen los pools, entonces el conjunto de anclajes admitidos es el mismo y solo cambia el desempate del orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Dos semillas distintas admiten el mismo conjunto y solo cambia el desempate",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un mundo ya generado, cuando cambian los datos de OSM de esa zona, entonces el pool congelado del mundo no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El mundo no depende de OSM después de generarse",
+      "escenario": "El mundo no depende de OSM después de generarse",
+      "nota": "Se captura lo que la tubería recibió de la capa de datos y se cambia por completo con el mundo ya generado. La mitad de guardar y volver a cargar es de la fila 9, que no existe."
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado el mundo congelado barrio de tres calles, que no trae ningún POI admisible, cuando se construye el pool, entonces el pool queda vacío y la construcción no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un mundo sin ningún POI admisible da un pool vacío y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un pool vacío, cuando se piden los anclajes libres, entonces se devuelve una lista vacía y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un mundo sin ningún POI admisible da un pool vacío y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado un pool que no llega a la demanda de la celda, cuando termina la construcción, entonces declara el déficit con su número, no lo esconde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "El pool declara el déficit con su número en vez de esconderlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente de datos que llega vacía o sin el campo de elementos, cuando se construye el pool, entonces se obtiene un pool vacío en lugar de una excepción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una fuente vacía o sin campo de elementos da un pool vacío en lugar de una excepción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005",
+      "criterio": "Dado una fuente de datos malformada —elementos sin tipo ni identificador—, cuando se construye el pool, entonces falla con un error que nombra la fuente y el primer elemento inválido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Una fuente malformada falla nombrando la fuente y el primer elemento inválido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado un conjunto de datos crudos, cuando se construye el pool, entonces ningún anclaje que haya pasado el filtro de tipos problemáticos, el catálogo de admisión, el descarte por falta de nombre, el radio y la máscara tierra/mar queda fuera del pool por exceder un tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Ningún anclaje que pasó los filtros queda fuera del pool por exceder un tope",
+      "hueco_de_bateria": true,
+      "nota": "La admisión sin topes se recalcula en la prueba a partir del dato crudo, no llamando al código que se prueba."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado el mundo congelado costero, cuando se construye el pool, entonces admite 45 anclajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Los mundos congelados admiten los anclajes medidos: 45 en el costero y 2 556 en el urbano denso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado el mundo congelado urbano denso, cuando se construye el pool, entonces admite 2 556 anclajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Los mundos congelados admiten los anclajes medidos: 45 en el costero y 2 556 en el urbano denso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado un pool ya construido, cuando se pide su resumen, entonces sigue declarando cuántos anclajes aporta cada etiqueta `clave=valor` y cada `kind`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "El resumen del pool sigue declarando cuánto aporta cada etiqueta y cada kind",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado un pool ya construido, cuando se comparan sus anclajes con los que devolvería la misma admisión sin ningún tope, entonces son exactamente los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Ningún anclaje que pasó los filtros queda fuera del pool por exceder un tope",
+      "hueco_de_bateria": true,
+      "nota": "El caso «Una etiqueta puede aportar más del 25 % del pool sin que se la recorte» del mismo fichero lo comprueba por el otro lado: con el tope en la admisión eso era imposible por construcción."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una fase que reparte anclajes libres y tiene más candidatos que su cupo, cuando elige, entonces ninguna etiqueta `clave=valor` aporta más del 25 % de los candidatos que se le ofrecen y ningún `kind` más del 40 %.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Con más candidatos que cupo, ninguna etiqueta ni ningún kind pasa de su tope",
+      "hueco_de_bateria": true,
+      "nota": "Los topes se miden como cuenta máxima sobre el conjunto de candidatos que entra al reparto, que es como los aplica recortaPorTopes. Medido sobre el conjunto que sale, la etiqueta dominante queda en el 33-36 %: si el criterio se lee así, no se cumple, y está señalado en el resumen de cobertura."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una fase cuyos candidatos libres no llegan a su cupo, cuando elige, entonces no se descarta ningún candidato por tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Si los candidatos no llegan al cupo no se descarta ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una fase donde respetar los topes dejaría menos candidatos que su cupo, cuando se aplican, entonces el recorte se detiene justo en el cupo y no por debajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Cuando respetar los topes dejaría menos candidatos que el cupo, el recorte se detiene justo en el cupo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una fase donde el recorte se ha detenido en el cupo, cuando se recuperan candidatos descartados, entonces se recuperan por orden de preferencia: primero los mejor puntuados y, a igualdad, los que tienen nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Los candidatos que se recuperan y los que se conservan son los mejor puntuados y, a igualdad, los que tienen nombre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una celda donde el reparto tuvo que saltarse los topes, cuando se consulta el mundo generado, entonces consta que se saltaron, con la fase que lo hizo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Cuando el reparto tuvo que saltarse los topes, consta en el mundo con la fase que lo hizo",
+      "hueco_de_bateria": true,
+      "nota": "Ningún mundo congelado dispara hoy la relajación, así que el caso monta un mundo mínimo a mano con doce anclajes de la misma etiqueta."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una celda donde los candidatos sobraban, cuando se consulta el mundo generado, entonces no consta ninguna relajación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Cuando los candidatos sobraban, no consta ninguna relajación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado una etiqueta que excede su tope en el reparto, cuando se recorta, entonces los candidatos que se conservan son los mejor puntuados y, a igualdad, los que tienen nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Los candidatos que se recuperan y los que se conservan son los mejor puntuados y, a igualdad, los que tienen nombre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado candidatos que vienen de Places y candidatos que vienen de OSM, cuando se reparten, entonces el tope los trata igual y no distingue la fuente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "El tope trata igual a los candidatos de Places y a los de OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado el mundo congelado urbano denso, cuando se generan los parajes, entonces los tipos siguen repartidos y ninguno se lleva más de la mitad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/anclajes.test.mjs",
+      "caso": "Un tag masivo no monopoliza un tipo de paraje",
+      "escenario": "Un tag masivo no monopoliza un tipo de paraje"
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado el mismo mundo congelado y la misma semilla, cuando se genera dos veces, entonces el reparto elige exactamente los mismos anclajes y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "El mismo mundo congelado y la misma semilla eligen los mismos anclajes y en el mismo orden",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo"
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado los ocho extractos de referencia regenerados tras esta iteración, cuando se suman las plantillas que castean en todos ellos, entonces el total es al menos 21 de 48, que es el valor medido en `cec7d91`, el commit anterior a esta fila.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "La casteabilidad agregada de los ocho extractos de referencia no baja de 21 de 48",
+      "hueco_de_bateria": true,
+      "nota": "Es el hueco más grande que deja la iteración: mide salud del generador y no corrección, y merece característica propia en la batería —«El generador no empeora entrega a entrega»—. El umbral es el número medido en cec7d91 y no el de hoy (24/48), para que una mejora no ponga rojo el caso."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado cada uno de los ocho extractos, cuando se compara cuántas plantillas castea con las que casteaba antes de esta fila, entonces ninguno castea menos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Ningún extracto castea menos, ni tiene menos parajes ni menos servicios, que antes de esta fila",
+      "hueco_de_bateria": true,
+      "nota": "La línea de cada mundo está escrita como constante en el fichero, con la medición de cec7d91 que trae la iteración."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado el extracto `urbano-denso#2`, cuando se cuentan sus plantillas casteadas, entonces son al menos 6 de 6, como antes de esta fila.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Ningún extracto castea menos, ni tiene menos parajes ni menos servicios, que antes de esta fila",
+      "hueco_de_bateria": true,
+      "nota": "urbano-denso#2 entra por su línea de 6 de 6."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado el extracto `costero#1` y el `costero#2`, cuando se cuentan sus parajes, entonces son 5 en cada uno, que es el cupo de la celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Los dos mundos costeros llegan al cupo de parajes de su celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado cada uno de los ocho extractos, cuando se comparan sus recuentos de parajes y de servicios con los de antes de esta fila, entonces ninguno tiene menos de ninguno de los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Ningún extracto castea menos, ni tiene menos parajes ni menos servicios, que antes de esta fila",
+      "hueco_de_bateria": true,
+      "nota": "Las calzadas quedan fuera a propósito: está medido que un reparto mejor puede trazar una calzada menos y castear más."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado un extracto de referencia regenerado, cuando el paquete genera ese mismo mundo y se extrae de él lo mismo, entonces el resultado es idéntico al extracto commiteado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "El paquete regenera cada extracto de referencia idéntico al commiteado",
+      "hueco_de_bateria": true,
+      "nota": "El caso ya existe desde SPEC-002 y cubre este criterio palabra por palabra: se mapea en lugar de duplicarlo, que es lo que permite ver que la batería ya está viva ahí."
+    },
+    {
+      "spec": "SPEC-005-iter-1",
+      "criterio": "Dado un extracto de referencia regenerado, cuando se lee su cabecera, entonces declara que esta iteración lo regeneró y por qué.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/reparto.test.mjs",
+      "caso": "Cada extracto de referencia declara qué iteración lo regeneró y por qué",
+      "hueco_de_bateria": true
     }
   ]
 }
