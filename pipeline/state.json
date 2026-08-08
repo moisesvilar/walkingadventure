@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-005",
+  "spec_actual": "SPEC-006",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -52,6 +52,16 @@
       "casos": "275/275 @nucleo",
       "app": "no ejecutado: Maestro ausente",
       "nota": "el suelo de parajes se calcula (7 escenas / 2 = 4) pero nadie lo consume: parajes.js sigue con parajeCountForRadius. Duena: fila 6."
+    },
+    {
+      "spec": "SPEC-005",
+      "slug": "pool-anclajes-filtros",
+      "resultado": "verde",
+      "iteraciones": 1,
+      "report": "test/reports/SPEC-005-iter-1-run-20260808T073643Z.md",
+      "casos": "332 casos: 329 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos: test/app/ vacio (Maestro ya presente)",
+      "nota": "la iteracion corrigio una regresion de salud del generador: los topes en la admision bajaban la casteabilidad de 21/48 a 17/48. Ahora 24/48."
     }
   ],
   "bloqueos": [],
