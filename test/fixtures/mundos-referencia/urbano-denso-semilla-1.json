@@ -4,8 +4,8 @@
     "semilla": "40.42,-3.70#1",
     "revision_prototipo": "07f1c41",
     "nota": "Capturado del prototipo (app/js/) antes del porte de SPEC-002. Lo regenera el paquete y debe salir idéntico.",
-    "regenerado_por": "SPEC-003",
-    "motivo_regeneracion": "Regenerado por SPEC-003: la fase de núcleos pasa a derivar su azar con sufijo propio (:nucleos) como el resto de las fases, así que los mundos generados cambian."
+    "regenerado_por": "SPEC-005-iter-1",
+    "motivo_regeneracion": "Regenerado por SPEC-005-iter-1: los topes de diversidad dejan de recortar el pool en la admisión y pasan al reparto, sobre los candidatos que se le ofrecen a la fase y deteniéndose en su cupo, así que los mundos generados cambian."
   },
   "titulo": "Marcas de Kaelun",
   "idioma": "es",
@@ -18,18 +18,18 @@
   },
   "nucleos": [
     {
-      "nombre": "Fuenfrida de Arriba",
+      "nombre": "Castrocades",
       "tipo": "aldea",
-      "x": -276,
-      "y": -240,
-      "anclaje": "node/11255230071"
+      "x": -363,
+      "y": 310,
+      "anclaje": "node/5325719513"
     },
     {
-      "nombre": "Fuenluna de los Vientos",
+      "nombre": "Ferraverde",
       "tipo": "aldea",
-      "x": 197,
-      "y": 520,
-      "anclaje": "node/5064733418"
+      "x": -272,
+      "y": 29,
+      "anclaje": "relation/18316567"
     },
     {
       "nombre": "Valmora",
@@ -41,23 +41,23 @@
     {
       "nombre": "Granja de la Colmena",
       "tipo": "granja",
+      "x": 60,
+      "y": 674,
+      "anclaje": "node/2717079169"
+    },
+    {
+      "nombre": "Granja de la Niebla",
+      "tipo": "granja",
+      "x": -365,
+      "y": -195,
+      "anclaje": "node/2631133126"
+    },
+    {
+      "nombre": "Granja de las Cabras",
+      "tipo": "granja",
       "x": 2,
       "y": 822,
       "anclaje": "node/1388332887"
-    },
-    {
-      "nombre": "Granja de los Manzanos",
-      "tipo": "granja",
-      "x": -487,
-      "y": 194,
-      "anclaje": "node/1556708366"
-    },
-    {
-      "nombre": "Granja del Arado",
-      "tipo": "granja",
-      "x": -490,
-      "y": 295,
-      "anclaje": "node/12712730759"
     },
     {
       "nombre": "Ferrabriga de los Vientos",
@@ -81,6 +81,13 @@
       "x": 256,
       "y": -315,
       "anclaje": "node/13429616602"
+    },
+    {
+      "nombre": "Botica del Cuervo Plateado",
+      "tipo": "boticario",
+      "x": -283,
+      "y": -6,
+      "anclaje": "node/3670167557"
     },
     {
       "nombre": "Botica del Roble Astuto",
@@ -125,18 +132,18 @@
       "anclaje": "way/1042066798"
     },
     {
-      "nombre": "Posada del Roble Astuto",
-      "tipo": "posada",
-      "x": -494,
-      "y": 287,
-      "anclaje": "node/3245942746"
-    },
-    {
       "nombre": "Taberna de la Espada Alegre",
       "tipo": "taberna",
       "x": 313,
       "y": -273,
       "anclaje": "node/4975520980"
+    },
+    {
+      "nombre": "Taberna del Caldero Dormido",
+      "tipo": "taberna",
+      "x": -362,
+      "y": 311,
+      "anclaje": "node/3237847436"
     },
     {
       "nombre": "Taberna del Ciervo Rojo",
@@ -146,21 +153,21 @@
       "anclaje": "node/6895672170"
     },
     {
-      "nombre": "Taberna del Cuervo Astuto",
+      "nombre": "Taberna del Dragón Alegre",
       "tipo": "taberna",
-      "x": 202,
-      "y": 518,
-      "anclaje": "node/13980472701"
-    },
-    {
-      "nombre": "Taberna del Farol Errante",
-      "tipo": "taberna",
-      "x": -250,
-      "y": -244,
-      "anclaje": "node/3150984148"
+      "x": -286,
+      "y": 38,
+      "anclaje": "node/9071663152"
     }
   ],
   "parajes": [
+    {
+      "nombre": "La Atalaya del Fin",
+      "tipo": "atalaya",
+      "x": -303,
+      "y": 717,
+      "anclaje": "node/2681923270"
+    },
     {
       "nombre": "La Encrucijada de las Brujas",
       "tipo": "cruce",
@@ -169,129 +176,122 @@
       "anclaje": null
     },
     {
-      "nombre": "El Crucero de la Vela",
-      "tipo": "ermita",
-      "x": -519,
-      "y": -231,
-      "anclaje": "way/629873316"
+      "nombre": "El Manantial de la Doncella",
+      "tipo": "fuente",
+      "x": -32,
+      "y": 315,
+      "anclaje": "node/13716868587"
     },
     {
-      "nombre": "El Santuario del Monte",
-      "tipo": "ermita",
-      "x": 267,
-      "y": 320,
-      "anclaje": "relation/18565266"
+      "nombre": "La Abadía del Alba",
+      "tipo": "monasterio",
+      "x": -195,
+      "y": 517,
+      "anclaje": "node/13342702051"
     },
     {
-      "nombre": "La Piedra del Alba",
-      "tipo": "piedra",
-      "x": -103,
-      "y": 735,
-      "anclaje": "node/2686612540"
-    },
-    {
-      "nombre": "La Muralla Caída",
+      "nombre": "La Torre Caída",
       "tipo": "ruina",
-      "x": -618,
-      "y": 648,
-      "anclaje": "node/12627911761"
+      "x": 294,
+      "y": 622,
+      "anclaje": "node/2674514530"
     }
   ],
   "calzadas": [
     {
-      "nombre": "El Camino del Alba Fría",
-      "tipo": "calzada",
-      "desde": [
-        -490,
-        295
-      ],
-      "hasta": [
-        2,
-        822
-      ],
-      "puntos": 25,
-      "recta": false
-    },
-    {
-      "nombre": "El Camino del Nordeste",
+      "nombre": "El Camino de Ferraverde",
       "tipo": "calzada",
       "desde": [
         -711,
         170
       ],
       "hasta": [
-        -490,
-        295
+        -272,
+        29
       ],
-      "puntos": 61,
+      "puntos": 55,
+      "recta": false
+    },
+    {
+      "nombre": "El Camino del Alba Fría",
+      "tipo": "calzada",
+      "desde": [
+        -363,
+        310
+      ],
+      "hasta": [
+        2,
+        822
+      ],
+      "puntos": 32,
+      "recta": false
+    },
+    {
+      "nombre": "El Camino del Alba",
+      "tipo": "calzada",
+      "desde": [
+        -711,
+        170
+      ],
+      "hasta": [
+        -363,
+        310
+      ],
+      "puntos": 68,
+      "recta": false
+    },
+    {
+      "nombre": "La Calzada de las Brumas",
+      "tipo": "calzada",
+      "desde": [
+        -272,
+        29
+      ],
+      "hasta": [
+        -365,
+        -195
+      ],
+      "puntos": 26,
+      "recta": false
+    },
+    {
+      "nombre": "La Calzada del Nordeste",
+      "tipo": "calzada",
+      "desde": [
+        -363,
+        310
+      ],
+      "hasta": [
+        60,
+        674
+      ],
+      "puntos": 56,
       "recta": false
     },
     {
       "nombre": "La Senda de Ferrabriga de los Vientos",
       "tipo": "calzada",
       "desde": [
-        -276,
-        -240
+        -365,
+        -195
       ],
       "hasta": [
         271,
         -265
       ],
-      "puntos": 59,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta de la Solana",
-      "tipo": "calzada",
-      "desde": [
-        -487,
-        194
-      ],
-      "hasta": [
-        -276,
-        -240
-      ],
-      "puntos": 44,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta del Alba",
-      "tipo": "calzada",
-      "desde": [
-        -490,
-        295
-      ],
-      "hasta": [
-        197,
-        520
-      ],
-      "puntos": 62,
-      "recta": false
-    },
-    {
-      "nombre": "La Vieja Ruta del Este",
-      "tipo": "calzada",
-      "desde": [
-        -711,
-        170
-      ],
-      "hasta": [
-        -487,
-        194
-      ],
-      "puntos": 42,
+      "puntos": 54,
       "recta": false
     },
     {
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -103,
-        735
+        -195,
+        517
       ],
       "hasta": [
-        -312,
-        735
+        -252,
+        446
       ],
       "puntos": 2,
       "recta": false
@@ -300,12 +300,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -519,
-        -231
+        -303,
+        717
       ],
       "hasta": [
-        -550,
-        -136
+        -314,
+        711
       ],
       "puntos": 2,
       "recta": false
@@ -314,12 +314,12 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        -618,
-        648
+        -32,
+        315
       ],
       "hasta": [
-        -673,
-        677
+        -22,
+        377
       ],
       "puntos": 2,
       "recta": false
@@ -328,14 +328,14 @@
       "nombre": null,
       "tipo": "ramal",
       "desde": [
-        267,
-        320
+        294,
+        622
       ],
       "hasta": [
-        225,
-        356
+        295,
+        510
       ],
-      "puntos": 5,
+      "puntos": 4,
       "recta": false
     }
   ],
