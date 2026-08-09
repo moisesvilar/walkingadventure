@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-028",
+  "spec_actual": "SPEC-029",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -278,6 +278,15 @@
       "casos": "1726 casos: 1723 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado",
       "nota": "dos partes no entregadas y declaradas: modulo nativo de ubicacion y capa de teselas, sin dependencia nombrada por ninguna spec."
+    },
+    {
+      "spec": "SPEC-028",
+      "slug": "portada-antes-de-salir",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-028-run-20260809T120952Z.md",
+      "casos": "1792 casos: 1789 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado"
     }
   ],
   "bloqueos": [],
