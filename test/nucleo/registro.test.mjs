@@ -214,8 +214,15 @@ describe('El registro de hechos', () => {
   });
 
   test('El catálogo de tipos de hecho es el de partida-guardada.md §2, más la versión oída', () => {
+    // `anclaje-devuelto` entra con SPEC-035 y **no es evitable ni ablandable**: la spec
+    // exige que deshacer un descarte se anote detrás y no borre el hecho del descarte
+    // —el registro es la bitácora de lo que pasó y no el estado, y borrar es la única
+    // operación que no tiene—. Sin este tipo, «se reconstruye desde el registro y salen
+    // los mismos descartes» sería falso: al reproducir, los descartes deshechos
+    // resucitarían y la partida reconstruida mandaría otra vez a la casa de alguien.
     assert.deepEqual([...TIPOS_DE_HECHO], [
       'anclaje-descartado',
+      'anclaje-devuelto',
       'aventura-abandonada',
       'aventura-aceptada',
       'aventura-cerrada',
@@ -680,6 +687,10 @@ describe('El tamaño, que se mide', () => {
       'entrega-atendida': { tipo: 'entrega-atendida', mapa: MAPA, dia: 1, paso: 1, carga: { entrega: 'e1', quien: 'regencia' } },
       'entrega-ignorada': { tipo: 'entrega-ignorada', mapa: MAPA, dia: 1, paso: 1, carga: { entrega: 'e1', porque: 'no dio tiempo' } },
       'anclaje-descartado': { tipo: 'anclaje-descartado', mapa: MAPA, dia: 1, paso: 1, carga: { anclaje: 'x1', rol: 'contacto', porque: 'es una casa' } },
+      // El deshacer de SPEC-035, que se anota detrás del descarte en lugar de borrarlo.
+      // Es el tipo más barato del catálogo justamente porque no repite el motivo: lleva
+      // el anclaje y el rol para que la línea se lea sola, y nada más.
+      'anclaje-devuelto': { tipo: 'anclaje-devuelto', mapa: MAPA, dia: 1, paso: 1, carga: { anclaje: 'x1', rol: 'contacto' } },
     };
     assert.deepEqual(Object.keys(ejemplos).sort(), [...TIPOS_DE_HECHO], 'se mide un ejemplo de cada tipo declarado');
     const medidas = Object.entries(ejemplos).map(([tipo, h]) => [tipo, bytesDeHecho(hecho(h))]);
