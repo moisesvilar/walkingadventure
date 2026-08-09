@@ -1,0 +1,19 @@
+{
+  "name": "@walkingadventure/app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo run:ios",
+    "android": "expo run:android"
+  },
+  "dependencies": {
+    "@walkingadventure/nucleo": "*",
+    "expo": "~57.0.11",
+    "expo-haptics": "~57.0.1",
+    "expo-notifications": "~57.0.9",
+    "react": "19.2.3",
+    "react-native": "0.86.2"
+  }
+}

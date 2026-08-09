@@ -1,0 +1,57 @@
+# @app — El primer flujo que toca un dispositivo (SPEC-020).
+#
+# Comprueba lo único que esta fila entrega: que la app arranca, que la pantalla de
+# andamiaje está entera, que el título de mundo lo pinta el núcleo y que las cuatro
+# capacidades se enumeran. Los elementos se localizan por los identificadores que
+# declara la spec, nunca por su texto: el texto de una capacidad cambia con el
+# dispositivo y el identificador no.
+#
+# El título esperado es el que el mismo paquete produce en Node con la semilla
+# 42.40,-8.81#1, y esa comparación es la prueba de RF-INFRA-001 dentro del móvil.
+
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    id: 'pantalla-andamiaje'
+
+# La pantalla se declara herramienta: si esto desaparece sin que la fila 27 la
+# haya sustituido, es que alguien la ha empezado a tratar como pantalla de juego.
+- assertVisible: 'Andamiaje. Esto no es el juego.*'
+
+- assertVisible:
+    id: 'titulo-de-mundo'
+
+# Idéntico al de Node: namesFor(localeFor(42.40, -8.81)).worldTitle(makeRng('42.40,-8.81#1:title')).
+- assertVisible: '«Reinos de Vaeloria»'
+
+- assertVisible: 'semilla 42.40,-8.81#1 · idioma gl'
+
+- assertVisible:
+    id: 'capacidades'
+
+- assertVisible:
+    id: 'capacidad-salud'
+- assertVisible:
+    id: 'capacidad-haptico'
+- assertVisible:
+    id: 'capacidad-notificaciones'
+- assertVisible:
+    id: 'capacidad-respaldo'
+
+# La salud queda declarada no montada, nombrando a su dueña.
+- assertVisible: 'Salud — no montada'
+- assertVisible: '.*la monta la fila 42.*'
+
+# Ni el núcleo caído ni la lista vacía: los dos estados existen y aquí no tocan.
+- assertNotVisible:
+    id: 'nucleo-error'
+- assertNotVisible:
+    id: 'capacidades-vacio'
+- assertNotVisible:
+    id: 'gancho-no-reconocido'
+
+# Sin cifras de distancia, tiempo, ritmo, pasos ni progreso en toda la pantalla.
+- assertNotVisible: '.*\d+\s*(km|m|min|pasos|%).*'

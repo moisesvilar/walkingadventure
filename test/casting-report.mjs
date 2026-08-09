@@ -8,7 +8,7 @@ globalThis.__WA_PROXY__ = process.env.WA_PROXY ?? 'http://localhost:8137/api/ove
 
 const { buildWorld, viasDelGrafo } = await import('../packages/nucleo/world/build.js');
 const { construyeGrafo } = await import('../packages/nucleo/world/grafo.js');
-const { fetchGeoFeatures, fetchPois, fetchStreets } = await import('../app/js/data/overpass.js');
+const { fetchGeoFeatures, fetchPois, fetchStreets } = await import('../prototipo/js/data/overpass.js');
 const { generateSettlements } = await import('../packages/nucleo/world/settlements.js');
 const { buildRoutes } = await import('../packages/nucleo/world/routes.js');
 const { generateParajes } = await import('../packages/nucleo/world/parajes.js');

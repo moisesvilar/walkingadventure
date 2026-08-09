@@ -11,10 +11,11 @@ import { homedir } from 'node:os';
 import { extname, join, normalize } from 'node:path';
 
 const PORT = process.env.PORT || 8137;
-// Los estáticos viven en app/, no en la raíz: el servidor se queda arriba porque
-// además es el proxy de Overpass, que no es parte del front.
-const ROOT = new URL('./app/', import.meta.url).pathname;
-// El generador ya no vive dentro de app/: es el paquete compartido, y el prototipo
+// Los estáticos son el PROTOTIPO web, que desde SPEC-020 vive en prototipo/ y ya
+// no en app/: app/ es la app de Expo y no se sirve por HTTP. El servidor se queda
+// arriba porque además es el proxy de Overpass, que no es parte del front.
+const ROOT = new URL('./prototipo/', import.meta.url).pathname;
+// El generador no vive dentro del prototipo: es el paquete compartido, y el prototipo
 // lo importa por ruta relativa (../../packages/nucleo/...). Servirlo aquí es lo que
 // evita tener una segunda copia del generador "para que el prototipo funcione".
 const PAQUETES = new URL('./packages/', import.meta.url).pathname;
