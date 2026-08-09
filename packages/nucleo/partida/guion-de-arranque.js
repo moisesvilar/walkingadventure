@@ -17,12 +17,19 @@
 // texto» no se cumpla por vacío.
 
 import { congelaHondo } from '../core/congelar.js';
+import { REGISTROS } from '../lenguaje/registro.js';
 import { reglaDeFormula } from '../names/lenguaje.js';
 import { DECLARACION_DEL_SUELO } from './tramo.js';
 import { IDS_DE_RESPUESTA } from './tramo.js';
 
-/** Los dos registros de `game-design/lenguaje.md`. La frontera entre ellos es el botón de A1P7. */
-export const REGISTROS = Object.freeze({ APLICACION: 'aplicacion', MUNDO: 'mundo' });
+/**
+ * Los dos registros de `game-design/lenguaje.md`. La frontera entre ellos es el botón de A1P7.
+ *
+ * Se reexportan desde `lenguaje/registro.js`, que es donde viven desde SPEC-038: el
+ * enumerado es una propiedad de todos los textos del juego y no del guion del arranque,
+ * y tener dos declaraciones del mismo enumerado es cómo se desincronizan.
+ */
+export { REGISTROS };
 
 /**
  * Dónde acaba la voz de la aplicación: el botón «Salir a andar» de A1P7 es el último

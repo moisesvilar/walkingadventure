@@ -28,6 +28,7 @@ import {
 } from './conocimiento.js';
 import { congelaDescartes, estadoDeDescartes, levantaDescartes } from './descartes.js';
 import { congelaPersonaje, estadoDePersonaje, levantaPersonaje } from './personaje.js';
+import { congelaPintado, estadoDePintado, levantaPintado } from './pintado.js';
 import {
   ESQUEMA_DIARIO,
   ESQUEMA_TEXTOS,
@@ -186,6 +187,20 @@ const AREA_PERSONAJE = campos({
  * nombres: un ajuste nuevo entra por su módulo y no por dos sitios.
  */
 const AREA_AJUSTES = campos(Object.fromEntries(IDS_DE_AJUSTE.map((id) => [id, 'booleano'])));
+
+/**
+ * Cómo se pinta el mapa: el estilo elegido y el escalón de tamaño de letra.
+ *
+ * Va **aparte del área de ajustes** y no dentro de ella porque aquella es el par de
+ * interruptores que `seguridad-privacidad.md` §4 declara —booleanos, y su esquema se
+ * deriva de que lo sean—, y esto son dos identificadores de sendos catálogos de la fila
+ * 21. Meterlos allí obligaría a que «un ajuste es un interruptor» dejara de ser cierto,
+ * que es la frase que impide que los ajustes se conviertan en un cajón.
+ *
+ * El estilo se guarda **como identificador y sin resolver**: el catálogo es de su dueña y
+ * guardar aquí un objeto de estilo sería una segunda copia de sus colores.
+ */
+const AREA_PINTADO = campos({ estilo: 'texto', tamanoDeTexto: 'texto' });
 
 const AREA_ORO = campos({ saldo: 'entero' });
 
@@ -397,6 +412,11 @@ declaraArea({ id: 'arranque', esquema: AREA_ARRANQUE, inicial: estadoDeArranque,
 // cuál era el anterior, y reproducirlos sería inventárselo.
 declaraArea({ id: 'personaje', esquema: AREA_PERSONAJE, inicial: estadoDePersonaje, congela: congelaPersonaje, levanta: levantaPersonaje, reproduce: false });
 declaraArea({ id: 'ajustes', esquema: AREA_AJUSTES, inicial: estadoDeAjustes, congela: congelaAjustes, levanta: levantaAjustes, reproduce: false });
+// Cómo se pinta el mapa, de la fila 21. **No se reproduce desde el registro**, por lo
+// mismo que el personaje: un hecho diría que alguien cambió de estilo, no cuál tenía
+// antes, y reproducirlo sería inventárselo. Entra por `declaraArea` como las demás y sin
+// subir la versión de formato, que es para lo que existe la vía canónica de SPEC-016.
+declaraArea({ id: 'pintado', esquema: AREA_PINTADO, inicial: estadoDePintado, congela: congelaPintado, levanta: levantaPintado, reproduce: false });
 declaraArea({ id: 'oro', esquema: AREA_ORO, inicial: estadoDeOro, congela: congelaOro, levanta: levantaOro });
 declaraArea({ id: 'objetos', esquema: AREA_OBJETOS, inicial: estadoDeObjetos, congela: congelaObjetos, levanta: levantaObjetos });
 declaraArea({ id: 'diario', esquema: ESQUEMA_DIARIO, inicial: estadoDeDiario, congela: congelaDiario, levanta: levantaDiario });

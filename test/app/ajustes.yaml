@@ -1,0 +1,159 @@
+# @app — Los ajustes dentro del móvil (SPEC-038).
+#
+# Aquí vive **solo lo que necesita dispositivo**. El catálogo cerrado, los cinco grupos y
+# su orden, los tres tipos de fila, el valor derivado de cada una, que no exista una fila
+# del oficio y que una fila sin dueño cableado impida componer la pantalla son
+# afirmaciones sobre **datos** y se comprueban en `test/nucleo/ajustes.test.mjs` sin
+# simulador. Lo que no se puede ver sin dispositivo es:
+#
+# 1. **Que la voz de aplicación se note hasta en la tipografía**, y que la frontera se
+#    cruce al entrar y al salir: en los ajustes se lee en sans y en la repisa en serif,
+#    sin que ninguna de las dos pantallas elija su fuente.
+# 2. **Que el interruptor de los pasos del día a día no se encienda solo por tocarlo**: lo
+#    que hace es pedirlo, y el valor que se pinta es siempre el real. El dato dice cuál es
+#    el real; que el conmutador no se adelante solo se ve tocándolo.
+# 3. **Que «Empezar de nuevo» no lleve color destructivo en la lista** y sí en su pantalla.
+#
+# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
+# Android, así que ningún flujo `@app` se puede correr aquí
+# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
+# registra como infraestructura ausente, nunca como verde.
+#
+# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
+#
+# - **Una puerta hasta la pantalla.** `app/pantallas/ajustes.jsx` existe y está entera,
+#   pero **`App.js` no la monta**. El primer paso va contra `paso-ajustes`, que sigue la
+#   convención de los otros pasos provisionales y **todavía no existe**. Es un hueco de
+#   cableado y no de este flujo.
+# - **Las dueñas de las filas cableadas.** Una fila sin su pieza impide componer la
+#   pantalla a propósito, así que el andamiaje tiene que traer el tramo, los criterios, el
+#   estilo, el tamaño de letra, los sitios marcados y las dos puertas.
+# - **La pantalla de «Empezar de nuevo»** (fila 40 del checklist), para poder afirmar que
+#   el rojo vive allí y no en la lista.
+#
+# **Lo que este flujo NO puede comprobar, y por qué:**
+#
+# - **Que la sans sea la sans.** Maestro no compara tipografías. Lo que sí se puede
+#   afirmar es el registro que declara cada pantalla —`ajustes-registro` vale `aplicacion`
+#   aquí y la repisa declara `mundo`—, que es de donde sale la fuente.
+# - **Que los títulos de grupo vayan en versalitas del color del filete.** Tampoco se ven
+#   colores ni espaciados desde aquí.
+#
+# Los elementos se localizan por los identificadores que declara la spec —`momento`,
+# `ajustes-lista`, `ajustes-grupo`, `ajustes-fila`, `ajustes-como-se-pinta`,
+# `ajustes-pasos-de-fondo`, `ajustes-nombre`, `ajustes-genero`, `ajustes-registro`— y
+# nunca por su posición en pantalla.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «Los ajustes son la única excepción»
+#   «El oficio no aparece en ajustes»
+#   «Los pasos de fondo vienen apagados»
+#
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+- tapOn:
+    id: 'paso-ajustes'
+
+# ── Los ajustes son la única excepción ─────────────────────────────────────────
+# La pantalla declara su registro, y es el único sitio del juego donde vale `aplicacion`.
+
+- assertVisible:
+    id: 'momento'
+- assertVisible: 'de-consulta'
+- assertVisible:
+    id: 'ajustes-registro'
+- assertVisible: 'aplicacion'
+- assertVisible: 'Ajustes'
+
+# Los cinco grupos, en su orden, y las once filas colgando de ellos.
+- assertVisible:
+    id: 'ajustes-lista'
+- assertVisible: 'como-andas,tu-personaje,el-mapa,el-mundo,tus-cosas'
+- assertVisible:
+    id: 'ajustes-grupo'
+- assertVisible:
+    id: 'ajustes-fila'
+- assertVisible: 'Cómo se pinta'
+- assertVisible: 'Tamaño de la letra'
+- assertVisible: 'Solo de día'
+- assertVisible: 'Guardar una copia'
+- assertVisible: 'Empezar de nuevo'
+
+# ── El oficio no aparece en ajustes ────────────────────────────────────────────
+# Se puede cambiar el nombre y el género gramatical, y no el oficio.
+
+- assertVisible:
+    id: 'ajustes-nombre'
+- assertVisible: 'Cómo te llamas'
+- assertVisible:
+    id: 'ajustes-genero'
+- assertVisible: 'Cómo se dirigen a ti'
+
+- assertNotVisible: 'Oficio'
+- assertNotVisible: 'A qué te dedicas'
+- assertNotVisible: 'Cambiar de oficio'
+- assertNotVisible:
+    id: 'ajustes-oficio'
+
+# Ni ninguna fila que cambie el mapa activo, ni nada de red, cuenta, suscripción o
+# analítica: el catálogo es cerrado y estas no están.
+- assertNotVisible: 'Mapa activo'
+- assertNotVisible: 'Cambiar de mapa'
+- assertNotVisible: 'Cuenta'
+- assertNotVisible: 'Suscripción'
+- assertNotVisible: 'Iniciar sesión'
+- assertNotVisible: 'Datos de uso'
+
+# Ni la palabra que «caminos que evitar» no dice nunca.
+- assertVisible: 'Caminos que evitar'
+- assertNotVisible: 'Accesibilidad'
+- assertNotVisible: 'Modo'
+- assertNotVisible: 'Adaptado'
+
+# ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
+# Instalación nueva: apagado. Y tocarlo **no lo enciende**: lo pide. Hasta que el permiso
+# no vuelve concedido, lo que se pinta sigue siendo el valor real.
+
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible: 'Contar los pasos del día a día'
+- tapOn:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible: 'no'
+
+# ── Un ajuste de valor abre, se elige y vuelve ─────────────────────────────────
+# Sin confirmación, sin aviso de éxito y sin salir de los ajustes.
+
+- tapOn:
+    id: 'ajustes-como-se-pinta'
+- assertVisible: 'Pergamino'
+- tapOn: 'Pergamino'
+- assertVisible:
+    id: 'ajustes-lista'
+- assertVisible: 'Pergamino'
+- assertNotVisible: 'Guardado'
+- assertNotVisible: 'Cambios guardados'
+
+# ── Lo destructivo no se marca en la lista ─────────────────────────────────────
+# «Empezar de nuevo» es la última y aquí es una puerta más; el aviso vive en su pantalla.
+
+- assertNotVisible: 'Se borrará'
+- assertNotVisible: 'Esta acción no se puede deshacer'
+- tapOn: 'Empezar de nuevo'
+- assertVisible: 'Se borrará'
+
+# ── La frontera se cruza al salir ──────────────────────────────────────────────
+# Fuera de los ajustes ya no se habla como aplicación: la repisa declara `mundo`.
+
+- back
+- tapOn: '‹ Volver'
+- tapOn:
+    id: 'paso-repisa'
+- assertVisible: 'La repisa'
+- assertNotVisible:
+    id: 'ajustes-registro'
