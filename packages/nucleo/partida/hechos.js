@@ -157,7 +157,15 @@ declaraTiposDeHecho('entregas', {
 });
 
 declaraTiposDeHecho('anclajes', {
+  // El identificador del sitio, el rol que ocupaba y el motivo si lo hubo, y **ninguna
+  // coordenada**: lo que el descarte guarda es un sitio del mundo congelado por su
+  // nombre, igual que `sitio-pisado`.
   'anclaje-descartado': campos({ anclaje: 'texto', rol: 'texto?', porque: 'texto?' }),
+  // Deshacer es **una transición más y no un borrado del registro**: el hecho del
+  // descarte se queda donde está y este se anota detrás. Borrar hechos rompería la
+  // reconstrucción y además es la única operación que el registro no tiene. Lleva el rol
+  // para que la línea se lea sola, sin ir a buscar el descarte que deshace.
+  'anclaje-devuelto': campos({ anclaje: 'texto', rol: 'texto?' }),
 });
 
 /** Los tipos de hecho declarados, en orden estable. */

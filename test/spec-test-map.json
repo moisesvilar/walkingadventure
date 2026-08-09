@@ -22432,6 +22432,432 @@
       "caso": "La escena queda disponible y espera",
       "escenario": "La escena queda disponible y espera",
       "nota": "El escenario ya está implementado en test/app/llegada.yaml y test/nucleo/llegadas.test.mjs desde el lado de la llegada. Aquí se afirma desde el motor: componer la escena tres veces no mueve el estado ni deja hecho, que es lo que hace que abrir la app no sea una acción de juego."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un paraje anclado a una casa particular, cuando el jugador lo marca, entonces ninguna aventura vuelve a mandarlo allí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado ese mismo descarte, cuando se compara el documento de la celda antes y después, entonces el resto del mundo sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar",
+      "nota": "Se compara `textoDeCelda` entero, que es lo que dice «byte a byte»; el tamaño medido de costero (283 991 B) se afirma al lado como dato, no como criterio."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado ese mismo descarte, cuando se mira el mapa, entonces el sitio sigue dibujado, con su nombre de fantasía y en su posición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio descartado, cuando se castea el catálogo entero, entonces no aparece como candidato de ningún rol de ninguna plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar",
+      "nota": "Se recorren los roles de sitio de las treinta plantillas y se mira el pool de `candidatosDeRol`, no solo el reparto elegido: no salir entre los elegidos podría ser casualidad del backtracking."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio descartado que era candidato pero no elegido en el casting anterior, cuando se vuelve a castear, entonces el reparto puede cambiar y ninguna celda se ha regenerado: el casting no es parte del mundo congelado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Un sitio que era candidato y no elegido puede cambiar el reparto, y no regenera ninguna celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un identificador que no corresponde a ningún sitio del mundo, cuando se intenta descartar, entonces falla nombrando el identificador, y no anota un descarte que no afecta a nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Un identificador que no es de ningún sitio del mundo falla nombrándolo y no anota nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio ya descartado, cuando se descarta otra vez, entonces no cambia nada y no se anota un segundo hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Descartar dos veces el mismo sitio no cambia nada y no anota un segundo hecho",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado varios descartes en varios mapas de la misma partida, cuando se consultan los de un mapa, entonces solo salen los suyos: el descarte es del mapa y no de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El descarte es del mapa y no de la partida",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso cubre el estado vacío: una partida sin ningún descarte devuelve lista vacía y `SIN_DESCARTES` cuenta cero, que es un caso normal y no un error."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el área de descartes, cuando se escribe, entonces el orden es el del identificador y no el de llegada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El orden de los descartes es el del identificador y no el de llegada",
+      "hueco_de_bateria": true,
+      "nota": "No está en la spec como criterio suelto: sale de «en orden estable» de las notas técnicas, y es lo que hace que dos partidas con los mismos descartes se escriban igual."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un anclaje marcado, cuando el jugador confirma el gesto, entonces son dos toques y ninguno más, y detrás de «Marcarlo» no aparece ningún diálogo de confirmación.",
+      "nivel": "@app",
+      "fichero": "test/app/descarte.yaml",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar",
+      "nota": "La mitad que necesita dedo. El resto del escenario —qué sale del casting y que el documento no cambia— se afirma en test/nucleo/descartes.test.mjs, que corre sin simulador."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un anclaje marcado, cuando el jugador lo desmarca desde los ajustes, entonces vuelve a estar disponible para el casting.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Es reversible",
+      "escenario": "Es reversible"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado ese mismo deshacer, cuando se compara el reparto con el de antes del descarte y con la misma semilla, entonces es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Es reversible",
+      "escenario": "Es reversible"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado una partida con dos sitios marcados, cuando se abre la lista de ajustes, entonces están los dos, con su nombre de fantasía y con qué son en realidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La lista de ajustes trae cada sitio con su nombre de fantasía y con qué es en realidad",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso cubre el estado vacío de la lista: con cero marcados la fila enseña el número cero y la lista dice que no hay ninguno."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio marcado sin motivo, cuando aparece en la lista, entonces aparece igual que los demás y no se le pide motivo para deshacerlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La lista de ajustes trae cada sitio con su nombre de fantasía y con qué es en realidad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio deshecho, cuando se mira la lista, entonces ya no está, y el hecho del descarte sigue en el registro con su deshacer anotado detrás.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Es reversible",
+      "escenario": "Es reversible"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el catálogo de tipos de hecho, cuando se enumera, entonces incluye el tipo del deshacer, que se anota detrás del descarte en lugar de borrarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "El catálogo de tipos de hecho es el de partida-guardada.md §2, más la versión oída",
+      "hueco_de_bateria": true,
+      "nota": "Los dos casos de registro.test.mjs enumeran TIPOS_DE_HECHO literalmente y esta fila añade `anclaje-devuelto`: sin él la reconstrucción resucitaría los descartes deshechos. Se corrige la enumeración con el motivo escrito, no se ablanda."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el tipo de hecho del deshacer, cuando se mide, entonces cabe en el presupuesto de 500 bytes por hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/registro.test.mjs",
+      "caso": "Un hecho del registro ocupa menos de 500 bytes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio que no estaba marcado, cuando se deshace, entonces no cambia nada y no se emite ningún hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Deshacer lo que no estaba marcado no cambia nada y no emite ningún hecho",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio marcado, cuando el jugador lo desmarca desde los ajustes con el dedo, entonces desaparece de la lista y el número vuelve a cero.",
+      "nivel": "@app",
+      "fichero": "test/app/descarte.yaml",
+      "caso": "Es reversible",
+      "escenario": "Es reversible"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un jugador que marca un anclaje sin elegir motivo, cuando confirma, entonces se marca igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "No hace falta dar motivo",
+      "escenario": "No hace falta dar motivo"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un motivo elegido, cuando se anota, entonces es uno de los cinco del vocabulario cerrado y ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Los motivos son los cinco del artefacto y ninguno lleva texto libre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un motivo que no está en el vocabulario, cuando se intenta anotar, entonces falla nombrando el motivo y enumerando los válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Un motivo que no está en el vocabulario falla nombrándolo y enumerando los válidos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el motivo «otra cosa», cuando se anota, entonces no lleva ningún texto libre asociado: no hay campo donde escribir por qué.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Los motivos son los cinco del artefacto y ninguno lleva texto libre",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre lo que se anota —el identificador pelado— y sobre el catálogo, que solo declara `id` y el texto que dibuja el artefacto."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado cualquier descarte, con motivo o sin él, cuando se compara su efecto sobre el casting, entonces es el mismo: el motivo no cambia nada de lo que ocurre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El motivo no cambia nada de lo que ocurre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado la capa de A4P8, cuando se abre, entonces ninguna opción viene marcada, no hay campo de texto en ninguna y cerrarla sin pulsar «Marcarlo» no marca nada.",
+      "nivel": "@app",
+      "fichero": "test/app/descarte.yaml",
+      "caso": "No hace falta dar motivo",
+      "escenario": "No hace falta dar motivo",
+      "nota": "La composición de la capa se afirma en el núcleo; lo que necesita dedo es que elegir un motivo y cerrar sin confirmar descarte la elección."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un anclaje marcado, cuando se inspecciona el tráfico saliente, entonces no sale ninguna petición relacionada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "No se reporta a ningún sitio",
+      "escenario": "No se reporta a ningún sitio",
+      "nota": "Con el inspector de red en modo estricto: un observador que solo ve lo que le dan no puede afirmar una ausencia. Bloqueante (@privacidad, RF-PRIV-004 y RNF-PRIV-001)."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado una partida con descartes, cuando se recorre el código de esta fila, entonces no hay ninguna llamada al proxy, al almacén remoto ni a nada que salga del dispositivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "No se reporta a ningún sitio",
+      "escenario": "No se reporta a ningún sitio"
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el hecho de un descarte guardado, cuando se inspecciona, entonces lleva el identificador del sitio, el rol que ocupaba y el motivo si lo hubo, y ninguna coordenada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El hecho del descarte lleva el sitio, el rol y el motivo, y ninguna coordenada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado una copia exportada de la partida, cuando se busca en ella, entonces los descartes están dentro y no hay ninguna otra copia en ningún sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Los descartes viajan dentro de la copia de la partida y no hay otra copia en ningún sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un mundo de referencia con sus parajes y su suelo congelado, cuando se descartan parajes uno a uno, entonces la alarma no salta mientras los parajes vivos sean el suelo o más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "nota": "Sobre urbano-denso, que tiene 7 parajes y congeló un suelo de 5: es el único de los cuatro donde el criterio se puede poner rojo por los dos lados. El escenario de la batería está implementado para la causa del filtro en test/nucleo/accesibilidad.test.mjs; aquí se implementa la causa nueva que esta fila añade."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado ese mismo mundo, cuando el descarte siguiente deja los parajes vivos por debajo del suelo, entonces la alarma salta en ese descarte y no en el anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "nota": "Se cuenta cuántas veces cruza en cinco descartes y se exige exactamente una: si saltara en todos los de debajo del suelo pasaría de aviso a reproche repetido."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado la alarma saltada, cuando se lee lo que se ofrece, entonces es alejarse un tramo más, con el mismo mecanismo y el mismo número de tramos que el estirón que ya existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Lo que se ofrece es el estirón que ya existe, y no ha cambiado nada al ofrecerlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado la alarma saltada y la oferta no aceptada, cuando se mira el alcance de la salida, entonces no ha cambiado: la oferta es un dato y no una acción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Lo que se ofrece es el estirón que ya existe, y no ha cambiado nada al ofrecerlo",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso comprueba que el texto de la oferta no menciona los descartes ni insinúa nada sobre quien juega: decirlo sería un reproche con datos."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado la alarma saltada, cuando se deshace el último descarte, entonces la alarma deja de saltar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Deshacer el último descarte apaga la alarma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un mundo por debajo del suelo por descartes, cuando se pide el reparto y ninguna aventura cabe, entonces el motivo declarado es el de los descartes y no el del mundo pequeño ni el del filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La falta de reparto se atribuye a los descartes solo si sin ellos había reparto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado ese mismo mundo, cuando se pide el reparto ignorando los descartes y alguna aventura cabía, entonces eso es lo que distingue el motivo de los descartes del motivo del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La falta de reparto se atribuye a los descartes solo si sin ellos había reparto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un mundo que ya estaba por debajo del suelo sin ningún descarte —el barrio de tres calles—, cuando se pide el reparto, entonces el motivo sigue siendo el del mundo pequeño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La falta de reparto se atribuye a los descartes solo si sin ellos había reparto",
+      "hueco_de_bateria": true,
+      "nota": "El mismo mundo por los dos lados —barrio-tres-calles con tramo 300 declara los descartes y con tramo 120 declara el mundo aun con un descarte puesto—, que es lo único que demuestra la regla de atribución."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado los cuatro mundos de referencia, cuando se marca el mundo entero, entonces el motivo declarado es el de los descartes en los cuatro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Con todo marcado el motivo es el de los descartes, en los cuatro mundos de referencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el suelo de la celda, cuando se consulta, entonces es el que la celda congeló al generarse y no uno recalculado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El suelo se lee de la celda y no se recalcula",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado una aventura en curso con un beat en un sitio, cuando se descarta ese sitio, entonces la aventura en curso sigue con su cadena intacta y su beat se puede resolver.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La aventura en curso sigue con su cadena intacta y su beat se puede resolver",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado ese mismo caso, cuando termina la salida y se vuelve a repartir, entonces ninguna aventura nueva usa ese sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La aventura en curso sigue con su cadena intacta y su beat se puede resolver",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un núcleo descartado, cuando se consulta lo que allí se cuenta y el rango que se tiene en él, entonces siguen existiendo: el descarte saca del casting, no borra el pueblo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Un núcleo descartado no se borra: el descarte saca del casting, no borra el pueblo",
+      "hueco_de_bateria": true,
+      "nota": "Se compara la partida entera congelada antes y después: la única diferencia admitida está en `areas.anclajes`, así que ni el rango, ni las relaciones, ni el diario se han movido."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio descartado, cuando avanza el reloj del mundo, entonces los rumores siguen viajando por las calzadas como antes: el árbol de propagación no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar",
+      "nota": "Se afirma por su causa: el árbol de propagación se deriva del viario, y el caso compara el grafo entero antes y después del descarte. Un caso que hiciera avanzar el reloj mediría la propagación, que es de otra fila."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado un sitio que es el punto de partida del mapa, cuando se intenta descartar, entonces falla nombrándolo, en lugar de dejar la partida sin sitio desde el que salir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El punto de partida del mapa no se puede descartar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el reparto de aventuras sin los descartes cableados, cuando se construye, entonces falla nombrando la pieza que falta, y no reparte como si no hubiera ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El reparto y el casting sin los descartes cableados fallan nombrando la pieza",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el casting sin los descartes cableados, cuando se castea, entonces falla nombrando la pieza, y no devuelve candidatos ya descartados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El reparto y el casting sin los descartes cableados fallan nombrando la pieza",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el comprobador del suelo sin el cupo de la celda cableado, cuando se ejecuta, entonces falla nombrando el cupo, y no da el suelo por cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El comprobador del suelo sin el cupo de la celda falla nombrando el cupo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el área `anclajes` del estado, cuando se consultan las áreas que no reproducen, entonces ya no está entre ellas: sus hechos se reproducen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El área anclajes ya no está entre las que no reproducen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado una partida con descartes, cuando se congela y se vuelve a levantar, entonces vuelven todos, en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Una partida con descartes se congela y se vuelve a levantar con todos, en el mismo orden",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante con RF-PERS-001. El mismo caso afirma que un motivo guardado fuera del vocabulario falla nombrándolo en lugar de volver como null."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado una partida con descartes, cuando se reconstruye desde el registro de hechos, entonces salen los mismos descartes que había.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Una partida con descartes se reconstruye desde el registro y salen los mismos",
+      "hueco_de_bateria": true,
+      "nota": "Incluye un descarte deshecho: si el registro solo trajera los descartes, resucitaría. Y un deshacer sin su descarte delante falla nombrando el anclaje en lugar de dar por correcto un estado incompleto."
+    },
+    {
+      "spec": "SPEC-035",
+      "criterio": "Dado el área de descartes mal formada, cuando se consulta, entonces se dice, en lugar de dar la partida por sin ningún descarte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El área llega mal formada y se dice, en lugar de dar la partida por sin descartes",
+      "hueco_de_bateria": true
     }
   ]
 }

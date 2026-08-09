@@ -21,6 +21,7 @@
 import { congelaHondo } from '../core/congelar.js';
 import { MOTIVOS_DE_FALTA, TRAMOS_DEL_ESTIRON, repartoDeAventuras } from './aventuras.js';
 import { diaDe } from './calendario.js';
+import { SIN_DESCARTES } from './descartes.js';
 import { aceptaRecado, entradaDe } from './entregas.js';
 import { medidaDe, textoConSitio, textoDelGuion } from './guion-de-antes-de-salir.js';
 import { MEDIDA_DEL_RECADO, TOPE_DE_LA_LISTA, listaDeHoy, recadoSuelto } from './recados.js';
@@ -159,6 +160,7 @@ export function componeLoQueHayHoy({
   mapaId,
   calendario,
   tramosDeMas = 0,
+  descartes = SIN_DESCARTES,
   catalogo = CATALOGO,
   tope = TOPE_DE_LA_LISTA,
 }) {
@@ -168,7 +170,10 @@ export function componeLoQueHayHoy({
   // es un día vacío: con recado hay lista, aunque no castee nada.
   const recado = entregas && mapaId ? recadoSuelto({ estado: entregas, mapaId, dia }) : null;
 
-  const reparto = repartoDeAventuras({ mundo, criterios, tramo, tamano, tramosDeMas });
+  // Los sitios marcados entran por aquí y por ningún otro sitio de esta pantalla: la
+  // alarma de estirón **no es una pantalla nueva**, es una causa más para que aparezca la
+  // que ya existe, y su texto no menciona los descartes ni insinúa nada sobre quien juega.
+  const reparto = repartoDeAventuras({ mundo, criterios, tramo, tamano, tramosDeMas, descartes });
   if (!reparto.hayReparto && !recado) {
     return sinReparto({ motivo: reparto.motivo, alcanceEnTramos: reparto.estiron.alcanceEnTramos - TRAMOS_DEL_ESTIRON, tramosDeMas });
   }
