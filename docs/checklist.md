@@ -40,8 +40,8 @@
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 20 | app-scaffold-expo | RF-INFRA-001, RF-INFRA-006, RNF-COM-001 | must | wip |
-| 21 | render-skia-estilos | RF-MAPA-001, RF-MAPA-002 | must | pending |
+| 20 | app-scaffold-expo | RF-INFRA-001, RF-INFRA-006, RNF-COM-001 | must | done |
+| 21 | render-skia-estilos | RF-MAPA-001, RF-MAPA-002 | must | wip |
 | 22 | declutter-rotulos | RF-MAPA-003 | must | pending |
 | 23 | proxy-ciego | RF-INFRA-002, RNF-PRIV-001, RNF-COST-001 | must | pending |
 | 24 | overpass-produccion | RF-INFRA-003, RNF-PER-001 | must | pending |

@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-020",
+  "spec_actual": "SPEC-021",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -198,6 +198,16 @@
       "report": "test/reports/SPEC-019-run.md",
       "casos": "1245 casos: 1242 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos"
+    },
+    {
+      "spec": "SPEC-020",
+      "slug": "app-scaffold-expo",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-020-run-20260809T025634Z.md",
+      "casos": "1314 casos: 1311 pasan, 0 fallan, 3 saltados",
+      "app": "dos flujos escritos en test/app/, NO ejecutados: Maestro presente pero sin dispositivo (sin Xcode completo ni SDK Android)",
+      "nota": "la app estrena app/; el prototipo web se muda a prototipo/. El runner ya distingue Maestro sin dispositivo de un flujo en rojo."
     }
   ],
   "bloqueos": [],
