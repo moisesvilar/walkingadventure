@@ -23,6 +23,7 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { COMO_ACABO, HECHO_QUE_NADIE_EMITE } from './aventura-en-curso.js';
+import { subeA as subeElConocimiento } from './conocimiento.js';
 import { anotaDescarte, quitaDescarte } from './descartes.js';
 import { apunta as apuntaEnDiario, entradaDeHecho } from './diario.js';
 import { AREAS_QUE_NO_REPRODUCEN, congelaEstado, estadoInicial, levantaEstado, pisaSitio } from './estado.js';
@@ -34,6 +35,7 @@ import { sedimenta, versionQueLlego } from './nucleos.js';
 import { guarda as guardaObjeto } from './objetos.js';
 import { estadoDeMapa } from './pasos.js';
 import { claveDeCara } from './puestos.js';
+import { hojaDeHecho } from './telon.js';
 
 /** Dónde viven los dos documentos de la partida dentro del almacén. */
 export const CLAVES_DE_PARTIDA = Object.freeze({
@@ -119,6 +121,29 @@ const APLICADORES = {
       `el hecho "${h.tipo}" dice que la aventura "${h.carga.aventura}" pidió elegir en su beat "${h.carga.beat}", y esta versión del juego ` +
       'no tiene beats que ramifiquen (exclusión 9 del PRD): reproducirlo sería inventarse la rama que se tomó',
     );
+  },
+  // --- La capa de conocimiento y el telón -----------------------------------
+  //
+  // El ascenso lleva dentro la clave y el escalón, así que reproducirlo devuelve el área
+  // entera: **el conocimiento se reproduce en lugar de declararse no reproducible**, que
+  // era la otra respuesta posible y habría hecho que una partida reconstruida amaneciera
+  // con el mapa en blanco.
+  'conocimiento-subido'(vivo, h) {
+    subeElConocimiento(vivo.conocimiento, { mapaId: h.mapa, clave: h.carga.elemento, escalon: h.carga.escalon });
+  },
+  // El arranque cerrado vuelve cerrado y **marcado**: sin este hecho, una partida
+  // reconstruida enseñaría la cartela del hito otra vez, que es lo que «una sola vez»
+  // prohíbe.
+  'arranque-cerrado'(vivo, h) {
+    vivo.arranque.abierto = false;
+    vivo.arranque.cerradoPor = h.carga.via;
+    vivo.arranque.cerradoEn = h.paso;
+    vivo.arranque.marcado = h.carga.marcado === true;
+  },
+  // La hoja de hoy vuelve como se escribió: sus hechos estructurados se derivan del asunto
+  // y el lugar porque los de lo propio siempre tienen la misma forma.
+  'hoja-propia'(vivo, h) {
+    apuntaEnDiario(vivo.diario, hojaDeHecho(h));
   },
   'version-oida'(vivo, h) {
     const entrada = entradaDeHecho(h);

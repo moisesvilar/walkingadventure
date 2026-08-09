@@ -54,6 +54,23 @@ import { LAS_DOS_SEMILLAS, LOS_CUATRO, fuente, generaMundo, semillaDe } from './
 /** El hueco de una pantalla de móvil, que es donde vive la lámina. */
 const TAMANO = { ancho: 390, alto: 780 };
 
+/**
+ * Cómo se llamaría un ángulo si alguien metiera uno. Es lo que hace comprobable «el
+ * norte está siempre arriba» sin enumerar la firma entera: lo que la lámina no puede
+ * tener es una manera de pedir que gire, se llame como se llame.
+ */
+const VOCABULARIO_DE_ANGULO = /angul|ángul|rot|giro|bearing|rumbo|heading|orientaci|azimut|acimut|brujula|brújula|norte/i;
+
+/**
+ * Lo que este porte añade sobre los cinco estilos del prototipo, declarado.
+ *
+ * La paridad clave a clave sigue siendo estricta —cualquier otra clave de más o de
+ * menos pone el caso rojo—, pero las altas deliberadas se declaran aquí en lugar de
+ * llevar la lista entera copiada: `tintas` es de SPEC-036, que llena la capa 17 con
+ * tres claves de estilo para que ningún color viva en el código de dibujo.
+ */
+const ALTAS_SOBRE_EL_PROTOTIPO = ['tintas'];
+
 /** Los dos módulos de los que la spec afirma cosas sobre su código, no sobre su salida. */
 const DIBUJO = 'app/render/skia.js';
 const COMPOSICION = 'packages/nucleo/render/escena.js';
@@ -261,12 +278,18 @@ describe('En marcha no hay nada que tocar', () => {
         }
       }
     }
-    // Y la firma de la composición no admite ningún ángulo.
+    // Y la firma de la composición **no admite ningún ángulo**, que es la propiedad y
+    // no el inventario: lo que este caso vigila es que no haya por dónde pedir una
+    // rotación, no cuántos parámetros hay. Con la lista literal, cada fila que añadía
+    // una entrada —`entintado` y `telon` en SPEC-036— ponía rojo un caso que habla del
+    // norte, y arreglarlo era copiar el nombre nuevo sin mirar qué significaba.
     const firma = codigo(COMPOSICION).match(/export function componeEscena\(\{([\s\S]*?)\}\)/)[1];
-    assert.deepEqual(
-      firma.split(',').map((t) => t.split('=')[0].trim()).filter(Boolean),
-      ['documento', 'estilo: estiloPedido', 'catalogo', 'vista', 'tamano', 'medidor', 'colocador', 'factorTexto'],
-    );
+    const parametros = firma.split(',').map((t) => t.split('=')[0].trim()).filter(Boolean);
+    assert.ok(parametros.length >= 8, 'la firma de componeEscena no se ha podido leer');
+    const angulos = parametros.filter((p) => VOCABULARIO_DE_ANGULO.test(p));
+    assert.deepEqual(angulos, [], `componeEscena admite un parámetro que es un ángulo: ${angulos.join(', ')}`);
+    // Y la comprobación se puede poner roja: un parámetro que fuera un ángulo lo haría.
+    assert.ok(VOCABULARIO_DE_ANGULO.test('rumbo'), 'el vocabulario de ángulo no reconocería un ángulo si lo hubiera');
   });
 });
 
@@ -520,10 +543,20 @@ describe('Los cinco estilos', () => {
       const original = STYLES.find((e) => e.id === portado.id);
       assert.ok(original, `el prototipo no tiene el estilo "${portado.id}"`);
       const claves = Object.keys(portado).sort();
-      assert.deepEqual(claves, Object.keys(original).sort(), `${portado.id}: las claves no son las mismas`);
-      assert.equal(claves.length, 28, `${portado.id}: tiene ${claves.length} claves y no las 28 del prototipo`);
+      const esperadas = [...Object.keys(original), ...ALTAS_SOBRE_EL_PROTOTIPO].sort();
+      assert.deepEqual(claves, esperadas, `${portado.id}: las claves no son las del prototipo más las altas declaradas`);
+      assert.equal(claves.length, Object.keys(original).length + ALTAS_SOBRE_EL_PROTOTIPO.length, `${portado.id}: sobra o falta alguna clave`);
       for (const clave of claves) {
+        if (ALTAS_SOBRE_EL_PROTOTIPO.includes(clave)) continue;
         assert.deepEqual(portado[clave], original[clave], `${portado.id}: la clave "${clave}" no es la del prototipo`);
+      }
+      // Y el alta no es una excusa para que falte: los cinco declaran las tres tintas
+      // con su color, su grosor y su alfa (SPEC-036, RF-MAPA-001 aplicado a la capa 17).
+      assert.deepEqual(Object.keys(portado.tintas).sort(), ['aLapiz', 'asentado', 'deHoy'], `${portado.id}: no declara las tres tintas`);
+      for (const [tinta, valores] of Object.entries(portado.tintas)) {
+        assert.match(valores.color, /^#[0-9a-f]{6}$/i, `${portado.id}: la tinta "${tinta}" no declara color`);
+        assert.ok(Number.isFinite(valores.grosor) && valores.grosor > 0, `${portado.id}: la tinta "${tinta}" no declara grosor`);
+        assert.ok(Number.isFinite(valores.alfa) && valores.alfa > 0 && valores.alfa <= 1, `${portado.id}: la tinta "${tinta}" no declara alfa`);
       }
     }
   });

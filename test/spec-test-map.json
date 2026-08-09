@@ -22858,6 +22858,758 @@
       "fichero": "test/nucleo/descartes.test.mjs",
       "caso": "El área llega mal formada y se dice, en lugar de dar la partida por sin descartes",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una salida con aventura terminada y desenlace notable, cuando se echa el telón, entonces las pantallas son, en este orden: el mapa, el desenlace, lo que se pone en camino, y la entrada del diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La secuencia de una aventura terminada con desenlace notable es mapa, desenlace, rumor y diario",
+      "hueco_de_bateria": true,
+      "nota": "El camino feliz de la fila. La batería no tiene escenario para la secuencia entera: solo para cada una de sus ramas."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una salida con aventura terminada y desenlace no notable, cuando se echa el telón, entonces son el mapa, el desenlace y la entrada del diario, y no aparece lo que se pone en camino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El rumor solo aparece si el desenlace era notable",
+      "escenario": "El rumor solo aparece si el desenlace era notable"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que se vuelve a mitad de una aventura, cuando se echa el telón, entonces ve el mapa entintado, en lugar del desenlace ve el cierre en corto, y después la entrada del diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El cierre en corto ocupa el sitio del desenlace",
+      "escenario": "El cierre en corto ocupa el sitio del desenlace"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que salió a andar sin coger nada, cuando vuelve a casa, entonces ve el mapa y la entrada del diario, y no ve desenlace ni rumor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un paseo sin aventura tiene telón completo menos desenlace",
+      "escenario": "Un paseo sin aventura tiene telón completo menos desenlace"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado cualquiera de esas cuatro salidas, cuando se compara la primera pantalla, entonces siempre es el mapa, y cuando se compara la última, entonces siempre es la entrada del diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La primera pantalla es siempre el mapa y la última siempre la entrada del diario",
+      "hueco_de_bateria": true,
+      "nota": "Las cuatro salidas de la spec se cierran de verdad en el mismo caso."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el paseo sin aventura, cuando se lee el título de su primera pantalla, entonces es el mismo que el de una salida con aventura: no hay una pantalla distinta con título propio para el paseo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El paseo sin aventura no es una pantalla distinta con título propio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una salida cerrada, cuando se cierra otra vez, entonces falla nombrando la salida y su estado, y no vuelve a entintar nada ni a ingresar el oro dos veces.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Una salida cerrada dos veces falla nombrándola y no ingresa el oro dos veces",
+      "hueco_de_bateria": true,
+      "nota": "Caso límite de la spec. Se afirma sobre el saldo, sobre el conocimiento guardado y sobre el número de hechos."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el telón echado y no leído, cuando se abre la app dos días después, entonces lo primero que se ve es el telón de aquella salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El telón espera a que lo leas",
+      "escenario": "El telón espera a que lo leas",
+      "nota": "La otra mitad del escenario, la de la vida de la salida, es de SPEC-030 y ya vive en test/nucleo/salidas.test.mjs. Aquí se afirma que el cierre no marca nada como leído y no toca esa área."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el telón de una salida, cuando se echa, entonces no salta ninguna notificación y la app no se pone en primer plano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Volver a casa cierra la salida",
+      "escenario": "Volver a casa cierra la salida",
+      "nota": "Misma partición que el anterior: SPEC-030 afirma el cierre y aquí se afirma que ni el cierre ni la composición conocen ninguna capa de aviso."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que atraviesa territorio que no conocía, cuando mira el mapa a mitad de camino, entonces el mapa está como al salir de casa y solo se ha movido su marca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida",
+      "nota": "La mitad del render ya la afirman render.test.mjs y camara.test.mjs; esta es la de la capa de conocimiento."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado esa misma salida, cuando se compara el estado de conocimiento al salir y a mitad de camino, entonces es idéntico: lo que hay a mitad es una anotación pendiente y no un cambio de nivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado esa misma salida, cuando se echa el telón, entonces todos los ascensos pendientes se aplican de una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que ha descubierto dos sitios nuevos durante la salida, cuando se echa el telón, entonces el mapa muestra los dos sitios recién entintados y la lista dice de qué nivel a qué nivel han subido, en palabras del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El mapa se entinta al echar el telón",
+      "escenario": "El mapa se entinta al echar el telón"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado esa lista, cuando se busca en ella un porcentaje, un kilómetro, un tiempo o una barra, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La lista de ascensos no lleva ni un porcentaje, ni un kilómetro, ni un tiempo, ni una barra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un sitio al que se llega por primera vez, cuando se echa el telón, entonces sube a «lo conoces».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un sitio nuevo sube a lo conoces y volver a él, a lo conoces bien",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un sitio al que ya se conocía y al que se vuelve, cuando se echa el telón, entonces sube a «lo conoces bien», sin haber hecho nada especial allí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un sitio nuevo sube a lo conoces y volver a él, a lo conoces bien",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un sitio del que llega un rumor que lo nombra y en el que no se ha estado nunca, cuando se echa el telón, entonces sube a «lo conoces»: se sube con las piernas o con la boca de otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un sitio del que llega un rumor sube a lo conoces sin haber puesto un pie",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un sitio ya en «lo conoces bien», cuando se vuelve a él, entonces no sube más: la escalera tiene cuatro escalones y el último es el último.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un sitio nuevo sube a lo conoces y volver a él, a lo conoces bien",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso cierra la escalera con una tercera salida al mismo sitio."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el nivel de partida de un mundo de referencia recién generado, cuando se consulta, entonces los picos, la costa, los bosques, los núcleos y las calzadas están en «lo ves» y los parajes y los servicios, en «no lo sabes».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El nivel de partida de un mundo de referencia lo decide la escala",
+      "hueco_de_bateria": true,
+      "nota": "Sobre los ocho extractos congelados, elemento a elemento. No se exigen las siete familias en cada uno: un extracto real puede no traer picos, y eso es dato de OSM."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un nivel de conocimiento fuera de la escalera, cuando se intenta aplicar, entonces falla nombrando el valor y enumerando los cuatro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un nivel de conocimiento fuera de la escalera falla nombrando el valor y los cuatro",
+      "hueco_de_bateria": true,
+      "nota": "Validación de entradas. Cubre la exigencia, el ascenso directo y el levantado de un documento con un nivel inventado."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el estado de conocimiento, cuando se castea el catálogo, entonces el reparto es el mismo con conocimiento y sin él: el casting no mira lo descubierto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El reparto del catálogo es el mismo con conocimiento y sin él",
+      "hueco_de_bateria": true,
+      "nota": "RF-QUEST-002 afirmado desde el lado del que sí mueve el conocimiento."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el mapa del telón, cuando se recorren sus elementos, entonces cada uno está pintado con una de tres tintas y ninguna otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Cada elemento del mapa del telón lleva una de tres tintas y ninguna otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un elemento que subió de nivel en esta salida, cuando se pinta, entonces lleva la tinta de lo de hoy.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Cada elemento del mapa del telón lleva una de tres tintas y ninguna otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un elemento en «lo conoces» o «lo conoces bien» que no subió hoy, cuando se pinta, entonces lleva la tinta de lo sabido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Cada elemento del mapa del telón lleva una de tres tintas y ninguna otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un elemento en «lo ves» o en «no lo sabes», cuando se pinta, entonces lleva la tinta de lo no sabido, a lápiz.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Cada elemento del mapa del telón lleva una de tres tintas y ninguna otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el mapa del telón, cuando se busca una leyenda, un rótulo de tinta o cualquier explicación de qué significa cada una, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La capa reservada del entintado ya no está vacía, y no mete ni un texto",
+      "hueco_de_bateria": true,
+      "nota": "El entintado no mete ni una primitiva de texto y los rótulos son los mismos con tinta y sin ella."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el plan de capas del render, cuando se pinta el telón, entonces la capa reservada del entintado ya no está vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La capa reservada del entintado ya no está vacía, y no mete ni un texto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el mismo mundo pintado con las tres tintas y pintado en marcha, cuando se comparan los dos, entonces el mundo es idéntico y solo cambia el pintado: entintar no resiembra ni mueve nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Entintar no resiembra ni mueve nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un estilo cualquiera de los cinco, cuando se pinta el telón, entonces las tres tintas salen del estilo y ningún color vive en el código de dibujo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Las tres tintas salen del estilo en los cinco, y ningún color vive en el código de dibujo",
+      "hueco_de_bateria": true,
+      "nota": "RF-MAPA-001 aplicado a la capa 17. La paridad de los cinco objetos de estilo, con el grupo «tintas» dentro, se afirma además en test/nucleo/render.test.mjs."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que anda su ruta de siempre sin descubrir nada, cuando se echa el telón, entonces el mapa aparece igual, el título reconoce que hoy no ha visto nada nuevo, y ningún texto se lo reprocha.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un día sin descubrir nada enseña el mapa igual",
+      "escenario": "Un día sin descubrir nada enseña el mapa igual",
+      "nota": "Estado vacío de la spec."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese mismo telón, cuando se mira el mapa, entonces no hay ni un elemento con la tinta de lo de hoy.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El día flojo no tiene ni un elemento con la tinta de hoy y su lista está vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese mismo telón, cuando se lee la lista de ascensos, entonces está vacía y no se sustituye por ninguna disculpa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El día flojo no tiene ni un elemento con la tinta de hoy y su lista está vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el título del día flojo y el del día con descubrimientos, cuando se buscan en los dos las palabras del vocabulario de reproche, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Ningún texto del telón usa el vocabulario de reproche, y uno que lo usara falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un título que contuviera una de esas palabras, cuando se ejecuta la comprobación, entonces falla nombrando el título y la palabra: el criterio se puede poner rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Ningún texto del telón usa el vocabulario de reproche, y uno que lo usara falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el día flojo, cuando se comprueba si el reloj del mundo avanzó, entonces avanzó igual: los kilómetros mueven el mundo con aventura o sin ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El día flojo mueve el reloj del mundo igual que un día con aventura",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma que el área del motor de pasos no está entre las que el cierre puede escribir y que queda idéntica con aventura y sin ella."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una aventura terminada, cuando se compone el desenlace, entonces lleva el texto del desenlace de su plantilla, lo que se gana en oro, los objetos que quedan, y la frase del rango.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El desenlace lleva el texto de su plantilla, el oro, los objetos y la frase del rango",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese desenlace, cuando se lee la cantidad de oro, entonces es la que declaró el desenlace y coincide con lo que la bolsa ingresó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El desenlace lleva el texto de su plantilla, el oro, los objetos y la frase del rango",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese desenlace, cuando se cuentan las cifras que aparecen en toda la pantalla, entonces la única es la del oro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La única cifra de la pantalla del desenlace es la del oro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese desenlace, cuando se busca una barra de reputación, un contador de puntos, una experiencia o un nivel, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La única cifra de la pantalla del desenlace es la del oro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un desenlace en el que el rango subió en un núcleo, cuando se lee la frase del rango, entonces nombra ese núcleo y dice el cambio con palabras, sin escalón escrito ni número.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La frase del rango nombra un solo núcleo aunque el rango se haya movido en varios",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un desenlace en el que el rango subió en más de un núcleo, cuando se lee, entonces hay una sola frase y nombra un solo núcleo, elegido de forma determinista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La frase del rango nombra un solo núcleo aunque el rango se haya movido en varios",
+      "hueco_de_bateria": true,
+      "nota": "Caso límite de la spec: el desempate es el escalón más alto y, a igualdad, el orden canónico del mapa."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un desenlace en el que el rango no se movió en ninguna parte, cuando se compone, entonces no hay frase de rango y no se sustituye por una que diga que no subió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin movimiento de rango no hay frase, y no se sustituye por una que diga que no subió",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el mismo desenlace compuesto dos veces con el mismo estado, cuando se comparan, entonces son idénticos, frase de rango incluida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El mismo desenlace compuesto dos veces es idéntico, frase de rango incluida",
+      "hueco_de_bateria": true,
+      "nota": "Se compone con el rango movido en dos núcleos y en los dos órdenes, que es donde el desempate tiene trabajo."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un objeto que el desenlace entrega, cuando se compone la pantalla, entonces aparece con de quién viene y no como requisito de nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un objeto aparece con de quién viene y no como requisito de nada",
+      "hueco_de_bateria": true,
+      "nota": "RF-PROG-006 visto desde el telón."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una aventura cerrada a mitad sin haber conseguido nada, cuando se compone el cierre en corto, entonces el texto es el de repuesto que cuenta cómo acabó sin ti.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un cierre en corto sin nada conseguido cuenta cómo acabó sin ti",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una aventura cerrada a mitad habiendo conseguido algo, cuando se compone, entonces el texto es el de repuesto que cierra con lo que sí se consiguió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un cierre en corto habiendo conseguido algo cierra con lo que sí se consiguió",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado todas las plantillas del catálogo, cuando se comprueban sus desenlaces de repuesto, entonces las treinta traen los dos textos, y una que no los trajera hace fallar la carga del catálogo nombrándola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Las treinta plantillas traen los dos textos de repuesto, y una que no los trajera hace fallar la carga",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado los sesenta textos de repuesto del catálogo, cuando se buscan en ellos las palabras del vocabulario de reproche, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Los sesenta textos de repuesto no usan el vocabulario de reproche",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una aventura cerrada en corto, cuando el mundo avanza diez pasos, entonces no existe ningún rumor sobre ella en ningún núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un cierre en corto no genera rumor",
+      "escenario": "Un cierre en corto no genera rumor",
+      "nota": "Se afirma núcleo a núcleo del mapa activo, no solo sobre el que devuelve el cierre."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una aventura cerrada en corto cuya plantilla declara su desenlace notable, cuando se echa el telón, entonces tampoco nace rumor: manda el cierre en corto sobre la declaración.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un cierre en corto no genera rumor aunque su plantilla declare el desenlace notable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un cierre en corto, cuando se recorre la secuencia del telón, entonces después viene la entrada del diario y nunca lo que se pone en camino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El cierre en corto ocupa el sitio del desenlace",
+      "escenario": "El cierre en corto ocupa el sitio del desenlace"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una aventura cerrada en corto con cero beats resueltos, cuando se echa el telón, entonces el cierre en corto aparece igual, con el texto de cómo acabó sin ti.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un cierre en corto con cero beats resueltos aparece igual",
+      "hueco_de_bateria": true,
+      "nota": "Caso límite de la spec."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un cierre en corto, cuando se mira si el mapa se entintó, entonces se entintó igual: volverse a mitad no anula lo andado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un cierre en corto entinta el mapa igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un desenlace notable, cuando aparece la pantalla de lo que se pone en camino, entonces se ve que algo ha salido del núcleo, pero no se ve a qué núcleos llegará, ni cuándo, ni con qué nivel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El telón no enseña la propagación",
+      "escenario": "El telón no enseña la propagación"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado esa pantalla, cuando se inspecciona lo que se le entregó para pintar, entonces lleva el núcleo de origen y nada más: ni destinos, ni saltos, ni nivel, ni el árbol de calzadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El telón no enseña la propagación",
+      "escenario": "El telón no enseña la propagación"
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado esa pantalla, cuando se buscan en ella las palabras del vocabulario de propagación, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El telón no enseña la propagación",
+      "escenario": "El telón no enseña la propagación",
+      "nota": "Incluye el nombre de cualquier núcleo del mapa que no sea el de origen, que enseña la propagación igual de bien que la palabra «llegará»."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el rumor recién nacido, cuando se consulta su nivel en el estado, entonces existe y es cero, y ninguna proyección de pantalla lo lleva dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El rumor recién nacido tiene nivel cero en el estado y ninguna proyección lo lleva dentro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el rumor recién nacido y el mismo mundo dos veces con la misma semilla, cuando se comparan, entonces nacen iguales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El rumor nace igual con la misma semilla y el mismo mundo",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante, @determinismo, RNF-DET-003."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado cualquier telón, cuando llega a su última pantalla, entonces hay una entrada del diario y cierra el telón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Todo telón cierra con una entrada del diario, y el telón sin ella falla",
+      "hueco_de_bateria": true,
+      "nota": "Incluye la mitad negativa: componer un telón sin entrada falla en lugar de dejar el día sin hoja."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una salida con aventura y con algo oído por el camino, cuando se compone la entrada, entonces lo propio va en primera persona y lo oído va aparte y entrecomillado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Lo propio va en primera persona y lo oído aparte, entrecomillado y con otra autoridad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado esa entrada, cuando se comparan las dos partes, entonces tienen distinta autoridad declarada: lo que se hizo se sabe, lo que contaron no.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Lo propio va en primera persona y lo oído aparte, entrecomillado y con otra autoridad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una versión oída y deformada, cuando se apunta, entonces queda como se oyó y el nivel de deformación no aparece en la entrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Lo propio va en primera persona y lo oído aparte, entrecomillado y con otra autoridad",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-001, ya entregado, afirmado aquí desde la hoja de hoy."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un día en el que se oye la versión buena de algo ya apuntado torcido, cuando se compone la entrada, entonces conviven las dos y ninguna se marca como la correcta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Conviven la versión oída y la propia sin marcar ninguna como la correcta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un paseo sin aventura y sin nada oído, cuando se compone la entrada, entonces existe igual y dice lo que se anduvo en palabras del mundo, sin cifras.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un paseo sin nada oído ni hecho tiene entrada igual, y dice lo andado sin cifras",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado la entrada del día escrita, cuando se abre el diario entero, entonces está allí, en el día que corresponde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La entrada del día está en el diario entero, en el día que corresponde",
+      "hueco_de_bateria": true,
+      "nota": "Arista A5P4 → A6P2 del flujo."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado la clase «lo propio» del diario, cuando se consulta quién la escribe, entonces la escribe esta capa y solo esta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La clase lo propio la escribe esta capa y solo esta",
+      "hueco_de_bateria": true,
+      "nota": "Incluye la ida y vuelta del hecho «hoja-propia», que es la inversa exacta de la hoja."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que llega a un núcleo donde lo que allí se cuenta es él, cuando se echa el telón de esa salida, entonces aparece la cartela del hito y queda una página del diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La cartela del hito aparece al llegar al núcleo donde lo que se cuenta eres tú",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006, marcado ⚠ sin escenario en el PRD: la batería no lo cubre y esta fila escribe sus criterios por primera vez."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese mismo jugador, cuando juega veinte salidas más, entonces la cartela no vuelve a aparecer ni una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La cartela no vuelve a aparecer en veinte salidas más",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006. Veinte salidas de verdad, cerradas una detrás de otra sobre el mismo núcleo."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el texto de la cartela y el de la página, cuando se buscan en ellos las palabras de la escalera de logro, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Los textos del hito no usan las palabras de la escalera de logro, y uno que las usara falla",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un texto del hito que contuviera una de esas palabras, cuando se ejecuta la comprobación, entonces falla nombrando el texto y la palabra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Los textos del hito no usan las palabras de la escalera de logro, y uno que las usara falla",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el texto de la cartela, cuando se lee, entonces dice que el mundo cambió y no que el jugador aprobó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La cartela dice que el mundo cambió y no que quien juega aprobó",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un hito que coincide con una salida cerrada en corto, cuando se echa el telón, entonces la cartela aparece igual: el hito es del mundo y no del desempeño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un hito que coincide con una salida cerrada en corto aparece igual",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006. Caso límite de la spec."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el estado del arranque ya cerrado, cuando se reconstruye la partida desde el registro de hechos, entonces sigue cerrado y la cartela no se vuelve a enseñar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El arranque cerrado sigue cerrado al reconstruir la partida desde el registro",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador cuyo arranque no ha cerrado, cuando se echa cualquier telón, entonces no aparece ninguna cartela ni ninguna insinuación de que falte algo por llegar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin arranque cerrado no aparece ninguna cartela ni ninguna insinuación de que falte algo",
+      "hueco_de_bateria": true,
+      "nota": "RF-DIARIO-006. Estado vacío del hito."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un cierre de salida en el que una de las escrituras falla, cuando se ejecuta, entonces ni el conocimiento, ni la bolsa, ni la repisa, ni los motes, ni el diario, ni los rumores han cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Con una pieza que revienta, ni el estado ni el registro han cambiado",
+      "hueco_de_bateria": true,
+      "nota": "Estado de error de la spec. Se compara el estado entero por su texto canónico y el registro hecho a hecho."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado ese mismo fallo, cuando se lee el error, entonces nombra qué pieza no encajó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin cada una de las seis piezas, el cierre falla nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un cierre correcto, cuando se mira el registro de hechos, entonces los hechos de todas las áreas que tocó están anexados, y el estado va detrás del registro y no delante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Los hechos de todas las áreas que tocó quedan anexados, y el estado va detrás del registro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una partida cerrada y guardada, cuando se congela y se vuelve a levantar, entonces el conocimiento vuelve idéntico, elemento a elemento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Una partida cerrada se congela y se levanta con el conocimiento idéntico, elemento a elemento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado una partida, cuando se reconstruye desde el registro, entonces el conocimiento se reproduce en lugar de declararse no reproducible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El conocimiento se reproduce desde el registro en lugar de declararse no reproducible",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado dos partidas con la misma semilla y las mismas entradas, cuando se cierran las mismas salidas, entonces los dos estados son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Dos partidas con la misma semilla y las mismas entradas cierran idénticas byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante, @determinismo, RNF-DET-003."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el cierre de salida sin el nacimiento de rumor cableado, cuando se ejecuta con un desenlace notable, entonces falla nombrando la pieza, y no cierra la salida sin que salga nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin cada una de las seis piezas, el cierre falla nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso recorre las seis piezas, quitando una cada vez y comprobando además que no ha escrito nada."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el cierre sin la progresión cableada, cuando se ejecuta, entonces falla nombrando la pieza, y no entrega un desenlace sin oro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin cada una de las seis piezas, el cierre falla nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el cierre sin el diario cableado, cuando se ejecuta, entonces falla nombrando el diario, y no echa un telón sin entrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin cada una de las seis piezas, el cierre falla nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el cierre sin el calendario cableado, cuando se ejecuta, entonces falla nombrando el calendario, y no apunta el día cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Sin el calendario cableado, el cierre falla nombrando la pieza y no apunta el día cero",
+      "hueco_de_bateria": true,
+      "nota": "La única entrada nueva de la fila, con su doble en Node."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el pintado del telón sin el estado de conocimiento cableado, cuando se pinta, entonces falla nombrando el estado, y no pinta todo con la tinta de lo no sabido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El pintado del telón sin el estado de conocimiento cableado falla nombrando el estado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado el cierre de salida, cuando se inspecciona qué recibió, entonces recibió la aventura en curso de la fila 34 con su declaración de cómo acabó, y no un booleano de «terminada».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El cierre recibe la aventura en curso con su declaración de cómo acabó, y no un booleano",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Un libro de pendientes por salida: durante la salida los ascensos se apuntan y no se aplican, y apuntarlo dos veces por la misma vía deja una sola anotación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El libro de pendientes vive fuera del estado y apuntar dos veces deja una anotación",
+      "hueco_de_bateria": true,
+      "nota": "De «Notas técnicas · La capa de conocimiento»."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "La capa de conocimiento es capa sobre el mundo generado: no toca la tubería, no importa ninguna fase de generación y no puede resembrar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El módulo no importa ninguna fase de generación y no puede resembrar nada",
+      "hueco_de_bateria": true,
+      "nota": "De «Notas técnicas · La capa de conocimiento»."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "El hecho del ascenso lleva el escalón de llegada: reproducirlo dos veces o en desorden deja el escalón más alto en lugar de bajar ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un hecho de conocimiento reproducido dos veces o en desorden deja el escalón más alto",
+      "hueco_de_bateria": true,
+      "nota": "De «Notas técnicas · La capa de conocimiento», y es lo que hace que la reproducción del registro no dependa del orden."
     }
   ]
 }

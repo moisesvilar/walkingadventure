@@ -129,6 +129,12 @@ declaraTiposDeHecho('objetos', {
 });
 
 declaraTiposDeHecho('diario', {
+  // La hoja de hoy, que es la clase «lo propio» y la escribe el telón (SPEC-036). No
+  // lleva dentro los hechos estructurados como `version-oida`, y no le hacen falta: los de
+  // lo propio los construye siempre esta misma capa con la misma forma —lo que pasó, una
+  // vez, protagonizado por quien juega, en el lugar que dice la carga—, así que
+  // reproducirlos es derivarlos y no inventárselos.
+  'hoja-propia': campos({ hoja: 'texto', asunto: 'texto', lugar: 'texto', signo: 'texto' }),
   'version-oida': campos({
     suceso: 'texto',
     fuenteTipo: 'texto',
@@ -154,6 +160,20 @@ declaraTiposDeHecho('aventuras', {
 declaraTiposDeHecho('entregas', {
   'entrega-atendida': campos({ entrega: 'texto', quien: 'texto?' }),
   'entrega-ignorada': campos({ entrega: 'texto', porque: 'texto?' }),
+});
+
+declaraTiposDeHecho('conocimiento', {
+  // El ascenso de un elemento del mundo: **su clave, por qué vía subió y a qué escalón**.
+  // Lleva el escalón de llegada y no el de salida a propósito: reproducirlo es subir hasta
+  // ahí, y así dos hechos en desorden dejan el más alto en lugar de pelearse.
+  'conocimiento-subido': campos({ elemento: 'texto', via: 'texto', escalon: 'texto' }),
+});
+
+declaraTiposDeHecho('arranque', {
+  // Que el arranque se cerró, por qué vía, y si dejó marcada la cartela del hito. Sin este
+  // hecho una partida reconstruida volvería con el arranque abierto y enseñaría la cartela
+  // otra vez, que es exactamente lo que «una sola vez» prohíbe.
+  'arranque-cerrado': campos({ via: 'texto', marcado: 'booleano' }),
 });
 
 declaraTiposDeHecho('anclajes', {

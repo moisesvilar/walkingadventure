@@ -20,6 +20,12 @@ import { exigeSemilla } from '../core/semilla.js';
 import { IDS_DE_AJUSTE, congelaAjustes, estadoDeAjustes, levantaAjustes } from './ajustes.js';
 import { congelaArranque, estadoDeArranque, levantaArranque } from './arranque.js';
 import { congelaAventuras, estadoDeAventuras, levantaAventuras } from './aventura-en-curso.js';
+import {
+  ESQUEMA_CONOCIMIENTO,
+  congelaConocimiento,
+  estadoDeConocimiento,
+  levantaConocimiento,
+} from './conocimiento.js';
 import { congelaDescartes, estadoDeDescartes, levantaDescartes } from './descartes.js';
 import { congelaPersonaje, estadoDePersonaje, levantaPersonaje } from './personaje.js';
 import {
@@ -453,6 +459,19 @@ declaraArea({
   inicial: estadoDeDescartes,
   congela: congelaDescartes,
   levanta: levantaDescartes,
+});
+
+// La capa de conocimiento, de SPEC-036. **Sí se reproduce**: su hecho lleva dentro la
+// clave del elemento y el escalón al que subió, que es el área entera. Y entra por
+// `declaraArea` como las quince anteriores, sin subir la versión de formato: la vía
+// canónica de SPEC-016 existe precisamente para que una fila nueva añada su área sin que
+// eso sea un cambio de formato.
+declaraArea({
+  id: 'conocimiento',
+  esquema: ESQUEMA_CONOCIMIENTO,
+  inicial: estadoDeConocimiento,
+  congela: congelaConocimiento,
+  levanta: levantaConocimiento,
 });
 
 /** Las áreas declaradas, en el orden en que se escriben. */

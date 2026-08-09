@@ -385,7 +385,7 @@ export const TEMPLATES = [
     },
     repuesto: {
       sinTi: 'La cita se deshizo por puro cansancio y quedaron en verse otro día, con fecha nueva y menos entusiasmo.',
-      conLoConseguido: 'Vuelves con el recado dado. Es poco, pero es exactamente lo que hacía falta.',
+      conLoConseguido: 'Vuelves con el recado dado. Es justo lo que hacía falta, ni más ni menos.',
     },
     relacion: [
       { rol: 'aldea', signo: 'reparador', beat: 4, decision: 'traer-a-quien-esperaba-hasta-la-plaza' },
@@ -829,7 +829,7 @@ export const TEMPLATES = [
       objetos: [],
     },
     repuesto: {
-      sinTi: 'La visita la hizo alguien más, con prisa y de pie en la puerta. Cuenta poco, pero cuenta.',
+      sinTi: 'La visita la hizo alguien más, con prisa y de pie en la puerta. Cuenta igual, que es lo que se pedía.',
       conLoConseguido: 'Vuelves con el recado dado desde el camino. Es menos de lo que querías y más de lo que había.',
     },
     relacion: [
@@ -907,7 +907,7 @@ export const TEMPLATES = [
       objetos: [],
     },
     repuesto: {
-      sinTi: 'Los recados se entregaron poco a poco y en desorden. Llegaron, que era lo importante.',
+      sinTi: 'Los recados se entregaron uno a uno y en desorden. Llegaron, que era lo importante.',
       conLoConseguido: 'Vuelves con lo entregado hasta ahora y con la lista abierta. Mañana sigue.',
     },
     relacion: [
@@ -997,7 +997,7 @@ export const TEMPLATES = [
     },
     repuesto: {
       sinTi: 'La fuente sigue goteando como siempre. Ya nadie la oye, que también es una forma de arreglarla.',
-      conLoConseguido: 'Vuelves con la pieza pedida y las medidas tomadas. Falta poco, y aquí poco significa algún día.',
+      conLoConseguido: 'Vuelves con la pieza pedida y las medidas tomadas. Lo que falta, aquí, significa algún día.',
     },
     relacion: [
       { rol: 'quien_forja', signo: 'reparador', beat: 3, decision: 'pagar-la-pieza-de-tu-bolsillo' },
