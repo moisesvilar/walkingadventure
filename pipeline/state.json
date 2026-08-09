@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-034",
+  "spec_actual": "SPEC-035",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -335,6 +335,16 @@
       "report": "test/reports/SPEC-033-run-20260809T175226Z.md",
       "casos": "2091 casos: 2088 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado"
+    },
+    {
+      "spec": "SPEC-034",
+      "slug": "escena-beat",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-034-run-20260809T184847Z.md",
+      "casos": "2132 casos: 2129 pasan, 0 fallan, 3 saltados",
+      "app": "tres casos declarados, sin pantalla montada",
+      "nota": "entrega el motor de salida que faltaba desde la verificacion de B2 (6r)."
     }
   ],
   "bloqueos": [],
