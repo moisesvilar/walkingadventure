@@ -19,6 +19,7 @@ import { congelaHondo } from '../core/congelar.js';
 import { exigeSemilla } from '../core/semilla.js';
 import { IDS_DE_AJUSTE, congelaAjustes, estadoDeAjustes, levantaAjustes } from './ajustes.js';
 import { congelaArranque, estadoDeArranque, levantaArranque } from './arranque.js';
+import { congelaAventuras, estadoDeAventuras, levantaAventuras } from './aventura-en-curso.js';
 import { congelaPersonaje, estadoDePersonaje, levantaPersonaje } from './personaje.js';
 import {
   ESQUEMA_DIARIO,
@@ -242,14 +243,40 @@ const AREA_ENTREGAS = campos({
 });
 
 /**
- * La salida abierta, si la hay: identidad, mapa, aventura aceptada y dónde se quedó.
+ * El área de aventuras, que la escriben dos filas y **ninguna la duplica**.
+ *
+ * De SPEC-028, la **salida abierta**: identidad, mapa, aventura aceptada y dónde se
+ * quedó. De SPEC-034, la **aventura en curso** —por qué beat va, cuáles quedaron
+ * resueltos con su vía y su variante— y las **cerradas** con cómo acabó cada una. Aquella
+ * fila es la dueña del campo que declaró y esta lo extiende por al lado, que es lo
+ * contrario de declarar el área dos veces.
  *
  * **Ninguna coordenada y ninguna marca de tiempo** (RF-PRIV-002): el sitio va con el
  * nombre del mundo, y sin marca de tiempo una salida abierta desde hace días se lee
- * exactamente igual que la de hace un rato, que es lo que pide `bucle-jugable.md` §4.
+ * exactamente igual que la de hace un rato, que es lo que pide `bucle-jugable.md` §4. Y
+ * **el minuto en que se resolvió un beat no está aquí**: lo que se guarda es qué variante
+ * de escena se leyó, porque un histórico de a qué hora estuviste dónde es un histórico de
+ * posiciones con otro nombre.
  */
 const AREA_AVENTURAS = campos({
   abierta: uno(['nulo', campos({ salida: 'texto', mapa: 'texto', aventura: 'texto?', sitio: 'texto?' })]),
+  enCurso: uno(['nulo', campos({
+    aventura: 'texto',
+    plantilla: 'texto',
+    mapa: 'texto',
+    // Nulo cuando la cadena se terminó: es lo que distingue una aventura lista para
+    // cerrarse como terminada de una que se deja a medias.
+    beatEnCurso: 'entero?',
+    resueltos: lista(campos({ n: 'entero', via: 'texto', variante: 'texto?', objeto: 'texto?' })),
+  })]),
+  cerradas: lista(campos({
+    aventura: 'texto',
+    plantilla: 'texto?',
+    mapa: 'texto',
+    comoAcabo: 'texto',
+    desenlace: 'texto?',
+    motivo: 'texto?',
+  })),
 });
 
 /**
@@ -362,17 +389,18 @@ declaraArea({ id: 'topicos', esquema: AREA_TOPICOS, inicial: estadoDeTopicos, co
 // entradas, así que se reconocen y se declaran en lugar de aplicarse.
 declaraArea({ id: 'entregas', esquema: AREA_ENTREGAS, inicial: estadoDeEntregas, congela: congelaEntregas, levanta: levantaEntregas, reproduce: false });
 
-// El registro de la salida abierta, de SPEC-028. Es el estado del área de aventuras, que
-// hasta esta fila solo aportaba tipos de hecho. **No se reproduce desde el registro**: sus
-// hechos dicen qué aventura se aceptó y cuál se cerró, no dónde se quedó quien la llevaba, y
-// reconstruir la tarjeta de a medias a partir de ellos sería inventarse el sitio.
+// El área de aventuras: la salida abierta de SPEC-028 y el motor de la aventura en curso
+// de SPEC-034, compuestos campo a campo desde sus dos módulos. **Sí se reproduce**: sus
+// cuatro tipos de hecho estaban declarados desde SPEC-016 esperando este momento, y desde
+// esta fila hay quien los aplica. Lo que ningún hecho lleva dentro —dónde se quedó la
+// salida, por qué beat iba la aventura— vuelve en su estado inicial y manda el estado
+// guardado, que es lo que el diagnóstico de discrepancia sabe nombrar.
 declaraArea({
   id: 'aventuras',
   esquema: AREA_AVENTURAS,
-  inicial: estadoDeSalidaAbierta,
-  congela: congelaSalidaAbierta,
-  levanta: levantaSalidaAbierta,
-  reproduce: false,
+  inicial: () => ({ ...estadoDeSalidaAbierta(), ...estadoDeAventuras() }),
+  congela: (estado) => ({ ...congelaSalidaAbierta(estado), ...congelaAventuras(estado) }),
+  levanta: (doc) => ({ ...levantaSalidaAbierta(doc), ...levantaAventuras(doc) }),
 });
 
 // La vida de una salida, de SPEC-030. **No se reproduce desde el registro**: sus hechos

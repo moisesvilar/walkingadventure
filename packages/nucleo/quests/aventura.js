@@ -41,6 +41,39 @@ export const FRANJAS = congelaHondo([
 /** Los identificadores válidos, en el orden del catálogo. */
 export const IDS_DE_FRANJA = congelaHondo(FRANJAS.map((f) => f.id));
 
+/** Cuántos minutos tiene un día. Es la escala entera del reloj de pared. */
+export const MINUTOS_DEL_DIA = 24 * 60;
+
+/**
+ * El minuto del día en que se resuelve un beat, exigido.
+ *
+ * Es lo único que el reloj de pared entrega y **no se guarda en ninguna parte**
+ * (RF-PRIV-002): se usa para elegir la variante de escena y se descarta. Un histórico
+ * de a qué hora estuviste dónde es un histórico de posiciones con otro nombre.
+ */
+export function exigeMinutoDelDia(minuto, quien = 'el minuto del día') {
+  if (!Number.isInteger(minuto) || minuto < 0 || minuto >= MINUTOS_DEL_DIA) {
+    throw new Error(
+      `${quien} llega como ${JSON.stringify(minuto) ?? String(minuto)}: es un entero de minutos desde medianoche, ` +
+      `entre 0 y ${MINUTOS_DEL_DIA - 1}`,
+    );
+  }
+  return minuto;
+}
+
+/**
+ * Si un minuto del día cae dentro de una franja.
+ *
+ * `noche` cruza la medianoche y por eso la comparación tiene dos ramas: con una sola,
+ * las dos y media de la mañana quedarían fuera de una franja que las contiene, y la
+ * variante de escena se elegiría al revés justo en la única franja que lo hace raro.
+ */
+export function dentroDeFranja(franja, minuto) {
+  const m = exigeMinutoDelDia(minuto, 'el minuto en que se resuelve el beat');
+  if (franja.hastaMin > franja.desdeMin) return m >= franja.desdeMin && m < franja.hastaMin;
+  return m >= franja.desdeMin || m < franja.hastaMin;
+}
+
 /**
  * El horario diurno: la franja permitida que llega **activada de origen**
  * (`game-design/seguridad-privacidad.md`, «no se ofrecen salidas de noche»).
@@ -72,6 +105,17 @@ export function franjaCabeEn(franja, permitida) {
   if (franja.hastaMin <= franja.desdeMin) return false;
   return franja.desdeMin >= permitida.desdeMin && franja.hastaMin <= permitida.hastaMin;
 }
+
+/**
+ * Los campos con los que una plantilla declararía **más de una continuación** para un
+ * mismo beat.
+ *
+ * La ramificación es exclusión 9 del PRD y aquí no se le deja hueco: la lista existe
+ * para poder **rechazarla**, no para prepararla. Sin ella, «la cadena es lineal» sería
+ * un criterio que se cumple porque nadie ha escrito todavía la plantilla que lo rompe,
+ * que es exactamente lo que §6o dice que no es un criterio.
+ */
+export const CAMPOS_DE_RAMIFICACION = congelaHondo(['siguientes', 'opciones', 'ramas', 'bifurcacion', 'elecciones']);
 
 const TIPOS_DE_ROL = Object.freeze(['servicio', 'nucleo', 'paraje', 'humano']);
 
@@ -165,7 +209,19 @@ export function validaPlantilla(plantilla) {
         `los tres válidos son ${DISPARADORES.join(', ')}`,
       );
     }
-    if (disparador.tipo === 'franja') franjaDe(disparador.franja);
+    if (disparador.tipo === 'franja') {
+      franjaDe(disparador.franja);
+      // La variante de fuera es **obligatoria**, no opcional. Con un campo opcional,
+      // «no la escribí» y «no hace falta» serían indistinguibles, y caer al texto de
+      // dentro produciría escenas que hablan de una hora que no es. Llegar fuera de la
+      // franja resuelve el beat igual: lo único que cambia es lo que se lee.
+      if (typeof disparador.varianteFuera !== 'string' || !disparador.varianteFuera.trim()) {
+        throw new Error(
+          `el beat ${i + 1} de la plantilla "${id}" dispara en la franja "${disparador.franja}" y no declara la variante de ` +
+          'llegar fuera de ella: llegar tarde no cancela nada, así que sin ese texto el beat se resolvería contando una hora que no es',
+        );
+      }
+    }
     if (disparador.tipo === 'con_objeto') {
       if (!disparador.objeto) {
         throw new Error(`el beat ${i + 1} de la plantilla "${id}" dispara con objeto y no dice cuál`);
@@ -190,6 +246,24 @@ export function validaPlantilla(plantilla) {
       );
     }
     if (!b.escena) throw new Error(`el beat ${i + 1} de la plantilla "${id}" no declara escena`);
+
+    // La cadena es lineal: un beat empuja a **uno** y el último a ninguno. Una
+    // plantilla que declarase dos continuaciones se rechaza aquí, nombrando la
+    // plantilla y el beat, en lugar de recorrerse eligiendo la primera en silencio.
+    for (const campo of CAMPOS_DE_RAMIFICACION) {
+      if (b[campo] !== undefined || b.resultado[campo] !== undefined) {
+        throw new Error(
+          `el beat ${i + 1} de la plantilla "${id}" declara "${campo}": la cadena de beats es lineal y cada beat empuja a un único ` +
+          'siguiente (exclusión 9 del PRD), así que aquí no hay dónde poner una segunda continuación',
+        );
+      }
+    }
+    if (Array.isArray(b.resultado.siguiente) || Array.isArray(b.resultado.siguienteBeat)) {
+      throw new Error(
+        `el beat ${i + 1} de la plantilla "${id}" declara una lista de beats siguientes: la cadena es lineal y cada beat ` +
+        'empuja a un único siguiente',
+      );
+    }
   }
   return orden;
 }
@@ -240,7 +314,13 @@ export function beatCasteado({ n, plantillaBeat, lugar, escenaDelLugar, siguient
     // la escena necesita saber cuál era y nadie necesita saber si se llegó a tiempo
     // para decidir si el beat ocurre.
     disparador.franja = { id: franja.id, desdeMin: franja.desdeMin, hastaMin: franja.hastaMin };
-    disparador.variantes = { dentro: plantillaBeat.disparador.variante ?? null, fuera: null };
+    // Las dos variantes viajan juntas y las dos están escritas: cuál se lee lo decide
+    // el reloj de pared al resolver el beat, y el beat sale del casting sin saber a
+    // qué hora se va a llegar.
+    disparador.variantes = {
+      dentro: plantillaBeat.disparador.variante ?? null,
+      fuera: plantillaBeat.disparador.varianteFuera ?? null,
+    };
   }
   if (disparador.tipo === 'con_objeto') {
     disparador.objeto = plantillaBeat.disparador.objeto;

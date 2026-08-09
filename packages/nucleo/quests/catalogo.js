@@ -24,6 +24,7 @@ import { declaracionDeRumor } from '../partida/rumores.js';
 import { exigeCantidadDeOro } from '../partida/oro.js';
 import { IDS_DE_TAMANO, RANGO_DE_BEATS } from '../partida/salida.js';
 import { TIPOS_DE_ROL, validaPlantilla } from './aventura.js';
+import { compruebaCoberturaDeMarcos, infraccionesDeLecturaEnVozAlta, infraccionesDeReproche } from './escena.js';
 import { OFICIOS, afinidadDePlantilla, exclusivasDeOficio, mediaDeAfinidades } from './oficios.js';
 import { TEMPLATES } from './templates.js';
 
@@ -134,7 +135,10 @@ export function textosDelCatalogo(catalogo = CATALOGO) {
     mete('gancho', 'gancho', plantilla.gancho);
     plantilla.beats.forEach((b, i) => {
       mete('beat', `beat ${i + 1}`, b.texto);
-      if (b.disparador.tipo === 'franja') mete('variante', `beat ${i + 1} · variante de franja`, b.disparador.variante);
+      if (b.disparador.tipo === 'franja') {
+        mete('variante', `beat ${i + 1} · variante de franja`, b.disparador.variante);
+        mete('variante', `beat ${i + 1} · variante de fuera de franja`, b.disparador.varianteFuera);
+      }
       if (b.disparador.tipo === 'con_objeto') mete('alternativa', `beat ${i + 1} · vía alternativa`, b.disparador.viaAlternativa.texto);
     });
     mete('desenlace', 'desenlace', plantilla.desenlace.texto);
@@ -167,7 +171,10 @@ export function huecosDePlantilla(plantilla) {
   mete('gancho', 'gancho', 'gancho', plantilla.gancho);
   plantilla.beats.forEach((b, i) => {
     mete(`beat:${i + 1}`, 'escena', 'beat', b.texto);
-    if (b.disparador.tipo === 'franja') mete(`beat:${i + 1}:variante`, 'escena', 'variante', b.disparador.variante);
+    if (b.disparador.tipo === 'franja') {
+      mete(`beat:${i + 1}:variante`, 'escena', 'variante', b.disparador.variante);
+      mete(`beat:${i + 1}:varianteFuera`, 'escena', 'variante', b.disparador.varianteFuera);
+    }
     if (b.disparador.tipo === 'con_objeto') mete(`beat:${i + 1}:alternativa`, 'escena', 'alternativa', b.disparador.viaAlternativa?.texto);
   });
   mete('desenlace', 'escena', 'desenlace', plantilla.desenlace?.texto);
@@ -257,6 +264,15 @@ function exigeTexto(plantilla, clase, donde, texto) {
   if (infracciones.length) {
     const detalle = infracciones.map((i) => `${i.familia}: "${i.fragmento}"`).join('; ');
     throw new Error(`el texto de ${donde} de la plantilla "${plantilla.id}" rompe las reglas de lenguaje — ${detalle}`);
+  }
+  // Y **escrito para leerse en voz alta** (`personaje.md` §4): las cifras ya las cazan
+  // las reglas de lenguaje de arriba y esto añade lo que no es cifra —siglas, símbolos,
+  // barras, paréntesis y abreviaturas—. El modo compañía es la razón: alguien lee esto
+  // en alto a otra persona, y un paréntesis de aclaración no se lee.
+  const sinVoz = infraccionesDeLecturaEnVozAlta(texto, { locale: 'es' }).filter((i) => i.familia === 'sinVoz');
+  if (sinVoz.length) {
+    const detalle = sinVoz.map((i) => `${i.formula}: "${i.fragmento}"`).join('; ');
+    throw new Error(`el texto de ${donde} de la plantilla "${plantilla.id}" no se puede leer en voz alta — ${detalle}`);
   }
 }
 
@@ -436,6 +452,19 @@ function compruebaPlantilla(plantilla, indice) {
     if (b.disparador.tipo === 'franja' && !b.disparador.variante) {
       throw new Error(`el beat ${i + 1} de la plantilla "${id}" dispara en franja y no trae la variante de escena de llegar dentro de ella`);
     }
+    // La de fuera la exige ya `validaPlantilla`, que es estructura; aquí se comprueba
+    // lo que es **tono**: que cuente lo que pasó mientras tanto y no lo que quien juega
+    // dejó de hacer. Un reproche por llegar tarde es penalizar la ausencia con otras
+    // palabras, y eso es lo que `quests.md` decisión 4 prohíbe.
+    if (b.disparador.tipo === 'franja') {
+      const reproches = infraccionesDeReproche(b.disparador.varianteFuera);
+      if (reproches.length) {
+        throw new Error(
+          `la variante de fuera de franja del beat ${i + 1} de la plantilla "${id}" reprocha llegar tarde ` +
+          `(${reproches.map((r) => `"${r.fragmento}"`).join(', ')}): cuenta lo que pasó mientras tanto, nunca lo que no se hizo`,
+        );
+      }
+    }
     if (b.disparador.tipo === 'con_objeto' && !b.disparador.viaAlternativa?.texto) {
       throw new Error(`el beat ${i + 1} de la plantilla "${id}" dispara con objeto y su vía alternativa no trae texto: sin él la aventura se queda muda por ese lado`);
     }
@@ -583,6 +612,11 @@ export function compruebaCatalogo(catalogo) {
       throw new Error(`solo ${cuantas} plantillas declaran algún acto "${signo}" y hacen falta ${suelo}: con menos, la mitad de la escalera de relación no la mueve nada de lo escrito`);
     }
   }
+
+  // Los marcos de escena: ninguna escena del catálogo se queda sin titular ni sin verbo
+  // para su única acción. Se comprueba aquí y no en la primera pantalla que la monte,
+  // por lo mismo que la cobertura de escenas de paraje.
+  compruebaCoberturaDeMarcos(catalogo);
 
   // Las aperturas de gancho: dos plantillas que empiezan igual se leen como la misma.
   const aperturas = new Map();

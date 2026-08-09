@@ -142,7 +142,14 @@ export const TEMPLATES = [
         rol: 'cita',
         escena: 'encuentro',
         texto: 'La figura encapuchada dice en voz baja lo que aquí nadie dice en voz alta, y luego pregunta si te ha gustado el efecto.',
-        disparador: { tipo: 'franja', franja: 'atardecer', variante: 'Llegas cuando la luz se va y la ves colocarse la capucha a toda prisa, ensayando el momento.' },
+        disparador: {
+          tipo: 'franja',
+          franja: 'atardecer',
+          variante: 'Llegas cuando la luz se va y la ves colocarse la capucha a toda prisa, ensayando el momento.',
+          // La variante de fuera cuenta **lo que pasó mientras tanto**, nunca lo que
+          // quien juega dejó de hacer: llegar fuera de la franja resuelve el beat igual.
+          varianteFuera: 'La capucha está doblada sobre el brocal, con una piedra encima para que el aire no se la lleve, y debajo hay otra nota con la misma letra.',
+        },
         resultado: { tipo: 'informacion' },
       },
       { rol: 'confidente', escena: 'verificación', texto: 'Quien se pasa el día mirando el camino desde lo alto confirma la historia y añade el nombre que faltaba, sin darle importancia.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
@@ -395,7 +402,12 @@ export const TEMPLATES = [
         rol: 'punto',
         escena: 'encuentro',
         texto: 'Quien espera lleva ahí desde mucho antes y ha tenido tiempo de ensayar el reproche.',
-        disparador: { tipo: 'franja', franja: 'tarde', variante: 'Llegas mientras aún hay sol y le pillas practicando el reproche en voz alta.' },
+        disparador: {
+          tipo: 'franja',
+          franja: 'tarde',
+          variante: 'Llegas mientras aún hay sol y le pillas practicando el reproche en voz alta.',
+          varianteFuera: 'Quien esperaba ha montado un campamento entero con la manta y la merienda, y ya se lo está pasando bien sin nadie.',
+        },
         resultado: { tipo: 'informacion' },
       },
       { rol: 'punto', escena: 'espera', texto: 'Esperáis a que llegue quien faltaba. La conversación mejora mucho a partir del rato incómodo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
