@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-018",
+  "spec_actual": "SPEC-019",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -179,6 +179,16 @@
       "casos": "1059 casos: 1056 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos",
       "nota": "cierra la deuda de tramos dificiles sin nombre (6i-a). Casteabilidad 30/48 -> 210/240."
+    },
+    {
+      "spec": "SPEC-018",
+      "slug": "contrato-llm",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-018-run-20260809T005920Z.md",
+      "casos": "1123 casos: 1120 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos",
+      "nota": "destapo seis textos del catalogo con voz de aplicacion o lexico no apto; la plantilla de la apuesta cambio de premisa."
     }
   ],
   "bloqueos": [],
