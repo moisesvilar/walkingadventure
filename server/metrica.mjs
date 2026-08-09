@@ -22,9 +22,22 @@ import { TIPOS_DE_LOTE } from './config.mjs';
 export const ESCRITURAS = Object.freeze([
   Object.freeze({
     entrada: 'metrica-del-dia',
-    campos: Object.freeze(['dia', 'contadores', 'peticiones', 'degradadas', 'coste', 'lotes']),
+    campos: Object.freeze(['dia', 'contadores', 'peticiones', 'degradadas', 'coste', 'lotes', 'eslabones']),
   }),
 ]);
+
+/**
+ * Los eslabones del origen de datos, para el recuento del día (SPEC-024).
+ *
+ * Es el contrapeso de dejar los mirrors públicos como respaldo: sin este recuento, que el
+ * Overpass del proyecto se caiga se nota solo en que todo va más lento, que es exactamente
+ * el fallo de siete horas. Con él, el día en que `propio` baja y `respaldo-1` sube es un
+ * número que dispara la revisión de la pieza.
+ *
+ * `ninguno` es la cadena agotada: ese mapa no se levantó. No hay ninguna geografía aquí,
+ * solo cuántas generaciones sirvió cada eslabón.
+ */
+export const ESLABONES_MEDIDOS = Object.freeze(['propio', 'respaldo-1', 'respaldo-2', 'respaldo-3', 'ninguno']);
 
 /** Las cuatro rutas de contenido. La de atestación no cuenta contenido de nadie. */
 export const RUTAS_MEDIDAS = Object.freeze(['texto', 'imagen', 'places', 'generacion']);
@@ -50,7 +63,9 @@ function diaVacio(dia, cubos) {
   for (const tipo of TIPOS_DE_LOTE) {
     lotes[tipo] = { n: 0, suma: 0, sumaCuadrados: 0, histograma: cubos[tipo].map(() => 0) };
   }
-  return { dia, contadores, peticiones: 0, degradadas: 0, coste: 0, lotes };
+  const eslabones = {};
+  for (const e of ESLABONES_MEDIDOS) eslabones[e] = 0;
+  return { dia, contadores, peticiones: 0, degradadas: 0, coste: 0, lotes, eslabones };
 }
 
 /**
@@ -108,6 +123,20 @@ export function creaMetrica({ config, reloj, almacen }) {
         let i = cortes.length - 1;
         while (i > 0 && coste < cortes[i]) i--;
         l.histograma[i] += 1;
+      });
+    },
+
+    /**
+     * Suma una generación al eslabón que la sirvió. Es un recuento y nada más: ni la
+     * celda, ni la consulta, ni cuándo dentro del día.
+     */
+    async cuentaEslabon(eslabon) {
+      if (!ESLABONES_MEDIDOS.includes(eslabon)) throw new Error(`eslabón no declarado: "${eslabon}"`);
+      return conElDia((r) => {
+        // Un día escrito antes de que existiera el recuento no tiene el campo: se completa
+        // al vuelo en vez de perder la suma o de fallar.
+        if (!r.eslabones) { r.eslabones = {}; for (const e of ESLABONES_MEDIDOS) r.eslabones[e] = 0; }
+        r.eslabones[eslabon] += 1;
       });
     },
 

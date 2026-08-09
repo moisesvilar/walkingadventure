@@ -28,19 +28,23 @@ say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
 # ¿Ya está sirviendo datos de verdad? Un contenedor "Up" no basta: si el volumen
 # está vacío responde 200 con una página de error XML (precedente real).
-# El corte debe superar la cabecera JSON: version, generator, osm3s y el aviso de
-# copyright ocupan ~264 bytes antes de "elements". Con 200 esto daba SIEMPRE
-# falso y el script no hacía nunca su early-exit.
-overpass_ok() {
-  curl -s -m 30 -X POST http://localhost:12345/api/interpreter \
-    --data-urlencode 'data=[out:json][timeout:25];node(around:300,40.4168,-3.7038)["amenity"="cafe"];out center 1;' 2>/dev/null \
-    | head -c 2000 | grep -q '"elements"'
-}
+#
+# El criterio ya no vive aquí: es la sonda de SPEC-024, la misma que decide si el
+# proxy encamina una generación al Overpass del proyecto. Un script y un servidor
+# con criterios distintos de "está listo" es cómo uno de los dos se equivoca solo.
+# Y la sonda exige un número mínimo de elementos: el `grep '"elements"'` de antes
+# pasaba con la lista vacía, que es justo lo que devuelve una base de datos sin
+# importar. Cuando falla, dice cuál de las dos causas conocidas es —importar horas,
+# o chmod 755 /db— y ese diagnóstico se enseña tal cual.
+SONDA="$COMPOSE_DIR/server/aguas-arriba/sonda-overpass.mjs"
+VEREDICTO="$(node "$SONDA" http://localhost:12345/api/interpreter 2>/dev/null)" && LISTO=1 || LISTO=0
 
-if overpass_ok; then
+if [ "$LISTO" = 1 ]; then
   say "Overpass local ya está sirviendo en http://localhost:12345 — nada que hacer."
+  echo "  $VEREDICTO"
   exit 0
 fi
+[ -n "$VEREDICTO" ] && printf '\n%s\n' "$VEREDICTO"
 
 mkdir -p "$WA_HOME/data" "$WA_HOME/cache/overpass"
 

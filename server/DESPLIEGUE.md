@@ -7,13 +7,16 @@ Documento de despliegue de `server/`. La mitad del valor del proxy está en lo q
 ```
 TOPE_DIARIO_GASTO=<n> VERIFICADOR_ATESTACION=<ruta> \
 CLAVE_TEXTO=… CLAVE_IMAGEN=… CLAVE_PLACES=… \
-URL_TEXTO=… URL_IMAGEN=… URL_PLACES=… URL_OVERPASS=… \
+URL_TEXTO=… URL_IMAGEN=… URL_PLACES=… \
+OVERPASS_PROPIO=http://overpass:80/api/interpreter CONSULTA_VERSION=1 \
 node server/arranca.mjs
 ```
 
 **El proxy no arranca sin `TOPE_DIARIO_GASTO`**, y es deliberado: una clave de API sin tope es la forma conocida de descubrir el presupuesto cuando ya se ha gastado. No hay valor por defecto porque un valor por defecto generoso convertiría una decisión pendiente (`game-design/arquitectura.md` p3) en una factura.
 
 **Tampoco arranca sin `VERIFICADOR_ATESTACION`.** Un verificador que acepta a todo el mundo es un proxy con las claves abiertas.
+
+**Tampoco arranca sin `OVERPASS_PROPIO` ni sin `CONSULTA_VERSION`** (SPEC-024). La alternativa —si no está el propio, a los mirrors públicos— es el fallo documentado que costó siete horas: todo «funcionaba», solo que lentísimo, porque la caída al respaldo era silenciosa. Y la clave de la caché de consultas es el texto literal de la consulta, así que cambiarlo sin subir su versión pierde la caché entera sin que nadie se entere; si el texto y la versión dejan de casar, tampoco arranca. El runbook del origen está en `deploy/overpass/RUNBOOK.md`.
 
 **Y no arranca si algún módulo declara que escribe algo que la superficie no contempla.** El error nombra la entrada y el módulo. Es lo que convierte «no registramos nada» en algo que se puede poner en rojo en lugar de prometerse.
 
@@ -28,7 +31,7 @@ Seis entradas, y ninguna con una clave derivada de quien llama.
 | Caché de generación (**apagada por defecto**) | resumen de la consulta de celda | respuesta de Overpass | indefinido |
 | Retos de atestación vivos | valor aleatorio del propio reto | nada más que el reto | `VIGENCIA_RETO` |
 | Fichas gastadas | la propia ficha | nada más que la ficha | `VIGENCIA_TANDA` |
-| Métrica del día | día natural | contadores e histogramas | indefinido |
+| Métrica del día | día natural | contadores, histogramas y el recuento de generaciones por eslabón del origen | indefinido |
 
 Los textos del LLM no aparecen: no se cachean. El texto de una aventura ya se guarda con la partida en el móvil y cachearlo aquí añadiría la única categoría de contenido que sí es de alguien en concreto.
 
@@ -39,6 +42,8 @@ Los textos del LLM no aparecen: no se cachean. El texto de una aventura ya se gu
 Ninguna dirección IP. Ningún identificador de instalación, de dispositivo o de sesión. Ninguna cabecera del cliente. Ningún identificador de lote. Ninguna marca de tiempo más fina que el día natural. Ninguna entrada por petición con la geografía dentro. Ningún endpoint que reciba sucesos del jugador —anclajes descartados, ajustes, progreso, errores del cliente—: no existe, y una ruta no declarada se rechaza sin escribir nada.
 
 Los diagnósticos de un fallo de aguas arriba llevan la ruta y el tipo de fallo. Ni el cuerpo, ni la clave del proveedor, ni el prompt.
+
+El recuento por eslabón de la métrica del día dice **cuántas** generaciones sirvió cada origen —el propio, cada respaldo, y cuántas no sirvió ninguno—, y ninguna zona. Es lo que hace visible que el respaldo esté trabajando, que si no se nota solo en que todo va lento.
 
 **Al desplegar hay que apagar el registro de conexiones de las capas que sirven el proxy**, y declararlo a propósito en su configuración: el `access_log` del terminador de TLS, el del servidor de aplicación y el del contenedor. El proxy no escribe una línea por petición; una capa por delante que sí lo haga deja escrito exactamente lo que aquí se evita.
 

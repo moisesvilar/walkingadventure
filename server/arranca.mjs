@@ -18,16 +18,22 @@
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-import { cargaConfig } from './config.mjs';
+import { cargaConfig, cargaConfigDeOrigen } from './config.mjs';
 import { creaProxy } from './proxy.mjs';
 import { creaAlmacenEnDisco } from './cache.mjs';
 import { creaClienteDeTexto } from './aguas-arriba/texto.mjs';
 import { creaClienteDeImagen } from './aguas-arriba/imagen.mjs';
 import { creaClienteDePlaces } from './aguas-arriba/places.mjs';
-import { creaClienteDeGeneracion } from './aguas-arriba/generacion.mjs';
+import { creaClienteDeOverpass } from './aguas-arriba/overpass.mjs';
+import { creaSonda } from './aguas-arriba/sonda-overpass.mjs';
+import { creaCobertura } from './aguas-arriba/cobertura.mjs';
 
 const entorno = process.env;
 const config = cargaConfig(entorno);
+// La segunda negativa a arrancar: sin `OVERPASS_PROPIO` y sin `CONSULTA_VERSION` no se
+// sigue. Caer a los mirrors públicos por no tener configurado el propio es el fallo
+// documentado que costó siete horas, y un fallo silencioso deja de serlo aquí.
+const origen = cargaConfigDeOrigen(entorno);
 
 const RAIZ = entorno.WA_PROXY_DIR || join(homedir(), '.walkingadventure', 'proxy');
 
@@ -39,6 +45,21 @@ if (!entorno.VERIFICADOR_ATESTACION) {
 }
 const { creaVerificador } = await import(entorno.VERIFICADOR_ATESTACION);
 
+// El origen de los datos de OSM: la sonda que decide si el propio recibe tráfico, la
+// cobertura del extracto que decide si tiene sentido preguntarle, y el cliente con la
+// cadena entera. La sonda arranca antes que el servidor: hasta que no la confirmen dos
+// pasadas en verde, el propio no recibe ni una generación.
+const sonda = creaSonda({ fetch, url: origen.OVERPASS_PROPIO, config: origen });
+const cobertura = creaCobertura({
+  cobertura: origen.COBERTURA,
+  extracto: origen.EXTRACTO,
+  mirror: origen.EXTRACTO_MIRROR,
+  fecha: origen.EXTRACTO_FECHA,
+});
+const generacion = creaClienteDeOverpass({ fetch, config: origen, sonda, cobertura });
+sonda.arranca();
+sonda.revisa();
+
 const proxy = creaProxy({
   config,
   verificador: creaVerificador({ entorno }),
@@ -46,7 +67,7 @@ const proxy = creaProxy({
     texto: creaClienteDeTexto({ fetch, url: entorno.URL_TEXTO, clave: entorno.CLAVE_TEXTO, config }),
     imagen: creaClienteDeImagen({ fetch, url: entorno.URL_IMAGEN, clave: entorno.CLAVE_IMAGEN, config }),
     places: creaClienteDePlaces({ fetch, url: entorno.URL_PLACES, clave: entorno.CLAVE_PLACES, config }),
-    generacion: creaClienteDeGeneracion({ fetch, url: entorno.URL_OVERPASS, config }),
+    generacion,
   },
   // La caché de generación se abre igual, encendida o apagada: si está apagada no
   // escribe nada, y así el interruptor no cambia la forma del cableado.
@@ -58,7 +79,11 @@ const proxy = creaProxy({
   },
 });
 
+// El recuento por eslabón se cablea aquí y no antes: la métrica vive dentro del proxy y
+// el cliente se construye antes que él.
+generacion.conectaMetrica((eslabon) => proxy.metrica.cuentaEslabon(eslabon));
+
 // Ni una línea por petición, ni al arrancar ni después. Lo único que se escribe en la
 // salida estándar es que el proceso está en pie, y eso ocurre una vez.
 proxy.arranca(Number(entorno.PUERTO || 8138));
-process.on('SIGTERM', async () => { await proxy.cierra(); process.exit(0); });
+process.on('SIGTERM', async () => { sonda.para(); await proxy.cierra(); process.exit(0); });

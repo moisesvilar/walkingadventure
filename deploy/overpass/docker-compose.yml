@@ -1,0 +1,54 @@
+# El Overpass del proyecto en producción. Deriva del docker-compose.yml de la raíz —el de
+# desarrollo— y cambia solo tres cosas, cada una por un motivo escrito:
+#
+# 1. **El registro de accesos apagado**, y declarado. La consulta de generación contiene
+#    las coordenadas del jugador, que es el único dato real que sale del móvil: un
+#    access_log ordinario las escribiría en disco, con fecha y con IP, y desmentiría el
+#    escenario bloqueante «Las coordenadas salen una sola vez, al generar el mapa» sin que
+#    ninguna línea de código pareciera culpable. Quien ponga un terminador de TLS delante
+#    tiene que apagar el suyo también.
+# 2. **No se publica el puerto al mundo**: solo el proxy habla con esto. `expose` en vez de
+#    `ports`, y el proxy en la misma red.
+# 3. **Sin actualización por diffs**, igual que en desarrollo y por el mismo motivo: las
+#    secuencias de replicación de dos proveedores no son intercambiables, y RF-MUNDO-005
+#    hace que la frescura solo afecte a mapas nuevos. Se reimporta a demanda, y la fecha
+#    del extracto se declara en la métrica para que el desfase se vea.
+#
+#   docker compose -f deploy/overpass/docker-compose.yml up -d
+#   node server/aguas-arriba/sonda-overpass.mjs http://localhost:12345/api/interpreter
+#
+# La sonda es la única forma de saber si sirve. `docker ps` dice `Up` en los dos fallos
+# conocidos y en ninguno de los dos hay datos: ver RUNBOOK.md.
+
+name: walkingadventure-produccion
+
+services:
+  overpass:
+    image: wiktorn/overpass-api
+    container_name: overpass-produccion
+    environment:
+      OVERPASS_META: "no"
+      OVERPASS_MODE: init
+      OVERPASS_PLANET_URL: file:///data/spain-latest.osm.pbf
+      OVERPASS_PLANET_PREPROCESS: 'mv /db/planet.osm.bz2 /db/planet.osm.pbf && osmium cat -o /db/planet.osm.bz2 /db/planet.osm.pbf && rm /db/planet.osm.pbf'
+      OVERPASS_RULES_LOAD: "10"
+      OVERPASS_FLUSH_SIZE: "4"
+      OVERPASS_STOP_AFTER_INIT: "false"
+    expose:
+      - "80"
+    volumes:
+      - overpass-db:/db
+      - ${WA_HOME:-/srv/walkingadventure}/data:/data:ro
+      # El fragmento que apaga el registro de accesos. Va montado y no editado dentro del
+      # contenedor para que sobreviva a recrearlo, que es cuando se pierden estas cosas.
+      - ./nginx-sin-registro.conf:/etc/nginx/conf.d/zz-sin-registro.conf:ro
+    restart: unless-stopped
+    networks: [origen]
+
+networks:
+  origen:
+    name: walkingadventure-origen
+
+volumes:
+  overpass-db:
+    name: walkingadventure-overpass-db-produccion

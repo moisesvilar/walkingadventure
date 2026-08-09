@@ -16332,6 +16332,519 @@
       "caso": "La clave de un proveedor no aparece en ninguna respuesta, ningún error ni la superficie de escritura",
       "hueco_de_bateria": true,
       "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: la respuesta de si está listo sale de haberle hecho una consulta real, y no de consultar el estado del contenedor, del proceso ni del puerto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La sonda pregunta consultando, y no mirando el contenedor, el proceso ni el puerto",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: un contenedor en estado Up cuyo volumen de base de datos está vacío da «no sirve», y ninguna generación se encamina hacia él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un contenedor levantado que no sirve datos no cuenta como listo",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: una respuesta que empieza por «<» se trata como fallo aunque el código HTTP sea 200, y el diagnóstico cita el mensaje de error literal que traía el XML.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La página de error no se toma por datos",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: la consulta canario exige un número mínimo de elementos conocido y no se conforma con que la palabra «elements» aparezca en la respuesta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El canario exige un número mínimo de elementos y no se conforma con la palabra elements",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: una celda de campo abierto sin un solo POI se acepta como dato legítimo y no se confunde con un Overpass roto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una celda de campo abierto sin un solo POI se acepta como dato legítimo",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: al fallar clasifica el motivo en un conjunto cerrado —sin base de datos, base de datos inalcanzable, importación en curso, plazo agotado, respuesta ilegible— y cada motivo nombra su arreglo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Los motivos de fallo son un conjunto cerrado y cada uno nombra su arreglo",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Se cubre con dos casos: el catálogo y su arreglo, y los seis finales del doble cayendo cada uno en su motivo."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: al fallar clasifica el motivo en un conjunto cerrado —sin base de datos, base de datos inalcanzable, importación en curso, plazo agotado, respuesta ilegible— y cada motivo nombra su arreglo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Los seis finales que un Overpass sabe dar caen cada uno en su motivo",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Segundo caso del mismo criterio, contra los seis modos del doble de Overpass."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: una respuesta cuyo XML dice «No such file or directory» sobre el socket del dispatcher se clasifica como «no hay base de datos», y el arreglo es importar y no reiniciar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un XML que dice No such file es «sin base de datos», y el arreglo es importar",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Es la primera de las dos causas de síntoma idéntico de CLAUDE.md: el texto literal del XML es el único dato que las separa."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: una respuesta cuyo XML dice «Permission denied» sobre el mismo socket se clasifica como «base de datos inalcanzable», y el arreglo es el permiso de travesía del directorio y no importar de nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un XML que dice Permission denied es «base de datos inalcanzable», y el arreglo es el permiso",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Segunda causa de síntoma idéntico: mismo 200, mismo docker ps en Up, arreglo opuesto."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La sonda: su periodo y su plazo están declarados en la configuración y su coste es despreciable frente al tráfico real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El periodo y el plazo de la sonda están declarados en la configuración",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Prontitud: con la importación en curso el servicio dice que no está listo, y lo dice durante toda la importación sin que nadie tenga que mirar los registros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Mientras importa, la sonda dice que no está listo durante toda la importación",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Prontitud: con el servicio no listo, una generación se encamina directamente al respaldo sin esperar a que el propio conteste.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un contenedor levantado que no sirve datos no cuenta como listo",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore. Segunda mitad del caso: con la sonda en no listo, el propio no entra en la cadena y recibe cero llamadas."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Prontitud: el servicio pasa a recibir tráfico cuando lo confirma el número declarado de sondas consecutivas en verde, y no antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Pasa a listo con el número declarado de sondas en verde, y no antes",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Prontitud: el servicio listo que deja de servir a mitad del día deja de recibir tráfico dentro del periodo de sonda declarado, y el respaldo lo absorbe sin que ninguna generación se quede colgada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El servicio que deja de servir a mitad del día deja de recibir tráfico y el respaldo lo absorbe",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Prontitud: tras un reinicio de la máquina el servicio no repite la importación y vuelve a estar listo sin intervención humana.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Un reinicio de la máquina no repite la importación y el servicio vuelve solo",
+      "hueco_de_bateria": true,
+      "nota": "Sin prueba automática: hace falta una máquina y un reinicio de verdad. Lo que sí queda afirmado en node --test es la configuración que lo consigue (restart: unless-stopped y el salto de importación por /db/init_done), dentro del caso «El registro de accesos está apagado y la configuración lo declara a propósito»."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Prontitud: si el destino del Overpass del proyecto no está configurado, el proxy no arranca y el error dice que falta, en lugar de caer silenciosamente a los mirrors públicos para siempre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El proxy no arranca sin el destino del Overpass propio ni sin la versión de la consulta",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: el reloj de RNF-PER-001 empieza cuando el jugador confirma dónde levantar el mapa [A1P4] y para cuando la pantalla de espera cede al mapa pintado [A1P6], e incluye red, generación y primer pintado.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El reloj del minuto se mide de A1P4 a A1P6 e incluye red, generación y primer pintado",
+      "hueco_de_bateria": true,
+      "nota": "La definición del reloj se mide sobre la app, que todavía no tiene las pantallas del onboarding (filas 21 y 25). Aquí solo se afirma el tramo de datos, que es el que esta spec debe cumplir."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: cada tramo tiene su presupuesto declarado y la suma deja margen; el tramo de datos es el que esta spec debe cumplir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El tramo de datos cabe bajo la espera máxima de aguas arriba y ningún eslabón se lo come entero",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Los otros dos tramos del reparto —25 s de generación y 10 s de primer pintado— son de las filas 26 y 21 y aquí no se pueden afirmar."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: sobre las cuatro celdas arquetipo con la caché fría contra el Overpass del proyecto, el percentil declarado queda por debajo de su presupuesto en las cuatro.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Levantar un mapa tarda menos de un minuto en el mundo más denso",
+      "hueco_de_bateria": true,
+      "nota": "Necesita el Overpass del proyecto levantado y consultas reales: ninguna prueba de node --test puede salir a la red. Se pasa con scripts/overpass-medir.mjs, que publica máquina, extracto y fecha. Medido el 9-ago-2026 contra el Overpass local: urbano-denso p95 1663 ms sobre 20 s de presupuesto. El escenario es el que SPEC-024 propone para docs/testing.md."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: la medida es el percentil declarado sobre las pasadas declaradas por celda, y no la media, que esconde la cola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El percentil declarado es el del más cercano y no la media",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: la celda urbana densa gobierna la medición, y no la media de las cuatro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El cronómetro da el mismo número dos veces y lo gobierna la celda urbana densa",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. El cronómetro reproducible es andamiaje nuevo (test/dobles/overpass.mjs): mide sobre el reloj inyectado, así que dos ejecuciones dan el mismo número y la aritmética del p95 y del veredicto se puede afirmar sin red."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: una celda entera son terreno, POIs y callejero pedidos como un solo lote, y el reloj de red mide el lote y no la suma de tres esperas encadenadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una celda entera son terreno, POIs y callejero pedidos como un solo lote",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: una consulta que se pasa del plazo declarado se corta, se pasa al siguiente eslabón del respaldo, y el plazo total sigue cabiendo en el presupuesto del tramo de datos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una consulta que se pasa del plazo se corta y se pasa al siguiente sin reintentar",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. El corte se cubre con dos casos: el paso al siguiente eslabón, y que agotado el presupuesto no se contacte ni uno más."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: una consulta que se pasa del plazo declarado se corta, se pasa al siguiente eslabón del respaldo, y el plazo total sigue cabiendo en el presupuesto del tramo de datos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Agotado el presupuesto de datos, no se contacta ni un eslabón más",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. El presupuesto se gasta sobre el reloj inyectado: el plazo agotado se simula lanzando el aborto, no esperando ocho segundos de verdad."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: con la caché caliente el tramo de datos es despreciable, y la medición del presupuesto no se apoya nunca en ese caso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La caché caliente hace despreciable el tramo de datos, y la medición nunca se apoya en ella",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: con la caché caliente el tramo de datos es despreciable, y la medición del presupuesto no se apoya nunca en ese caso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El cronómetro consigue la caché fría desplazando la celda un metro por pasada",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. La caché fría no se consigue comentando el texto: eso cambia nuestra clave —el hash— pero no la consulta que ve Overpass, que rechaza la repetida con duplicate_query y contesta una página de error en 300 ms. Se consigue desplazando la celda un metro por pasada."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: dos generaciones simultáneas de celdas distintas no se salen de su presupuesto la una por culpa de la otra, y el número de consultas en vuelo que el servicio admite está declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Dos generaciones simultáneas de celdas distintas no se estorban",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "El presupuesto del minuto: la medición publicada dice sobre qué máquina se hizo, con qué extracto y en qué fecha.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La cadena declarada dice el orden del respaldo, sus plazos y la procedencia del extracto",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. El extracto, su mirror y su fecha se afirman aquí; la máquina la publica scripts/overpass-medir.mjs y va con la comprobación manual del presupuesto."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: con el Overpass del proyecto sirviendo, la consulta no sale hacia ningún mirror público.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Con el Overpass del proyecto sirviendo, la consulta no sale hacia ningún mirror",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Se afirma con el inspector de tráfico saliente de SPEC-001, que es la única forma de decir «esto no salió» en lugar de suponerlo."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: con el Overpass del proyecto sin servir, la consulta recorre los mirrors públicos en el orden declarado y el mapa se levanta igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Sin el Overpass del proyecto, el mapa se levanta igual",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: un mirror que responde 429, 503 o 504 se descarta y se pasa al siguiente sin reintentar contra el mismo y sin que el jugador vea nada distinto de una espera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un mirror que responde 429, 503 o 504 se descarta y se pasa al siguiente sin reintentar",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: un mirror que responde 200 con una página de error XML se descarta con el mismo criterio que el propio, porque la sonda es una y vale para todos los eslabones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La página de error no se toma por datos",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore. Tercera parte del caso: la misma clasificación aplicada a un mirror."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: con la cadena entera agotada el mapa no se levanta a medias, no se congela ningún mundo parcial y no se guarda nada de esa celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Sin ningún origen de datos no se levanta un mundo a medias",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: tras una generación que agotó la cadena, el jugador reintenta y el onboarding sigue donde estaba con lo contestado precubierto.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El jugador reintenta y el onboarding sigue donde estaba",
+      "hueco_de_bateria": true,
+      "nota": "Fuera de alcance de este nivel: la reanudación del onboarding es de la fila 25 (RF-PJ-001) y todavía no hay pantalla que recorrer con Maestro. Lo que sí queda afirmado aquí es la mitad servidor: la cadena agotada no deja nada guardado, así que no hay estado sucio que impida reintentar."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: de una generación fallida queda una espera que no salió y una forma de volver a intentarlo, y no una explicación de qué servidor falló.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una generación fallida no dice qué servidor falló ni por dónde pasó",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. La mitad servidor del criterio: el fallo no nombra ningún destino ni lleva coordenada. Lo que se ve en pantalla es de la fila 21 y es @app."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cadena de respaldo: de un día con el respaldo en uso queda un recuento de generaciones servidas por cada eslabón, y ese recuento es lo que dispara la revisión de la pieza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El recuento del día dice qué eslabón sirvió cada generación, y nada más",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: su cobertura geográfica es un dato explícito y consultable, y no algo que se deduzca del nombre del fichero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La cobertura del extracto es un dato explícito y consultable, no el nombre de un fichero",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: una celda dentro de la cobertura se consulta al Overpass del proyecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una celda dentro de la cobertura se consulta al Overpass del proyecto y no sale hacia ningún mirror",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: una celda fuera de la cobertura no se consulta al Overpass del proyecto y se va directo al respaldo, que sí tiene el planeta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una celda fuera del extracto no da un mundo vacío",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore. Se comprueban Lisboa y París, que la caja de España contiene o roza, y Madrid como contraste."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: una respuesta vacía por consultar fuera de la cobertura se distingue de una celda pobre de verdad, y no se genera un mundo vacío como si fuera legítimo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una respuesta vacía del propio se confirma contra el respaldo antes de darla por buena",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: una respuesta vacía por consultar fuera de la cobertura se distingue de una celda pobre de verdad, y no se genera un mundo vacío como si fuera legítimo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Media celda dentro de la cobertura no cuenta como cubierta",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. La otra mitad: la cobertura se comprueba con la celda entera, radio incluido, porque un mundo con la mitad de sus anclajes es indistinguible de un mundo pobre."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: reimportarlo con datos más recientes no cambia ningún mundo ya congelado, porque lo generado no se resiembra jamás (RF-MUNDO-005).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "El mundo no depende de OSM después de generarse",
+      "escenario": "El mundo no depende de OSM después de generarse",
+      "nota": "Escenario de la batería ya vivo desde SPEC-009: esta spec no lo reimplementa, lo cita. Es lo que acota el daño de que esta pieza falle."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La cobertura del extracto: de su procedencia consta de qué mirror salió y de qué fecha es, y esa pareja aparece en la métrica de operación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La cadena declarada dice el orden del respaldo, sus plazos y la procedencia del extracto",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado. Segunda mitad del caso: extracto, mirror y fecha salen declarados por la cobertura y viajan en la cadena declarada."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: es permanente por diseño y ninguna entrada caduca por el paso del tiempo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Ninguna entrada de la caché de consultas caduca por el paso del tiempo",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: la clave sale del texto literal de la consulta y de nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "La clave de la caché sale del texto literal de la consulta y de nada más",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: un cambio de una sola letra en el texto de la consulta deja la caché entera invalidada y la petición sale hacia arriba, y eso es una consecuencia conocida y no una avería.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un cambio de una sola letra en el texto de la consulta invalida la caché entera",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: el texto de la consulta lleva una versión declarada y cambiarla es un acto deliberado, con su coste de repoblar la caché anotado en el propio cambio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El texto de la consulta cambiado sin subir su versión impide arrancar",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: un cambio de versión de la consulta se puede comparar con los fixtures de OSM de SPEC-001, porque cada fixture guarda la consulta literal con la que se capturó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Cada fixture de OSM guarda la consulta literal con la que se capturó",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: una respuesta que no es JSON completo no se cachea y no se sirve.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una respuesta que no es JSON completo no se cachea y no se sirve",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "La caché permanente: dos generaciones simultáneas de la misma celda sin acierto de caché hacen una sola consulta aguas arriba y las dos reciben lo mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Dos generaciones simultáneas de la misma celda hacen una sola consulta aguas arriba",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: el registro de accesos del Overpass del proyecto y de todas las capas que lo sirven está apagado, y la configuración lo declara a propósito.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El registro de accesos está apagado y la configuración lo declara a propósito",
+      "hueco_de_bateria": true,
+      "nota": "Escenario propuesto por SPEC-024 para docs/testing.md (característica «El mapa se genera contra el Overpass del proyecto», @red @privacidad). RF-INFRA-003 está marcado ⚠ sin escenario en el PRD §4.13: el caso lleva ya el nombre literal de la propuesta para que el mapa case solo cuando alguien la incorpore. Bloqueante (@privacidad, RNF-DET-003). Se afirma sobre deploy/overpass/: access_log off montado como fragmento, puerto sin publicar, sin actualización por diffs, y el runbook separando las dos causas."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: tras un mes de generaciones, en la máquina del Overpass no queda ninguna consulta con coordenadas, ninguna dirección IP y ninguna cabecera de cliente.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El Overpass del proyecto no registra ninguna consulta",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante y sin prueba automática posible: hace falta la máquina desplegada y un mes de tráfico. Lo comprobable en node --test es la configuración que lo garantiza y que la coordenada no queda escrita en nada de lo nuestro. Escenario propuesto por SPEC-024 para docs/testing.md."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: las coordenadas del jugador salen del móvil exactamente una vez, al generar cada mapa, y esta es la pieza que las recibe.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "Escenario bloqueante de la batería. Aquí se afirma la mitad de esta pieza: tres generaciones de la misma celda dejan una sola salida con la coordenada, y ni la clave de caché, ni el contenido guardado, ni la métrica del día la contienen."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: a la superficie de escritura declarada de SPEC-023 se le suman las entradas que esta pieza añade, siguen declaradas todas y ninguna deriva su clave de quién llamó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "La métrica de un día son recuentos por ruta y por resultado, coste imputado y nada más",
+      "hueco_de_bateria": true,
+      "nota": "El recuento por eslabón es el campo que esta spec añade a «metrica-del-dia». El caso se actualizó para comparar los campos del día con la superficie declarada en vez de con una lista de seis fijada a mano: el criterio es «nada que identifique», no «seis campos», y con la lista fija un campo agregado que la spec pide ponía la métrica en rojo."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: de un fallo de consulta, el diagnóstico que queda escrito lleva el motivo clasificado y el eslabón que falló, y ninguna coordenada.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Una generación fallida no dice qué servidor falló ni por dónde pasó",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: en la métrica de operación de un día no hay ninguna geografía de lo generado, solo un recuento de generaciones.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "El proxy no identifica a nadie",
+      "escenario": "El proxy no identifica a nadie",
+      "nota": "Escenario bloqueante de la batería, aplicado al recuento por eslabón que esta spec añade: cuántas generaciones sirvió cada origen, nunca dónde."
+    },
+    {
+      "spec": "SPEC-024",
+      "criterio": "Lo que no se escribe: un día sin una sola generación tiene todos los contadores a cero y no falta ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/origen.test.mjs",
+      "caso": "Un día sin una sola generación tiene el recuento por eslabón a cero y no le falta ninguno",
+      "hueco_de_bateria": true,
+      "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
     }
   ]
 }
