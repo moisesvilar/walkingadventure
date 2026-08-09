@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-022",
+  "spec_actual": "SPEC-023",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -218,6 +218,16 @@
       "casos": "1359 casos: 1356 pasan, 0 fallan, 3 saltados",
       "app": "Skia declarada y en el bundle; sin simulador no se pinta en dispositivo. Paridad visual @manual sin revisar.",
       "nota": "la composicion vive en packages/nucleo/render/ para no romper el criterio de arrancar sin node_modules; arquitectura.md actualizado."
+    },
+    {
+      "spec": "SPEC-022",
+      "slug": "declutter-rotulos",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-022-run.md",
+      "casos": "1413 casos: 1410 pasan, 0 fallan, 3 saltados",
+      "app": "sin dispositivo",
+      "nota": "cierra el hueco de RF-MAPA-003 con ocho escenarios nuevos en docs/testing.md. Tipografias escaladas por lamina: 61 retiros por 'no cabe' -> 0."
     }
   ],
   "bloqueos": [],
@@ -232,6 +242,13 @@
         "La semilla no contiene ninguna coordenada"
       ],
       "estado": "implementados y en verde; verifica-gherkin ok (34 caracteristicas, 177 casos)"
+    },
+    {
+      "caracteristica": "Ningun rotulo del mapa pisa a otro",
+      "hueco": "RF-MAPA-003 (de los quince del PRD)",
+      "spec": "SPEC-022",
+      "escenarios": 8,
+      "estado": "implementados y en verde"
     }
   ],
   "specs_escritas": [
