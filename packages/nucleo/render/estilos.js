@@ -49,6 +49,16 @@ export const POR_DEFECTO = {
   // trazo: con halo opaco una sola pasada deja el borde lavado por el antialiasing.
   label: { family: FELL, italic: true, weight: '', upper: false, tracking: 0, scale: 1, color: '#4a3a22', halo: 'rgba(233,220,182,0.9)', haloW: 4, haloPasadas: 1, placa: [] },
   placa: null,          // caja bajo el rótulo: { fill, border, lw, padX, padY, radio, color, sombra }
+  // Las tres tintas del entintado del telón (capa 17 del plan de capas). Entran como
+  // claves de estilo para que **ningún color viva en el código de dibujo**, igual que
+  // todo lo demás; y son tres y no cuatro porque con una por nivel habría que explicar en
+  // el mapa la diferencia entre «lo conoces» y «lo conoces bien», que es exactamente la
+  // leyenda que `bucle-jugable.md` §8 prohíbe.
+  tintas: {
+    deHoy: { color: '#a8321e', grosor: 2.8, alfa: 1 },
+    asentado: { color: '#4a3a22', grosor: 1.8, alfa: 0.8 },
+    aLapiz: { color: '#8b7a58', grosor: 1.1, alfa: 0.35 },
+  },
   routeLabel: { mode: 'plain' },                       // 'plain' | 'ribbon'
   cartouche: { mode: 'roundrect', pos: 'top', family: MEDIEVAL, size: 30, fill: '#e9dcb6', color: null, border: null, tracking: 0 },
   frame: { mode: 'ticks', color: null, gold: '#8a6d34' },
@@ -120,6 +130,7 @@ const pergamino = fusiona({
   street: { major: 'rgba(100,76,44,0.55)', minor: 'rgba(100,76,44,0.45)' },
   glyph: { fill: '#d2b785', stroke: '#3f3019', lw: 1.5, wall: 'rgba(210,183,133,0.95)' },
   label: { family: FELL, halo: 'rgba(216,191,140,0.85)', color: '#3f3019' },
+  tintas: { deHoy: { color: '#8d2f21', grosor: 2.8, alfa: 1 }, asentado: { color: '#3f3019', grosor: 1.8, alfa: 0.8 }, aLapiz: { color: '#7b6844', grosor: 1.1, alfa: 0.32 } },
   routeLabel: { mode: 'ribbon' },
   cartouche: { mode: 'scroll', pos: 'bottom', family: MEDIEVAL, size: 30, fill: '#e3cfa1', border: '#8d2f21' },
   frame: { mode: 'double', color: '#3f3019' },
@@ -151,6 +162,7 @@ const cuento = fusiona({
   street: { major: 'rgba(120,92,54,0.55)', minor: 'rgba(120,92,54,0.4)' },
   glyph: { fill: '#f5ead0', stroke: '#5b4326', lw: 1.5, roof: '#b8543f', tower: '#8ca0c4', wall: '#f5ead0' },
   label: { family: HAND, italic: false, weight: '', scale: 1.3, color: '#4a3520', halo: 'rgba(240,235,208,0.85)', haloW: 5 },
+  tintas: { deHoy: { color: '#b8543f', grosor: 3, alfa: 1 }, asentado: { color: '#5b4326', grosor: 2, alfa: 0.75 }, aLapiz: { color: '#8d7c5e', grosor: 1.2, alfa: 0.3 } },
   cartouche: { mode: 'banner', pos: 'bottom', family: HAND, size: 40, fill: '#f3e7c6', border: '#5b4326' },
   frame: { mode: 'vine', color: '#5b4326' },
   compass: { mode: 'star', corner: 'sw', scale: 0.95 },
@@ -182,6 +194,7 @@ const atlas = fusiona({
   street: { major: 'rgba(150,140,100,0.45)', minor: 'rgba(150,140,100,0.3)' },
   glyph: { fill: '#f0ead2', stroke: '#6b5c3a', lw: 1.2, roof: '#a3543f', wall: '#f0ead2' },
   label: { family: CINZEL, italic: false, upper: true, tracking: 2.4, scale: 0.82, color: '#57503a', halo: 'rgba(226,234,219,0.8)', haloW: 4 },
+  tintas: { deHoy: { color: '#9a6a3c', grosor: 2.4, alfa: 1 }, asentado: { color: '#6a6144', grosor: 1.6, alfa: 0.75 }, aLapiz: { color: '#9aa08a', grosor: 1, alfa: 0.3 } },
   cartouche: { mode: 'plain', pos: 'top', family: CINZEL, size: 27, tracking: 5, color: '#57503a' },
   frame: { mode: 'none' },
   compass: { mode: 'thin', corner: 'nw', scale: 3.4, behind: true, color: 'rgba(150,140,105,0.5)' },
@@ -220,6 +233,8 @@ const reino = fusiona({
   // halo blanco no daba: pueblo y paraje se distinguen sin leer el nombre.
   label: { family: CINZEL, italic: false, upper: true, tracking: 1.4, scale: 0.92, color: '#14200f', halo: '#efe3c0', haloW: 6, haloPasadas: 2, placa: ['nucleo'] },
   placa: { fill: '#efe3c0', border: '#8a6d34', lw: 1.2, padX: 9, padY: 5, radio: 3, color: '#1e2b18', sombra: 'rgba(18,30,14,0.32)' },
+  // Reino es el mapa base: la tinta de hoy es el rojo del acento y la de lo no sabido, casi nada.
+  tintas: { deHoy: { color: '#c62828', grosor: 3.2, alfa: 1 }, asentado: { color: '#1e2b18', grosor: 2, alfa: 0.7 }, aLapiz: { color: '#f2e7c8', grosor: 1.2, alfa: 0.28 } },
   cartouche: { mode: 'banner', pos: 'top', family: CINZEL, size: 28, fill: '#efe3c0', border: '#8a6d34', tracking: 3 },
   frame: { mode: 'ornate', color: '#8a6d34', gold: '#c8a24a' },
   compass: { mode: 'rose', corner: 'se', scale: 1.25, letters: true },

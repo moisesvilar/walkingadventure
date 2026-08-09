@@ -63,6 +63,17 @@ export const PLAN_DE_CAPAS = Object.freeze([
 
 const INDICE_DE_CAPA = new Map(PLAN_DE_CAPAS.map((capa) => [capa.nombre, capa.n]));
 
+/**
+ * Las tres tintas del entintado y la clave de estilo de cada una. El nombre de la tinta es
+ * el de la capa de conocimiento —`de-hoy`, `asentado`, `a-lapiz`, los mismos que declara la
+ * miniatura de la portada— y la clave es la del objeto de datos del estilo: aquí no hay
+ * ningún color, solo la correspondencia entre los dos vocabularios.
+ */
+export const TINTA_DEL_ESTILO = Object.freeze({ 'de-hoy': 'deHoy', asentado: 'asentado', 'a-lapiz': 'aLapiz' });
+
+/** Las familias de elemento que la capa 17 sabe repasar, en orden estable. */
+export const FAMILIAS_QUE_SE_ENTINTAN = Object.freeze(['bosque', 'calzada', 'costa', 'nucleo', 'paraje', 'pico', 'servicio']);
+
 // --- pintura ----------------------------------------------------------------
 
 const PINTURA_VACIA = { relleno: null, trazo: null, grosor: 0, alfa: 1, discontinuo: null, remate: 'butt', union: 'miter', sombra: null };
@@ -153,6 +164,12 @@ function encuadre(estilo, vista, tamano) {
  *   la superficie; `medidor(texto, tipografia) → { ancho, alto }`;
  *   `colocador(rotulos, contexto) → [{ id, x, y }]`; `factorTexto` el ajuste de
  *   tamaño de letra, con «mediana» valiendo 1.
+ *
+ *   Y dos que son del telón (SPEC-036): `entintado`, la tinta de cada elemento del mundo
+ *   tal como la deja `entintadoDelMundo`, y `telon`, que dice que esta lámina es la del
+ *   telón y **exige** el entintado. Sin la marca, la capa 17 se queda vacía como hasta
+ *   ahora, que es lo que pinta el mapa en marcha; con la marca y sin entintado, falla
+ *   nombrando el estado en lugar de pintarlo todo con la tinta de lo no sabido.
  */
 export function componeEscena({
   documento,
@@ -163,6 +180,8 @@ export function componeEscena({
   medidor,
   colocador,
   factorTexto = 1,
+  entintado = null,
+  telon = false,
 }) {
   if (!documento || typeof documento !== 'object') throw new Error('componeEscena necesita el documento de celda');
   if (!tamano || !Number.isFinite(tamano.ancho) || !Number.isFinite(tamano.alto)) {
@@ -465,9 +484,70 @@ export function componeEscena({
   }
 
   // ── 17 · entintado por nivel de conocimiento ────────────────────────────────
-  // Reservada vacía a propósito: cuando la fila 36 entregue las tres tintas, añade
-  // aquí su capa y sus claves de estilo en lugar de reabrir el orden.
+  // La capa que SPEC-021 dejó reservada nombrando a esta fila. Repasa lo ya pintado con
+  // **una de tres tintas y ninguna otra**, y no mete ni un texto: la diferencia se ve, y
+  // una leyenda convertiría el mapa ganado en un cuadro de mandos.
+  //
+  // Solo añade primitivas: el mundo pintado con las tres tintas y el mismo mundo pintado
+  // en marcha son idénticos capa a capa hasta aquí, que es lo que hace literal «entintar
+  // no resiembra ni mueve nada».
   capa('entintado');
+  if (telon && !Array.isArray(entintado)) {
+    throw new Error(
+      'componeEscena: el telón necesita el estado de conocimiento entintado (entintadoDelMundo(estado, { mapaId, mundo, ascensos })) ' +
+      'y no ha llegado ninguno: sin él pintaría el mapa entero con la tinta de lo no sabido y diría que no sabes nada',
+    );
+  }
+  if (Array.isArray(entintado)) {
+    const puntoDeNucleo = new Map();
+    const puntoDeServicio = new Map();
+    const puntoDeParaje = new Map();
+    for (const s of documento.settlements ?? []) {
+      puntoDeNucleo.set(s.name, s);
+      for (const v of s.services ?? []) if (v.x != null) puntoDeServicio.set(v.name, v);
+    }
+    for (const p of documento.parajes ?? []) puntoDeParaje.set(p.name, p);
+
+    for (const marca of entintado) {
+      const tinta = estilo.tintas?.[TINTA_DEL_ESTILO[marca.tinta]];
+      if (!tinta) {
+        throw new Error(
+          `componeEscena: el estilo "${estilo.id}" no declara la tinta "${marca.tinta}" (${Object.keys(TINTA_DEL_ESTILO).join(', ')}): ` +
+          'las tres tintas son datos del estilo y ningún color vive en el código de dibujo',
+        );
+      }
+      const trazo = pinta({ trazo: tinta.color, grosor: tinta.grosor, alfa: tinta.alfa, remate: 'round', union: 'round' });
+      const anillo = (p, r) => circulo(px(p).x, px(p).y, r, trazo);
+      const familia = marca.familia;
+      if (familia === 'nucleo') {
+        const s = puntoDeNucleo.get(marca.id);
+        if (s) anillo(s, (RADIO_DE_PUNTO[s.type] ?? 6) + 3.5);
+      } else if (familia === 'servicio') {
+        const v = puntoDeServicio.get(marca.id);
+        if (v) anillo(v, 6);
+      } else if (familia === 'paraje') {
+        const p = puntoDeParaje.get(marca.id);
+        if (p) anillo(p, 8);
+      } else if (familia === 'calzada') {
+        const r = (documento.routes ?? [])[Number(marca.id)];
+        if (r?.pts) lineaEnMetros(r.pts, trazo);
+      } else if (familia === 'costa') {
+        const c = (geo.coastlines ?? [])[Number(marca.id)];
+        if (c?.pts) lineaEnMetros(c.pts, trazo);
+      } else if (familia === 'bosque') {
+        const b = (geo.forests ?? [])[Number(marca.id)];
+        if (b?.pts) lineaEnMetros(b.pts, trazo, true);
+      } else if (familia === 'pico') {
+        const pk = (geo.peaks ?? [])[Number(marca.id)];
+        if (pk) anillo(pk, 4);
+      } else {
+        throw new Error(
+          `componeEscena: el entintado trae la familia "${familia}", que esta capa no sabe pintar: ` +
+          `las que se entintan son ${FAMILIAS_QUE_SE_ENTINTAN.join(', ')}`,
+        );
+      }
+    }
+  }
 
   // ── 18 · rótulos, todos, en una sola pasada ─────────────────────────────────
   capa('rotulos');
