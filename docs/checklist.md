@@ -61,13 +61,13 @@
 | 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | done |
 | 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done |
 | 35 | descarte-anclaje | RF-PRIV-004 | must | done |
-| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | wip |
+| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | done |
 
 ## B6 · Lo que queda en casa
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 37 | diario-consulta | RF-DIARIO-002, RF-DIARIO-003, RF-DIARIO-004 | must | pending |
+| 37 | diario-consulta | RF-DIARIO-002, RF-DIARIO-003, RF-DIARIO-004 | must | wip |
 | 38 | repisa-ajustes | RF-PROG-007, RF-PJ-010, RF-LANG-002 | must | pending |
 | 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | pending |
 | 40 | empezar-de-nuevo | RF-PERS-006 | must | pending |

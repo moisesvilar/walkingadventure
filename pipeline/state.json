@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-036",
+  "spec_actual": "SPEC-037",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -354,6 +354,16 @@
       "report": "test/reports/SPEC-035-run.md",
       "casos": "2163 casos: 2160 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado"
+    },
+    {
+      "spec": "SPEC-036",
+      "slug": "telon",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-036-run-20260809T202851Z.md",
+      "casos": "2230 casos: 2227 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujo",
+      "nota": "entrega la capa de conocimiento y el cierre de salida a todo o nada, que no tenian dueno."
     }
   ],
   "bloqueos": [],
@@ -398,6 +408,6 @@
     "casos": "1645: 1642 pasan, 0 fallan, 3 saltados",
     "app": "3 flujos escritos, 0 ejecutados"
   },
-  "bloque": "B5",
+  "bloque": "B6",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos."
 }
