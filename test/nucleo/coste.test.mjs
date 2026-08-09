@@ -14,7 +14,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { CUBOS_COSTE_LOTE, PARAMETROS, cargaConfig } from '../../server/config.mjs';
-import { RESULTADOS, RUTAS_MEDIDAS, UNIDAD_DE_COSTE } from '../../server/metrica.mjs';
+import { ESLABONES_MEDIDOS, RESULTADOS, RUTAS_MEDIDAS, UNIDAD_DE_COSTE } from '../../server/metrica.mjs';
+import { SUPERFICIE } from '../../server/superficie.mjs';
 import { pideTanda } from '../dobles/atestacion.mjs';
 import { creaReloj, DIA, HORA, MINUTO } from '../dobles/reloj.mjs';
 import { EJEMPLOS, montaProxy, peticionDe, todoLoEscrito } from '../dobles/proxy-ciego.mjs';
@@ -190,7 +191,18 @@ describe('La medición del coste, agregada y sin identidad', () => {
     }
 
     const dia = await proxy.metrica.delDia();
-    assert.deepEqual(Object.keys(dia).sort(), ['coste', 'contadores', 'degradadas', 'dia', 'lotes', 'peticiones'].sort());
+    // El criterio no es «seis campos» sino **nada que identifique**, y la diferencia se vio
+    // con SPEC-024: el recuento por eslabón del origen de datos es un campo más que la spec
+    // pide, y contarlo como intruso ponía en rojo una métrica que sigue sin decir quién,
+    // desde dónde ni qué zona. Lo que este caso afirma es que cada campo que hay es un
+    // agregado del día —y por eso la lista se compara con la superficie declarada, que es
+    // donde una escritura nueva tiene que darse de alta para poder existir—.
+    const declarados = SUPERFICIE.find((e) => e.entrada === 'metrica-del-dia').campos;
+    assert.deepEqual(Object.keys(dia).sort(), [...declarados].sort());
+    assert.deepEqual([...declarados].sort(), ['contadores', 'coste', 'degradadas', 'dia', 'eslabones', 'lotes', 'peticiones']);
+    // `eslabones` es cuántas generaciones sirvió cada origen, nunca dónde (SPEC-024).
+    assert.deepEqual(Object.keys(dia.eslabones), [...ESLABONES_MEDIDOS]);
+    assert.ok(Object.values(dia.eslabones).every((n) => Number.isInteger(n)));
     assert.deepEqual(Object.keys(dia.contadores).sort(), [...RUTAS_MEDIDAS].sort());
     for (const ruta of RUTAS_MEDIDAS) {
       assert.deepEqual(Object.keys(dia.contadores[ruta]).sort(), ['coste', ...RESULTADOS].sort(), ruta);
