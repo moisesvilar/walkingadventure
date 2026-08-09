@@ -15607,6 +15607,731 @@
       "caso": "Pueblo y paraje se distinguen sin leer el nombre",
       "hueco_de_bateria": true,
       "nota": "Propuesto por la spec y no escrito en docs/testing.md. Su mitad medible —jerarquía de tamaño, placa contra halo— sí está automatizada en test/nucleo/rotulos.test.mjs."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La superficie de escritura, declarada y cerrada: el proxy enumera su superficie completa, entrada por entrada, sin que haga falta leer su código.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El proxy enumera su superficie de escritura entera sin que haga falta leer su código",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La superficie de escritura, declarada y cerrada: comparada con lo que hay en el disco tras un mes de tráfico simulado, no hay ni una entrada que no esté declarada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Tras un mes de tráfico no hay ni una entrada fuera de la superficie declarada",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La superficie de escritura, declarada y cerrada: una entrada nueva que el código escribe y la declaración no contempla impide arrancar, y el error nombra la entrada no declarada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Una escritura que la declaración no contempla impide arrancar y el error nombra la entrada",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La superficie de escritura, declarada y cerrada: recorrida entrada por entrada, cada una dice de qué se deriva su clave y ninguna se deriva de quién llamó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Cada entrada de la superficie dice de qué deriva su clave y ninguna se deriva de quién llamó",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La superficie de escritura, declarada y cerrada: el proxy recién desplegado y sin una sola petición atendida lista su superficie vacía y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Un proxy recién desplegado lista su superficie de escritura vacía y no falla",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Notas técnicas: la superficie escrita tras el tráfico declarado es la que declara la tabla de seis entradas, y ninguna más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Tras el tráfico declarado, lo escrito es exactamente la superficie declarada y nada más",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: tras un mes de tráfico, recorrida entera la superficie, no aparece ninguna dirección IP.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El proxy no identifica a nadie",
+      "escenario": "El proxy no identifica a nadie",
+      "nota": "Bloqueante (RNF-DET-003). El caso afirma de una pieza los cuatro criterios de ausencia del bloque: IP, identificadores, cabeceras y partida."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: no aparece ningún identificador de instalación, ni de dispositivo, ni de sesión, ni ninguna cabecera del cliente.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El proxy no identifica a nadie",
+      "escenario": "El proxy no identifica a nadie"
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: dada una partida cualquiera, no hay ni un fragmento de ella en la superficie de escritura.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El proxy no identifica a nadie",
+      "escenario": "El proxy no identifica a nadie"
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: buscar cualquier endpoint que reciba sucesos del jugador no encuentra ninguno, y una petición a una ruta no declarada se rechaza sin escribir nada.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "No se reporta a ningún sitio",
+      "escenario": "No se reporta a ningún sitio",
+      "nota": "La batería lo afirma desde el cliente (que no sale la petición); aquí se afirma la otra mitad: que no hay ningún sitio al que reportar."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: la ubicación del jugador no queda escrita en el servidor, que es la otra mitad de la frase que SPEC-009 afirma sobre la partida.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: no aparece ninguna marca de tiempo con resolución menor que la ventana de agregación declarada.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Ninguna marca de tiempo escrita baja de la ventana de agregación declarada",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: no hay ninguna entrada por petición; nada crece a razón de una fila por llamada.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Ninguna entrada de la superficie crece a razón de una fila por llamada",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: dadas dos llamadas cualesquiera del mismo móvil separadas por un día, no hay nada escrito que las relacione.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "Nada de lo escrito relaciona dos llamadas del mismo móvil separadas por un día",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: provocado un error de aguas arriba, el diagnóstico escrito lleva la ruta, el tipo de fallo y nada del cuerpo de la petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El diagnóstico de un fallo de aguas arriba lleva la ruta y el tipo, y nada del cuerpo",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: en cualquier capa que sirva el proxy, el registro de conexiones está apagado y la configuración lo declara a propósito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/superficie.test.mjs",
+      "caso": "El registro de conexiones está apagado y la configuración lo declara a propósito",
+      "hueco_de_bateria": true,
+      "nota": "La superficie de escritura declarada: que existe, que se recorre, que un mes de tráfico no deja nada fuera y que una escritura sin declarar impide arrancar. No tiene ni una línea en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Lo que el proxy no escribe nunca: un fichero de caché recién escrito lleva como marca de tiempo la constante declarada, y dos ficheros escritos con un mes de diferencia no dicen cuál se escribió antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Un fichero de caché recién escrito lleva la marca de tiempo constante declarada",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: una instalación legítima que pide una tanda en la ruta de atestación presenta la evidencia de la plataforma y recibe fichas anónimas con la vigencia declarada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una instalación legítima recibe una tanda de fichas anónimas con la vigencia declarada",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: una llamada a cualquier ruta de contenido lleva una ficha y no lleva evidencia de plataforma, identificador de clave de atestación ni cabecera de cliente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una llamada a una ruta de contenido no admite ninguna evidencia de plataforma ni cabecera de cliente",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: la ruta de atestación no lleva ningún prompt, ningún place_id y ninguna coordenada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "La ruta de atestación no admite ningún prompt, ningún place_id y ninguna coordenada",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: dos fichas de la misma tanda no muestran que salieron de la misma tanda ni de qué atestación salieron.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Dos fichas de la misma tanda no muestran que salieron de la misma tanda ni de qué atestación",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: una ficha gastada se rechaza al volver a presentarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una ficha ya gastada se rechaza al volver a presentarla",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: una ficha caducada se rechaza y el error dice que hay que volver a atestar, sin decir nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una ficha caducada se rechaza diciendo que hay que volver a atestar, y nada más",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: una ficha falsificada se rechaza sin llegar a aguas arriba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una ficha falsificada se rechaza sin llegar a aguas arriba",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: lo que la ruta de atestación guarda para que una evidencia no se reutilice caduca en el plazo declarado, vive solo en su plano y no aparece en ninguna entrada de las rutas de contenido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una evidencia no vale dos veces: el reto se consume y caduca en el plazo declarado",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: en el plano de atestación no hay ningún contador por instalación ni ningún dato que sobreviva a la vigencia de la tanda; y a qué instalación se emitió una tanda el proxy no lo sabe, porque no lo guardó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "El plano de atestación no guarda ningún contador por instalación ni nada que sobreviva a la tanda",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: lo que persiste del plano de identidad es la lista de retos vivos y nada más que el reto (superficie: retos-vivos, campos vacíos y ventana nula).",
+      "nivel": "@red",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Un reto vivo no guarda nada más que el propio reto",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Las dos mitades del proxy: una evidencia falsificada o ausente no produce ninguna tanda, y el motivo del verificador no se propaga.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una evidencia falsificada o ausente no produce ninguna tanda",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: una llamada sin ficha válida que pide una imagen ya cacheada recibe la copia cacheada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Sin ficha válida, una imagen que ya está en la caché se sirve de la caché",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: una llamada sin ficha válida que pide una imagen no cacheada, o un texto del LLM, no hace ninguna llamada de pago aguas arriba y se responde que no hay.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Sin ficha válida no se hace ninguna llamada de pago y se responde que no hay",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: con un dispositivo rooteado, un emulador o un sistema que la atestación no cubre, se juega una salida entera de principio a fin.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una salida entera se completa sin ninguna atestación válida",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: agotada la cuota diaria de la vía sin atestación, deja de responder y el juego sigue comportándose como sin cobertura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Cuando la cuota de la vía sin atestación se agota, deja de responder y el juego sigue igual",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: el gasto aguas arriba imputable a la vía sin atestación durante un día entero es cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Una salida entera se completa sin ninguna atestación válida",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: no se escribe en ninguna parte que la atestación falló para nadie en concreto; solo suma en el contador agregado del día.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "De una llamada sin atestación sólo queda el contador agregado del día",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Cuando la atestación falla: el cliente que recibe «no hay» de cualquier ruta de contenido se comporta igual que sin cobertura, con textos de plantilla y sin ninguna pantalla que mencione la red ni la atestación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/atestacion.test.mjs",
+      "caso": "Sin ficha válida no se hace ninguna llamada de pago y se responde que no hay",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "La mitad servidor: «no hay» llega con el mismo código de éxito y sin campo de error, que es lo que impide al cliente distinguir esto de estar sin cobertura. La mitad cliente ya está viva en test/nucleo/sin-red.test.mjs."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "El sobre, la ruta y el esquema cerrado: un cuerpo con un campo que el esquema de esa ruta no declara se rechaza nombrando el campo y no se llama a aguas arriba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Un campo que el esquema de la ruta no declara se rechaza nombrándolo y no llega a aguas arriba",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "El sobre, la ruta y el esquema cerrado: la petición de texto admite el prompt de ficción, el idioma y el tono; la de imagen el prompt y el formato; la de foto un place_id; la de generación la consulta de celda. Ningún campo más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "El esquema de cada ruta admite lo que la spec declara y ningún campo más",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "El sobre, la ruta y el esquema cerrado: el esquema cerrado de la ruta de texto rechaza cualquier campo no declarado, que es la segunda red del prompt sin datos reales.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real",
+      "nota": "La batería lo afirma sobre el contenido del prompt (SPEC-018, narrador.test.mjs). Aquí se afirma la red del servidor: un nombre real, una dirección, un id de OSM o de Places y una coordenada no tienen por dónde entrar."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de generación: la ruta de generación es la única que ve las coordenadas, ninguna otra las admite en su esquema y no quedan escritas en ninguna entrada de la superficie ni en la métrica.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa"
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "El sobre, la ruta y el esquema cerrado: cualquier respuesta de cualquier ruta comparte la misma forma de sobre: qué se pide, si viene de caché, y el contenido o la declaración de que no hay.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Las cuatro rutas comparten la misma forma de sobre",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "El sobre, la ruta y el esquema cerrado: la misma petición dos veces da dos respuestas idénticas salvo en la marca de acierto de caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "La misma petición dos veces devuelve la misma respuesta salvo en la marca de acierto de caché",
+      "hueco_de_bateria": true,
+      "nota": "La separación de los dos planos: que la ruta de atestación no ve ficción, que las de contenido no ven plataforma y que dos fichas no se pueden enlazar. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "El sobre, la ruta y el esquema cerrado: el sobre del doble del proxy que entregó SPEC-001 y el del proxy real coinciden campo a campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "El sobre del proxy real coincide campo a campo con el del doble del andamiaje",
+      "escenario": "El doble del proxy responde lo mismo a la misma petición",
+      "nota": "La spec cierra la convención que el fixture del andamiaje llevaba abierta desde SPEC-001; el caso compara la forma del contenido de las tres categorías del fixture con la que devuelve el proxy real."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: la clave de una petición de imagen sale del resumen del prompt de ficción normalizado y de los parámetros de formato, y de nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "La clave de una imagen sale del prompt normalizado y del formato, y de nada más",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: la clave de una petición de foto es el place_id y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "La clave de una foto es el place_id y nada más",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: una clave de caché elegida por el cliente se ignora y la deriva el proxy del contenido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Una clave de caché elegida por el cliente se ignora y la deriva el proxy del contenido",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: el mismo prompt de ficción pedido por dos móviles distintos se sirve de la caché la segunda vez y no llega a aguas arriba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "La clave de una imagen sale del prompt normalizado y del formato, y de nada más",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: una entrada de la caché de imágenes contiene el binario y la clave derivada, y ni un dato de quién la pidió, cuántas veces ni cuándo.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Una entrada de la caché de imágenes lleva el binario y la clave derivada, y ni un dato de quién la pidió",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: una entrada de la caché de fotos contiene el binario y la atribución que exige Places, y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Una entrada de la caché de fotos lleva el binario y la atribución que exige Places, y nada más",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: dos peticiones simultáneas del mismo prompt sin acierto de caché hacen una sola llamada de pago y las dos reciben el mismo contenido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Dos peticiones simultáneas del mismo prompt hacen una sola llamada de pago",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: una entrada que aguas arriba no llegó a devolver no deja ninguna entrada negativa que se pueda enumerar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Una llamada que aguas arriba no llegó a devolver no deja ninguna entrada negativa que enumerar",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: un texto del LLM no se cachea; se guarda con la partida en el móvil y el proxy no lo conserva.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Un texto del LLM no se cachea en el servidor",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: no existe ninguna ruta que enumere la caché, la liste o la cuente por zonas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "No existe ninguna ruta que enumere la caché, la liste o la cuente por zonas",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de lo inerte: el proxy sirve el lote entero de fotos por place_id y las cachea por sitio, que es lo que hace posible pedirlas todas al crear el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Las fotos de Places se piden al crear el mapa",
+      "escenario": "Las fotos de Places se piden al crear el mapa",
+      "nota": "La mitad servidor. Que el cliente no vuelva a pedirlas es de SPEC-009, que las congela con la partida."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de generación: con la configuración por defecto no se escribe ninguna respuesta de generación en ninguna caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Con la configuración por defecto no se escribe ninguna respuesta de generación en ninguna caché",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de generación: activada a propósito, la entrada se escribe con la clave declarada, sin marca de tiempo, sin contador de aciertos y con la marca del sistema de ficheros normalizada.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Con la caché de generación encendida, la entrada se escribe sin marca de tiempo y sin contador de aciertos",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de generación: recorrida entera, cada entrada dice de qué zona es y ninguna dice cuándo se pidió, cuántas veces ni por cuántos; lo único que añade es que alguien, alguna vez, generó un mapa en esa zona.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "Lo único que la caché de generación añade es que alguien, alguna vez, generó un mapa en esa zona",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de generación: el documento de despliegue declara esa consecuencia con esas palabras, en lugar de prometer que la caché no dice nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cache.test.mjs",
+      "caso": "El documento de despliegue declara la consecuencia de encender la caché de generación con esas palabras",
+      "hueco_de_bateria": true,
+      "nota": "La caché como oráculo: sin marca de tiempo dentro ni en el sistema de ficheros, sin contador de aciertos, sin entradas negativas y sin enumeración. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La caché de generación: la métrica del día solo tiene un recuento de generaciones, sin ninguna geografía.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: la métrica de un día tiene recuentos por ruta, por resultado y coste imputado, y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "La métrica de un día son recuentos por ruta y por resultado, coste imputado y nada más",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: la unidad «jugador» no existe; la unidad es el lote de trabajo y los lotes no se atribuyen a nadie.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "La unidad de la métrica es el lote de trabajo y no existe la unidad jugador",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: un lote de mapa completo suma su coste en el histograma de coste por lote de mapa, en cubos declarados, y un lote de salida en el suyo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "El coste de un lote completo suma en el histograma de su tipo, en cubos declarados",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: no existe ninguna serie temporal más fina que el día.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "De la métrica no se puede sacar ninguna serie más fina que el día",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: un día sin una sola petición tiene todos los contadores a cero y no le falta ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Un día sin una sola petición tiene todos los contadores a cero y no le falta ninguno",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: del histograma de coste por lote no se puede reconstruir la secuencia de lotes de un móvil, porque los cubos son agregados y no guardan orden.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Del histograma de coste por lote no se reconstruye la secuencia de lotes de un móvil",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "La medición del coste: preguntado cuánto cuesta un mapa nuevo, se responde con el coste medio y la dispersión por lote de mapa, medidos y no estimados; preguntado cuánto cuesta un jugador, la respuesta se declara modelo con sus dos factores medidos y su factor de uso supuesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "El coste por mapa se responde medido y el coste por jugador se responde declarado como modelo",
+      "hueco_de_bateria": true,
+      "nota": "La medición de coste sin identidad: que la métrica no baja del día, que no hay unidad de jugador y que del histograma no se reconstruye ninguna secuencia. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: sin un tope diario de gasto declarado en su configuración, el proxy no arranca y el error dice que falta el tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "El proxy no arranca sin un tope diario de gasto declarado en su configuración",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: un lote de mapa que supera el tope de llamadas de pago por lote recibe «no hay» en las siguientes y no se corta a la mitad para el jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Un lote de mapa que se pasa de su tope de llamadas de pago no se corta a la mitad para el jugador",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: un lote de salida que supera su tope se comporta igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Un lote de salida que se pasa de su tope se comporta igual",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: agotado el tope diario global, todas las rutas de contenido responden «no hay», los aciertos de caché siguen sirviéndose y no se hace ninguna llamada de pago más ese día.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Con el tope diario agotado todas las rutas responden que no hay y los aciertos de caché siguen sirviéndose",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: con el tope diario agotado, el jugador completa una salida entera de principio a fin con textos de plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Con el tope diario agotado, una salida entera se completa de principio a fin",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "La mitad servidor: el presupuesto agotado termina en el mismo «no hay» que la falta de cobertura, que es lo que este escenario ya cubre desde el cliente."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: el identificador de lote deja de servir al caducar su vigencia y en ningún momento se escribe en la superficie de escritura.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "El identificador de lote caduca y en ningún momento se escribe en la superficie",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: una llamada con un identificador de lote que no existe se trata como un lote nuevo con su tope entero y no se registra el intento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Un identificador de lote que no existe se trata como un lote nuevo y el intento no se registra",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Los topes y el presupuesto: un bucle del cliente que repite la misma petición mil veces lo corta el tope por lote antes de que llegue a aguas arriba mil veces.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/coste.test.mjs",
+      "caso": "Un bucle del cliente que repite la misma petición se corta por el tope del lote",
+      "hueco_de_bateria": true,
+      "nota": "Los topes y el presupuesto: que el proxy no arranca sin tope diario, que un bucle se corta por lote y que agotar el presupuesto se comporta como quedarse sin cobertura. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: con el proveedor de texto caído se responde «no hay» y el cliente cae a plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Con el proveedor de texto caído se responde que no hay y el cliente cae a plantilla",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: con el proveedor de imágenes caído, una imagen que sí está en la caché se sirve de la caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Con el proveedor de imágenes caído, una imagen que sí está en la caché se sirve de la caché",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: con Places caído se responde «no hay» y el visor abre con la cartela sobre fondo liso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Sin foto de Places, el visor abre igual",
+      "escenario": "Sin foto de Places, el visor abre igual",
+      "nota": "La mitad servidor: el «no hay» de la ruta de fotos es una de las formas de llegar a ese escenario."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: un proveedor que tarda más que el plazo declarado se corta, se responde «no hay» y no se escribe ninguna llamada a medias en la caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Un proveedor que se pasa del plazo declarado se corta y no deja ninguna llamada a medias en la caché",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Notas técnicas: el plazo máximo de aguas arriba (ESPERA_MAXIMA_AGUAS_ARRIBA) lo aplica el cliente real, no el proveedor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "El plazo máximo de aguas arriba lo corta el cliente real y no el proveedor",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: un proveedor que devuelve algo que no encaja en el esquema de su ruta no se cachea y se responde «no hay».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "Un proveedor que devuelve algo fuera del esquema de su ruta no se cachea y responde que no hay",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: de un fallo de aguas arriba queda un contador agregado del día y ningún cuerpo, ninguna clave y ningún prompt.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "De un fallo de aguas arriba queda un contador agregado y ningún cuerpo, clave ni prompt",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-023",
+      "criterio": "Aguas arriba caído: las claves de los proveedores no aparecen en ninguna respuesta, en ningún mensaje de error ni en la superficie de escritura.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/proxy.test.mjs",
+      "caso": "La clave de un proveedor no aparece en ninguna respuesta, ningún error ni la superficie de escritura",
+      "hueco_de_bateria": true,
+      "nota": "La política cuando la atestación falla: acierto de caché sí, llamada de pago no, salida entera completable. Sin escenario en la batería."
     }
   ]
 }
