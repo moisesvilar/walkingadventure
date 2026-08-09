@@ -66,9 +66,39 @@ function exigePresupuesto(ms, nombre) {
   return ms;
 }
 
+/**
+ * Las listas blancas **cerradas** del contenido que puede volver, por ruta.
+ *
+ * Son la copia declarada de lo que el proxy deja pasar —la entrada de caché de imágenes
+ * de `server/superficie.mjs` y lo que devuelve `server/aguas-arriba/places.mjs`—, que esta
+ * mitad no puede importar por la misma razón que no puede importar `server/config.mjs`.
+ *
+ * Cerradas y no «que estén los obligatorios»: comprobar solo lo obligatorio deja pasar una
+ * respuesta con una URL de Places dentro, y lo que se guarda en el almacén es el contenido
+ * **entero**. La URL de Places caduca y no puede vivir en el dispositivo, así que un campo
+ * de más no es ruido: es exactamente lo que el esquema cerrado viene a impedir.
+ */
+export const CAMPOS_DE_CONTENIDO_DE_IMAGEN = Object.freeze(['formato', 'ancho', 'alto', 'datos_base64']);
+export const CAMPOS_DE_CONTENIDO_DE_FOTO = Object.freeze(['foto']);
+export const CAMPOS_DE_FOTO = Object.freeze(['referencia', 'atribucion', 'ancho', 'alto']);
+
+/**
+ * Comprueba un objeto contra una lista blanca cerrada. Devuelve el primer campo de más.
+ *
+ * Es el mismo mecanismo que `campoDeMas` de `server/proxy.mjs` y con el mismo nombre a
+ * propósito: allí criba lo que **entra** y aquí lo que **vuelve**, y las dos mitades del
+ * esquema cerrado tienen que poder leerse como una sola.
+ */
+function campoDeMas(objeto, permitidos) {
+  if (objeto === null || objeto === undefined) return null;
+  if (typeof objeto !== 'object' || Array.isArray(objeto)) return '(no es un objeto)';
+  return Object.keys(objeto).find((c) => !permitidos.includes(c)) ?? null;
+}
+
 /** El contenido de una imagen, tal como lo declara la ruta de imagen del proxy. */
 function imagenValida(contenido) {
   if (!contenido || typeof contenido !== 'object') return null;
+  if (campoDeMas(contenido, CAMPOS_DE_CONTENIDO_DE_IMAGEN)) return null;
   if (typeof contenido.datos_base64 !== 'string' || !contenido.datos_base64) return null;
   if (typeof contenido.formato !== 'string') return null;
   if (!Number.isInteger(contenido.ancho) || !Number.isInteger(contenido.alto)) return null;
@@ -79,6 +109,8 @@ function imagenValida(contenido) {
 function fotoValida(contenido) {
   const foto = contenido && contenido.foto;
   if (!foto || typeof foto !== 'object') return null;
+  if (campoDeMas(contenido, CAMPOS_DE_CONTENIDO_DE_FOTO)) return null;
+  if (campoDeMas(foto, CAMPOS_DE_FOTO)) return null;
   if (typeof foto.referencia !== 'string' || !foto.referencia) return null;
   if (typeof foto.atribucion !== 'string' || !foto.atribucion) return null;
   if (!Number.isInteger(foto.ancho) || !Number.isInteger(foto.alto)) return null;

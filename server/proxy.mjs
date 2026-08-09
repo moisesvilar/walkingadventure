@@ -71,8 +71,14 @@ function sobre(tipo, { hay = false, deCache = false, contenido = null, error = n
   return s;
 }
 
-/** Comprueba un objeto contra una lista blanca cerrada. Devuelve el primer campo de más. */
-function campoDeMas(objeto, permitidos) {
+/**
+ * Comprueba un objeto contra una lista blanca cerrada. Devuelve el primer campo de más.
+ *
+ * Se exporta porque no es solo del proxy: el conseguidor de recursos criba con este mismo
+ * mecanismo lo que **vuelve**, y una segunda implementación sería la manera conocida de
+ * que una de las dos se quede sin cerrar.
+ */
+export function campoDeMas(objeto, permitidos) {
   if (objeto === null || objeto === undefined) return null;
   if (typeof objeto !== 'object' || Array.isArray(objeto)) return '(no es un objeto)';
   return Object.keys(objeto).find((c) => !permitidos.includes(c)) ?? null;

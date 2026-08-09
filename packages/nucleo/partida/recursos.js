@@ -477,9 +477,23 @@ export function lugaresParaIlustrar({ aventura, recursos = null, tope = TOPE_ILU
 export function planDeIlustraciones({ aventura, mundo, locale, recursos = null, tope = TOPE_ILUSTRACIONES_SALIDA, formato = FORMATO_DE_ILUSTRACION, datosReales = null }) {
   const plan = lugaresParaIlustrar({ aventura, recursos, tope });
   const reales = datosReales ?? datosRealesDeMundo(mundo);
-  const porClave = new Map(elementosIlustrables(mundo).map((e) => [claveDeElemento(e.type ?? e.tipo, e.name ?? e.nombre), e]));
+  // El índice va **por nombre de fantasía** y no por la clave del reparto, y no es un
+  // detalle: la clave del reparto lleva el rol del casting —`paraje`, `nucleo`— y el
+  // elemento del mundo lleva su tipo del vocabulario del juego —`ruina`, `aldea`—, así
+  // que un índice por `tipo:nombre` no acierta **nunca** y todos los prompts saldrían del
+  // elemento de repuesto, sin escena y sin rasgo. Indexar por nombre es legítimo por la
+  // misma razón que lo es `claveDeElemento`: los nombres son únicos dentro de un mundo, y
+  // lo garantiza el índice de nombres.
+  const porNombre = new Map();
+  for (const e of elementosIlustrables(mundo)) {
+    const nombre = e.name ?? e.nombre ?? null;
+    if (nombre && !porNombre.has(nombre)) porNombre.set(nombre, e);
+  }
   const lote = plan.lote.map((entrada) => {
-    const elemento = porClave.get(entrada.clave) ?? { type: entrada.tipo, name: entrada.nombre };
+    // El repuesto es para los lugares que no están en este mundo —un reparto sintético, o
+    // una aventura de otra celda—: sale con el rol por tipo y sin escena, que es lo poco
+    // que se puede decir de un lugar del que no se tiene el elemento.
+    const elemento = porNombre.get(entrada.nombre) ?? { type: entrada.tipo, name: entrada.nombre };
     const prompt = promptDeIlustracion({ elemento, locale, datosReales: reales });
     return {
       clave: entrada.clave,

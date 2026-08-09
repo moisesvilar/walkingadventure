@@ -30,12 +30,15 @@ export const MOTIVOS_DE_APERTURA = ['pisada', 'acontecimiento'];
  *   dos vías se abre; `consultaOsm({ celda, limites, margenM })` la consulta de
  *   datos inyectada —el llamante decide caché y red—; `demanda` cuántos anclajes
  *   pide la celda, inyectada y opcional; `places` la fuente de relleno ya
- *   descargada, también opcional; `onStatus` se pasa tal cual
+ *   descargada, también opcional; `placesActivo` el interruptor de SPEC-025, que
+ *   apagado tiene que dejar la celda idéntica a la que se genera sin fuente de
+ *   relleno —por eso se acepta aquí y se reenvía, en vez de quedarse en el pool
+ *   donde nadie podía alcanzarlo—; `onStatus` se pasa tal cual
  *   a la tubería; `tramoM` el tramo de quien juega **hoy**, con el que se
  *   dimensionan los cupos de esta celda y solo de esta.
  * @returns el registro de la celda, congelado.
  */
-export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'pisada', consultaOsm, demanda = null, places = null, onStatus, tramoM }) {
+export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'pisada', consultaOsm, demanda = null, places = null, placesActivo = true, onStatus, tramoM }) {
   if (!rejilla) throw new Error('generaCelda necesita la rejilla del mapa');
   exigeCelda(celda);
   const semillaPartida = exigeSemilla(semilla);
@@ -89,6 +92,7 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
     // La fuente de relleno es opcional y su ausencia es el caso normal: sin ella la
     // celda se genera igual y queda registrada como generada sin relleno.
     ...(places ? { places } : {}),
+    placesActivo,
     ...(onStatus ? { onStatus } : {}),
   });
 

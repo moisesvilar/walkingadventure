@@ -74,6 +74,10 @@ export function demandaDeAnclajes(radius, cupoParajes = null) {
  * los cupos son de `cupos.js` y duplicarlos aquí garantizaría que las dos copias se
  * desincronicen. `places` es la fuente de relleno, **opcional**: su ausencia es un
  * caso normal y el mundo se genera igual, solo que con el pool de OSM.
+ * `placesActivo` es el interruptor de SPEC-025 y se reenvía tal cual al pool: apagado
+ * tiene que dar el mismo mundo que no haber ofrecido fuente de relleno, así que el
+ * interruptor **viaja hasta abajo** en vez de quedarse en el pool, que es donde nadie
+ * podía alcanzarlo desde la generación de una celda.
  *
  * `radioEnTramos` es el alcance de la celda medido en tramos, con el que se calcula
  * el techo de parajes por ritmo. Lo trae la **geometría de la rejilla**, que no se
@@ -85,7 +89,7 @@ export function demandaDeAnclajes(radius, cupoParajes = null) {
  * plantillas hasta que exista el catálogo de verdad. Orquestar es pasarlo; la fase
  * de parajes no lo importa.
  */
-export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = null, places = null, radioEnTramos = null, vocabulario = null, onStatus = async () => {} }) {
+export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = null, places = null, placesActivo = true, radioEnTramos = null, vocabulario = null, onStatus = async () => {} }) {
   // El núcleo no llama a la red por su cuenta: si nadie le inyecta `fetchData`,
   // el fallo tiene que decirlo por su nombre y antes de empezar. Con la frontera
   // ya comprobable, un TypeError a mitad de la primera fase esconde el motivo.
@@ -166,6 +170,7 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     // sabría cuánto le toca cubrir.
     demanda: demanda ?? demandaDeAnclajes(radius, cupoDeParajes),
     places,
+    placesActivo,
     seaMask,
   });
   const anchors = pool.anclajes;
