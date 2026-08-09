@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-024",
+  "spec_actual": "SPEC-025",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -238,6 +238,16 @@
       "casos": "1488 casos: 1485 pasan, 0 fallan, 3 saltados",
       "app": "sin dispositivo",
       "nota": "defecto @privacidad corregido: el reto guardaba instante en ms; y la comprobacion de arranque pasa a validar campos, no solo entradas."
+    },
+    {
+      "spec": "SPEC-024",
+      "slug": "overpass-produccion",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-024-run.md",
+      "casos": "1535 casos: 1532 pasan, 0 fallan, 3 saltados",
+      "app": "sin dispositivo",
+      "nota": "minuto medido: urbano-denso p95 1663 ms sobre 20 s. Sexta aparicion de 6h: overpass-medir.mjs sin guardian, corregido."
     }
   ],
   "bloqueos": [],
