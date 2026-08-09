@@ -1,0 +1,42 @@
+# @app @accesibilidad — El gancho para poner una capacidad en rojo (SPEC-020).
+#
+# Es lo que hace que «la app funciona aunque falten» se pueda poner ROJO en lugar
+# de afirmarse: se fuerzan capacidades a ausentes por enlace profundo y se
+# comprueba que la app sigue en pie y lo declara. El gancho no escribe nada, así
+# que al relanzar sin enlace las capacidades vuelven a su estado real.
+#
+# Solo corre en una compilación de desarrollo: en producción el enlace es inerte.
+
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+# Los tres degradables a la vez, que es el caso que de verdad importa.
+- openLink: 'walkingadventure://andamiaje?ausentes=haptico,notificaciones,respaldo'
+
+- assertVisible:
+    id: 'pantalla-andamiaje'
+- assertVisible:
+    id: 'capacidades'
+- assertVisible: 'Háptico — no montada'
+- assertVisible: 'Notificaciones — no montada'
+- assertVisible: 'Respaldo — no montada'
+- assertVisible: '.*ausente por el gancho de andamiaje.*'
+
+# Ninguna parte de la pantalla queda vacía por ello: el título sigue ahí.
+- assertVisible:
+    id: 'titulo-de-mundo'
+
+# Un nombre que no es ninguna de las cuatro no cambia nada y se dice cuál fue.
+- openLink: 'walkingadventure://andamiaje?ausentes=telepatia'
+- assertVisible:
+    id: 'gancho-no-reconocido'
+- assertVisible: '.*No reconozco la capacidad «telepatia».*'
+
+# Al relanzar sin enlace, el estado real vuelve: el gancho no persiste nada.
+- launchApp:
+    clearState: false
+- assertVisible:
+    id: 'capacidad-haptico'
+- assertNotVisible: '.*ausente por el gancho de andamiaje.*'

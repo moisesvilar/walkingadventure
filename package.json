@@ -1,0 +1,14 @@
+{
+  "name": "walkingadventure",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Walking Adventure: espacio de trabajo con la app de Expo, el núcleo compartido y el prototipo web.",
+  "workspaces": [
+    "app",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Walking Adventure",
+    "slug": "walkingadventure",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "walkingadventure",
+    "ios": {
+      "bundleIdentifier": "com.walkingadventure.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.walkingadventure.app",
+      "allowBackup": true,
+      "edgeToEdgeEnabled": true
+    }
+  }
+}

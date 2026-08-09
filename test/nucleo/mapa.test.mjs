@@ -25,7 +25,8 @@ import {
   resuelvePosicion,
 } from '../../packages/nucleo/partida/mapa.js';
 import { celdaEnPosicion, celdasContiguas, limitesDeCelda } from '../../packages/nucleo/world/rejilla.js';
-import { STYLES, getStyle } from '../../app/js/render/styles.js';
+// Los estilos son del prototipo web, que SPEC-020 mudó de app/ a prototipo/.
+import { STYLES, getStyle } from '../../prototipo/js/render/styles.js';
 import { creaInspectorDeRed } from '../dobles/inspector-red.mjs';
 import {
   SEMILLA_A,

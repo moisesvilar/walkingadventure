@@ -72,7 +72,36 @@ function plantaBinDeMentira(caja, { salidaTest = null, codigoTest = 0, registro 
   chmodSync(join(bin, 'node'), 0o755);
 
   if (conMaestro) {
-    writeFileSync(join(bin, 'maestro'), `#!/bin/sh\n${anota}exit 0\n`);
+    // El maestro de mentira DEJA SU INFORME JUNIT, y no es un detalle: desde que
+    // el runner distingue los tres estados de @app, una salida sin informe
+    // reconocible ya no es un flujo verde sino «no se pudo ejecutar», y con ella
+    // el veredicto entero vale 2. Un maestro que solo hace `exit 0` dejó de ser un
+    // maestro que ejecutó algo, así que aquí escribe el informe que afirma que sí.
+    const junit = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<testsuites>',
+      '  <testsuite name="flujos del sandbox" tests="1" failures="0">',
+      '    <testcase name="Un flujo de ejemplo del andamiaje que pasa"/>',
+      '  </testsuite>',
+      '</testsuites>',
+      '',
+    ].join('\n');
+    writeFileSync(join(bin, 'informe-maestro.xml'), junit);
+    writeFileSync(
+      join(bin, 'maestro'),
+      [
+        '#!/bin/sh',
+        anota.trimEnd(),
+        'SALIDA=""',
+        'while [ $# -gt 0 ]; do',
+        '  if [ "$1" = "--output" ]; then SALIDA="$2"; fi',
+        '  shift',
+        'done',
+        `[ -n "$SALIDA" ] && cat ${sh(join(bin, 'informe-maestro.xml'))} > "$SALIDA"`,
+        'exit 0',
+        '',
+      ].join('\n'),
+    );
     chmodSync(join(bin, 'maestro'), 0o755);
   }
 
