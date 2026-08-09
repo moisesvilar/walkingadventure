@@ -49,7 +49,11 @@ function separacion(toques) {
  *   `levantamiento` la orquestación, ya cableada; `enlace` el enlace con Skia;
  *   `cronometro` el que mide el minuto; `tamano` el hueco de la lámina; `punto` la
  *   coordenada confirmada; `semilla` la de la partida; `tramoM` el tramo declarado;
- *   `estilo` cómo se pinta; `mapaId` el mapa ya levantado que hay que abrir, si lo hay.
+ *   `estilo` cómo se pinta; `mapaId` el mapa ya levantado que hay que abrir, si lo hay;
+ *   `arrancaSolo` si el levantamiento empieza sin que nadie pulse nada, que es lo que
+ *   necesita A1P5 —ahí ya se pulsó «Generar aquí» en la pantalla anterior—;
+ *   `alMomento` un aviso de cada cambio de momento, para que quien la monta dentro de
+ *   un flujo sepa cuándo pasar de pantalla sin tener que adivinarlo.
  */
 export function PantallaMapa({
   levantamiento,
@@ -62,6 +66,8 @@ export function PantallaMapa({
   estilo = ESTILO_POR_DEFECTO,
   factorTexto = 1,
   mapaId = null,
+  arrancaSolo = false,
+  alMomento = null,
 }) {
   const [momento, setMomento] = useState(mapaId ? 'levantando' : 'sin-mapa');
   const [resultado, setResultado] = useState(null);
@@ -115,6 +121,25 @@ export function PantallaMapa({
       setMomento('no-se-pudo');
     }
   }, [levantamiento, punto, semilla, tramoM, tamano, estilo, factorTexto]);
+
+  /**
+   * El levantamiento que empieza solo. Es lo que A1P5 necesita: allí la acción ya se
+   * pulsó en la pantalla anterior, y enseñar otro botón sería pedir dos veces lo
+   * mismo. Corre una sola vez por montaje —de ahí la referencia— porque levantar es
+   * irreversible y un repintado no puede volver a dispararlo.
+   */
+  const yaArranco = useRef(false);
+  useEffect(() => {
+    if (!arrancaSolo || mapaId || yaArranco.current) return;
+    yaArranco.current = true;
+    levanta();
+  }, [arrancaSolo, mapaId, levanta]);
+
+  // Quien monta esta pantalla dentro de un flujo necesita saber cuándo cambia el
+  // momento; adivinarlo mirando la lámina sería adivinar.
+  useEffect(() => {
+    if (alMomento) alMomento(momento, resultado);
+  }, [momento, resultado, alMomento]);
 
   /**
    * El enlace con el pintado medido. Se envuelve `creaCuadro` y nada más: es la

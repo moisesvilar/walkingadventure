@@ -176,6 +176,29 @@ export const es = {
    * tenga el mapa. Se resuelve sin azar a propósito, para que desempatar no consuma
    * el azar de la cara y dos generaciones desempaten igual.
    */
+  /**
+   * El repertorio de nombres propios de un género, **sin epíteto y sin sortear**.
+   *
+   * Es lo que consume el sorteo de sugerencias del arranque (SPEC-027), y hace falta
+   * aparte de `personName` porque aquella devuelve nombres compuestos —«Elvira la
+   * Zurda»— que sirven para poblar un mundo y no para proponerle un nombre a quien
+   * juega. Sacarlos de ahí obligaría a recortar la cadena por el espacio, y entonces
+   * cambiar el formato de un epíteto rompería la pantalla del arranque.
+   *
+   * Devuelve la lista entera, para que quien sortea pueda **garantizar que no
+   * repite** en vez de reintentar a ciegas.
+   */
+  personNames(genero) {
+    const nombres = NOMBRES_DE_PERSONA[genero];
+    if (!nombres) {
+      throw new Error(
+        `el paquete de idioma "es" no tiene repertorio de nombres de persona para el género ${JSON.stringify(genero) ?? String(genero)}: ` +
+        `los que declara son ${Object.keys(NOMBRES_DE_PERSONA).join(', ')}`,
+      );
+    }
+    return nombres.slice();
+  },
+
   personName(rng, genero, { base = null, intento = 0 } = {}) {
     const nombres = NOMBRES_DE_PERSONA[genero];
     const epitetos = EPITETOS_DE_PERSONA[genero];

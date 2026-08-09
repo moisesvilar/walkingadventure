@@ -1,0 +1,278 @@
+# @app — El arranque dentro del móvil (SPEC-027).
+#
+# Aquí vive **solo lo que necesita dispositivo**: que las siete pantallas se monten en
+# orden de verdad, que la flecha de atrás exista en las cinco que la llevan y no en las
+# dos últimas, que el pin se pueda arrastrar con el dedo, que el diálogo del sistema
+# aparezca al pulsar «Permitir», y que la pantalla de generación no enseñe ninguna
+# cifra. Todo lo demás de esta fila —la secuencia, el precubierto, la reanudación, el
+# sorteo de nombres, el filtro del escrito a mano, la permanencia del oficio, el
+# anclaje redondeado, los ajustes de origen y el guion entero— se afirma en
+# `test/nucleo/onboarding.test.mjs` y `test/nucleo/personaje.test.mjs`, que corren sin
+# simulador. Duplicar aquí lo que ya se puede poner rojo en Node solo añadiría un flujo
+# lento que se cae por el entorno.
+#
+# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
+# Android, así que ningún flujo `@app` se puede correr aquí
+# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
+# registra como infraestructura ausente, nunca como verde.
+#
+# **Lo que este flujo necesita para pasar**: la app montada por `ArranqueMontado`, el
+# proxy alcanzable desde el simulador (`EXPO_PUBLIC_PROXY`) con el Overpass del
+# proyecto detrás, y una instalación limpia — el arranque solo se recorre entero la
+# primera vez.
+#
+# **Lo que este flujo NO puede comprobar todavía, y por qué:**
+#
+# - **El diálogo del sistema al pulsar «Permitir».** Esta entrega no trae módulo nativo
+#   de ubicación —ninguna spec ha nombrado la dependencia—, así que «Permitir» sale
+#   apagado con su motivo al lado y el diálogo no existe. Los pasos van escritos bajo
+#   `runFlow` con condición, para que el día que la dependencia entre no haya que
+#   reescribir el flujo. Que la vía manual queda entera sí se recorre aquí.
+# - **Denegar en el diálogo nativo, en las dos plataformas.** Ningún automatismo lo
+#   provoca de forma fiable: es `@manual`, y así lo declara la spec.
+# - **El mapa real de A1P4.** No hay capa de teselas —misma razón—, así que la
+#   superficie declara `sin-mapa-real`. Lo que sí se ejercita es el gesto: la marca y
+#   el círculo se pintan encima y son de la pantalla, no de ninguna librería.
+#
+# Los elementos se localizan por los identificadores que declara la spec —`arranque`,
+# `arranque-paso`, `nombre-campo`, `oficio-<id>`, `tramo-<id>`, `permiso-a-mano`,
+# `punto-pin`, `punto-generar`, `generacion-fases`, `primera-lista`— y nunca por su
+# posición en pantalla.
+
+# El caso, tal y como lo cita `test/spec-test-map.json`:
+#   «El arranque recorre las siete pantallas en orden en el dispositivo»
+#
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    id: 'arranque'
+- assertNotVisible:
+    id: 'arranque-sin-cablear'
+
+# El momento del sistema de diseño: antes de salir. La pantalla está permitida y se
+# puede leer, elegir y esperar.
+- assertVisible:
+    id: 'momento-antes-de-salir'
+
+# ── A1P1 · Quién eres ──────────────────────────────────────────────────────────
+- assertVisible:
+    id: 'arranque-paso'
+- assertVisible:
+    id: 'arranque-contador'
+- assertVisible: '1/5'
+- assertVisible:
+    id: 'arranque-atras'
+
+# El campo llega relleno y las cuatro sugerencias están a la vista, sin abrir nada.
+- assertVisible:
+    id: 'nombre-campo'
+- assertVisible:
+    id: 'nombre-sugerencias'
+- assertVisible:
+    id: 'nombre-resortear'
+- assertVisible: '¿Quién vas a ser ahí dentro?'
+
+# El género llega en femenino y se cambia en un toque, sin desplegable.
+- assertVisible:
+    id: 'genero-femenino'
+- assertVisible:
+    id: 'genero-masculino'
+
+# El oficio se marca y **se despliega en su sitio**: no abre otra pantalla.
+- assertVisible:
+    id: 'oficios'
+- assertNotVisible:
+    id: 'oficio-implicacion'
+- tapOn:
+    id: 'oficio-taberna'
+- assertVisible:
+    id: 'oficio-implicacion'
+- assertVisible:
+    id: 'arranque'
+
+# La lista desplaza y la pantalla no cambia de forma: el desplazamiento está para que
+# crecer no rompa el diseño, no para esconder nada.
+- scrollUntilVisible:
+    element:
+      id: 'oficio-mercado'
+    direction: DOWN
+- assertVisible:
+    id: 'arranque-seguir'
+- assertVisible:
+    id: 'oficios'
+
+# Ni una cifra en toda la pantalla, y ninguna pregunta por la edad.
+- assertNotVisible: '.*\d+\s*(m|km|min|minutos|pasos|%).*'
+- assertNotVisible: '.*[Ee]dad.*'
+- assertNotVisible: '.*[Aa]ños.*'
+
+- tapOn:
+    id: 'arranque-seguir'
+
+# ── A1P2 · Tu tramo ────────────────────────────────────────────────────────────
+- assertVisible: '2/5'
+- assertVisible:
+    id: 'tramo-respuestas'
+- assertVisible:
+    id: 'tramo-vuelta-de-la-esquina'
+- assertVisible:
+    id: 'tramo-par-de-manzanas'
+- assertVisible:
+    id: 'tramo-otro-barrio'
+- assertVisible:
+    id: 'tramo-pueblo-de-al-lado'
+# Cuatro sitios a los que se llega, y ni un metro. Ni la palabra accesibilidad, ni una
+# opción para quien va en silla.
+- assertNotVisible: '.*\d+\s*(m|km|metros|minutos).*'
+- assertNotVisible: '.*[Aa]ccesibilidad.*'
+- tapOn:
+    id: 'tramo-otro-barrio'
+
+# La vuelta atrás existe y lo contestado sigue puesto: es lo que hace que arrepentirse
+# del nombre no sea una puerta cerrada.
+- tapOn:
+    id: 'arranque-atras'
+- assertVisible: '1/5'
+- assertVisible:
+    id: 'oficio-implicacion'
+- tapOn:
+    id: 'arranque-seguir'
+- assertVisible: '2/5'
+- tapOn:
+    id: 'arranque-seguir'
+
+# ── A1P3 · El permiso ──────────────────────────────────────────────────────────
+- assertVisible: '3/5'
+- assertVisible:
+    id: 'permiso-alcance'
+- assertVisible: 'Ubicación · mientras usas la app'
+- assertVisible: 'Nunca en segundo plano. Si la app no está abierta, el juego no puede seguirte.'
+# La alternativa se enseña **antes** de que el sistema pregunte: después la convertiría
+# en un rescate y sugeriría que denegar fue un error.
+- assertVisible:
+    id: 'permiso-permitir'
+- assertVisible:
+    id: 'permiso-a-mano'
+
+# El diálogo del sistema, cuando exista el módulo nativo. Mientras no exista, «Permitir»
+# sale apagado con su motivo y este bloque no entra.
+- runFlow:
+    when:
+      notVisible:
+        id: 'permiso-permitir-motivo'
+    commands:
+      - tapOn:
+          id: 'permiso-permitir'
+      - assertVisible: '.*[Uu]bicación.*'
+      - assertVisible:
+          id: 'arranque'
+
+# La vía manual, que es la que esta entrega recorre entera.
+- runFlow:
+    when:
+      visible:
+        id: 'permiso-a-mano'
+    commands:
+      - tapOn:
+          id: 'permiso-a-mano'
+
+# ── A1P4 · Dónde se levanta ────────────────────────────────────────────────────
+- assertVisible: '4/5'
+- assertVisible:
+    id: 'punto-mapa-real'
+- assertVisible:
+    id: 'punto-pin'
+- assertVisible:
+    id: 'punto-circulo'
+- assertVisible:
+    id: 'punto-irreversible'
+- assertVisible: 'El mapa se genera aquí y se queda aquí. Es lo único del juego que no se deshace.'
+# El texto que acompaña al círculo habla en palabras de camino: ni metros ni minutos.
+- assertVisible: 'El tamaño sale de la dificultad que elegiste: te da para una tarde larga.'
+- assertNotVisible: '.*\d+\s*(m|km|metros|minutos).*'
+# Y no hay perilla de tamaño: el círculo es una consecuencia del tramo, no un control.
+- assertNotVisible: '.*[Rr]adio.*'
+- assertNotVisible: '.*[Zz]oom.*'
+
+# La marca se arrastra de verdad. Es lo único de esta pantalla que necesita dedo.
+- copyTextFrom:
+    id: 'punto-pin'
+- evalScript: ${output.pinInicial = maestro.copiedText}
+- swipe:
+    from:
+      id: 'punto-pin'
+    direction: RIGHT
+- copyTextFrom:
+    id: 'punto-pin'
+- assertTrue: ${maestro.copiedText != output.pinInicial}
+
+- tapOn:
+    id: 'punto-generar'
+
+# ── A1P5 · La generación ───────────────────────────────────────────────────────
+# Desde aquí no se vuelve: ni flecha ni contador, y esa ausencia es la forma que toma
+# en la interfaz el único invariante irreversible del juego.
+- assertNotVisible:
+    id: 'arranque-atras'
+- assertNotVisible:
+    id: 'arranque-contador'
+
+# Las seis fases, una por línea. Va dentro de `runFlow` porque una celda que se levanta
+# deprisa puede no dejar ver este momento, y eso no es un fallo.
+- runFlow:
+    when:
+      visible:
+        id: 'generacion-fases'
+    commands:
+      - assertVisible: 'Generando el mundo del juego'
+      - assertVisible: 'Mirando qué hay por ahí'
+      - assertVisible: 'Poniéndole nombre a todo'
+      - assertVisible:
+          id: 'generacion-prologo'
+      # Ni barra, ni porcentaje, ni contador, ni estimación de segundos.
+      - assertNotVisible: '.*\d+\s*%.*'
+      - assertNotVisible: '.*\d+\s*(s|seg|segundos).*'
+      - assertNotVisible: '.*[Qq]uedan.*'
+
+# Al terminar se pasa sola a A1P6: no hay nada que pulsar.
+- extendedWaitUntil:
+    visible:
+      id: 'mapa-lamina'
+    timeout: 60000
+
+# ── A1P6 · Tu mapa, el día uno ─────────────────────────────────────────────────
+- assertVisible:
+    id: 'trato'
+- assertNotVisible:
+    id: 'arranque-atras'
+- assertNotVisible:
+    id: 'generacion-fases'
+- assertVisible:
+    id: 'arranque-seguir'
+- tapOn:
+    id: 'arranque-seguir'
+
+# ── A1P7 · La primera aventura ─────────────────────────────────────────────────
+- assertVisible: 'Lo que se cuenta hoy'
+- assertVisible: 'Por aquí hay quien necesita algo'
+- assertVisible:
+    id: 'primera-lista'
+- assertVisible:
+    id: 'aventura-medida'
+- assertVisible:
+    id: 'andar-sin-nada'
+- assertVisible: 'Y puedes salir a andar sin coger ninguna. El mundo se mueve igual.'
+- assertNotVisible:
+    id: 'arranque-atras'
+
+# La frontera de registro: «Salir a andar» es el último texto que dice «nosotros».
+- assertVisible: 'Salir a andar'
+- tapOn:
+    id: 'arranque-seguir'
+
+# Y el arranque queda cerrado: no se vuelve a entrar en él salvo por «empezar de nuevo».
+- assertNotVisible:
+    id: 'arranque-paso'

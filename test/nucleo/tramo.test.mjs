@@ -105,6 +105,42 @@ async function textosDeDentroDelJuego() {
   return exportados;
 }
 
+/** El único módulo del núcleo que exporta texto con **registro declarado**. */
+const MODULO_DEL_GUION = 'packages/nucleo/partida/guion-de-arranque.js';
+
+/**
+ * Los textos que el núcleo pone **en boca del mundo**.
+ *
+ * Es el corpus de «el ajuste no se comenta nunca», y no coincide con el de dentro
+ * del juego desde que SPEC-027 metió el guion del arranque en el núcleo. La regla que
+ * hay que sostener no es «esta frase no existe en ninguna parte», es **«el ajuste del
+ * tramo no se comenta»**: que el mundo no le diga a nadie que se le ha medido el paso.
+ * Preguntar «en media hora andando, ¿tú dónde llegas?» es la pregunta del onboarding
+ * —`accesibilidad.md` §1 la formula así, literal, y la maqueta la dibuja— y es la voz
+ * de la aplicación explicando qué le está preguntando, no el mundo comentando una
+ * medición que todavía no ha ocurrido.
+ *
+ * Así que el corpus es el núcleo entero **menos las piezas del guion que hablan como
+ * aplicación**, que son las únicas cadenas del paquete con registro escrito al lado.
+ * Las de registro `mundo` siguen dentro, y siguen sujetas a la prohibición entera.
+ *
+ * Esto no afloja nada por dos motivos: cualquier texto nuevo del núcleo sigue entrando
+ * al corpus por defecto —hay que declararse voz de aplicación del arranque para
+ * quedarse fuera, y eso se ve en el diff—, y las piezas que se quedan fuera pasan por
+ * `revisaGuion`, que en el arranque prohíbe los dígitos, las distancias, los tiempos y
+ * el ritmo. Un texto que le dijera a alguien que anda menos que antes cae en un lado o
+ * en el otro.
+ */
+async function textosQueHablaElMundo() {
+  const { GUION, REGISTROS } = await import(join(RAIZ_REPO, MODULO_DEL_GUION));
+  const textos = (await textosDeDentroDelJuego()).filter((t) => !t.de.startsWith(`${MODULO_DEL_GUION} ·`));
+  for (const pieza of GUION) {
+    if (pieza.registro !== REGISTROS.MUNDO || typeof pieza.texto !== 'string') continue;
+    textos.push({ de: `${MODULO_DEL_GUION} · ${pieza.paso}/${pieza.id}`, texto: pieza.texto });
+  }
+  return textos;
+}
+
 describe('El tramo declarado', () => {
   test('El catálogo del arranque son cuatro sitios a los que se llega, sin ninguna cifra', () => {
     assert.equal(RESPUESTAS_DE_TRAMO.length, 4, 'el catálogo del arranque no tiene cuatro respuestas');
@@ -291,11 +327,23 @@ describe('La corrección del tramo, en silencio', () => {
       [/\bandas? (más|menos)\b/i, 'cuánto se anda'],
       [/\b\d+([.,]\d+)?\s*(m|km|metros?|kil[óo]metros?|minutos?|pasos?)\b/i, 'una cifra de distancia o de tiempo'],
     ];
-    const textos = await textosDeDentroDelJuego();
+    const textos = await textosQueHablaElMundo();
     assert.ok(textos.length > 20, `solo se han recogido ${textos.length} textos: la prueba no está recorriendo nada`);
     for (const { de, texto } of textos) {
       for (const [patron, que] of prohibido) {
         assert.equal(patron.test(texto), false, `${de} menciona ${que}: «${texto}»`);
+      }
+    }
+
+    // Y la mitad que el recorte no cubre: la voz de aplicación del arranque puede
+    // decir «media hora» porque es la definición del tramo, pero **no** puede
+    // comentar la medición. Se afirma pieza a pieza sobre lo que se dejó fuera.
+    const { GUION, REGISTROS } = await import(join(RAIZ_REPO, MODULO_DEL_GUION));
+    const deAplicacion = GUION.filter((p) => p.registro === REGISTROS.APLICACION && typeof p.texto === 'string');
+    assert.ok(deAplicacion.length > 10, `el guion del arranque solo declara ${deAplicacion.length} piezas de aplicación: la prueba no está mirando nada`);
+    for (const pieza of deAplicacion) {
+      for (const [patron, que] of [prohibido[0], prohibido[1], prohibido[3], prohibido[4]]) {
+        assert.equal(patron.test(pieza.texto), false, `${pieza.paso}/${pieza.id} menciona ${que}: «${pieza.texto}»`);
       }
     }
   });

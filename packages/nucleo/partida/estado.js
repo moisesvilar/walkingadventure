@@ -17,7 +17,9 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { exigeSemilla } from '../core/semilla.js';
+import { IDS_DE_AJUSTE, congelaAjustes, estadoDeAjustes, levantaAjustes } from './ajustes.js';
 import { congelaArranque, estadoDeArranque, levantaArranque } from './arranque.js';
+import { congelaPersonaje, estadoDePersonaje, levantaPersonaje } from './personaje.js';
 import {
   ESQUEMA_DIARIO,
   ESQUEMA_TEXTOS,
@@ -150,6 +152,30 @@ const AREA_ARRANQUE = campos({
   par: uno(['nulo', campos({ suceso: 'texto', nucleos: lista('texto'), niveles: dic('entero') })]),
 });
 
+/**
+ * Quién juega. El esquema es **cerrado y corto**, y esa es media garantía de «nada del
+ * personaje afecta al cuerpo»: no hay dónde poner una velocidad ni una resistencia sin
+ * declararla aquí, y declararla se ve en el diff.
+ *
+ * Los cuatro campos llegan nulos en una partida recién creada porque el personaje se
+ * rellena en el arranque, que ocurre antes de que la partida exista.
+ */
+const AREA_PERSONAJE = campos({
+  nombre: 'texto?',
+  genero: 'texto',
+  oficio: 'texto?',
+  oficioPermanente: 'booleano',
+  tramo: uno(['nulo', campos({ respuesta: 'texto?', declaradoM: 'numero', estimadoM: 'numero', salidasMedidas: 'entero' })]),
+});
+
+/**
+ * Los ajustes, con su valor de origen puesto por el arranque sin preguntar nada.
+ *
+ * El esquema se deriva del catálogo cerrado de `ajustes.js` en lugar de repetir los
+ * nombres: un ajuste nuevo entra por su módulo y no por dos sitios.
+ */
+const AREA_AJUSTES = campos(Object.fromEntries(IDS_DE_AJUSTE.map((id) => [id, 'booleano'])));
+
 const AREA_ORO = campos({ saldo: 'entero' });
 
 // La procedencia sale estructurada de `objetos.js` y el día es el del calendario de
@@ -249,6 +275,11 @@ declaraArea({ id: 'memorias', esquema: AREA_MEMORIAS, inicial: estadoDeMemorias,
 declaraArea({ id: 'relaciones', esquema: AREA_RELACIONES, inicial: estadoDeRelaciones, congela: congelaRelaciones, levanta: levantaRelaciones });
 declaraArea({ id: 'motes', esquema: AREA_MOTES, inicial: estadoDeMotes, congela: congelaMotes, levanta: levantaMotes });
 declaraArea({ id: 'arranque', esquema: AREA_ARRANQUE, inicial: estadoDeArranque, congela: congelaArranque, levanta: levantaArranque });
+// El personaje y los ajustes son de SPEC-027. No reproducen desde el registro y se
+// declara: sus hechos —si algún día los hay— dirían que alguien cambió su nombre, no
+// cuál era el anterior, y reproducirlos sería inventárselo.
+declaraArea({ id: 'personaje', esquema: AREA_PERSONAJE, inicial: estadoDePersonaje, congela: congelaPersonaje, levanta: levantaPersonaje, reproduce: false });
+declaraArea({ id: 'ajustes', esquema: AREA_AJUSTES, inicial: estadoDeAjustes, congela: congelaAjustes, levanta: levantaAjustes, reproduce: false });
 declaraArea({ id: 'oro', esquema: AREA_ORO, inicial: estadoDeOro, congela: congelaOro, levanta: levantaOro });
 declaraArea({ id: 'objetos', esquema: AREA_OBJETOS, inicial: estadoDeObjetos, congela: congelaObjetos, levanta: levantaObjetos });
 declaraArea({ id: 'diario', esquema: ESQUEMA_DIARIO, inicial: estadoDeDiario, congela: congelaDiario, levanta: levantaDiario });

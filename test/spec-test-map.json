@@ -17910,6 +17910,764 @@
       "caso": "La copia declarada de la consulta produce el mismo texto que la del servidor",
       "hueco_de_bateria": true,
       "nota": "La app no puede importar server/aguas-arriba/overpass.mjs —importa node:crypto y el empaquetador del móvil no lo resuelve—, así que lleva una copia declarada. Divergir no rompe nada visible: el móvil deja de acertar en la caché del proxy, cuya clave es el hash del texto, y paga minutos contra los mirrors sin que nada se ponga rojo. Se comparan las cuatro celdas de referencia más dos casos de radio, byte a byte, y las dos VERSION_CONSULTA."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva, cuando se abre la app, entonces el arranque empieza en A1P1 y los siete pasos se recorren en el orden `quien-eres · tu-tramo · el-permiso · donde-se-levanta · la-generacion · tu-mapa · la-primera-aventura`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Los siete pasos se recorren en el orden del flujo",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene ninguna característica sobre la secuencia del arranque. Se afirma sobre el vocabulario cerrado y recorriendo la máquina, y además que un paso inventado falla nombrando los siete."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva, cuando se abre la app, entonces el arranque empieza en A1P1 y los siete pasos se recorren en el orden del flujo.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita dispositivo: que las siete pantallas se monten de verdad y en orden."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque en cualquiera de los cinco primeros pasos, cuando se lee su cabecera, entonces lleva flecha de atrás y contador, y el contador dice el paso sobre cinco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Las cinco primeras llevan flecha y contador sobre cinco, y las dos últimas ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque en cualquiera de los cinco primeros pasos, cuando se lee su cabecera, entonces lleva flecha de atrás y contador sobre cinco.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. El flujo comprueba «1/5» … «4/5» y la presencia de `arranque-atras` en las cinco primeras."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque en A1P6 o en A1P7, cuando se lee su cabecera, entonces no lleva flecha ni contador: desde que el mapa existe no se vuelve.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Las cinco primeras llevan flecha y contador sobre cinco, y las dos últimas ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque en A1P6 o en A1P7, cuando se lee su cabecera, entonces no lleva flecha ni contador.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. `assertNotVisible` de `arranque-atras` y `arranque-contador` en A1P5, A1P6 y A1P7."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque en A1P3 con el permiso ya contestado, cuando se pulsa la flecha de atrás, entonces se vuelve a A1P2 con la respuesta de tramo ya marcada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Volver atrás desde A1P3 deja la respuesta de tramo ya marcada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque retrocedido hasta A1P1, cuando se lee la pantalla, entonces el nombre y el oficio que se habían contestado siguen puestos, y ninguno se ha vuelto a sortear.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Retroceder hasta A1P1 no resortea el nombre ni pierde el oficio",
+      "hueco_de_bateria": true,
+      "nota": "Las sugerencias se comparan enteras: sortear al volver atrás cambiaría un nombre que alguien ya había aceptado."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque en A1P1, cuando se pulsa la flecha de atrás, entonces no se sale de la app ni se pierde nada: no hay paso anterior y la pantalla lo dice quedándose.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La flecha de atrás en A1P1 no sale de la app ni pierde nada",
+      "hueco_de_bateria": true,
+      "nota": "Se compara la vista entera serializada antes y después: «no se pierde nada» campo a campo dejaría pasar justo lo que no se mirase."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque completo hasta A1P7, cuando se pulsa «Salir a andar», entonces el arranque queda cerrado y no se vuelve a entrar en él salvo por «empezar de nuevo».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Cerrar el arranque lo deja cerrado y sella el oficio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado todos los textos de los siete pasos, cuando se leen, entonces hablan como aplicación salvo el guion de fases de A1P5, el título y el párrafo del trato de A1P6 y las tarjetas de A1P7, que hablan como mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El onboarding habla como aplicación",
+      "escenario": "El onboarding habla como aplicación",
+      "nota": "El escenario de la batería es @app y aquí se afirma en @nucleo, que es lo que el guion en el paquete hace posible: cada pieza declara su registro y las de mundo son una lista enumerada de excepciones."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado todos los textos de los siete pasos, cuando se buscan cifras de distancia, de tiempo de esfuerzo, de ritmo, de pasos o de porcentaje, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Ningún texto del arranque lleva cifras de distancia, de tiempo, de ritmo ni de pasos",
+      "hueco_de_bateria": true,
+      "nota": "La única excepción declarada es la pregunta del tramo, que `accesibilidad.md` §1 formula literalmente en media hora; la prueba exige que toda excepción traiga su motivo escrito."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado todos los textos de los siete pasos, cuando se generan diez mundos distintos, entonces ninguno se vuelve falso en ninguno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta",
+      "nota": "Se mide contra los ocho extractos de referencia commiteados —cuatro mundos por dos semillas—, que son los mundos distintos que este repositorio tiene congelados: ningún texto nombra un elemento de ninguno ni afirma una cantidad."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva con el mapa por levantar en Galicia, cuando se abre A1P1, entonces el campo de nombre llega ya relleno con un nombre sorteado del paquete gallego.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El campo de nombre llega relleno con un nombre del paquete del sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1 recién abierta, cuando se leen las sugerencias, entonces son cuatro, no hay dos iguales y las femeninas van primero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El personaje llega en femenino",
+      "escenario": "El personaje llega en femenino",
+      "nota": "La segunda cláusula del escenario —«las sugerencias de nombre muestran femeninos primero»— es exactamente este criterio. Que sean cuatro y sin repetir tiene caso propio, «Las sugerencias son cuatro y no hay dos iguales», sobre los dos idiomas y cuatro rondas."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1 recién abierta, cuando se pulsa «↻ otro», entonces salen otras cuatro sugerencias y el campo se rellena con la primera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "«↻ otro» saca otras cuatro sugerencias y el campo se rellena con la primera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la misma semilla de partida, cuando se sortean las sugerencias dos veces, entonces salen las mismas y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "La misma semilla sortea las mismas sugerencias y en el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1 sin haber escrito nada, cuando se pulsa «Seguir», entonces se sigue con el nombre precargado y no se pide nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Seguir sin escribir nada sigue con el nombre precargado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1, cuando se lee su primera línea, entonces dice que el nombre es el del personaje y no el de quien juega.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La primera línea de A1P1 dice que el nombre es el del personaje",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un nombre escrito a mano que pasa el filtro, cuando se pulsa «Seguir», entonces se guarda tal cual, con sus tildes y sus mayúsculas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Un nombre escrito a mano que pasa el filtro se guarda tal cual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un nombre escrito a mano de más caracteres de los que el tope admite, cuando se intenta seguir, entonces no se guarda y se dice que es demasiado largo, sin nombrar ningún número interno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Un nombre más largo que el tope no se guarda y no se nombra ninguna cifra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un nombre escrito a mano que el filtro de aptitud rechaza, cuando se intenta seguir, entonces no se guarda y se dice que ese nombre no vale, sin repetirlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Un nombre que el filtro de aptitud rechaza no se guarda y no se repite",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el campo de nombre vaciado del todo, cuando se intenta seguir, entonces no se guarda un nombre vacío: vuelve el precargado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El campo de nombre vaciado del todo no guarda un nombre vacío",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un paquete de idioma sin repertorio suficiente para sortear cuatro sugerencias sin repetir, cuando se abre A1P1, entonces falla nombrando el paquete y la función que se queda corta, en lugar de enseñar sugerencias repetidas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Un paquete sin repertorio suficiente falla nombrando el paquete y la función",
+      "hueco_de_bateria": true,
+      "nota": "Y falla igual con suerte que sin ella: se comprueba con dos semillas distintas, porque el repertorio se revisa entero antes de sortear nada."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva, cuando el jugador llega a la creación de personaje, entonces el género gramatical está puesto en femenino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El personaje llega en femenino",
+      "escenario": "El personaje llega en femenino"
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1, cuando se lee la línea del género, entonces habla de cómo se dirigen a ti dentro del juego y no de quién eres fuera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "La línea del género habla de cómo se dirigen a ti dentro del juego",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el género en masculino, cuando el mundo se dirige al personaje, entonces la concordancia sale en masculino en todos los textos, y no solo en unos cuantos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El género en masculino sale en masculino en todos los textos",
+      "hueco_de_bateria": true,
+      "nota": "Sobre los dos paquetes de idioma. La concordancia entera es de SPEC-002 y aquí se afirma la mitad que esta fila estrena: que el género de quien juega la gobierna."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el género cambiado después del arranque, cuando se compara el mundo generado, entonces es idéntico byte a byte: el género no siembra nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Cambiar el nombre o el género después del arranque deja el mundo idéntico",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre lo que siembra —la semilla de la partida y el identificador del mapa, que no se mueven— y sobre que el área del personaje no se reproduce. Levantar dos mundos enteros comparaba lo mismo y costaba un minuto."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1, cuando el jugador llega a la elección de oficio, entonces se le dice que el oficio decide qué aventuras verá, y que no se cambia después.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "La pantalla de elección dice qué implica el oficio",
+      "escenario": "La pantalla de elección dice qué implica el oficio",
+      "nota": "Las dos primeras cláusulas salen del guion del núcleo; la tercera —que el oficio marcado explica a qué manda— se lee en la fuente del componente, que es lo único que se puede hacer sin simulador."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la lista de oficios, cuando se marca uno, entonces ese se despliega y explica a qué tipo de aventuras manda, y los demás se quedan en su línea de sabor.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. El flujo comprueba que `oficio-implicacion` no está antes de marcar y sí después, y que no se ha abierto otra pantalla."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la lista de oficios, cuando se cuenta cuántos hay, entonces son los del enumerado cerrado del núcleo y ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Los oficios de la pantalla son los del enumerado cerrado del núcleo y ninguno más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una lista de oficios más larga que la pantalla, cuando se recorre, entonces desplaza y la pantalla no cambia de forma.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es de las pocas cosas que de verdad necesitan pantalla: el desplazamiento se ejercita con `scrollUntilVisible` y se comprueba que la acción del pie sigue donde estaba."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un oficio ya fijado, cuando se intenta fijar otro, entonces falla nombrando el oficio que ya estaba: el oficio es permanente y el estado lo sostiene, no la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Un oficio ya fijado no se cambia, y el error nombra el que estaba",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un oficio que no está en el enumerado, cuando se intenta fijar, entonces falla nombrando los que sí valen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Un oficio que no está en el enumerado falla nombrando los que sí valen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un personaje con su oficio, cuando se pide el reparto de aventuras, entonces el catálogo llega filtrado por afinidad y hay plantillas que no aparecen nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El oficio del personaje filtra el reparto de aventuras que se le ofrece",
+      "hueco_de_bateria": true,
+      "nota": "La misma regla que afirma «El oficio filtra el catálogo» de SPEC-017 en test/nucleo/catalogo.test.mjs, afirmada aquí desde el personaje que el arranque deja hecho: sobre los cuatro oficios, con plantillas que no ve y al menos una que solo ve él."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un personaje con su oficio, cuando se pide el reparto de aventuras, entonces el catálogo llega filtrado por afinidad y hay plantillas que no aparecen nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/catalogo.test.mjs",
+      "caso": "El oficio filtra el catálogo",
+      "escenario": "El oficio filtra el catálogo",
+      "nota": "Ya vivo desde SPEC-017 y aquí se consume tal cual: esta fila no respecifica el filtro, solo lo cablea al personaje."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P1 con el oficio ya marcado, cuando se retrocede desde A1P2 y se vuelve, entonces el oficio marcado sigue marcado y todavía se puede cambiar: la permanencia empieza cuando el arranque se cierra, no antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "El oficio marcado se puede cambiar hasta que el arranque se cierra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P3, cuando se lee, entonces explica para qué hace falta la ubicación antes de pedirla y dice que nunca se guarda ni se comparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente",
+      "nota": "La razón, la tarjeta de alcance y la nota de segundo plano se leen del guion, que es donde viven; el mismo caso comprueba después que lo que la app solicita no se separa de lo que la pantalla promete."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque entero, cuando se revisan los permisos que la app solicita, entonces solo pide la ubicación «mientras se usa» y ninguno en segundo plano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente",
+      "nota": "Se revisan el manifiesto de Expo y los módulos que tocan la ubicación buscando las seis formas del permiso permanente en iOS y en Android. Es lo que impide que la promesa de la pantalla y lo solicitado se separen sin que nadie lo note."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P3, cuando se concede el permiso, entonces se pasa a A1P4 con el pin puesto en la posición actual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Conceder el permiso pasa a A1P4 con la marca en la posición actual",
+      "hueco_de_bateria": true,
+      "nota": "Con el doble que concede. El módulo nativo no está entregado —ninguna spec ha nombrado la dependencia—, así que en dispositivo este camino no se puede recorrer todavía: ver «No hay módulo nativo de ubicación»."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P3, cuando se elige «Prefiero elegir el punto a mano», entonces se pasa a A1P4 igual, con el pin en un punto por defecto y sin haber pedido ningún permiso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Elegir el punto a mano pasa a A1P4 sin pedir ningún permiso",
+      "hueco_de_bateria": true,
+      "nota": "La ausencia se afirma sobre el recuento de peticiones del doble, no suponiéndola: es la única manera de distinguir «no se pidió» de «se pidió y salió bien»."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el permiso denegado en el diálogo del sistema, entonces el arranque continúa por la vía de elegir el punto a mano y ninguna pantalla se queda sin salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Denegar el permiso continúa por la vía de elegir el punto a mano",
+      "hueco_de_bateria": true,
+      "nota": "Con el doble que deniega, y se recorre hasta el final para que «ninguna pantalla se queda sin salida» signifique algo. El diálogo nativo de las dos plataformas es @manual y así lo declara la spec."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el permiso denegado en el diálogo del sistema, entonces el arranque continúa por la vía de elegir el punto a mano.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Denegar el permiso en el diálogo nativo deja seguir por la vía manual",
+      "hueco_de_bateria": true,
+      "nota": "La mitad que ningún automatismo provoca de forma fiable: el diálogo del sistema, denegado a mano, en iOS y en Android. La spec lo declara @manual y aquí queda anotado como comprobación de una persona, pendiente además del módulo nativo que esta entrega no trae."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el permiso denegado, cuando se pulsa la flecha de atrás desde A1P4, entonces se vuelve a A1P3 y se puede volver a intentar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Con el permiso denegado se vuelve a A1P3 y se puede volver a intentar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un arranque terminado por cualquiera de las dos vías, cuando se inspecciona la partida guardada, entonces contiene la coordenada redondeada del anclaje de la celda y ninguna posición exacta de quien juega.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La partida guardada lleva el anclaje redondeado y ninguna posición exacta",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el texto canónico entero —la posición del proveedor, la del pin y cualquier marca de tiempo— y además que el esquema es cerrado por los dos lados: un campo de polizón hace fallar la escritura nombrándolo."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un arranque terminado, cuando se inspecciona qué salió a la red, entonces las coordenadas salieron una sola vez, al generar el mapa.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "La mitad de esta fila: el arranque toca la posición de quien juega y no saca nada. Se afirma con el inspector de tráfico en modo estricto, que corta lo que no envuelve. La otra mitad —que levantar el mapa consulta una sola vez— la afirma SPEC-026 en test/nucleo/levantamiento.test.mjs."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P4, cuando se pinta, entonces enseña el mapa real —calles, manzanas— con una marca arrastrable y un círculo alrededor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No hay capa de teselas para A1P4: la superficie declara «sin-mapa-real» en vez de fingir un mapa",
+      "hueco_de_bateria": true,
+      "nota": "PARTE NO ENTREGADA: el mapa real no está, porque ninguna spec ha nombrado la dependencia de la capa de teselas. Lo entregado es la superficie con el identificador de la spec, que declara `sin-mapa-real` en vez de hacerse pasar por un mapa, y la marca y el círculo, que sí son de esta fila y se pintan encima. El criterio queda cubierto solo en su mitad y la otra no puede ponerse verde con nada de este repositorio."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el tramo declarado en A1P2, cuando se dibuja el círculo, entonces su radio sale del tramo y de nada más: dos tramos distintos dan dos círculos distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El círculo de alcance sale del tramo y de nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el círculo dibujado, cuando se lee el texto que lo acompaña, entonces habla en palabras de camino y no lleva ni metros ni minutos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Ningún texto del arranque lleva cifras de distancia, de tiempo, de ritmo ni de pasos",
+      "hueco_de_bateria": true,
+      "nota": "Las dos piezas de A1P4 —«El círculo es hasta dónde llega el mundo por ahora» y «te da para una tarde larga»— entran en la revisión de cifras del guion como todas las demás."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P4, cuando se arrastra la marca y se suelta, entonces el mapa se levantaría en la celda de la coordenada redondeada de donde se soltó, no en la exacta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El mapa se ancla a la coordenada redondeada de donde se soltó la marca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P4, cuando se arrastra la marca con el dedo, entonces la marca se mueve de verdad sobre la superficie.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. El gesto es de las pocas cosas que necesitan dedo: se arrastra `punto-pin` y se comprueba que la coordenada que publica ha cambiado."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado dos posiciones distintas dentro de la misma celda, cuando se levanta el mapa desde cada una, entonces sale el mismo mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El mapa se ancla a la coordenada redondeada de donde se soltó la marca",
+      "hueco_de_bateria": true,
+      "nota": "Mismo anclaje y mismo identificador de mapa desde dos puntos distintos de la celda. Que el mismo identificador dé el mismo documento es de SPEC-026 y aquí se consume."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P4, cuando se lee antes de pulsar, entonces dice que a partir de ahí ya no se vuelve, y esa es la única cosa del arranque que lo dice.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "A1P4 dice que desde ahí ya no se vuelve, y es la única pantalla que lo dice",
+      "hueco_de_bateria": true,
+      "nota": "Y no hay ningún «¿estás seguro?» en el guion: la irreversibilidad se informa antes de pulsar, no se confirma después."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el mapa ya levantado, cuando se busca en toda la app una acción de regenerar o de mover el mapa, entonces no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No existe ninguna acción de regenerar ni de mover el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un tramo en el suelo de 250 m, cuando se dibuja A1P4, entonces el círculo se dibuja igual y la pantalla no menciona ni el suelo ni ninguna limitación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Un tramo en el suelo dibuja el círculo igual y la pantalla no menciona el suelo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P5, cuando se pinta, entonces enseña las seis fases del generador dichas como mundo, una por línea, con las literales que la pantalla dibujada usa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "A1P5 enseña las seis fases del levantamiento y no las reescribe",
+      "hueco_de_bateria": true,
+      "nota": "El guion no se escribe las fases por su cuenta: declara de dónde salen y se comparan las seis literales con las del levantamiento, que es quien las declara (SPEC-026)."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P5, cuando se pinta, entonces enseña las seis fases, una por línea.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Va dentro de un `runFlow` con condición porque una celda que se levanta deprisa puede no dejar ver ese momento, y eso no es un fallo."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P5, cuando se busca una barra de progreso, un porcentaje, un contador o una estimación de segundos, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "A1P5 no lleva barra de progreso, porcentaje, contador ni estimación de segundos",
+      "hueco_de_bateria": true,
+      "nota": "Sobre el guion y sobre la fuente del componente. Se busca lo que pintaría progreso y no la palabra: el comentario de cabecera declara justamente esa ausencia."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P5, cuando se lee su última línea, entonces anuncia que ahí fuera ya pasan cosas que nadie te ha contado, sin explicar qué es el prólogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La última línea de A1P5 anuncia el prólogo sin explicar qué es",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la generación terminada, cuando acaba, entonces se pasa a A1P6 sin pulsar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Terminada la generación se pasa a A1P6 sin pulsar nada",
+      "hueco_de_bateria": true,
+      "nota": "Lo dispara el mapa pintado y no un botón, y se comprueba además que A1P5 no declara ninguna acción en el guion."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la app cerrada mientras A1P5 corre, cuando se vuelve a abrir, entonces el arranque aparece en A1P4 con el nombre, el oficio, el tramo y el punto ya contestados, y no se ha escrito ningún documento a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Reabrir tras cerrarse durante la generación vuelve a A1P4 con todo contestado",
+      "hueco_de_bateria": true,
+      "nota": "Se reanuda desde el documento en otro montaje y con otra entropía: la semilla que vuelve es la de la partida interrumpida, no una nueva. La marca vuelve al anclaje, que es lo único que se guardó."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la app cerrada mientras A1P5 corre, cuando se vuelve a abrir, entonces no se repite ninguna pregunta ya contestada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Reabrir tras cerrarse durante la generación vuelve a A1P4 con todo contestado",
+      "hueco_de_bateria": true,
+      "nota": "La lista de campos sin contestar vuelve vacía, y el precubierto se compara entero contra lo que se había respondido."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la generación que no se puede completar, cuando falla, entonces el arranque se queda en A1P4 con todo contestado y ofrece volver a intentarlo, sin nombrar la red ni ningún código.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La generación que no se puede completar deja el arranque en A1P4 con todo contestado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una celda que no da para un mundo jugable, cuando se intenta levantar, entonces se dice en la pantalla y se ofrece mover la marca, en lugar de entregar un mapa vacío que parece un mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Una celda que no da para un mundo jugable se dice y se ofrece mover la marca",
+      "hueco_de_bateria": true,
+      "nota": "La declaración de celda no jugable es de SPEC-026; lo que esta fila entrega y aquí se afirma es qué se hace con ella."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el jugador que recorre el onboarding entero, cuando se revisan sus siete pantallas, entonces no se le pregunta la edad en ningún momento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No se pregunta la edad",
+      "escenario": "No se pregunta la edad",
+      "nota": "Las dos mitades: la lista cerrada de campos no tiene dónde meter una edad, y ninguna de las siete palabras de la lista de lo que el arranque no pregunta aparece en ningún texto."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la lista cerrada de campos que el arranque recoge, cuando se lee, entonces son nombre, género gramatical, oficio, respuesta de tramo, origen del punto y coordenada del punto, y ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No se pregunta la edad",
+      "escenario": "No se pregunta la edad",
+      "nota": "El mismo caso comprueba que lo que recoge cada paso cuadra exactamente con la lista cerrada y que los tres últimos pasos no recogen nada: solo enseñan."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva con el arranque terminado, cuando se lee el estado de la partida, entonces «solo de día» está activado y se puede desactivar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El horario diurno viene encendido",
+      "escenario": "El horario diurno viene encendido",
+      "nota": "El escenario de la batería lo lee en la pantalla de ajustes, que es de otra fila; aquí se lee en el estado, que es donde el valor de origen vive y lo que permite afirmarlo sin abrir esa pantalla."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva con el arranque terminado, cuando se lee el estado de la partida, entonces «contar los pasos del día a día» está desactivado, y el juego es completo sin activarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Los pasos de fondo vienen apagados",
+      "escenario": "Los pasos de fondo vienen apagados",
+      "nota": "Y ningún texto del arranque lo pide ni lo menciona: «sin preguntar nada» es la mitad de la decisión."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado los ajustes de origen, cuando se recorre el arranque, entonces ninguna pantalla los enseña ni los pregunta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El arranque deja los ajustes puestos sin enseñarlos ni preguntarlos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el texto de la ficha de la tienda, cuando se lee, entonces declara el suelo por debajo del cual no hay juego, con el número que el núcleo declara y no con uno escrito a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La ficha de la tienda declara el suelo con el número que declara el núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado los textos de las siete pantallas del arranque, cuando se busca el suelo, entonces no aparece: se dice antes de instalar y nunca dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El suelo se dice antes de instalar y no aparece dentro del arranque",
+      "hueco_de_bateria": true,
+      "nota": "Ni las frases de la declaración ni el número. La guarda gemela, que ningún texto de dentro del juego lo diga, vive en test/nucleo/tramo.test.mjs desde SPEC-004."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque terminado, cuando se lee A1P7, entonces ofrece la primera aventura, que además de castear pasa por los dos núcleos que oyeron versiones distintas del mismo suceso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/arranque.test.mjs",
+      "caso": "Las candidatas de la primera lista son las que castean y además pasan por los dos",
+      "hueco_de_bateria": true,
+      "nota": "La regla es de SPEC-013 y aquí se consume entera: `componePrimeraLista` castea, filtra por oficio y aplica `filtraPrimeraAventura` encima. Lo que esta fila añade —que A1P7 la pinta— es @app y va en el flujo."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque terminado, cuando se lee A1P7, entonces ofrece la primera aventura con su medida en palabra del mundo.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El arranque recorre las siete pantallas en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. El flujo comprueba `primera-lista` y `aventura-medida`."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P7, cuando se lee su última línea, entonces dice que se puede salir a andar sin coger ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "A1P7 dice que se puede salir a andar sin coger ninguna aventura",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado todos los atributos del personaje, cuando se revisan, entonces ninguno modifica la velocidad, la resistencia ni la distancia que puede andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Nada del personaje afecta al cuerpo",
+      "escenario": "Nada del personaje afecta al cuerpo",
+      "nota": "Bloqueante. El área es cerrada y corta, la guarda se llama al congelar —no solo desde la prueba— y el módulo no declara aritmética de cuerpo por otro nombre."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado dos personajes con nombre, género y oficio distintos y el mismo tramo, cuando se dimensiona una salida, entonces sale exactamente el mismo tamaño en metros y en beats.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Dos personajes distintos con el mismo tramo dimensionan la misma salida",
+      "hueco_de_bateria": true,
+      "nota": "Sobre los tres tamaños y por serialización completa. Y con el tramo cambiado sale distinto, que es lo que hace que la afirmación anterior diga algo."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado dos personajes con oficios distintos y la misma semilla, cuando se levanta el mapa, entonces los dos documentos son idénticos byte a byte: el oficio filtra lo que se ofrece y no lo que existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Dos personajes con oficios distintos entregan el mismo mundo por levantar",
+      "hueco_de_bateria": true,
+      "nota": "Se levanta de verdad el fixture del barrio de tres calles con lo que entregarían los dos personajes y se comparan los documentos serializados enteros; además el documento no guarda ninguna clave del personaje."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el mundo ya generado, cuando se cambia el nombre o el género desde donde se cambien, entonces el mundo sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Cambiar el nombre o el género después del arranque deja el mundo idéntico",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado un personaje recién creado, cuando el mundo se dirige a él antes del hito de fin de arranque, entonces lo llama forastera o forastero según su género, y nunca por su nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Antes del hito el mundo te llama forastera o forastero según tu género",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el hito de fin de arranque disparado, cuando el mundo se dirige al personaje, entonces ya puede usar su nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/personaje.test.mjs",
+      "caso": "Disparado el hito de fin de arranque, el mundo ya usa el nombre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque sin proveedor de ubicación cableado, cuando se construye, entonces falla nombrando la pieza que falta, y no cae en silencio a la vía de elegir el punto a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El arranque sin proveedor de ubicación falla nombrando la pieza que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque sin origen de entropía cableado, cuando se construye, entonces falla nombrando la pieza que falta, y no fabrica una semilla con el reloj.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El arranque sin origen de entropía falla en vez de fabricar la semilla con el reloj",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso cubre la cuarta pieza, el punto por defecto: el paquete no conoce ninguna geografía y no se la puede inventar."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque sin paquete de idioma resuelto, cuando se piden sugerencias de nombre, entonces falla nombrando el paquete, y no entrega una lista vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El arranque sin paquete de idioma resuelto falla nombrando el paquete",
+      "hueco_de_bateria": true,
+      "nota": "Falla al construir y no al pedir sugerencias: tiene que romperse antes de que nadie vea una pantalla, y nunca resolverse en silencio con el paquete de otro idioma."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el guion de textos del arranque, cuando se comprueba que cada pantalla tiene el suyo, entonces ninguna pantalla se queda sin texto y la que falte se nombra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Ninguna pantalla del arranque se queda sin texto, y la que falte se nombra",
+      "hueco_de_bateria": true,
+      "nota": "Y una pieza sin texto propio dice de dónde sale el suyo, en vez de devolver una cadena vacía que en pantalla se lee como un hueco."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el arranque terminado, cuando se inspecciona qué recibió el levantamiento del mapa, entonces recibió el tramo declarado y la coordenada redondeada, y no un radio por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "El levantamiento recibe el tramo declarado y la coordenada redondeada, y no un radio por defecto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado la misma semilla de partida, cuando se recorre el arranque dos veces con las mismas respuestas, entonces el personaje, el mundo y la primera aventura son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "Dos recorridos con la misma semilla y las mismas respuestas dan lo mismo",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-003). Por serialización completa de lo que el cierre entrega y del documento del arranque; con otra entropía sale otra partida, que es lo que hace que la afirmación diga algo. Que el mismo anclaje y la misma semilla den el mismo mundo es de SPEC-026."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece `Math.random` ni `Date.now` dentro de nada que participe en la generación ni en el sorteo de sugerencias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "Sobre los cinco módulos que esta fila añade y, de red de seguridad, sobre el paquete entero. Se busca la llamada y no la palabra: los comentarios de esos módulos explican precisamente por qué no las usan."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado A1P3 con el módulo de ubicación montado, cuando se pulsa «Permitir», entonces aparece el diálogo del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera",
+      "hueco_de_bateria": true,
+      "nota": "PARTE NO ENTREGADA: la app no trae módulo nativo de ubicación, porque ninguna spec ha nombrado la dependencia que lo daría. Lo entregado —y lo que este caso afirma— es que la ausencia se declara: el proveedor dice que no está montado, «Permitir» sale apagado con su motivo al lado, pedir el permiso falla nombrando la pieza en vez de responder «denegado», y la vía manual llega hasta el final. El contrato del módulo nativo existe entero para el día que la dependencia se nombre."
     }
   ]
 }
