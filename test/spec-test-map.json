@@ -12142,6 +12142,853 @@
       "fichero": "test/nucleo/catalogo.test.mjs",
       "caso": "Ampliar el catálogo no resiembra el reparto de las demás plantillas",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la respuesta del narrador, **cuando** se valida, **entonces** se valida contra un esquema cerrado y enumerable de campos inertes, declarado en un solo sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El catálogo de campos inertes son seis y no se cruza con ningún dato vivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta con un campo que el esquema no declara, **cuando** se valida, **entonces** el campo se descarta y el resto de la respuesta se adopta igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Lo que llega fuera del esquema se descarta",
+      "escenario": "Lo que llega fuera del esquema se descarta"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** ese mismo campo descartado, **cuando** se busca algún sitio donde se haya leído su valor, **entonces** no existe: se descarta sin interpretarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Lo que llega fuera del esquema se descarta",
+      "escenario": "Lo que llega fuera del esquema se descarta"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** ese mismo campo descartado, **cuando** se mira lo que ve la jugadora, **entonces** no se registra ningún error visible para ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Lo que llega fuera del esquema se descarta",
+      "escenario": "Lo que llega fuera del esquema se descarta"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** ese mismo campo descartado, **cuando** se lee el diagnóstico de la llamada, **entonces** consta el descarte con su clave y su motivo del catálogo cerrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Lo que llega fuera del esquema se descarta",
+      "escenario": "Lo que llega fuera del esquema se descarta"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el catálogo de campos inertes, **cuando** se enumera, **entonces** cubre el título, el gancho, el texto de una escena, el texto de una versión de rumor, el envoltorio del zurrón y el nombre propuesto, y ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El catálogo de campos inertes son seis y no se cruza con ningún dato vivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta que incluye un campo `oro` con valor 500, **cuando** se aplica a la aventura, **entonces** el oro de la aventura es el que fijó la plantilla y el campo del modelo se descarta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El modelo no escribe ningún dato vivo",
+      "escenario": "El modelo no escribe ningún dato vivo"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta que incluye un lugar, un disparador, un resultado, una franja, un geofence, un nivel o un signo, **cuando** se valida, **entonces** cada uno se descarta por ser dato vivo y ninguno llega a la aventura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El modelo no escribe ningún dato vivo",
+      "escenario": "El modelo no escribe ningún dato vivo"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el catálogo de campos inertes y la lista de datos vivos de `quests.md` decisión 1, **cuando** se cruzan, **entonces** su intersección está vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El catálogo de campos inertes son seis y no se cruza con ningún dato vivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta que no es un documento legible, **cuando** se valida, **entonces** se rechaza entera con su motivo y todos sus huecos caen al fallback.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una respuesta que no es un documento legible se rechaza entera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta con un texto vacío o solo con espacios, **cuando** se valida, **entonces** ese hueco cae al fallback con motivo propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto vacío cae al fallback con motivo propio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta válida, **cuando** se adopta, **entonces** cada texto adoptado se guarda con su origen `llm` declarado, y cada hueco que cayó, con origen `plantilla`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Cada texto adoptado declara su origen y cada hueco que cayó declara el suyo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un mundo y una aventura aceptada, **cuando** no hay conexión en ningún momento, **entonces** todos los textos salen de plantilla y la aventura se puede completar de principio a fin.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una aventura sin ninguna llamada al narrador, **cuando** se recorre entera, **entonces** ningún hueco queda sin texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una plantilla del catálogo, **cuando** se comprueba, **entonces** declara un texto de fallback para cada hueco que puede pedirle al narrador, y sin uno de ellos la plantilla se rechaza al cargarse el catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Toda plantilla del catálogo declara un texto de fallback para cada uno de sus huecos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la llamada al narrador que falla, **cuando** se mira lo que llega a las pantallas, **entonces** ningún texto menciona la red, la aplicación, un permiso ni una espera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Ningún texto que llega a las pantallas menciona la red, la aplicación, un permiso ni una espera",
+      "hueco_de_bateria": true,
+      "nota": "Rojo: los fallbacks «el-inventario-del-mercado · desenlace» y «la-feria-que-no-cabe · beat:7» del catálogo de la fila 17 dicen «error» y «permiso», que es voz de aplicación según las listas del propio filtro."
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la llamada al narrador que falla, **cuando** se lee el diagnóstico, **entonces** consta el fallo con su motivo del catálogo cerrado: silencio hacia la jugadora, constancia en el dato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El diagnóstico de una caída entera se lee sin pantalla y se agrega por clave",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el presupuesto de espera agotado, **cuando** se resuelve la llamada, **entonces** todos los huecos caen al fallback con el motivo de espera agotada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El presupuesto de espera agotado manda todos los huecos al fallback",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el módulo sin presupuesto de espera declarado, **cuando** se pide una redacción, **entonces** falla nombrando la dependencia que falta, en vez de esperar sin límite.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El presupuesto de espera sin declarar hace fallar la llamada nombrando la dependencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una llamada que cae al fallback y otra que no, **cuando** se comparan las dos aventuras, **entonces** solo difieren en los textos y en el origen declarado de cada uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un mundo entero sin ningún texto del narrador, **cuando** se congela y se levanta, **entonces** está completo y jugable, y cada hueco declara que está vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "La mitad de congelar y levantar un mundo entero sin texto del narrador ya la sostiene SPEC-009 en sin-red.test.mjs."
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** cualquier texto que produzca el narrador, **cuando** se va a adoptar, **entonces** pasa antes por el filtro de aptitud, sin excepción por tipo de hueco ni por punto de invocación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto que no pasa el filtro cae al fallback",
+      "escenario": "Un texto que no pasa el filtro cae al fallback"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto con contenido no apto para menores, **cuando** se valida, **entonces** se usa el texto de plantilla y la aventura funciona igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto que no pasa el filtro cae al fallback",
+      "escenario": "Un texto que no pasa el filtro cae al fallback"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto que manda a consumir en el anclaje real, **cuando** se valida, **entonces** no pasa el filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto que manda a consumir en el anclaje real no pasa el filtro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto con una fórmula de la lista de masculino genérico evitable, **cuando** se valida, **entonces** no pasa el filtro y se nombra la fórmula que lo tumbó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "No se usa masculino genérico en fórmulas frecuentes",
+      "escenario": "No se usa masculino genérico en fórmulas frecuentes"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto con una terminación en `-e` o en `-x` usada como género, **cuando** se valida, **entonces** no pasa el filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "No se usa morfología inventada",
+      "escenario": "No se usa morfología inventada"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto con una cifra de distancia, de tiempo de esfuerzo, de ritmo o de progreso, **cuando** se valida, **entonces** no pasa el filtro, porque ninguna pantalla las lleva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Ningún texto depende de un número que solo existe en la maqueta",
+      "escenario": "Ningún texto depende de un número que solo existe en la maqueta"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto que menciona la aplicación, la red, un permiso o una carga, **cuando** se valida dentro del juego, **entonces** no pasa el filtro: dentro del juego solo habla el mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El motivo de un rechazo es una clave del catálogo cerrado y no una frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto que pasa todas las listas pero contiene el nombre real de un anclaje del mundo congelado, **cuando** se valida, **entonces** no pasa el filtro y se nombra el anclaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto que arrastra el nombre real de un anclaje no pasa el filtro y lo nombra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto exactamente en el tope de longitud de su hueco, **cuando** se valida, **entonces** pasa, y uno de un carácter más cae al fallback.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto exactamente en el tope de longitud pasa y uno de un carácter más cae al fallback",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el filtro, **cuando** se le pide el motivo de un rechazo, **entonces** su clave pertenece a un catálogo cerrado y enumerable y no es una frase redactada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El motivo de un rechazo es una clave del catálogo cerrado y no una frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un rechazo cuya causa no está en ese catálogo, **cuando** se va a entregar, **entonces** la validación falla nombrando la causa desconocida, en vez de devolver una clave genérica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una causa que no está en el catálogo hace fallar la entrega nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** los rechazos de muchas llamadas, **cuando** se agregan por clave, **entonces** el recuento sale sin parsear ninguna frase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El motivo de un rechazo es una clave del catálogo cerrado y no una frase",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** las listas del filtro, **cuando** se lee de dónde salen, **entonces** llegan inyectadas por locale y ninguna está escrita a mano dentro de la comprobación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Las listas del filtro llegan inyectadas por locale y un locale sin listas hace fallar la validación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el filtro sin listas para el locale del mundo, **cuando** se pide una validación, **entonces** falla nombrando el locale, en vez de dar por apto lo que no ha podido comprobar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Las listas del filtro llegan inyectadas por locale y un locale sin listas hace fallar la validación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el mismo texto y las mismas listas, **cuando** se valida dos veces, **entonces** el resultado y el motivo son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El mismo texto y las mismas listas dan el mismo veredicto y el mismo motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el filtro, **cuando** se inspeccionan sus imports, **entonces** ninguno habla con la red ni con el reloj.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El filtro no importa la red ni el reloj",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** cualquier elemento con nombre propio, **cuando** nace, **entonces** su nombre lo produce primero el paquete de idioma, y existe sin ninguna llamada de red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El nombre de cualquier elemento lo produce primero el paquete de idioma, sin ninguna llamada de red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un mundo con un paraje llamado «O Fuso da Vella», **cuando** el narrador propone ese mismo nombre para otro elemento, **entonces** se descarta por chocar con el índice global de nombres y el elemento conserva el nombre del paquete de idioma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre propuesto que supera la longitud permitida, **cuando** se valida, **entonces** se descarta y se conserva el base.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre propuesto con cifras, con signos de puntuación no permitidos o con caracteres ajenos al locale, **cuando** se valida, **entonces** se descarta y se conserva el base.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre propuesto que no pasa el filtro de aptitud, **cuando** se valida, **entonces** se descarta y se conserva el base.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre propuesto que coincide con el nombre real de un anclaje del mundo, **cuando** se valida, **entonces** se descarta y se conserva el base.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto que coincide con el nombre real de un anclaje se descarta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre propuesto que pasa las cuatro validaciones, **cuando** se adopta, **entonces** queda reservado en el índice global y ningún otro elemento puede tomarlo después.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre adoptado, **cuando** se lee su origen, **entonces** consta que vino del narrador, y el nombre base sigue disponible como el que había.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un mundo generado sin ninguna llamada al narrador, **cuando** se recogen los nombres de núcleos, servicios, parajes y calzadas, **entonces** no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el mismo mundo generado con el narrador disponible y sin él, **cuando** se comparan, **entonces** el conjunto de elementos y su reparto son idénticos y solo pueden diferir los nombres adoptados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la capa de nombres propuestos, **cuando** se lee a qué se aplica por defecto, **entonces** es a los elementos que nacen dentro de una aventura, y extenderla a las entidades del mundo es un parámetro apagado de origen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un nombre propuesto por el LLM solo se adopta si pasa validación",
+      "escenario": "Un nombre propuesto por el LLM solo se adopta si pasa validación"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el módulo del narrador, **cuando** se enumeran sus puntos de invocación, **entonces** son exactamente dos: al crear la aventura y al abrir la salida para el zurrón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Los puntos de invocación son exactamente dos: crear la aventura y abrir la salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un punto de invocación que no está en esos dos, **cuando** se pide una redacción, **entonces** falla nombrando el punto recibido y enumerando los dos válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un punto de invocación que no existe falla nombrando el recibido y enumerando los dos válidos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una salida en marcha, **cuando** se pide una redacción desde cualquier punto, **entonces** falla nombrando el momento, y no se registra ninguna llamada saliente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una salida en marcha no pide ninguna redacción y no registra ninguna llamada saliente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el módulo sin el momento de la salida entre sus entradas, **cuando** se pide una redacción, **entonces** falla nombrando la dependencia que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El módulo sin el momento de la salida falla nombrando la dependencia que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una aventura recién creada, **cuando** se redacta su narrativa, **entonces** todos sus huecos se piden en una sola llamada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Todos los huecos de una aventura recién creada se piden en una sola llamada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una reserva con cinco pasos por narrar, **cuando** se abre la salida, **entonces** el envoltorio del zurrón y los textos de sus entradas se piden en una sola llamada agrupada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una reserva de cinco pasos se pide en una sola llamada agrupada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una reserva vacía, **cuando** se abre la salida, **entonces** no se hace ninguna llamada y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una reserva vacía no hace ninguna llamada y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el modo de pasos de fondo apagado, **cuando** se abre la salida, **entonces** no se hace ninguna llamada del zurrón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El modo de pasos de fondo apagado no hace ninguna llamada del zurrón",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una salida entera caminada, **cuando** se inspecciona el tráfico saliente, **entonces** no hay ninguna llamada al narrador entre el arranque de la salida y el telón.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una salida en marcha no pide ninguna redacción y no registra ninguna llamada saliente",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma con el inspector de tráfico saliente: en marcha la redacción falla y no sale ninguna petición."
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el envoltorio del zurrón que no se pudo redactar, **cuando** se lee el resumen, **entonces** cada entrada trae el texto de la plantilla que la generó y el resumen se lee igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El envoltorio del zurrón que no se pudo redactar deja cada entrada con el texto de su plantilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una aventura anclada al bar «Casa Manuela», **cuando** se genera su narrativa, **entonces** el prompt no contiene «Casa Manuela».",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** ese mismo prompt, **cuando** se recorre entero, **entonces** no contiene ninguna coordenada, ninguna dirección ni ningún identificador de OSM o de Places.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** ese mismo prompt, **cuando** se recorre entero, **entonces** no contiene la semilla del mapa ni nada que la jugadora haya tecleado.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el sobre de la petición, **cuando** se valida, **entonces** sus campos pertenecen a una lista blanca cerrada y enumerable, y un campo fuera de ella la hace fallar nombrándolo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un campo fuera de la lista blanca hace fallar el sobre nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un sobre de petición al que se le añade el nombre real de un anclaje en un campo cualquiera, **cuando** se valida, **entonces** falla nombrando el campo, antes de construir ningún prompt.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el prompt ya construido y el mundo congelado del que salió, **cuando** se criba el prompt contra los datos reales de ese mundo, **entonces** no aparece ninguno, y si apareciera, la construcción falla nombrando el dato y el campo por el que entró.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un nombre de fantasía que por casualidad coincide con el nombre real de su anclaje, **cuando** se criba el prompt, **entonces** la construcción falla, porque el cribado no distingue por qué coincide.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la construcción del prompt, **cuando** se ejecuta, **entonces** no hace ninguna llamada de red y su resultado se puede afirmar entero sin conexión.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el prompt de una aventura, **cuando** se lee lo que sí lleva, **entonces** son el locale, el tono, las reglas de lenguaje, los nombres de fantasía, los tipos abstractos, la escena, y para un rumor su signo y su nivel.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el prompt de una versión de un rumor, **cuando** se lee, **entonces** lleva el signo y el nivel como restricción explícita, y no le pide al modelo que los decida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El signo y el nivel de un rumor viajan en el prompt como restricción y no como pregunta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el prompt de un rumor de signo bueno, **cuando** el modelo devuelve una versión de signo contrario, **entonces** el texto se descarta y el signo de la aventura no cambia, porque el signo es dato vivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El signo y el nivel de un rumor viajan en el prompt como restricción y no como pregunta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una jugadora que juega treinta días, **cuando** se inspecciona todo el tráfico saliente, **entonces** las coordenadas aparecen solo en la generación de cada mapa y en ninguna llamada al narrador.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el paquete del núcleo, **cuando** se inspeccionan sus imports, **entonces** ninguno abre una conexión: la llamada llega inyectada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El filtro no importa la red ni el reloj",
+      "hueco_de_bateria": true,
+      "nota": "El paquete entero lo cubre además test/nucleo/paquete.test.mjs desde SPEC-002; aquí se afirma sobre los cinco módulos de esta fila."
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una partida, **cuando** se lee su registro de tópicos, **entonces** existe uno por semilla de mundo y no uno global.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El registro de tópicos es uno por semilla de mundo y no uno global",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un registro de tópicos, **cuando** se enumeran sus categorías, **entonces** son aperturas, imágenes, giros, oficios y objetos, y forman un catálogo cerrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un registro recién creado ya trae la lista negra de tics precargada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un registro recién creado, **cuando** se lee, **entonces** ya trae la lista negra de tics genéricos precargada, y no está vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un registro recién creado ya trae la lista negra de tics precargada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un prompt, **cuando** se construye, **entonces** el registro viaja dentro como restricción negativa y nunca como ejemplo a imitar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El registro viaja dentro del prompt como restricción negativa y nunca como ejemplo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una categoría con la ventana llena, **cuando** entra un tópico nuevo, **entonces** sale el más antiguo y la ventana conserva su tamaño.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una categoría con la ventana llena pierde la entrada más antigua y conserva su tamaño",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una categoría exactamente en el tamaño de la ventana, **cuando** se lee, **entonces** cabe entera en el prompt y no se recorta a mitad de una entrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una categoría exactamente en el tamaño de la ventana cabe entera en el prompt",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto que se descarta por el filtro, **cuando** se mira el registro, **entonces** sus tópicos no se han anotado: solo se anota lo adoptado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Solo se anota lo adoptado: un texto descartado no deja tópico",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto adoptado, **cuando** se anota, **entonces** sus tópicos entran en su categoría y el orden dentro de la ventana es el de anotación, declarado y no dependiente de ninguna estructura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Solo se anota lo adoptado: un texto descartado no deja tópico",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el registro de tópicos, **cuando** se busca alguna regla que bifurque por él fuera de la construcción del prompt, **entonces** no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El registro viaja dentro del prompt como restricción negativa y nunca como ejemplo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una partida sin ninguna llamada al narrador, **cuando** se lee su registro, **entonces** sigue siendo el inicial y nada se ha anotado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una partida sin ninguna llamada al narrador conserva su registro inicial",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un hueco ya redactado y validado, **cuando** se vuelve a pedir, **entonces** se devuelve el texto guardado y no se hace ninguna llamada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un hueco ya redactado se devuelve del guardado y no hace ninguna llamada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la clave de un hueco, **cuando** se calcula, **entonces** sale del mapa, del punto de invocación y de la identidad del elemento, y es la misma en dos ejecuciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "La clave de un hueco sale del mapa, del punto de invocación y de la identidad del elemento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** dos huecos distintos que piden el mismo texto, **cuando** se guardan, **entonces** el texto vive una sola vez en el área de textos y las dos entradas lo citan por su clave.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Dos huecos distintos que piden el mismo texto lo guardan una sola vez y lo citan por su clave",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto adoptado, **cuando** se guarda la partida, **entonces** viaja con ella, y al volver a abrirla se lee el mismo texto sin ninguna llamada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto adoptado viaja con la partida y al reabrirla se lee sin ninguna llamada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una aventura ya vestida, **cuando** se vuelve a abrir la partida, **entonces** ningún texto se regenera al vuelo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto adoptado viaja con la partida y al reabrirla se lee sin ninguna llamada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un texto guardado con origen `plantilla`, **cuando** más tarde hay conexión, **entonces** no se sustituye por uno del narrador dentro de la misma aventura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un texto guardado con origen plantilla no se sustituye después por uno del narrador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el área de textos del estado, **cuando** se escribe en ella, **entonces** se usa la que SPEC-016 declara, con sus mismas tres partes —clave, texto y origen— y sin añadirle ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Dos huecos distintos que piden el mismo texto lo guardan una sola vez y lo citan por su clave",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un mundo sembrado con `\"42.40,-8.81#1\"`, **cuando** se genera una aventura con el narrador disponible y la misma aventura sin red, **entonces** las dos tienen el mismo casting, los mismos beats en el mismo orden, las mismas cantidades de oro y los mismos objetos, y el mismo lazo, y solo difieren los textos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una aventura casteada y dos respuestas distintas del narrador, **cuando** se aplica cada una, **entonces** las dos aventuras resultantes son idénticas en todo lo que no es texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la operación que viste una aventura, **cuando** se inspecciona, **entonces** solo escribe referencias a textos y no toca ningún otro campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una aventura vestida, **cuando** se enumeran los datos por los que alguna regla bifurca, **entonces** ninguno tiene origen `llm`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El modelo no escribe ningún dato vivo",
+      "escenario": "El modelo no escribe ningún dato vivo"
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el módulo del narrador, **cuando** se inspecciona, **entonces** no genera mundo, no castea, no propaga y no resiembra nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El módulo del narrador no genera mundo, no castea, no propaga y no resiembra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una partida entera jugada sin red y la misma jugada con el narrador, **cuando** se comparan sus registros de hechos, **entonces** son idénticos salvo en las referencias a textos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica",
+      "nota": "Se afirma sobre el esqueleto de la aventura, que es lo que esta fila entrega; el registro de hechos de una partida entera es de SPEC-013."
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una petición sin ningún hueco que redactar, **cuando** se pide una redacción, **entonces** no se hace ninguna llamada y se devuelve una lista vacía, que no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una petición sin ningún hueco que redactar devuelve una lista vacía y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una petición con un locale que ningún paquete de idioma cubre, **cuando** se valida, **entonces** falla nombrando el locale y enumerando los disponibles.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un locale que ningún paquete de idioma cubre falla nombrando el locale y enumerando los disponibles",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una petición con un tipo de hueco que el catálogo no declara, **cuando** se valida, **entonces** falla nombrando el tipo recibido y enumerando los válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un tipo de hueco que el catálogo no declara falla nombrando el recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una petición con un hueco sin texto de fallback, **cuando** se valida, **entonces** falla nombrando el hueco, antes de llamar a nadie.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Un hueco sin texto de fallback falla antes de llamar a nadie",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** la llamada de red que lanza un error, **cuando** se resuelve la redacción, **entonces** todos los huecos caen al fallback con el motivo del catálogo y el error no se propaga a la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "La llamada de red que lanza un error no se propaga a la pantalla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** el módulo sin la llamada de red inyectada, **cuando** se pide una redacción, **entonces** todos los huecos caen al fallback y no se intenta ninguna conexión.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El módulo sin la llamada de red inyectada cae al fallback sin intentar ninguna conexión",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta que trae más huecos de los que se pidieron, **cuando** se valida, **entonces** los que nadie pidió se descartan sin interpretarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Los huecos que nadie pidió se descartan y los que faltan caen al fallback",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una respuesta que trae menos huecos de los que se pidieron, **cuando** se valida, **entonces** los que faltan caen al fallback y los que llegaron se adoptan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Los huecos que nadie pidió se descartan y los que faltan caen al fallback",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** un catálogo de plantillas vacío, **cuando** se pide una redacción, **entonces** no hay ningún hueco y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Una petición sin ningún hueco que redactar devuelve una lista vacía y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una plantilla del catálogo, **cuando** se comprueba, **entonces** declara un texto de fallback para cada hueco que puede pedirle al narrador, y sin uno de ellos la plantilla se rechaza al cargarse el catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "Sin cobertura, la preparación dice lo mismo",
+      "escenario": "Sin cobertura, la preparación dice lo mismo",
+      "nota": "De este escenario @app esta fila sostiene solo la mitad de datos: sin red hay texto de plantilla para cada hueco, el mismo que con cobertura. La pantalla es de la fila 28."
+    },
+    {
+      "spec": "SPEC-018",
+      "criterio": "**Dado** una reserva vacía, **cuando** se abre la salida, **entonces** no se hace ninguna llamada y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/narrador.test.mjs",
+      "caso": "El zurrón solo aparece si hay reserva que vaciar",
+      "escenario": "El zurrón solo aparece si hay reserva que vaciar",
+      "nota": "De este escenario @app esta fila sostiene solo la mitad de datos: sin reserva no hay ninguna llamada ni ningún error. La pantalla es de la fila 42."
     }
   ]
 }
