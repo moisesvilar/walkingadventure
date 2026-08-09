@@ -9,7 +9,8 @@
     "./world/*": "./world/*",
     "./names/*": "./names/*",
     "./partida/*": "./partida/*",
-    "./quests/*": "./quests/*"
+    "./quests/*": "./quests/*",
+    "./render/*": "./render/*"
   },
   "engines": {
     "node": ">=20"

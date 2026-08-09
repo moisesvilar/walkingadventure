@@ -9,6 +9,7 @@
     "android": "expo run:android"
   },
   "dependencies": {
+    "@shopify/react-native-skia": "2.6.2",
     "@walkingadventure/nucleo": "*",
     "expo": "~57.0.11",
     "expo-haptics": "~57.0.1",
