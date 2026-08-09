@@ -255,6 +255,32 @@ export function semillaDePasoDePrologo(semilla, mapaId, intento, n) {
   return `${semillaDePrologo(semilla, mapaId, intento)}${SUFIJO_DE_PASO}${n}`;
 }
 
+/**
+ * El sufijo del sorteo de sugerencias de nombre del arranque, declarado aquí por lo
+ * mismo que los del paso y el prólogo: un sufijo propio para que su azar no desplace
+ * el de nada más.
+ *
+ * Va **aparte de `SUFIJOS_DE_FASE`** porque sortear cuatro nombres no es una fase de
+ * la tubería y no cuelga de ninguna celda: ocurre antes de que exista ningún mapa, y
+ * de hecho antes de que se sepa dónde se va a levantar.
+ */
+export const SUFIJO_DE_SUGERENCIAS = ':nombres:';
+
+/**
+ * La semilla de la ronda `ronda` de sugerencias de nombre.
+ *
+ * Cuelga de la semilla de la **partida** y no de la de un mapa, que todavía no
+ * existe. La ronda entra en la derivación porque «↻ otro» tiene que dar otras
+ * cuatro: sin ella, resortear devolvería siempre las mismas y el botón sería un
+ * adorno.
+ */
+export function semillaDeSugerencias(semilla, ronda) {
+  if (!Number.isInteger(ronda) || ronda < 0) {
+    throw new Error(`ronda de sugerencias inválida ${JSON.stringify(ronda) ?? String(ronda)}: las rondas se numeran desde cero con enteros no negativos`);
+  }
+  return `${semilla}${SUFIJO_DE_SUGERENCIAS}${ronda}`;
+}
+
 /** La semilla de una celda concreta de un mapa. */
 export function semillaDeCelda(semilla, mapaId, celda) {
   return `${semillaDeMapa(semilla, mapaId)}#${celda.i},${celda.j}`;

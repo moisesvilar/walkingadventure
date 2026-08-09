@@ -14,6 +14,29 @@ export function namesFor(locale) {
   return locale === 'gl' ? gl : es;
 }
 
+/** Los idiomas con paquete de nombres declarado, en orden declarado. */
+export const IDIOMAS = Object.freeze(['es', 'gl']);
+
+/**
+ * El paquete de un idioma, **o un error que lo nombra**.
+ *
+ * Convive con `namesFor` y no la sustituye: aquella cae al castellano a propósito
+ * porque nombrar un mundo fuera de Galicia con el paquete castellano es la decisión
+ * correcta y no una degradación. El arranque no puede caer igual — las sugerencias de
+ * nombre saldrían de otro idioma sin que nadie lo dijera, y `personaje.md` §1 pide
+ * justo lo contrario: que el nombre pegue con el sitio. Por eso quien necesite el
+ * paquete resuelto de verdad pide este.
+ */
+export function exigeNombres(locale) {
+  if (!IDIOMAS.includes(locale)) {
+    throw new Error(
+      `el idioma ${JSON.stringify(locale) ?? String(locale)} no tiene paquete de nombres declarado: los declarados son ${IDIOMAS.join(', ')}. ` +
+      'Un idioma nuevo trae el suyo, en vez de resolverse en silencio con el de otro',
+    );
+  }
+  return namesFor(locale);
+}
+
 /**
  * Índice de nombres de un mundo: uno solo, creado en build.js y compartido por las
  * cinco familias que nombran (núcleos, granjas, servicios, parajes y calzadas).

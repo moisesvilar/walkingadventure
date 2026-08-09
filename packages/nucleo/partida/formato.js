@@ -37,6 +37,12 @@ export const CLASES = Object.freeze({
   CELDA: 'celda',
   ESTADO: 'estado-de-partida',
   REGISTRO: 'registro-de-hechos',
+  // El arranque a medio contestar (SPEC-027). Es un documento de esta misma familia y
+  // no un fichero aparte por lo mismo que los otros: comparte la constante de versión
+  // y la escritura canónica. Existe **antes** de que haya partida —esa es toda su
+  // razón de ser: sin él, cerrar la app durante la generación obligaría a repetir el
+  // onboarding entero— y desaparece en cuanto la partida se crea.
+  ARRANQUE: 'arranque-en-curso',
 });
 
 // --- El lenguaje del esquema ------------------------------------------------

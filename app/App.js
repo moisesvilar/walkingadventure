@@ -18,6 +18,7 @@ import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native
 
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
+import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
@@ -34,6 +35,10 @@ export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
   const [enRevision, setEnRevision] = useState(false);
   const [enMapa, setEnMapa] = useState(false);
+  // La app abre en el arranque, que es lo que ve quien la instala. Se sale de él por
+  // el botón «Salir a andar» de A1P7, que es la frontera de registro y el único
+  // camino: no hay manera de volver a entrar salvo por «empezar de nuevo».
+  const [enArranque, setEnArranque] = useState(true);
 
   useEffect(() => {
     let vivo = true;
@@ -50,6 +55,14 @@ export function App() {
       suscripcion.remove();
     };
   }, []);
+
+  if (enArranque) {
+    return (
+      <SafeAreaView style={estilos.raiz}>
+        <ArranqueMontado alSalirAAndar={() => setEnArranque(false)} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={estilos.raiz}>

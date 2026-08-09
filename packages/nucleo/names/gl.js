@@ -146,6 +146,22 @@ export const gl = {
    * género** en lugar de caer en el otro, y sin `rng` devuelve la forma de
    * desempate, que encadena epítetos y por eso siempre deja un nombre libre.
    */
+  /**
+   * El repertorio de nombres propios de un género, sin epíteto y sin sortear. Misma
+   * regla que en `es` y por el mismo motivo: el arranque propone nombres a quien
+   * juega, y «Aldara a Zurda» es un nombre de reparto, no una sugerencia.
+   */
+  personNames(genero) {
+    const nombres = NOMBRES_DE_PERSONA[genero];
+    if (!nombres) {
+      throw new Error(
+        `el paquete de idioma "gl" no tiene repertorio de nombres de persona para el género ${JSON.stringify(genero) ?? String(genero)}: ` +
+        `los que declara son ${Object.keys(NOMBRES_DE_PERSONA).join(', ')}`,
+      );
+    }
+    return nombres.slice();
+  },
+
   personName(rng, genero, { base = null, intento = 0 } = {}) {
     const nombres = NOMBRES_DE_PERSONA[genero];
     const epitetos = EPITETOS_DE_PERSONA[genero];
