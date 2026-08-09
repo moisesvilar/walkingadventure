@@ -365,12 +365,14 @@ function normalizaDemanda(demanda) {
  *   la celda; `semilla` la de la celda, de la que sale el desempate del orden;
  *   `demanda` cuántos anclajes hacen falta —`{ total, suelo }` o un número—, que
  *   **llega inyectada** porque los cupos son de otras fases; `places` la fuente de
- *   relleno, opcional y cuya ausencia es un caso normal; `radio` y `seaMask`, si
+ *   relleno, opcional y cuya ausencia es un caso normal; `placesActivo`, el
+ *   interruptor de SPEC-025, que apagado deja el pool en OSM sin cambiar nada más;
+ *   `radio` y `seaMask`, si
  *   quien construye ya los conoce, para no admitir lo que cae fuera del mundo o en
  *   el mar.
  * @returns el pool, con su registro de uso único.
  */
-export function construyePool({ poiJson, lat0, lon0, semilla = null, demanda = null, places = null, radio = null, seaMask = null } = {}) {
+export function construyePool({ poiJson, lat0, lon0, semilla = null, demanda = null, places = null, radio = null, seaMask = null, placesActivo = true } = {}) {
   const proj = makeProjector(lat0, lon0);
   const cuenta = {
     // Las familias se declaran todas y en el orden del filtro: si se fueran
@@ -407,7 +409,10 @@ export function construyePool({ poiJson, lat0, lon0, semilla = null, demanda = n
   // Places solo cubre déficit: no sustituye ninguna fase, y una celda que ya llega
   // a su demanda con OSM no admite ni una entrada suya (`parajes.md`).
   const exigido = normalizaDemanda(demanda);
-  const ofreceRelleno = places != null;
+  // El interruptor de Places (SPEC-025) apagado se comporta **exactamente** como no
+  // haber ofrecido fuente de relleno: el pool se queda en OSM y el mundo se genera
+  // igual, sin un estado nuevo que las pantallas pudieran llegar a distinguir.
+  const ofreceRelleno = placesActivo && places != null;
   let deOsm = anclajes.length;
   let admitidosDePlaces = 0;
   if (ofreceRelleno && exigido.total > anclajes.length) {
