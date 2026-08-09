@@ -1338,6 +1338,61 @@ Conviene que esté escrito, porque una suite que finge cubrirlo todo es peor que
 - **Si un mundo generado es bonito.** El informe de casting mide salud, no belleza. El declutter de rótulos sí es comprobable —ninguna caja se solapa con otra— y debe tener su prueba cuando se implemente.
 - **Si el reparto de NPCs se percibe equilibrado.** Se mide por mundo, y eso sí está automatizado; lo que el jugador percibe es por partida, y son cosas distintas (`lenguaje.md`, pendiente 3).
 
+```gherkin
+# language: es
+
+@nucleo
+Característica: Ningún rótulo del mapa pisa a otro
+  La colocación calcula posición y tamaño de todos los rótulos antes de pintar
+  y garantiza que ninguno pisa a otro. Es la deuda de render más antigua del
+  proyecto, y con placa opaca en los núcleos canta a la primera.
+  Fuente: arquitectura.md · RF-MAPA-003
+  Hueco cerrado: RF-MAPA-003, marcado «⚠ sin escenario» en docs/prd.md §4.9.
+
+  Escenario: Ninguna pareja de rótulos se solapa en un mundo denso
+    Dado un mundo urbano denso pintado con el estilo por defecto
+    Cuando se colocan todos sus rótulos
+    Entonces ninguna pareja de cajas se solapa
+
+  Escenario: Ningún rótulo pisa un glifo ni la cartela ni la brújula
+    Dado un mundo cualquiera con su cartela y su brújula
+    Cuando se colocan todos sus rótulos
+    Entonces ninguna caja pisa un glifo del mapa
+    Y ninguna caja pisa la cartela ni la brújula
+
+  Escenario: Ningún rótulo se sale del marco
+    Dado un mundo con núcleos pegados al borde
+    Cuando se colocan todos sus rótulos
+    Entonces todas las cajas quedan dentro del marco
+
+  Escenario: El rótulo de un núcleo no se retira mientras quepa en algún sitio
+    Dado un mundo donde dos rótulos compiten por el mismo hueco
+    Cuando se colocan
+    Entonces el del núcleo conserva su nombre
+
+  Escenario: Cuando dos no caben, se retira el de menor prioridad y su pueblo se sigue dibujando
+    Dado un mundo donde dos rótulos protegidos no caben ni alejándolos
+    Cuando se colocan
+    Entonces se retira el nombre del de menor rango
+    Pero su glifo se dibuja igual
+
+  Escenario: Ningún rótulo se encoge ni se recorta para caber
+    Dado un mundo con rótulos en conflicto
+    Cuando se colocan
+    Entonces todas las cajas conservan el tamaño que pide su estilo
+    Y ningún texto aparece cortado
+
+  Escenario: La misma colocación para el mismo mundo, el mismo estilo y el mismo encuadre
+    Dado un mundo con su estilo y su encuadre
+    Cuando se colocan sus rótulos dos veces
+    Entonces las dos colocaciones son idénticas caja a caja
+
+  Escenario: El orden de los candidatos no cambia la colocación
+    Dado un mundo con su estilo y su encuadre
+    Cuando se colocan sus rótulos con los candidatos en otro orden
+    Entonces la colocación es idéntica caja a caja
+```
+
 ## Lo que hay que montar para poder ejecutar esto
 
 - **Fixtures de OSM congelados** para varios mundos: uno costero, uno urbano denso, uno de barrio de tres calles y uno en el suelo de 250 m.

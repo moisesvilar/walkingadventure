@@ -234,6 +234,106 @@ export const ESTILOS = [reino, clasico, pergamino, cuento, atlas];
 /** El estilo con el que se pinta si nadie dice otra cosa. */
 export const ESTILO_POR_DEFECTO = 'reino';
 
+// --- la escala de la lámina --------------------------------------------------------
+// Las métricas de rótulo de los cinco estilos son las del prototipo **tal cual**, y el
+// prototipo pinta sobre un lienzo de 1300 px (`prototipo/index.html`). La lámina del
+// móvil tiene 390. Sin escalar, una placa de núcleo mide 213-322 px contra 254 de marco
+// útil, 21 candidatos son más anchos que el marco entero y se retiran ocho de cada diez
+// nombres: el algoritmo de colocación hace lo correcto —antes retirar que cortar— sobre
+// unos números que no son de esta pantalla.
+//
+// Lo que se escala es **el estilo para el dispositivo**, una vez y para todos los
+// rótulos a la vez. No es un apaño por rótulo: ninguno se encoge para caber, que es lo
+// que SPEC-022 prohíbe, y la jerarquía se conserva entera porque lo que se multiplica
+// es la escala tipográfica del estilo y no el tamaño de un rol suelto.
+
+/** El ancho de lámina para el que están escritas las métricas del prototipo: su lienzo. */
+export const ANCHO_DEL_PROTOTIPO = 1300;
+
+/**
+ * El suelo de la escala, y por qué existe.
+ *
+ * La razón cruda —390/1300 = 0,30— deja el nombre de una ciudad en 7 px y el de un
+ * paraje en 4: un mapa cuyos nombres no se leen es el mismo mapa sin nombres que se
+ * quería arreglar, así que la escala se detiene antes y el mapa muestra menos nombres
+ * en lugar de nombres ilegibles.
+ *
+ * El valor sale de medir, no de elegirlo: sobre los cuatro mundos de referencia por sus
+ * cinco estilos, **0,65 es la escala más grande a la que no se retira ni un rótulo por
+ * no caber en el marco** (61 lo hacían) y a la que 69 de los 70 núcleos conservan su
+ * nombre (lo hacían 26). Por encima vuelven a caerse núcleos; por debajo ya no se gana
+ * casi nada y la jerarquía empieza a aplastarse —ciudad y pueblo se juntan— porque los
+ * tamaños se redondean a píxeles enteros.
+ */
+export const SUELO_DE_ESCALA_DE_LAMINA = 0.65;
+
+/**
+ * Qué claves están escritas en píxeles de lámina y por tanto escalan con ella.
+ *
+ * `margin` va aquí y no es una métrica de rótulo: es la que fija el marco útil, y con
+ * 46 px por lado de una lámina de 390 el marco se queda con el 65 % del ancho, contra
+ * el 91 % que tiene en el prototipo. Ninguna escala tipográfica arregla eso —un nombre
+ * de pueblo que cabe de sobra se sigue retirando porque su caja no cabe entre los dos
+ * márgenes—, así que el margen escala con lo demás.
+ */
+const METRICAS_DE_LAMINA = Object.freeze({
+  // `scale` es la escala tipográfica del estilo, por la que se multiplica el tamaño de
+  // cada rol: multiplicarla aquí es lo que conserva la jerarquía entera —una ciudad
+  // sigue siendo mayor que un pueblo y que un paraje— en lugar de recortar rótulo a
+  // rótulo. `haloW` y `tracking` son lo que el halo y el interletraje añaden a la caja.
+  label: ['scale', 'haloW', 'tracking'],
+  // Los márgenes de la placa, su filete y su redondeo: si no escalaran con la letra, la
+  // caja de un nombre de 15 px llevaría el acolchado de uno de 23, y la placa dejaría
+  // de leerse como la cartela pequeña que es.
+  placa: ['padX', 'padY', 'lw', 'radio'],
+});
+
+/** Las claves sueltas, fuera de grupo, que también están en píxeles de lámina. */
+const METRICAS_SUELTAS_DE_LAMINA = Object.freeze(['margin']);
+
+/**
+ * Lo que hay que encoger las métricas de una lámina de este ancho.
+ *
+ * Es continua y monótona, y a 1300 px vale 1: una lámina del tamaño del lienzo del
+ * prototipo pinta exactamente lo que pinta el prototipo, que es lo que mantiene con
+ * sentido la revisión de paridad visual.
+ */
+export function escalaDeLamina(ancho) {
+  if (!Number.isFinite(ancho) || ancho <= 0) {
+    throw new Error(`escalaDeLamina: el ancho de la lámina tiene que ser positivo; llegó ${ancho}`);
+  }
+  return Math.min(1, Math.max(SUELO_DE_ESCALA_DE_LAMINA, ancho / ANCHO_DEL_PROTOTIPO));
+}
+
+/**
+ * El estilo escalado para una lámina de este ancho.
+ *
+ * Devuelve **otro objeto de datos**, con la misma forma y las mismas claves: quien pinta
+ * y quien coloca siguen leyendo del estilo, y ninguno de los dos sabe que ha habido un
+ * escalado ni tiene un tamaño escrito dentro. Lo que no toca es todo lo que no está en
+ * píxeles de lámina —colores, tipografías, modos, capas— ni lo que es grosor de tinta:
+ * el filete del marco mide lo que mide en cualquier pantalla.
+ *
+ * El catálogo no se muta: `ESTILOS` sigue siendo clave a clave el del prototipo, que es
+ * lo que la revisión de paridad de SPEC-021 compara.
+ */
+export function estiloParaLamina(estilo, ancho) {
+  const k = escalaDeLamina(ancho);
+  if (k === 1) return estilo;
+  const salida = { ...estilo };
+  for (const clave of METRICAS_SUELTAS_DE_LAMINA) {
+    if (Number.isFinite(estilo[clave])) salida[clave] = estilo[clave] * k;
+  }
+  for (const [grupo, claves] of Object.entries(METRICAS_DE_LAMINA)) {
+    const original = estilo[grupo];
+    if (!original || typeof original !== 'object') continue; // `placa: null` en los estilos sin caja
+    const escalado = { ...original };
+    for (const clave of claves) if (Number.isFinite(original[clave])) escalado[clave] = original[clave] * k;
+    salida[grupo] = escalado;
+  }
+  return salida;
+}
+
 /**
  * Un catálogo con estilos añadidos.
  *

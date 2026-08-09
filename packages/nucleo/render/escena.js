@@ -9,7 +9,7 @@
 import { makeRng } from '../core/rng.js';
 import { pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
 import { isSea } from '../world/seamask.js';
-import { ESTILO_POR_DEFECTO, ESTILOS, resuelveEstilo } from './estilos.js';
+import { ESTILO_POR_DEFECTO, ESTILOS, estiloParaLamina, resuelveEstilo } from './estilos.js';
 
 /**
  * El sufijo con el que se siembra el azar del pintado —grano del papel, siembra de
@@ -18,7 +18,12 @@ import { ESTILO_POR_DEFECTO, ESTILOS, resuelveEstilo } from './estilos.js';
  */
 export const SUFIJO_DE_RENDER = ':render';
 
-/** Tamaños de rótulo por rol, antes de la escala tipográfica del estilo y del factor de letra. */
+/**
+ * Tamaños de rótulo por rol, antes de la escala tipográfica del estilo y del factor de
+ * letra. Son los del prototipo y siguen siéndolo: lo que los lleva a la lámina del
+ * móvil es `estiloParaLamina`, que multiplica la escala tipográfica del estilo. Por eso
+ * la jerarquía de aquí —ciudad, pueblo, aldea, paraje— vale en cualquier pantalla.
+ */
 export const TAMANO_DE_ROTULO = Object.freeze({ ciudad: 25, pueblo: 19, aldea: 15, granja: 12, paraje: 13, servicio: 18, ruta: 16 });
 
 /** Tamaño del glifo de núcleo por tipo, en px. */
@@ -167,14 +172,21 @@ export function componeEscena({
   if (typeof colocador !== 'function') throw new Error('componeEscena necesita que se le inyecte colocador(rotulos, contexto) → [{ id, x, y }]');
   if (!Number.isFinite(factorTexto) || factorTexto <= 0) throw new Error(`componeEscena: el factor de tamaño de letra tiene que ser un número positivo; llegó ${factorTexto}`);
 
-  const { estilo, sustitucion } = resuelveEstilo(estiloPedido, catalogo);
+  const { estilo: estiloDelCatalogo, sustitucion } = resuelveEstilo(estiloPedido, catalogo);
+  // El estilo se escala para la lámina **una vez, aquí**, y a partir de este punto nadie
+  // vuelve a ver el del catálogo: quien coloca y quien pinta leen las métricas del mismo
+  // objeto y no pueden discrepar. Es lo que impide que la caja que se reserva y la placa
+  // que se dibuja lleven acolchados distintos, y lo que deja el escalado fuera del
+  // código de dibujo, que sigue sin tener ni un tamaño propio.
+  const estilo = tamano.ancho > 0 ? estiloParaLamina(estiloDelCatalogo, tamano.ancho) : estiloDelCatalogo;
 
   // Una superficie sin área no se pinta y no falla: es lo que ocurre entre que la
   // pantalla se monta y el gestor de ventanas le da tamaño.
   if (tamano.ancho <= 0 || tamano.alto <= 0) {
     return Object.freeze({
       version: 1, estilo: estilo.id, sustitucion, tamano: { ...tamano }, vista: null,
-      primitivas: Object.freeze([]), rotulos: Object.freeze([]), capas: PLAN_DE_CAPAS, vacia: true,
+      primitivas: Object.freeze([]), rotulos: Object.freeze([]), retirados: Object.freeze([]),
+      colocacion: Object.freeze([]), capas: PLAN_DE_CAPAS, vacia: true,
     });
   }
 
@@ -351,6 +363,12 @@ export function componeEscena({
   // ── 13 · calzadas y ramales ─────────────────────────────────────────────────
   capa('calzadas');
   const rotulos = [];
+  // Los bultos que dibuja cada elemento, y lo que solo esta capa sabe de cada rótulo.
+  // El colocador los necesita para dos cosas: que ninguna caja pise un glifo —ni
+  // siquiera el del propio elemento— y medir las ocho posiciones desde el bulto, que
+  // es de donde cuelga el nombre, y no desde el sitio donde hoy cae el texto.
+  const glifos = [];
+  const extras = {};
   const calzadas = exigeLista(documento.routes, 'routes', 'calzadas');
   const grosorDeRamal = (r, w) => (r.ramal ? w * 0.62 : w);
   for (const r of calzadas) {
@@ -369,7 +387,11 @@ export function componeEscena({
     calzadas.forEach((r, i) => {
       const sitio = sitioDelRotuloDeCalzada(r, px);
       if (!sitio) return;
-      rotulos.push({ id: `ruta:${i}`, rol: 'ruta', texto: r.name, ancla: sitio.punto, rotacion: sitio.angulo, tamano: TAMANO_DE_ROTULO.ruta, base: 'bottom', dy: -6 });
+      const id = `ruta:${i}`;
+      rotulos.push({ id, rol: 'ruta', texto: r.name, ancla: sitio.punto, rotacion: sitio.angulo, tamano: TAMANO_DE_ROTULO.ruta, base: 'bottom', dy: -6 });
+      // Con el trazado entero, el rótulo de calzada puede deslizarse desde el punto
+      // medio hacia los extremos en lugar de retirarse en cuanto el medio está ocupado.
+      extras[id] = { ancla: sitio.punto, radio: 0, trazado: r.pts.map(px) };
     });
   }
 
@@ -379,7 +401,15 @@ export function componeEscena({
   parajes.forEach((p, i) => {
     const q = px(p);
     componeGlifoDeParaje(p.type, q, p === v.paraje, estilo, { camino, circulo });
-    rotulos.push({ id: `paraje:${i}`, rol: 'paraje', texto: p.name, ancla: { x: q.x, y: q.y + 12 }, rotacion: 0, tamano: TAMANO_DE_ROTULO.paraje, base: 'top', dy: 0 });
+    const id = `paraje:${i}`;
+    // El bulto de un paraje ilustrado cuelga hacia arriba del punto —la ermita, la
+    // atalaya—, así que su caja no está centrada en él.
+    const bulto = estilo.glyph.mode === 'punto'
+      ? bultoDe(q.x, q.y, 9, 9)
+      : bultoDe(q.x, q.y - 8, 20, 18);
+    glifos.push({ id, caja: bulto });
+    rotulos.push({ id, rol: 'paraje', texto: p.name, ancla: { x: q.x, y: q.y + 12 }, rotacion: 0, tamano: TAMANO_DE_ROTULO.paraje, base: 'top', dy: 0 });
+    extras[id] = { ancla: { x: q.x, y: q.y }, glifo: bulto };
   });
 
   // ── 15 · glifos de núcleo ───────────────────────────────────────────────────
@@ -392,14 +422,22 @@ export function componeEscena({
     const q = px(s);
     const medida = TAMANO_DE_GLIFO[s.type];
     componeGlifoDeNucleo(s.type, q, medida, estilo, { camino, circulo });
+    const id = `nucleo:${i}`;
+    // El bulto es el punto rojo o la casita, según lo que pinte el estilo; la
+    // separación del nombre es la misma en los dos, que es la de hoy.
+    const bulto = estilo.glyph.mode === 'punto'
+      ? bultoDe(q.x, q.y, RADIO_DE_PUNTO[s.type] * 2, RADIO_DE_PUNTO[s.type] * 2)
+      : bultoDe(q.x, q.y - medida * 0.4, medida * 2, medida * 1.6);
+    glifos.push({ id, caja: bulto });
     // El núcleo enfocado no lleva rótulo: su nombre está en la cartela y taparía
     // los marcadores de servicio. Las granjas tampoco: son demasiado ruido.
     if (s !== v.foco && s.type !== 'granja') {
       rotulos.push({
-        id: `nucleo:${i}`, rol: 'nucleo', texto: s.name,
+        id, rol: 'nucleo', texto: s.name,
         ancla: { x: q.x, y: q.y + medida * 0.75 + 3 }, rotacion: 0,
         tamano: TAMANO_DE_ROTULO[s.type], base: 'top', dy: 0, variante: VARIANTE_DE_ROTULO[s.type],
       });
+      extras[id] = { ancla: { x: q.x, y: q.y }, glifo: bulto, rango: s.type };
     }
   }
 
@@ -416,7 +454,13 @@ export function componeEscena({
         pintura: pintaTexto({ color: estilo.glyph.fill, familia: estilo.cartouche.family, tamano: TAMANO_DE_LETRA_DE_MARCADOR, peso: 'bold' }),
       });
       circulo(q.x, q.y, 3.5, pinta({ relleno: estilo.glyph.stroke }));
-      rotulos.push({ id: `servicio:${i}`, rol: 'servicio', texto: p.name, ancla: { x: q.x, y: q.y + 6 }, rotacion: 0, tamano: TAMANO_DE_ROTULO.servicio, base: 'top', dy: 0 });
+      const id = `servicio:${i}`;
+      // El bulto del servicio es el alfiler entero: el punto, la caña y el disco de
+      // la letra, que es lo que de verdad ocupa sitio.
+      const bulto = bultoDe(q.x, q.y - 22, 28, 48);
+      glifos.push({ id, caja: bulto });
+      rotulos.push({ id, rol: 'servicio', texto: p.name, ancla: { x: q.x, y: q.y + 6 }, rotacion: 0, tamano: TAMANO_DE_ROTULO.servicio, base: 'top', dy: 0 });
+      extras[id] = { ancla: { x: q.x, y: q.y }, glifo: bulto };
     });
   }
 
@@ -427,7 +471,12 @@ export function componeEscena({
 
   // ── 18 · rótulos, todos, en una sola pasada ─────────────────────────────────
   capa('rotulos');
-  const colocados = colocaRotulos({ rotulos, estilo, factorTexto, medidor, colocador, tamano, caja });
+  const titulo = v.foco ? v.foco.name : v.paraje ? v.paraje.name : exige(documento.title, 'title', 'cartela');
+  const { colocados, retirados } = colocaRotulos({
+    rotulos, estilo, factorTexto, medidor, colocador, tamano, caja, glifos, extras,
+    reservadas: zonasReservadas({ estilo, caja, W, titulo, medidor, v, px }),
+    marco: marcoDeRotulos(estilo, caja),
+  });
   for (const rotulo of colocados) componeRotulo(rotulo, estilo, { texto, camino, guarda, restaura, transforma });
 
   // ── 19 · viñeteo ────────────────────────────────────────────────────────────
@@ -453,7 +502,6 @@ export function componeEscena({
 
   // ── 22 · cartela ────────────────────────────────────────────────────────────
   capa('cartela');
-  const titulo = v.foco ? v.foco.name : v.paraje ? v.paraje.name : exige(documento.title, 'title', 'cartela');
   componeCartela({ estilo, caja, W, titulo, medidor, texto, camino });
 
   // ── 23 · barra de escala ────────────────────────────────────────────────────
@@ -472,6 +520,16 @@ export function componeEscena({
     factorTexto,
     capas: PLAN_DE_CAPAS,
     rotulos: Object.freeze(colocados.map((r) => Object.freeze({ id: r.id, rol: r.rol, texto: r.texto, x: r.x, y: r.y, caja: r.medida }))),
+    // Lo que se ha retirado y por qué. Es un dato para quien programa y no una
+    // superficie: a la jugadora no se le explica que un nombre no cupo.
+    retirados: Object.freeze(retirados.map((r) => Object.freeze({ ...r }))),
+    // El volcado inerte de la colocación, que es lo que la lámina expone en
+    // `mapa-colocacion`: un lienzo no tiene nodos que alcanzar y sin esto una prueba
+    // de aplicación solo podría afirmar que el mapa se pintó.
+    colocacion: Object.freeze(colocados.map((r) => Object.freeze({
+      id: r.id, rol: r.rol, posicion: r.posicion ?? null,
+      caja: r.cajaColocada ?? null, tirador: r.tirador ?? null,
+    }))),
     primitivas: Object.freeze(primitivas),
     vacia: false,
   });
@@ -798,23 +856,126 @@ function tipografiaDeRotulo(estilo, rotulo, factorTexto) {
 }
 
 /**
- * Mide todos los rótulos y se los da **de golpe** al colocador, que devuelve la
- * posición de todos antes de que se pinte nada. El colocador de esta spec es el
- * provisional y puede solapar; el de la fila 22 entra por aquí sin tocar ni este
- * módulo ni el que dibuja.
+ * El marco dentro del que tiene que caber un rótulo entero: el área pintada menos la
+ * banda que ocupa el marco del estilo. Un rótulo que no cabe entero no se pinta
+ * recortado —un topónimo a medias no es un topónimo—: se retira.
  */
-function colocaRotulos({ rotulos, estilo, factorTexto, medidor, colocador, tamano, caja }) {
+// Lo que ocupa hacia dentro la tinta de cada marco: el filete interior y su grosor
+// para 'double' y 'ticks', el rombo del marco dorado, la hoja de la zarza. A sangre
+// no hay marco y basta con no pegar el rótulo al borde del lienzo.
+const BANDA_DE_MARCO = { none: 2, ticks: 11, double: 11, vine: 16, ornate: 14 };
+
+function marcoDeRotulos(estilo, caja) {
+  const banda = BANDA_DE_MARCO[estilo.frame.mode] ?? 12;
+  return caja.modo === 'disc'
+    ? { modo: 'disc', cx: caja.cx, cy: caja.cy, R: Math.max(0, caja.R - banda) }
+    : { modo: 'rect', x0: caja.x0 + banda, y0: caja.y0 + banda, x1: caja.x1 - banda, y1: caja.y1 - banda };
+}
+
+/**
+ * Una caja de datos, sin más: el bulto que ocupa un glifo o una zona reservada. Se
+ * declara aquí en lugar de traerla de `core/cajas.js` porque esto no hace geometría
+ * —quien la hace es la colocación—: aquí solo se dice dónde cae lo que se pinta.
+ */
+function bultoDe(cx, cy, ancho, alto) {
+  return Object.freeze({ cx, cy, ancho, alto, rot: 0 });
+}
+
+/**
+ * Las zonas que ningún rótulo invade: la cartela, la brújula, la barra de escala
+ * cuando está encendida y la marca de la jugadora.
+ *
+ * Llegan a la colocación **ya calculadas**, porque quien las dibuja es quien sabe
+ * dónde caen. Sus medidas se repiten aquí en lugar de componerlas antes: el orden de
+ * las capas es dato, y adelantar la cartela para que los rótulos la esquiven la
+ * pintaría debajo del mapa.
+ */
+function zonasReservadas({ estilo, caja, W, titulo, medidor, v, px }) {
+  const zonas = [];
+
+  const C = estilo.cartouche;
+  if (C.mode !== 'none') {
+    const cadena = estilo.label.upper ? titulo.toUpperCase() : titulo;
+    const medida = mide(medidor, cadena, { familia: C.family, tamano: C.size, italica: false, peso: '', tracking: C.tracking }, 'la cartela');
+    // Lo que cada forma de cartela añade al ancho del texto: los banderines del
+    // estandarte, las volutas del rollo, el redondeo de la caja o nada si va a pelo.
+    const vuelo = C.mode === 'banner' ? 130 : C.mode === 'scroll' ? 92 : C.mode === 'plain' ? 12 : 44;
+    const y = C.pos === 'bottom' ? caja.y1 - 46 : caja.y0 + 42;
+    zonas.push({ nombre: 'cartela', caja: bultoDe(W / 2, y, medida.ancho + vuelo, C.size + 34) });
+  }
+
+  // Una brújula pintada **detrás** del mapa no es un obstáculo: es una marca de agua
+  // bajo el papel, y el mapa entero se pinta encima. Reservarle sitio como si
+  // estorbara es lo que dejaba a Atlas —cuya brújula mide 442 px en una lámina de
+  // 390— sin sitio para ningún rótulo en media pantalla.
+  if (estilo.compass.mode !== 'none' && !estilo.compass.behind) {
+    const centro = centroDeBrujula(caja, estilo);
+    const k = estilo.compass.scale;
+    const radio = estilo.compass.mode === 'thin' ? 26 * k * 2.5
+      : estilo.compass.mode === 'rose' ? 26 * k * (estilo.compass.letters ? 2.2 : 1.6)
+        : estilo.compass.mode === 'star' ? 30 * k * 1.5 : 34;
+    zonas.push({ nombre: 'brujula', caja: bultoDe(centro.x, centro.y, radio * 2, radio * 2) });
+  }
+
+  if (estilo.escala && v.escala === true) {
+    const derecha = estilo.compass.corner === 'sw' && caja.modo !== 'disc';
+    const x = caja.modo === 'disc' ? 40 : derecha ? caja.x1 - 28 : caja.x0 + 28;
+    const y = caja.modo === 'disc' ? caja.y1 + 40 : caja.y1 - 26;
+    zonas.push({ nombre: 'escala', caja: bultoDe(derecha ? x - 100 : x + 100, y - 12, 220, 60) });
+  }
+
+  // La marca de la jugadora es zona reservada aunque esté parada dentro de un núcleo:
+  // ni el rótulo de ese núcleo la pisa.
+  if (v.marca && Number.isFinite(v.marca.x) && Number.isFinite(v.marca.y)) {
+    const q = px(v.marca);
+    zonas.push({ nombre: 'marca', caja: bultoDe(q.x, q.y, 36, 36) });
+  }
+
+  return zonas;
+}
+
+/**
+ * Mide todos los rótulos y se los da **de golpe** al colocador, que devuelve la
+ * posición de todos —y los que retira, con su motivo— antes de que se pinte nada.
+ *
+ * Lo que esta capa aporta y el colocador no puede saber es el **desfase**: entre el
+ * centro de la caja que se pinta y el punto donde se escribe el texto hay una placa,
+ * un halo o una filacteria de por medio, y eso es geometría de dibujo.
+ */
+function colocaRotulos({ rotulos, estilo, factorTexto, medidor, colocador, tamano, caja, glifos = [], extras = {}, reservadas = [], marco = null }) {
   const conMedida = rotulos.map((rotulo) => {
     const tipografia = tipografiaDeRotulo(estilo, rotulo, factorTexto);
     const cadena = estilo.label.upper ? rotulo.texto.toUpperCase() : rotulo.texto;
     return { ...rotulo, texto: cadena, tipografia, medida: mide(medidor, cadena, tipografia, `rótulo ${rotulo.id}`) };
   });
 
-  const puestos = colocador(
+  const completos = {};
+  for (const r of conMedida) {
+    const conPlaca = Boolean(estilo.placa) && estilo.label.placa.includes(r.rol);
+    const esFilacteria = r.rol === 'ruta' && estilo.routeLabel.mode === 'ribbon';
+    const alto = conPlaca ? r.tipografia.tamano + estilo.placa.padY * 2 : r.medida.alto;
+    const alBorde = r.base === 'bottom' ? -alto / 2 : r.base === 'middle' ? 0 : alto / 2;
+    completos[r.id] = {
+      ...(extras[r.id] ?? {}),
+      desfase: esFilacteria ? -14 : (r.dy ?? 0) + alBorde,
+      // La filacteria es más ancha y más alta que el texto: cinta, pliegues y todo.
+      margen: esFilacteria
+        ? { x: Math.max(0, (44 - estilo.label.haloW) / 2), y: Math.max(0, (24 - r.medida.alto - estilo.label.haloW) / 2) }
+        : { x: 0, y: 0 },
+    };
+  }
+
+  const salida = colocador(
     conMedida.map((r) => ({ id: r.id, rol: r.rol, texto: r.texto, ancla: { ...r.ancla }, rotacion: r.rotacion, base: r.base, medida: { ...r.medida } })),
-    { tamano: { ...tamano }, caja: { ...caja }, factorTexto },
+    { tamano: { ...tamano }, caja: { ...caja }, factorTexto, estilo, marco, glifos, reservadas, extras: completos },
   );
+
+  // Dos formas de respuesta: la lista pelada de posiciones —la del colocador
+  // provisional, que los pone todos— y la que además declara lo retirado.
+  const puestos = Array.isArray(salida) ? salida : salida?.colocados;
   if (!Array.isArray(puestos)) throw new Error('componeEscena: el colocador tiene que devolver una lista de posiciones');
+  const retirados = Array.isArray(salida?.retirados) ? salida.retirados.map((r) => ({ ...r })) : [];
+  const retiradosPorId = new Set(retirados.map((r) => r.id));
 
   const porId = new Map();
   for (const puesto of puestos) {
@@ -823,14 +984,35 @@ function colocaRotulos({ rotulos, estilo, factorTexto, medidor, colocador, taman
     }
     porId.set(puesto.id, puesto);
   }
-  const faltan = conMedida.filter((r) => !porId.has(r.id)).map((r) => r.id);
-  if (faltan.length) throw new Error(`componeEscena: el colocador devolvió menos rótulos de los que se le dieron; faltan ${faltan.join(', ')}`);
+  const faltan = conMedida.filter((r) => !porId.has(r.id) && !retiradosPorId.has(r.id)).map((r) => r.id);
+  if (faltan.length) throw new Error(`componeEscena: el colocador ni colocó ni retiró todos los rótulos; faltan ${faltan.join(', ')}`);
 
-  return conMedida.map((r) => ({ ...r, x: porId.get(r.id).x, y: porId.get(r.id).y }));
+  return {
+    colocados: conMedida.filter((r) => porId.has(r.id)).map((r) => {
+      const puesto = porId.get(r.id);
+      return {
+        ...r,
+        x: puesto.x,
+        y: puesto.y,
+        rotacion: Number.isFinite(puesto.rotacion) ? puesto.rotacion : r.rotacion,
+        posicion: puesto.posicion ?? null,
+        cajaColocada: puesto.cajaColocada ?? null,
+        tirador: puesto.tirador ?? null,
+      };
+    }),
+    retirados,
+  };
 }
 
 /** Un rótulo ya colocado, resuelto con placa o con halo según lo diga el estilo. */
 function componeRotulo(rotulo, estilo, { texto, camino, guarda, restaura, transforma }) {
+  // El tirador: el filete que ata una caja alejada con su glifo, para que se sepa de
+  // quién es el nombre. Es lo único visible que la colocación añade al repertorio del
+  // mapa, y no inventa ningún color: es el filete del marco.
+  if (rotulo.tirador) {
+    const t = rotulo.tirador;
+    camino([['M', t.x0, t.y0], ['L', t.x1, t.y1]], pinta({ trazo: estilo.frame.color ?? estilo.ink, grosor: 1 }));
+  }
   const rotado = rotulo.rotacion !== 0;
   if (rotado) {
     guarda();

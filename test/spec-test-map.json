@@ -15137,6 +15137,476 @@
       "fichero": "test/nucleo/render.test.mjs",
       "caso": "La pantalla de revisión no es del juego y es la que enciende la escala",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un mundo de jornada con todos sus rótulos candidatos, cuando se colocan, entonces ninguna pareja de cajas devueltas se solapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ninguna pareja de rótulos se solapa en un mundo denso",
+      "escenario": "Ninguna pareja de rótulos se solapa en un mundo denso",
+      "nota": "Se afirma sobre el urbano denso con el estilo por defecto, que es lo que dice el escenario, y además sobre los cuatro mundos congelados con los cinco estilos."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado ese mismo resultado, cuando se comprueban las cajas dos a dos, entonces entre cualquier par hay al menos la holgura mínima declarada, y dos cajas que se tocan cuentan como que se pisan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Entre cualquier par hay al menos la holgura mínima, y dos cajas que se tocan cuentan como que se pisan",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo colocado, cuando se compara su caja con el glifo de su propio elemento, entonces no lo pisa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ningún rótulo pisa el glifo de su propio elemento ni el de ningún otro",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «Ningún rótulo pisa un glifo ni la cartela ni la brújula» lo cubre sobre mundos de verdad; este caso construye el conflicto exacto contra el glifo propio, que en un mundo real no se puede provocar a voluntad."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo colocado, cuando se compara su caja con el glifo de cualquier otro elemento del encuadre, entonces no lo pisa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ningún rótulo pisa un glifo ni la cartela ni la brújula",
+      "escenario": "Ningún rótulo pisa un glifo ni la cartela ni la brújula"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado las zonas reservadas del encuadre —cartela, brújula, escala, marco y la marca de la jugadora—, cuando se colocan los rótulos, entonces ninguna caja invade ninguna de ellas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ninguna caja invade una zona reservada",
+      "hueco_de_bateria": true,
+      "nota": "La mitad de cartela y brújula sobre mundos de verdad va en «Ningún rótulo pisa un glifo ni la cartela ni la brújula»; este caso añade la escala y la marca de la jugadora, que la vista por defecto no enciende."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo de calzada, que va girado sobre su trazado, cuando se comprueba contra los demás, entonces el solape se mide sobre el rectángulo orientado y no sobre su envolvente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "El solape de un rótulo girado se mide sobre el rectángulo orientado y no sobre su envolvente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo cuya caja no cabe entera dentro del marco, cuando se coloca, entonces no se pinta recortado: se retira y se declara con el motivo de que no cabe en el marco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ningún rótulo se sale del marco",
+      "escenario": "Ningún rótulo se sale del marco"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un encuadre sin ningún candidato, cuando se coloca, entonces se obtienen dos listas vacías y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un encuadre sin ningún candidato devuelve dos listas vacías y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un único candidato, cuando se coloca, entonces queda en la primera posición de su lista y no se retira nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un único candidato queda en la primera posición de su lista y no se retira nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un encuadre donde todo cabe a la primera, cuando se coloca, entonces ningún rótulo se ha movido de su posición preferida y la lista de retirados está vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Donde todo cabe a la primera, ningún rótulo se mueve de su posición preferida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo puntual sin ningún conflicto, cuando se coloca, entonces queda debajo de su glifo, que es su posición preferida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un rótulo puntual sin conflicto queda debajo de su glifo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo puntual cuya posición preferida está ocupada, cuando se coloca, entonces se prueban las ocho posiciones alrededor del ancla en el orden declarado y se toma la primera libre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Con la preferida ocupada se prueban las ocho alrededor del ancla y se toma la primera libre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado el mismo rótulo colocado dos veces con la misma entrada, cuando se comparan, entonces cae en la misma de las ocho posiciones: el orden es fijo y no depende de qué se colocó antes en otra ejecución.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "El mismo rótulo con la misma entrada cae siempre en la misma de las ocho posiciones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo de calzada, cuando su punto medio está ocupado, entonces se desliza por el trazado en pasos declarados, alternando hacia los dos extremos, y el texto sigue derecho en todas las posiciones probadas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un rótulo de calzada con el punto medio ocupado se desliza por el trazado y el texto sigue derecho",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo de calzada cuyo trazado visible es más corto que el mínimo declarado, cuando se coloca, entonces no se rotula la calzada y se declara el motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Una calzada cuyo trazado visible es más corto que el mínimo no se rotula, y se declara el motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo protegido para el que ninguna de las ocho posiciones sirve, cuando se coloca, entonces se aleja del ancla en la dirección de su mejor posición, hasta el tope declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un protegido para el que ninguna de las ocho sirve se aleja del ancla hasta el tope declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo alejado por encima de la separación base, cuando se lee su colocación, entonces trae el tirador que lo une a su glifo, con sus dos extremos ya calculados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un rótulo alejado trae el tirador que lo une a su glifo, con sus dos extremos calculados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo no protegido, cuando ninguna de sus ocho posiciones sirve, entonces no se aleja con tirador: se retira.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un rótulo no protegido no se aleja con tirador: se retira",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un racimo donde no caben todos los rótulos, cuando se coloca, entonces los que se retiran son los de menor prioridad, por el orden declarado: primero las calzadas, luego los servicios, luego los parajes conocidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "En un racimo se retiran los de menor prioridad, por el orden declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado ese mismo racimo, cuando se lee el resultado, entonces cada rótulo retirado declara su identificador y su motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Cada rótulo retirado declara su identificador y su motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo retirado, cuando se compara el resto del dibujo, entonces su glifo se dibuja igual: lo que se retira es el nombre, no el elemento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Cuando dos no caben, se retira el de menor prioridad y su pueblo se sigue dibujando",
+      "escenario": "Cuando dos no caben, se retira el de menor prioridad y su pueblo se sigue dibujando"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo que no cabe, cuando se coloca, entonces no se encoge: su tamaño es el de su rol y el mismo antes y después del conflicto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ningún rótulo se encoge ni se recorta para caber",
+      "escenario": "Ningún rótulo se encoge ni se recorta para caber"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo que no cabe, cuando se coloca, entonces su texto tampoco se recorta ni se abrevia con puntos suspensivos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Ningún rótulo se encoge ni se recorta para caber",
+      "escenario": "Ningún rótulo se encoge ni se recorta para caber",
+      "nota": "El mismo caso cubre los dos criterios: el escenario de la batería afirma a la vez que no se encoge y que no se recorta."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un núcleo y un paraje que se disputan el mismo hueco, cuando se coloca, entonces el que se queda con el hueco es el núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un núcleo y un paraje que se disputan el mismo hueco lo gana el núcleo",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «El rótulo de un núcleo no se retira mientras quepa en algún sitio» cubre la mitad de mundo real; este caso construye la disputa exacta en un marco donde solo cabe uno."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un núcleo cualquiera, cuando existe alguna colocación posible para su rótulo, entonces su rótulo no se retira: retirar es siempre el último recurso y nunca un atajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "El rótulo de un núcleo no se retira mientras quepa en algún sitio",
+      "escenario": "El rótulo de un núcleo no se retira mientras quepa en algún sitio"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un sitio encargado de la salida en curso que todavía no se ha pisado, cuando se coloca, entonces va rotulado, y si compite con un paraje conocido gana él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "El sitio encargado va rotulado aunque no se haya pisado, y si compite con un paraje conocido gana él",
+      "hueco_de_bateria": true,
+      "nota": "La spec proponía este escenario para la batería con este mismo nombre y no llegó a docs/testing.md: hueco pendiente de cerrar."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado dos núcleos cuyas placas no caben ni reubicadas ni alejadas con tirador, cuando se coloca, entonces se retira el del rango menor —aldea antes que pueblo, pueblo antes que ciudad— y el de rango mayor conserva su rótulo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Entre dos núcleos que no caben se retira el de rango menor",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «Cuando dos no caben, se retira el de menor prioridad y su pueblo se sigue dibujando» afirma lo mismo sobre el resultado; este caso lo prueba en los dos órdenes de lista."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado dos núcleos del mismo rango en ese mismo conflicto, cuando se coloca, entonces el que se retira sale del desempate declarado por identificador y nunca del orden en que llegaron a la lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Entre dos núcleos del mismo rango el desempate es por identificador y no por el orden de la lista",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un rótulo protegido cuyo texto es más ancho que el marco entero, cuando se coloca, entonces se retira declarando que no cabe en el marco, porque pintarlo cortado es peor que no ponerlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un protegido cuyo texto es más ancho que el marco se retira declarando que no cabe",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un encuadre con más candidatos que el tope declarado, cuando se coloca, entonces los que sobran no llegan a intentarlo, se descartan por prioridad y se declaran con ese motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Con más candidatos que el tope, los que sobran se descartan por prioridad sin intentarlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado el mundo mínimo, de un solo núcleo y tres parajes, cuando se coloca, entonces no se retira ningún rótulo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "En el mundo mínimo, de un núcleo y tres parajes, no se retira ningún rótulo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado el mismo mundo, el mismo estilo y el mismo encuadre, cuando se coloca dos veces, entonces las dos colocaciones son idénticas, caja a caja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "La misma colocación para el mismo mundo, el mismo estilo y el mismo encuadre",
+      "escenario": "La misma colocación para el mismo mundo, el mismo estilo y el mismo encuadre"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado esa misma entrada con los candidatos en otro orden de lista, cuando se coloca, entonces el resultado es el mismo: el orden de proceso sale de la prioridad y del identificador, nunca del orden de inserción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "El orden de los candidatos no cambia la colocación",
+      "escenario": "El orden de los candidatos no cambia la colocación"
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado el módulo de colocación, cuando se inspeccionan sus imports, entonces no hay ninguna fuente de azar, ni lectura del reloj, ni acceso a la red, ni nada de plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "En el módulo de colocación no hay azar, ni reloj, ni red, ni nada de plataforma",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «No se usa ninguna fuente de azar ni de tiempo del sistema» ya está vivo para todo el paquete; este caso lo estrecha a los dos módulos que entrega esta fila, que es lo que la spec pide."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un encuadre que se mueve menos que el paso de cuantización declarado, cuando se coloca, entonces el resultado es idéntico al anterior y ningún rótulo salta de sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un encuadre que se mueve menos que el paso de cuantización da el mismo resultado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un arrastre que cruza un paso de cuantización, cuando se recoloca, entonces la colocación se recalcula entera y no depende de cuál fuera la anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un arrastre que cruza un paso de cuantización recoloca entero y no depende de la colocación anterior",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un mundo pintado en «reino», cuando se cambia el estilo a «pergamino», entonces se recoloca con las métricas del estilo nuevo y el mundo sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "nota": "Escenario @determinismo, bloqueante. La mitad de la geometría del terreno ya la afirma test/nucleo/render.test.mjs con el colocador provisional; este caso añade la del declutter: recolocar es pintar y el documento no se toca."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado dos estilos con métricas distintas, cuando se coloca el mismo mundo con cada uno, entonces las colocaciones pueden diferir, y ninguna de las dos tiene solapes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Dos estilos con métricas distintas pueden colocar distinto, y ninguno con solapes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un fotograma que va a pintarse, cuando empieza el pintado, entonces la colocación ya está resuelta y el pintado no mide texto ni mueve ninguna caja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Cuando empieza el pintado la colocación ya está resuelta y el pintado no mide ni un texto de rótulo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado la lista de rótulos colocados, cuando se lee, entonces cada uno trae posición, tamaño, caja, rol, si va sobre placa y su tirador si lo tiene: quien pinta no decide nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Cada rótulo colocado trae posición, tamaño, caja, rol, si va sobre placa y su tirador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un encuadre con el tope de candidatos, cuando se coloca, entonces las comprobaciones de solape por rótulo colocado no superan el máximo declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Con el tope de candidatos, las comprobaciones por rótulo no superan el máximo declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un encuadre y otro con el doble de candidatos, cuando se colocan los dos, entonces el total de comprobaciones del segundo no llega al cuádruple del primero: el índice espacial está haciendo su trabajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Doblar los candidatos no dobla el coste al cuadrado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un candidato cuya ancla queda fuera del encuadre, cuando se coloca, entonces no entra en el reparto y no cuesta ninguna comprobación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un candidato cuya ancla queda fuera del encuadre no entra en el reparto ni cuesta una comprobación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un candidato sin texto, cuando se coloca, entonces falla nombrando el campo que falta y el identificador del candidato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un candidato sin texto falla nombrando el campo y el identificador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un candidato sin ancla, cuando se coloca, entonces falla nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un candidato sin ancla falla nombrando el campo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un candidato con un rol que no es núcleo, paraje, servicio ni calzada, cuando se coloca, entonces falla nombrando el rol recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un rol que no es núcleo, paraje, servicio ni calzada falla nombrando el rol recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado dos candidatos con el mismo identificador, cuando se coloca, entonces falla nombrando el identificador repetido, en lugar de elegir uno en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Dos candidatos con el mismo identificador fallan nombrando el repetido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado el módulo sin medidor de texto inyectado, cuando se coloca, entonces falla declarando que falta el medidor, y no estima el ancho por el número de letras.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Sin medidor de texto inyectado falla, y no estima el ancho por el número de letras",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un medidor que devuelve un ancho o un alto que no es un número positivo, cuando se coloca, entonces falla nombrando el rótulo que lo provocó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un medidor que devuelve un ancho o un alto que no es un número positivo falla nombrando el rótulo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado un estilo al que le falta la métrica de un rol que hay que colocar, cuando se coloca, entonces falla nombrando el rol y la métrica, en lugar de caer a un valor por omisión.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un estilo al que le falta la métrica de un rol que hay que colocar falla nombrando el rol y la métrica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Dado dos candidatos con el ancla exactamente en el mismo punto, cuando se coloca, entonces no falla: se resuelve por prioridad y por identificador, y las dos cajas no se solapan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Dos candidatos con el ancla en el mismo punto no fallan: se resuelven por prioridad e identificador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "UX Design, A1P6: el tamaño por rango es lo que distingue un núcleo de un paraje, y por eso no se encoge; el escalado a la lámina de móvil tiene que conservar esa jerarquía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Un núcleo se lee más grande que un paraje en cualquier tamaño de lámina",
+      "hueco_de_bateria": true,
+      "nota": "La spec propuso el escenario @manual «Pueblo y paraje se distinguen sin leer el nombre» y no llegó a docs/testing.md. Lo que sí es afirmable de esa jerarquía —el tamaño de caja y placa contra halo— se afirma aquí; lo que queda a ojo sigue siendo @manual."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "UX Design, A1P6: los núcleos van sobre placa de pergamino y los parajes con halo, que es lo que hace que se distingan sin leer el nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "Placa y halo siguen distinguiendo pueblo de paraje después de escalar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "RNF-PER-003 y el escalado por lámina: en una pantalla de móvil, un rótulo que cabría de sobra no puede retirarse porque su caja no quepa entre los dos márgenes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/rotulos.test.mjs",
+      "caso": "En una lámina de móvil ningún rótulo se retira por no caber en el marco",
+      "hueco_de_bateria": true,
+      "nota": "Medido sobre los cuatro mundos congelados con los cinco estilos: 121 de 163 rótulos colocados, 42 retirados, ninguno por «no cabe en el marco», 69 de 70 núcleos conservan su nombre."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "Notas técnicas: en dispositivo, colocar 300 rótulos tiene que caber en un fotograma de 60 Hz en un móvil de gama media.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Colocar el tope de rótulos cabe en un fotograma en un móvil de gama media",
+      "hueco_de_bateria": true,
+      "nota": "No hay forma honesta de automatizarlo: en @nucleo el coste se presupuesta en comprobaciones de solape, no en milisegundos. Sin escenario en la batería."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "El hueco de la batería: el mapa del día uno se lee entero, con sus núcleos y sus calzadas, que es donde el artefacto 1 dice que el solape se nota.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El mapa del día uno se lee entero, con siete núcleos y seis calzadas",
+      "hueco_de_bateria": true,
+      "nota": "Propuesto por la spec y no escrito en docs/testing.md. Además el nombre miente sobre el dato: las granjas no llevan rótulo por diseño del wireframe, así que el máximo por mundo son cuatro rótulos de núcleo, no siete. Al escribirlo en la batería conviene corregirlo."
+    },
+    {
+      "spec": "SPEC-022",
+      "criterio": "El hueco de la batería: pueblo y paraje se distinguen sin leer el nombre, que es la otra mitad de RF-MAPA-003.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Pueblo y paraje se distinguen sin leer el nombre",
+      "hueco_de_bateria": true,
+      "nota": "Propuesto por la spec y no escrito en docs/testing.md. Su mitad medible —jerarquía de tamaño, placa contra halo— sí está automatizada en test/nucleo/rotulos.test.mjs."
     }
   ]
 }
