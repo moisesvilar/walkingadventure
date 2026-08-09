@@ -20,8 +20,10 @@
 # —ejecuté esto, reconocí el resumen, y salió bien—, nunca por ausencia de
 # señales de fallo. Si no se entiende lo que llegó, el resultado es 2.
 #
-# Sin credenciales, sin .env, sin red y sin dev server. Maestro ausente es
-# infraestructura ausente: se registra aparte y nunca produce un verde.
+# Sin credenciales, sin .env, sin red y sin dev server. Los flujos de @app tienen
+# tres estados y no dos: Maestro ausente y Maestro presente pero sin dispositivo
+# son los dos infraestructura ausente —se registran en la sección 3 y nunca
+# producen un verde—, y solo un flujo que llegó a ejecutarse y falló es rojo.
 
 set -uo pipefail
 
@@ -201,18 +203,84 @@ if [ "$ALCANCE" != "app" ]; then
 fi
 
 # --- 5 · flujos de @app -----------------------------------------------------
+#
+# Aquí se decide entre los tres estados. El criterio es el mismo que rige @nucleo:
+# el verde es por afirmación. Por eso se le pide a Maestro un informe JUnit en vez
+# de leerle la prosa de la consola —el recuento de flujos y de fallos vive en el
+# informe, es estable entre versiones y se puede afirmar—; sin informe reconocible
+# no se concluye nada bueno.
+#
+# Y sin informe hay dos motivos posibles, que no se pueden confundir: o la máquina
+# no tiene lo que hace falta (Java, dispositivo) y eso es infraestructura ausente,
+# o no se entiende lo que devolvió, y eso es «no se pudo ejecutar». Nunca PASS.
+
+# Lo que esta máquina no puede aportar, dicho por Maestro con sus palabras. La
+# lista es corta a propósito: cada patrón nombra algo que falta en el entorno, no
+# algo que haya salido mal en un flujo. Un patrón de más aquí convertiría un fallo
+# real en un «no pasa nada», que es justo el defecto que esto viene a corregir.
+MAESTRO_SIN_DISPOSITIVO='devices connected, which is not enough|Not enough devices connected|No running devices found|No connected devices|No devices found|No Android device found with id'
+MAESTRO_SIN_ENTORNO='Unable to locate a Java Runtime|No Java runtime present|adb not found at the SDK location or on PATH|unable to find utility "simctl"'
 
 APP_ESTADO="no ejecutado (fuera del alcance pedido)"
+APP_INFRA=""          # motivo, cuando Maestro está pero la máquina no da para ejecutarlo
+APP_INFRA_LINEA=""    # la línea literal de Maestro que lo dice
+APP_DISCREPANCIA=""
+APP_RECONOCIDO=0      # 1 solo si el informe JUnit se entendió, que es lo que permite contar
+APP_TOTAL=0; APP_FALLA=0
+
 if [ "$ALCANCE" != "nucleo" ]; then
   if [ "$HAY_MAESTRO" -eq 0 ]; then
     APP_ESTADO="no ejecutado: Maestro no está instalado (infraestructura ausente, no un fallo de pruebas)"
   elif [ "${#FLUJOS[@]}" -eq 0 ]; then
     APP_ESTADO="no había flujos que ejecutar: test/app/ no contiene ningún .yaml"
   else
-    maestro test test/app/ >"$TMP/app-run.txt" 2>&1
+    INFORME="$TMP/app-junit.xml"
+    # `--no-ansi` para que los colores no rompan los patrones, y `</dev/null` para
+    # que el menú interactivo de «elige un dispositivo» no deje el runner colgado
+    # esperando una tecla que en desatendido no llega nunca.
+    maestro test --format JUNIT --output "$INFORME" --no-ansi test/app/ >"$TMP/app-run.txt" 2>&1 </dev/null
     RC=$?
-    EJECUTADO=1
-    if [ "$RC" -ne 0 ]; then FALLO=1; APP_ESTADO="FALLO (código $RC)"; else APP_ESTADO="OK"; fi
+
+    # Se afirma que hubo ejecución solo si el informe trae un `<testsuite` por cada
+    # recuento y viceversa: un informe a medias no se interpreta a ojo.
+    SUITES="$(LC_ALL=C grep -c '<testsuite ' "$INFORME" 2>/dev/null)"; [ -n "$SUITES" ] || SUITES=0
+    ATRIB_TESTS="$(LC_ALL=C grep -o 'tests="[0-9][0-9]*"' "$INFORME" 2>/dev/null | wc -l | tr -d ' ')"
+    ATRIB_FALLOS="$(LC_ALL=C grep -o 'failures="[0-9][0-9]*"' "$INFORME" 2>/dev/null | wc -l | tr -d ' ')"
+
+    if [ "$SUITES" -ge 1 ] && [ "$ATRIB_TESTS" -eq "$SUITES" ] && [ "$ATRIB_FALLOS" -eq "$SUITES" ]; then
+      APP_TOTAL="$(LC_ALL=C grep -o 'tests="[0-9][0-9]*"' "$INFORME" | LC_ALL=C sed 's/[^0-9]//g' | awk '{s+=$1} END{print s+0}')"
+      APP_FALLA="$(LC_ALL=C grep -o 'failures="[0-9][0-9]*"' "$INFORME" | LC_ALL=C sed 's/[^0-9]//g' | awk '{s+=$1} END{print s+0}')"
+      APP_RECONOCIDO=1
+      if [ "$APP_TOTAL" -eq 0 ]; then
+        # Mismo trato que en @nucleo: había flujos y no se ejecutó ninguno.
+        NO_EJECUTABLE=1
+        APP_ESTADO="no se pudo ejecutar: había ${#FLUJOS[@]} flujo(s) y el informe JUnit declara 0 casos ejecutados (código de Maestro: $RC)"
+      else
+        EJECUTADO=1
+        if [ "$RC" -ne 0 ] && [ "$APP_FALLA" -eq 0 ]; then
+          APP_DISCREPANCIA="Maestro salió con código $RC pero su informe declara 0 fallos. Se toma el peor de los dos."
+        elif [ "$RC" -eq 0 ] && [ "$APP_FALLA" -ne 0 ]; then
+          APP_DISCREPANCIA="Maestro salió con código 0 pero su informe declara $APP_FALLA fallo(s). Se toma el peor de los dos."
+        fi
+        if [ "$RC" -ne 0 ] || [ "$APP_FALLA" -ne 0 ]; then
+          FALLO=1
+          APP_ESTADO="FALLO (código $RC, $APP_FALLA flujo(s) en rojo de $APP_TOTAL)"
+        else
+          APP_ESTADO="OK ($APP_TOTAL flujo(s), 0 en rojo)"
+        fi
+      fi
+    elif LC_ALL=C grep -Eq "$MAESTRO_SIN_DISPOSITIVO" "$TMP/app-run.txt"; then
+      APP_INFRA="no hay ningún dispositivo conectado"
+      APP_INFRA_LINEA="$(LC_ALL=C grep -Eh -m1 "$MAESTRO_SIN_DISPOSITIVO" "$TMP/app-run.txt")"
+      APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas)"
+    elif LC_ALL=C grep -Eq "$MAESTRO_SIN_ENTORNO" "$TMP/app-run.txt"; then
+      APP_INFRA="a Maestro le falta algo del entorno para arrancar"
+      APP_INFRA_LINEA="$(LC_ALL=C grep -Eh -m1 "$MAESTRO_SIN_ENTORNO" "$TMP/app-run.txt")"
+      APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas)"
+    else
+      NO_EJECUTABLE=1
+      APP_ESTADO="no se pudo ejecutar: Maestro terminó con código $RC y su salida no se reconoce — ni informe JUnit con recuento (\`<testsuite ... tests=\"n\" failures=\"n\">\`) ni ninguna causa de infraestructura conocida"
+    fi
   fi
 fi
 
@@ -290,6 +358,12 @@ fi
   echo
   if [ "$HAY_MAESTRO" -eq 0 ]; then
     echo "- **Maestro no está instalado.** Los flujos de \`@app\` no se han ejecutado."
+  elif [ -n "$APP_INFRA" ]; then
+    echo "- **Maestro está instalado, pero $APP_INFRA.** Los flujos de \`@app\` no se han ejecutado: falta esta máquina, no falla el código. Maestro lo dijo así:"
+    echo
+    echo '```'
+    printf '%s\n' "$APP_INFRA_LINEA"
+    echo '```'
   else
     echo "- Maestro: presente."
   fi
@@ -338,7 +412,16 @@ fi
   echo "## 5 · Resultados de @app"
   echo
   echo "- Estado: $APP_ESTADO"
+  echo "- Flujos: ${#FLUJOS[@]}"
   if [ -f "$TMP/app-run.txt" ]; then
+    if [ "$APP_RECONOCIDO" -eq 1 ]; then
+      echo "- Casos: $APP_TOTAL · fallan: $APP_FALLA"
+    else
+      echo "- Casos: no contados. Maestro no llegó a dejar un informe JUnit con recuento, así que de esta ejecución no se afirma ninguna cifra."
+    fi
+    if [ -n "$APP_DISCREPANCIA" ]; then
+      echo "- **Discrepancia:** $APP_DISCREPANCIA"
+    fi
     echo
     echo "Salida literal:"
     echo
