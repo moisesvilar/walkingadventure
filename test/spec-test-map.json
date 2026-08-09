@@ -18668,6 +18668,535 @@
       "caso": "No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera",
       "hueco_de_bateria": true,
       "nota": "PARTE NO ENTREGADA: la app no trae módulo nativo de ubicación, porque ninguna spec ha nombrado la dependencia que lo daría. Lo entregado —y lo que este caso afirma— es que la ausencia se declara: el proveedor dice que no está montado, «Permitir» sale apagado con su motivo al lado, pedir el permiso falla nombrando la pieza en vez de responder «denegado», y la vía manual llega hasta el final. El contrato del módulo nativo existe entero para el día que la dependencia se nombre."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una partida con un mapa levantado y ninguna salida abierta, cuando se compone la portada, entonces sus bloques son exactamente: la miniatura del mapa con su día, la identidad de quien juega, las acciones de salir, y las tres puertas. Ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "La portada trae exactamente sus bloques y ninguno más",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene ninguna característica sobre la composición de la portada. Se afirma como igualdad contra el vocabulario cerrado, con salida abierta y sin ella, y además que un bloque de fuera falla enumerando los que hay y los que no puede haber (caso «Un bloque que el vocabulario no declara falla enumerando los que hay y los que no puede haber»)."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una partida con un mapa levantado, cuando se abre la app, entonces la portada se monta con su miniatura, su identidad, sus acciones de salir y sus tres puertas.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita dispositivo: que la pantalla se monte de verdad tras salir del arranque."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada compuesta, cuando se busca un bloque de estado del mundo, entonces no existe ninguno, y el vocabulario de bloques no tiene forma de expresarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "No existe ningún bloque de estado del mundo",
+      "hueco_de_bateria": true,
+      "nota": "Las dos mitades: ni aparece compuesto, ni está en el vocabulario, ni las dos listas se solapan."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada compuesta, cuando se busca un medidor de reputación, una barra o una lista de pueblos con puntuación, entonces no existe ninguno, y el rango solo aparece dicho dentro de una frase cuando toca decirlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "No hay ninguna barra ni lista de reputación",
+      "escenario": "No hay ninguna barra ni lista de reputación",
+      "nota": "El escenario de la batería es @app —«el jugador recorre todas las pantallas»— y aquí se implementa en @nucleo sobre la portada: sin simulador, una ausencia comprobada a ojo no se pone roja nunca (§6o). Se afirma contra el vocabulario cerrado y contra la identidad, que es el único sitio donde el rango cabría."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada compuesta, cuando se cuentan sus destinos de navegación, entonces son tres —diario, repisa, ajustes— y cuelgan de la portada, no de una barra de pestañas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "Los tres destinos cuelgan de la portada y no de una barra de pestañas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada en el dispositivo, cuando se mira su pie, entonces las tres puertas están y son tres.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Lo que este flujo NO comprueba: que cada puerta lleve a su destino. El diario, la repisa y los ajustes son de las filas 37 y 38 y todavía no existen, así que App.js monta el momento sin alAbrirPuerta y pulsar una puerta no lleva a ninguna parte. Está declarado en la cabecera del flujo."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada compuesta, cuando se busca un selector de mapas, entonces no existe: el mapa activo lo decide dónde estás.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "No existe ningún selector de mapas",
+      "escenario": "No existe ningún selector de mapas",
+      "nota": "El escenario de la batería es @app y aquí se implementa en @nucleo sobre la portada, por la misma razón que el de reputación: la mitad que recorre todas las pantallas del juego sigue siendo de la batería y no la cierra esta fila."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada compuesta, cuando se leen sus acciones de salir, entonces «Salir a andar sin más» está al mismo nivel que «Ver qué se cuenta hoy», y no como nota al pie de ninguna otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "Salir a andar sin nada es una opción de primer nivel",
+      "escenario": "Salir a andar sin nada es una opción de primer nivel"
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la portada en el dispositivo, cuando se miran las dos maneras de salir, entonces las dos son botones y ninguna es una nota al pie de la otra.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita pantalla: el nivel declarado se afirma en @nucleo, pero que se vean como dos botones del mismo peso solo se ve en un dispositivo."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la miniatura del mapa, cuando se pinta, entonces enseña lo entintado contra lo que sigue a lápiz, y ningún porcentaje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "La miniatura enseña lo entintado contra lo que sigue a lápiz, y ningún porcentaje",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la identidad de quien juega, cuando se lee, entonces trae el nombre del personaje y su oficio, y ninguna cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "La identidad trae el nombre del personaje y su oficio, y ninguna cifra",
+      "hueco_de_bateria": true,
+      "nota": "Incluye el caso del oficio sin palabra dicha: se enseña la clave, que es fea pero cierta, y nunca nada inventado."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una partida con el modo de pasos de fondo apagado, cuando se compone la portada, entonces no aparece la puerta del zurrón. Y con el modo encendido y la reserva vacía, tampoco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "El zurrón solo aparece si hay reserva que vaciar",
+      "escenario": "El zurrón solo aparece si hay reserva que vaciar",
+      "nota": "El escenario de la batería es @app y solo cubre la mitad del modo apagado; aquí se afirman las dos condiciones —modo encendido y algo que vaciar— y que la puerta no cambia los bloques de la portada."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una portada sin calendario cableado, cuando se compone, entonces falla nombrando la pieza que falta, y no supone el día uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "Una portada sin calendario cableado falla nombrando la pieza y no supone el día uno",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene ninguna característica sobre la degradación silenciosa. El día entero e inyectado se afirma además en el caso «El día llega del calendario, entero y al lado del encabezado»."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un jugador que abandonó una aventura y llegó a casa, cuando abre la app, entonces no hay ninguna tarjeta de aventura a medias, y la aventura ya está cerrada porque el cierre en corto se disparó al llegar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "La tarjeta de a medias solo existe con la salida abierta",
+      "escenario": "La tarjeta de a medias solo existe con la salida abierta"
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una salida todavía abierta, cuando se compone la portada, entonces aparece arriba una tarjeta que dice dónde se dejó y ofrece dos cosas: seguir con ella, o dejarlo aquí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "La tarjeta dice dónde se dejó y ofrece seguir o dejarlo aquí",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la tarjeta de a medias en pantalla, cuando se leen el resto de bloques, entonces siguen todos ahí: se puede mirar el diario o salir a andar sin ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "Con la tarjeta en pantalla el resto de bloques siguen todos ahí",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la tarjeta de a medias, cuando se elige «dejarlo aquí», entonces la salida se cierra por la misma vía que llegar a casa, con el mismo cierre en corto, y no por una vía de emergencia distinta. Y por cualquiera de las dos vías la tarjeta desaparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "«Dejarlo aquí» cierra por la misma vía que llegar a casa, con el mismo cierre en corto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la tarjeta de a medias, cuando se elige seguir, entonces se pasa a andar con la misma salida abierta y sin volver a preparar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "La tarjeta dice dónde se dejó y ofrece seguir o dejarlo aquí",
+      "hueco_de_bateria": true,
+      "nota": "CUBIERTO A MEDIAS. Se afirma que la acción existe, que es la primaria y que componer la portada no toca el registro —la salida sigue abierta y con su aventura—. Lo que no se cubre es el paso a andar: el momento en marcha es de la fila 29 y App.js todavía monta el momento sin alAndar, así que no hay ningún sitio donde ponerlo rojo, ni en Node ni en un dispositivo."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una salida abierta desde hace días, cuando se abre la app, entonces la tarjeta sigue ahí igual y ningún texto menciona cuánto tiempo lleva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "Una salida abierta desde hace días se lee igual y ningún texto dice cuánto lleva",
+      "hueco_de_bateria": true,
+      "nota": "Se compone la misma tarjeta con el día 3 y con el día 97: sin marca de tiempo en el registro, las dos salen iguales."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado el registro de la salida abierta, cuando se inspecciona lo que guarda, entonces no hay ninguna coordenada ni ninguna marca de tiempo (RF-PRIV-002).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/portada.test.mjs",
+      "caso": "El registro no guarda ninguna coordenada ni ninguna marca de tiempo",
+      "hueco_de_bateria": true,
+      "nota": "De «El registro de la salida abierta» de las notas técnicas. El ida y vuelta del documento y las dos reglas de una salida y una aventura tienen casos propios en el mismo fichero."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un mundo donde castean ocho plantillas para este oficio, cuando el jugador abre la lista de hoy, entonces ve tres como mucho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Se ofrecen tres aventuras como mucho",
+      "escenario": "Se ofrecen tres aventuras como mucho",
+      "nota": "Se mide sobre el mundo congelado costero con semilla 1, que tiene veintinueve plantillas casteadas —muchas más que las ocho del escenario—, y sobre los cuatro oficios. Se comprueba además que el catálogo filtrado por oficio traía más de tres, para que el tope esté midiendo algo."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la lista de hoy en el dispositivo, cuando se abre, entonces trae la lista o la oferta del estirón, nunca las dos, y sin paginación ni «ver más».",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita pantalla: que la disyunción se monte de verdad."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un mundo donde castea una sola plantilla, cuando el jugador abre la lista de hoy, entonces ve una, y ningún texto se disculpa por ello.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Un día con una sola aventura no es un día roto",
+      "escenario": "Un día con una sola aventura no es un día roto",
+      "nota": "Se afirma además que la lista de una trae exactamente los mismos bloques que la de tres: sin línea nueva no hay dónde escribir una disculpa."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la lista de hoy, cuando se lee cada entrada, entonces cada aventura muestra una palabra del mundo y un tiempo aproximado, y ninguna muestra una distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Cada aventura declara su tamaño con una palabra",
+      "escenario": "Cada aventura declara su tamaño con una palabra",
+      "nota": "La revisión de cifras se aplica a lo que compone esta pantalla —la medida y los textos del guion—. El título y el gancho son prosa del catálogo y los revisa SPEC-017 con las reglas de la prosa, donde «te sale al paso» es castellano y no una cifra."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una partida con un recado suelto pendiente, cuando se compone la lista, entonces el recado comparte lista con las aventuras, mide «un momento» y ocupa un sitio del tope de tres, nunca añade un cuarto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El recado suelto comparte lista y ocupa un sitio del tope de tres",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene ningún escenario del recado suelto en la lista de hoy: es un hueco que alguien tendrá que cerrar. El caso cubre además el límite del enunciado —el recado ocupando el tercer sitio— y el día que solo tiene recado, que es la razón de que el recado exista."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la lista de hoy, cuando se comprueba de dónde salen las aventuras, entonces el catálogo llegó ya filtrado por la afinidad del oficio y hay plantillas que con este personaje no aparecen nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El catálogo llega ya filtrado por la afinidad del oficio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la lista de hoy, cuando se lee su última línea, entonces dice que se puede salir a andar sin coger ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "La última línea dice que se puede salir a andar sin coger ninguna",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma en los dos casos, con lista y con la oferta del estirón: es lo que impide que la oferta sea la única salida."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado el mismo mundo, el mismo día y la misma partida, cuando se compone la lista dos veces, entonces sale la misma, en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El mismo mundo, el mismo día y la misma partida componen la misma lista, en el mismo orden",
+      "hueco_de_bateria": true,
+      "nota": "Comparación por serialización completa, con la cola de entregas poblada: pedir el recado dos veces el mismo día devuelve el mismo."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un día sin ninguna aventura que castee y sin recado pendiente, cuando se compone la lista, entonces se entrega la falta de reparto con su motivo, no una lista vacía que parece una lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Un día sin ninguna aventura que castee y sin recado entrega la falta de reparto, nunca una lista vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un mundo donde el filtro deja menos de un lazo posible, cuando el jugador pide aventuras, entonces el juego dice que por aquí cerca no hay hoy gran cosa que contar, y ofrece alejarse un tramo más, pero no lo impone.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "nota": "El escenario ya estaba vivo en test/nucleo/accesibilidad.test.mjs sobre el reparto de SPEC-008. Aquí se implementa con el mismo nombre sobre la pantalla, que es lo que esta fila entrega: el dato convertido en oferta, con su texto en voz de mundo y con `impuesto: false`."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la oferta del estirón en pantalla, cuando no se acepta, entonces la lista se queda como estaba y «salir a andar sin más» sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "La oferta que no se acepta deja la lista como estaba y salir a andar sigue disponible",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la oferta del estirón, cuando se acepta, entonces se compone otra lista con un tramo más de alcance, y esa segunda lista se ofrece igual que la primera. Y el mundo es idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El estirón aceptado compone otra lista con un tramo más, y el mundo es idéntico byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "La huella del grafo se compara antes y después: comparar los objetos serializados dejaría pasar cualquier regresión, porque los Maps del grafo serializan como {}."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado el estirón aceptado y una segunda falta de reparto, cuando se compone, entonces no se encadena un segundo estirón automático: el alcance de más es de un tramo y se declara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El estirón no se encadena solo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la oferta del estirón, cuando se lee su texto, entonces habla como mundo, no lleva ninguna cifra y no menciona ningún filtro ni la palabra accesibilidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "La oferta del estirón habla como mundo, sin cifras y sin nombrar el filtro",
+      "hueco_de_bateria": true,
+      "nota": "Y el motivo sí viaja en el dato: el silencio es hacia quien juega, nunca hacia el dato."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una aventura de la lista, cuando se abre su ficha, entonces enseña la forma del lazo entera y nombra solo la primera parada; las demás están dibujadas y sin nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "La ficha enseña la forma del lazo entera y nombra solo la primera parada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha en el dispositivo, cuando se mira, entonces el lazo está dibujado y solo la primera parada lleva rótulo.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita pantalla: que el lazo y su única parada rotulada se pinten."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha, cuando se lee su pie, entonces dice la palabra del mundo, el tiempo aproximado y «vuelves donde empiezas», y ninguna distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El pie dice la palabra del mundo, el tiempo aproximado y «vuelves donde empiezas»",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha de una aventura cuyo lazo no cierra, cuando se intenta componer, entonces falla: una ficha que dijera «vuelves donde empiezas» sobre un lazo abierto estaría mintiendo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Una ficha sobre un lazo que no cierra falla antes que mentir",
+      "hueco_de_bateria": true,
+      "nota": "Cubre además las otras dos maneras de no poder componerla: sin beats y con la primera parada sin nombre."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha, cuando se lee su gancho, entonces es el que escribió el narrador si lo hubo y el de plantilla si no, y la pantalla es la misma en los dos casos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "El gancho es el del narrador si lo hubo y el de plantilla si no, y la pantalla es la misma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha, cuando se elige «Otra cosa», entonces se vuelve a la lista con las mismas entradas y sin haber aceptado nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "«Otra cosa» vuelve a la lista con las mismas entradas y sin haber aceptado nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha en el dispositivo, cuando se pulsa «Otra cosa», entonces se vuelve a la lista.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita pantalla: la arista de vuelta."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha, cuando se elige «Me la quedo», entonces la aventura queda aceptada y se pasa a la preparación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "«Me la quedo» deja la aventura aceptada y pasa a la preparación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la ficha en el dispositivo, cuando se pulsa «Me la quedo», entonces se pasa a la preparación.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita pantalla: la arista de A2P4 a A2P5."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una aventura aceptada, cuando se vuelve a la lista, entonces ya no se puede aceptar una segunda: hay una salida y una aventura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Una aventura aceptada no admite una segunda: hay una salida y una aventura",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una entrada de la lista que ya no existe en el estado cuando se acepta, cuando se intenta aceptar, entonces falla nombrando la entrada, y no acepta una aventura distinta en su lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Una entrada que ya no está en la lista falla nombrándola, y no acepta otra en su lugar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un recado suelto ya aceptado en otra salida, cuando se intenta aceptar otra vez, entonces falla nombrando el recado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lo-que-hay-hoy.test.mjs",
+      "caso": "Un recado ya aceptado en otra salida falla nombrando el recado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una aventura aceptada, cuando se abre la preparación, entonces enseña las tres líneas que SPEC-025 fija y la frase que dice que a partir de ahí se puede meter el móvil en el bolsillo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "La preparación enseña las tres líneas de SPEC-025 y la frase de contrato",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la preparación en el dispositivo, cuando termina, entonces enseña sus tres líneas, su frase de contrato y deja salir a andar.",
+      "nivel": "@app",
+      "fichero": "test/app/antes-de-salir.yaml",
+      "caso": "Las cinco pantallas del momento se montan en orden en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita pantalla: que A2P5 se monte y que «Listo. Vamos.» aparezca y se pueda pulsar."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la preparación, cuando termina, entonces deja salir a andar, y esa es la última pantalla que pide atención hasta pararse en algún sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "La preparación enseña las tres líneas de SPEC-025 y la frase de contrato",
+      "hueco_de_bateria": true,
+      "nota": "La mitad de Node es `dejaSalir`, que se afirma con cobertura y sin ella. Que de ahí se salga a andar de verdad es del flujo @app y de la fila 29."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un jugador sin conexión, cuando acepta una aventura y llega a la pantalla de preparación, entonces el texto es el mismo que con conexión, y ninguna pantalla menciona la falta de red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Sin cobertura, la preparación dice lo mismo",
+      "escenario": "Sin cobertura, la preparación dice lo mismo",
+      "nota": "Se afirma dos veces: comparando las dos composiciones del núcleo y recorriendo la tubería entera de app/salida/preparacion.js con el conseguidor generoso y con el que nunca consigue nada. La única pieza que nombra la cobertura es la frase de contrato, declarada como excepción de voz."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado un jugador sin conexión, cuando sale y recorre la aventura entera, entonces funciona entera: los textos salen de plantilla y el visor cae a ficha de texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "Ya estaba viva desde SPEC-009, SPEC-010 y SPEC-018, y esta fila la consume sin volver a implementarla: lo que aporta aquí es que la preparación que precede a esa aventura dice lo mismo sin cobertura, que tiene caso propio."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una preparación sin cobertura, cuando se inspecciona el dato que queda guardado, entonces cada texto lleva su origen anotado como plantilla: el silencio es hacia quien juega, nunca hacia el dato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Sin cobertura, el dato lo dice todo: cada texto con su origen y cada ausencia con su motivo",
+      "hueco_de_bateria": true,
+      "nota": "Y la asimetría entera: con cobertura el resumen dice otra cosa, mientras la pantalla no cambia ni una letra."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una preparación con cliente de imágenes sin cablear, cuando se construye, entonces falla nombrando la pieza que falta, y no se comporta como una preparación sin cobertura.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Una preparación con el cliente de imágenes sin cablear falla nombrando la pieza",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene ninguna característica sobre la degradación silenciosa (§6h). Cubre las tres piezas: el cliente de imágenes, el conseguidor y el narrador no declarado."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado una preparación que se pasa de su presupuesto, cuando se cumple, entonces se sale igual con lo que haya, con lo que falte anotado como ausente y su motivo, y sin que la pantalla lo mencione.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Una preparación que se pasa de su presupuesto sale igual con lo que haya",
+      "hueco_de_bateria": true,
+      "nota": "El presupuesto se afirma por su efecto —lo que no cabe queda ausente con el motivo `tope`— y no esperando a un reloj real: la pared de tiempo del conseguidor es de SPEC-025 y vive en test/nucleo/recursos.test.mjs."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la preparación, cuando se buscan sus controles, entonces no ofrece cancelar: dura segundos y termina sola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "La preparación no ofrece cancelar ni ningún indicador por recurso",
+      "hueco_de_bateria": true,
+      "nota": "Del patrón de interacción de la spec. Volver atrás desde aquí es «Otra cosa» en la ficha, un paso antes."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado todos los textos de A2P1 a A2P5, cuando se buscan cifras de distancia, ritmo, pasos, calorías, tiempo de esfuerzo, porcentaje de progreso o racha, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Ningún texto lleva una cifra de distancia, de ritmo, de pasos ni de progreso",
+      "hueco_de_bateria": true,
+      "nota": "Las únicas excepciones son la hora orientativa que bucle-jugable.md §3 pide al lado de la palabra del mundo, y se comprueba que cada una va con su motivo escrito. La distancia no se dice nunca, ni con excepción declarada."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado todos los textos de A2P1 a A2P5, cuando se leen, entonces hablan como mundo: ninguno menciona la aplicación, la red ni los permisos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Los textos hablan como mundo: ninguno menciona la aplicación, la red ni los permisos",
+      "hueco_de_bateria": true,
+      "nota": "Con la única excepción declarada —la frase de contrato de A2P5—, y se afirma que es una sola: la siguiente tendría que escribirse en la lista y se vería en el diff. El caso «Ningún texto del guion se disculpa» cubre la otra mitad de «un día con una sola no es un día roto»."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado todos los textos de A2P1 a A2P5, cuando se generan diez mundos distintos, entonces ninguno se vuelve falso en ninguno de ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "Los textos de las cinco pantallas son los mismos en diez mundos distintos",
+      "hueco_de_bateria": true,
+      "nota": "Se mecaniza así: ningún texto de estas pantallas se recompone con datos del mundo, así que no puede volverse falso al cambiar de mundo. Ocho mundos congelados —cuatro fixtures por dos semillas— y dos sintéticos."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado todos los textos de A2P1 a A2P5, cuando se pasan por el filtro de aptitud, entonces ninguno cae por masculino genérico evitable ni por morfología inventada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "El guion pasa el filtro de aptitud en masculino genérico y morfología inventada",
+      "hueco_de_bateria": true,
+      "nota": "Con el filtro inyectado en los dos idiomas que el juego habla, es y gl."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado la misma partida, el mismo mundo y el mismo día, cuando se compone la portada y la lista de hoy dos veces, entonces salen idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "La misma partida, el mismo mundo y el mismo día componen la portada y la lista idénticas",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-002). Comparación por serialización completa, y la portada tiene además su propio caso en test/nucleo/portada.test.mjs."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece Math.random ni Date.now: el día llega inyectado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/antes-de-salir.test.mjs",
+      "caso": "En el código que esta fila añade no aparece Math.random ni Date.now",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo). Se recorren los seis módulos de núcleo y las cinco piezas de app/ de esta fila, y se comprueba además que el reloj sigue estando donde tiene que estar: app/datos/calendario.js."
     }
   ]
 }
