@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-030",
+  "spec_actual": "SPEC-031",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -297,6 +297,16 @@
       "casos": "1873 casos: 1870 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado",
       "nota": "la pantalla no estaba montada en App.js; cableada. El seguidor de posicion lo trae la fila 30."
+    },
+    {
+      "spec": "SPEC-030",
+      "slug": "rotulo-sistema",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-030-run-20260809T151632Z.md",
+      "casos": "1939 casos: 1936 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujo: ninguna superficie de la salida montada todavia",
+      "nota": "restaura el criterio duro de SPEC-020 (decisiones 6u): 67 casos no se descubrian sin node_modules."
     }
   ],
   "bloqueos": [],
