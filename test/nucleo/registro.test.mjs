@@ -220,24 +220,34 @@ describe('El registro de hechos', () => {
     // operación que no tiene—. Sin este tipo, «se reconstruye desde el registro y salen
     // los mismos descartes» sería falso: al reproducir, los descartes deshechos
     // resucitarían y la partida reconstruida mandaría otra vez a la casa de alguien.
+    // Los tres de SPEC-036 entran por la misma puerta y **tampoco son ablandables**:
+    // sin `conocimiento-subido` una partida reconstruida amanecería con el mapa en
+    // blanco, sin `arranque-cerrado` volvería a enseñar la cartela del hito —que es lo
+    // que «una sola vez» prohíbe— y sin `hoja-propia` el diario reconstruido perdería
+    // justo lo que escribió quien juega.
     assert.deepEqual([...TIPOS_DE_HECHO], [
       'anclaje-descartado',
       'anclaje-devuelto',
+      'arranque-cerrado',
       'aventura-abandonada',
       'aventura-aceptada',
       'aventura-cerrada',
       'cara-conocida',
+      'conocimiento-subido',
       'decision-en-aventura',
       'entrega-atendida',
       'entrega-ignorada',
+      'hoja-propia',
       'objeto-obtenido',
       'paso-ejecutado',
       'sitio-pisado',
       'version-oida',
     ]);
-    assert.deepEqual([...tiposDelArea('diario')], ['version-oida']);
+    assert.deepEqual([...tiposDelArea('diario')], ['hoja-propia', 'version-oida']);
     assert.equal(areaDeTipo('sitio-pisado'), 'sitios');
     assert.equal(areaDeTipo('entrega-atendida'), 'entregas');
+    assert.equal(areaDeTipo('conocimiento-subido'), 'conocimiento');
+    assert.equal(areaDeTipo('arranque-cerrado'), 'arranque');
   });
 
   test('Un hecho declara su tipo, su mapa, su momento y su carga inerte', () => {
@@ -691,6 +701,12 @@ describe('El tamaño, que se mide', () => {
       // Es el tipo más barato del catálogo justamente porque no repite el motivo: lleva
       // el anclaje y el rol para que la línea se lea sola, y nada más.
       'anclaje-devuelto': { tipo: 'anclaje-devuelto', mapa: MAPA, dia: 1, paso: 1, carga: { anclaje: 'x1', rol: 'contacto' } },
+      // Los tres de SPEC-036. El del conocimiento es el que más se repite —uno por
+      // elemento que sube y por salida—, así que se mide con la clave más larga que
+      // el mundo puede dar: la de un servicio con nombre de verdad, y no con un `x1`.
+      'conocimiento-subido': { tipo: 'conocimiento-subido', mapa: MAPA, dia: 1, paso: 1, carga: { elemento: 'servicio:Pousada do Caldeiro Durmido', via: 'boca-de-otro', escalon: 'lo-conoces-bien' } },
+      'arranque-cerrado': { tipo: 'arranque-cerrado', mapa: MAPA, dia: 1, paso: 1, carga: { via: 'te-cuentan', marcado: true } },
+      'hoja-propia': { tipo: 'hoja-propia', mapa: MAPA, dia: 1, paso: 1, carga: { hoja: 'salida:s-42', asunto: 'entrega-sospechosa@42.40,-8.81#1', lugar: 'Lamivella do Corvo', signo: 'bueno' } },
     };
     assert.deepEqual(Object.keys(ejemplos).sort(), [...TIPOS_DE_HECHO], 'se mide un ejemplo de cada tipo declarado');
     const medidas = Object.entries(ejemplos).map(([tipo, h]) => [tipo, bytesDeHecho(hecho(h))]);
