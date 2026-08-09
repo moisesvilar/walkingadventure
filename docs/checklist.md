@@ -60,8 +60,8 @@
 | 32 | llegadas-geofence | RF-BUCLE-005, RF-BUCLE-006, RF-RUMOR-005 | must | done |
 | 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | done |
 | 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done |
-| 35 | descarte-anclaje | RF-PRIV-004 | must | wip |
-| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | pending |
+| 35 | descarte-anclaje | RF-PRIV-004 | must | done |
+| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | wip |
 
 ## B6 · Lo que queda en casa
 
