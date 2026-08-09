@@ -100,16 +100,21 @@ export function PantallaEnMarcha({
       <View testID="en-marcha-tocables" accessibilityLabel={momento.tocables.join(',')} style={estilos.marca} />
       <View testID="en-marcha-orientacion" accessibilityLabel={momento.orientacion} style={estilos.marca} />
 
-      {/* La lámina a sangre, de borde a borde y sin nada encima. */}
+      {/* La lámina a sangre, de borde a borde y sin nada encima. El envoltorio existe solo
+          para llevar el identificador que la spec declara: es el mismo `mapa-lamina` de
+          SPEC-026, y desde el dispositivo es lo único de esta fila que no se puede afirmar
+          sin él, porque «de borde a borde» es propiedad del hueco real. */}
       {Lamina && documento ? (
-        <Lamina
-          documento={documento}
-          estilo={estilo}
-          vista={vista}
-          tamano={tamano}
-          factorTexto={factorTexto}
-          enlace={enlace}
-        />
+        <View testID="mapa-lamina">
+          <Lamina
+            documento={documento}
+            estilo={estilo}
+            vista={vista}
+            tamano={tamano}
+            factorTexto={factorTexto}
+            enlace={enlace}
+          />
+        </View>
       ) : null}
       {camaraNormal ? (
         <View testID="mapa-camara" accessibilityLabel={`${camaraNormal.cx},${camaraNormal.cy},${camaraNormal.r},${tamano.ancho}x${tamano.alto}`} style={estilos.marca} />
