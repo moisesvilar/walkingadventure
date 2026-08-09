@@ -7,8 +7,9 @@
 // Tres cosas que hacen que la medida signifique algo:
 //
 // - **Caché fría siempre.** La caliente da un tramo despreciable y mediría el disco. Cada
-//   pasada añade un comentario distinto al final del texto de la consulta: cambia el
-//   hash —que es la clave— sin cambiar ni un filtro de lo que se pide.
+//   pasada desplaza la celda un metro: cambia la consulta lo justo para que nadie la
+//   reconozca —ni nuestra caché, ni el propio Overpass— sin cambiar lo que se mide. Un
+//   comentario distinto no bastaba; el porqué está junto al código que lo hace.
 // - **p95 sobre veinte pasadas**, no la media: la media esconde exactamente la cola que
 //   estropea un onboarding.
 // - **La gobierna la celda urbana densa**, que es la que más datos pide. Si esa cabe,
@@ -23,6 +24,7 @@ import { cargaConfigDeOrigen } from '../server/config.mjs';
 import { consultaDeCelda, VERSION_CONSULTA } from '../server/aguas-arriba/overpass.mjs';
 import { creaSonda } from '../server/aguas-arriba/sonda-overpass.mjs';
 import { creaCobertura } from '../server/aguas-arriba/cobertura.mjs';
+import { esPrincipal } from './guardian-principal.mjs';
 
 /**
  * Las cuatro celdas arquetipo del andamiaje, con las coordenadas y los radios de los
@@ -110,52 +112,61 @@ async function mide({ url, celdas, pasadas, plazo }) {
   return salida;
 }
 
-const args = process.argv.slice(2);
-const opcion = (nombre, defecto) => {
-  const i = args.indexOf(`--${nombre}`);
-  return i >= 0 && args[i + 1] ? args[i + 1] : defecto;
-};
+async function principal(args) {
+  const opcion = (nombre, defecto) => {
+    const i = args.indexOf(`--${nombre}`);
+    return i >= 0 && args[i + 1] ? args[i + 1] : defecto;
+  };
 
-const config = cargaConfigDeOrigen({ CONSULTA_VERSION: VERSION_CONSULTA, ...process.env });
-const cobertura = creaCobertura({
-  cobertura: config.COBERTURA, extracto: config.EXTRACTO, mirror: config.EXTRACTO_MIRROR, fecha: config.EXTRACTO_FECHA,
-});
-const url = config.OVERPASS_PROPIO;
-const pasadas = Number(opcion('pasadas', config.PASADAS_MEDIDA));
-const soloUna = opcion('celda', null);
-const celdas = soloUna ? CELDAS.filter((c) => c.nombre === soloUna) : CELDAS;
+  const config = cargaConfigDeOrigen({ CONSULTA_VERSION: VERSION_CONSULTA, ...process.env });
+  const cobertura = creaCobertura({
+    cobertura: config.COBERTURA, extracto: config.EXTRACTO, mirror: config.EXTRACTO_MIRROR, fecha: config.EXTRACTO_FECHA,
+  });
+  const url = config.OVERPASS_PROPIO;
+  const pasadas = Number(opcion('pasadas', config.PASADAS_MEDIDA));
+  const soloUna = opcion('celda', null);
+  const celdas = soloUna ? CELDAS.filter((c) => c.nombre === soloUna) : CELDAS;
 
-// Sin sonda no se mide: medir contra un Overpass que devuelve una página de error da
-// tiempos magníficos y ningún dato.
-const sonda = creaSonda({ fetch, url, config });
-const veredicto = await sonda.pasa();
-if (!veredicto.sirve) {
-  process.stdout.write(`el Overpass del proyecto no sirve datos (${veredicto.motivo}): ${veredicto.mensaje}\n  → ${veredicto.arreglo}\n`);
-  process.exit(1);
+  // Sin sonda no se mide: medir contra un Overpass que devuelve una página de error da
+  // tiempos magníficos y ningún dato.
+  const sonda = creaSonda({ fetch, url, config });
+  const veredicto = await sonda.pasa();
+  if (!veredicto.sirve) {
+    process.stdout.write(`el Overpass del proyecto no sirve datos (${veredicto.motivo}): ${veredicto.mensaje}\n  → ${veredicto.arreglo}\n`);
+    return 1;
+  }
+
+  const medidas = await mide({ url, celdas, pasadas, plazo: config.PRESUPUESTO_DATOS });
+  const presupuesto = REPARTO_DEL_MINUTO[0].presupuesto_ms;
+  const gobierna = medidas.find((m) => m.gobierna) ?? medidas[0];
+
+  const informe = {
+    medido: {
+      // La fecha del día, no la hora: es una medición de operación, no una traza.
+      dia: new Date().toISOString().slice(0, 10),
+      maquina: `${hostname()} · ${platform()}/${arch()} · ${cpus().length} núcleos · ${Math.round(totalmem() / 2 ** 30)} GB`,
+      origen: url,
+      ...cobertura.declara(),
+      consultaVersion: VERSION_CONSULTA,
+      percentil: config.PERCENTIL_MEDIDA,
+      pasadasPorCelda: pasadas,
+      cache: 'fría en todas las pasadas',
+    },
+    repartoDelMinuto: REPARTO_DEL_MINUTO,
+    presupuestoDatos_ms: presupuesto,
+    celdas: medidas,
+    gobierna: gobierna.celda,
+    veredicto: gobierna.p95 !== null && gobierna.p95 <= presupuesto ? 'cabe' : 'no cabe',
+  };
+
+  process.stdout.write(JSON.stringify(informe, null, 2) + '\n');
+  return informe.veredicto === 'cabe' ? 0 : 1;
 }
 
-const medidas = await mide({ url, celdas, pasadas, plazo: config.PRESUPUESTO_DATOS });
-const presupuesto = REPARTO_DEL_MINUTO[0].presupuesto_ms;
-const gobierna = medidas.find((m) => m.gobierna) ?? medidas[0];
-
-const informe = {
-  medido: {
-    // La fecha del día, no la hora: es una medición de operación, no una traza.
-    dia: new Date().toISOString().slice(0, 10),
-    maquina: `${hostname()} · ${platform()}/${arch()} · ${cpus().length} núcleos · ${Math.round(totalmem() / 2 ** 30)} GB`,
-    origen: url,
-    ...cobertura.declara(),
-    consultaVersion: VERSION_CONSULTA,
-    percentil: config.PERCENTIL_MEDIDA,
-    pasadasPorCelda: pasadas,
-    cache: 'fría en todas las pasadas',
-  },
-  repartoDelMinuto: REPARTO_DEL_MINUTO,
-  presupuestoDatos_ms: presupuesto,
-  celdas: medidas,
-  gobierna: gobierna.celda,
-  veredicto: gobierna.p95 !== null && gobierna.p95 <= presupuesto ? 'cabe' : 'no cabe',
-};
-
-process.stdout.write(JSON.stringify(informe, null, 2) + '\n');
-process.exit(informe.veredicto === 'cabe' ? 0 : 1);
+// Con guardián, y no una llamada suelta en el cuerpo del módulo: sin él, importar este
+// fichero para reutilizar CELDAS o percentil disparaba veinte consultas contra la red. El
+// mismo guardián que los demás scripts (ver scripts/guardian-principal.mjs), por rutas
+// canónicas, porque comparar cadenas deja el bloque sin ejecutar tras un enlace simbólico.
+if (esPrincipal(import.meta.url)) {
+  process.exitCode = await principal(process.argv.slice(2));
+}
