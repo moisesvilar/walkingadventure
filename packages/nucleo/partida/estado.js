@@ -47,6 +47,7 @@ import {
   uno,
 } from './formato.js';
 import { ESQUEMA_HECHOS_DE_RUMOR, ESQUEMA_PROCEDENCIA_DE_OBJETO, tiposDelArea } from './hechos.js';
+import { congelaLlegadas, estadoDeLlegadas, levantaLlegadas } from './llegadas.js';
 import { congelaMemorias, estadoDeMemorias, levantaMemorias } from './memoria.js';
 import { congelaMotes, estadoDeMotes, levantaMotes } from './motes.js';
 import { congelaNpcs, estadoDeNpcs, levantaNpcs } from './npcs.js';
@@ -284,6 +285,29 @@ const AREA_SALIDAS = campos({
   })]),
 });
 
+/**
+ * Las llegadas validadas de la salida en curso, de SPEC-032: por cuál va su secuencia y
+ * cuáles siguen esperando.
+ *
+ * Va al estado guardado y no a la memoria de la salida porque la escena **espera**: una
+ * escena que se pierde al cerrar la app rompe a la vez «pararse en un semáforo… sigue
+ * disponible para cuando vuelva» y «la aventura sigue abierta hasta volver o cerrar a
+ * mano». Guarda la secuencia entera —que es lo único que no se puede recalcular sin
+ * volver a preguntar si era la primera visita— y **ni una coordenada ni una marca de
+ * tiempo**: el sitio va con su nombre del mundo, y el reloj de permanencia es una medida
+ * de sensor de veinte segundos, no un hecho de la partida.
+ */
+const AREA_LLEGADAS = campos({
+  salida: 'texto?',
+  llegadas: lista(campos({
+    mapa: 'texto',
+    sitio: 'texto',
+    secuencia: lista(campos({ tipo: 'texto', modo: 'texto' })),
+    paso: 'entero',
+    cerrada: 'booleano',
+  })),
+});
+
 // --- El registro de áreas -----------------------------------------------------
 
 const AREAS = [];
@@ -361,6 +385,18 @@ declaraArea({
   inicial: estadoDeSalidas,
   congela: congelaSalidas,
   levanta: levantaSalidas,
+  reproduce: false,
+});
+
+// Las llegadas validadas, de SPEC-032. **No se reproducen desde el registro**: sus hechos
+// dirían que se llegó a un sitio, no por qué paso de la secuencia iba quien llegó, y
+// reconstruir la escena que espera a partir de ellos sería inventársela.
+declaraArea({
+  id: 'llegadas',
+  esquema: AREA_LLEGADAS,
+  inicial: estadoDeLlegadas,
+  congela: congelaLlegadas,
+  levanta: levantaLlegadas,
   reproduce: false,
 });
 

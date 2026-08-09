@@ -70,6 +70,36 @@ export function validaLlegadaPorGeofence(clasificacion) {
   return c !== 'vehiculo';
 }
 
+/**
+ * Si un enlace de la traza —dos posiciones seguidas— es una **parada**.
+ *
+ * Vive aquí porque aquí vive el umbral, y porque quien pregunta es el geofence: lo que
+ * separa haber llegado de pasar por delante es haberse parado, no haber estado dentro.
+ * Un geofence generoso se cruza andando en casi un minuto, así que medir tiempo dentro
+ * valida cualquier paseo por delante de un sitio.
+ *
+ * Lo dice la clasificación que llega —el detector ya distingue `parada`— y **además** el
+ * umbral, con el mismo criterio por el que `mideRitmoDeSalida` no se cree veinte minutos
+ * de café marcados como andando: por debajo de medio metro por segundo se está quieta,
+ * lo etiquetara quien lo etiquetara. Y en la duda **sí** es parada, que es la asimetría
+ * de `REGLA_DE_LA_DUDA` para las llegadas: quien se para a mirar algo raro valida.
+ *
+ * El vehículo nunca es una parada aunque el coche esté quieto: un atasco dentro de un
+ * geofence no es haber llegado, y esa es la única clasificación que aparta la llegada.
+ */
+export function esUnaParada({ metros, duracionS, clasificacion }) {
+  const c = normalizaClasificacion(clasificacion);
+  if (c === 'vehiculo') return false;
+  if (c === 'parada') return true;
+  if (!Number.isFinite(metros) || metros < 0) {
+    throw new Error(`el enlace del que se pregunta si es una parada mide ${metros} m: hacen falta metros finitos y no negativos`);
+  }
+  if (!Number.isFinite(duracionS) || duracionS <= 0) {
+    throw new Error(`el enlace del que se pregunta si es una parada dura ${duracionS} s: una duración que no es positiva no se puede medir`);
+  }
+  return metros / duracionS < UMBRAL_PARADA_MS;
+}
+
 // Un segmento puede declarar su duración o sus dos marcas de tiempo. Con marcas se
 // comprueba además que la traza va hacia adelante: una traza desordenada mide
 // cualquier cosa y hay que verla fallar, no promediarla.
