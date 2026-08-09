@@ -48,21 +48,29 @@ export const TEXTOS_DE_OFICIO = Object.freeze({
   taberna: {
     femenino: 'Tabernera, de las que oyen de todo',
     masculino: 'Tabernero, de los que oyen de todo',
+    cortoFemenino: 'tabernera',
+    cortoMasculino: 'tabernero',
     implicacion: 'Te llegarán los encargos que nacen de una conversación: recados de vecindario, líos que alguien cuenta a media voz y noticias que hay que llevar de un sitio a otro.',
   },
   botica: {
     femenino: 'Boticaria, de las que curan lo que se puede',
     masculino: 'Boticario, de los que curan lo que se puede',
+    cortoFemenino: 'boticaria',
+    cortoMasculino: 'boticario',
     implicacion: 'Te mandarán a por lo que hace falta y a donde hace falta: remedios, plantas y gente a la que hay que llegar antes de que se ponga peor.',
   },
   forja: {
     femenino: 'Herrera, de las que arreglan lo roto',
     masculino: 'Herrero, de los que arreglan lo roto',
+    cortoFemenino: 'herrera',
+    cortoMasculino: 'herrero',
     implicacion: 'Lo tuyo son las cosas: llevarlas, recuperarlas y devolverlas enteras. Aventuras de objeto, de encargo y de taller.',
   },
   mercado: {
     femenino: 'Mercadera, de las que regatean sin despeinarse',
     masculino: 'Mercader, de los que regatean sin despeinarse',
+    cortoFemenino: 'mercadera',
+    cortoMasculino: 'mercader',
     implicacion: 'Te tocará cruzar el mapa entero: tratos con quien vive lejos, cargas que van y vienen y ferias que se montan donde menos se espera.',
   },
 });
@@ -74,6 +82,20 @@ export function nombreDeOficio(oficio, genero) {
     throw new Error(`el oficio "${oficio}" no tiene texto de pantalla: los declarados en el núcleo son ${OFICIOS.join(', ')}`);
   }
   return textos[IDS_DE_GENERO.includes(genero) ? genero : 'femenino'];
+}
+
+/**
+ * El oficio dicho en una palabra, en el género de quien juega.
+ *
+ * Es lo que va bajo el nombre en la portada —«Xoana, mercadera»—, donde la frase entera de
+ * A1P1 no cabe y además sobra: allí se elegía, y aquí solo se recuerda quién eres.
+ */
+export function nombreCortoDeOficio(oficio, genero) {
+  const textos = TEXTOS_DE_OFICIO[oficio];
+  if (!textos) {
+    throw new Error(`el oficio "${oficio}" no tiene texto de pantalla: los declarados en el núcleo son ${OFICIOS.join(', ')}`);
+  }
+  return genero === 'masculino' ? textos.cortoMasculino : textos.cortoFemenino;
 }
 
 /** El texto de error del nombre, según el motivo del núcleo. */
@@ -317,7 +339,9 @@ export function PantallaArranque({
           alSalir={() => {
             const cerrado = arranque.cierra();
             refresca();
-            if (alSalirAAndar) alSalirAAndar(cerrado, lista);
+            // El mapa levantado viaja con lo cerrado: la portada del día siguiente se compone
+            // sobre él, y volver a preguntárselo a nadie sería levantarlo dos veces.
+            if (alSalirAAndar) alSalirAAndar(cerrado, lista, levantado.current);
           }}
         />
       ) : null}

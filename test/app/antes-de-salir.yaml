@@ -1,0 +1,227 @@
+# @app — El momento «antes de salir» dentro del móvil (SPEC-028).
+#
+# Aquí vive **solo lo que necesita dispositivo**: que las cinco pantallas se monten en
+# orden de verdad, que las dos maneras de salir sean dos botones del mismo peso y no un
+# botón con una nota al pie, que las tres puertas estén al pie en una fila, y que la
+# preparación termine y deje salir a andar. Todo lo demás de esta fila —el vocabulario
+# cerrado de bloques, el tope de tres, la tarjeta de a medias y su condición, el estirón,
+# la ficha, los dos silencios y el guion entero— se afirma en `test/nucleo/portada.test.mjs`,
+# `test/nucleo/lo-que-hay-hoy.test.mjs` y `test/nucleo/antes-de-salir.test.mjs`, que corren
+# sin simulador. Duplicar aquí lo que ya se puede poner rojo en Node solo añadiría un flujo
+# lento que se cae por el entorno.
+#
+# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
+# Android, así que ningún flujo `@app` se puede correr aquí
+# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
+# registra como infraestructura ausente, nunca como verde.
+#
+# **Lo que este flujo necesita para pasar**: una instalación limpia —a la portada se llega
+# saliendo del arranque, que es hoy el único camino— y el proxy alcanzable desde el
+# simulador (`EXPO_PUBLIC_PROXY`). Sin proxy la preparación sigue terminando: es
+# exactamente lo que afirma «sin cobertura dice lo mismo», y por eso este flujo no
+# distingue los dos casos.
+#
+# **Lo que este flujo NO puede comprobar todavía, y por qué:**
+#
+# - **Que las tres puertas lleven a sus tres destinos.** El diario, la repisa y los ajustes
+#   son de las filas 37 y 38 y todavía no existen: `App.js` monta el momento sin
+#   `alAbrirPuerta`, así que pulsar una puerta no lleva a ninguna parte. Lo que sí se
+#   comprueba aquí es que las tres están, que son tres y que están al pie; el destino se
+#   añade a este flujo el día que exista la pantalla al otro lado.
+# - **La tarjeta de a medias.** Se llega a ella con una salida abierta de una sesión
+#   anterior, y hoy la partida solo dura la sesión: no hay partida guardada —es de otra
+#   fila—, así que en un dispositivo no hay manera de reabrir la app con una salida
+#   abierta. Su condición entera se afirma en `test/nucleo/portada.test.mjs`.
+# - **La puerta del zurrón.** A2P2 es de la fila 42 y de origen el modo de pasos de fondo
+#   está apagado (SPEC-027), así que la puerta no aparece nunca en esta entrega.
+#
+# Los elementos se localizan por los identificadores que declara la spec —`portada`,
+# `portada-identidad`, `salir-sin-mas`, `ver-que-se-cuenta`, `puerta-<id>`, `lista-de-hoy`,
+# `oferta-<id>`, `ficha-aventura`, `preparacion-salida`— y nunca por su posición.
+
+# El caso, tal y como lo cita `test/spec-test-map.json`:
+#   «Las cinco pantallas del momento se montan en orden en el dispositivo»
+#
+appId: com.walkingadventure.app
+---
+# A la portada se llega saliendo del arranque, que hoy es el único camino. El flujo del
+# arranque ya está escrito y se reutiliza entero en vez de copiarlo.
+- runFlow:
+    file: arranque.yaml
+
+# ── A2P1 · La portada ──────────────────────────────────────────────────────────
+- assertVisible:
+    id: 'portada'
+- assertNotVisible:
+    id: 'antes-de-salir-sin-cablear'
+# El momento del sistema de diseño: antes de salir. La pantalla está permitida y se puede
+# leer, elegir y esperar.
+- assertVisible:
+    id: 'momento-antes-de-salir'
+# Y el arranque queda atrás: no se vuelve a entrar en él.
+- assertNotVisible:
+    id: 'arranque-paso'
+
+- assertVisible:
+    id: 'portada-miniatura'
+- assertVisible: 'Tu mapa · día \d+'
+- assertVisible:
+    id: 'portada-identidad'
+- assertVisible:
+    id: 'portada-bloques'
+
+# La tarjeta de a medias no está: no hay ninguna salida abierta al llegar aquí.
+- assertNotVisible:
+    id: 'tarjeta-a-medias'
+- assertNotVisible:
+    id: 'a-medias-dejarlo'
+
+# Las dos maneras de salir, **las dos botones**. Que «salir a andar sin más» no sea una
+# nota al pie es de las pocas cosas de esta fila que solo se ven en una pantalla real.
+- assertVisible:
+    id: 'ver-que-se-cuenta'
+- assertVisible: 'Ver qué se cuenta hoy'
+- assertVisible:
+    id: 'salir-sin-mas'
+- assertVisible: 'Salir a andar sin más'
+
+# Las tres puertas, en una fila al pie. Tres, y ninguna cuarta: cuatro destinos de igual
+# peso convertirían el juego en una aplicación con secciones.
+- assertVisible:
+    id: 'puerta-diario'
+- assertVisible:
+    id: 'puerta-repisa'
+- assertVisible:
+    id: 'puerta-ajustes'
+- assertVisible: 'El diario'
+- assertVisible: 'La repisa'
+- assertVisible: 'Ajustes'
+
+# Lo que la portada no tiene, y su ausencia es lo que esta spec protege.
+- assertNotVisible: '.*[Rr]eputación.*'
+- assertNotVisible: '.*[Ff]orastera.*'
+- assertNotVisible: '.*[Cc]ambiar de mapa.*'
+- assertNotVisible: '.*[Mm]is mapas.*'
+- assertNotVisible: '.*\d+\s*(m|km|min|minutos|pasos|kcal|%).*'
+# La puerta del zurrón no existe: de origen el modo de pasos de fondo está apagado.
+- assertNotVisible: '.*[Zz]urrón.*'
+
+# ── A2P3 · Lo que hay hoy ──────────────────────────────────────────────────────
+- tapOn:
+    id: 'ver-que-se-cuenta'
+- assertVisible:
+    id: 'lo-que-hay-hoy'
+- assertVisible:
+    id: 'momento-antes-de-salir'
+- assertVisible: 'Lo que se cuenta hoy'
+- assertVisible: 'Por aquí hay quien necesita algo'
+
+# O la lista, o la oferta del estirón. Nunca las dos, y nunca una lista vacía: es la misma
+# disyunción que afirma el núcleo, vista desde la pantalla.
+- runFlow:
+    when:
+      visible:
+        id: 'lista-de-hoy'
+    commands:
+      - assertVisible:
+          id: 'oferta-medida'
+      - assertNotVisible:
+          id: 'sin-reparto'
+      # Sin paginación y sin «ver más»: el tope existe para que no haga falta.
+      - assertNotVisible: '.*[Vv]er más.*'
+      - assertNotVisible: '.*[Ss]iguiente.*'
+- runFlow:
+    when:
+      visible:
+        id: 'sin-reparto'
+    commands:
+      - assertVisible: 'Por aquí cerca no hay hoy gran cosa que contar.'
+      - assertVisible:
+          id: 'estiron'
+      - assertNotVisible:
+          id: 'lista-de-hoy'
+      # La oferta nunca es la única salida.
+      - assertVisible:
+          id: 'andar-sin-nada'
+      # No se pulsa: aceptar el estirón cambiaría el estado a mitad de flujo, y lo que
+      # hace y lo que no hace ya está afirmado en `test/nucleo/lo-que-hay-hoy.test.mjs`.
+      # Que la pantalla llegue aquí con un mundo recién levantado sería la noticia.
+
+# La línea que dice que se puede salir sin coger ninguna, en los dos casos.
+- assertVisible:
+    id: 'andar-sin-nada'
+- assertVisible: 'Y puedes salir a andar sin coger ninguna. El mundo se mueve igual.'
+# Ni una distancia en toda la pantalla. La hora orientativa sí, que es lo que el diseño
+# pide al lado de la palabra del mundo.
+- assertNotVisible: '.*\d+\s*(m|km|metros|pasos|kcal|%).*'
+
+# ── A2P4 · La ficha ────────────────────────────────────────────────────────────
+- tapOn:
+    id: 'oferta-medida'
+    index: 0
+- assertVisible:
+    id: 'ficha-aventura'
+- assertVisible:
+    id: 'ficha-lazo'
+# El lazo entero, con una sola parada rotulada: es lo que permite juzgar la caminata sin
+# destripar la historia.
+- assertVisible:
+    id: 'ficha-primera-parada'
+- assertVisible:
+    id: 'ficha-gancho'
+- assertVisible:
+    id: 'ficha-pie'
+- assertVisible: '.*vuelves donde empiezas.*'
+- assertNotVisible: '.*\d+\s*(m|km|metros|pasos|%).*'
+
+# «Otra cosa» devuelve a la lista sin haber aceptado nada.
+- assertVisible:
+    id: 'ficha-otra-cosa'
+- tapOn:
+    id: 'ficha-otra-cosa'
+- assertVisible:
+    id: 'lo-que-hay-hoy'
+- assertVisible:
+    id: 'andar-sin-nada'
+
+# Y «Me la quedo» pasa a la preparación.
+- tapOn:
+    id: 'oferta-medida'
+    index: 0
+- assertVisible:
+    id: 'ficha-aceptar'
+- assertVisible: 'Me la quedo'
+- tapOn:
+    id: 'ficha-aceptar'
+
+# ── A2P5 · La preparación ──────────────────────────────────────────────────────
+- assertVisible:
+    id: 'preparacion-salida'
+- assertVisible:
+    id: 'momento-antes-de-salir'
+- assertVisible: 'Preparando la salida'
+- assertVisible:
+    id: 'preparacion-lineas'
+- assertVisible: 'Repartiendo los papeles'
+- assertVisible: 'Escribiendo lo que se dirá'
+- assertVisible: 'Dibujando los sitios'
+# La frase más importante de la pantalla, y la única de las cinco que nombra la cobertura:
+# promete que deja de importar, no avisa de que falta.
+- assertVisible: 'A partir de aquí no hace falta cobertura. Puedes meter el móvil en el bolsillo.'
+# No ofrece cancelar: dura segundos y termina sola.
+- assertNotVisible: '.*[Cc]ancelar.*'
+- assertNotVisible: '.*\d+\s*%.*'
+# Y con o sin cobertura, la pantalla no menciona la red ni sugiere reintentar.
+- assertNotVisible: '.*[Ss]in conexión.*'
+- assertNotVisible: '.*[Rr]eintentar.*'
+- assertNotVisible: '.*[Ee]rror.*'
+
+# Termina y deja salir a andar. Es la última pantalla que pide atención hasta pararse en
+# algún sitio.
+- extendedWaitUntil:
+    visible:
+      id: 'preparacion-listo'
+    timeout: 30000
+- assertVisible: 'Listo. Vamos.'
+- tapOn:
+    id: 'preparacion-listo'
