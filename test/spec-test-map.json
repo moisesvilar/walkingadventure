@@ -12989,6 +12989,976 @@
       "caso": "El zurrón solo aparece si hay reserva que vaciar",
       "escenario": "El zurrón solo aparece si hay reserva que vaciar",
       "nota": "De este escenario @app esta fila sostiene solo la mitad de datos: sin reserva no hay ninguna llamada ni ningún error. La pantalla es de la fila 42."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mapa recién creado sin prólogo corrido, **cuando** se lee la cola de entregas, **entonces** está vacía y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Un mapa recién creado y sin prólogo devuelve la cola vacía y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un paso del mundo que produce una entrega, **cuando** se lee la cola, **entonces** contiene una entrada con su tipo, su procedencia y su escena declarada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Un paso que produce una entrega deja una entrada con su tipo, su procedencia y su escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una entrada de la cola, **cuando** se lee su procedencia, **entonces** nombra el mapa y el número del paso que la produjo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "La procedencia de una entrada nombra el mapa y el paso que la produjo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el enumerado de tipos de entrega, **cuando** se enumera, **entonces** tiene exactamente dos valores: noticia y oportunidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El enumerado de tipos de entrega tiene exactamente dos valores",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una entrada con un tipo que no está en el enumerado, **cuando** se intenta encolar, **entonces** falla nombrando el tipo recibido y enumerando los dos válidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una entrada con un tipo que no está en el enumerado falla nombrando el tipo y los dos válidos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una entrada de oportunidad sin escena declarada, **cuando** se intenta encolar, **entonces** falla nombrando la entrada, en lugar de suponer una escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad sin escena declarada falla nombrando la entrada en vez de suponerle una",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad encolada, **cuando** se lee su estado, **entonces** es «pendiente», con cero ofertas registradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad recién encolada está pendiente y con cero ofertas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la cola, **cuando** se consulta lo pendiente, **entonces** devuelve solo oportunidades, y en un orden estable que no depende de la iteración sobre ningún `Set` ni `Map`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Lo pendiente devuelve solo oportunidades, en un orden declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una cola con varias oportunidades pendientes, **cuando** se consulta dos veces desde el mismo estado, **entonces** el orden es idéntico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Dos consultas de lo pendiente desde el mismo estado dan el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el productor de paso de esta spec, **cuando** produce una entrega, **entonces** el efecto que devuelve es de un tipo del catálogo cerrado de SPEC-011 y añade: no resta oro, no baja ningún rango y no retira nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El productor de la cola se registra con su identificador y produce efectos del catálogo",
+      "hueco_de_bateria": true,
+      "nota": "Sostiene la parte de núcleo de «Un paso solo añade»: el efecto que devuelve la cola es del catálogo cerrado de SPEC-011 y no trae ningún campo que quite."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el productor de paso, **cuando** devuelve un efecto de un tipo que no está en el catálogo de SPEC-011, **entonces** el paso falla nombrando el tipo, y la cola no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una producción de un tipo que no está en el enumerado hace fallar el paso y deja la cola igual",
+      "hueco_de_bateria": true,
+      "nota": "El productor solo puede emitir \"rumor\" y \"oportunidad\", así que un tipo fuera del catálogo se para antes, al construir la entrada. La afirmación que queda viva es la que importa: falla nombrando el tipo y la cola no cambia."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un paso ejecutado en el que el mundo no produce nada, **cuando** se invoca este productor, **entonces** no encola nada y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Un paso en el que el mundo no produce nada no encola nada y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la cola de entregas, **cuando** se busca dónde se guarda, **entonces** viaja con la partida y nunca dentro del documento congelado de ninguna celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "La cola viaja con la partida y nunca dentro del documento congelado de una celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una cola con oportunidades pendientes y ofertas registradas, **cuando** se serializa la partida y se vuelve a cargar, **entonces** vuelven las mismas entradas, con el mismo estado, las mismas ofertas y el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una cola serializada y vuelta a cargar conserva estados, ofertas y orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un paso que produce una noticia, **cuando** termina ese mismo paso, **entonces** la noticia ya está sedimentada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una noticia ya está sedimentada al terminar el paso que la produjo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una noticia sedimentada, **cuando** se consulta lo pendiente de la cola, **entonces** no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una noticia sedimentada no aparece en lo pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una noticia sedimentada, **cuando** se consulta lo que se cuenta en su núcleo, **entonces** sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una noticia sedimentada sigue disponible en lo que se cuenta en su núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mapa en el que el mundo ha producido cincuenta noticias y ninguna oportunidad, **cuando** se consulta lo pendiente, **entonces** está vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Un mapa con cincuenta noticias y ninguna oportunidad deja lo pendiente vacío",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una noticia, **cuando** se buscan sus ofertas registradas, **entonces** no tiene ninguna y no puede tenerla: el ciclo de dos ofertas no le aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una noticia no tiene ninguna oferta registrada y el ciclo de dos ofertas no le aplica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una noticia, **cuando** se intenta ofrecer como micro-encuentro, **entonces** falla nombrando el tipo, en lugar de ofrecerla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Intentar ofrecer una noticia falla nombrando el tipo en vez de ofrecerla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una jugadora que no abre la app en un mes y luego anda, **cuando** se leen las noticias que el mundo produjo, **entonces** están todas sedimentadas y consultables, sin ninguna caducada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Un mes sin abrir la app deja todas las noticias sedimentadas y consultables, sin ninguna caducada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida abierta y la cola sin ninguna oportunidad pendiente, **cuando** la jugadora anda una salida entera, **entonces** no salta ningún micro-encuentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una salida entera con la cola vacía no hace saltar ningún micro-encuentro",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: nada de la batería afirma que un micro-encuentro solo salta con cola no vacía."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida abierta y una oportunidad pendiente, **cuando** la jugadora atraviesa un sitio apto, **entonces** salta un micro-encuentro con esa oportunidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Con una oportunidad pendiente, atravesar un sitio apto hace saltar el micro-encuentro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mundo cuyo motor de pasos no ha producido nada, **cuando** la jugadora anda tres salidas, **entonces** no salta ni un micro-encuentro y no se inventa ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un mundo cuyo motor no ha producido nada no inventa micro-encuentros en tres salidas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la implementación del disparo, **cuando** se inspecciona, **entonces** no existe ninguna vía por la que un micro-encuentro nazca sin una entrada de la cola detrás.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "No existe ninguna vía por la que un micro-encuentro nazca sin una entrada de la cola detrás",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro ya saltado en el paso del mundo en curso, **cuando** la jugadora atraviesa otro sitio apto dentro del mismo paso, **entonces** no salta un segundo micro-encuentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Como mucho un micro-encuentro por paso del mundo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: el cooldown no está en la batería."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo caso, **cuando** el mundo avanza un paso más y ella atraviesa otro sitio apto, **entonces** sí puede saltar el siguiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Con el mundo un paso más adelante sí puede saltar el siguiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida en la que la jugadora completa la cola entera, **cuando** se consulta lo pendiente al cerrar, **entonces** está vacío y no ha saltado más de un micro-encuentro por paso del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una salida que completa la cola entera la deja vacía sin más de un encuentro por paso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad ya ofrecida en esta salida, **cuando** la jugadora atraviesa otro sitio apto en la misma salida, **entonces** esa misma oportunidad no se vuelve a ofrecer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una oportunidad ya ofrecida en esta salida no se vuelve a ofrecer en la misma salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro disponible, **cuando** se lee lo que entrega hacia fuera, **entonces** entrega el sitio y la escena, y ni un texto destinado a mostrarse: la notificación y su redacción son de las filas 29 y 18.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro entrega el sitio y la escena, y ni un texto destinado a mostrarse",
+      "hueco_de_bateria": true,
+      "nota": "La distinción entre los dos tipos de aviso nace aquí; la notificación y el háptico de «Una oportunidad va por notificación y háptico» son de la fila 29."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro atendido, **cuando** se lee el estado de su entrada, **entonces** es «atendida» y no vuelve a ofrecerse nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro atendido queda «atendida» y no vuelve a ofrecerse ni a aparecer",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro atendido, **cuando** se consulta lo pendiente, **entonces** esa entrada ya no está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro atendido queda «atendida» y no vuelve a ofrecerse ni a aparecer",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso cubre los dos criterios: el estado de la entrada y su ausencia de lo pendiente."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad pendiente, **cuando** se lee su entrada recién encolada, **entonces** no tiene lugar: declara una escena, no un sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una oportunidad recién encolada declara una escena y no tiene lugar",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: el lugar diferido no tiene escenario en la batería."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad y una salida en marcha, **cuando** la jugadora atraviesa el primer sitio apto del trazado, **entonces** el lugar de la entrada se resuelve contra ese sitio y no contra ninguno posterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "El lugar se resuelve contra el primer sitio apto del trazado y no contra ninguno posterior",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un sitio cuyas afinidades de escena no admiten la escena declarada, **cuando** la jugadora lo atraviesa, **entonces** ese sitio no resuelve el lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un sitio cuyas afinidades no admiten la escena declarada no resuelve el lugar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida cuyo trazado no contiene ningún sitio apto, **cuando** la jugadora la completa entera, **entonces** no salta ningún micro-encuentro y la oportunidad sigue pendiente, con las mismas ofertas que tenía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una salida sin ningún sitio apto no hace saltar nada y deja la oportunidad como estaba",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad que resuelve lugar, **cuando** se lee el sitio resuelto, **entonces** es una localización del mundo con nombre y anclaje, nunca una coordenada suelta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "El sitio resuelto es una localización del mundo con nombre y anclaje, nunca una coordenada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oferta que se ofrece contra un sitio que no existe en el mapa, **cuando** se registra, **entonces** falla nombrando el sitio, en lugar de registrarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una oferta contra un sitio que no existe en el mapa falla nombrando el sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el contenido de una oportunidad, **cuando** se compara entre dos ejecuciones que la resuelven en sitios distintos, **entonces** es idéntico: lo que depende de por dónde pase la jugadora es dónde se entrega, nunca qué se entrega.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "El contenido de una oportunidad es el mismo se resuelva donde se resuelva",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: la mitad determinista del lugar diferido no está en la batería."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo mapa, la misma semilla y la misma secuencia de pasos, **cuando** se ejecutan dos veces desde cero, **entonces** las entradas producidas, su tipo, su escena y su orden son idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El mismo paso ejecutado dos veces desde el mismo estado encola lo mismo y en el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida sin ninguna aventura aceptada, **cuando** la jugadora atraviesa un sitio apto, **entonces** el micro-encuentro puede saltar igual: no hace falta un lazo para que el mundo te deba algo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Sin aventura aceptada el lugar se resuelve por llegada real y el micro-encuentro puede saltar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida sin trazado vigente y sin llegada declarada, **cuando** se intenta resolver un lugar diferido, **entonces** falla nombrando lo que falta, en lugar de elegir un sitio cualquiera del mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Sin trazado y sin llegada declarada falla nombrando lo que falta, en vez de elegir un sitio cualquiera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una aventura aceptada con su cadena de beats, **cuando** salta y se atiende un micro-encuentro, **entonces** la cadena de beats de la aventura es la misma: mismos lugares, mismo orden, mismo número.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Atender un micro-encuentro deja la cadena de beats, el presupuesto y el tamaño de la aventura como estaban",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: el coste cero de desvío no tiene escenario en la batería."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo caso, **cuando** se lee el presupuesto de la aventura, **entonces** no ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Atender un micro-encuentro deja la cadena de beats, el presupuesto y el tamaño de la aventura como estaban",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso afirma el presupuesto: alcance en metros y en tramos, antes y después."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo caso, **cuando** se lee el tamaño declarado de la aventura, **entonces** es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Atender un micro-encuentro deja la cadena de beats, el presupuesto y el tamaño de la aventura como estaban",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso afirma el tamaño declarado, que es de dónde sale el alcance."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una aventura aceptada, **cuando** se ofrece un micro-encuentro, **entonces** su sitio está en el trazado vigente y la jugadora lo atraviesa siguiéndolo, sin ningún metro añadido de ida ni de vuelta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "El lazo recorrido con un micro-encuentro atendido es el mismo que sin él",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un sitio apto que exige salirse del trazado vigente, **cuando** se busca el lugar de un micro-encuentro, **entonces** ese sitio no es candidato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un sitio apto que exige salirse del trazado vigente no es candidato",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida con un micro-encuentro atendido, **cuando** se compara el lazo recorrido con el de la misma salida sin él, **entonces** el trazado es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "El lazo recorrido con un micro-encuentro atendido es el mismo que sin él",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso: el trazado recorrido con y sin micro-encuentro es el mismo."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro ignorado, **cuando** se lee el estado de la aventura principal, **entonces** no ha cambiado nada en ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro ignorado no cambia nada de la aventura principal",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro atendido, **cuando** se lee el trecho que queda hasta el siguiente beat de la aventura, **entonces** es el mismo que antes de atenderlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Atender un micro-encuentro deja la cadena de beats, el presupuesto y el tamaño de la aventura como estaban",
+      "hueco_de_bateria": true,
+      "nota": "El trecho hasta el siguiente beat sale del lazo, que es lo que este caso compara antes y después."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro, **cuando** se lee cuántos beats tiene, **entonces** tiene exactamente uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro tiene exactamente un beat y no se contabiliza en ningún presupuesto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un micro-encuentro, **cuando** se busca si tiene disparador de franja o tiempo límite, **entonces** no tiene ninguno: no se puede fallar por no llegar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro no tiene disparador de franja ni tiempo límite",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una aventura y un micro-encuentro vivos a la vez, **cuando** se busca en qué presupuesto se contabiliza el beat del micro-encuentro, **entonces** no se contabiliza en ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un micro-encuentro tiene exactamente un beat y no se contabiliza en ningún presupuesto",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso afirma `cuentaEnElPresupuesto: false`."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una jugadora dentro de una escena de la aventura principal, **cuando** el mundo produce una oportunidad, **entonces** no se ofrece ningún micro-encuentro hasta que la escena termina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "No se avisa durante un beat en curso",
+      "escenario": "No se avisa durante un beat en curso",
+      "nota": "De este escenario @app esta fila sostiene la mitad de núcleo: la retención. El aviso y su háptico son de la fila 29."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo caso, **cuando** se lee el estado de la entrada mientras la escena sigue abierta, **entonces** sigue pendiente y no ha consumido ninguna oferta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "No se avisa durante un beat en curso",
+      "escenario": "No se avisa durante un beat en curso",
+      "nota": "El mismo caso afirma que la entrada retenida sigue pendiente y sin oferta consumida."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una escena de la aventura principal que termina, **cuando** la jugadora vuelve a atravesar un sitio apto, **entonces** el micro-encuentro retenido puede ofrecerse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "No se avisa durante un beat en curso",
+      "escenario": "No se avisa durante un beat en curso",
+      "nota": "El mismo caso afirma que, terminada la escena, el micro-encuentro retenido se ofrece."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una jugadora que atraviesa un sitio apto justo al entrar en el geofence de un beat de la aventura, **cuando** el beat comienza, **entonces** manda el beat y el micro-encuentro no se ofrece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Manda el beat cuando la jugadora atraviesa un sitio apto justo al entrar en su geofence",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una salida entera dentro de escenas encadenadas de la aventura principal, **cuando** se cierra la salida, **entonces** ninguna oportunidad ha consumido oferta por haber estado retenida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una salida entera dentro de escenas encadenadas no consume ninguna oferta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el estado del beat en curso, **cuando** se busca de dónde lo lee esta capa, **entonces** lo recibe como dato de la fila 34 y no lo deduce de la posición ni de ningún temporizador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "El estado del beat llega como dato de dos valores y no se deduce de la posición ni del tiempo parado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un beat en curso que nunca declara su fin, **cuando** se cierra la salida, **entonces** las oportunidades retenidas siguen pendientes y no se pierde ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un beat que nunca declara su fin deja las oportunidades retenidas pendientes y no pierde ninguna",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la regla de no avisar durante un beat, **cuando** se busca dónde está escrita, **entonces** está en un solo sitio y la consultan por igual el micro-encuentro y cualquier otro aviso que cuelgue de esta capa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "La regla de no avisar durante un beat está escrita en un solo sitio",
+      "hueco_de_bateria": true,
+      "nota": "Se completa con «La regla se consulta antes que ninguna otra guarda, así que durante una escena ni se mira la cola», que es lo que fija su orden."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad pendiente sin ninguna oferta, **cuando** se ofrece y la jugadora no la atiende, **entonces** queda con una oferta registrada y vuelve a estar pendiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad con una oferta vuelve a estar pendiente hasta que sale otro día",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad con una oferta, **cuando** la jugadora sale otro día, **entonces** se le ofrece una vez más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad ignorada se ofrece una segunda vez",
+      "escenario": "Una oportunidad ignorada se ofrece una segunda vez",
+      "nota": "De este escenario @app esta fila sostiene la mitad de núcleo: el ciclo de dos ofertas, la exigencia de otra salida y otro sitio, y la sedimentación."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad con una oferta registrada en una salida, **cuando** la misma salida sigue abierta, **entonces** no se le ofrece una segunda vez en esa salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Una oportunidad ya ofrecida en esta salida no se vuelve a ofrecer en la misma salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad con una oferta registrada en un sitio, **cuando** se busca dónde ofrecerla la segunda vez, **entonces** el sitio de la primera oferta no es candidato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El sitio de la primera oferta no es candidato para la segunda, y sin otro no se ofrece",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad cuya segunda oferta solo podría caer en el mismo sitio que la primera, **cuando** la jugadora atraviesa ese sitio, **entonces** no se ofrece y la oportunidad sigue pendiente con una sola oferta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El sitio de la primera oferta no es candidato para la segunda, y sin otro no se ofrece",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: la batería dice «en otro sitio» pero no tiene ningún caso donde el único sitio disponible sea el de la primera oferta."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad con dos ofertas sin atender, **cuando** se cierra la salida de la segunda, **entonces** sedimenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad ignorada se ofrece una segunda vez",
+      "escenario": "Una oportunidad ignorada se ofrece una segunda vez",
+      "nota": "El mismo caso: con dos ofertas sin atender, cerrar la salida de la segunda sedimenta."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad sedimentada, **cuando** la jugadora sale otro día, **entonces** no se le ofrece nunca más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad sedimentada no se ofrece nunca más y no aparece en lo pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad sedimentada, **cuando** se consulta lo pendiente, **entonces** no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad sedimentada no se ofrece nunca más y no aparece en lo pendiente",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso afirma las dos cosas."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad sedimentada, **cuando** se intenta ofrecer, **entonces** falla nombrando su estado, en lugar de ofrecerla una tercera vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Ofrecer una tercera vez falla nombrando el estado en lugar de ofrecerla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad sedimentada, **cuando** se intenta atender, **entonces** falla nombrando su estado y el estado de la partida no cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Atender una sedimentada falla nombrando el estado y no cambia el estado de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad atendida en su primera oferta, **cuando** se lee su historial, **entonces** tiene una sola oferta y nunca se ofrece una segunda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad atendida en su primera oferta tiene una sola oferta y no se ofrece otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el tope de ofertas, **cuando** se busca de dónde sale, **entonces** hay una sola constante con valor dos y todo lo que la consulta la lee de ahí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El tope de ofertas sale de una sola constante con valor dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad ofrecida en la última salida antes de guardar, **cuando** se recarga la partida, **entonces** conserva su oferta registrada con su salida y su sitio, y la segunda oferta sigue exigiendo salida y sitio distintos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oferta registrada en la última salida antes de guardar vuelve con su salida y su sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad que sedimenta, **cuando** se compara el rango de la jugadora en cada núcleo antes y después, **entonces** es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha",
+      "nota": "De este escenario @app esta fila sostiene todo lo que no es leer un texto: el diff del estado por áreas, que incluye los rangos de cada núcleo."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo caso, **cuando** se compara su relación con cada cara del mapa, **entonces** es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha",
+      "nota": "El mismo caso compara el área de relaciones antes y después."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo caso, **cuando** se comparan el oro, los objetos y los motes, **entonces** son los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha",
+      "nota": "El mismo caso compara oro, objetos y motes."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una jugadora que deja sedimentar veinte oportunidades seguidas, **cuando** se compara el estado de la partida con el de otra que no recibió ninguna, **entonces** la única diferencia son las entradas sedimentadas de la cola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha",
+      "nota": "El mismo caso: veinte sedimentaciones frente a una partida sin ninguna, y la única área que difiere es «entregas»."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una jugadora que deja sedimentar veinte oportunidades, **cuando** el mundo produce la siguiente, **entonces** se le ofrece igual, con las mismas dos ofertas: sedimentar no reduce lo que se ofrece después.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar veinte no reduce las dos ofertas de la siguiente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco enumerado por la spec: nada de la batería comprueba que la oferta futura no encoja."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oportunidad sedimentada, **cuando** se busca si generó alguna entrada de diario, **entonces** no generó ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha",
+      "nota": "El mismo caso afirma cero entradas de diario."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el catálogo de efectos que esta capa puede producir, **cuando** se enumera, **entonces** todos añaden y ninguno resta, baja, caduca ni retira nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Un paso solo añade",
+      "escenario": "Un paso solo añade",
+      "nota": "De este escenario esta capa es el segundo productor: diez pasos con la cola colgada solo producen efectos del catálogo cerrado, y todos añaden."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la sedimentación de una oportunidad, **cuando** se mira qué efecto produce, **entonces** no produce ninguno: cambia el estado de su propia entrada y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "La sedimentación no produce ningún efecto, ni siquiera aditivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** todos los textos que esta capa expone hacia fuera, **cuando** se revisan, **entonces** ninguno menciona lo no atendido, lo perdido ni lo que la jugadora no hizo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Ningún texto que esta capa expone menciona lo no atendido ni lo perdido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la superficie pública de esta capa, **cuando** se busca una consulta que devuelva cuántas oportunidades se dejaron pasar, **entonces** no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "No existe ninguna consulta que devuelva cuántas oportunidades se dejaron pasar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una cola con al menos una oportunidad pendiente, **cuando** se pide el recado suelto para la lista de hoy, **entonces** devuelve exactamente una entrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Con al menos una oportunidad pendiente, el recado suelto devuelve exactamente una entrada",
+      "hueco_de_bateria": true,
+      "nota": "RF-QUEST-016 va sin escenario de respaldo: el PRD lo marca ⚠ y la batería no lo recoge en ninguna característica."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el recado devuelto, **cuando** se lee su medida, **entonces** es «un momento».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El recado declara la medida «un momento» y ninguna cifra",
+      "hueco_de_bateria": true,
+      "nota": "La razón de que el recado declare una medida y ninguna cifra es «Cada aventura declara su tamaño con una palabra», que es @app y de la fila 28."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el recado devuelto, **cuando** se busca su tiempo aproximado y su distancia, **entonces** no tiene ninguno de los dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El recado declara la medida «un momento» y ninguna cifra",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso afirma la ausencia de tiempo aproximado y de distancia."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una cola con doce oportunidades pendientes, **cuando** se pide el recado suelto, **entonces** devuelve una sola, no una lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Con doce oportunidades pendientes el recado sigue siendo uno solo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la cola sin ninguna oportunidad pendiente, **cuando** se pide el recado suelto, **entonces** devuelve vacío y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "La cola sin ninguna oportunidad pendiente devuelve vacío y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una jugadora de un oficio y una cola cuyas oportunidades nacieron sin afinidad de oficio, **cuando** se pide el recado suelto, **entonces** devuelve una: el recado no se filtra por oficio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El recado no se filtra por oficio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mundo donde no castea ninguna plantilla para el oficio de la jugadora, **cuando** se compone la lista de hoy, **entonces** hay al menos una entrada, y es el recado suelto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Un día con una sola aventura no es un día roto",
+      "escenario": "Un día con una sola aventura no es un día roto",
+      "nota": "De este escenario @app esta fila sostiene la mitad de núcleo: sin ninguna aventura casteada la lista no sale vacía, y nada de lo que sale de aquí se disculpa."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el recado suelto, **cuando** se lee lo que declara, **entonces** declara que ocupa un sitio del tope de tres de la lista: nunca añade un cuarto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Se ofrecen tres aventuras como mucho",
+      "escenario": "Se ofrecen tres aventuras como mucho",
+      "nota": "De este escenario @app esta fila sostiene la mitad de núcleo: el recado ocupa un sitio del tope de tres y nunca añade un cuarto. La pantalla es de la fila 28."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un recado suelto que aparece en la lista y la jugadora elige una aventura, **cuando** se lee su entrada, **entonces** sigue pendiente y no ha consumido ninguna oferta: aparecer en la lista y no elegirse no es una oferta perdida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Aparecer en la lista y no elegirse no consume ninguna oferta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un recado suelto que apareció en la lista y no se eligió, **cuando** se pide el recado del día siguiente y hay otra oportunidad pendiente, **entonces** se ofrece la otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Un recado que apareció y no se eligió rota, y al día siguiente se ofrece la otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un recado suelto aceptado, **cuando** la jugadora anda, **entonces** su lugar se resuelve en marcha con las mismas reglas del micro-encuentro, incluido el coste cero de desvío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El lugar de un recado aceptado se resuelve en marcha con las reglas del micro-encuentro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un recado suelto aceptado y no atendido, **cuando** se cierra la salida, **entonces** consume una oferta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Un recado aceptado y no atendido consume una oferta al cerrar la salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un recado suelto aceptado y atendido, **cuando** se lee su entrada, **entonces** está «atendida» y sale de la cola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Un recado aceptado y atendido queda «atendida» y sale de la cola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el recado suelto, **cuando** se busca qué texto entrega, **entonces** entrega la referencia a su texto de plantilla y ninguna cadena redactada aquí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El recado entrega la referencia a su texto de plantilla y ninguna cadena redactada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** cada uno de los cuatro mundos congelados de las pruebas con su prólogo corrido, **cuando** se consulta lo pendiente de la cola, **entonces** hay al menos una oportunidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El prólogo de costero deja al menos una oportunidad pendiente en la cola",
+      "hueco_de_bateria": true,
+      "nota": "Un caso por cada uno de los cuatro mundos congelados: barrio-tres-calles, costero, suelo-250m y urbano-denso."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mundo congelado `barrio-tres-calles` con su prólogo corrido, **cuando** se pide el recado suelto para cada oficio del catálogo, **entonces** devuelve uno para todos ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "En barrio-tres-calles el recado suelto sale para cada uno de los cuatro oficios",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mundo congelado `suelo-250m`, que es el mínimo del proyecto, **cuando** se compone la lista de hoy para un oficio sin ninguna plantilla que castee, **entonces** la lista no está vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "En suelo-250m la lista de hoy no sale vacía para un oficio sin ninguna plantilla que castee",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mapa cuyo prólogo no dejó ninguna oportunidad, **cuando** se compone la lista de hoy sin aventuras casteadas, **entonces** la lista sale vacía y el criterio anterior se pone rojo: es la comprobación de que mide algo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Un mapa cuyo prólogo no dejó ninguna oportunidad compone la lista vacía, y el criterio se pone rojo",
+      "hueco_de_bateria": true,
+      "nota": "Es la comprobación de que los tres criterios anteriores miden algo: con la cola a cero el recado es nulo y la lista sale vacía."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** las entradas sembradas por el prólogo, **cuando** se comparan con las que produce un paso durante la partida, **entonces** tienen la misma forma y esta capa no las distingue.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Las entradas sembradas por el prólogo tienen la misma forma que las de un paso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una entrada sembrada por el prólogo, **cuando** se ofrece, **entonces** sigue el mismo ciclo de dos ofertas y la misma sedimentación que cualquier otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Una entrada sembrada por el prólogo sigue el mismo ciclo de dos ofertas y la misma sedimentación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo mundo congelado y la misma semilla, **cuando** se corre el prólogo dos veces desde cero, **entonces** la cola sembrada que esta capa lee es idéntica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "El prólogo del mismo mundo con la misma semilla siembra una cola idéntica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una partida que consume la cola sembrada hasta vaciarla, **cuando** la jugadora sigue andando, **entonces** la cola vuelve a llenarse con lo que producen los pasos, sin ningún resiembra del prólogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recados.test.mjs",
+      "caso": "Una cola sembrada que se vacía vuelve a llenarse con lo que producen los pasos, sin resiembra del prólogo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** los módulos de esta spec, **cuando** se inspecciona su implementación, **entonces** no aparece `Math.random()`, ni `Date.now()`, ni `new Date()`, ni ningún temporizador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Los módulos de la cola no usan azar, ni reloj, ni temporizadores",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "Se afirma sobre los tres módulos que entrega SPEC-019."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el productor de paso de esta spec, **cuando** se ejecuta un paso, **entonces** recibe un azar derivado del suyo propio, de modo que añadirlo no desplaza el azar de la propagación de rumores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Colgar la cola del motor no desplaza el azar de la propagación de rumores",
+      "hueco_de_bateria": true,
+      "nota": "Sostiene «Cada fase usa su propio sufijo de azar» sobre el productor: el azar cuelga de su identificador."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mapa con esta capa y otro idéntico sin ella, **cuando** se comparan los rumores propagados en los mismos cincuenta pasos, **entonces** son los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Colgar la cola del motor no desplaza el azar de la propagación de rumores",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso compara cincuenta pasos con la cola colgada y sin ella."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** el mismo paso ejecutado dos veces desde el mismo estado, **cuando** se comparan las entradas encoladas, **entonces** son idénticas y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El mismo paso ejecutado dos veces desde el mismo estado encola lo mismo y en el mismo orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** un mundo congelado, **cuando** se ejecutan cincuenta pasos con esta capa colgada, **entonces** el documento de cada celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "El documento de cada celda sigue idéntico byte a byte después de cincuenta pasos con la cola colgada",
+      "hueco_de_bateria": true,
+      "nota": "«Lo generado no se resiembra jamás» es la característica que lo respalda, pero ninguno de sus escenarios cubre los pasos del mundo."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una llamada a resolver un lugar diferido sin trazado, sin llegada o sin escena, **cuando** se ejecuta, **entonces** falla nombrando lo que falta y no cae a un comportamiento reducido en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Sin trazado y sin llegada declarada falla nombrando lo que falta, en vez de elegir un sitio cualquiera",
+      "hueco_de_bateria": true,
+      "nota": "La escena que falta la cubre «Los sitios aptos de un trazado se buscan sobre la lista de sitios y no sobre otra cosa»."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una llamada que recibe un sitio en lugar de un trazado, o un trazado en lugar de un sitio, **cuando** se ejecuta, **entonces** falla nombrando lo recibido: ninguna firma de esta capa admite dos formas distintas en el mismo parámetro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/microencuentros.test.mjs",
+      "caso": "Un sitio suelto en lugar de un trazado falla nombrando lo recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** una oferta que se registra sin salida o sin sitio, **cuando** se ejecuta, **entonces** falla nombrando el campo que falta, en lugar de registrar una oferta a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oferta sin salida o sin sitio falla nombrando el campo que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la superficie pública de esta capa, **cuando** se busca una cifra de distancia, tiempo, ritmo o progreso, **entonces** no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "La superficie pública de la cola no expone ninguna cifra de distancia, tiempo, ritmo ni progreso",
+      "hueco_de_bateria": true,
+      "nota": "Se completa con «El micro-encuentro no expone ninguna cifra de distancia, tiempo, ritmo ni progreso», que lo afirma sobre la otra mitad de la superficie."
+    },
+    {
+      "spec": "SPEC-019",
+      "criterio": "**Dado** la superficie pública de esta capa, **cuando** se busca un texto destinado a mostrarse dentro del juego, **entonces** no exporta ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "La cola no exporta ningún texto destinado a mostrarse dentro del juego",
+      "hueco_de_bateria": true
     }
   ]
 }

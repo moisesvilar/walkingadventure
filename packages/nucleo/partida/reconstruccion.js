@@ -23,7 +23,7 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { apunta as apuntaEnDiario, entradaDeHecho } from './diario.js';
-import { AREAS_SIN_ESTADO, congelaEstado, estadoInicial, levantaEstado, pisaSitio } from './estado.js';
+import { AREAS_QUE_NO_REPRODUCEN, congelaEstado, estadoInicial, levantaEstado, pisaSitio } from './estado.js';
 import { VERSION_GENERADOR, lee, texto as textoCanonico } from './formato.js';
 import { areaDeTipo, congelaRegistro, cuantosHechos, hechosDesde, levantaRegistro } from './hechos.js';
 import { exigeAlmacen } from './mapa.js';
@@ -99,14 +99,15 @@ const APLICADORES = {
  * Un tipo que ninguna área declara **hace fallar la reproducción nombrándolo** en
  * lugar de saltárselo: saltarse hechos produciría un estado reconstruido incompleto
  * que además se declara correcto, que es peor que no abrir. Un tipo declarado por un
- * área que todavía no tiene estado se reconoce, no altera nada y **se declara** en el
- * resultado, que es lo contrario de perderlo en silencio.
+ * área que no se reproduce —porque todavía no tiene estado, o porque su hecho no
+ * lleva dentro con qué reconstruirla— se reconoce, no altera nada y **se declara** en
+ * el resultado, que es lo contrario de perderlo en silencio.
  */
 export function aplicaHecho(vivo, h) {
   const area = areaDeTipo(h.tipo);
   const aplicador = APLICADORES[h.tipo];
   if (!aplicador) {
-    if (AREAS_SIN_ESTADO.includes(area)) return { area, aplicado: false };
+    if (AREAS_QUE_NO_REPRODUCEN.includes(area)) return { area, aplicado: false };
     throw new Error(`el hecho "${h.tipo}" es del área "${area}", que no dice cómo se reproduce: sin eso el estado reconstruido saldría incompleto y se declararía correcto`);
   }
   aplicador(vivo, h);
