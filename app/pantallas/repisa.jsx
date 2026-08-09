@@ -15,7 +15,16 @@
 // - **Los motes van debajo de los objetos y en la misma columna.** Sin pestañas y sin
 //   secciones plegables: separarlos los convertiría en un perfil.
 // - **La tipografía sale del registro**, que la repisa declara como mundo. La serif no se
-//   elige aquí.
+//   elige aquí, y **no hay ninguna excepción para la línea de procedencia**. El wireframe
+//   la dibuja en sans pequeña y aquí estaba escrita a mano; se resuelve por el mecanismo y
+//   no por la excepción, porque la familia no es una decisión de esta pantalla: en este
+//   juego una sans es voz de aplicación, «de Ferreiro · día 12» habla como mundo igual que
+//   el nombre que tiene al lado, y un texto con voz de aplicación colocado en la repisa lo
+//   rechaza `coloca` nombrándolo. Lo que el artefacto pedía y sí sobrevive es la
+//   **jerarquía**: cuerpo pequeño y color de lápiz, que es lo que separa el margen del
+//   nombre. Si algún día esa línea tuviera que ir de verdad en sans, la vía es que su
+//   registro lo diga —y eso sería abrir la voz de aplicación dentro del bucle, que es un
+//   rediseño de `lenguaje.md` y no un `fontFamily` en un componente.
 
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -30,21 +39,21 @@ const LAPIZ = '#9a9483';
 const PUNTEADO = '#d9d2be';
 
 /** Una línea de objeto: el nombre a la izquierda, de quién y de qué día a la derecha. */
-function LineaDeObjeto({ objeto, serif, sans }) {
+function LineaDeObjeto({ objeto, serif }) {
   return (
     <View testID={TESTIDS.objeto} accessibilityLabel={objeto.id} style={estilos.linea}>
       <Text style={[estilos.nombre, serif]}>{objeto.nombre}</Text>
-      <Text style={[estilos.margen, sans]}>{objeto.linea}</Text>
+      <Text style={[estilos.margen, serif]}>{objeto.linea}</Text>
     </View>
   );
 }
 
 /** Una línea de mote: el mote en itálica a la izquierda y el núcleo a la derecha. */
-function LineaDeMote({ mote, serif, sans }) {
+function LineaDeMote({ mote, serif }) {
   return (
     <View testID={TESTIDS.mote} accessibilityLabel={mote.nucleo} style={estilos.linea}>
       <Text style={[estilos.mote, serif]}>{mote.mote}</Text>
-      <Text style={[estilos.margen, sans]}>{`en ${mote.nucleo}`}</Text>
+      <Text style={[estilos.margen, serif]}>{`en ${mote.nucleo}`}</Text>
     </View>
   );
 }
@@ -54,11 +63,9 @@ function LineaDeMote({ mote, serif, sans }) {
  *   `repisa` lo que devuelve `componeRepisa`; `alVolver` qué ocurre al volver.
  */
 export function PantallaRepisa({ repisa, alVolver = null }) {
-  // La familia sale del registro que declara la composición, no de esta pantalla. El
-  // margen derecho va en la otra, que es la sans de la voz de aplicación en el resto del
-  // juego y aquí solo tamaño pequeño: es cómo lo dibuja el artefacto.
+  // **Una sola familia en toda la pantalla, y sale del registro.** No hay una segunda
+  // constante de fuente aquí y no es un olvido: ver la nota de la cabecera.
   const serif = { fontFamily: familiaDe(repisa.registro) };
-  const sans = { fontFamily: 'sans-serif' };
   const texto = (id) => repisa.textos.find((t) => t.id === id).texto;
 
   return (
@@ -73,14 +80,14 @@ export function PantallaRepisa({ repisa, alVolver = null }) {
         <View testID={TESTIDS.objetos} style={estilos.lista}>
           {repisa.objetos.vacio
             ? <Text style={[estilos.vacio, serif]}>{repisa.objetos.vacio}</Text>
-            : repisa.objetos.lista.map((o) => <LineaDeObjeto key={o.id} objeto={o} serif={serif} sans={sans} />)}
+            : repisa.objetos.lista.map((o) => <LineaDeObjeto key={o.id} objeto={o} serif={serif} />)}
         </View>
 
         <Text style={[estilos.rotuloDeMotes, serif]}>{texto('motes')}</Text>
         <View testID={TESTIDS.motes} style={estilos.lista}>
           {repisa.motes.vacio
             ? <Text style={[estilos.vacio, serif]}>{repisa.motes.vacio}</Text>
-            : repisa.motes.lista.map((m) => <LineaDeMote key={m.nucleo} mote={m} serif={serif} sans={sans} />)}
+            : repisa.motes.lista.map((m) => <LineaDeMote key={m.nucleo} mote={m} serif={serif} />)}
         </View>
 
         {/* Al pie, en una sola línea y en cuerpo pequeño: es una moneda que se gasta y no un marcador. */}

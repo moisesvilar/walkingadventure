@@ -214,7 +214,11 @@ export const TEMPLATES = [
     desenlace: {
       texto: 'Das el parte con detalle y quien vigila palidece, luego asiente, y luego te pide que vuelvas mañana. La costumbre se pega rápido.',
       oro: 8,
-      objetos: [{ id: 'catalejo-del-vigia', clase: 'llave', procedencia: { plantilla: 'ronda-del-vigia' } }],
+      // Con tilde dentro del identificador, igual que los motes: el nombre visible se lee
+      // de aquí —la plantilla no persiste ningún otro— y «Catalejo del vigia» sale a la
+      // repisa mal escrito. Es una referencia y nadie la parsea; el único que la toca la
+      // parte por los guiones para escribirla en palabras.
+      objetos: [{ id: 'catalejo-del-vigía', clase: 'llave', procedencia: { plantilla: 'ronda-del-vigia' } }],
     },
     repuesto: {
       sinTi: 'La ronda la hizo quien siempre la hace, refunfuñando, y no vio nada raro porque ya no mira.',
@@ -788,7 +792,8 @@ export const TEMPLATES = [
     desenlace: {
       texto: 'El libro no sale, pero la página sí: alguien la copia a mano con una letra preciosa. Todo el mundo queda satisfecho por motivos distintos.',
       oro: 13,
-      objetos: [{ id: 'copia-de-la-pagina', clase: 'llave', procedencia: { plantilla: 'el-libro-que-no-se-presta' } }],
+      // Con tilde, por lo mismo: la repisa escribía «Copia de la pagina».
+      objetos: [{ id: 'copia-de-la-página', clase: 'llave', procedencia: { plantilla: 'el-libro-que-no-se-presta' } }],
     },
     repuesto: {
       sinTi: 'El asunto se resolvió de memoria y con errores. Se notó al usarlo, y bastante.',
