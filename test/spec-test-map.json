@@ -20957,6 +20957,559 @@
       "fichero": "test/nucleo/transporte.test.mjs",
       "caso": "La clasificación no viaja con la partida: nadie del paquete guarda la traza",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio del mundo con su posición, cuando se lee su geofence, entonces su radio es el declarado por esta spec, el mismo para todos los sitios, y sale de una constante única.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El radio del geofence es el mismo para todos los sitios y sale de una constante única",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un anclaje que es un local cerrado, cuando la jugadora se para en la acera de enfrente, a treinta metros, entonces la llegada se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El geofence se valida desde la calle",
+      "escenario": "El geofence se valida desde la calle",
+      "nota": "La batería lo etiqueta @app; con las posiciones como dato entra entero en @nucleo, y se afirma además la otra mitad del borde: a cuarenta y cinco metros no valida."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado cualquier sitio del juego, cuando se busca alguna condición de validación que exija estar en el interior del recinto real, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Ninguna condición de validación exige estar dentro del recinto real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una jugadora que atraviesa el geofence de un sitio sin pararse, cuando sigue andando, entonces la llegada no se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El visor no aparece nunca andando",
+      "escenario": "El visor no aparece nunca andando",
+      "nota": "La mitad de validación del escenario, sobre una secuencia de posiciones simulada: se cruza el geofence en línea recta a cinco kilómetros por hora, que es la velocidad del escenario."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una jugadora que se para dentro del geofence menos del tiempo de permanencia, cuando sigue andando, entonces la llegada no se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una parada más corta que la permanencia no valida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una jugadora que se para dentro del geofence el tiempo de permanencia, cuando se comprueba, entonces la llegada se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una parada del tiempo de permanencia valida la llegada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una jugadora que atraviesa el geofence a cincuenta kilómetros por hora, cuando se comprueba, entonces la llegada no se valida, y la regla se lee del mismo módulo del que la lee el motor de pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Pasar en coche por delante de un beat no lo valida",
+      "escenario": "Pasar en coche por delante de un beat no lo valida",
+      "nota": "El mismo escenario lo implementa también test/nucleo/transporte.test.mjs, por su mitad de clasificación; aquí se afirma la mitad de validación de la llegada."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una jugadora que atraviesa el geofence a velocidad ambigua y se para dentro, cuando se comprueba, entonces la llegada se valida: en la duda, valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "En la duda, cuenta",
+      "escenario": "En la duda, cuenta",
+      "nota": "La mitad de validación del escenario; la de los metros que cuentan para el motor de pasos vive en test/nucleo/transporte.test.mjs."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la superficie pública de esta capa, cuando se busca una operación de validar que reciba un toque, una confirmación o cualquier acción de la jugadora, entonces no existe: llegar valida, y no hay otra manera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Validar no es un gesto: ninguna operación de esta capa recibe un toque",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando se inspecciona lo que la capa emite hacia la plataforma, entonces no emite ninguna notificación, ningún háptico ni ninguna petición de poner la app en primer plano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una llegada validada no emite ninguna notificación, ningún háptico ni ninguna petición de primer plano",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando la jugadora no mira el móvil, entonces la escena queda disponible y sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La escena queda disponible y espera",
+      "escenario": "La escena queda disponible y espera"
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando la jugadora no mira el móvil, entonces la escena queda disponible y sigue disponible.",
+      "nivel": "@app",
+      "fichero": "test/app/llegada.yaml",
+      "caso": "La escena queda disponible y espera",
+      "escenario": "La escena queda disponible y espera",
+      "nota": "Lo único de este escenario que necesita dispositivo: que la app no pase a primer plano sola. Que la pantalla no se encienda con el móvil bloqueado sigue siendo @manual."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un beat cuyo geofence toca un cruce con semáforo, cuando la jugadora se para cuarenta segundos y sigue andando sin mirar el móvil, entonces el beat sigue disponible para cuando vuelva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Pararse en un semáforo dentro de un geofence no tiene consecuencias",
+      "escenario": "Pararse en un semáforo dentro de un geofence no tiene consecuencias"
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un beat cuyo geofence toca un cruce con semáforo, cuando la jugadora se para cuarenta segundos y sigue andando sin mirar el móvil, entonces el beat sigue disponible para cuando vuelva.",
+      "nivel": "@app",
+      "fichero": "test/app/llegada.yaml",
+      "caso": "Pararse en un semáforo dentro de un geofence no tiene consecuencias",
+      "escenario": "Pararse en un semáforo dentro de un geofence no tiene consecuencias"
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando se serializa la partida, se cierra la app y se vuelve dos días después, entonces la escena sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La escena sigue disponible después de cerrar la app y volver dos días después",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando se serializa la partida, se cierra la app y se vuelve dos días después, entonces la escena sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El área del estado guarda la llegada, el paso vigente y las escenas que esperan, y nada más",
+      "hueco_de_bateria": true,
+      "nota": "La otra mitad del mismo criterio: qué guarda el documento —y qué no, que es el rastro del sensor—."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando se serializa la partida, se cierra la app y se vuelve dos días después, entonces la escena sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un registro de llegadas mal formado falla al leerse en lugar de darse por vacío",
+      "hueco_de_bateria": true,
+      "nota": "Levantar la partida no puede degradar a «no había ninguna llegada»: es la forma de fallo que esta fila no puede permitirse."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada ya validada en la salida en curso, cuando la jugadora vuelve a pararse en el mismo sitio, entonces no se valida una segunda vez ni se duplica nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una llegada ya validada no se valida dos veces en la misma salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada ya validada en la salida en curso, cuando la jugadora vuelve a pararse en el mismo sitio, entonces no se valida una segunda vez ni se duplica nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una salida nueva empieza sin ninguna llegada de la anterior",
+      "hueco_de_bateria": true,
+      "nota": "El borde del criterio por el otro lado: lo que no se revalida es dentro de la salida, y una salida nueva no arrastra la escena de ayer."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado dos sitios cuyos geofences se solapan y la jugadora parada en la intersección, cuando se comprueba, entonces se validan los dos, y la secuencia que se ofrece es la del más cercano, con la del otro esperando detrás.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dos geofences solapados validan los dos y se ofrece primero el más cercano",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada pedida sin ninguna salida abierta, cuando se comprueba, entonces falla nombrando que no hay salida, en lugar de validar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una llegada pedida sin ninguna salida abierta falla nombrando que no hay salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio que no pertenece al mapa activo, cuando se comprueba su geofence, entonces falla nombrando el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio que no pertenece al mapa activo falla nombrando el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio sin posición, cuando se pide su geofence, entonces falla nombrando el sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio sin posición falla nombrando el sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una traza con un segmento sin clasificar, cuando se comprueba una llegada sobre ella, entonces falla nombrando el segmento, en lugar de suponer que se andaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un segmento sin clasificar falla nombrando el segmento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el módulo de las llegadas, cuando se inspecciona su código, entonces no lee el reloj del sistema, no usa ninguna fuente de azar y no clasifica velocidades por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El módulo de las llegadas no lee el reloj, no sortea y no clasifica velocidades",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada validada, cuando se pide su secuencia, entonces se obtiene una lista ordenada de pasos, cada uno con su tipo y su modo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una llegada validada entrega una lista ordenada de pasos con su tipo y su modo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el catálogo de tipos de paso, cuando se enumera, entonces son exactamente cuatro: el visor, el beat, la ficha del sitio y lo que aquí se cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El catálogo de tipos de paso es exactamente el visor, el beat, la ficha y lo que aquí se cuenta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el catálogo de modos, cuando se enumera, entonces son dos: encadenado y a un toque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El catálogo de modos es exactamente encadenado y a un toque",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado cualquier llegada validada, cuando se pide su secuencia, entonces tiene al menos un paso encadenado: no existe una llegada que no enseñe nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "No existe una llegada que no enseñe nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una primera visita a un sitio con ilustración, cuando se pide la secuencia, entonces empieza por el visor, en modo encadenado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El visor abre por la ficción la primera vez",
+      "escenario": "El visor abre por la ficción la primera vez",
+      "nota": "La mitad de forma de la secuencia; la composición del visor es de la fila 33 y no está en disco."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una primera visita a un sitio sin ilustración, cuando se pide la secuencia, entonces no contiene el visor en ningún modo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio sin ilustración no tiene visor en ningún modo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una segunda visita al mismo sitio, cuando se pide la secuencia, entonces el visor aparece en modo a un toque y nunca encadenado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La segunda vez el visor no se abre solo",
+      "escenario": "La segunda vez el visor no se abre solo",
+      "nota": "Dos mitades: que el visor viene en modo a un toque, y que lo que la llegada ofrece como paso vigente es lo que ha cambiado y no el visor."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio que es beat del lazo vigente, cuando se pide la secuencia, entonces contiene el beat, después del visor si lo hubiera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El visor es una capa y debajo está el beat",
+      "escenario": "El visor es una capa y debajo está el beat"
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio al que ha caído un micro-encuentro mandado por la cola, cuando se pide la secuencia, entonces contiene el beat igual que si fuera del lazo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un micro-encuentro mandado por la cola produce el mismo paso que un beat del lazo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un paraje sin beat, cuando se pide la secuencia, entonces contiene la ficha del sitio y no contiene el beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Llegar sin haber venido a nada da la ficha del sitio",
+      "escenario": "Llegar sin haber venido a nada da la ficha del sitio",
+      "nota": "La mitad de forma de la secuencia; la ficha la compone la fila 33."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio con beat, cuando se pide la secuencia, entonces no contiene la ficha: la ficha es lo que hay cuando no se ha venido a nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio con beat no lleva la ficha: la ficha es lo que hay cuando no se ha venido a nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un núcleo, cuando se pide la secuencia, entonces contiene lo que aquí se cuenta, y es el último paso encadenado de la lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aquí se cuenta cierra la llegada a un núcleo",
+      "escenario": "Lo que aquí se cuenta cierra la llegada a un núcleo"
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un núcleo con beat, cuando se comparan las posiciones del beat y de lo que aquí se cuenta, entonces lo que aquí se cuenta va después.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aquí se cuenta cierra la llegada a un núcleo",
+      "escenario": "Lo que aquí se cuenta cierra la llegada a un núcleo",
+      "nota": "El mismo caso cubre los dos criterios: afirma el orden entero de la secuencia y la comparación de las dos posiciones."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un núcleo sin beat, cuando se pide la secuencia, entonces el único paso encadenado, salvo el visor de la primera vez, es lo que aquí se cuenta: la llegada entera es eso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Sin beat, lo que se cuenta es la llegada entera",
+      "escenario": "Sin beat, lo que se cuenta es la llegada entera"
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un paraje, cuando se pide la secuencia, entonces no contiene lo que aquí se cuenta en ningún caso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un paraje nunca lleva lo que aquí se cuenta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado cualquier secuencia, cuando se buscan dos pasos del mismo tipo, entonces no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Ninguna secuencia repite un paso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la superficie pública de esta capa, cuando se busca una operación que permita saltar a un paso concreto de la secuencia, entonces no existe: la secuencia se recorre entera y en orden, y quien la encadena es haber llegado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "No existe ninguna operación que salte a un paso concreto de la secuencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la superficie pública de esta capa, cuando se busca una operación que permita saltar a un paso concreto de la secuencia, entonces no existe: la secuencia se recorre entera y en orden, y quien la encadena es haber llegado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La pantalla de lo que aquí se cuenta no tiene camino de vuelta ni decide nada",
+      "hueco_de_bateria": true,
+      "nota": "La mitad de pantalla del mismo criterio: A4P5 no tiene cabecera, ni flecha de atrás, ni más control que «Seguir», y declara los data-testid que la spec pide."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una secuencia recorrida hasta el final, cuando se pide la siguiente, entonces la llegada queda cerrada y no vuelve a ofrecerse en la misma salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una secuencia recorrida hasta el final cierra la llegada y no vuelve a ofrecerse",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada cuya secuencia se abandonó a mitad —la app se cierra entre dos pasos—, cuando se vuelve a abrir estando todavía dentro del geofence, entonces la secuencia continúa por el paso donde iba y no vuelve a empezar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una secuencia abandonada a mitad continúa por el paso donde iba",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la misma llegada, cuando se pide su secuencia dos veces desde el mismo estado, entonces las dos son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La misma llegada pedida dos veces desde el mismo estado da la misma secuencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado los ocho mundos de referencia con su reparto casteado, cuando se recorren las llegadas posibles, entonces ocurren las cuatro formas de secuencia —solo ficha, ficha con visor, beat con lo que se cuenta, y lo que se cuenta como llegada entera— al menos una vez cada una.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Las cuatro formas de secuencia ocurren en los ocho mundos de referencia",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma también la quinta forma declarada, «beat sin núcleo», y el recuento exacto de las cinco sobre el recorrido que el propio caso describe: los números solo significan algo con ese recorrido."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una llegada a un núcleo, cuando aflora su estado, entonces trae lo que ese núcleo oyó, en la versión que le llegó, y no la de ningún otro núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aflora en un núcleo es lo que ese núcleo oyó y no lo de ningún otro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado dos núcleos que oyeron el mismo suceso en niveles distintos, cuando se llega a cada uno, entonces cada uno cuenta la suya.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dos núcleos que oyeron el mismo suceso en niveles distintos cuentan cada uno la suya",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado lo que aflora al llegar, cuando se inspecciona, entonces no lleva el nivel de deformación ni ninguna etiqueta de fiabilidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aflora al llegar no lleva el nivel de deformación ni ninguna etiqueta de fiabilidad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un núcleo que no ha oído nada, cuando se llega, entonces el paso existe igual y dice que no hay nada que contar, sin llamarlo error ni falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un núcleo que no ha oído nada enseña la pantalla igual y no lo llama error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un núcleo del que ha llegado algo sobre la propia jugadora, cuando aflora el estado, entonces eso aparece por el mismo canal y en su versión, y no en un apartado distinto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que llegó sobre la jugadora aparece por el mismo canal y en su versión",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado todo el juego entregado hasta esta fila, cuando se busca una pantalla, una consulta o una acción que devuelva el estado de todos los núcleos a la vez, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "No existe ninguna consulta que devuelva el estado de todos los núcleos a la vez",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la superficie pública de esta capa, cuando se busca una operación que consulte el estado de un núcleo sin haber llegado a él, entonces no existe: enterarse cuesta piernas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "No existe manera de consultar el estado de un núcleo sin haber llegado a él",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la superficie pública de esta capa, cuando se busca una operación que consulte el estado de un núcleo sin haber llegado a él, entonces no existe: enterarse cuesta piernas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Ningún módulo del paquete consume las llegadas para consultar un núcleo por su cuenta",
+      "hueco_de_bateria": true,
+      "nota": "La otra puerta del mismo criterio: si otro módulo del paquete cablease las llegadas, la consulta podría invocarse sin haber llegado."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado lo que aflora al llegar, cuando se comprueba el diario, entonces queda anotado con el sitio y el momento, con el mecanismo que ya define la fila 16 y sin reimplementarlo aquí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aflora queda anotado en el diario con el sitio y el momento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado una versión ya anotada en el diario y otra distinta del mismo suceso que aflora después, cuando se anota, entonces conviven las dos y ninguna sobrescribe a la otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dos versiones del mismo suceso conviven en el diario y ninguna sobrescribe a la otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la primera vez que aflora una segunda versión de algo ya apuntado, cuando se cierra el paso, entonces el estado lo declara, para que la pantalla de la triangulación pueda existir; componerla es de la fila 37.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dos versiones del mismo suceso conviven en el diario y ninguna sobrescribe a la otra",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso afirma que la triangulación se declara la primera vez y solo la primera."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un mundo en gallego, cuando aflora lo que allí se cuenta, entonces los nombres son los que produjo el paquete de idioma de ese mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "En un mundo en gallego los nombres son los que produjo su paquete de idioma",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado cualquier texto de este paso, cuando se busca una cifra de distancia, de tiempo, de ritmo, de progreso o de reputación, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Ningún texto de este paso lleva una cifra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el reparto de la aventura no cableado, cuando se pide la secuencia de una llegada, entonces falla nombrando lo que falta, en lugar de devolver una secuencia sin beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El reparto no cableado falla nombrando lo que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un beat cuyo lugar no corresponde a ningún sitio del mundo congelado, cuando se resuelve la llegada, entonces falla nombrando el lugar, en lugar de tratarlo como un sitio sin beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un beat cuyo lugar no es un sitio del mundo falla nombrando el lugar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la cola de entregas no cableada, cuando se pide la secuencia, entonces falla nombrando la cola, en lugar de decidir que no hay micro-encuentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La cola de entregas no cableada falla nombrando la cola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la capa de lo que se cuenta no cableada, cuando se llega a un núcleo, entonces falla nombrándola, en lugar de producir un núcleo que calla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La capa de lo que se cuenta no cableada falla nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un núcleo que calla y un núcleo sin cablear, cuando se comparan, entonces son distinguibles: el primero es un estado y el segundo es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un núcleo que calla y un núcleo sin cablear son distinguibles",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el detector de transporte ausente, cuando se comprueba una llegada, entonces falla, en lugar de validar suponiendo que se andaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El detector de transporte ausente falla en lugar de validar suponiendo que se andaba",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado la llegada de un sitio marcado por la jugadora como que no vale, cuando se comprueba, entonces el sitio conserva su nombre y su posición y no produce beat, con el mecanismo de la fila 35 y sin reimplementarlo aquí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio sin beat conserva su nombre y su posición y no produce beat",
+      "hueco_de_bateria": true,
+      "nota": "El gesto de marcar un anclaje que no vale es de la fila 35 y no está en disco: aquí se afirma la mitad que esta capa sostiene —un sitio que no da beat sigue siendo un sitio entero con su nombre y su posición—. Queda pendiente de la fila 35 la mitad del marcado."
     }
   ]
 }
