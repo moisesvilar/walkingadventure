@@ -5,12 +5,12 @@
 // por cuál va y se monta esa pantalla. Tres cosas que eso compra, y son la razón:
 //
 // - **No hay ruta a la que ir**, así que no hay manera de llegar a A4P5 sin haber llegado
-//   al núcleo. Un enrutador con cuatro rutas habría dejado esa puerta abierta.
+//   al núcleo. Cuatro rutas habrían dejado esa puerta abierta.
 // - **Ninguna de las pantallas encadenadas sabe si es la primera visita ni si hay beat**:
 //   cada una recibe qué paso es. Sin esto, la regla del orden acabaría escrita cuatro
 //   veces, que es exactamente cómo se desincronizan.
 // - **La app cerrada a mitad de secuencia continúa donde iba**, porque el paso vigente es
-//   estado y no una posición en una pila de navegación.
+//   estado y no una posición en una pila.
 //
 // El único control de cada paso es su propia acción de seguir, y la dibuja la fila dueña
 // de esa pantalla. Aquí no hay barra, ni flecha de atrás entre pasos, ni manera de saltar
@@ -21,17 +21,25 @@
 // como lo que es —el acceso de arriba, que espera un dedo— y montarlo además como paso
 // vigente sería abrirlo solo, que es lo que la segunda visita no puede hacer.
 //
-// Las pantallas del visor (A4P1, A4P2), de la escena (A4P3, A4P4) y de la ficha (A4P7)
-// son de las filas 33 y 34 y **no están en disco**: entran inyectadas por su tipo de
-// paso, y mientras no existan se monta el hueco con el paso nombrado, en lugar de saltar
-// el paso en silencio.
+// **El visor es una capa y no un paso**, y aquí es donde eso deja de ser una frase: cuando
+// el paso vigente es el visor, lo que se monta debajo es ya el paso siguiente —el beat, la
+// ficha, lo que aquí se cuenta— y el visor va encima. Cerrarlo no lleva a ningún sitio:
+// deja a la vista lo que ya estaba. Por eso cerrar es la única acción que el visor añade,
+// y existe igual cuando el visor no está.
+//
+// La pantalla de la escena (A4P3, A4P4) es de la fila 34 y **no está en disco**: entra
+// inyectada por su tipo de paso, y mientras no exista se monta el hueco con el paso
+// nombrado, en lugar de saltar el paso en silencio.
 
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MODOS, TIPOS_DE_PASO } from '@walkingadventure/nucleo/partida/secuencia.js';
+import { TEXTOS as TEXTOS_DEL_VISOR } from '@walkingadventure/nucleo/partida/visor.js';
 
+import { PantallaFicha } from './ficha.js';
 import { PantallaLoQueSeCuenta } from './lo-que-se-cuenta.js';
+import { PantallaVisor } from './visor.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -49,18 +57,43 @@ export function etiquetaDeSecuencia(secuencia) {
   return secuencia.map((paso) => `${paso.tipo}:${paso.modo}`).join(',');
 }
 
+/** El primer paso encadenado desde `desde`, o `null` si por delante no queda ninguno. */
+function encadenadoDesde(secuencia, desde) {
+  for (let i = desde; i < secuencia.length; i++) {
+    if (secuencia[i].modo === MODOS.ENCADENADO) return { ...secuencia[i], indice: i };
+  }
+  return null;
+}
+
 /**
  * @param {object} props
  *   `llegada` la escena que espera, tal cual la entrega `creaLlegadas().espera()`;
+ *   `estado` el estado del momento que resuelve `partida/visor.js`, del vocabulario
+ *   cerrado `visor` · `visor-sin-foto` · `ficha` · `visor-a-un-toque`;
+ *   `visor` la descripción del visor ya compuesta, o `null` si este sitio no tiene;
+ *   `ficha` la ficha de texto ya compuesta, o `null`;
  *   `loQueSeCuenta` la parte `pantalla` de `loQueAquiSeCuenta(...)`, que es lo que compone
  *   A4P5 cuando el paso vigente es el suyo;
- *   `pantallas` las de las filas 33 y 34, por tipo de paso; `alSeguir` avanzar al
- *   siguiente paso —lo único que mueve la secuencia—; `alVisor` abrir el visor que quedó
- *   a un toque, que **no se abre solo**.
+ *   `pantallas` las de la fila 34, por tipo de paso; `alSeguir` avanzar al siguiente paso
+ *   —lo único que mueve la secuencia—; `alVisor` abrir el visor que quedó a un toque, que
+ *   **no se abre solo**; `visorAbierto` si esa capa está puesta ahora mismo; `alCerrarVisor`
+ *   quitarla; `alDescartar` el sitio donde se toca «Este sitio no pega», de la fila 35.
  *
  * No hay ninguna propiedad para ir a un paso concreto, y su ausencia es la pieza.
  */
-export function PantallaLlegada({ llegada, loQueSeCuenta = null, pantallas = {}, alSeguir = null, alVisor = null }) {
+export function PantallaLlegada({
+  llegada,
+  estado = null,
+  visor = null,
+  ficha = null,
+  loQueSeCuenta = null,
+  pantallas = {},
+  alSeguir = null,
+  alVisor = null,
+  visorAbierto = false,
+  alCerrarVisor = null,
+  alDescartar = null,
+}) {
   if (!llegada) {
     return (
       <View style={estilos.raiz} testID="llegada">
@@ -71,25 +104,34 @@ export function PantallaLlegada({ llegada, loQueSeCuenta = null, pantallas = {},
 
   const vigente = llegada.vigente;
   const aUnToque = llegada.secuencia.find((paso) => paso.modo === MODOS.A_UN_TOQUE) ?? null;
-  const Pantalla = vigente ? pantallas[vigente.tipo] ?? null : null;
+
+  // El visor encadenado no tapa un paso pendiente: el paso de debajo es el siguiente, y
+  // ya está montado mientras la capa está puesta. Cerrarla lo deja a la vista.
+  const enVisor = !!vigente && vigente.tipo === TIPOS_DE_PASO.VISOR;
+  const debajo = enVisor ? encadenadoDesde(llegada.secuencia, vigente.indice + 1) : vigente;
+  const capaPuesta = !!visor && (enVisor || visorAbierto);
+  const Pantalla = debajo ? pantallas[debajo.tipo] ?? null : null;
 
   return (
     <View style={estilos.raiz} testID="llegada">
       <View testID="momento-estado" accessibilityLabel="al-parar" style={estilos.marca} />
+      <View testID="llegada-estado" accessibilityLabel={estado ?? 'sin-resolver'} style={estilos.marca} />
       <View testID="llegada-secuencia" accessibilityLabel={etiquetaDeSecuencia(llegada.secuencia)} style={estilos.marca} />
-      <View testID="llegada-paso" accessibilityLabel={vigente ? vigente.tipo : 'cerrada'} style={estilos.marca} />
+      <View testID="llegada-paso" accessibilityLabel={debajo ? debajo.tipo : 'cerrada'} style={estilos.marca} />
 
       {aUnToque ? (
         <Pressable testID="visor-a-un-toque" onPress={alVisor} style={estilos.aUnToque}>
-          <Text style={estilos.aUnToqueTexto}>{llegada.sitio}</Text>
+          <Text testID="visor-abrir" style={estilos.aUnToqueTexto}>{`${TEXTOS_DEL_VISOR.volverAMirar} ${llegada.sitio}`}</Text>
         </Pressable>
       ) : null}
 
-      {vigente && vigente.tipo === TIPOS_DE_PASO.LO_QUE_SE_CUENTA && loQueSeCuenta ? (
+      {debajo && debajo.tipo === TIPOS_DE_PASO.LO_QUE_SE_CUENTA && loQueSeCuenta ? (
         <PantallaLoQueSeCuenta loQueSeCuenta={loQueSeCuenta} alSeguir={alSeguir} />
-      ) : vigente && Pantalla ? (
-        <Pantalla paso={vigente} sitio={llegada.sitio} alSeguir={alSeguir} />
-      ) : vigente ? (
+      ) : debajo && debajo.tipo === TIPOS_DE_PASO.FICHA && ficha ? (
+        <PantallaFicha ficha={ficha} alSeguir={alSeguir} alDescartar={alDescartar} />
+      ) : debajo && Pantalla ? (
+        <Pantalla paso={debajo} sitio={llegada.sitio} alSeguir={alSeguir} />
+      ) : debajo ? (
         <View style={estilos.hueco}>
           <Text style={estilos.mundo}>{TEXTOS.sinPantalla}</Text>
           <Pressable testID="llegada-seguir" onPress={alSeguir} style={estilos.accion}>
@@ -99,6 +141,8 @@ export function PantallaLlegada({ llegada, loQueSeCuenta = null, pantallas = {},
       ) : (
         <Text style={estilos.mundo}>{TEXTOS.nada}</Text>
       )}
+
+      {capaPuesta ? <PantallaVisor visor={visor} alCerrar={enVisor ? alSeguir : alCerrarVisor} /> : null}
     </View>
   );
 }
