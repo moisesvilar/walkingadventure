@@ -12,18 +12,28 @@
 // Y una tercera, la revisión del render, detrás de un paso que solo existe con
 // `__DEV__`. Esa no es navegación: es el equivalente del hook `__wa.style()` que el
 // prototipo tiene en consola, y es donde se hace la revisión de paridad.
+//
+// Desde la fila 29 hay además un **cuarto momento encadenado de verdad**: en marcha. No
+// cuelga de ningún paso provisional cuando hay partida —se llega andando, que es como se
+// llega en el juego: por «salir a andar» de la preparación, por «salir a andar sin más» de
+// la portada y de la lista, y por «seguir con ella» de la tarjeta de a medias—. El paso
+// provisional existe solo al lado de los otros dos, para poder abrir el momento sin
+// recorrer el arranque entero.
 
 import React, { useEffect, useState } from 'react';
 import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native';
 
 import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
 
+import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
+import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
 import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
+import { EnMarchaMontado } from './pantallas/en-marcha-montado.jsx';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
 
@@ -47,6 +57,15 @@ export function App() {
   // que la portada necesita, y es de esta fila que exista una portada a la que ir. Mientras no
   // haya partida guardada —que es de otra fila—, vive aquí y solo dura la sesión.
   const [partida, setPartida] = useState(null);
+  // La salida que se echó a andar, tal y como la declaró quien salió: con aventura preparada,
+  // sin más, o retomando la que estaba a medias. Mientras vale `null` no se anda. No se vuelve
+  // desde aquí: se sale de una salida llegando a casa o echando el telón, que es de la fila 36.
+  const [salida, setSalida] = useState(null);
+  // El paso provisional al momento en marcha, hermano de los otros dos y con su mundo: sin
+  // partida no hay mapa levantado, así que se pinta sobre el mundo de revisión —el mismo
+  // `__wa.demo()` del prototipo— en lugar de sobre uno inventado aquí.
+  const [enMarcha, setEnMarcha] = useState(false);
+  const [mundoDelPaso, setMundoDelPaso] = useState({ documento: null, fallo: null });
 
   useEffect(() => {
     let vivo = true;
@@ -63,6 +82,19 @@ export function App() {
       suscripcion.remove();
     };
   }, []);
+
+  // El mundo del paso provisional se levanta la primera vez que se abre el momento y no al
+  // arrancar la app: construirlo cuesta, y quien nunca pulsa el paso no tiene por qué pagarlo.
+  // Si no se pudiera construir se guarda el motivo, que es lo que la pantalla enseña: un mapa
+  // en blanco no distingue «no hay mundo» de «no hay seguidor».
+  useEffect(() => {
+    if (!enMarcha || mundoDelPaso.documento !== null || mundoDelPaso.fallo !== null) return undefined;
+    let vivo = true;
+    mundoDeRevision()
+      .then((documento) => { if (vivo) setMundoDelPaso({ documento, fallo: null }); })
+      .catch((e) => { if (vivo) setMundoDelPaso({ documento: null, fallo: mensajeDeError(e) }); });
+    return () => { vivo = false; };
+  }, [enMarcha, mundoDelPaso]);
 
   if (enArranque) {
     return (
@@ -90,6 +122,18 @@ export function App() {
     );
   }
 
+  // Con la salida echada a andar ya no hay portada: se anda. Es el momento en marcha sobre el
+  // mapa que la partida levantó, y **no se dibuja envuelto en la raíz**: la lámina va a sangre,
+  // de borde a borde, y el área segura le comería el borde superior.
+  if (partida && salida) {
+    return (
+      <EnMarchaMontado
+        mundo={partida.mundo.documento}
+        salidas={partida.estado.aventuras}
+      />
+    );
+  }
+
   // La portada: lo que se ve al abrir la app cualquier día que no sea el primero. Sin partida
   // —una compilación abierta directamente en el andamiaje— se queda el andamiaje, que es lo
   // que había antes de esta fila.
@@ -101,6 +145,11 @@ export function App() {
           personaje={partida.personaje}
           mundo={partida.mundo}
           arrancadaEn={partida.arrancadaEn}
+          // Las cuatro maneras de echarse a andar pasan por aquí, y las cuatro llegan al mismo
+          // sitio: «salir a andar» de la preparación, «salir a andar sin más» de la portada y de
+          // la lista, y «seguir con ella» de la tarjeta de a medias. Que la de a medias no vuelva
+          // a preparar nada es el criterio de SPEC-028 que esto cierra.
+          alAndar={(echada) => setSalida(echada ?? { conAventura: false })}
         />
       </SafeAreaView>
     );
@@ -110,21 +159,33 @@ export function App() {
     <SafeAreaView style={estilos.raiz}>
       {/* El paso al mapa. Existe en todas las compilaciones porque el mapa es del
           juego; lo provisional es el paso, no la pantalla. */}
-      {!enRevision ? (
+      {!enRevision && !enMarcha ? (
         <Pressable onPress={() => setEnMapa((estaba) => !estaba)} style={estilos.paso} testID="paso-mapa">
           <Text style={estilos.pasoTexto}>{enMapa ? 'Volver al andamiaje' : 'El mapa'}</Text>
         </Pressable>
       ) : null}
 
+      {/* El paso al momento en marcha, hermano del anterior y por la misma razón: el
+          momento es del juego y a él se llega andando desde la portada, pero sin partida
+          levantada no hay ninguna manera de abrirlo. Lo sustituye A3P1 con su rótulo del
+          sistema, que es de la fila 30; hasta entonces la lámina convive con esta tira. */}
+      {!enRevision && !enMapa ? (
+        <Pressable onPress={() => setEnMarcha((estaba) => !estaba)} style={estilos.paso} testID="paso-marcha">
+          <Text style={estilos.pasoTexto}>{enMarcha ? 'Volver al andamiaje' : 'En marcha'}</Text>
+        </Pressable>
+      ) : null}
+
       {/* El paso a la revisión del render. Solo en desarrollo: el flujo de Maestro
           abre la app en el andamiaje y ahí se queda. */}
-      {EN_DESARROLLO && !enMapa ? (
+      {EN_DESARROLLO && !enMapa && !enMarcha ? (
         <Pressable onPress={() => setEnRevision((estaba) => !estaba)} style={estilos.paso} testID="paso-revision-render">
           <Text style={estilos.pasoTexto}>{enRevision ? 'Volver al andamiaje' : 'El render en Skia'}</Text>
         </Pressable>
       ) : null}
 
-      {enMapa ? <MapaMontado /> : enRevision ? (
+      {enMapa ? <MapaMontado /> : enMarcha ? (
+        <EnMarchaMontado mundo={mundoDelPaso.documento} falloDeCableado={mundoDelPaso.fallo} />
+      ) : enRevision ? (
         <RevisionMontada />
       ) : (
         <PantallaAndamiaje
