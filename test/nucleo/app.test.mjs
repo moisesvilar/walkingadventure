@@ -31,6 +31,13 @@ import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
 import { fuente, hay } from './mundo-de-prueba.mjs';
 
 const APP_JSON = JSON.parse(fuente('app/app.json'));
+
+/**
+ * Los dos flujos de Maestro **de esta fila**. Se nombran y no se descubren leyendo el
+ * directorio: `test/app/` crece con cada fila que entrega pantalla, y una prueba de
+ * SPEC-020 que comparase el directorio entero se pondría roja por lo que hace otra.
+ */
+const FLUJOS_DE_ESTA_FILA = ['test/app/andamiaje.yaml', 'test/app/gancho-capacidad-ausente.yaml'];
 const APP_PAQUETE = JSON.parse(fuente('app/package.json'));
 const RAIZ_PAQUETE = JSON.parse(fuente('package.json'));
 
@@ -441,13 +448,17 @@ describe('La pantalla de andamiaje', () => {
   test('Los flujos de Maestro localizan la pantalla solo por los identificadores declarados', () => {
     // Si un flujo se agarra a un identificador que la spec no declara, o el flujo
     // inventa un selector frágil o la spec tiene un hueco. Las dos cosas hay que verlas.
+    //
+    // Se recorren **los flujos de esta fila** y no todo `test/app/`: cada spec declara
+    // sus identificadores, y una lista de aquí que tuviera que crecer con cada fila
+    // nueva dejaría de decir nada de SPEC-020. Los flujos de las demás filas los
+    // comprueba la prueba de su propia fila.
     const declarados = new Set([
       'pantalla-andamiaje', 'titulo-de-mundo', 'nucleo-error', 'capacidades', 'capacidades-vacio',
       'gancho-no-reconocido', 'capacidad-salud', 'capacidad-haptico', 'capacidad-notificaciones', 'capacidad-respaldo',
     ]);
-    const flujos = ficherosDe(join(RAIZ_REPO, 'test', 'app'), (n) => /\.ya?ml$/.test(n));
-    assert.ok(flujos.length >= 2, 'faltan los flujos de @app de esta fila');
-    for (const flujo of flujos) {
+    assert.equal(FLUJOS_DE_ESTA_FILA.length, 2, 'faltan los flujos de @app de esta fila');
+    for (const flujo of FLUJOS_DE_ESTA_FILA) {
       for (const m of fuente(flujo).matchAll(/^\s*id:\s*'([^']+)'/gm)) {
         assert.equal(declarados.has(m[1]), true, `${flujo}: usa el identificador "${m[1]}", que la spec no declara`);
       }
@@ -530,8 +541,13 @@ describe('El primer flujo de nivel @app', () => {
   });
 
   test('Los flujos de Maestro de esta fila existen y son los dos que la spec pide', () => {
+    // Los dos de SPEC-020 tienen que estar. Que en `test/app/` haya además los de otras
+    // filas no es asunto de esta prueba: lo era cuando esta fila era la única con
+    // flujos, y comparar el directorio entero convertía cada fila nueva en un rojo aquí.
     const flujos = ficherosDe(join(RAIZ_REPO, 'test', 'app'), (n) => /\.ya?ml$/.test(n));
-    assert.deepEqual(flujos.sort(), ['test/app/andamiaje.yaml', 'test/app/gancho-capacidad-ausente.yaml']);
+    for (const flujo of FLUJOS_DE_ESTA_FILA) {
+      assert.ok(flujos.includes(flujo), `falta el flujo de @app "${flujo}"`);
+    }
     // El del gancho es el que hace que «la app funciona aunque falten» se pueda
     // poner rojo desde el dispositivo, y por eso fuerza las tres degradables a la vez.
     const gancho = fuente('test/app/gancho-capacidad-ausente.yaml');

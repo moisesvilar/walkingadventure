@@ -17342,6 +17342,574 @@
       "caso": "exigeResidentes sin almacén inyectado falla en vez de decir que está todo",
       "hueco_de_bateria": true,
       "nota": "El mismo §6h en el lado del núcleo: sin almacén inyectado, responder «está todo» sin haber mirado es la degradación silenciosa que esto viene a impedir."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una coordenada real de referencia y ningún mapa levantado, cuando se levanta el mapa, entonces la celda se ancla a la coordenada redondeada y no a la coordenada exacta que entró.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "La celda se ancla a la coordenada redondeada y no a la que entró",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene ningún escenario sobre el anclaje de la rejilla: es geometría de SPEC-003 y se afirma aquí al otro lado de la frontera. Se comprueba con dos coordenadas exactas distintas dentro del mismo anclaje —dan el mismo mapa y el mismo documento— y además que ninguna de las dos acaba escrita en la partida, que es la mitad de privacidad del mismo criterio."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado ese mismo levantamiento, cuando termina, entonces hay un documento de celda escrito en el móvil que se puede volver a levantar sin tocar la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El mundo no depende de OSM después de generarse",
+      "escenario": "El mundo no depende de OSM después de generarse",
+      "nota": "`abre` no recibe el traedor, así que por ahí no hay ningún camino hasta la red: es más fuerte que prometer que no se toma. Se afirma además que la lámina de reabrir sale idéntica primitiva a primitiva a la del levantamiento."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la misma coordenada y la misma semilla, cuando se levanta el mapa en el móvil y en Node con los mismos datos de OSM, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El mundo levantado en el móvil y el generado en Node son idénticos byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "La batería tiene «Dos generaciones con la misma semilla dan el mismo mundo», que compara dos generaciones del mismo lado. Esta compara los dos lados de la frontera sobre las cuatro coordenadas, que es lo que esta fila añade y lo que ningún escenario cubre."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa levantado en el móvil, cuando se recogen los nombres de sus núcleos, servicios, parajes, calzadas y ramales, entonces no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo",
+      "nota": "RF-MUNDO-012 comprobado al otro lado de la frontera: la misma regla de SPEC-002-iter-1, afirmada sobre el mundo que levanta la app y sobre las cuatro coordenadas de referencia."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa levantado en el móvil en una coordenada de Galicia y otro en una del interior, cuando se comparan sus nombres, entonces los primeros salen del paquete gallego y los segundos del castellano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El idioma sale de la ubicación",
+      "hueco_de_bateria": true,
+      "nota": "Los dos ejemplos del esquema, sobre el mundo que levanta la app: costero (42.40,-8.81) en gallego y urbano denso (40.42,-3.70) en castellano, y el idioma del índice del mapa igual al del documento de la celda. El escenario existe en docs/testing.md como «Esquema del escenario» con sus dos ejemplos, y el validador solo indexa las líneas «Escenario:»: por eso va marcado como hueco, igual que las entradas de SPEC-002 y SPEC-007 sobre el mismo esquema."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa ya levantado, cuando se vuelve a abrir la app, entonces se pinta desde el documento y no se hace ninguna petición a OSM.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "Se afirma con el recuento del traedor y del levantamiento: abrir, repintar con otro estilo y volver a pedir el mismo mapa no añaden ni una consulta."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa ya levantado, cuando se pide levantarlo otra vez en la misma coordenada, entonces no se resiembra: se abre el que ya existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Pedir el mapa otra vez en la misma coordenada no resiembra: se abre el que existe",
+      "hueco_de_bateria": true,
+      "nota": "Se comparan las láminas y no los objetos que devuelve cada camino: levantar entrega el mundo recién generado y abrir el que se leyó del almacén, que es un subconjunto congelado del primero. Lo que la spec afirma —que se pinta lo mismo— se afirma primitiva a primitiva."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el dispositivo de referencia, la caché del proxy fría y una coordenada real de referencia, cuando se levanta el mapa, entonces desde que se confirma la coordenada hasta que la lámina está pintada pasa menos de un minuto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "El minuto se cuenta desde que se confirma la coordenada hasta que la lámina está pintada",
+      "hueco_de_bateria": true,
+      "nota": "La batería no habla de rendimiento: describe qué hace el juego, no cuánto tarda. El presupuesto se comprueba con el reloj inyectado, que es lo que lo convierte en criterio (§6o). Lo que la suite no puede afirmar es el número real: eso se mide sobre el dispositivo de referencia contra el Overpass del proyecto con la caché fría, y ni el reloj real ni la red entran en node --test. La medida en dispositivo sigue pendiente y es @manual."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado las cuatro coordenadas reales de referencia, cuando se mide cada una, entonces ninguna pasa del minuto, y el reparto del tiempo entre consulta, generación, colocación y pintado queda declarado fase a fase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "Con el reparto por debajo del presupuesto, las cuatro coordenadas caben",
+      "hueco_de_bateria": true,
+      "nota": "El presupuesto se comprueba con el reloj inyectado, que es lo que lo convierte en criterio (§6o). Lo que la suite no puede afirmar es el número real: eso se mide sobre el dispositivo de referencia contra el Overpass del proyecto con la caché fría, y ni el reloj real ni la red entran en node --test."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado las cuatro coordenadas reales de referencia, cuando se mide cada una, entonces el reparto es disjunto y las cinco fases suman el total, con lo que queda sin repartir declarado aparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "El reparto es disjunto y suma el total, con las costuras declaradas aparte",
+      "hueco_de_bateria": true,
+      "nota": "Las fases se anidan y lo de dentro no se le cobra a lo de fuera: sin eso, «la consulta tarda 12 s y la generación 40 s» sobre un total de 40 s sería una frase que no significa nada."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un levantamiento en el móvil, cuando se mide, entonces el tiempo de los datos se le cobra a la consulta y no a la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "Levantar el mapa cobra su tiempo a las fases que le corresponden",
+      "hueco_de_bateria": true,
+      "nota": "Se conduce el reloj doblado desde dentro del traedor sobre un levantamiento de verdad: es el reparto por fases del que sale que un incumplimiento futuro tenga dueño."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una medida que se pasa del minuto, cuando se ejecuta la comprobación, entonces falla nombrando la coordenada y la fase que se lo comió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "Un cronómetro doblado por encima del presupuesto pone el criterio rojo",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueban las dos mitades: que el fallo nombra la coordenada, la fase peor y a la fila dueña de esa fase, y que la fase que nombra es la peor y no la última —con la generación pasada de rosca acusa a B1 y B2—."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la celda urbana densa, que es la peor de las cuatro, cuando se mide, entonces también cabe en el minuto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "La celda urbana densa, que es la peor de las cuatro, también cabe",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma además que es la que más datos pide de las cuatro, leyéndolo del manifiesto de los fixtures: si esa cabe, caben las cuatro. El presupuesto se comprueba con el reloj inyectado, que es lo que lo convierte en criterio (§6o). Lo que la suite no puede afirmar es el número real: eso se mide sobre el dispositivo de referencia contra el Overpass del proyecto con la caché fría, y ni el reloj real ni la red entran en node --test."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la misma medida con la caché del proxy caliente, entonces queda declarada aparte y no sustituye a la medida en frío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "La medida en caliente se declara aparte y no sustituye a la medida en frío",
+      "hueco_de_bateria": true,
+      "nota": "El cronómetro distingue las dos medidas por `cacheFria`. Lo que hoy no ocurre es que alguien se lo diga: la pantalla llama a `medida({cacheFria: null})` y el `deCache` que el cliente del proxy devuelve se queda en el observador del traedor. Queda declarado como carencia de la fila, no como prueba en verde."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un cronómetro doblado que devuelve tiempos por encima del presupuesto, cuando se ejecuta la comprobación del minuto, entonces falla: el criterio se puede poner rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "Un cronómetro doblado por encima del presupuesto pone el criterio rojo",
+      "hueco_de_bateria": true,
+      "nota": "Es §6o literal, y es la razón de que el reloj esté inyectado. Se comprueba además que apretar el presupuesto sobre una medida que cabía la pone roja, para que el criterio dependa de la medida y no de una constante escrita dos veces."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el instrumento del minuto, cuando se monta, entonces el presupuesto y las cinco fases con su dueña se declaran como dato.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/minuto.test.mjs",
+      "caso": "El presupuesto es el minuto de RNF-PER-001 y se declara como dato",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mundo de referencia y el estilo Reino, cuando se pinta en el móvil, entonces se ve la lámina con su terreno, su mar, sus calzadas, sus núcleos y sus parajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Un mundo de referencia se ve con su terreno, su mar, sus calzadas, sus núcleos y sus parajes",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por capas de la escena compuesta —papel, tierra, calzadas, glifos de núcleo, marco y cartela, y el mar sobre el mundo costero—, que es lo que se puede comprobar sin dispositivo. Que Skia dibuje esas primitivas es @app."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina pintada, cuando se recorren sus rótulos, entonces ninguna pareja de cajas se solapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Ninguna pareja de rótulos se solapa en un mundo denso",
+      "escenario": "Ninguna pareja de rótulos se solapa en un mundo denso",
+      "nota": "Sobre la lámina levantada dentro del móvil y con los cinco estilos. SPEC-022 lo afirma sobre mundos compuestos en Node; lo que esta fila añade es que el colocador está cableado de verdad en la orquestación de la app."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina pintada, cuando se arrastra, entonces la cámara se mueve y el mundo no.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Arrastrar mueve la cámara y no el mundo",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba la aritmética del arrastre —el dedo va con el papel y el eje vertical se invierte— y que el documento y el mundo que se pinta quedan idénticos. Que el dedo produzca esos píxeles es @app."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina pintada, cuando se acerca y se aleja, entonces cambia la escala y no cambia ni un nombre, ni un tipo, ni una posición del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida",
+      "nota": "Se compara el mundo que la escena dice pintar —nombre, tipo y posición de núcleos, servicios, parajes y calzadas— antes y después de cuatro acercamientos, y que todo rótulo pintado sigue siendo un nombre de ese mundo. Los nombres se comparan en versalitas: la caja alta la pone el estilo, y eso es pintura y no mundo."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina en cualquier posición de la cámara y a cualquier acercamiento, cuando se mira, entonces el norte está arriba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "El norte está siempre arriba",
+      "escenario": "El norte está siempre arriba",
+      "nota": "La cámara expone tres ejes y ninguno es un ángulo: si apareciera un cuarto, hay rotación. Se afirma sobre cuatro encuadres, sobre la vista con la que se pinta y sobre el código de la cámara, donde no hay ni un atan2."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un gesto de rotación con dos dedos, cuando se hace sobre la lámina, entonces no ocurre nada: la cámara no tiene rotación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Un gesto de rotación no encuentra nada que mover y no ocurre nada",
+      "hueco_de_bateria": true,
+      "nota": "La pantalla calcula la separación entre los dos dedos y no el ángulo, y no hay ninguna animación de rechazo: ignorar en silencio, porque una animación de rechazo es la app hablando. Que el gesto llegue al PanResponder es @app."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina pintada, cuando se cambia el estilo desde donde se cambie, entonces el mundo sigue idéntico byte a byte y solo cambian colores, grosores y tipografías.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "nota": "Sobre el documento congelado que sostiene la orquestación de la app: cambiar de estilo no toca el documento, no resiembra, no mueve la cámara, y volver al de partida devuelve la lámina de partida primitiva a primitiva."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un arrastre y un acercamiento cualesquiera, cuando se cuenta cuántas veces se ha llamado al generador, entonces cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Arrastrar y acercar no llaman al generador ni una vez",
+      "hueco_de_bateria": true,
+      "nota": "Doce arrastres con sus acercamientos por los cinco estilos: una generación —la del levantamiento—, una consulta y, con el inspector de red en modo estricto, ni una salida."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una cámara alejada hasta que la celda entera cabe en la pantalla, cuando se pinta, entonces los rótulos que no caben se sacrifican por orden y los que quedan siguen sin pisarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Cuando dos no caben, se retira el de menor prioridad y su pueblo se sigue dibujando",
+      "escenario": "Cuando dos no caben, se retira el de menor prioridad y su pueblo se sigue dibujando",
+      "nota": "Con la celda entera en cuatrocientos píxeles hay sacrificios de verdad —si no los hubiera, el caso no probaría nada—, todo rótulo compuesto queda resuelto con su motivo, y los glifos de los núcleos se siguen dibujando aunque su nombre se retire."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado esa misma cámara alejada, cuando se colocan los rótulos, entonces todas las cajas quedan dentro del marco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Ningún rótulo se sale del marco",
+      "escenario": "Ningún rótulo se sale del marco",
+      "nota": "El marco del área pintada solo lo conoce quien coloca, así que se compone con el colocador envuelto para verlo. Se comprueba a tres acercamientos, del tope de alejamiento al radio mínimo."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el mapa cerrado y vuelto a abrir, cuando se pinta, entonces la cámara vuelve al encuadre que dejó y el documento no se ha tocado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "El mapa cerrado y vuelto a abrir vuelve al encuadre que dejó, sin tocar el documento",
+      "hueco_de_bateria": true,
+      "nota": "La cámara vive fuera del árbol de documentos del mapa, con su propia clave: guardar el encuadre no toca ni un byte de la partida, y esa separación es lo que hace afirmable el invariante."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la cámara, cuando termina de generar, entonces encuadra la celda entera con margen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "El encuadre de partida es la celda entera con margen",
+      "hueco_de_bateria": true,
+      "nota": "Decisión no cubierta por el design system, resuelta en la spec: el primer mensaje de A1P6 es que esto es tu barrio con otra ropa, y eso solo se ve entero."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la cámara, cuando se lleva a sus extremos, entonces queda dentro de sus topes y no se puede perder el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "La cámara tiene topes y no se puede perder el mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una cámara guardada ilegible, cuando se abre el mapa, entonces se vuelve al encuadre inicial y no se toca el documento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "Una cámara guardada ilegible vuelve al encuadre inicial y no es un error del juego",
+      "hueco_de_bateria": true,
+      "nota": "La cámara es estado de pantalla: una guardada ilegible no es un error del juego, y volver al encuadre inicial es la respuesta honesta."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la pantalla del mapa, cuando se mira, entonces no hay nada encima del dibujo: ni barra, ni cabecera, ni control de zoom, ni botón de centrar, ni leyenda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "La mitad que se puede afirmar sin dispositivo: en el código de la pantalla, sin sus comentarios, no hay nada tocable dentro del contenedor de la lámina y el único Pressable que existe es la acción de levantar, que vive en los momentos que no son la lámina. Que la pantalla se vea así en el simulador es @app."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado ningún mapa levantado y ninguna conexión, cuando se pide levantar uno, entonces no se levanta y el momento lo dice en voz de mundo, sin nombrar la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Sin conexión no se levanta el mapa, y no queda ningún documento a medias",
+      "hueco_de_bateria": true,
+      "nota": "La mitad del comportamiento. La mitad del texto va en «El texto que se lee cuando no se puede levantar no nombra la red»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado ningún mapa levantado y ninguna conexión, cuando se pide levantar uno, entonces el texto que se lee no nombra la red, ni el servidor, ni un código de error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El texto que se lee cuando no se puede levantar no nombra la red",
+      "hueco_de_bateria": true,
+      "nota": "Se lee el bloque de literales de la pantalla, que están declarados en un solo sitio, y se comprueba que el motivo del fallo viaja como marca de diagnóstico y no como texto leído."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa ya levantado y ninguna conexión, cuando se abre la app, entonces el mapa se pinta entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Una salida entera se juega sin red",
+      "escenario": "Una salida entera se juega sin red",
+      "nota": "Con el inspector de red en modo estricto, que corta cualquier salida que no envuelva: abrir un mapa levantado no saca ni una petición y la lámina sale entera."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el Overpass del proyecto caído, cuando se pide levantar un mapa, entonces no se levanta a medias: o hay documento completo o no hay documento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Sin conexión no se levanta el mapa, y no queda ningún documento a medias",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el almacén: ni el índice, ni la celda, ni una sola escritura, y ningún mapa levantado al volver a mirar."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una respuesta de OSM que no encaja con lo que se pidió, cuando se parsea, entonces falla nombrando lo que llegó y no genera un mundo pobre en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Una respuesta de OSM que no encaja falla nombrando lo que llegó",
+      "hueco_de_bateria": true,
+      "nota": "Por el traedor de verdad, con el cliente del proxy doblado, y también por la orquestación entera para que el fallo no se coma a mitad de camino y no deje nada escrito."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una coordenada en mitad del mar, cuando se levanta el mapa, entonces la generación termina y el resultado declara que la celda no da para un mundo jugable, en lugar de entregar una celda vacía que parece un mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Una celda que no da para un mundo jugable se declara en vez de entregarse vacía",
+      "hueco_de_bateria": true,
+      "nota": "La celda en mitad del mar se doblan con datos de OSM sin una sola vía ni un solo anclaje, que es lo que devuelve esa consulta. La generación termina, el documento existe y la carencia va escrita en el resultado."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una celda sin ningún POI utilizable, cuando se levanta, entonces el mundo se genera con lo que hay y la carencia queda declarada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Una celda sin ningún anclaje utilizable se genera con lo que hay y lo declara",
+      "hueco_de_bateria": true,
+      "nota": "El barrio de tres calles es exactamente ese caso: callejero y ni un anclaje admitido. El mundo sale entero —sus parajes nacen de los cruces del grafo— y la carencia se declara."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la app cerrada a mitad de la generación, cuando se vuelve a abrir, entonces no hay ningún documento a medias escrito, y levantar el mapa empieza otra vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "La app cerrada a mitad de la generación no deja ningún documento a medias",
+      "hueco_de_bateria": true,
+      "nota": "Se dobla como una consulta que se cae con el levantamiento a medio camino, que es lo mismo que ver el proceso morir: el registro solo se toca cuando hay un mundo entero. Al volver a abrir, el mismo almacén levanta el mapa de cero y termina."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un documento de una versión de formato que el juego no entiende, cuando se abre, entonces se dice y no se pinta media lámina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Un documento de una versión que el juego no entiende se dice, y no se pinta media lámina",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la orquestación del levantamiento sin traedor de datos cableado, cuando se construye, entonces falla nombrando la pieza que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Sin una de las cinco piezas, la orquestación no se construye y nombra la que falta",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren las cinco piezas declaradas y se comprueba que quitar cualquiera —incluida la del traedor de datos— rompe al construir y no al usarla. §6h: la pieza que, al no estar, no protesta."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la orquestación sin colocador de rótulos cableado, cuando se construye, entonces falla nombrando el colocador, y no pinta con rótulos superpuestos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Sin una de las cinco piezas, la orquestación no se construye y nombra la que falta",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren las cinco piezas declaradas y se comprueba que quitar cualquiera —incluida la del colocador de rótulos— rompe al construir y no al usarla. §6h: la pieza que, al no estar, no protesta."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la orquestación sin medidor de texto cableado, cuando se construye, entonces falla nombrando el medidor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Sin una de las cinco piezas, la orquestación no se construye y nombra la que falta",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren las cinco piezas declaradas y se comprueba que quitar cualquiera —incluida la del medidor de texto— rompe al construir y no al usarla. §6h: la pieza que, al no estar, no protesta."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la orquestación con un almacén o un cronómetro a medias, cuando se construye, entonces falla nombrando la operación que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Un almacén o un cronómetro a medias fallan al construir y no al primer mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el traedor de datos sin el cliente del proxy, cuando se construye, entonces falla nombrando lo que le falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El traedor de datos no se construye sin el cliente del proxy",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un levantamiento en el móvil, cuando se inspecciona qué recibió buildWorld, entonces recibió el grafo viario cosido y no la lista de vías en crudo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "A buildWorld le llega el grafo viario cosido y no la lista de vías en crudo",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el informe del grafo del mundo levantado en el móvil, en las cuatro coordenadas: nodos y aristas mayores que cero y al menos un hueco cosido. Es la degradación silenciosa que este repositorio ya ha pagado tres veces."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa levantado en el móvil, cuando se cuentan las componentes conexas de su grafo y sus aristas cosidas, entonces salen los mismos números que en Node con los mismos datos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "A buildWorld le llega el grafo viario cosido y no la lista de vías en crudo",
+      "hueco_de_bateria": true,
+      "nota": "La misma celda se genera además con `generaCelda` en Node y se comparan componentes, aristas cosidas y los metros de cada costura: el cosido de SPEC-007 está vivo dentro del móvil y no es código muerto."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa levantado en el móvil, cuando se cuentan sus parajes que nacen de cruces y puentes, entonces no son cero en las cuatro coordenadas de referencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "En las cuatro coordenadas de referencia hay parajes que nacen de cruces y puentes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lista de fases de la pantalla, cuando el generador avisa, entonces declara en qué fase va, las seis llegan en orden y ninguna retrocede.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El generador declara en qué fase va, y las seis llegan en orden",
+      "hueco_de_bateria": true,
+      "nota": "Es lo que esta fila entrega por debajo de A1P5, que es de la fila 27. Se comprueba además que los seis literales son los de la pantalla ya dibujada y que ninguno lleva una cifra: ni barra, ni porcentaje, ni estimación de segundos."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado una fase del generador que la lista de la pantalla no reconoce, cuando se traduce, entonces falla nombrándola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Una fase del generador que la pantalla no reconoce falla nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Falla en vez de ignorar: una fase nueva en buildWorld que aquí no esté dejaría la lista quieta mientras el generador avanza, y una lista quieta se lee como «esto se ha colgado»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la misma semilla y los mismos datos de OSM, cuando se levanta el mapa dos veces en el móvil, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "Bloqueante (@determinismo, RNF-DET-003). Se compara por serialización completa el documento, el registro y lo escrito en la partida."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado los mismos datos de OSM llegando en distinto orden, cuando se levanta el mapa, entonces el documento es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El orden de iteración no depende del orden de inserción",
+      "escenario": "El orden de iteración no depende del orden de inserción"
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el código que la app añade en esta fila, cuando se busca en él, entonces no aparece Math.random ni Date.now dentro de nada que participe en la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "Sobre los ocho módulos que esta fila añade a app/, sin sus comentarios, y ampliado a `new Date`, `performance.now` y `hrtime`. El cronómetro es la excepción declarada y por eso el reloj le llega inyectado: no lo lee, lo recibe."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado dos jugadoras con tramos distintos y la misma semilla, cuando levantan el mapa, entonces generan el mismo mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "escenario": "Cambiar el tramo del jugador no redimensiona un mundo ya generado",
+      "nota": "COBERTURA PARCIAL, declarada. Lo que se afirma es que un mundo ya levantado no se redimensiona ni se resiembra al recalibrar el tramo: la rejilla se lee del índice y no se recalcula, así que pedir el mapa con 400, 1200 o 2000 m devuelve la misma celda y la misma lámina. Lo que el criterio dice literalmente —dos levantamientos frescos con tramos distintos dan el mismo mundo— no se sostiene ni puede sostenerse: el lado de la celda es dos tramos (alcance-del-mundo.md §2), así que con 400 m la celda mide 800 m y con 1200 m mide 2400, y el mundo de dentro es necesariamente otro. El criterio está mal escrito, no la implementación."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el cronómetro sin reloj inyectado, cuando se monta, entonces falla diciendo que sin él el minuto no se puede poner rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "El cronómetro no arranca sin el reloj inyectado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mundo de referencia y el estilo Reino, cuando se pinta en el móvil, entonces se ve la lámina con su terreno, su mar, sus calzadas, sus núcleos y sus parajes.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "La lámina se dibuja de verdad en el dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "La mitad que necesita dispositivo: que Skia ejecute las primitivas que la escena compone. Que la escena las componga bien se afirma en test/nucleo/camara.test.mjs, por capas. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el dispositivo de referencia, la caché del proxy fría y una coordenada real de referencia, cuando se levanta el mapa, entonces desde que se confirma la coordenada hasta que la lámina está pintada pasa menos de un minuto.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "El minuto se cumple contra el reloj de verdad y el Overpass del proyecto",
+      "hueco_de_bateria": true,
+      "nota": "Es el único sitio donde el presupuesto se mide contra el reloj real, la red real y el dispositivo: `extendedWaitUntil` con 60 000 ms de plazo sobre `mapa-lamina`. Si no está pintada al cumplirse el minuto, el flujo se cae y el criterio está rojo. En node --test se afirma el instrumento y no el número. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina pintada, cuando se arrastra, entonces la cámara se mueve y el mundo no.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "Arrastrar sobre la lámina mueve la cámara y no el mundo",
+      "hueco_de_bateria": true,
+      "nota": "Se lee la marca `mapa-camara` —centro, radio y tamaño— antes y después del arrastre: cambia. Y el momento no vuelve a pasar por la lista de fases, así que no se ha regenerado nada. La aritmética del arrastre se afirma sin dispositivo. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina en cualquier posición de la cámara y a cualquier acercamiento, cuando se mira, entonces el norte está arriba.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "Girar el móvil reencuadra la lámina y no resiembra nada",
+      "escenario": "El norte está siempre arriba",
+      "nota": "La mitad que necesita dispositivo: girar el móvil reencuadra y no vuelve a generar, y el encuadre que se dejó sigue siendo el que se dejó. El gesto de rotación con dos dedos no se puede provocar con Maestro y queda como @manual; que la cámara no tenga por dónde girar se afirma sin dispositivo. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la lámina pintada, cuando se mira, entonces no hay nada encima del dibujo: ni barra, ni cabecera, ni control de zoom, ni botón de centrar, ni leyenda.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "Sobre la lámina no hay ningún control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "La mitad que necesita dispositivo: en la pantalla renderizada no aparece ningún control ni ninguna cifra. La mitad del código se afirma en test/nucleo/camara.test.mjs. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el estado de mientras se levanta, cuando se mira, entonces se ven las seis fases con marca de completada, sin barra, sin porcentaje y sin estimación de segundos.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "Las seis fases se ven mientras se levanta, y ninguna lleva cifra",
+      "hueco_de_bateria": true,
+      "nota": "Va dentro de un `runFlow` condicionado a que el momento llegue a verse: una celda que se levanta deprisa puede no dejarlo ver, y eso no es un fallo. Lo que sí sería un fallo es que la lista existiera y estuviera mal. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado un mapa ya levantado, cuando se vuelve a abrir la app, entonces se pinta desde el documento y no se hace ninguna petición a OSM.",
+      "nivel": "@app",
+      "fichero": "test/app/mapa.yaml",
+      "caso": "Reabrir la app pinta desde el documento",
+      "hueco_de_bateria": true,
+      "nota": "PENDIENTE DE LA FILA 39, declarado en la cabecera del flujo: el almacén de la partida es el de memoria y vive lo que viva la pantalla, así que hoy reabrir la app no encuentra ningún documento que pintar. El criterio se afirma en @nucleo sobre el mismo almacén; en dispositivo queda pendiente de la persistencia duradera. NO EJECUTADO en esta máquina: a Maestro le falta el entorno para arrancar (sin Java Runtime), y el flujo necesita además el proxy alcanzable desde el simulador con el Overpass del proyecto detrás. Queda escrito y declarado; el runner distingue «Maestro ausente» de «prueba en rojo»."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado la pantalla del mapa, cuando se lee, entonces declara los cinco data-testid de la spec y el flujo de @app no se agarra a ningún otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/camara.test.mjs",
+      "caso": "La pantalla declara los cinco identificadores de la spec, y el flujo de @app no usa otros",
+      "hueco_de_bateria": true,
+      "nota": "El equivalente de la guarda que SPEC-020 escribió para sus dos flujos, acotada a los de esta fila. Comprueba además que el vocabulario cerrado del estado del momento —sin-mapa, levantando, pintado, no-se-pudo— es el de la spec y el que la pantalla usa."
+    },
+    {
+      "spec": "SPEC-026",
+      "criterio": "Dado el texto de la consulta de Overpass, que la app lleva como copia declarada, cuando se compara con la del servidor, entonces son idénticos y declaran la misma versión.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "La copia declarada de la consulta produce el mismo texto que la del servidor",
+      "hueco_de_bateria": true,
+      "nota": "La app no puede importar server/aguas-arriba/overpass.mjs —importa node:crypto y el empaquetador del móvil no lo resuelve—, así que lleva una copia declarada. Divergir no rompe nada visible: el móvil deja de acertar en la caché del proxy, cuya clave es el hash del texto, y paga minutos contra los mirrors sin que nada se ponga rojo. Se comparan las cuatro celdas de referencia más dos casos de radio, byte a byte, y las dos VERSION_CONSULTA."
     }
   ]
 }
