@@ -6,6 +6,7 @@
   "type": "module",
   "exports": {
     "./core/*": "./core/*",
+    "./lenguaje/*": "./lenguaje/*",
     "./world/*": "./world/*",
     "./names/*": "./names/*",
     "./partida/*": "./partida/*",
