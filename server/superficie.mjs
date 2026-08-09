@@ -21,13 +21,21 @@ export const INDEFINIDO = 'indefinido';
  * `ventana: null` significa que la entrada no admite **ninguna** marca de tiempo:
  * ni en el registro ni en los metadatos del sistema de ficheros. Solo la métrica
  * tiene ventana, y es el día natural.
+ *
+ * `campos` son los **nombres literales** que el valor de la entrada admite en su primer
+ * nivel, no una descripción: es lo que permite que `compruebaCampos` rechace un campo de
+ * más en el momento de escribirlo en lugar de que aparezca meses después recorriendo el
+ * disco. Que sean literales tiene un límite declarado: se comprueba el primer nivel, así
+ * que un campo colado **dentro** de otro no lo caza esto sino el validador del cliente de
+ * aguas arriba que produce ese sobre.
  */
 export const SUPERFICIE = Object.freeze([
   Object.freeze({
     entrada: 'cache-imagenes',
     claveDerivadaDe: 'resumen del prompt de ficción normalizado y los parámetros de formato',
     deQuienLlama: false,
-    campos: Object.freeze(['binario']),
+    // El binario y sus dimensiones, que es lo que devuelve el cliente de imagen.
+    campos: Object.freeze(['formato', 'ancho', 'alto', 'datos_base64']),
     vive: INDEFINIDO,
     ventana: null,
   }),
@@ -35,7 +43,8 @@ export const SUPERFICIE = Object.freeze([
     entrada: 'cache-fotos',
     claveDerivadaDe: 'el place_id, y nada más',
     deQuienLlama: false,
-    campos: Object.freeze(['binario', 'atribucion']),
+    // El sobre `foto` del cliente de Places: referencia, atribución y dimensiones.
+    campos: Object.freeze(['foto']),
     vive: INDEFINIDO,
     ventana: null,
   }),
@@ -43,7 +52,8 @@ export const SUPERFICIE = Object.freeze([
     entrada: 'cache-generacion',
     claveDerivadaDe: 'resumen de la consulta de celda',
     deQuienLlama: false,
-    campos: Object.freeze(['respuesta']),
+    // Los elementos de OSM tal cual, que es la respuesta entera de Overpass.
+    campos: Object.freeze(['elements']),
     vive: INDEFINIDO,
     ventana: null,
     // Apagada por defecto: encendida, el disco contiene un mapa de qué zonas se han
@@ -52,8 +62,10 @@ export const SUPERFICIE = Object.freeze([
   }),
   Object.freeze({
     entrada: 'retos-vivos',
-    claveDerivadaDe: 'el valor aleatorio del propio reto, que emite el proxy',
+    claveDerivadaDe: 'el valor aleatorio del propio reto, que emite el proxy, precedido de su época',
     deQuienLlama: false,
+    // Ninguno: el reto está entero en la clave y el valor va vacío. La caducidad va en
+    // la época que precede a la clave, nunca en un instante dentro de la entrada.
     campos: Object.freeze([]),
     vive: 'VIGENCIA_RETO',
     ventana: null,
@@ -70,7 +82,9 @@ export const SUPERFICIE = Object.freeze([
     entrada: 'metrica-del-dia',
     claveDerivadaDe: 'el día natural',
     deQuienLlama: false,
-    campos: Object.freeze(['contadores', 'histogramas', 'coste']),
+    // Contadores agregados, volumen del día y los histogramas por tipo de lote. `dia` es
+    // el día natural, que ya está en la clave: es la única resolución temporal escrita.
+    campos: Object.freeze(['dia', 'contadores', 'peticiones', 'degradadas', 'coste', 'lotes']),
     vive: INDEFINIDO,
     ventana: 'dia-natural',
   }),
@@ -85,18 +99,62 @@ export function entradaDeclarada(id) {
 }
 
 /**
+ * Comprueba un valor contra los campos que su entrada declara. Es la mitad de la
+ * comprobación que ocurre **al escribir**, y la que caza un campo de más en el momento
+ * en que alguien lo añade en lugar de meses después recorriendo el disco.
+ *
+ * Se mira el primer nivel del valor, que es donde se cuela un campo por descuido. Un
+ * valor que no es un objeto —una lista, un número— no tiene campos que comprobar.
+ *
+ * @throws nombrando la entrada y el campo no declarado.
+ */
+export function compruebaCampos(entrada, valor) {
+  const declarada = entradaDeclarada(entrada);
+  if (!declarada) throw new Error(`el proxy no arranca: escritura sobre la entrada no declarada "${entrada}"`);
+  if (valor === null || typeof valor !== 'object' || Array.isArray(valor)) return true;
+  const fuera = Object.keys(valor).filter((c) => !declarada.campos.includes(c));
+  if (fuera.length) {
+    throw new Error(
+      `escritura fuera de la superficie declarada: la entrada "${entrada}" no admite el campo ` +
+      `${fuera.map((c) => `"${c}"`).join(', ')}. Sus campos declarados son: ` +
+      `${declarada.campos.length ? declarada.campos.join(', ') : '(ninguno)'}.`,
+    );
+  }
+  return true;
+}
+
+/**
  * La comprobación de arranque.
  *
- * @param {Array<{modulo: string, entradas: string[]}>} escrituras lo que cada módulo
- *   declara que escribe. La declaración la hace el módulo, no quien lo cablea: así
- *   una escritura nueva se declara donde se escribe o no arranca.
- * @throws nombrando la entrada no declarada y el módulo que la escribe.
+ * Valida **la entrada y sus campos**. Que solo mirase el nombre de la entrada es lo que
+ * dejó pasar un instante en milisegundos dentro de `retos-vivos`, declarada sin ningún
+ * campo: la entrada estaba en la lista, así que nada protestó. Un módulo declara qué
+ * escribe y con qué campos, y declarar un campo que su entrada no admite impide arrancar
+ * igual que declarar una entrada que no existe.
+ *
+ * @param {Array<{modulo: string, entradas: Array<string|{entrada: string, campos?: string[]}>}>} escrituras
+ *   lo que cada módulo declara que escribe. La declaración la hace el módulo, no quien lo
+ *   cablea: así una escritura nueva se declara donde se escribe o no arranca. Un elemento
+ *   en texto es una entrada sin campos propios que declarar —el caso de un almacén
+ *   inyectado, que no decide qué se guarda dentro—.
+ * @throws nombrando el módulo, la entrada y, si es el caso, el campo no declarado.
  */
 export function compruebaSuperficie(escrituras) {
   const fuera = [];
   for (const { modulo, entradas } of escrituras) {
-    for (const id of entradas) {
-      if (!entradaDeclarada(id)) fuera.push(`${modulo} escribe "${id}"`);
+    for (const declarada of entradas) {
+      const id = typeof declarada === 'string' ? declarada : declarada.entrada;
+      const entrada = entradaDeclarada(id);
+      if (!entrada) {
+        fuera.push(`${modulo} escribe "${id}"`);
+        continue;
+      }
+      const campos = typeof declarada === 'string' ? [] : (declarada.campos ?? []);
+      for (const campo of campos) {
+        if (!entrada.campos.includes(campo)) {
+          fuera.push(`${modulo} escribe el campo "${campo}" en la entrada "${id}", que no lo declara`);
+        }
+      }
     }
   }
   if (fuera.length) {
@@ -116,6 +174,9 @@ export function compruebaSuperficie(escrituras) {
  * cuándo se escribió, ni cuántas veces se ha leído, ni quién lo pidió. Que no haya
  * contador de aciertos no es un olvido: un contador responde «cuántos han pasado por
  * aquí», que es justo lo que la caché no puede responder.
+ *
+ * Y guarda menos de lo que se le da si se le da de más: escribir un campo que la entrada
+ * no declara lanza aquí, en el momento de la escritura.
  */
 export function creaAlmacenEnMemoria(entrada) {
   if (!entradaDeclarada(entrada)) {
@@ -126,7 +187,7 @@ export function creaAlmacenEnMemoria(entrada) {
     entrada,
     async existe(clave) { return datos.has(clave); },
     async lee(clave) { return datos.has(clave) ? datos.get(clave) : null; },
-    async escribe(clave, valor) { datos.set(clave, valor); },
+    async escribe(clave, valor) { compruebaCampos(entrada, valor); datos.set(clave, valor); },
     async borra(clave) { datos.delete(clave); },
     /**
      * Recorrer la superficie es una operación **de quien opera el servidor**, no una

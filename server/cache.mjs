@@ -19,8 +19,20 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, existsSync, writeFileSync, unlinkSync, utimesSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-/** Lo que este módulo escribe. Se compara con la superficie declarada al arrancar. */
-export const ESCRITURAS = Object.freeze(['cache-imagenes', 'cache-fotos', 'cache-generacion']);
+import { compruebaCampos, entradaDeclarada } from './superficie.mjs';
+
+/**
+ * Lo que este módulo escribe, entrada por entrada **y campo por campo**. Se compara con
+ * la superficie declarada al arrancar, y los campos son los que valida el cliente de
+ * aguas arriba de esa ruta: la caché guarda el sobre que aquél devuelve, entero y sin
+ * añadirle nada. Que estén escritos dos veces —aquí y en la superficie— es el mecanismo:
+ * si el sobre crece por un lado y no por el otro, el proxy no arranca.
+ */
+export const ESCRITURAS = Object.freeze([
+  Object.freeze({ entrada: 'cache-imagenes', campos: Object.freeze(['formato', 'ancho', 'alto', 'datos_base64']) }),
+  Object.freeze({ entrada: 'cache-fotos', campos: Object.freeze(['foto']) }),
+  Object.freeze({ entrada: 'cache-generacion', campos: Object.freeze(['elements']) }),
+]);
 
 /**
  * Normaliza un prompt de ficción antes de resumirlo: espacios colapsados y extremos
@@ -74,6 +86,11 @@ export function claveDeTexto({ prompt, idioma, tono }) {
  * borrar; está escrito en server/DESPLIEGUE.md.
  */
 export function creaAlmacenEnDisco({ entrada, raiz, config }) {
+  // La otra mitad del mecanismo, igual que en el almacén en memoria: una entrada
+  // desconocida lanza al abrirla, no al escribir.
+  if (!entradaDeclarada(entrada)) {
+    throw new Error(`el proxy no arranca: almacén abierto sobre la entrada no declarada "${entrada}"`);
+  }
   mkdirSync(raiz, { recursive: true });
   const segundos = config.MTIME_CONSTANTE / 1000;
   const fichero = (clave) => join(raiz, `${Buffer.from(String(clave)).toString('base64url')}.json`);
@@ -88,6 +105,7 @@ export function creaAlmacenEnDisco({ entrada, raiz, config }) {
       return JSON.parse(readFileSync(f, 'utf8'));
     },
     async escribe(clave, valor) {
+      compruebaCampos(entrada, valor);
       const f = fichero(clave);
       writeFileSync(f, JSON.stringify(valor));
       normaliza(f);

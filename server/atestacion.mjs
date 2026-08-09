@@ -15,8 +15,35 @@
 
 import { randomBytes } from 'node:crypto';
 
-/** Lo que este módulo escribe. Se compara con la superficie declarada al arrancar. */
-export const ESCRITURAS = Object.freeze(['retos-vivos']);
+/**
+ * Lo que este módulo escribe, entrada por entrada **y campo por campo**. Se compara con
+ * la superficie declarada al arrancar: declarar aquí un campo que la entrada no admite
+ * impide arrancar, y nombra el campo.
+ *
+ * `campos: []` es literal: la entrada de retos guarda el reto en la clave y **nada** en
+ * el valor. Ni cuándo se emitió: ver `EPOCAS_POR_VIGENCIA`, más abajo.
+ */
+export const ESCRITURAS = Object.freeze([
+  Object.freeze({ entrada: 'retos-vivos', campos: Object.freeze([]) }),
+]);
+
+/**
+ * En cuántos tramos se parte `VIGENCIA_RETO` para rotar la época del reto.
+ *
+ * La caducidad va en la **clave de época**, como en las fichas, y por el mismo motivo:
+ * el instante de emisión dentro de la entrada es una marca de tiempo al milisegundo en
+ * una superficie que declara no admitir ninguna. Lo que sustituye al instante es un
+ * identificador de época opaco y correlativo (`e1`, `e2`, …) delante de la clave, cuyo
+ * instante vive en memoria y no se escribe.
+ *
+ * Con cuatro tramos, una época emite durante `VIGENCIA_RETO / 4` y se barre al cumplir
+ * `VIGENCIA_RETO`: así un reto vive **como mucho** lo declarado —nunca más, que es lo
+ * que el criterio exige— y como poco tres cuartas partes, en vez de morir en el mismo
+ * instante en que se emite si le tocara el final de su época. El identificador agrupa lo
+ * emitido en un tramo de setenta y cinco segundos, que es menos de lo que ya revela que
+ * dos retos estén vivos a la vez.
+ */
+export const EPOCAS_POR_VIGENCIA = 4;
 
 /** El esquema cerrado de la ruta de atestación. Ni un campo más. */
 export const CAMPOS_DE_ATESTACION = Object.freeze(['plataforma', 'reto', 'evidencia', 'cegadas']);
@@ -36,10 +63,41 @@ export const PLATAFORMAS = Object.freeze(['app-attest', 'play-integrity']);
  * @param {(n: number) => Buffer} [deps.aleatorio]
  */
 export function creaPlanoDeAtestacion({ config, reloj, verificador, retos, emisor, aleatorio = randomBytes }) {
+  // Las épocas del reto: identificador → instante en que se abrió. Vive **en memoria** y
+  // no es de quien llama: es el mismo para todo lo emitido en su tramo, igual que la
+  // época de la clave de firma de las fichas.
+  const epocas = new Map();
+  let ultimaEpoca = 0;
+
+  const epocaDe = (clave) => String(clave).split('.')[0];
+
   const barre = async (ahora) => {
-    for (const { clave, valor } of await retos.recorre()) {
-      if (ahora - valor.desde >= config.VIGENCIA_RETO) await retos.borra(clave);
+    for (const [id, desde] of [...epocas]) {
+      if (ahora - desde >= config.VIGENCIA_RETO) epocas.delete(id);
     }
+    // Los retos no llevan fecha —a propósito—, así que no se barren por antigüedad: se
+    // barren los de las épocas que ya no existen, que son exactamente los caducados.
+    for (const { clave } of await retos.recorre()) {
+      if (!epocas.has(epocaDe(clave))) await retos.borra(clave);
+    }
+  };
+
+  const epocaVigente = (ahora) => {
+    for (const [id, desde] of epocas) {
+      if (ahora - desde < config.VIGENCIA_RETO / EPOCAS_POR_VIGENCIA) return id;
+    }
+    const id = `e${++ultimaEpoca}`;
+    epocas.set(id, ahora);
+    return id;
+  };
+
+  /** La clave con la que está escrito un reto vivo, o `null`. Son cuatro épocas como mucho. */
+  const claveViva = async (reto) => {
+    for (const id of epocas.keys()) {
+      const clave = `${id}.${reto}`;
+      if (await retos.existe(clave)) return clave;
+    }
+    return null;
   };
 
   return {
@@ -53,9 +111,11 @@ export function creaPlanoDeAtestacion({ config, reloj, verificador, retos, emiso
       const ahora = reloj.ahora();
       await barre(ahora);
       const reto = Buffer.from(aleatorio(32)).toString('base64url');
-      // El instante se guarda **dentro** de la entrada de retos y no en ninguna otra:
-      // es lo mínimo para caducar, vive cinco minutos y su clave es el propio reto.
-      await retos.escribe(reto, { desde: ahora });
+      // La entrada guarda el reto y **nada más**: el valor va vacío y lo que caduca es la
+      // época, que va delante en la clave. Un instante aquí sería una marca de tiempo al
+      // milisegundo en una entrada declarada sin ninguna, y con un reto en vuelo bastaría
+      // para situar en el tiempo la atestación de alguien.
+      await retos.escribe(`${epocaVigente(ahora)}.${reto}`, {});
       return { reto, clave: emisor.clavePublica(), vigencia: config.VIGENCIA_RETO };
     },
 
@@ -76,11 +136,11 @@ export function creaPlanoDeAtestacion({ config, reloj, verificador, retos, emiso
 
       const ahora = reloj.ahora();
       await barre(ahora);
-      const vivo = await retos.lee(reto);
-      if (!vivo) return { ok: false, motivo: 'el reto no está vivo: hay que volver a atestar' };
+      const claveDelReto = await claveViva(reto);
+      if (!claveDelReto) return { ok: false, motivo: 'el reto no está vivo: hay que volver a atestar' };
       // El reto se consume antes de verificar: si se consumiera después, una evidencia
       // rechazada dejaría el reto en pie y valdría para reintentar sin límite.
-      await retos.borra(reto);
+      await retos.borra(claveDelReto);
 
       let veredicto;
       try {

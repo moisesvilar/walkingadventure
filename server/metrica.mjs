@@ -14,8 +14,17 @@
 
 import { TIPOS_DE_LOTE } from './config.mjs';
 
-/** Lo que este módulo escribe. Se compara con la superficie declarada al arrancar. */
-export const ESCRITURAS = Object.freeze(['metrica-del-dia']);
+/**
+ * Lo que este módulo escribe, entrada por entrada **y campo por campo**. Se compara con
+ * la superficie declarada al arrancar: son los campos exactos de `diaVacio`, y añadir uno
+ * ahí sin declararlo aquí y en la superficie impide arrancar.
+ */
+export const ESCRITURAS = Object.freeze([
+  Object.freeze({
+    entrada: 'metrica-del-dia',
+    campos: Object.freeze(['dia', 'contadores', 'peticiones', 'degradadas', 'coste', 'lotes']),
+  }),
+]);
 
 /** Las cuatro rutas de contenido. La de atestación no cuenta contenido de nadie. */
 export const RUTAS_MEDIDAS = Object.freeze(['texto', 'imagen', 'places', 'generacion']);

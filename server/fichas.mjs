@@ -19,8 +19,14 @@
 
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
 
-/** Lo que este módulo escribe. Se compara con la superficie declarada al arrancar. */
-export const ESCRITURAS = Object.freeze(['fichas-gastadas']);
+/**
+ * Lo que este módulo escribe, entrada por entrada **y campo por campo**. Se compara con
+ * la superficie declarada al arrancar. `campos: []` es literal: una ficha gastada está
+ * entera en la clave y su valor va vacío.
+ */
+export const ESCRITURAS = Object.freeze([
+  Object.freeze({ entrada: 'fichas-gastadas', campos: Object.freeze([]) }),
+]);
 
 /** Los motivos por los que una ficha se rechaza. Cerrado: no hay un «otros». */
 export const MOTIVOS_DE_RECHAZO = Object.freeze(['ausente', 'malformada', 'caducada', 'falsificada', 'gastada']);
