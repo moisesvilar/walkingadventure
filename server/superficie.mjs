@@ -84,7 +84,10 @@ export const SUPERFICIE = Object.freeze([
     deQuienLlama: false,
     // Contadores agregados, volumen del día y los histogramas por tipo de lote. `dia` es
     // el día natural, que ya está en la clave: es la única resolución temporal escrita.
-    campos: Object.freeze(['dia', 'contadores', 'peticiones', 'degradadas', 'coste', 'lotes']),
+    // `eslabones` es el recuento de generaciones servidas por cada origen de datos
+    // (SPEC-024): cuántas, nunca dónde. Es lo que hace visible que el respaldo esté
+    // trabajando, que si no se nota solo en que todo va lento.
+    campos: Object.freeze(['dia', 'contadores', 'peticiones', 'degradadas', 'coste', 'lotes', 'eslabones']),
     vive: INDEFINIDO,
     ventana: 'dia-natural',
   }),
