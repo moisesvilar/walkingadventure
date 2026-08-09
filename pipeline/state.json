@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-038",
+  "spec_actual": "SPEC-039",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -373,6 +373,16 @@
       "report": "test/reports/SPEC-037-run-20260809T212245Z.md",
       "casos": "2288 casos: 2285 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado"
+    },
+    {
+      "spec": "SPEC-038",
+      "slug": "repisa-ajustes",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-038-run-20260809T225440Z.md",
+      "casos": "2344 casos: 2341 pasan, 0 fallan, 3 saltados",
+      "app": "flujos escritos, no ejecutados",
+      "nota": "tres defectos destapados, uno bloqueante @determinismo: el estilo no se persistia."
     }
   ],
   "bloqueos": [],

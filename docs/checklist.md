@@ -68,8 +68,8 @@
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
 | 37 | diario-consulta | RF-DIARIO-002, RF-DIARIO-003, RF-DIARIO-004 | must | done |
-| 38 | repisa-ajustes | RF-PROG-007, RF-PJ-010, RF-LANG-002 | must | wip |
-| 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | pending |
+| 38 | repisa-ajustes | RF-PROG-007, RF-PJ-010, RF-LANG-002 | must | done |
+| 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | wip |
 | 40 | empezar-de-nuevo | RF-PERS-006 | must | pending |
 | 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | pending |
 | 42 | pasos-fondo-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
