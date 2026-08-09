@@ -38,7 +38,7 @@ import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
 
 // Referencia estable: si fuera un literal en el cuerpo, cada repintado sería un
-// re-sondeo de las cuatro capacidades.
+// re-sondeo de las cinco capacidades.
 const SIN_GANCHO = { ausentes: [], noReconocidos: [] };
 
 // `__DEV__` lo define el empaquetador. En una compilación de producción vale

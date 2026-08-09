@@ -3,12 +3,16 @@
 // porque los módulos también lo necesitan y no deben depender de quien los monta.
 
 /**
- * Las cuatro capacidades, en el orden estable en el que se enumeran siempre.
+ * Las cinco capacidades, en el orden estable en el que se enumeran siempre.
  * Estable quiere decir que no depende del orden en que se inyectaron los módulos:
  * una lista que se reordena sola es una lista que no se puede comparar entre dos
  * ejecuciones ni entre dos plataformas.
+ *
+ * `rotulo` entra la última, de SPEC-030, y es la única cuya ausencia **no** admite
+ * degradar en silencio: sin él una salida no se abre, porque abrirla significaría o
+ * perder la ubicación a los pocos minutos o pedir el permiso permanente.
  */
-export const CAPACIDADES = ['salud', 'haptico', 'notificaciones', 'respaldo'];
+export const CAPACIDADES = ['salud', 'haptico', 'notificaciones', 'respaldo', 'rotulo'];
 
 /** El nombre en castellano de cada capacidad, que es lo que se lee en pantalla. */
 export const ETIQUETAS = {
@@ -16,12 +20,13 @@ export const ETIQUETAS = {
   haptico: 'Háptico',
   notificaciones: 'Notificaciones',
   respaldo: 'Respaldo',
+  rotulo: 'Rótulo del sistema',
 };
 
 /**
  * Las capas de aviso de `game-design/accesibilidad.md` §3. `ninguna` no es una
  * capa: es la respuesta honesta de una capacidad que no avisa de nada —salud y
- * respaldo—, y existe para que el campo sea obligatorio en las cuatro.
+ * respaldo, y también el rótulo—, y existe para que el campo sea obligatorio en las cinco.
  */
 export const CAPAS = ['bolsillo', 'pantalla', 'ninguna'];
 

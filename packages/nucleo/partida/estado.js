@@ -57,6 +57,7 @@ import { congelaPasos, estadoDePasos, levantaPasos } from './pasos.js';
 import { congelaRelaciones, estadoDeRelaciones, levantaRelaciones } from './relacion.js';
 import { congelaRumores, estadoDeRumores, levantaRumores } from './rumores.js';
 import { congelaSalidaAbierta, estadoDeSalidaAbierta, levantaSalidaAbierta } from './salida-abierta.js';
+import { congelaSalidas, estadoDeSalidas, levantaSalidas } from './salidas.js';
 import { CATEGORIAS_DE_TOPICO, congelaTopicos, estadoDeTopicos, levantaTopicos } from './topicos.js';
 
 // --- Los esquemas de las áreas que ya existen --------------------------------
@@ -250,6 +251,39 @@ const AREA_AVENTURAS = campos({
   abierta: uno(['nulo', campos({ salida: 'texto', mapa: 'texto', aventura: 'texto?', sitio: 'texto?' })]),
 });
 
+/**
+ * La vida de una salida, de SPEC-030: en cuál de sus cuatro situaciones está, dónde
+ * está su rótulo, por qué se cerró y si se cerró en corto.
+ *
+ * Guarda **también las cerradas sin leer**, y va en la misma área a propósito: «el
+ * telón espera a que lo leas» exige que un cierre sobreviva a días con la app cerrada,
+ * y partir la salida en curso y el telón pendiente en dos áreas es cómo se
+ * desincronizan.
+ *
+ * Lleva la única posición de quien juega que la partida guarda —el punto de partida,
+ * uno y no un histórico— y las marcas del sensor con las que se miden el plazo y el
+ * regreso. Las dos cosas están declaradas en `formato.js`: sin el punto, volver a casa
+ * andando no cerraría la salida después de que el sistema haya matado el proceso.
+ */
+const AREA_SALIDAS = campos({
+  salida: uno(['nulo', campos({
+    salida: 'texto',
+    mapa: 'texto',
+    aventura: 'texto?',
+    aventuraTerminada: 'booleano',
+    destino: 'texto?',
+    mundo: 'texto?',
+    situacion: 'texto',
+    rotulo: 'texto',
+    partida: campos({ lat: 'numero', lon: 'numero' }),
+    regreso: campos({ seAlejo: 'booleano', dentroDesdeMs: 'entero?' }),
+    ultimoPropioMs: 'entero',
+    ultimaMarcaMs: 'entero',
+    motivo: 'texto?',
+    cierreEnCorto: 'booleano',
+  })]),
+});
+
 // --- El registro de áreas -----------------------------------------------------
 
 const AREAS = [];
@@ -314,6 +348,19 @@ declaraArea({
   inicial: estadoDeSalidaAbierta,
   congela: congelaSalidaAbierta,
   levanta: levantaSalidaAbierta,
+  reproduce: false,
+});
+
+// La vida de una salida, de SPEC-030. **No se reproduce desde el registro**: sus hechos
+// dicen que una salida se abrió y que otra se cerró, no dónde empezó ni cuándo fue el
+// último metro propio, y reconstruir el punto de partida a partir de ellos sería
+// inventárselo — que es peor que declararlo irreproducible.
+declaraArea({
+  id: 'salidas',
+  esquema: AREA_SALIDAS,
+  inicial: estadoDeSalidas,
+  congela: congelaSalidas,
+  levanta: levantaSalidas,
   reproduce: false,
 });
 
