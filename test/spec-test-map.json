@@ -14549,6 +14549,594 @@
       "caso": "Estrenar la app no añade ninguna comprobación de infraestructura saltada al report",
       "hueco_de_bateria": true,
       "nota": "Se comprueban las dos fuentes de la sección 3 del report —el veredicto de la frontera del núcleo y el del validador del mapa—, y que ninguno diga «sin-paquete», «no-comprobada», «sin-mapa» ni «no-validado». No se lanza el runner de verdad porque se llamaría a sí mismo: quien lo hace es el sandbox de test/nucleo/andamiaje-veredicto.test.mjs. Lo que esta fila SÍ añade a la sección 3 y no se puede quitar es Maestro sin dispositivo, y eso es infraestructura ausente por diseño, no una comprobación saltada."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un documento de celda y un estilo, cuando se compone la escena, entonces se obtiene una lista ordenada de primitivas en la que cada una lleva ya resuelto su color, su grosor y su tipografía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Cada primitiva lleva ya resuelto su color, su grosor y su tipografía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una escena compuesta, cuando se pinta en Skia, entonces el módulo que ejecuta el dibujo no consulta el estilo ni una sola vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "En el módulo que ejecuta el dibujo no aparece ninguna decisión de capa ni de estilo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un documento de celda, cuando se compone la escena dos veces con el mismo estilo, el mismo tamaño y la misma vista, entonces las dos escenas son idénticas primitiva a primitiva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida",
+      "hueco_de_bateria": false,
+      "nota": "La mitad que le toca al render del escenario @app: pintar dos veces el mismo documento da la misma escena. Que durante la salida no se genere nada es de la fila 29."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un documento de celda, cuando se compone la escena, entonces el azar que usa —grano del papel, siembra de árboles, zarza del marco— sale de `makeRng(semilla + ':render')` y de ninguna otra fuente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El azar del pintado sale de makeRng(semilla + ':render') y de ninguna otra fuente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un documento de celda, cuando se compone la escena, entonces no se ejecuta ninguna fase de generación ni se llama a ninguna fuente de datos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Cambiar el estilo no ejecuta ninguna fase de generación ni pide nada a la red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el módulo que compone la escena, cuando se inspeccionan sus importaciones, entonces no importa nada de React Native ni de Skia, y corre en Node.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El módulo que compone no importa nada de React Native ni de Skia y corre en Node",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un documento de celda, cuando se compone la escena, entonces el orden de las capas es el declarado en «El plan de capas» y ninguna capa se pinta antes de la que la precede.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El orden de las capas es el del plan y ninguna se pinta antes de la que la precede",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una escena compuesta, cuando se pinta, entonces sobre el agua no queda pintado ningún árbol ni ningún pico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Sobre el agua no queda pintado ningún árbol ni ningún pico",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo con norte, cuando se pinta con cualquier estilo y cualquier vista, entonces el norte queda arriba y no existe ninguna manera de rotar la lámina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El norte está siempre arriba",
+      "escenario": "El norte está siempre arriba",
+      "hueco_de_bateria": false,
+      "nota": "Afirmado a nivel de render: la vista no lleva ángulo, la firma de la composición no admite ninguno y las únicas rotaciones de la escena son las de los rótulos de camino."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el módulo que ejecuta el dibujo, cuando se busca en su código un literal de color —`#rrggbb`, `rgb(`, `rgba(`, un nombre de color—, entonces no aparece ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "En el módulo que ejecuta el dibujo no aparece ni un literal de color",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el módulo que ejecuta el dibujo, cuando se busca un grosor de trazo, un tamaño de tipografía o un nombre de familia tipográfica escritos a mano, entonces no aparece ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "En el módulo que ejecuta el dibujo no aparece ni un grosor ni una tipografía escritos a mano",
+      "hueco_de_bateria": true,
+      "nota": "El cerrojo va más allá del patrón: los únicos números del ejecutor son 0, 1, el 2 del diámetro de la elipse, los índices de camino y las dos constantes con nombre. Cualquier número nuevo lo pone rojo."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el módulo que ejecuta el dibujo, cuando se busca una decisión de qué capa se pinta y cuál no, entonces no aparece ninguna: la decisión sale del grupo `capas` del estilo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "En el módulo que ejecuta el dibujo no aparece ninguna decisión de capa ni de estilo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el módulo que compone la escena, cuando se busca en él el identificador de un estilo concreto —`'reino'`, `'atlas'`—, entonces no aparece ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "En el módulo que compone la escena no aparece el identificador de ningún estilo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el catálogo de estilos, cuando se enumera, entonces tiene exactamente cinco entradas y son Reino, Clásico, Pergamino, Cuento y Atlas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El catálogo tiene exactamente cinco entradas y Reino es el de por defecto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el catálogo de estilos, cuando se pide el estilo por defecto, entonces es Reino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El catálogo tiene exactamente cinco entradas y Reino es el de por defecto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado cualquiera de los cinco estilos, cuando se resuelve, entonces su objeto es idéntico clave a clave al que produce `prototipo/js/render/styles.js` para el mismo identificador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Los cinco estilos son idénticos clave a clave a los del prototipo",
+      "hueco_de_bateria": true,
+      "nota": "La mitad automática de la paridad visual: 5 de 5 estilos, 28 claves cada uno, comparadas contra el prototipo vivo. Cubre la paleta entera, todos los grosores, todas las tipografías, las esquinas de brújula, los modos de marco y de cartela y el contenido de `capas`."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo que solo declara lo que lo distingue, cuando se resuelve, entonces todas las claves que no declara le llegan de los valores por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "La fusión es de dos niveles y lo que un estilo no declara le llega de los valores por defecto",
+      "hueco_de_bateria": true,
+      "nota": "Las tres trampas de CLAUDE.md, cada una con su aserción: `label` no es `title`, `capas` decide qué se dibuja, y la fusión es de dos niveles y nada anida más hondo."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo, cuando se lee su nombre visible, entonces sale de `title` y nunca de `label`, que es la tipografía de los rótulos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El nombre visible sale de title y nunca de label",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo cuyo grupo `capas` apaga bosques, picos, carreteras, lagos y rótulos de camino, cuando se compone la escena, entonces la escena no contiene ni una primitiva de esas capas y el código que las dibuja sigue existiendo para los demás estilos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El grupo capas decide qué se dibuja y el código de las capas apagadas sigue existiendo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado Reino, cuando se compone la escena de un mundo con bosques y picos, entonces no aparece ni un árbol ni un pico, porque es el mapa base y no el mapa ilustrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El grupo capas decide qué se dibuja y el código de las capas apagadas sigue existiendo",
+      "hueco_de_bateria": true,
+      "nota": "Se le planta un bosque y un pico al mundo de referencia para que la afirmación no dependa de que el fixture los traiga: Reino no pinta ninguno y Cuento pinta los dos."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo nuevo declarado solo como objeto de datos y añadido al catálogo, cuando se compone la escena con él, entonces se pinta sin haber tocado el módulo de dibujo ni el que compone la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Añadir un estilo es añadir un objeto: pinta sin tocar el módulo de dibujo ni el que compone",
+      "hueco_de_bateria": true,
+      "nota": "Comprobado byte a byte: se compara el sha256 de `app/render/skia.js` y de `packages/nucleo/render/escena.js` antes y después, y se afirma que ninguno de los dos nombra al estilo nuevo ni lleva escrito ninguno de sus colores."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo nuevo, cuando se abre el selector de estilos, entonces aparece con su `title`, porque el selector se construye desde el catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El nombre visible sale de title y nunca de label",
+      "hueco_de_bateria": true,
+      "nota": "Cubierto a nivel de código: el selector de la pantalla de revisión se construye recorriendo el catálogo y pinta `title`. Que se vea en el dispositivo es @app y no hay dónde ejecutarlo."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo que declara `label.placa` con el rol `nucleo`, cuando se compone la escena, entonces los rótulos de núcleo llevan caja de pergamino y los de paraje se resuelven con halo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "La jerarquía de rótulo la decide el estilo: placa en los roles que declara, halo en el resto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo que declara `label.placa` vacía, cuando se compone la escena, entonces ningún rótulo lleva caja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "La jerarquía de rótulo la decide el estilo: placa en los roles que declara, halo en el resto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado Clásico, cuando se compone la escena, entonces el área pintada es un disco; dado Atlas, es un rectángulo a sangre sin marco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "La forma del área es la que declara el estilo: disco en Clásico, a sangre en Atlas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo generado y pintado en estilo Reino, cuando se cambia el estilo a Pergamino, entonces el documento de celda sigue idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "hueco_de_bateria": false,
+      "nota": "El escenario que manda de la fila: @nucleo @determinismo y por tanto bloqueante (RNF-DET-003)."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo pintado, cuando se cambia el estilo, entonces el documento que recibe el render es el mismo, no una copia levantada otra vez del almacén.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "hueco_de_bateria": false
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo pintado, cuando se cambia el estilo, entonces solo cambian los colores, los grosores y las tipografías, y la geometría de cada primitiva es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "hueco_de_bateria": false,
+      "nota": "MATIZ ACEPTADO: entre dos estilos con `margin` o `shape` distintos la geometría sí cambia, porque el encuadre es del estilo —Clásico recorta a disco, Atlas va a sangre—. La comparación de geometría se hace entre Reino y un Reino repintado con otra paleta y otros grosores, que es la única en la que «la geometría es la misma» significa algo; entre Reino y Pergamino lo que se afirma es que el documento no se ha movido."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo pintado, cuando se cambia el estilo, entonces no se ejecuta ninguna fase de generación ni se pide nada a la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Cambiar el estilo no ejecuta ninguna fase de generación ni pide nada a la red",
+      "hueco_de_bateria": true,
+      "nota": "Con el inspector de red en modo estricto, que es lo que permite afirmar una ausencia en lugar de suponerla."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo pintado en Reino, cuando se cambia a Atlas y se vuelve a Reino, entonces la escena es idéntica a la primera, primitiva a primitiva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Volver al estilo de partida devuelve la escena de partida, primitiva a primitiva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un jugador con un estilo elegido, cuando cierra y vuelve a abrir la app, entonces el mapa aparece con ese estilo y no con el de por defecto.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El estilo elegido sobrevive a cerrar y abrir la app",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: haría falta un flujo de @app sobre la lámina montada en una pantalla del juego, y en esta fila la lámina todavía no la monta ninguna —las pantallas son de las filas 27, 29 y 38— ni hay dispositivo en la máquina del pipeline. Escribir el flujo ahora sería agarrarse a una pantalla que no existe. Hueco declarado. Además, la persistencia de la preferencia es de la fila 39 y la pantalla de ajustes de la 38: aquí no hay dónde guardarla ni dónde elegirla."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el módulo que ejecuta el dibujo, cuando se busca en él un cálculo de posición de rótulo, entonces no aparece ninguno: cada rótulo llega con su posición, su tamaño y su caja resueltos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "En el módulo que ejecuta el dibujo no aparece ninguna decisión de capa ni de estilo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una escena, cuando se recorren sus primitivas, entonces todos los rótulos están en una única pasada posterior a toda la geometría.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El orden de las capas es el del plan y ninguna se pinta antes de la que la precede",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma como contigüidad: ninguna capa se pinta en dos tandas, así que los rótulos son una pasada y no un reparto por el recorrido. Es lo que hace posible la fila 22."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un colocador que devuelve dos rótulos con cajas que se solapan, cuando se pinta, entonces los dos se pintan donde el colocador dijo y el render no mueve ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El render pinta los rótulos donde diga el colocador, aunque se solapen",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el colocador provisional que entrega esta spec, cuando coloca los rótulos de un mundo de paseo real, entonces los pone en el anclaje de cada elemento, como el prototipo, y puede solaparlos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El colocador provisional pone cada rótulo en su anclaje y puede solapar",
+      "hueco_de_bateria": true,
+      "nota": "La deuda de la fila 22 queda medida y no solo declarada: `solapes()` cuenta los pares de cajas que se pisan, que es contra lo que la fila 22 tendrá que comparar."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado otro colocador inyectado en su lugar, cuando se compone la escena, entonces cambian las posiciones de los rótulos y no cambia ni un color, ni un grosor, ni una tipografía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Otro colocador cambia las posiciones y no cambia ni un color, ni un grosor, ni una tipografía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un colocador, cuando se le pide colocar, entonces recibe todos los rótulos del mapa a la vez, con su rol, su texto, su anclaje y la medida de su caja, y devuelve todas las posiciones antes de que se pinte nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El colocador recibe todos los rótulos de una vez, con su rol, su texto, su anclaje y su caja",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un factor de tamaño de letra distinto del normal, cuando se compone la escena, entonces las cajas medidas y las posiciones colocadas lo tienen en cuenta, y el objeto de estilo no se modifica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El factor de tamaño de letra entra al medir y al colocar, y no toca el objeto de estilo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado la app arrancada sin red, cuando se pinta cualquiera de los cinco estilos, entonces sus tipografías están disponibles porque viajan con la app y no se piden a ningún servidor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Las tipografías las declara el propio objeto de estilo",
+      "hueco_de_bateria": true,
+      "nota": "La mitad afirmable sin dispositivo: ninguna de las familias declaradas es una URL. Que estén cargadas de verdad al pintar es @app y necesita la lámina montada en una pantalla."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una tipografía que todavía no está cargada, cuando se va a pintar, entonces el mapa espera a tenerla y no pinta con una sustituta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un medidor que no sabe medir una tipografía falla nombrándola, en lugar de inventarse la medida",
+      "hueco_de_bateria": true,
+      "nota": "Cubierta la mitad del medidor, que es la que corre en Node: sin la tipografía cargada falla nombrándola en lugar de medir con una sustituta. Que el pintado espere en el dispositivo es @app; el ejecutor lo tiene escrito (`fuente()` falla nombrando la familia) pero no hay dónde ejecutarlo. Hueco 5 de la spec."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un estilo, cuando se pregunta qué tipografías necesita, entonces las declara el propio objeto de estilo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Las tipografías las declara el propio objeto de estilo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo sin costa —sin máscara de mar—, cuando se pinta, entonces se ve el papel del estilo y no falla nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un mundo sin costa, sin parajes, sin bosques, sin picos, sin lagos y sin ríos se pinta entero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo sin parajes, cuando se pinta, entonces la lámina se pinta entera sin ningún hueco ni ningún marcador vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un mundo sin costa, sin parajes, sin bosques, sin picos, sin lagos y sin ríos se pinta entero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo sin bosques, sin picos, sin lagos y sin ríos, cuando se pinta con Cuento, entonces se pinta el terreno base y ninguna capa protesta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un mundo sin costa, sin parajes, sin bosques, sin picos, sin lagos y sin ríos se pinta entero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el mundo de referencia `suelo-250m`, que es el más pobre de los ocho, cuando se pinta con los cinco estilos, entonces los cinco producen una lámina y ninguno falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El más pobre de los ocho mundos de referencia se pinta con los cinco estilos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo con un solo núcleo, cuando se pinta, entonces aparece su rótulo y la lámina no queda en blanco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un mundo con un solo núcleo enseña su rótulo y la lámina no queda en blanco",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un identificador de estilo que no existe en el catálogo, cuando se pide pintar con él, entonces se pinta con Reino y el resultado declara que hubo sustitución, en lugar de fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un estilo que no existe se pinta con Reino y lo declara, en lugar de fallar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una partida guardada con un estilo que ya no existe, cuando se abre el mapa, entonces se abre en Reino y la partida no se corrompe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un estilo que no existe se pinta con Reino y lo declara, en lugar de fallar",
+      "hueco_de_bateria": true,
+      "nota": "Cubierta la mitad del render: el identificador que ya no está cae a Reino, lo declara y la lámina se pinta entera. Que la partida guardada no se corrompa al leerlo es de la fila 39."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un documento de celda al que le falta un campo que una capa necesita, cuando se compone la escena, entonces falla nombrando el campo y la capa, en lugar de pintar media lámina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un documento al que le falta un campo falla nombrando el campo y la capa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una superficie de ancho o alto cero, cuando se pide pintar, entonces no se pinta nada y no falla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Una superficie de ancho o alto cero no pinta nada y no falla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un colocador que devuelve menos rótulos de los que se le dieron, cuando se compone la escena, entonces falla nombrando los que faltan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un colocador que devuelve menos rótulos de los que se le dieron falla nombrando los que faltan",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un medidor de texto que no sabe medir una tipografía, cuando se compone la escena, entonces falla nombrando la tipografía, en lugar de colocar con una medida inventada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un medidor que no sabe medir una tipografía falla nombrándola, en lugar de inventarse la medida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una vista cuyo radio es mayor que el mundo entero, cuando se pinta, entonces se ve el mundo completo rodeado del color de fuera del área, sin estirarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Una vista más grande que el mundo entero lo enseña rodeado del color de fuera, sin estirarlo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una vista muy cerrada sobre un núcleo, cuando se pinta, entonces las capas que quedan fuera del recorte no se pintan y los rótulos de lo que sí se ve siguen apareciendo.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Una vista cerrada sobre un núcleo recorta el terreno y conserva los rótulos de lo que se ve",
+      "hueco_de_bateria": true,
+      "nota": "NO CUBIERTO: el recorte es una primitiva de la escena y el descarte de lo que cae fuera lo hace Skia al ejecutarla, no la composición. Afirmar «no se pinta» sin rasterizar exigiría un ejecutor doble que acumulara el recorte, y eso es más máquina de prueba que afirmación. Se revisa en la ficha de paridad, que ya mira encuadre por encuadre. Hueco declarado."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un rótulo cuyo texto es más largo que el ancho de la lámina, cuando se pinta, entonces se pinta y no desborda por los dos lados a la vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Un rótulo más largo que la lámina se pinta y no desborda por los dos lados a la vez",
+      "hueco_de_bateria": true,
+      "nota": "MATIZ: un texto centrado más ancho que la lámina desborda por los dos lados a la vez, y eso es lo correcto —lo que sería un error es que se saliera solo por uno, que delataría una caja mal medida—. Es lo que se afirma."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo de una celda costera, cuando se pinta con Reino, entonces la tierra tapa el papel y el mar sale de la máscara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Sobre el agua no queda pintado ningún árbol ni ningún pico",
+      "hueco_de_bateria": true,
+      "nota": "Cubierto por el lado de la máscara: el mar se pinta desde ella y después de la vegetación y el relieve, y lo que cae en el mar no se pinta. Que el verde tape el papel a la vista es paridad de pintado, o sea @manual."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado la superficie girada de vertical a apaisada, cuando se repinta, entonces el mundo pintado es el mismo y solo cambia el encuadre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Girar la superficie de vertical a apaisada reencuadra y no cambia el mundo pintado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo de referencia y una superficie del tamaño de la pantalla, cuando se pinta por primera vez, entonces la lámina completa aparece en menos de 500 ms.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El primer pintado completo baja de 500 ms en un móvil de gama media",
+      "hueco_de_bateria": true,
+      "nota": "MANUAL: no es afirmable con una aserción en esta máquina. La mitad automática de lo que sí se puede afirmar está cubierta aparte; esta mitad va a la ficha de revisión de la spec, sobre hardware real y con las capturas. La spec lo dice expresamente: la medida sobre simulador no vale como evidencia, porque corre sobre el escritorio y miente a favor. Hueco 4 de la spec."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una lámina ya pintada, cuando el jugador arrastra o hace zoom, entonces la geometría del terreno no se vuelve a componer: la cámara se mueve sobre la escena que ya existe.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Arrastrar y hacer zoom no recomponen la geometría del terreno",
+      "hueco_de_bateria": true,
+      "nota": "NO CUBIERTO: los gestos son de las filas 26 y 29 y aquí no existe nada que mueva la cámara, así que no hay gesto que ejercitar. Lo que sí queda afirmado es la propiedad de la que depende: componer dos veces el mismo documento con el mismo estilo, tamaño y vista da la misma escena. Hueco 4 de la spec."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado una lámina ya pintada, cuando el jugador arrastra, entonces ningún rótulo se recoloca hasta que el gesto termina.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Ningún rótulo se recoloca durante un gesto",
+      "hueco_de_bateria": true,
+      "nota": "NO CUBIERTO por lo mismo: no hay gestos en esta fila. Hueco 4 de la spec."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un arrastre y un zoom encadenados sobre un mundo de referencia, cuando se mide el gasto por fotograma, entonces ninguno pasa de 32 ms.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Ningún fotograma de un gesto pasa de 32 ms en un móvil de gama media",
+      "hueco_de_bateria": true,
+      "nota": "MANUAL: no es afirmable con una aserción en esta máquina. La mitad automática de lo que sí se puede afirmar está cubierta aparte; esta mitad va a la ficha de revisión de la spec, sobre hardware real y con las capturas. Hueco 4 de la spec."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un mundo de referencia, cuando se compone su escena, entonces el número de primitivas queda por debajo del tope declarado en «El presupuesto de fluidez».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "El número de primitivas de una escena queda por debajo del tope declarado",
+      "hueco_de_bateria": true,
+      "nota": "Medido sobre los cuarenta pares: el peor caso es Atlas sobre urbano-denso, con unas 6.200 primitivas frente al tope de 40.000. El tope no es un límite de la máquina, es la señal de que una capa se ha ido de las manos."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado los cinco estilos portados, cuando se compara su objeto resuelto con el del prototipo, entonces no hay ninguna diferencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Los cinco estilos son idénticos clave a clave a los del prototipo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado los ocho mundos de referencia y los cinco estilos, cuando se recorre la ficha de revisión de «El protocolo de revisión de paridad visual», entonces los cuarenta pares quedan con todos sus ítems en verde.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Los cuarenta pares de la ficha de revisión se recorren y quedan en verde",
+      "hueco_de_bateria": true,
+      "nota": "MANUAL por construcción: la identidad pixel a pixel no es criterio —Skia y el canvas del navegador rasterizan distinto— y la revisión es una ficha binaria de tres bloques que se registra en docs/paridad-render.md. Lo automatizable es la paridad de datos, y está cubierta. Hueco 1 de la spec, que el PRD ya marca con ⚠. Lo que sí se afirma aquí es que los cuarenta pares se componen sin fallar y con la barra de escala encendida, que es la condición para poder mirarlos: caso «Los cuarenta pares de la ficha de revisión existen y los cuarenta producen lámina» en test/nucleo/render.test.mjs."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado un ítem de la ficha en rojo, cuando se cierra la revisión, entonces queda anotado con su captura y la fila no se da por terminada.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Un ítem rojo de la ficha bloquea el cierre de la fila",
+      "hueco_de_bateria": true,
+      "nota": "MANUAL: es una regla de proceso sobre la revisión, no una propiedad del código. Se registra en docs/paridad-render.md."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado la lámina que entrega esta fila, cuando se mira la pantalla, entonces no hay ningún elemento tocable dentro de la app.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "hueco_de_bateria": false,
+      "nota": "La mitad que le toca al render: ni la lámina ni el ejecutor llevan nada tocable, y el plan de capas no tiene leyenda. El estilo se cambia desde los ajustes, que son de la fila 38."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado la barra de escala, que existe en el estilo, cuando se pinta cualquier pantalla del juego, entonces está apagada y la lámina no enseña ninguna cifra de distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "No se enseña ninguna cifra de esfuerzo",
+      "escenario": "No se enseña ninguna cifra de esfuerzo",
+      "hueco_de_bateria": false,
+      "nota": "La decisión de apagar la barra en el juego es lo que impide que este escenario se rompa por el sitio más tonto: la leyenda de una escala cartográfica dice «250 varas (250 m)». Se afirma sobre los cinco estilos y sobre los textos de la escena, y que el único sitio de la app que la enciende es la pantalla de revisión."
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado el render de esta fila, cuando se busca una dependencia del reloj o del rendimiento de la máquina, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "Componer no depende del reloj ni del rendimiento de la máquina",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-021",
+      "criterio": "Dado la pantalla de revisión, que solo existe en la build de desarrollo, cuando se comprueba dónde vive, entonces no está en `docs/flujo.md` ni en las cuarenta pantallas del juego, y es la única que enciende la barra de escala.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/render.test.mjs",
+      "caso": "La pantalla de revisión no es del juego y es la que enciende la escala",
+      "hueco_de_bateria": true
     }
   ]
 }

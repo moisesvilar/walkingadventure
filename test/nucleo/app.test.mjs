@@ -83,10 +83,25 @@ describe('La disposición del repositorio tras estrenar la app', () => {
   });
 
   test('app/package.json declara exactamente las dependencias que la spec nombra', () => {
-    // Lista cerrada de «Las dependencias que entran». Cualquier añadido que la spec
-    // no nombre tiene que ponerse rojo aquí: es la única barrera contra que una app
-    // vacía se llene de librerías que nadie pidió.
-    const permitidas = new Set(['expo', 'react', 'react-native', 'expo-haptics', 'expo-notifications', 'expo-linking', '@walkingadventure/nucleo']);
+    // Lista cerrada de «Las dependencias que entran». Cualquier añadido que ninguna
+    // spec nombre tiene que ponerse rojo aquí: es la única barrera contra que una
+    // app vacía se llene de librerías que nadie pidió.
+    //
+    // **Cómo se abre la lista**: una dependencia entra cuando la spec de la fila que
+    // la trae la nombra en su reparto, y entra en la misma iteración que el código
+    // que la usa — nunca «por si acaso» ni por comodidad de quien implementa. Al
+    // abrirla, el paquete pasa de `fuera` a `permitidas` citando la fila que lo
+    // autoriza, y `fuera` conserva a los demás con el motivo por el que esperan.
+    //
+    // `@shopify/react-native-skia` entra por **SPEC-021**, que porta el pintado del
+    // mapa a Skia: `app/render/skia.js` ejecuta la escena sobre un lienzo de Skia y
+    // `app/render/lamina.jsx` lo monta. Sigue sin ser obligatoria porque el render
+    // recibe Skia inyectado (`app/render/enlace-skia.js`) y por eso se compone y se
+    // ejercita en Node sin ella; el día que se declare, esta lista ya no lo impide.
+    const permitidas = new Set([
+      'expo', 'react', 'react-native', 'expo-haptics', 'expo-notifications', 'expo-linking', '@walkingadventure/nucleo',
+      '@shopify/react-native-skia', // SPEC-021: el pintado del mapa
+    ]);
     const declaradas = Object.keys(APP_PAQUETE.dependencies ?? {});
     for (const d of declaradas) {
       assert.equal(permitidas.has(d), true, `app/package.json declara "${d}", que la spec no nombra`);
@@ -99,7 +114,6 @@ describe('La disposición del repositorio tras estrenar la app', () => {
       'react-navigation': 'navegación, fila 27',
       'expo-router': 'navegación, fila 27',
       'expo-font': 'tipografías propias, fila 27',
-      '@shopify/react-native-skia': 'Skia, fila 21',
       axios: 'cliente HTTP, fila 26',
       '@react-native-async-storage/async-storage': 'almacenamiento de partida, fila 39',
       'expo-task-manager': 'servicio en primer plano, fila 30',
