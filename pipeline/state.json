@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-025",
+  "spec_actual": "SPEC-026",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -248,6 +248,16 @@
       "casos": "1535 casos: 1532 pasan, 0 fallan, 3 saltados",
       "app": "sin dispositivo",
       "nota": "minuto medido: urbano-denso p95 1663 ms sobre 20 s. Sexta aparicion de 6h: overpass-medir.mjs sin guardian, corregido."
+    },
+    {
+      "spec": "SPEC-025",
+      "slug": "imagenes-ficcion-fotos-places",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-025-run-20260809T083155Z.md",
+      "casos": "1589 casos: 1586 pasan, 0 fallan, 3 saltados",
+      "app": "sin dispositivo",
+      "nota": "tres defectos destapados por las pruebas: indice que nunca acertaba, interruptor inalcanzable y filtro que dejaba pasar campos de mas."
     }
   ],
   "bloqueos": [],

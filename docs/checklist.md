@@ -45,8 +45,8 @@
 | 22 | declutter-rotulos | RF-MAPA-003 | must | done |
 | 23 | proxy-ciego | RF-INFRA-002, RNF-PRIV-001, RNF-COST-001 | must | done |
 | 24 | overpass-produccion | RF-INFRA-003, RNF-PER-001 | must | done |
-| 25 | imagenes-ficcion-fotos-places | RF-MUNDO-016, RF-BUCLE-003 | should | wip |
-| 26 | mapa-en-movil | RF-MUNDO-001, RF-MUNDO-012, RNF-PER-001 | must | pending |
+| 25 | imagenes-ficcion-fotos-places | RF-MUNDO-016, RF-BUCLE-003 | should | done |
+| 26 | mapa-en-movil | RF-MUNDO-001, RF-MUNDO-012, RNF-PER-001 | must | wip |
 
 ## B5 · El bucle en la calle
 
