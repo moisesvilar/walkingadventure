@@ -1,11 +1,17 @@
 // La raíz de la app: monta la pantalla de andamiaje con los módulos de plataforma
-// inyectados y con lo que diga el gancho de enlace profundo. Sin navegación: en la
-// compilación de tienda hay una sola pantalla, y un enrutador con una sola pantalla
-// es una librería para nada. La fila 27 es la que tendrá dos pantallas que encadenar.
+// inyectados y con lo que diga el gancho de enlace profundo. Sin navegación: un
+// enrutador para pasar entre pantallas de herramienta es una librería para nada. La
+// fila 27 es la que tendrá el onboarding entero que encadenar, y es la que sustituye
+// el andamiaje por la primera pantalla de verdad.
 //
-// En desarrollo hay una segunda, la revisión del render, detrás de un paso que solo
-// existe con `__DEV__`. No es navegación: es el equivalente del hook `__wa.style()`
-// que el prototipo tiene en consola, y es donde se hace la revisión de paridad.
+// Desde esta fila hay una segunda pantalla que **sí es del juego**: el mapa. Aquí
+// cuelga de un paso porque todavía no existe el flujo que lleva hasta ella —dónde se
+// levanta, con qué permiso, con qué tramo— y sin ese paso no habría manera de
+// recorrer el levantamiento de punta a punta ni de medir el minuto.
+//
+// Y una tercera, la revisión del render, detrás de un paso que solo existe con
+// `__DEV__`. Esa no es navegación: es el equivalente del hook `__wa.style()` que el
+// prototipo tiene en consola, y es donde se hace la revisión de paridad.
 
 import React, { useEffect, useState } from 'react';
 import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native';
@@ -13,6 +19,7 @@ import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
+import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
 
 // Referencia estable: si fuera un literal en el cuerpo, cada repintado sería un
@@ -26,6 +33,7 @@ const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
 export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
   const [enRevision, setEnRevision] = useState(false);
+  const [enMapa, setEnMapa] = useState(false);
 
   useEffect(() => {
     let vivo = true;
@@ -45,15 +53,23 @@ export function App() {
 
   return (
     <SafeAreaView style={estilos.raiz}>
-      {/* El paso a la revisión del render. Va arriba y solo en desarrollo: el flujo
-          de Maestro abre la app en el andamiaje y ahí se queda. */}
-      {EN_DESARROLLO ? (
+      {/* El paso al mapa. Existe en todas las compilaciones porque el mapa es del
+          juego; lo provisional es el paso, no la pantalla. */}
+      {!enRevision ? (
+        <Pressable onPress={() => setEnMapa((estaba) => !estaba)} style={estilos.paso} testID="paso-mapa">
+          <Text style={estilos.pasoTexto}>{enMapa ? 'Volver al andamiaje' : 'El mapa'}</Text>
+        </Pressable>
+      ) : null}
+
+      {/* El paso a la revisión del render. Solo en desarrollo: el flujo de Maestro
+          abre la app en el andamiaje y ahí se queda. */}
+      {EN_DESARROLLO && !enMapa ? (
         <Pressable onPress={() => setEnRevision((estaba) => !estaba)} style={estilos.paso} testID="paso-revision-render">
           <Text style={estilos.pasoTexto}>{enRevision ? 'Volver al andamiaje' : 'El render en Skia'}</Text>
         </Pressable>
       ) : null}
 
-      {enRevision ? (
+      {enMapa ? <MapaMontado /> : enRevision ? (
         <RevisionMontada />
       ) : (
         <PantallaAndamiaje

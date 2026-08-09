@@ -209,3 +209,15 @@ Y destapa lo que ya estaba escrito como deuda en §6i-a: **un tramo difícil sin
 
 1. **Se arregla la deuda ahora**, nombrando todo tramo difícil al generar, que es lo que §6i-a dejó con dueño en SPEC-007.
 2. **Se regeneran los extractos de referencia.** Eran la instantánea del prototipo de seis plantillas; con treinta, esa línea base ya no describe el juego. El instrumento se actualiza cuando lo que mide cambia — como en §6b.
+
+## 6t · B4 cerrado, y lo que no se ha podido verificar
+
+Las siete filas de B4 en verde, **1645 casos**. Tres cosas que quedan dichas y no disimuladas:
+
+**a · Nada se ha ejecutado en un dispositivo.** Maestro 2.8.0 está instalado, pero **no hay simulador**: `xcode-select -p` da `/Library/Developer/CommandLineTools`, `xcrun simctl` no existe, y no hay SDK de Android. Hay **tres flujos escritos** en `test/app/` y ninguno se ha ejecutado. El runner lo registra como infraestructura ausente y nunca como verde, que era el punto.
+
+**b · El minuto está medido, pero no donde la spec dice.** `urbano-denso` levanta en **3222 ms** (consulta 1723, generación 1318, congelación 180, colocación 1) sobre 60 000 de presupuesto — pero **en Node contra el Overpass del proyecto, no en el dispositivo de referencia**, que la spec exige declarar y **no está declarado en ningún sitio del repo**. Lo que sí está verificado es el **instrumento**: con cronómetro doblado la comprobación se pone roja nombrando coordenada y fase. El pintado sale 0 ms en Node porque Skia solo mide en dispositivo, y eso está afirmado para que ese cero no se lea como «el pintado es gratis».
+
+**c · Un AC de SPEC-026 está mal escrito y no puede cumplirse.** Dice que «dos jugadoras con tramos distintos y la misma semilla generan el mismo mundo», y es falso por construcción: el lado de celda son dos tramos (`alcance-del-mundo.md` §2), así que 400 m da celda de 800 y 1200 m da 2400, con otro mundo dentro — medido, 7 núcleos frente a 10. Lo que sí se sostiene, y es lo que se prueba, es que **un mapa ya levantado no se redimensiona al recalibrar**. El AC hay que corregirlo en la spec.
+
+**Y la sexta y séptima aparición de §6h**, las dos cazadas por pruebas: `scripts/overpass-medir.mjs` sin guardián de ejecución directa —lo que SPEC-001-iter-1 exige a todo script ejecutable—, y la medida en caliente sin cablear: el cronómetro distinguía caché fría de caliente y nadie se lo decía.
