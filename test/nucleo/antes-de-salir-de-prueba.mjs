@@ -14,7 +14,38 @@
 // lo que se mide es el dato real de OSM.
 
 import { construyeGrafo } from '../../packages/nucleo/world/grafo.js';
+import {
+  PRESUPUESTO_PREPARACION_MS,
+  declaraAusencia,
+  declaraIlustracion,
+  declaraTexto,
+  ordenaRecursos,
+  planDeIlustraciones,
+  recursosVacios,
+} from '../../packages/nucleo/partida/recursos.js';
+import { componePreparacion, resumenDeLaPreparacion } from '../../packages/nucleo/partida/preparacion.js';
+import { redactaAventura } from '../../packages/nucleo/quests/narrador.js';
 import { generaMundo, semillaDe, LOS_CUATRO, LAS_DOS_SEMILLAS } from './mundo-de-prueba.mjs';
+
+/**
+ * El generador, armado como la pieza que `creaPreparacion` exige en su `DEL_NUCLEO`.
+ *
+ * El mismo objeto que arma `app/nucleo/piezas.js` para la app, pero por ruta relativa:
+ * la app cita el paquete por su nombre y estas pruebas no pueden resolver nada
+ * instalado, que es el criterio duro de SPEC-020.
+ */
+export const NUCLEO_DE_LA_PREPARACION = Object.freeze({
+  PRESUPUESTO_PREPARACION_MS,
+  declaraAusencia,
+  declaraIlustracion,
+  declaraTexto,
+  ordenaRecursos,
+  planDeIlustraciones,
+  recursosVacios,
+  componePreparacion,
+  resumenDeLaPreparacion,
+  redactaAventura,
+});
 
 /** El día de casi todas estas pruebas. Un entero, nunca una fecha. */
 export const DIA = 23;

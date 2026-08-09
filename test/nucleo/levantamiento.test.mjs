@@ -32,7 +32,7 @@ import assert from 'node:assert/strict';
 import { creaAlmacenEnMemoria } from '../../app/datos/almacen.js';
 import { creaTraedorDeOsm } from '../../app/datos/traedor.js';
 import { VERSION_CONSULTA, consultaDeCelda } from '../../app/datos/consulta-osm.js';
-import { PIEZAS_DEL_LEVANTAMIENTO, carenciasDe, creaLevantamiento } from '../../app/mapa/levantamiento.js';
+import { DEL_NUCLEO, PIEZAS_DEL_LEVANTAMIENTO, carenciasDe, creaLevantamiento } from '../../app/mapa/levantamiento.js';
 import { FASES, IDS_DE_FASE, faseDeAviso } from '../../app/mapa/fases.js';
 import { creaCronometro } from '../../app/mapa/cronometro.js';
 import { CLAVES } from '../../packages/nucleo/partida/mapa.js';
@@ -47,6 +47,7 @@ import {
   EN_EL_INTERIOR,
   EN_GALICIA,
   LAS_CUATRO,
+  NUCLEO_DEL_LEVANTAMIENTO,
   OTRA_SEMILLA,
   SEMILLA_DE_PRUEBA,
   TAMANO,
@@ -375,10 +376,13 @@ describe('Nada degrada por falta de cableado', () => {
     cronometro: creaCronometro({ ahora: () => 0 }),
     colocador: colocadorDeRotulos,
     medidor: medidorNominal,
+    nucleo: NUCLEO_DEL_LEVANTAMIENTO,
   });
 
   test('Sin una de las cinco piezas, la orquestación no se construye y nombra la que falta', () => {
-    assert.deepEqual([...PIEZAS_DEL_LEVANTAMIENTO], ['consultaOsm', 'almacen', 'cronometro', 'colocador', 'medidor']);
+    // Son seis desde SPEC-020: el generador dejó de ser un import de la orquestación y
+    // pasó a ser una pieza más, y por eso su ausencia tiene que protestar como las otras.
+    assert.deepEqual([...PIEZAS_DEL_LEVANTAMIENTO], ['consultaOsm', 'almacen', 'cronometro', 'colocador', 'medidor', 'nucleo']);
     for (const pieza of PIEZAS_DEL_LEVANTAMIENTO) {
       const piezas = cableadoCompleto();
       delete piezas[pieza];
@@ -400,6 +404,19 @@ describe('Nada degrada por falta de cableado', () => {
       const piezas = cableadoCompleto();
       piezas.cronometro = { ...piezas.cronometro, [metodo]: undefined };
       assert.throws(() => creaLevantamiento(piezas), new RegExp(metodo));
+    }
+    // Y el generador, que desde SPEC-020 es una pieza inyectada como las otras: un
+    // núcleo sin `componeEscena` que construyera reventaría al pintar, que es la misma
+    // degradación silenciosa un rato más tarde.
+    assert.ok(DEL_NUCLEO.length > 0);
+    for (const nombre of DEL_NUCLEO) {
+      const piezas = cableadoCompleto();
+      piezas.nucleo = { ...NUCLEO_DEL_LEVANTAMIENTO, [nombre]: undefined };
+      assert.throws(
+        () => creaLevantamiento(piezas),
+        new RegExp(nombre),
+        `el levantamiento se ha construido con un núcleo sin "${nombre}"`,
+      );
     }
   });
 

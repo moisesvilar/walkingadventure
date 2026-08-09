@@ -19899,6 +19899,634 @@
       "caso": "La salida sigue viva con el móvil bloqueado",
       "escenario": "La salida sigue viva con el móvil bloqueado",
       "nota": "Andar veinte minutos con el móvil bloqueado y comprobar que la pantalla no se enciende ni una vez. La mitad automatizable —que la noticia no usa el canal de notificación— está en «La oportunidad es el único aviso que enciende la pantalla»."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el catálogo de situaciones de una salida, cuando se enumera, entonces son exactamente cuatro: abierta con el rótulo puesto, abierta con el rótulo retirado, cerrada sin leer y cerrada leída.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Las situaciones de una salida son exactamente cuatro",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: docs/testing.md no tiene ninguna característica sobre la vida de una salida como estado. Se afirma como igualdad contra el vocabulario cerrado, más el de las abiertas y el del momento (las cuatro más la nada)."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una partida sin ninguna salida, cuando se pregunta por la salida en curso, entonces no hay ninguna, y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una partida sin ninguna salida lo dice y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una partida sin ninguna salida y el rótulo disponible, cuando se abre una salida, entonces queda abierta con el rótulo puesto y con el punto de partida anotado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Abrir una salida la deja abierta con el rótulo puesto y el punto de partida anotado",
+      "hueco_de_bateria": true,
+      "nota": "Se afirman las dos mitades: la situación del estado y que el rótulo se puso de verdad, con su línea. Nacen ya coincidiendo, que es la premisa del criterio de coincidencia."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida ya abierta, cuando se abre otra, entonces falla nombrando la salida que sigue abierta, en lugar de sustituirla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Abrir otra salida con una abierta falla nombrando la que sigue abierta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando se serializa la partida y se vuelve a cargar, entonces vuelve en la misma situación, con el mismo punto de partida y con la misma marca de la última posición propia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida abierta vuelve de su documento en la misma situación y con el mismo punto de partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida cerrada sin leer, cuando se serializa la partida y se vuelve a cargar, entonces sigue sin leer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida cerrada sin leer sigue sin leer después de ir y volver del documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida cerrada leída, cuando se pregunta por la salida en curso, entonces no hay ninguna y la partida admite abrir otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Con una salida cerrada leída no hay salida en curso y se puede abrir otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado cualquier situación, cuando se pide una transición que esa situación no admite —cerrar una salida ya cerrada, retirar el rótulo de una salida cerrada, retomar una que nunca se abrió—, entonces falla nombrando la situación de partida y la transición pedida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una transición que la situación no admite falla nombrando las dos",
+      "hueco_de_bateria": true,
+      "nota": "Las tres de la spec, más marcar como leído un telón ya leído. Se afirma que el mensaje nombra las dos cosas y no solo que lance."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la superficie pública de esta capa, cuando se busca una operación que reciba una fecha, una hora o un número de días, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Ninguna operación pública recibe una fecha, una hora ni un número de días",
+      "hueco_de_bateria": true,
+      "nota": "Se lee el código sin comentarios, porque los comentarios nombran a propósito el reloj que no se usa. Y se afirma la mitad positiva: lo que sí recibe se llama tMs."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el módulo de la salida, cuando se inspecciona su código, entonces no aparece ninguna lectura del reloj del sistema ni ninguna fuente de azar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El módulo de la salida no lee el reloj del sistema ni siembra ningún azar",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren los tres módulos de la fila —salidas.js, regreso.js y rotulo.js— y no solo el primero: el reloj se colaría igual por cualquiera de los otros dos."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta y cerrada, cuando se lee el contador de pasos del mundo, entonces el cierre no lo ha movido: cerrar una salida no es andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Cerrar una salida no mueve el contador de pasos del mundo",
+      "hueco_de_bateria": true,
+      "nota": "Dos mitades: el contador real de un motor de pasos no se mueve, y salidas.js no importa pasos.js, que es por dónde podría moverse mañana."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "packages/nucleo/partida/estado.js se toca solo para registrar el área nueva, con el mecanismo que ya existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El área de la salida se registra con el mecanismo que ya existe y no se reproduce",
+      "hueco_de_bateria": true,
+      "nota": "Incluye que el área no se reproduce desde el registro: sus hechos no llevan dentro el punto de partida y reconstruirlo sería inventárselo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta cuyo punto de partida está anotado, cuando la jugadora se aleja más de la distancia de alejamiento y vuelve a estar dentro del radio de regreso el tiempo de permanencia declarado, entonces la salida se cierra. Y cuando se cierra por regreso, no se emite ninguna notificación y no se pide poner la app en primer plano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Volver a casa cierra la salida",
+      "escenario": "Volver a casa cierra la salida",
+      "nota": "El escenario cubre los dos criterios de la spec —que cierra y que no avisa—, y por eso van en una entrada: el mismo caso afirma las tres ausencias declaradas (notifica, primer plano y confirmación)."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando la jugadora vuelve al punto de partida en autobús, entonces la salida se cierra igual: la comprobación del regreso no consulta la clasificación de la traza en ningún punto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Volver a casa en autobús echa el telón igual",
+      "escenario": "Volver a casa en autobús echa el telón igual",
+      "nota": "Aquí se sostiene el lado del cierre. La otra mitad del escenario —que esos kilómetros no muevan el mundo— es de SPEC-011 y no se re-afirma."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el módulo del regreso, cuando se inspecciona lo que consulta, entonces no importa nada del detector de transporte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La comprobación del regreso no consulta la clasificación de la traza en ningún punto",
+      "hueco_de_bateria": true,
+      "nota": "Tres alturas: no importa ritmo.js, no nombra ninguna palabra de la clasificación en su código (descontando la lista declarada de lo que no mira) y la misma secuencia cierra igual con las cuatro clasificaciones."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta que nunca se alejó más de la distancia de alejamiento, cuando la jugadora pasa por el punto de partida, entonces la salida no se cierra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Sin haberse alejado, pasar por el punto de partida no cierra la salida",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la propia spec: sin este caso, una implementación que cierre la salida al abrirla en casa pasa todos los escenarios existentes."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando la jugadora pasa por delante del punto de partida sin quedarse el tiempo de permanencia, entonces la salida no se cierra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Pasar por delante de casa sin quedarse el tiempo de permanencia no cierra la salida",
+      "hueco_de_bateria": true,
+      "nota": "Incluye que dos medios minutos no suman uno: salir del radio borra el reloj de permanencia, que es lo que impide cerrar sobre una aventura viva a mitad de un lazo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la distancia de alejamiento, cuando se lee de dónde sale, entonces está expresada en tramos y se traduce a metros con el tramo de quien juega, y nunca es menor que el suelo de moverse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La distancia de alejamiento va en tramos, con el suelo de moverse como mínimo",
+      "hueco_de_bateria": true,
+      "nota": "Y la contraria: el radio de regreso va en metros y no se escala con nada, porque es tolerancia de sensor y no unidad de juego."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado dos jugadoras con tramos distintos, cuando se comparan sus distancias de alejamiento en metros, entonces son distintas y proporcionales a su tramo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Dos jugadoras con tramos distintos se alejan distancias distintas y proporcionales",
+      "hueco_de_bateria": true,
+      "nota": "Además de la proporción, se ve en el cierre: 500 m alejan de verdad a quien anda 700 m en media hora y no a quien anda 2 km."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando se pulsa «dar la salida por terminada» en el rótulo, entonces la salida se cierra exactamente igual que si hubiera vuelto, sin ninguna diferencia de estado salvo el motivo anotado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Se puede cerrar la salida desde el rótulo del sistema",
+      "escenario": "Se puede cerrar la salida desde el rótulo del sistema",
+      "nota": "La igualdad se compara sobre la vista entera descontando el motivo y las dos marcas del sensor, que son del recorrido y no del cierre: una salida cerrada a mano se cierra antes de dar el último paso, y compararlas mediría el paseo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida cerrada por cualquiera de las dos vías, cuando se lee su motivo, entonces es uno de un vocabulario cerrado: regreso, a mano desde el rótulo, o dejarlo aquí desde la portada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El motivo de cierre sale de un vocabulario cerrado de tres",
+      "hueco_de_bateria": true,
+      "nota": "Y un motivo inventado no cierra la salida igual: se comprueba que la situación no ha cambiado tras el fallo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida con una aventura aceptada y sin terminar, cuando se cierra por cualquiera de las tres vías, entonces el cierre queda marcado como en corto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida con aventura sin terminar se cierra marcada como en corto por las tres vías",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida sin ninguna aventura aceptada, cuando se cierra, entonces el cierre no queda marcado como en corto y no se produce ningún desenlace.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida sin ninguna aventura aceptada no se cierra en corto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida con la aventura terminada, cuando se cierra, entonces el cierre no queda marcado como en corto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida con la aventura terminada no se cierra en corto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida que se cierra, cuando se mira el rótulo, entonces queda retirado en la misma transición y no en una posterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El rótulo queda retirado en la misma transición del cierre y no en una posterior",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el doble —presente() responde por lo que se le hizo de verdad— y no sobre lo que el estado cree, que es la distinción que sostiene toda la fila."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la comprobación del regreso, cuando avanza con una posición, entonces devuelve una vigilancia nueva y no muta la recibida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La vigilancia del regreso no se muta y sale del documento con sus dos campos",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Sale del criterio de ida y vuelta: una vigilancia mutada en sitio haría que serializar a mitad de un lazo guardase un estado que nadie pidió."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida cerrada sin leer, cuando se abre la app, entonces lo primero que el estado ofrece es el telón de esa salida y no la portada; y sigue ofreciéndose dos días después con la app cerrada en medio; y al marcarse como leída pasa a cerrada leída y deja de ofrecerse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El telón espera a que lo leas",
+      "escenario": "El telón espera a que lo leas",
+      "nota": "Los tres criterios van juntos porque el escenario es uno. Los «dos días» no son una espera: son una vuelta por el documento, que es lo que de verdad prueba que nada del paso del tiempo lo toca."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida cerrada sin leer, cuando se busca qué la marca como leída, entonces es una acción explícita de quien la lee y nunca el paso de nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Nada salvo marcarlo lo marca como leído",
+      "hueco_de_bateria": true,
+      "nota": "La ausencia se afirma recorriendo las cinco consultas de la capa: ninguna cambia la situación. Suponerlo sería el criterio que se cumple siempre."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado dos salidas cerradas sin leer, cuando se busca si es posible, entonces no lo es: no se puede abrir una salida nueva con un telón sin leer, y el intento falla nombrando el telón pendiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "No se puede abrir una salida nueva con un telón sin leer, y el fallo lo nombra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: es consecuencia directa de «El telón espera a que lo leas» y no está escrita en ningún sitio."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida que se cierra, cuando se inspecciona lo que la capa emite hacia la plataforma, entonces no emite ninguna notificación ni ninguna petición de primer plano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Al cerrarse, la capa no emite ninguna notificación ni ninguna petición de primer plano",
+      "hueco_de_bateria": true,
+      "nota": "Dos alturas: las tres ausencias que el cierre devuelve declaradas, y que el módulo no importa ningún canal por el que avisar. Una ausencia sin enumeración no se puede poner roja."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta con el rótulo puesto, cuando transcurre el plazo declarado de tiempo del sensor sin un solo metro propio, entonces el rótulo se retira y la salida queda abierta con el rótulo retirado; y al leer su situación tras la retirada sigue abierta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El rótulo se retira pero la salida no se cierra",
+      "escenario": "El rótulo se retira pero la salida no se cierra",
+      "nota": "Cubre también la última línea del escenario —que al abrir la app aparece la tarjeta con «seguir» y «dejarlo aquí»— por su mitad de estado: lo que se ofrece es la salida a medias y no el telón. Los noventa minutos no se esperan: se comparan dos marcas del sensor."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando la jugadora se para veinte minutos a comer y sigue andando, entonces el rótulo sigue puesto y el plazo vuelve a contar desde el último metro propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una parada de veinte minutos no retira el rótulo, y el plazo cuenta desde el último metro propio",
+      "hueco_de_bateria": true,
+      "nota": "La segunda mitad es la que importa: a los 100 min del arranque, pero solo 65 desde el último metro propio, el rótulo sigue puesto. Sin ella el caso pasaría con un plazo que contara desde la apertura."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando la jugadora se desplaza durante el plazo entero a velocidad de vehículo, entonces el rótulo se retira igual: el vehículo no es andar por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El plazo entero a velocidad de vehículo retira el rótulo igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando la jugadora se desplaza a velocidad ambigua, entonces el plazo se reinicia: en la duda, cuenta, y la regla se lee del mismo sitio que la del motor de pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La velocidad ambigua reinicia el plazo, y la regla se lee del motor de pasos",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma el reparto entero de las cuatro clasificaciones y que rotulo.js llama a cuentaParaElMotorDePasos en lugar de reimplementar la regla de la duda."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta con el rótulo retirado, cuando se abre la app, entonces el estado ofrece la salida a medias y no el telón; y cuando se pide «seguir», la salida vuelve a abierta con el rótulo puesto y el plazo cuenta de nuevo desde ese momento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Con el rótulo retirado, el estado ofrece la salida a medias y «seguir» vuelve a ponerlo",
+      "hueco_de_bateria": true,
+      "nota": "El «cuenta de nuevo» se afirma dos veces: la marca del último metro propio pasa a ser la de retomar, y sesenta minutos después el rótulo sigue puesto."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta con el rótulo retirado, cuando se pide «dejarlo aquí», entonces la salida se cierra con el motivo de la portada, y con la marca de cierre en corto si había aventura sin terminar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Con el rótulo retirado, «dejarlo aquí» cierra con el motivo de la portada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta con el rótulo puesto, cuando se abre la app, entonces el estado ofrece igualmente la salida a medias: la tarjeta depende de que la salida esté abierta y no de dónde esté el rótulo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La tarjeta de a medias solo existe con la salida abierta",
+      "escenario": "La tarjeta de a medias solo existe con la salida abierta",
+      "nota": "El escenario mira el caso contrario —quien abandonó y llegó a casa no tiene tarjeta— y el criterio de la spec mira el de dentro. El caso afirma los tres estados: con rótulo, sin rótulo y cerrada, incluido que el cierre en corto se disparó al llegar."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta con el rótulo retirado que lleva tres semanas así, cuando se abre la app, entonces sigue abierta y ninguna regla la ha cerrado por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida con el rótulo retirado hace tres semanas sigue abierta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería que la spec anota para quien orquesta: es la mitad de RF-BUCLE-014 que sigue marcado ⚠ sin escenario en el PRD. Las tres semanas son tres vueltas por el documento, que es lo que de verdad se quiere afirmar: nada del paso del tiempo la toca."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el catálogo de motivos de retirada del rótulo, cuando se enumera, entonces son tres y se distinguen: el plazo del juego, el cierre de la salida y la retirada por el sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Los motivos de retirada del rótulo son tres y se distinguen",
+      "hueco_de_bateria": true,
+      "nota": "Y el del cierre no se puede pedir aparte: ocurre dentro del cierre, y pedirlo como retirada suelta falla diciéndolo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado un rótulo que retira el sistema por su cuenta antes del plazo, cuando se lee el estado, entonces queda registrado con su propio motivo y no se confunde con el plazo del juego, y la salida sigue abierta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El rótulo que retira el sistema queda con su propio motivo y la salida sigue abierta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec: es el corazón del riesgo 4 del PRD y la batería no lo menciona. El doble que se retira solo es el que reproduce la Actividad en Vivo que caduca sin avisar a nadie."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el plazo declarado del juego, cuando se compara con el tope de vida más corto de las dos plataformas, entonces es menor, y esa comparación está escrita como comprobación y no como comentario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El plazo del juego cabe por debajo del tope de vida más corto de las dos plataformas",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se afirma además que revisaElPlazo() se ejecuta al importar, que es lo que hace que no dependa de que alguien se acuerde de llamarla, y que un plazo por encima del tope falla."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "«Tiempo del sensor» significa la marca de tiempo que trae cada posición de la fuente inyectada: en ningún criterio de esta spec el núcleo lee el reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El plazo se mide comparando dos marcas del sensor y no admite otra cosa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Es la premisa que hace afirmable un plazo de noventa minutos en node --test sin esperar noventa minutos, y por eso una fecha en lugar de una marca tiene que fallar."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta con destino, cuando se compone el rótulo, entonces trae una sola línea que nombra el destino y una sola acción, «Dar la salida por terminada».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Con destino, el rótulo trae una línea que lo nombra y una sola acción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la spec anota que nada afirma esto fuera de un escenario @app, que no se ejecuta en esta máquina."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el texto compuesto del rótulo en cualquier estado, cuando se busca un dígito, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Ninguna línea del rótulo lleva un dígito",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería declarado en la spec. Las dos mitades: las líneas compuestas no llevan dígito, y un destino con un número falla donde nace en vez de llegar a la pantalla de bloqueo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el texto compuesto del rótulo, cuando se buscan las palabras de esfuerzo —kilómetros, metros, minutos, ritmo, pasos, progreso, restante, faltan—, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Ninguna línea del rótulo dice una palabra de esfuerzo",
+      "hueco_de_bateria": true,
+      "nota": "Se recorre la lista entera del módulo y se comprueba además que la lista cierra las ocho que la spec nombra: una lista que se quedara corta haría el cribado decorativo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta sin ninguna aventura, cuando se compone el rótulo, entonces trae igualmente una línea en voz de mundo que nombra dónde se anda, y la misma acción única.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Sin aventura, el rótulo dice por dónde se anda en voz de mundo y con la misma acción",
+      "hueco_de_bateria": true,
+      "nota": "Incluye el estado vacío que la spec pide: sin destino y sin mundo no hay línea que componer, y falla diciéndolo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una aventura cuyo beat siguiente cambia de sitio, cuando se recompone el rótulo, entonces la línea nombra el sitio nuevo y nada más cambia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Cambiar el beat cambia el sitio de la línea y nada más",
+      "hueco_de_bateria": true,
+      "nota": "El «nada más cambia» se afirma campo a campo sobre la vista de la salida —situación, rótulo, plazo, cierre en corto— y sobre el doble: recomponer actualiza, no vuelve a poner el rótulo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el rótulo, cuando se busca en su composición algún dato del estado del mundo, de la reputación o del oro, entonces no aparece ninguno. Y un rótulo compuesto tiene exactamente una acción tocable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El rótulo no compone ningún dato del mundo, de la reputación ni del oro",
+      "hueco_de_bateria": true,
+      "nota": "Tres alturas: la lista declarada de lo que no lleva, que el módulo no importa ninguna de esas capas, y que lo que compone son exactamente cinco claves y ninguna más."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el módulo que compone el rótulo, cuando se inspecciona su superficie, entonces devuelve datos —la línea y la acción— y no dibuja: quién lo pinta es la plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El rótulo devuelve datos y no dibuja: quien lo pinta es la plataforma",
+      "hueco_de_bateria": true,
+      "nota": "Y ninguna de las acciones que el rótulo no tiene —pausar, ver el mapa, descartar, abrir la app, saltar el beat— aparece entre las que compone."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado un mundo en gallego, cuando se compone el rótulo, entonces el nombre del destino es el que produjo el paquete de idioma de ese mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "En un mundo gallego el rótulo dice el nombre que produjo su paquete de idioma",
+      "hueco_de_bateria": true,
+      "nota": "El nombre se produce de verdad con el paquete gl y un rng sembrado, no se escribe a mano: es lo que prueba que el módulo no traduce ni normaliza nada."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la capacidad del rótulo no disponible, cuando se intenta abrir una salida, entonces no se abre, y el resultado nombra la capacidad que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Sin la capacidad del rótulo la salida no se abre, y el resultado la nombra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: es el caso más duro del bloque que SPEC-020 propuso y que sigue sin estar escrito, porque el rótulo es la única capacidad cuya ausencia no admite degradar en silencio. Y no lanza: no poder abrir es una respuesta que la portada tiene que enseñar."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la capacidad del rótulo no montada en esta compilación, cuando se intenta abrir una salida, entonces ocurre lo mismo y el motivo distingue «no montada» de «no disponible».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El motivo distingue «no montada» de «no disponible»",
+      "hueco_de_bateria": true,
+      "nota": "La distinción se afirma como desigualdad entre los dos motivos, no solo como que cada uno tenga texto: dos problemas distintos que se arreglan en sitios distintos."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta, cuando el rótulo desaparece sin que ninguna transición del juego lo haya pedido, entonces la capa lo detecta, lo registra con el motivo de retirada por el sistema y no deja la salida creyéndose sostenida. Y con el rótulo puesto, la situación del estado y la presencia real coinciden, y esa coincidencia es comprobable en cualquier momento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un rótulo que desaparece sin que nadie lo pida se detecta en cualquier momento",
+      "hueco_de_bateria": true,
+      "nota": "Los dos criterios van juntos porque son la misma llamada mirada antes y después: reconciliar con el rótulo puesto dice que coincidían, y tras la caducidad dice que no y corrige. Reconciliar dos veces no vuelve a corregir."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el rótulo del sistema como capacidad, cuando se monta, entonces expone poner, actualizar la línea, retirar con motivo y una consulta de presencia real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El contrato del rótulo exige las cuatro operaciones y la consulta de presencia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se quita una operación cada vez: un rótulo al que le falte cualquiera de las cuatro se rechaza nombrándola."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la fuente de posiciones no cableada, cuando se abre una salida, entonces falla nombrando la fuente que falta, en lugar de abrir una salida que nunca recibirá una posición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Sin la fuente de posiciones cableada, abrir falla nombrando la fuente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una posición sin marca de tiempo o con una marca anterior a la última recibida, cuando llega a la capa, entonces falla nombrando la posición, en lugar de tratarla como reciente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una posición sin marca o con una marca anterior a la última falla nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Y en la transición, no solo en la validación suelta: una posición rechazada no cambia la situación de la salida."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado un punto de partida que no es una coordenada, cuando se abre la salida, entonces falla nombrando lo recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un punto de partida que no es una coordenada falla nombrando lo recibido",
+      "hueco_de_bateria": true,
+      "nota": "Cinco formas de no ser una coordenada, incluidas las que están fuera del mundo. Y la marca con la que se abre también tiene que ser una marca del sensor."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el registro de capacidades, cuando se enumera, entonces el rótulo aparece como una capacidad más, con su nombre, su capa y su sonda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Los cuatro módulos de plataforma están y declaran nombre, capa y sonda",
+      "hueco_de_bateria": true,
+      "nota": "El caso es de SPEC-020 y se amplía aquí sin cambiarle el nombre: enumera cinco capacidades y comprueba que las dos partidas por plataforma tienen su pareja. El rótulo NO entra en los casos de degradación de ese fichero, y el motivo está escrito en su cabecera: sin él la salida no se abre, que es lo contrario de degradar."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el registro de capacidades, cuando se enumera el rótulo, entonces su sonda no pide ningún permiso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Ninguna sonda pide un permiso al sistema ni abre un diálogo",
+      "hueco_de_bateria": true,
+      "nota": "Ampliado en SPEC-030 con las dos implementaciones del rótulo. Era la que más tentaba a pedir algo: podría comprobar si puede arrancar el servicio pidiendo el permiso de notificaciones."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el rótulo del sistema, cuando se lee su capa, entonces es «ninguna»: no es una capa de aviso, es permanente y visible a propósito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Las capas de cada capacidad son las de accesibilidad.md §3",
+      "hueco_de_bateria": true,
+      "nota": "Ampliado en SPEC-030 con las dos implementaciones del rótulo. Declararlo capa de pantalla lo metería a competir en el par de capas de accesibilidad.md §3, donde no pinta nada."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado app/plataforma/, cuando se enumeran las implementaciones del rótulo, entonces hay una por plataforma y las dos exportan exactamente los mismos nombres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Hay una implementación del rótulo por plataforma y las dos exportan los mismos nombres",
+      "hueco_de_bateria": true,
+      "nota": "La igualdad se compara sobre la lista de exports leída del código, no sobre una lista escrita a mano que se quedaría vieja."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado las dos implementaciones, cuando se comparan sus sondas, entonces las dos responden al mismo contrato de montado, disponible y motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Las dos sondas responden al mismo contrato de montado, disponible y motivo",
+      "hueco_de_bateria": true,
+      "nota": "Y el mecanismo sí difiere entre las dos: si fuera el mismo, la partición por plataforma sería decorativa."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado cualquier fichero de app/ fuera de app/plataforma/, cuando se busca en su código, entonces no aparece ninguna bifurcación por sistema operativo relacionada con el rótulo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Ningún fichero de la app fuera de app/plataforma bifurca por sistema operativo por el rótulo",
+      "hueco_de_bateria": true,
+      "nota": "Se recorre app/ entero saltando app/plataforma/, que es donde la partición vive a propósito, y solo se miran los ficheros que nombran el rótulo."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la implementación de Android, cuando se lee el manifiesto, entonces declara el servicio en primer plano con el tipo de ubicación y su canal de notificación, y la notificación no se puede descartar deslizando. Y dado la implementación de iOS, declara la Actividad en Vivo y el modo de ubicación en segundo plano, y no declara ningún permiso de ubicación permanente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El manifiesto declara el servicio en primer plano de Android y la Actividad en Vivo de iOS",
+      "hueco_de_bateria": true,
+      "nota": "Los dos criterios van en un caso porque se leen del mismo app.json, como dato y no como texto. Lo que necesita dispositivo —que la notificación no se pueda tirar deslizando de verdad, y que la Actividad en Vivo se pinte— queda fuera de esta máquina."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado las dos plataformas, cuando se comparan los literales del rótulo, entonces son los mismos: lo que difiere es el ciclo de vida, nunca el texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Los literales del rótulo son los mismos en las dos plataformas",
+      "hueco_de_bateria": true,
+      "nota": "La igualdad se garantiza por construcción y se afirma así: ninguna de las dos implementaciones escribe un literal por su cuenta, los compone el paquete y llegan hechos."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida abierta en cualquiera de las dos plataformas, cuando se bloquea el móvil y se anda veinte minutos, entonces la salida sigue abierta y el rótulo muestra hacia dónde va, sin ninguna cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La salida sigue viva con el móvil bloqueado",
+      "escenario": "La salida sigue viva con el móvil bloqueado",
+      "nota": "La mitad afirmable sin dispositivo: veinte minutos de posiciones sin que nadie toque la app dejan la salida abierta, el rótulo puesto y la línea sin ninguna cifra. La otra mitad —que el sistema no mate el proceso ni la Actividad en Vivo— es de dispositivo y NO SE EJECUTA aquí: en la máquina de este pipeline no hay simulador (pipeline/decisiones-orquestador.md §4), y además la app todavía no monta ninguna pantalla que exponga la salida."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la app en cualquiera de las dos plataformas, cuando se revisan los permisos que solicita, entonces solo pide la ubicación «mientras se usa».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente",
+      "nota": "REEXPRESADO EN SPEC-030. La prohibición era demasiado ancha: vetaba la cadena UIBackgroundModes entera, y eso metía en el mismo saco el permiso permanente (ACCESS_BACKGROUND_LOCATION / «Siempre») y el modo de ubicación en primer plano que sostiene «mientras se usa» y que SPEC-030 exige. Ahora el modo de fondo se comprueba por su VALOR —exactamente [\"location\"] y nada más—, se afirma que la única descripción de uso declarada es la de «mientras se usa», y la lista de permisos de Android se lee como dato. Sigue rojo con un ACCESS_BACKGROUND_LOCATION, con una clave NSLocationAlways*, con un allowsBackgroundLocationUpdates o con un modo de fondo de más."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el rótulo del sistema como quinta capacidad de plataforma, cuando se monta la app, entonces se inyecta en el registro junto a las otras cuatro y su implementación se elige por plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El módulo de respaldo se importa sin extensión, que es como Metro elige la plataforma",
+      "hueco_de_bateria": true,
+      "nota": "El caso es de SPEC-020 y se amplía aquí sin cambiarle el nombre: las importaciones sin extensión pasan de una a dos, y la lista inyectada pasa a cinco. La regla no es «hay una excepción» sino «solo las capacidades con ciclo de vida propio por sistema la tienen»."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado el punto de partida guardado en el estado, cuando se comprueba contra RF-PRIV-002, entonces es la única posición declarada: una ruta exacta y una sola, con su motivo escrito, porque lo que se prohíbe es el histórico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La única posición declarada es el punto de partida, y es una ruta exacta",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad y bloqueante. Se afirma como igualdad contra la lista y como longitud uno: una segunda ruta declarada tiene que verse en su propio diff. Y el motivo está escrito donde vive la excepción, no en otro fichero."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado la excepción declarada, cuando se prueban otras posiciones, entonces todo lo demás sigue fallando: la exención es de la ruta exacta y no un permiso para el área.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La ruta declarada pasa y todo lo demás sigue fallando",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad y bloqueante. Siete documentos prohibidos, incluidos los que cuelgan de la misma área. Y la otra mitad del argumento: como la exención devuelve el subárbol entero, lo que cuelgue de «partida» lo cierra el esquema del área, que se comprueba aquí al lado —un histórico colgado del ancla no llega a escribirse—."
+    },
+    {
+      "spec": "SPEC-030",
+      "criterio": "Dado una salida en curso, cuando se serializa su área, entonces lo único que escribe es el punto de partida y ninguna posición más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Lo que la salida escribe en su documento es el punto de partida y ninguna posición más",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad y bloqueante. Se recorre el documento entero buscando coordenadas en lugar de comprobar las claves que uno se espera: una posición nueva en un sitio imprevisto es exactamente lo que se persigue."
     }
   ]
 }

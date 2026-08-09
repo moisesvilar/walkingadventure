@@ -59,10 +59,11 @@ import { componeFicha, componeLoQueHayHoy } from '../../packages/nucleo/partida/
 import { estadoDeSalidaAbierta } from '../../packages/nucleo/partida/salida-abierta.js';
 import { CATALOGO } from '../../packages/nucleo/quests/catalogo.js';
 import { creaConseguidorDeRecursos } from '../../app/recursos/conseguidor.js';
-import { creaPreparacion } from '../../app/salida/preparacion.js';
+import { DEL_NUCLEO, creaPreparacion } from '../../app/salida/preparacion.js';
 import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
 import {
   MUNDO,
+  NUCLEO_DE_LA_PREPARACION,
   PERSONAJE,
   TRAMO,
   calendarioEn,
@@ -156,9 +157,9 @@ describe('La preparación, y la red que no está', () => {
 
     // Y la de verdad: la tubería entera, una vez con todo y otra sin nada.
     const { aventura, plantilla, mundo } = await unaAventura();
-    const conRed = await creaPreparacion({ conseguidor: conseguidorGeneroso(), llamada: narradorQueResponde(), locale: 'gl' })
+    const conRed = await creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorGeneroso(), llamada: narradorQueResponde(), locale: 'gl' })
       .prepara({ aventura, plantilla, mundo });
-    const sinRed = await creaPreparacion({ conseguidor: conseguidorSinCobertura(), sinNarrador: true, locale: 'gl' })
+    const sinRed = await creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorSinCobertura(), sinNarrador: true, locale: 'gl' })
       .prepara({ aventura, plantilla, mundo });
 
     assert.equal(JSON.stringify(sinRed.pantalla), JSON.stringify(conRed.pantalla), 'la preparación no dice lo mismo con red y sin ella');
@@ -176,7 +177,7 @@ describe('La preparación, y la red que no está', () => {
 
   test('Sin cobertura, el dato lo dice todo: cada texto con su origen y cada ausencia con su motivo', async () => {
     const { aventura, plantilla, mundo } = await unaAventura();
-    const sinRed = await creaPreparacion({ conseguidor: conseguidorSinCobertura(), sinNarrador: true, locale: 'gl' })
+    const sinRed = await creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorSinCobertura(), sinNarrador: true, locale: 'gl' })
       .prepara({ aventura, plantilla, mundo });
 
     // El silencio es hacia quien juega, nunca hacia el dato.
@@ -193,7 +194,7 @@ describe('La preparación, y la red que no está', () => {
     }
 
     // Con cobertura, el mismo resumen dice otra cosa: es la asimetría entera.
-    const conRed = await creaPreparacion({ conseguidor: conseguidorGeneroso(), llamada: narradorQueResponde(), locale: 'gl' })
+    const conRed = await creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorGeneroso(), llamada: narradorQueResponde(), locale: 'gl' })
       .prepara({ aventura, plantilla, mundo });
     assert.deepEqual(conRed.resumen.ausencias, [], 'con cobertura queda alguna ausencia anotada');
     assert.notEqual(JSON.stringify(conRed.resumen), JSON.stringify(sinRed.resumen), 'el resumen es el mismo con red y sin ella: el dato tampoco lo dice');
@@ -203,7 +204,7 @@ describe('La preparación, y la red que no está', () => {
     const { aventura, plantilla, mundo } = await unaAventura();
     // El motivo `tope` es el que declara «cabía preguntarlo pero no cabía»: lo que no entra
     // queda ausente con su motivo, y la pantalla no lo menciona.
-    const alPasarse = await creaPreparacion({ conseguidor: conseguidorSinCobertura(MOTIVOS_DE_AUSENCIA.TOPE), sinNarrador: true, locale: 'gl' })
+    const alPasarse = await creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorSinCobertura(MOTIVOS_DE_AUSENCIA.TOPE), sinNarrador: true, locale: 'gl' })
       .prepara({ aventura, plantilla, mundo });
 
     assert.equal(alPasarse.pantalla.dejaSalir, true, 'pasarse del presupuesto deja la salida sin poder salir');
@@ -212,7 +213,7 @@ describe('La preparación, y la red que no está', () => {
     for (const ausencia of alPasarse.ausencias) assert.equal(ausencia.motivo, MOTIVOS_DE_AUSENCIA.TOPE);
     // El presupuesto está declarado y no es un número suelto en medio del código.
     assert.ok(Number.isFinite(PRESUPUESTO_PREPARACION_MS) && PRESUPUESTO_PREPARACION_MS > 0);
-    assert.equal(creaPreparacion({ conseguidor: conseguidorSinCobertura(), sinNarrador: true }).presupuestoMs, PRESUPUESTO_PREPARACION_MS);
+    assert.equal(creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorSinCobertura(), sinNarrador: true }).presupuestoMs, PRESUPUESTO_PREPARACION_MS);
   });
 
   test('Una preparación con el cliente de imágenes sin cablear falla nombrando la pieza', () => {
@@ -226,16 +227,33 @@ describe('La preparación, y la red que no está', () => {
       },
       'el conseguidor se construye sin cliente de imágenes',
     );
-    assert.throws(() => creaPreparacion({ conseguidor: null }), (e) => {
+    assert.throws(() => creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: null }), (e) => {
       assert.match(e.message, /conseguidor de recursos/);
       return true;
     });
+    // El generador es una pieza inyectada desde SPEC-020, así que también se puede
+    // olvidar: sin él, y con él a medias, hay que protestar al construir y nombrar lo
+    // que falta. Un núcleo sin `redactaAventura` que construya reventaría a mitad de
+    // una salida, que es tarde.
+    assert.throws(() => creaPreparacion({ conseguidor: conseguidorSinCobertura(), sinNarrador: true }), /n[úu]cleo/);
+    assert.ok(DEL_NUCLEO.length > 0);
+    for (const nombre of DEL_NUCLEO) {
+      assert.throws(
+        () => creaPreparacion({
+          nucleo: { ...NUCLEO_DE_LA_PREPARACION, [nombre]: undefined },
+          conseguidor: conseguidorSinCobertura(),
+          sinNarrador: true,
+        }),
+        new RegExp(nombre),
+        `la preparación se ha construido con un núcleo sin "${nombre}"`,
+      );
+    }
     // Y el narrador se puede no tener, pero **se declara**: sin declararlo, olvidarlo y no
     // tenerlo serían la misma cosa y todos los textos saldrían de plantilla sin que nadie
     // lo hubiera decidido.
-    assert.throws(() => creaPreparacion({ conseguidor: conseguidorSinCobertura() }), /sinNarrador/);
-    assert.ok(creaPreparacion({ conseguidor: conseguidorSinCobertura(), sinNarrador: true }));
-    assert.throws(() => creaPreparacion({ conseguidor: { pide: () => {} }, sinNarrador: true }), /ilustracionesDeSalida/);
+    assert.throws(() => creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorSinCobertura() }), /sinNarrador/);
+    assert.ok(creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: conseguidorSinCobertura(), sinNarrador: true }));
+    assert.throws(() => creaPreparacion({ nucleo: NUCLEO_DE_LA_PREPARACION, conseguidor: { pide: () => {} }, sinNarrador: true }), /ilustracionesDeSalida/);
   });
 
   test('Un origen de texto o un motivo de ausencia sin declarar falla enumerando el vocabulario', () => {

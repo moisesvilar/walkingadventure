@@ -221,3 +221,15 @@ Las siete filas de B4 en verde, **1645 casos**. Tres cosas que quedan dichas y n
 **c · Un AC de SPEC-026 está mal escrito y no puede cumplirse.** Dice que «dos jugadoras con tramos distintos y la misma semilla generan el mismo mundo», y es falso por construcción: el lado de celda son dos tramos (`alcance-del-mundo.md` §2), así que 400 m da celda de 800 y 1200 m da 2400, con otro mundo dentro — medido, 7 núcleos frente a 10. Lo que sí se sostiene, y es lo que se prueba, es que **un mapa ya levantado no se redimensiona al recalibrar**. El AC hay que corregirlo en la spec.
 
 **Y la sexta y séptima aparición de §6h**, las dos cazadas por pruebas: `scripts/overpass-medir.mjs` sin guardián de ejecución directa —lo que SPEC-001-iter-1 exige a todo script ejecutable—, y la medida en caliente sin cablear: el cronómetro distinguía caché fría de caliente y nadie se lo decía.
+
+## 6u · El criterio duro roto sin que nadie se enterara
+
+`node --test test/nucleo/` **había dejado de arrancar entero sin `node_modules`**: 1872 pruebas en vez de 1939, **5 ficheros sin cargar y 67 casos que ni se descubrían**. La causa eran dos módulos de `app/` que citaban el paquete por su nombre y que las pruebas alcanzaban de forma transitiva.
+
+Llevaba roto **desde antes de la fila 30** y nadie se enteró: el guardián de SPEC-001 solo mira los imports **directos** de `test/nucleo/` y `test/dobles/`, no el cierre transitivo. Otra vez §6h.
+
+Y había un choque real de criterios: SPEC-020 exige arrancar sin instalar nada, y `paquete.test.mjs` prohíbe que `app/` consuma el generador por ruta relativa.
+
+**Decisión: manda el criterio duro**, y `CLAUDE.md` lo dice con todas las letras — *el día que la red de seguridad del determinismo dependa de un `node_modules`, deja de ser una red*. Los dos criterios dejan de chocar aplicando el patrón que este proyecto usa en todas partes: **inyección**. Los dos módulos de `app/` reciben el núcleo como pieza, `app/nucleo/piezas.js` es el único sitio que lo coge por su nombre, y las pruebas arman el mismo bundle por ruta relativa.
+
+Restaurado: **1939 pruebas y 0 fallos con y sin `node_modules`**, idénticos.
