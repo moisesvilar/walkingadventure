@@ -193,8 +193,34 @@ describe('La medición del ritmo', () => {
     // su cuenta qué hacer con lo ambiguo. Dispersarla es como se rompe.
     // Se busca la clasificación como valor —entre comillas—, no la palabra: los
     // paquetes de nombres «desambiguan» topónimos y eso no decide nada de esto.
+    //
+    // **El detector de SPEC-031 es la única excepción, y está nombrada.** Nombrar el
+    // valor era un buen proxy mientras solo `ritmo.js` sabía de velocidades, pero
+    // desde que alguien deduce la clasificación en lugar de escribirla la prueba,
+    // ese proxy cazaba justo a quien tiene que producirla. El criterio de verdad es
+    // el que la propia spec declara: **el detector clasifica y no decide por
+    // efecto**. Así que se le exige eso, que es más estrecho que no nombrar el
+    // valor: su código no nombra a ninguno de los tres efectos ni importa ninguna de
+    // las tres respuestas de este módulo. El día que se ponga a decidir qué se hace
+    // con lo ambiguo, esto vuelve a rojo.
+    const DETECTOR = 'packages/nucleo/partida/transporte.js';
     const otros = modulosDelPaquete().filter((m) => m !== 'packages/nucleo/partida/ritmo.js' && /['"]ambigu[oa]['"]/i.test(fuente(m)));
-    assert.deepEqual(otros, [], `otro módulo decide sobre la velocidad ambigua: ${otros.join(', ')}`);
+    assert.deepEqual(otros, [DETECTOR], `otro módulo decide sobre la velocidad ambigua: ${otros.filter((m) => m !== DETECTOR).join(', ') || 'ninguno, y el detector ha dejado de producirla'}`);
+
+    // Los comentarios del detector explican con estas mismas palabras lo que no
+    // hace, así que se mira su código y no su texto: castigar una buena explicación
+    // sería el peor de los guardianes.
+    const codigo = fuente(DETECTOR)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('\n')
+      .filter((l) => !/^\s*\/\//.test(l))
+      .join('\n');
+    for (const efecto of [/paso/i, /tramo/i, /llegada/i, /geofence/i, /duda/i, /medida/i]) {
+      assert.equal(efecto.test(codigo), false, `el detector nombra un efecto (${efecto}): clasificar no es decidir qué se hace con lo clasificado`);
+    }
+    for (const respuesta of ['REGLA_DE_LA_DUDA', 'cuentaParaElMotorDePasos', 'entraEnLaMedidaDelTramo', 'validaLlegadaPorGeofence']) {
+      assert.equal(codigo.includes(respuesta), false, `el detector importa "${respuesta}": la asimetría se consulta desde los tres consumidores, no desde quien clasifica`);
+    }
   });
 
   test('Una salida entera en autobús no aporta ninguna medida y no se registra como salida medida', () => {
