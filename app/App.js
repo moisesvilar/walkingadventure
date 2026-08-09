@@ -25,6 +25,10 @@ import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native
 
 import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
 
+import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
+import { creaCopia } from './datos/copia.js';
+import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
+import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
@@ -47,6 +51,18 @@ const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
 
 export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
+  // El almacén duradero, cableado **aquí y una sola vez**: es lo que hace que cerrar la
+  // app deje de perder la partida. Si el sistema de ficheros no estuviera, esto lanza y
+  // la app no arranca, que es lo que la spec pide en lugar de caer al de memoria: una
+  // app que juega perfectamente y pierde la partida al cerrar es la degradación
+  // silenciosa más cara posible.
+  const [almacen] = useState(() => creaAlmacenDuradero({
+    ficheros: creaFicherosDelDispositivo(),
+    directorio: directorioDeLaPartida(directorioDeDocumentos()),
+  }));
+  // Guardar y abrir una copia, con las dos piezas del sistema. La hoja de compartir y el
+  // selector no se envuelven en ninguna pantalla nuestra: se usan tal cual.
+  const [copia] = useState(() => creaCopia({ almacen, comparte: comparteConElSistema, elige: eligeConElSistema }));
   const [enRevision, setEnRevision] = useState(false);
   const [enMapa, setEnMapa] = useState(false);
   // La app abre en el arranque, que es lo que ve quien la instala. Se sale de él por
@@ -100,6 +116,8 @@ export function App() {
     return (
       <SafeAreaView style={estilos.raiz}>
         <ArranqueMontado
+          almacen={almacen}
+          copia={copia}
           alSalirAAndar={(cerrado, lista, levantado) => {
             if (cerrado && levantado) {
               setPartida({
@@ -183,7 +201,7 @@ export function App() {
         </Pressable>
       ) : null}
 
-      {enMapa ? <MapaMontado /> : enMarcha ? (
+      {enMapa ? <MapaMontado almacen={almacen} /> : enMarcha ? (
         <EnMarchaMontado mundo={mundoDelPaso.documento} falloDeCableado={mundoDelPaso.fallo} />
       ) : enRevision ? (
         <RevisionMontada />

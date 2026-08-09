@@ -9,14 +9,14 @@
 // `PantallaArranque` directamente: esa es la frontera, y es lo que permite recorrer el
 // arranque en `node --test` sin ningún dispositivo.
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { CLAVE_DEL_ARRANQUE, creaArranque } from '@walkingadventure/nucleo/partida/onboarding.js';
 import { localeFor } from '@walkingadventure/nucleo/names/index.js';
 import { colocadorDeRotulos } from '@walkingadventure/nucleo/render/colocador.js';
 
-import { creaAlmacenEnMemoria } from '../datos/almacen.js';
+import { exigeAlmacenDuradero } from '../datos/almacen-duradero.js';
 import { creaClienteDeProxy } from '../datos/cliente-proxy.js';
 import { entropiaDelDispositivo } from '../datos/entropia.js';
 import { puertaDeRed } from '../datos/red.js';
@@ -28,6 +28,7 @@ import { componePrimeraLista } from '../mapa/primera-lista.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { proveedorSinMontar } from '../plataforma/ubicacion.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
+import { AbrirCopia } from './copia.jsx';
 import { creaMedidorSkia } from '../render/medidor-skia.js';
 import { PantallaArranque } from './arranque.jsx';
 import { DIRECCION_DEL_PROXY, PUNTO_DE_ARRANQUE } from './mapa-montado.jsx';
@@ -61,12 +62,16 @@ export function ArranqueMontado({
   puntoPorDefecto = PUNTO_POR_DEFECTO,
   base = DIRECCION_DEL_PROXY,
   alSalirAAndar = null,
+  almacen = null,
+  copia = null,
 }) {
   const { width, height } = useWindowDimensions();
-  const [almacen] = useState(() => creaAlmacenEnMemoria());
 
   const montaje = useMemo(() => {
     try {
+      // El arranque a medias y el mapa que levanta se escriben aquí: sin almacén
+      // duradero, cerrar la app durante la generación perdería las dos cosas.
+      exigeAlmacenDuradero(almacen, 'el arranque');
       const enlace = creaEnlaceReal();
       const cronometro = creaCronometro({ ahora: () => Date.now() });
       const cliente = creaClienteDeProxy({ pide: puertaDeRed(), base });
@@ -121,27 +126,34 @@ export function ArranqueMontado({
   }
 
   return (
-    <PantallaArranque
-      arranque={montaje.arranque}
-      levantamiento={montaje.levantamiento}
-      enlace={montaje.enlace}
-      cronometro={montaje.cronometro}
-      tamano={tamano}
-      guarda={(texto) => almacen.escribe(CLAVE_DEL_ARRANQUE, texto)}
-      componeLista={(levantado, personaje) => componePrimeraLista({
-        semilla: montaje.arranque.semilla(),
-        mapaId: levantado.mapaId,
-        mundo: levantado.documento,
-        tramoM: personaje.tramo.declaradoM,
-        oficio: personaje.oficio,
-        sinContenidoJugable: !levantado.jugable,
-      })}
-      alSalirAAndar={alSalirAAndar}
-    />
+    <View style={estilos.pila}>
+      <PantallaArranque
+        arranque={montaje.arranque}
+        levantamiento={montaje.levantamiento}
+        enlace={montaje.enlace}
+        cronometro={montaje.cronometro}
+        tamano={tamano}
+        guarda={(texto) => almacen.escribe(CLAVE_DEL_ARRANQUE, texto)}
+        componeLista={(levantado, personaje) => componePrimeraLista({
+          semilla: montaje.arranque.semilla(),
+          mapaId: levantado.mapaId,
+          mundo: levantado.documento,
+          tramoM: personaje.tramo.declaradoM,
+          oficio: personaje.oficio,
+          sinContenidoJugable: !levantado.jugable,
+        })}
+        alSalirAAndar={alSalirAAndar}
+      />
+      {/* A1P1 aporta una acción secundaria y nada más: por debajo de la principal y con
+          menos peso. Sin las dos piezas del sistema cableadas no se ofrece, porque una
+          acción que no puede llegar a ninguna parte es peor que no tenerla. */}
+      {copia ? <AbrirCopia copia={copia} /> : null}
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
+  pila: { flex: 1 },
   aviso: { flex: 1, padding: 24 },
   texto: { fontSize: 14, lineHeight: 20 },
 });

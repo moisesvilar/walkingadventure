@@ -43,6 +43,16 @@ export const CLASES = Object.freeze({
   // razón de ser: sin él, cerrar la app durante la generación obligaría a repetir el
   // onboarding entero— y desaparece en cuanto la partida se crea.
   ARRANQUE: 'arranque-en-curso',
+  // El manifiesto de un fichero de partida (SPEC-039). Es de esta familia y no de
+  // otra por lo mismo que los demás: comparte la constante de versión y la escritura
+  // canónica, y **es lo que decide si un fichero es una partida**. Que el contenedor
+  // lo escriba otro no lo saca de aquí: lo que se valida son datos.
+  MANIFIESTO: 'manifiesto-de-partida',
+  // De dónde viene la partida que hay abierta: propia, importada o migrada. Existe
+  // porque «declara que vino de una importación» y «declara desde qué versión se
+  // migró» no caben en el estado sin abrir su esquema cerrado, y abrirlo por esto
+  // metería en el estado un dato que no es del juego.
+  PROCEDENCIA: 'procedencia-de-partida',
 });
 
 // --- El lenguaje del esquema ------------------------------------------------

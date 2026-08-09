@@ -25,6 +25,19 @@ export function creaAlmacenDeBinarios() {
       return referencia;
     },
 
+    /**
+     * Guarda por **referencia entera** y no por clave: es lo que necesita importar una
+     * partida, donde la referencia ya viene escrita dentro del documento del mundo y
+     * volver a prefijarla la duplicaría (`local/recursos/local/recursos/...`).
+     */
+    restaura(referencia, contenido) {
+      if (typeof referencia !== 'string' || !referencia.startsWith(PREFIJO)) {
+        throw new Error(`una referencia de recurso empieza por "${PREFIJO}" y ha llegado ${JSON.stringify(referencia)}`);
+      }
+      datos.set(referencia, contenido);
+      return referencia;
+    },
+
     /** Si el binario de una referencia está de verdad. Síncrono: lo consume `exigeResidentes`. */
     tiene(referencia) {
       return datos.has(referencia);

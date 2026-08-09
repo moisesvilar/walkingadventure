@@ -43,6 +43,20 @@ export const CLAVES_DE_PARTIDA = Object.freeze({
   registro: 'partida/registro.json',
 });
 
+/**
+ * Las dos claves de trabajo de una compactación (SPEC-039).
+ *
+ * Existen porque compactar cambia **dos claves a la vez** y el almacén solo promete
+ * atomicidad de una: sin ellas, un apagón entre las dos escrituras dejaría o un estado
+ * sellado con el registro entero delante —que se reproduciría dos veces— o un estado
+ * por delante de un registro vacío —que ni siquiera abre—. Con ellas, cada punto en el
+ * que se puede morir deja una partida que se recupera sola y sin ambigüedad.
+ */
+export const CLAVES_DE_COMPACTACION = Object.freeze({
+  sello: 'partida/sello.json',
+  registroAnterior: 'partida/registro.anterior.json',
+});
+
 // --- Reproducir un hecho ------------------------------------------------------
 //
 // El reparto de trabajo de un hecho es este: lo que es **dato** —qué se oyó, dónde,
@@ -375,8 +389,32 @@ export async function guardaPartida({ estado, registro, almacen }) {
  *   · **los dos ilegibles** → falla declarando las dos cosas, y no se ofrece ninguna
  *     partida a medias.
  */
+export async function recuperaCompactacion({ almacen } = {}) {
+  exigeAlmacen(almacen, 'recuperaCompactacion');
+  const anterior = await almacen.lee(CLAVES_DE_COMPACTACION.registroAnterior);
+  if (anterior == null) return { habia: false, resultado: 'ninguna' };
+
+  // El sello se escribe **antes** que nada y se conserva hasta el final: comparar el
+  // estado que hay con él es lo único que distingue «la compactación se completó y
+  // solo faltaba limpiar» de «la compactación no llegó a cambiar el estado». Sin esa
+  // distinción, recuperar restauraría el registro entero sobre un estado ya sellado y
+  // reproduciría todos los hechos dos veces.
+  const sello = await almacen.lee(CLAVES_DE_COMPACTACION.sello);
+  const estadoActual = await almacen.lee(CLAVES_DE_PARTIDA.estado);
+  const completada = sello != null && estadoActual != null && estadoActual === sello;
+
+  if (!completada) await almacen.escribe(CLAVES_DE_PARTIDA.registro, anterior);
+  await almacen.borra(CLAVES_DE_COMPACTACION.registroAnterior);
+  await almacen.borra(CLAVES_DE_COMPACTACION.sello);
+  return { habia: true, resultado: completada ? 'terminada' : 'deshecha' };
+}
+
 export async function cargaPartida({ almacen, semilla }) {
   exigeAlmacen(almacen, 'cargaPartida');
+  // Antes de leer nada: una compactación a medias se deshace o se remata, y nunca se
+  // lee por encima de ella. Está aquí y no en quien orquesta porque una pieza que hay
+  // que acordarse de llamar es una pieza que un día no se llama (§6h).
+  const compactacion = await recuperaCompactacion({ almacen });
 
   let registro = null;
   let falloDelRegistro = null;
@@ -427,5 +465,8 @@ export async function cargaPartida({ almacen, semilla }) {
     colaAplicada: cola.length,
     areas,
     falloDelRegistro,
+    // Qué se encontró de una compactación anterior, declarado en vez de silencioso: es
+    // la única señal de que hubo un apagón en medio de una.
+    compactacion,
   });
 }

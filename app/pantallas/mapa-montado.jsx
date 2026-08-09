@@ -10,13 +10,13 @@
 // directamente: esa es la frontera, y es lo que hace que el minuto se pueda poner
 // rojo sin un dispositivo.
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { RESPUESTAS_DE_TRAMO, tramoDeRespuesta } from '@walkingadventure/nucleo/partida/tramo.js';
 import { colocadorDeRotulos } from '@walkingadventure/nucleo/render/colocador.js';
 
-import { creaAlmacenEnMemoria } from '../datos/almacen.js';
+import { exigeAlmacenDuradero } from '../datos/almacen-duradero.js';
 import { creaClienteDeProxy } from '../datos/cliente-proxy.js';
 import { creaTraedorDeOsm } from '../datos/traedor.js';
 import { puertaDeRed } from '../datos/red.js';
@@ -71,15 +71,15 @@ export function MapaMontado({
   semilla = SEMILLA_DE_ARRANQUE,
   tramoM = tramoDeArranque(),
   base = DIRECCION_DEL_PROXY,
+  almacen = null,
 }) {
   const { width, height } = useWindowDimensions();
-  // El almacén vive lo que viva la pantalla: la escritura duradera es de la fila 39,
-  // que es la que decide dónde escribe cada plataforma. La frontera ya está entera,
-  // así que esa fila cambia una línea de aquí y ninguna de la orquestación.
-  const [almacen] = useState(() => creaAlmacenEnMemoria());
 
   const montaje = useMemo(() => {
     try {
+      // Lo primero, antes de montar nada: sin almacén duradero esta pantalla generaría
+      // un mapa entero y lo perdería al cerrar. Se protesta en vez de seguir (§6h).
+      exigeAlmacenDuradero(almacen, 'la pantalla del mapa');
       const enlace = creaEnlaceReal();
       const cronometro = creaCronometro({ ahora: () => Date.now() });
       const cliente = creaClienteDeProxy({ pide: puertaDeRed(), base });
