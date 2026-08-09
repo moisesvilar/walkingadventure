@@ -68,6 +68,58 @@ export function creaFuenteDePosiciones({ lee }) {
  * devolviera siempre la misma posición dejaría la salida sin cerrarse jamás por regreso
  * sin que nada protestara.
  */
+/**
+ * Cablea la fuente con el detector de `partida/transporte.js`: se lee una posición, se le
+ * entrega al detector, y quien quiera la traza de la salida la pide aquí.
+ *
+ * Es todo lo que la plataforma hace con la clasificación: **no decide nada**. El detector
+ * vive en el núcleo porque clasificar decide si el mundo avanza, y aquí solo se junta lo
+ * que ya existe.
+ *
+ * Las dos ausencias se dicen en lugar de degradar: sin fuente montada no hay traza que
+ * dar —una traza vacía sería indistinguible de una salida sin andar—, y sin detector
+ * tampoco —una traza con todo por andando movería el mundo desde un tren—.
+ */
+export function creaTrazaDeSalida({ fuente, detector }) {
+  if (!fuente || typeof fuente.posicion !== 'function') {
+    throw new Error(`la traza de la salida se monta con la fuente de posiciones y llegó ${JSON.stringify(fuente) ?? String(fuente)}`);
+  }
+  if (!detector || typeof detector.agrega !== 'function' || typeof detector.traza !== 'function') {
+    throw new Error(
+      `la traza de la salida se monta con el detector de transporte y llegó ${JSON.stringify(detector) ?? String(detector)}: ` +
+      'sin él las posiciones llegarían sin clasificar y el mundo avanzaría con los kilómetros de un tren',
+    );
+  }
+  const exigeMontados = (quien) => {
+    if (fuente.montado === false) {
+      throw new Error(`${quien}: la fuente de posiciones no está montada — ${fuente.motivo ?? 'sin motivo declarado'}`);
+    }
+    if (detector.montado === false) {
+      throw new Error(`${quien}: el detector de transporte no está montado — ${detector.motivo ?? 'sin motivo declarado'}`);
+    }
+  };
+
+  return {
+    /**
+     * Lee una posición y se la entrega al detector. Devuelve la posición leída, o `null`
+     * si el sensor todavía no ha dado ninguna, que es una respuesta prevista.
+     */
+    muestrea() {
+      exigeMontados('no se puede muestrear la posición de la salida');
+      const p = fuente.posicion();
+      if (p == null) return null;
+      detector.agrega([p]);
+      return p;
+    },
+
+    /** La traza clasificada de lo muestreado hasta ahora. */
+    traza() {
+      exigeMontados('no se puede dar la traza de la salida');
+      return detector.traza();
+    },
+  };
+}
+
 export function fuenteSinMontar(motivo = 'no montada todavía: la app no trae módulo de ubicación en marcha, y ninguna spec ha nombrado la dependencia que lo daría') {
   return {
     montado: false,
