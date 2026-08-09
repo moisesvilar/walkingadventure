@@ -54,8 +54,8 @@
 | --- | --- | --- | --- | --- |
 | 27 | onboarding-arranque | RF-PJ-001, RF-PJ-002, RF-PJ-003, RF-PJ-005, RF-PJ-006, RF-PJ-007, RF-PJ-008, RF-PRIV-005, RF-PRIV-006 | must | done |
 | 28 | portada-antes-de-salir | RF-BUCLE-002, RF-QUEST-011, RF-QUEST-012, RNF-RED-001 | must | done |
-| 29 | en-marcha-mapa-avisos | RF-BUCLE-001, RF-BUCLE-004, RF-BUCLE-009, RF-BUCLE-014, RF-BUCLE-016, RF-MAPA-005 | must | wip |
-| 30 | rotulo-sistema | RF-INFRA-004, RF-BUCLE-010, RF-BUCLE-017 | must | pending |
+| 29 | en-marcha-mapa-avisos | RF-BUCLE-001, RF-BUCLE-004, RF-BUCLE-009, RF-BUCLE-014, RF-BUCLE-016, RF-MAPA-005 | must | done |
+| 30 | rotulo-sistema | RF-INFRA-004, RF-BUCLE-010, RF-BUCLE-017 | must | wip |
 | 31 | deteccion-vehiculo | RF-INFRA-005, RF-BUCLE-015 | must | pending |
 | 32 | llegadas-geofence | RF-BUCLE-005, RF-BUCLE-006, RF-RUMOR-005 | must | pending |
 | 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | pending |
