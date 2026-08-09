@@ -21510,6 +21510,494 @@
       "caso": "Un sitio sin beat conserva su nombre y su posición y no produce beat",
       "hueco_de_bateria": true,
       "nota": "El gesto de marcar un anclaje que no vale es de la fila 35 y no está en disco: aquí se afirma la mitad que esta capa sostiene —un sitio que no da beat sigue siendo un sitio entero con su nombre y su posición—. Queda pendiente de la fila 35 la mitad del marcado."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio con ilustración residente y foto residente que no se había pisado, cuando se resuelve qué enseña su llegada, entonces la presentación es el visor con sus dos lados y abre por el lado de la ficción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio con ilustración y foto residentes abre el visor por el lado de la ficción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio con ilustración residente y foto residente que no se había pisado, cuando se resuelve qué enseña su llegada, entonces la presentación es una de las tres declaradas y el estado del momento sale de su vocabulario cerrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Las presentaciones declaradas son exactamente tres y el estado del momento añade la segunda vez",
+      "hueco_de_bateria": true,
+      "nota": "La segunda mitad del primer criterio: que el vocabulario de `llegada-estado` sea cerrado es lo que hace que «una de las tres» se pueda poner rojo."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio con ilustración residente y sin foto, cuando se resuelve, entonces la presentación sigue siendo el visor, abre por la ficción, y su lado real es la cartela sobre fondo liso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio con ilustración y sin foto sigue siendo el visor, con el lado real sobre fondo liso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio sin ilustración, cuando se resuelve, entonces la presentación es la ficha de texto, tenga o no tenga foto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio sin ilustración da la ficha de texto, tenga o no tenga foto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado cualquier sitio de cualquiera de los ocho mundos de referencia y cualquier combinación de recursos residentes, cuando se resuelve su presentación, entonces el resultado es una de esas tres y nunca ninguna otra ni ninguna vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Cada sitio de los ocho mundos de referencia cae en una de las tres presentaciones y en ninguna otra",
+      "hueco_de_bateria": true,
+      "nota": "144 sitios en los ocho extractos, con el reparto exacto 0 visor / 65 visor-sin-foto / 79 ficha. El cero de la primera columna es el que se mueve el día que Places entre."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el mismo sitio, los mismos recursos y el mismo registro de sitios pisados, cuando se resuelve la presentación dos veces, entonces las dos resoluciones son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La misma llegada resuelta dos veces da la misma presentación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio cuya ilustración está declarada residente y cuyo binario no está en el almacén, cuando se resuelve, entonces falla nombrando el sitio y el recurso, en lugar de abrir un visor con un lado en blanco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Una ilustración declarada residente que no está en el almacén falla nombrando el sitio y el recurso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio sin nombre de fantasía, cuando se pide su presentación, entonces falla nombrando el sitio, y no devuelve una cartela vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio sin nombre de fantasía falla nombrando el sitio y no devuelve una cartela vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio sin nombre de fantasía, cuando se pide su presentación, entonces falla nombrando el sitio: un nombre que no es de este mundo tampoco resuelve en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio que no es del mundo falla nombrando el sitio",
+      "hueco_de_bateria": true,
+      "nota": "El borde de al lado del criterio del nombre que falta: nombrar un sitio que no existe es la otra manera de pedir una cartela vacía."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio con ilustración que no se conocía, cuando se abre la app parada dentro de su geofence, entonces se ve la ilustración de fantasía y el nombre inventado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor abre por la ficción la primera vez",
+      "escenario": "El visor abre por la ficción la primera vez",
+      "nota": "La validación de la parada dentro del geofence es de SPEC-032 y está en test/nucleo/llegadas.test.mjs con este mismo nombre; aquí se afirma la presentación, que es la mitad que entrega esta fila."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado ese mismo visor recién abierto, cuando se mira el tirador, entonces está en el borde del lado de la ficción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor abre por la ficción la primera vez",
+      "escenario": "El visor abre por la ficción la primera vez"
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado ese mismo visor recién abierto, cuando se lee su cartela, entonces dice el tipo del sitio y su nombre de fantasía, y no dice el nombre real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor abre por la ficción la primera vez",
+      "escenario": "El visor abre por la ficción la primera vez"
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado ese mismo visor recién abierto, cuando se lee la primera línea de su cartela, entonces dice el rol del sitio y su matiz, y los roles son exactamente tres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El rótulo del tipo dice el rol y su matiz, y los roles son exactamente tres",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un jugador que atraviesa el geofence de un sitio sin pararse, cuando sigue andando, entonces el visor no se abre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor no aparece nunca andando",
+      "escenario": "El visor no aparece nunca andando",
+      "nota": "La mitad de la validación es de SPEC-032 y ya está implementada en test/nucleo/llegadas.test.mjs; aquí se afirma que esta capa no mira nada del movimiento, así que no hay manera de que abra por su cuenta."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto por el lado de la ficción, cuando se arrastra el tirador hasta el final, entonces aparece la foto del lugar real y la cartela dice el nombre real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Arrastrar descubre el sitio real",
+      "escenario": "Arrastrar descubre el sitio real"
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto por el lado de la ficción, cuando se arrastra el tirador hasta el final, entonces aparece la foto del lugar real y la cartela dice el nombre real.",
+      "nivel": "@app",
+      "fichero": "test/app/visor.yaml",
+      "caso": "Arrastrar descubre el sitio real",
+      "escenario": "Arrastrar descubre el sitio real",
+      "nota": "El gesto es lo único de este criterio que necesita dedo: el swipe de un borde al otro y el cambio de cartela en pantalla."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio del que Places no tiene foto, cuando se arrastra el tirador hasta el final, entonces aparece la cartela con el nombre real sobre fondo liso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Sin foto de Places, el visor abre igual",
+      "escenario": "Sin foto de Places, el visor abre igual",
+      "nota": "Se compara contra el caso con foto: la cartela tiene que salir idéntica, y la única diferencia posible está en real.foto y real.fondoLiso."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio del que Places no tiene foto, cuando se arrastra el tirador hasta el final, entonces aparece la cartela con el nombre real sobre fondo liso.",
+      "nivel": "@app",
+      "fichero": "test/app/visor.yaml",
+      "caso": "Sin foto de Places, el visor abre igual",
+      "escenario": "Sin foto de Places, el visor abre igual",
+      "nota": "En el móvil, lo que se afirma es que el lado real está y que no se dibuja ningún hueco de imagen ni ninguna leyenda. Que el fondo liso sea el papel del estilo es @manual."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el tirador en cualquier posición intermedia, cuando se lee qué cartela está puesta, entonces es la de ficción hasta el punto de cruce y la real a partir de él, y nunca las dos a la vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La cartela puesta es la de la ficción hasta el cruce y la real a partir de él, y nunca las dos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un arrastre soltado antes del punto de cruce, cuando se suelta, entonces el tirador vuelve al lado de la ficción y la cartela no ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un arrastre soltado antes del cruce vuelve al lado de la ficción y la cartela no ha cambiado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un arrastre soltado antes del punto de cruce, cuando se suelta, entonces el tirador vuelve al lado de la ficción y la cartela no ha cambiado.",
+      "nivel": "@app",
+      "fichero": "test/app/visor.yaml",
+      "caso": "Un arrastre soltado antes del cruce vuelve al lado de la ficción y la cartela no ha cambiado",
+      "hueco_de_bateria": true,
+      "nota": "El arrastre interrumpido a mitad solo se puede soltar de verdad con un dedo; en @nucleo se afirma a qué lado cae."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado una posición de tirador fuera del rango declarado, cuando se pide la cartela que corresponde, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Una posición de tirador fuera del rango declarado falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto en un sitio con beat, cuando se cierra el visor, entonces aparece la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor es una capa y debajo está el beat",
+      "escenario": "El visor es una capa y debajo está el beat",
+      "nota": "SPEC-032 afirma con este mismo nombre que la secuencia es [visor, beat]; aquí se afirma que cerrar deja debajo el beat y que la pantalla ya lo tiene montado mientras la capa está puesta."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto en un sitio con beat, cuando se cierra el visor, entonces aparece la escena.",
+      "nivel": "@app",
+      "fichero": "test/app/visor.yaml",
+      "caso": "El visor es una capa y debajo está el beat",
+      "escenario": "El visor es una capa y debajo está el beat"
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto en un sitio sin beat, cuando se cierra el visor, entonces aparece la ficha del sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor abierto en un sitio sin beat deja debajo la ficha del sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto, cuando se toca fuera de él, entonces se cierra igual que con la flecha, y lo que queda debajo es lo mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Tocar fuera y la flecha son la misma salida y dejan debajo lo mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto, cuando se toca fuera de él, entonces se cierra igual que con la flecha, y lo que queda debajo es lo mismo.",
+      "nivel": "@app",
+      "fichero": "test/app/visor.yaml",
+      "caso": "Tocar fuera y la flecha son la misma salida y dejan debajo lo mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado una llegada completa a un sitio, cuando se cuenta cuántas veces hubo que tocar algo para llegar a lo que se había venido a hacer, entonces el visor no añade ninguna: cerrarlo es la única y existe también sin él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor no añade ningún toque a una llegada: cerrarlo es la única y existe también sin él",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el visor abierto, cuando se busca cualquier control que no sea cerrar, entonces no hay ninguno: ni botón de aceptar, ni confirmación, ni indicador de página, ni tercera lámina, ni tutorial del arrastre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor no añade ningún control de más: ni aceptar, ni confirmar, ni pasar de lámina",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio que ya se había pisado, cuando se llega y se abre la app, entonces la presentación no abre el visor sola y lo deja disponible con un toque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La segunda vez el visor no se abre solo",
+      "escenario": "La segunda vez el visor no se abre solo",
+      "nota": "SPEC-032 afirma con este mismo nombre que el paso del visor viene en modo «a un toque»; aquí se afirma el estado del momento y que la presentación no abre sola."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado ese mismo sitio, cuando se toca la acción de volver a mirarlo, entonces se abre el mismo visor, con los mismos dos lados y el mismo tirador en el borde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El visor que se reabre a un toque tiene los mismos dos lados y el tirador en el borde",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado ese mismo sitio, cuando se toca la acción de volver a mirarlo, entonces se abre el mismo visor, con los mismos dos lados y el mismo tirador en el borde.",
+      "nivel": "@app",
+      "fichero": "test/app/visor.yaml",
+      "caso": "El visor que se reabre a un toque tiene los mismos dos lados y el tirador en el borde",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio pisado en una salida anterior y no en esta, cuando se llega, entonces cuenta como segunda vez: el registro de sitios pisados no se vacía al echar el telón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio pisado en una salida anterior cuenta como segunda vez: el registro no se vacía al echar el telón",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado la llegada a un sitio nuevo, cuando se resuelve la presentación, entonces se resuelve contra el registro de sitios pisados anterior a esta llegada, y la anotación de que se ha pisado se hace después.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La llegada se resuelve contra el registro anterior y la anotación se hace después",
+      "hueco_de_bateria": true,
+      "nota": "Lleva dentro el rojo a propósito: anotando antes de resolver, la primera visita sale como segunda y el visor no se abriría nunca solo. Sin ese medio caso, el orden sería un comentario."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado una misma llegada resuelta dos veces sin salir de ella —la app se cierra y se vuelve a abrir sin moverse—, cuando se compara, entonces la presentación es la misma las dos veces y el visor no vuelve a abrirse solo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Consultar la presentación no anota nada: solo llegar deja el sitio pisado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio sin ilustración ya pisado, cuando se resuelve, entonces su ficha no queda a un toque: la ficha no ofrece volver a mirar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La ficha no queda nunca a un toque: no ofrece volver a mirar nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un paraje que no es beat de ninguna aventura, cuando se para dentro de su geofence, entonces ve el nombre de fantasía, qué es en realidad y la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Llegar sin haber venido a nada da la ficha del sitio",
+      "escenario": "Llegar sin haber venido a nada da la ficha del sitio",
+      "nota": "SPEC-032 afirma con este mismo nombre que la secuencia es solo la ficha; aquí se afirma qué dice esa ficha."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado esa misma ficha, cuando se recorre su texto entero, entonces ningún texto lo llama error ni falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Llegar sin haber venido a nada da la ficha del sitio",
+      "escenario": "Llegar sin haber venido a nada da la ficha del sitio"
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un mundo entero sin un solo recurso residente —el modo sin cobertura—, cuando se resuelven las presentaciones de todos sus sitios, entonces todas son la ficha de texto y ninguna difiere en composición de la ficha de un sitio que sí tenía foto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un mundo entero sin un solo recurso residente resuelve todas sus llegadas como ficha",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un mundo entero sin un solo recurso residente, cuando se compara su ficha con la de un sitio con recursos, entonces ninguna difiere en composición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La ficha de un sitio con foto y la de un sitio sin nada tienen la misma composición",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado una ficha de paraje, cuando se compara «qué es en realidad» con el tipo de fantasía, entonces pueden no tener nada que ver, y eso no es un fallo: el tipo está desacoplado del anclaje a propósito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El tipo de fantasía y lo que el sitio es en realidad pueden no tener nada que ver",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio cuyo anclaje real no tiene nombre en OSM, cuando se compone su ficha, entonces la línea de «qué es en realidad» dice lo que es por su etiqueta y no queda vacía ni dice que se desconoce.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un anclaje real sin nombre en OSM se dice por su etiqueta y nunca queda vacío",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio cuyo anclaje real no tiene nombre en OSM, cuando se compone su ficha, entonces la línea de «qué es en realidad» no queda vacía: el catálogo de admisión y el de artículos son el mismo catálogo visto dos veces.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El catálogo de admisión y el de artículos son el mismo catálogo visto dos veces",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio del que no hay nada real que descubrir, cuando se resuelve, entonces cae a la ficha, y componer su ficha o su cartela real falla nombrándolo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Un sitio sin anclaje real ni origen en el callejero cae a la ficha y no se le compone ninguna",
+      "hueco_de_bateria": true,
+      "nota": "El cuarto caso que la spec declara y que no es una cuarta presentación. Es también donde se ve que un núcleo colocado por geometría no es un olvido."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado los ocho mundos de referencia, cuando se cuentan sus place_id, entonces no hay ninguno: sobre dato real la presentación con foto no ocurre hoy.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Ningún extracto de los ocho mundos trae un solo place_id",
+      "hueco_de_bateria": true,
+      "nota": "Sostiene el recuento 0/65/79. Se afirma en voz alta para que el día que Places entre se vea que ese cero se movió."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado todos los textos que esta capa produce —cartelas, ficha y la acción de volver a mirar— sobre los ocho mundos de referencia y en los dos idiomas, cuando se buscan en ellos las palabras del vocabulario prohibido, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Ningún texto de esta capa dice una palabra del vocabulario prohibido, sobre los ocho mundos y en los dos idiomas",
+      "hueco_de_bateria": true,
+      "nota": "2981 textos recorridos —primera visita, segunda y modo sin cobertura sobre los ocho extractos— con 0 infracciones. El recuento se afirma para que nadie apruebe el criterio mirando tres textos."
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un texto de esta capa que contuviera una de esas palabras, cuando se ejecuta la comprobación, entonces falla nombrando el texto y la palabra: el criterio se puede poner rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El criterio se puede poner rojo: un texto prohibido falla nombrando el texto y la palabra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el vocabulario prohibido, cuando se comprueba palabra a palabra, entonces las doce se detectan una a una, con otra caja y sin tildes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El vocabulario prohibido es una lista cerrada de doce palabras y cada una se detecta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un texto legítimo que lleva dentro una palabra prohibida como subcadena, cuando se ejecuta la comprobación, entonces no se marca: la lista caza palabras enteras y no trozos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Ninguna palabra del vocabulario prohibido se dispara por subcadena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el sitio sin foto, cuando se lee todo lo que se enseña en el lado real, entonces no hay ninguna mención de la foto, de la red, ni de que el lado esté incompleto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El lado real de un sitio sin foto no menciona la foto, ni la red, ni que esté incompleto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado la ficha de texto, cuando se lee entera, entonces no hay ninguna acción de reintentar, ninguna de descargar y ninguna de conectarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La ficha no ofrece reintentar, ni descargar, ni conectarse, ni una acción deshabilitada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado la composición de una llegada sin lector de recursos cableado, cuando se construye, entonces falla nombrando la pieza que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La composición de una llegada sin lector de recursos cableado falla nombrando la pieza",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado la composición de una llegada sin el registro de sitios pisados cableado, cuando se construye, entonces falla nombrando el registro, y no trata todas las llegadas como primeras.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La composición de una llegada sin el registro de sitios pisados falla nombrando el registro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado un sitio cuyos recursos se consultan, cuando se inspecciona qué recibió la resolución de la presentación, entonces recibió el inventario de recursos del mundo congelado y no una lista vacía por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "La resolución recibe el inventario de recursos del mundo y no una lista vacía por defecto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado una resolución de presentación, cuando se cuenta cuántas peticiones de red se hicieron, entonces cero: aquí no se llama a la red para nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Resolver una presentación no hace ninguna petición de red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el módulo de esta capa, cuando se busca en él el reloj, el azar o el disco, entonces no hay ninguno: el momento del apunte entra inyectado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Esta capa no lee el reloj, no sortea y no lee de disco",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado una llegada a un sitio con visor abierto y arrastrado hasta el final, cuando se inspecciona el tráfico saliente, entonces no sale ninguna petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Una llegada con el visor abierto y arrastrado hasta el final no manda ninguna petición",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado el registro que esta capa escribe al mirar un sitio, cuando se inspecciona, entonces es el identificador del sitio y el momento, y ninguna coordenada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "El apunte de haber mirado un sitio es su identificador y el momento, y ninguna coordenada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-033",
+      "criterio": "Dado los textos de esta capa, cuando se busca de dónde sale la línea de remate del lado real, entonces sale de la plantilla y nunca del LLM en marcha: el nombre real no entra en ninguna llamada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/visor.test.mjs",
+      "caso": "Ningún texto de esta capa lleva el nombre real de un sitio al que no se haya llegado",
+      "hueco_de_bateria": true
     }
   ]
 }

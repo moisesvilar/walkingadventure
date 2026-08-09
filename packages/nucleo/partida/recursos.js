@@ -324,8 +324,13 @@ export const CAMPOS_DE_PETICION_DE_IMAGEN = congelaHondo(['prompt', 'formato']);
 /** Lo mismo para la ruta de fotos: un `place_id` y ningún campo más. */
 export const CAMPOS_DE_PETICION_DE_FOTO = congelaHondo(['place_id']);
 
-/** La escena dominante de un elemento, sin sortear nada: la de más peso, y el empate por clave. */
-function escenaDominante(scenes) {
+/**
+ * La escena dominante de un elemento, sin sortear nada: la de más peso, y el empate por clave.
+ *
+ * Exportada porque la ficha de texto del visor cuenta la misma escena que el prompt de la
+ * ilustración, y dos desempates que dicen lo mismo escritos en dos sitios se desincronizan.
+ */
+export function escenaDominante(scenes) {
   const claves = Object.keys(scenes ?? {}).sort();
   if (!claves.length) return null;
   return claves.reduce((mejor, c) => ((scenes[c] ?? 0) > (scenes[mejor] ?? 0) ? c : mejor), claves[0]);
