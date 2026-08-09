@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-021",
+  "spec_actual": "SPEC-022",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -208,6 +208,16 @@
       "casos": "1314 casos: 1311 pasan, 0 fallan, 3 saltados",
       "app": "dos flujos escritos en test/app/, NO ejecutados: Maestro presente pero sin dispositivo (sin Xcode completo ni SDK Android)",
       "nota": "la app estrena app/; el prototipo web se muda a prototipo/. El runner ya distingue Maestro sin dispositivo de un flujo en rojo."
+    },
+    {
+      "spec": "SPEC-021",
+      "slug": "render-skia-estilos",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-021-run-20260809T035906Z.md",
+      "casos": "1359 casos: 1356 pasan, 0 fallan, 3 saltados",
+      "app": "Skia declarada y en el bundle; sin simulador no se pinta en dispositivo. Paridad visual @manual sin revisar.",
+      "nota": "la composicion vive en packages/nucleo/render/ para no romper el criterio de arrancar sin node_modules; arquitectura.md actualizado."
     }
   ],
   "bloqueos": [],
