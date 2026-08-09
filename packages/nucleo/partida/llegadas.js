@@ -34,7 +34,7 @@
 import { congelaHondo } from '../core/congelar.js';
 import { infraccionesDeTexto } from '../names/lenguaje.js';
 import { PROTAGONISTAS } from './deformacion.js';
-import { apuntaLoQueSeCuenta, sucesosConVariasVersiones } from './diario.js';
+import { apuntaLoQueSeCuenta } from './diario.js';
 import { paraLaCapaQuePinta } from './nucleos.js';
 import { exigeMapaId } from './pasos.js';
 import { esUnaParada, validaLlegadaPorGeofence } from './ritmo.js';
@@ -47,6 +47,17 @@ import {
   pasoVigente as pasoVigenteDe,
   secuenciaDeLlegada,
 } from './secuencia.js';
+// La escena de la primera coincidencia se **compone** aquí, porque ocurre en la
+// llegada; **cerrarla** no, y es a propósito: `cierraLaEscena` vive en su módulo y la
+// llama quien la enseña. Esta capa no recibe ni un toque de quien juega, y añadirle
+// una operación que sí lo hiciera sería la primera grieta de «validar no es un gesto».
+import {
+  ESTADOS_DEL_MARCADOR,
+  anotaLaCoincidencia,
+  coincidencia,
+  componeLaEscena,
+  estadoDelMarcador,
+} from './triangulacion.js';
 
 /**
  * El radio del geofence, **el mismo para todos los sitios**.
@@ -631,12 +642,21 @@ export function creaLlegadas({
       const deTi = versiones.filter(deLaJugadora);
 
       const anotado = apuntaLoQueSeCuenta({ diario, versiones, mapaId: id, nucleo: nombre, dia, paso });
-      // El marcador de la primera triangulación lo reservó SPEC-016 sin decidir cuándo
+      // El marcador de la primera coincidencia lo reservó SPEC-016 sin decidir cuándo
       // se enciende, y quien lo decide es la llegada: una segunda versión de algo ya
-      // apuntado solo puede aflorar donde te la cuentan. Aquí solo se declara en el
-      // estado; **componer la pantalla es de la fila 37**.
-      const primeraTriangulacion = diario.triangulado !== true && sucesosConVariasVersiones(diario, { mapaId: id }).length > 0;
-      if (primeraTriangulacion) diario.triangulado = true;
+      // apuntado solo puede aflorar donde te la cuentan. Coincidir es tener dos
+      // entradas del mismo suceso con **fuentes distintas**, y eso lo resuelve
+      // `triangulacion.js` sobre el dato, sin comparar ni un texto.
+      const primeraTriangulacion = estadoDelMarcador(diario) === ESTADOS_DEL_MARCADOR.NUNCA
+        && !!coincidencia(diario, { mapaId: id, nuevas: anotado.entradas });
+      if (primeraTriangulacion) {
+        anotaLaCoincidencia(diario, coincidencia(diario, { mapaId: id, nuevas: anotado.entradas }));
+      }
+      // La escena se debe hasta que se lee, y por eso se ofrece **también cuando no se
+      // acaba de detectar**: si la app murió entre detectarla y enseñarla, se paga aquí,
+      // en la siguiente llegada, con las dos mismas versiones. No se enseña nunca al
+      // abrir el diario en casa, que es lo que la convertiría en un aviso de logro.
+      const escena = componeLaEscena(diario, { dia });
 
       return congelaHondo({
         sitio: nombre,
@@ -659,8 +679,12 @@ export function creaLlegadas({
           seguir: TEXTOS.seguir,
         },
         anotado,
-        // Que la pantalla de la triangulación pueda existir: componerla es de la fila 37.
+        // Que la primera coincidencia acaba de encenderse en **esta** llegada. Declararlo
+        // dos veces sería contar dos primeras veces.
         triangulacion: primeraTriangulacion,
+        // Y la escena entera, A6P3, cuando hay una que se debe. Nula el resto del tiempo,
+        // que es casi siempre: ocurre una sola vez en toda la partida.
+        escena,
       });
     },
   };

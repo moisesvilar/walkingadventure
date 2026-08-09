@@ -23610,6 +23610,548 @@
       "caso": "Un hecho de conocimiento reproducido dos veces o en desorden deja el escalón más alto",
       "hueco_de_bateria": true,
       "nota": "De «Notas técnicas · La capa de conocimiento», y es lo que hace que la reproducción del registro no dependa del orden."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una partida con dos mapas, cuando se piden los capítulos del diario, entonces hay exactamente dos y ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Una partida con dos mapas tiene exactamente dos capítulos y ninguno más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado los capítulos, cuando se lee cada uno, entonces declara el identificador de su mapa, el título del mundo que ese mapa tiene en su índice y cuántos días de diario contiene.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Cada capítulo declara su mapa, el título de su mundo y cuántos días contiene",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado los capítulos, cuando se abre el diario, entonces el que viene abierto es el del mapa activo, sin que nadie lo elija.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El capítulo que viene abierto es el del mapa activo, sin que nadie lo elija",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado los capítulos, cuando se leen en orden, entonces el del mapa activo va primero y los demás salen por un criterio declarado y estable, nunca por el orden en que se abrieron sus documentos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El capítulo del mapa activo va primero y los demás por un criterio declarado y estable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo, cuando se lee su subtítulo, entonces sale de un vocabulario cerrado de dos valores —el mapa donde vives y un mapa donde estuviste— y nunca de una fecha del calendario real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El subtítulo de un capítulo sale de un vocabulario cerrado de dos valores y nunca de una fecha",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo que no es el del mapa activo, cuando se lee su proyección, entonces no ofrece ninguna acción que empiece una salida, acepte una aventura o cambie el mapa activo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un capítulo que no es el del mapa activo no ofrece ninguna acción de juego",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara como hueco 3 de la batería: «pero no puede jugar en él desde casa» es una línea de un escenario @app que ninguna aserción perseguía. Aquí se persigue sobre el dato, contra la enumeración ACCIONES_DE_JUEGO_QUE_UN_CAPITULO_NO_TRAE."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo que no es el del mapa activo, cuando se recorre entero, entonces trae sus días, sus caras conocidas y su lámina, y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un capítulo que no es el del mapa activo trae sus días, sus caras y su lámina, y nada más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo que no es el del mapa activo, cuando se recorre entero, entonces trae sus días, sus caras conocidas y su lámina, y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Los mapas antiguos se leen desde el diario",
+      "escenario": "Los mapas antiguos se leen desde el diario",
+      "nota": "De este escenario esta fila sostiene la mitad del diario —el capítulo, sus días, su lámina y la ausencia de acciones— y la fila 41 sostiene la del mapa activo. Etiquetado @app en la batería y verificado en @nucleo sobre el dato (Maestro ausente, pipeline/decisiones-orquestador.md §4)."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo de un mapa cuyo documento de celda no está en el almacén, cuando se abre, entonces falla nombrando la celda que falta, en lugar de enseñar un capítulo a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un capítulo cuyo documento de celda no está en el almacén falla nombrando la celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una partida con un solo mapa, cuando se piden los capítulos, entonces hay uno y la lista no se presenta como una elección.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "No existe ningún selector de mapas",
+      "escenario": "No existe ningún selector de mapas",
+      "nota": "El escenario es de la fila 41 y está etiquetado @app; aquí se verifica la mitad que esta fila sostiene —que la tira de capítulos no es un selector y que con un solo mapa no se presenta como una elección—, sobre el dato."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un identificador de mapa que la partida no tiene, cuando se pide su capítulo, entonces falla nombrando el identificador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un identificador de mapa que la partida no tiene falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo recién creado, sin ningún día, cuando se abre, entonces se obtiene un capítulo vacío y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un capítulo recién creado, sin ningún día, se abre vacío y no como un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el capítulo de casa con cientos de días y el de unas vacaciones con seis, cuando se comparan sus proyecciones, entonces tienen la misma forma y ninguna se completa con relleno para igualar a la otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El capítulo de cientos de días y el de seis tienen la misma forma y ninguno lleva relleno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un capítulo abierto, cuando se piden sus días, entonces salen del más reciente al más antiguo y el criterio es el día de diario, no ningún otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Los días de un capítulo salen del más reciente al más antiguo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un día con lo propio y lo oído, cuando se lee, entonces las dos clases llegan separadas y declaradas, sin que la proyección las mezcle en una sola lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Lo propio y lo oído llegan separados y declarados, sin mezclarse en una sola lista",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una entrada de lo oído, cuando se lee, entonces trae el sitio donde se oyó y el día, y el texto que la cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Una entrada de lo oído trae el sitio donde se oyó, el día y el texto que la cuenta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una entrada cuyo texto del narrador no existe, cuando se lee, entonces trae el texto de la plantilla y se lee igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Una entrada cuyo texto del narrador no existe se lee igual, con el de su plantilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un jugador que nunca ha oído dos versiones de lo mismo, cuando abre el diario, entonces solo puede leerlo por días.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Al principio el diario solo se lee por días",
+      "escenario": "Al principio el diario solo se lee por días",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre la proyección y el marcador: es el nivel al que hoy se puede ejecutar (Maestro ausente, pipeline/decisiones-orquestador.md §4). Desdoblar la etiqueta es de quien mantiene la batería, y la spec lo declara como hueco 1."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado ese mismo jugador, cuando se busca en la pantalla una manera de leerlo por historias, entonces no existe: no está desactivada, no está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Al principio el diario solo se lee por días",
+      "escenario": "Al principio el diario solo se lee por días",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre la proyección y el marcador: es el nivel al que hoy se puede ejecutar (Maestro ausente, pipeline/decisiones-orquestador.md §4). Desdoblar la etiqueta es de quien mantiene la batería, y la spec lo declara como hueco 1."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado ese mismo jugador, cuando se busca en la pantalla una manera de leerlo por historias, entonces no existe: no está desactivada, no está.",
+      "nivel": "@app",
+      "fichero": "test/app/diario.yaml",
+      "caso": "Al principio el diario solo se lee por días",
+      "escenario": "Al principio el diario solo se lee por días",
+      "nota": "La mitad que solo se ve con dispositivo. NO SE EJECUTA en esta máquina: Maestro no está instalado (pipeline/decisiones-orquestador.md §4), así que el runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que el dato no puede sostener: que además no haya una pestaña en gris con un candado solo se ve mirando la pantalla."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado cualquier entrada de la vista por días, cuando se inspecciona, entonces no lleva nivel, ni porcentaje, ni etiqueta de fiabilidad, ni marca de cuál es la buena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El nivel de deformación no sale nunca a pantalla",
+      "escenario": "El nivel de deformación no sale nunca a pantalla",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre la proyección y el marcador: es el nivel al que hoy se puede ejecutar (Maestro ausente, pipeline/decisiones-orquestador.md §4). Desdoblar la etiqueta es de quien mantiene la batería, y la spec lo declara como hueco 1."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una entrada que apunta a un sitio que el mundo congelado del mapa no contiene, cuando se proyecta, entonces falla nombrando el sitio, en lugar de pintar una entrada sin lugar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Una entrada que apunta a un sitio que el mundo congelado no tiene falla nombrando el sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un jugador con la versión de tres campanas apuntada, cuando llega a un núcleo donde se cuenta otra versión de lo mismo, entonces el juego enseña las dos versiones juntas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La primera coincidencia se pone en escena",
+      "escenario": "La primera coincidencia se pone en escena",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre la proyección y el marcador: es el nivel al que hoy se puede ejecutar (Maestro ausente, pipeline/decisiones-orquestador.md §4). Desdoblar la etiqueta es de quien mantiene la batería, y la spec lo declara como hueco 1."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esa escena, cuando se lee su texto entero, entonces no explica en ningún sitio que las noticias se deforman.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La escena no explica nada y no marca ninguna de las dos versiones",
+      "escenario": "La primera coincidencia se pone en escena",
+      "nota": "Se comprueba sobre todas las cadenas que la escena produce, con la lista cerrada PALABRAS_QUE_LA_ESCENA_NO_DICE: leído a ojo, ese criterio no se pone rojo nunca."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esa escena, cuando se lee, entonces no dice cuál de las dos es la buena, y ninguna de las dos lleva marca, orden ni tipografía que la distinga como más fiel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La escena no explica nada y no marca ninguna de las dos versiones",
+      "escenario": "La primera coincidencia se pone en escena",
+      "nota": "La mitad tipográfica no es afirmable sin dispositivo y Maestro tampoco compara tipografías; lo que se afirma es que las dos versiones tienen exactamente la misma forma de dato y que ninguna clave insinúa fidelidad."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esa escena, cuando se leen sus dos versiones, entonces la primera es la que se acaba de oír, con el sitio donde se está, y la segunda es la que ya estaba apuntada, con su sitio y hace cuántos días de diario se oyó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Arriba va la que se acaba de oír, con el sitio donde se está, y debajo la que ya estaba apuntada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esa escena, cuando se busca de dónde salen sus dos textos, entonces son los de las dos entradas del diario y no un texto nuevo redactado para la ocasión.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Los dos textos de la escena son los de las dos entradas del diario y no una redacción nueva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esa escena, cuando se cuentan sus acciones, entonces hay una sola, la que la cierra, y no hay ninguna manera de descartarla sin leerla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La escena tiene una sola acción, la que la cierra, y no hay manera de descartarla sin leerla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esa escena, cuando se cuentan sus acciones, entonces hay una sola, la que la cierra, y no hay ninguna manera de descartarla sin leerla.",
+      "nivel": "@app",
+      "fichero": "test/app/diario.yaml",
+      "caso": "La primera coincidencia se pone en escena",
+      "escenario": "La primera coincidencia se pone en escena",
+      "nota": "La mitad que solo se ve con dispositivo. NO SE EJECUTA en esta máquina: Maestro no está instalado (pipeline/decisiones-orquestador.md §4), así que el runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que el dato no puede sostener: que el Modal respete sePuedeSaltar ante el botón de atrás del sistema y ante un gesto de descarte."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una partida en la que la escena ya ocurrió, cuando el jugador oye una segunda versión de otro suceso cualquiera, entonces la escena no vuelve a ocurrir nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La escena no vuelve a ocurrir nunca después de la primera",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara como hueco 2 de la batería: que la escena ocurra una sola vez en toda la partida es la mitad de RF-DIARIO-002 y no tiene escenario, y es la única que puede romperse en silencio meses después de la primera."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una partida en la que la escena nunca ha ocurrido, cuando se apunta una entrada cuyo suceso ya tenía una versión de otra fuente, entonces el marcador queda pendiente y la escena se debe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Una segunda versión de otra fuente deja el marcador pendiente y la escena se debe",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara como hueco 4 de la batería: el estado intermedio del marcador no tiene escenario, y es el caso que decide si el truco se regala."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una escena pendiente y una app que se cierra antes de enseñarla, cuando se vuelve a abrir, entonces la escena sigue pendiente y se enseña en la siguiente llegada, con las mismas dos versiones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Cerrar la app entre detectar la coincidencia y enseñarla no regala la escena ni la pierde",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara como hueco 4 de la batería. La app que muere es un congelaDiario seguido de un levantaDiario, nunca una espera."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una escena enseñada y cerrada, cuando se lee el marcador, entonces está hecho, y no se puede volver a poner en pendiente por ninguna ruta pública.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Una escena enseñada y cerrada deja el marcador hecho y no se puede volver a poner en pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado dos versiones del mismo suceso oídas de la misma fuente, cuando se apuntan, entonces no hay coincidencia que poner en escena, porque SPEC-016 no las guarda como dos entradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Dos versiones del mismo suceso oídas de la misma fuente no son una coincidencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado dos versiones de dos sucesos distintos oídas en el mismo paso, cuando se apuntan, entonces el marcador no se enciende: coincidir es tener dos versiones del mismo suceso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Dos versiones de dos sucesos distintos oídas en el mismo paso no encienden el marcador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado dos versiones del mismo suceso apuntadas en el mismo paso, cuando se resuelve cuál va arriba en la escena, entonces el criterio está declarado y da el mismo resultado en dos ejecuciones iguales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Dos versiones del mismo suceso apuntadas en el mismo paso se resuelven con un criterio estable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la escena, cuando se busca dónde ocurre, entonces ocurre en la llegada a un núcleo y nunca al abrir el diario en casa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La escena ocurre en la llegada a un núcleo y nunca al abrir el diario en casa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el intento de encender el marcador dos veces, cuando se hace, entonces falla nombrando el estado en el que ya está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "El marcador no se enciende dos veces",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado los tres estados del marcador, cuando se leen, entonces son nunca, pendiente y hecho, y el estado se deriva del par marcador-escena en vez de guardarse aparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "El marcador tiene tres estados y se deriva del par marcador-escena",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la versión de un testigo directo de un suceso que el pueblo ya contó, cuando se apunta, entonces coincide, porque la fuente es otra y entra como entrada aparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La versión de un testigo directo coincide con la del pueblo porque la fuente es otra",
+      "hueco_de_bateria": true,
+      "nota": "Frontera que la spec consume y no implementa: el escenario «El testigo directo es fiel y no corrige al pueblo» es de las filas 12 y 14. Aquí solo se afirma la consecuencia que esta fila necesita, que esa versión cuenta como coincidencia."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la escena de la primera coincidencia, cuando se busca quién la cierra, entonces cerrarla no es una operación de la capa de llegadas, que no recibe ningún toque de quien juega.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "Cerrar la escena no es una operación de la capa de llegadas",
+      "hueco_de_bateria": true,
+      "nota": "Verifica el reparto de rutas de la spec contra el escenario «Validar no es un gesto: ninguna operación de esta capa recibe un toque» de SPEC-032, que enumera la superficie pública entera de creaLlegadas."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un jugador que acaba de triangular por primera vez, cuando abre el diario, entonces puede leerlo por días o por historias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "A partir de ahí se abre la vista por historias",
+      "escenario": "A partir de ahí se abre la vista por historias",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre la proyección y el marcador: es el nivel al que hoy se puede ejecutar (Maestro ausente, pipeline/decisiones-orquestador.md §4). Desdoblar la etiqueta es de quien mantiene la batería, y la spec lo declara como hueco 1."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un jugador que acaba de triangular por primera vez, cuando abre el diario, entonces puede leerlo por días o por historias.",
+      "nivel": "@app",
+      "fichero": "test/app/diario.yaml",
+      "caso": "A partir de ahí se abre la vista por historias",
+      "escenario": "A partir de ahí se abre la vista por historias",
+      "nota": "La mitad que solo se ve con dispositivo. NO SE EJECUTA en esta máquina: Maestro no está instalado (pipeline/decisiones-orquestador.md §4), así que el runner lo registra como infraestructura ausente y nunca como verde."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la vista por historias, cuando se leen las versiones de un suceso, entonces aparecen agrupadas por su identidad de suceso, sin comparar ningún texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Las versiones se agrupan por la identidad de su suceso, sin comparar ningún texto",
+      "escenario": "A partir de ahí se abre la vista por historias"
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado tres versiones de un suceso, oídas en los días 22, 23 y 29, cuando el jugador las mira en la vista por historias, entonces aparecen en el orden 22, 23, 29.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Las versiones se ordenan por cuándo se oyeron",
+      "escenario": "Las versiones se ordenan por cuándo se oyeron",
+      "nota": "De este escenario SPEC-016 sostenía la mitad de dato —el orden de las entradas—; aquí vive la otra, que es la vista por historias. Etiquetado @app en la batería y verificado en @nucleo sobre la proyección (Maestro ausente)."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado esas tres versiones, cuando se busca en la vista un orden por fidelidad, por nivel o por fuente, entonces no existe ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "En la vista por historias no existe ningún orden por fidelidad, por nivel ni por fuente",
+      "escenario": "Las versiones se ordenan por cuándo se oyeron"
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la vista por historias, cuando se recorre entera, entonces ninguna versión lleva etiqueta, porcentaje ni marca de cuál es la buena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Ninguna versión de la vista por historias lleva etiqueta, porcentaje ni marca de cuál es la buena",
+      "escenario": "El nivel de deformación no sale nunca a pantalla",
+      "nota": "El escenario está etiquetado @app en docs/testing.md y aquí se verifica en @nucleo, sobre la proyección y el marcador: es el nivel al que hoy se puede ejecutar (Maestro ausente, pipeline/decisiones-orquestador.md §4). Desdoblar la etiqueta es de quien mantiene la batería, y la spec lo declara como hueco 1."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado dos versiones oídas en el mismo día, cuando se ordenan, entonces desempata el paso del mundo, y si también empata, un criterio declarado y estable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Dos versiones oídas el mismo día desempatan por el paso del mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la lista de historias de un capítulo, cuando se lee su orden, entonces sale de un criterio declarado sobre el momento de la versión más reciente de cada suceso, y no del orden de inserción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "La lista de historias se ordena por la versión más reciente de cada suceso y no por inserción",
+      "hueco_de_bateria": true,
+      "nota": "La spec lo declara como hueco 5 de la batería: el escenario existente ordena las versiones dentro de una historia, no las historias entre sí."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un suceso con una sola versión, cuando se abre la vista por historias, entonces aparece igual, con su única versión, y no se esconde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un suceso con una sola versión aparece igual en la vista por historias",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado lo que se cuenta de la propia jugadora, cuando se abre la vista por historias, entonces aparece con el mismo formato que cualquier otro suceso y sin sección aparte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Lo que se cuenta de la propia jugadora aparece con el mismo formato y sin sección aparte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la vista por historias abierta, cuando se vuelve a la vista por días, entonces las dos conviven y ninguna sustituye a la otra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "La vista por historias y la de días conviven y ninguna sustituye a la otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el cierre de un hilo con varias versiones, cuando se lee, entonces su texto se compone en tiempo de ejecución a partir de cuántas fuentes distintas lo contaron, y no hay ninguna cifra escrita a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El cierre de un hilo se compone con cuántas fuentes distintas lo contaron y no lleva ninguna cifra a mano",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado una identidad de suceso que el diario no tiene, cuando se piden sus versiones, entonces falla nombrando la identidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Una identidad de suceso que el diario no tiene falla nombrándola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la vista por historias de un capítulo que no es el activo, cuando se abre, entonces enseña las historias de ese mapa y ninguna de otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "La vista por historias de un capítulo que no es el activo enseña las de ese mapa y ninguna de otro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado cualquiera de las tres vistas, cuando se recorre entera, entonces no aparece ningún dato del mundo que la jugadora no haya oído.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Ninguna de las tres vistas trae un dato del mundo que la jugadora no haya oído",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un núcleo del que la jugadora no ha oído nada, cuando se recorre el diario, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Ninguna de las tres vistas trae un dato del mundo que la jugadora no haya oído",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado cualquiera de las tres vistas, cuando se buscan cifras, entonces las únicas que existen son cuentas de cuánto hay dentro —los días de un capítulo— y ninguna de distancia, tiempo, ritmo, pasos ni progreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Las únicas cifras del diario son cuentas de cuánto hay dentro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el diario entero, cuando se busca una barra de reputación o una lista de escalones, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "En el diario entero no hay ninguna barra de reputación ni ninguna lista de escalones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado cualquiera de las tres vistas y la escena, cuando se inspeccionan, entonces ninguna lleva el nivel de deformación ni nada derivado de él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El nivel de deformación no sale nunca a pantalla",
+      "escenario": "El nivel de deformación no sale nunca a pantalla",
+      "nota": "La spec afirma este escenario sobre las tres vistas, que es donde de verdad podría escaparse; SPEC-016 lo sostenía solo sobre la proyección. Etiquetado @app en la batería y verificado en @nucleo (Maestro ausente)."
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el mismo estado de partida, cuando se proyecta el diario dos veces, entonces las dos proyecciones son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Proyectar el diario dos veces desde el mismo estado da lo mismo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el mismo estado, cuando se piden los capítulos, los días y las historias, entonces ninguna de las tres consultas escribe nada en el estado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Pedir los capítulos, los días y las historias no escribe nada en el estado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado un marcador encendido, cuando se serializa la partida y se vuelve a cargar, entonces vuelve encendido y la vista por historias sigue disponible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un marcador encendido vuelve encendido de la serialización y la vista por historias sigue disponible",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece `Math.random`, `Date.now` ni ninguna lectura del reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "El código de esta fila no lee el reloj del sistema ni sortea nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-037",
+      "criterio": "Dado la proyección del diario, cuando se comparan los documentos congelados del mapa antes y después de leerla, entonces son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Leer el diario no mueve ni un byte de los documentos congelados del mapa",
+      "hueco_de_bateria": true
     }
   ]
 }
