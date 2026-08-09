@@ -22,6 +22,7 @@ import { puertaDeRed } from '../datos/red.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { creaAlmacenDeBinarios } from '../recursos/almacen-de-binarios.js';
 import { creaConseguidorDeRecursos } from '../recursos/conseguidor.js';
+import { NUCLEO_DE_LA_PREPARACION } from '../nucleo/piezas.js';
 import { creaPreparacion } from '../salida/preparacion.js';
 import { PantallaAntesDeSalir } from './antes-de-salir.jsx';
 import { DIRECCION_DEL_PROXY } from './mapa-montado.jsx';
@@ -60,7 +61,13 @@ export function AntesDeSalirMontado({
         calendario: creaCalendario({ arrancadaEn }),
         // Sin cliente de narrador montado todavía, y **declarado**: los textos salen de
         // plantilla porque alguien lo decidió, no porque se olvidara una pieza.
-        preparacion: creaPreparacion({ conseguidor, llamada, sinNarrador: !llamada, locale: mundo?.locale ?? 'es' }),
+        preparacion: creaPreparacion({
+          nucleo: NUCLEO_DE_LA_PREPARACION,
+          conseguidor,
+          llamada,
+          sinNarrador: !llamada,
+          locale: mundo?.locale ?? 'es',
+        }),
         fallo: null,
       };
     } catch (e) {

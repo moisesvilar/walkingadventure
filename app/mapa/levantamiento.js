@@ -12,32 +12,37 @@
 // el traedor —no puede pedirle nada aunque quisiera— y por eso `recuento()` publica
 // cuántas veces se ha generado: es la forma de afirmarlo desde fuera.
 //
-// **Y nada degrada por falta de cableado** (§6h). Las cinco piezas se comprueban al
+// **Y nada degrada por falta de cableado** (§6h). Las seis piezas se comprueban al
 // construir, no al usarlas: un levantamiento sin colocador pintaría rótulos
 // superpuestos y sin traedor fallaría al primer mapa, que son dos maneras de que una
 // pieza ausente no proteste. Es la forma de fallo que este repositorio ha pagado
 // cinco veces.
-
-import { componeEscena } from '@walkingadventure/nucleo/render/escena.js';
-import { ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
-import {
-  CLAVES,
-  cargaCelda,
-  cargaMapa,
-  celdaAbierta,
-  celdasAbiertas,
-  creaMapa,
-  guardaMapa,
-  listaMapas,
-  pisa,
-} from '@walkingadventure/nucleo/partida/mapa.js';
-import { claveDeCelda, creaRejilla } from '@walkingadventure/nucleo/world/rejilla.js';
+//
+// **El generador también entra por la puerta, no por un import** (SPEC-020). Este
+// módulo orquesta y no genera nada, así que recibe el núcleo igual que recibe el
+// traedor, el almacén o el colocador: como una pieza más. No es una preferencia de
+// estilo — es lo que mantiene la orquestación alcanzable desde `node --test` **sin
+// resolver ningún especificador que haya que instalar**. Citando
+// `@walkingadventure/nucleo` desde aquí, cinco ficheros de `test/nucleo/` dejaban de
+// cargar en cuanto faltaba `node_modules`, y la red de seguridad del determinismo
+// pasaba a depender de una instalación sin que nada se pusiera rojo. Quien monta la
+// app sí cita el paquete por su nombre, y lo hace en `app/nucleo/piezas.js`.
 
 import { CLAVE_DE_CAMARA, encuadraCelda, leeCamara, normaliza, textoDeCamara, vistaDe } from './camara.js';
 import { creaSeguimientoDeFases } from './fases.js';
 
-/** Las cinco piezas que hay que cablear. Sin una, esto no se construye. */
-export const PIEZAS_DEL_LEVANTAMIENTO = Object.freeze(['consultaOsm', 'almacen', 'cronometro', 'colocador', 'medidor']);
+/** Las seis piezas que hay que cablear. Sin una, esto no se construye. */
+export const PIEZAS_DEL_LEVANTAMIENTO = Object.freeze(['consultaOsm', 'almacen', 'cronometro', 'colocador', 'medidor', 'nucleo']);
+
+/**
+ * Lo que la orquestación le pide al generador, enumerado. Va escrito y no
+ * sobreentendido por lo mismo que las piezas: un núcleo al que le falta media
+ * interfaz fallaría en la tercera pantalla y no al construir.
+ */
+export const DEL_NUCLEO = Object.freeze([
+  'componeEscena', 'ESTILO_POR_DEFECTO', 'CLAVES', 'cargaCelda', 'cargaMapa', 'celdaAbierta',
+  'celdasAbiertas', 'creaMapa', 'guardaMapa', 'listaMapas', 'pisa', 'claveDeCelda', 'creaRejilla',
+]);
 
 /** Los cuatro estados del momento, tal como los declara la spec. Vocabulario cerrado. */
 export const ESTADOS = Object.freeze(['sin-mapa', 'levantando', 'pintado', 'no-se-pudo']);
@@ -48,6 +53,7 @@ const QUE_HACE = Object.freeze({
   cronometro: 'sin él el minuto de RNF-PER-001 es una intención y no un criterio',
   colocador: 'sin él la lámina se pinta con los rótulos pisándose unos a otros',
   medidor: 'sin él no hay cajas, y sin cajas no hay colocación posible',
+  nucleo: 'es el generador entero: la rejilla, el registro de celdas y la composición de la escena',
 });
 
 /**
@@ -79,17 +85,19 @@ export function carenciasDe(registro) {
  * @param {object} piezas.cronometro  el que mide el minuto.
  * @param {Function} piezas.colocador  el colocador de rótulos.
  * @param {Function} piezas.medidor  el medidor de texto.
- * @param {Function} [piezas.compone]  el compositor de escenas; el del paquete por defecto.
+ * @param {object} piezas.nucleo  el generador, con lo que enumera `DEL_NUCLEO`.
+ * @param {Function} [piezas.compone]  el compositor de escenas; el del núcleo por defecto.
  */
-export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador, medidor, compone = componeEscena }) {
-  const traidas = { consultaOsm, almacen, cronometro, colocador, medidor };
+export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador, medidor, nucleo, compone = null }) {
+  const traidas = { consultaOsm, almacen, cronometro, colocador, medidor, nucleo };
   for (const pieza of PIEZAS_DEL_LEVANTAMIENTO) {
     const valor = traidas[pieza];
-    const bien = pieza === 'almacen' || pieza === 'cronometro' ? valor && typeof valor === 'object' : typeof valor === 'function';
+    const esObjeto = pieza === 'almacen' || pieza === 'cronometro' || pieza === 'nucleo';
+    const bien = esObjeto ? valor && typeof valor === 'object' : typeof valor === 'function';
     if (!bien) {
       throw new Error(
         `el levantamiento del mapa se construye sin ${pieza} y no arranca sin él: ${QUE_HACE[pieza]}. ` +
-        `Las cinco piezas son ${PIEZAS_DEL_LEVANTAMIENTO.join(', ')}`,
+        `Las seis piezas son ${PIEZAS_DEL_LEVANTAMIENTO.join(', ')}`,
       );
     }
   }
@@ -99,6 +107,16 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
   for (const metodo of ['arranca', 'mide', 'para', 'medida']) {
     if (typeof cronometro[metodo] !== 'function') throw new Error(`al cronómetro inyectado le falta "${metodo}"`);
   }
+  for (const nombre of DEL_NUCLEO) {
+    if (nucleo[nombre] == null) throw new Error(`al núcleo inyectado le falta "${nombre}", que es de lo que se compone el levantamiento`);
+  }
+
+  const {
+    CLAVES, cargaCelda, cargaMapa, celdaAbierta, celdasAbiertas,
+    claveDeCelda, creaMapa, creaRejilla, guardaMapa, listaMapas, pisa,
+  } = nucleo;
+  const ESTILO_POR_DEFECTO = nucleo.ESTILO_POR_DEFECTO;
+  const componeLaEscena = compone ?? nucleo.componeEscena;
 
   // Cuántas veces se ha llamado al generador y cuántas se ha pedido a OSM. Es
   // diagnóstico y es lo que permite afirmar «arrastrar no ha regenerado nada» sin
@@ -144,7 +162,7 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
    * de estilo o mover la cámara vuelve por aquí y por ningún otro sitio.
    */
   function pinta({ documento, camara, tamano, estilo = ESTILO_POR_DEFECTO, factorTexto = 1 }) {
-    return compone({
+    return componeLaEscena({
       documento,
       estilo,
       vista: vistaDe(normaliza(camara, documento)),

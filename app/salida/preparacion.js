@@ -16,21 +16,25 @@
 //   construye**. Una preparación que arranca sin ellos daría exactamente el mismo resultado
 //   que una sin cobertura, y entonces «nadie lo cableó» y «hoy no hay red» serían la misma
 //   cosa (`pipeline/decisiones-orquestador.md` §6h).
-
-import {
-  PRESUPUESTO_PREPARACION_MS,
-  declaraAusencia,
-  declaraIlustracion,
-  declaraTexto,
-  ordenaRecursos,
-  planDeIlustraciones,
-  recursosVacios,
-} from '@walkingadventure/nucleo/partida/recursos.js';
-import { componePreparacion, resumenDeLaPreparacion } from '@walkingadventure/nucleo/partida/preparacion.js';
-import { redactaAventura } from '@walkingadventure/nucleo/quests/narrador.js';
+//
+// **Y el núcleo entra por la puerta, como todo lo demás** (SPEC-020). Aquí no hay ni una
+// regla de juego, así que el generador es una pieza inyectada y no un import: es lo que
+// deja esta orquestación alcanzable desde `node --test` sin resolver ningún especificador
+// que haya que instalar. Quien monta la app sí cita el paquete por su nombre, y lo hace en
+// `app/nucleo/piezas.js`.
 
 /** Las piezas sin las que esto no se construye. Su ausencia es avería, nunca falta de red. */
-export const PIEZAS_DE_LA_PREPARACION = Object.freeze(['conseguidor', 'llamada']);
+export const PIEZAS_DE_LA_PREPARACION = Object.freeze(['nucleo', 'conseguidor', 'llamada']);
+
+/**
+ * Lo que la preparación le pide al núcleo, enumerado. Un núcleo al que le falta media
+ * interfaz tiene que fallar al construir y no a mitad de una salida.
+ */
+export const DEL_NUCLEO = Object.freeze([
+  'PRESUPUESTO_PREPARACION_MS', 'declaraAusencia', 'declaraIlustracion', 'declaraTexto',
+  'ordenaRecursos', 'planDeIlustraciones', 'recursosVacios', 'componePreparacion',
+  'resumenDeLaPreparacion', 'redactaAventura',
+]);
 
 function exigePieza(pieza, nombre, paraQue) {
   if (!pieza) {
@@ -46,11 +50,22 @@ function exigePieza(pieza, nombre, paraQue) {
  * La preparación, ya cableada.
  *
  * @param {object} opciones
- *   `conseguidor` el de SPEC-025, que es quien pide el lote de ilustraciones; `llamada` el
- *   cliente del narrador; `locale` el idioma del mundo; `presupuestoMs` lo que dura la
- *   pantalla como mucho — se sale igual con lo que haya cuando se agota.
+ *   `nucleo` el generador, con lo que enumera `DEL_NUCLEO`; `conseguidor` el de SPEC-025,
+ *   que es quien pide el lote de ilustraciones; `llamada` el cliente del narrador; `locale`
+ *   el idioma del mundo; `presupuestoMs` lo que dura la pantalla como mucho — se sale igual
+ *   con lo que haya cuando se agota.
  */
-export function creaPreparacion({ conseguidor, llamada = null, sinNarrador = false, locale = 'es', presupuestoMs = PRESUPUESTO_PREPARACION_MS }) {
+export function creaPreparacion({ nucleo, conseguidor, llamada = null, sinNarrador = false, locale = 'es', presupuestoMs = null }) {
+  exigePieza(nucleo, 'el núcleo', 'es quien declara los recursos, compone la pantalla y redacta la aventura');
+  for (const nombre of DEL_NUCLEO) {
+    if (nucleo[nombre] == null) throw new Error(`al núcleo inyectado le falta "${nombre}", que es de lo que se compone la preparación`);
+  }
+  const {
+    PRESUPUESTO_PREPARACION_MS, componePreparacion, declaraAusencia, declaraIlustracion, declaraTexto,
+    ordenaRecursos, planDeIlustraciones, recursosVacios, redactaAventura, resumenDeLaPreparacion,
+  } = nucleo;
+  const presupuesto = presupuestoMs ?? PRESUPUESTO_PREPARACION_MS;
+
   exigePieza(conseguidor, 'el conseguidor de recursos', 'es quien pide el lote de ilustraciones de los lugares del lazo');
   if (typeof conseguidor.ilustracionesDeSalida !== 'function') {
     throw new Error('el conseguidor inyectado no expone "ilustracionesDeSalida", que es como se le pide el lote entero de una vez');
@@ -62,7 +77,7 @@ export function creaPreparacion({ conseguidor, llamada = null, sinNarrador = fal
   if (!llamada && !sinNarrador) {
     exigePieza(null, 'la llamada al narrador', 'es quien escribe los textos de la aventura antes de salir; si de verdad no hay narrador, se declara con sinNarrador: true');
   }
-  if (!Number.isFinite(presupuestoMs) || presupuestoMs <= 0) {
+  if (!Number.isFinite(presupuesto) || presupuesto <= 0) {
     throw new Error(
       `la preparación necesita su presupuesto declarado y llegó ${JSON.stringify(presupuestoMs) ?? String(presupuestoMs)}: ` +
       'sin él la pantalla esperaría sin límite, y una espera sin límite es una pantalla de carga',
@@ -70,7 +85,7 @@ export function creaPreparacion({ conseguidor, llamada = null, sinNarrador = fal
   }
 
   return {
-    presupuestoMs,
+    presupuestoMs: presupuesto,
 
     /**
      * Prepara una salida y devuelve `{ pantalla, recursos, textos, resumen }`.
@@ -93,7 +108,7 @@ export function creaPreparacion({ conseguidor, llamada = null, sinNarrador = fal
           locale,
           momento: 'antes-de-salir',
           llamada,
-          presupuestoMs,
+          presupuestoMs: presupuesto,
           filtro,
           topicos,
           semillaDeMundo,
