@@ -9,7 +9,7 @@
 import { makeRng } from '../core/rng.js';
 import { pointInPolygon, polygonBBox, polygonArea } from '../core/geo.js';
 import { isSea } from '../world/seamask.js';
-import { ESTILO_POR_DEFECTO, ESTILOS, resuelveEstilo } from './estilos.js';
+import { ESTILO_POR_DEFECTO, ESTILOS, estiloParaLamina, resuelveEstilo } from './estilos.js';
 
 /**
  * El sufijo con el que se siembra el azar del pintado —grano del papel, siembra de
@@ -18,7 +18,12 @@ import { ESTILO_POR_DEFECTO, ESTILOS, resuelveEstilo } from './estilos.js';
  */
 export const SUFIJO_DE_RENDER = ':render';
 
-/** Tamaños de rótulo por rol, antes de la escala tipográfica del estilo y del factor de letra. */
+/**
+ * Tamaños de rótulo por rol, antes de la escala tipográfica del estilo y del factor de
+ * letra. Son los del prototipo y siguen siéndolo: lo que los lleva a la lámina del
+ * móvil es `estiloParaLamina`, que multiplica la escala tipográfica del estilo. Por eso
+ * la jerarquía de aquí —ciudad, pueblo, aldea, paraje— vale en cualquier pantalla.
+ */
 export const TAMANO_DE_ROTULO = Object.freeze({ ciudad: 25, pueblo: 19, aldea: 15, granja: 12, paraje: 13, servicio: 18, ruta: 16 });
 
 /** Tamaño del glifo de núcleo por tipo, en px. */
@@ -167,7 +172,13 @@ export function componeEscena({
   if (typeof colocador !== 'function') throw new Error('componeEscena necesita que se le inyecte colocador(rotulos, contexto) → [{ id, x, y }]');
   if (!Number.isFinite(factorTexto) || factorTexto <= 0) throw new Error(`componeEscena: el factor de tamaño de letra tiene que ser un número positivo; llegó ${factorTexto}`);
 
-  const { estilo, sustitucion } = resuelveEstilo(estiloPedido, catalogo);
+  const { estilo: estiloDelCatalogo, sustitucion } = resuelveEstilo(estiloPedido, catalogo);
+  // El estilo se escala para la lámina **una vez, aquí**, y a partir de este punto nadie
+  // vuelve a ver el del catálogo: quien coloca y quien pinta leen las métricas del mismo
+  // objeto y no pueden discrepar. Es lo que impide que la caja que se reserva y la placa
+  // que se dibuja lleven acolchados distintos, y lo que deja el escalado fuera del
+  // código de dibujo, que sigue sin tener ni un tamaño propio.
+  const estilo = tamano.ancho > 0 ? estiloParaLamina(estiloDelCatalogo, tamano.ancho) : estiloDelCatalogo;
 
   // Una superficie sin área no se pinta y no falla: es lo que ocurre entre que la
   // pantalla se monta y el gestor de ventanas le da tamaño.
@@ -893,7 +904,11 @@ function zonasReservadas({ estilo, caja, W, titulo, medidor, v, px }) {
     zonas.push({ nombre: 'cartela', caja: bultoDe(W / 2, y, medida.ancho + vuelo, C.size + 34) });
   }
 
-  if (estilo.compass.mode !== 'none') {
+  // Una brújula pintada **detrás** del mapa no es un obstáculo: es una marca de agua
+  // bajo el papel, y el mapa entero se pinta encima. Reservarle sitio como si
+  // estorbara es lo que dejaba a Atlas —cuya brújula mide 442 px en una lámina de
+  // 390— sin sitio para ningún rótulo en media pantalla.
+  if (estilo.compass.mode !== 'none' && !estilo.compass.behind) {
     const centro = centroDeBrujula(caja, estilo);
     const k = estilo.compass.scale;
     const radio = estilo.compass.mode === 'thin' ? 26 * k * 2.5
