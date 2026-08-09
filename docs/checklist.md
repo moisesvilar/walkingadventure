@@ -58,8 +58,8 @@
 | 30 | rotulo-sistema | RF-INFRA-004, RF-BUCLE-010, RF-BUCLE-017 | must | done |
 | 31 | deteccion-vehiculo | RF-INFRA-005, RF-BUCLE-015 | must | done |
 | 32 | llegadas-geofence | RF-BUCLE-005, RF-BUCLE-006, RF-RUMOR-005 | must | done |
-| 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | wip |
-| 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | pending |
+| 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | done |
+| 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | wip |
 | 35 | descarte-anclaje | RF-PRIV-004 | must | pending |
 | 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | pending |
 

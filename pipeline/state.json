@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-033",
+  "spec_actual": "SPEC-034",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -326,6 +326,15 @@
       "casos": "2041 casos: 2038 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado",
       "nota": "dos defectos destapados: la permanencia media tiempo dentro y no parada; y el visor se abria solo la segunda vez."
+    },
+    {
+      "spec": "SPEC-033",
+      "slug": "visor-anclaje",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-033-run-20260809T175226Z.md",
+      "casos": "2091 casos: 2088 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado"
     }
   ],
   "bloqueos": [],
