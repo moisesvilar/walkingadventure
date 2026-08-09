@@ -32,6 +32,22 @@ export function crearIndiceDeNombres() {
     tomado: (nombre) => usados.has(nombre),
 
     /**
+     * Reserva un nombre concreto si está libre. Devuelve si lo consiguió.
+     *
+     * Existe para la capa de nombres propuestos por el narrador (SPEC-018), que no
+     * sortea nada: trae un nombre ya escrito y lo único que puede hacer es tomarlo o
+     * quedarse con el que había. `fija` no sirve ahí porque su contrato es
+     * «devuélveme un nombre libre pase lo que pase», y aquí no adoptar es la
+     * respuesta correcta.
+     */
+    reserva(nombre) {
+      if (typeof nombre !== 'string' || !nombre) return false;
+      if (usados.has(nombre)) return false;
+      usados.add(nombre);
+      return true;
+    },
+
+    /**
      * Fija un nombre libre y lo reserva.
      *
      * `sortea()` es el sorteo de la familia que nombra, y se reintenta con la

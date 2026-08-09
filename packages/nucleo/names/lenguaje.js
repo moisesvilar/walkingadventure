@@ -89,11 +89,21 @@ const FORMAS = congelaHondo({
 const ANTES = '(?<![\\wáéíóúüñÁÉÍÓÚÜÑ])';
 const DESPUES = '(?![\\wáéíóúüñÁÉÍÓÚÜÑ])';
 
-/** Una fórmula literal como regla: la fórmula tal cual se dice, y su expresión. */
+/**
+ * Una fórmula literal como regla: la fórmula tal cual se dice, y su expresión.
+ *
+ * Se exporta —como `reglaDeFormula`— porque el filtro de aptitud del texto generado
+ * (SPEC-018) compila sus listas con **estos mismos límites de palabra**. Reescribirlos
+ * allí habría dado dos definiciones de «palabra» en el mismo idioma, y la que se
+ * olvidase de las acentuadas fallaría solo con algunas palabras, que es la peor forma
+ * de fallar.
+ */
 function formula(texto) {
   const escapado = texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return Object.freeze({ formula: texto, re: new RegExp(ANTES + escapado + DESPUES, 'i') });
 }
+
+export { formula as reglaDeFormula };
 
 /** Una regla que no es una fórmula literal sino una forma: se nombra y se explica. */
 function forma(nombre, re) {

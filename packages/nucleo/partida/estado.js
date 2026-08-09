@@ -53,6 +53,7 @@ import { congelaOro, estadoDeOro, levantaOro } from './oro.js';
 import { congelaPasos, estadoDePasos, levantaPasos } from './pasos.js';
 import { congelaRelaciones, estadoDeRelaciones, levantaRelaciones } from './relacion.js';
 import { congelaRumores, estadoDeRumores, levantaRumores } from './rumores.js';
+import { CATEGORIAS_DE_TOPICO, congelaTopicos, estadoDeTopicos, levantaTopicos } from './topicos.js';
 
 // --- Los esquemas de las áreas que ya existen --------------------------------
 //
@@ -170,6 +171,17 @@ const AREA_OBJETOS = campos({
  */
 const AREA_SITIOS = campos({ mapas: dic(lista('texto')) });
 
+/**
+ * El registro de tópicos, **por semilla de mundo** y con sus cinco categorías cerradas.
+ *
+ * Su contenido depende de lo que devolviera el modelo, así que no es reproducible, y eso
+ * no rompe RNF-DET-002: es **estado inerte**, ninguna regla bifurca por él fuera de la
+ * construcción del prompt, y la estructura de una aventura no cambia con lo que
+ * contenga. Se guarda con la partida porque sin guardarlo no cumpliría su función entre
+ * salidas, que es no repetirse.
+ */
+const AREA_TOPICOS = campos({ mundos: dic(campos(Object.fromEntries(CATEGORIAS_DE_TOPICO.map((c) => [c, lista('texto')])))) });
+
 // --- El registro de áreas -----------------------------------------------------
 
 const AREAS = [];
@@ -205,6 +217,7 @@ declaraArea({ id: 'oro', esquema: AREA_ORO, inicial: estadoDeOro, congela: conge
 declaraArea({ id: 'objetos', esquema: AREA_OBJETOS, inicial: estadoDeObjetos, congela: congelaObjetos, levanta: levantaObjetos });
 declaraArea({ id: 'diario', esquema: ESQUEMA_DIARIO, inicial: estadoDeDiario, congela: congelaDiario, levanta: levantaDiario });
 declaraArea({ id: 'textos', esquema: ESQUEMA_TEXTOS, inicial: estadoDeTextos, congela: congelaTextos, levanta: levantaTextos });
+declaraArea({ id: 'topicos', esquema: AREA_TOPICOS, inicial: estadoDeTopicos, congela: congelaTopicos, levanta: levantaTopicos });
 
 // Las tres que solo aportan tipos de hecho. Su estado es de las filas que las
 // poseen —19 la cola de entregas, y la de aventuras y anclajes su propia fila— y
