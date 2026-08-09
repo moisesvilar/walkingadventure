@@ -34,13 +34,13 @@
 | --- | --- | --- | --- | --- |
 | 17 | catalogo-plantillas | RF-QUEST-009, RF-LANG-001, RF-LANG-003, RF-LANG-004 | must | done |
 | 18 | contrato-llm | RF-QUEST-006, RF-QUEST-007, RF-QUEST-008, RF-LANG-005, RF-PRIV-001 | must | done |
-| 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | wip |
+| 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | done |
 
 ## B4 · La app y el mapa
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 20 | app-scaffold-expo | RF-INFRA-001, RF-INFRA-006, RNF-COM-001 | must | pending |
+| 20 | app-scaffold-expo | RF-INFRA-001, RF-INFRA-006, RNF-COM-001 | must | wip |
 | 21 | render-skia-estilos | RF-MAPA-001, RF-MAPA-002 | must | pending |
 | 22 | declutter-rotulos | RF-MAPA-003 | must | pending |
 | 23 | proxy-ciego | RF-INFRA-002, RNF-PRIV-001, RNF-COST-001 | must | pending |

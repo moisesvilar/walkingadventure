@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-019",
+  "spec_actual": "SPEC-020",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -189,6 +189,15 @@
       "casos": "1123 casos: 1120 pasan, 0 fallan, 3 saltados",
       "app": "sin flujos",
       "nota": "destapo seis textos del catalogo con voz de aplicacion o lexico no apto; la plantilla de la apuesta cambio de premisa."
+    },
+    {
+      "spec": "SPEC-019",
+      "slug": "cola-entregas-microencuentros",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-019-run.md",
+      "casos": "1245 casos: 1242 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujos"
     }
   ],
   "bloqueos": [],
@@ -242,6 +251,6 @@
     "casos": "1042: 1039 pasan, 0 fallan, 3 saltados",
     "app": "sin flujos: test/app/ vacio"
   },
-  "bloque": "B3",
+  "bloque": "B4",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos."
 }
