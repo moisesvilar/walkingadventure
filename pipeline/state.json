@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-037",
+  "spec_actual": "SPEC-038",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -364,6 +364,15 @@
       "casos": "2230 casos: 2227 pasan, 0 fallan, 3 saltados",
       "app": "sin flujo",
       "nota": "entrega la capa de conocimiento y el cierre de salida a todo o nada, que no tenian dueno."
+    },
+    {
+      "spec": "SPEC-037",
+      "slug": "diario-consulta",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-037-run-20260809T212245Z.md",
+      "casos": "2288 casos: 2285 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado"
     }
   ],
   "bloqueos": [],
