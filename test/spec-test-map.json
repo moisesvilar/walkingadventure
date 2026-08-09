@@ -20527,6 +20527,436 @@
       "caso": "Lo que la salida escribe en su documento es el punto de partida y ninguna posición más",
       "hueco_de_bateria": true,
       "nota": "@privacidad y bloqueante. Se recorre el documento entero buscando coordenadas en lugar de comprobar las claves que uno se espera: una posición nueva en un sitio imprevisto es exactamente lo que se persigue."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia de posiciones con marca de tiempo, cuando se clasifica, entonces se obtiene una traza de segmentos consecutivos, cada uno con sus metros, su duración y su clasificación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una secuencia de posiciones se convierte en segmentos con sus metros, su duración y su clasificación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la traza resultante, cuando se leen sus clasificaciones, entonces todas pertenecen al vocabulario que ya declara `ritmo.js`, y el detector no añade ningún valor nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Las clasificaciones de la traza son las que declara ritmo.js y el detector no añade ninguna",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la traza resultante, cuando se suman los metros de sus segmentos, entonces el total coincide con la distancia recorrida por la secuencia, salvo los metros de los huecos, que no pertenecen a ningún segmento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Los metros de la traza son los del recorrido salvo los del hueco, que no son de nadie",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado dos segmentos consecutivos, cuando se comparan, entonces tienen clasificaciones distintas: un cambio de segmento significa siempre un cambio de clasificación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Dos segmentos consecutivos nunca comparten clasificación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la misma secuencia clasificada dos veces, cuando se comparan las dos trazas, entonces son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "La misma secuencia clasificada dos veces da exactamente la misma traza",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la misma secuencia entregada de una vez o troceada en lotes, cuando se clasifica, entonces la traza resultante es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Dar la secuencia entera o trocearla en lotes produce la misma traza",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma dos veces: sobre una secuencia continua y sobre una con hueco, en «El troceado y el orden no cambian nada de lo que el hueco produce»."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado el detector, cuando se inspecciona su código, entonces no lee el reloj del sistema, no usa ninguna fuente de azar y no importa nada de React Native.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "El detector no lee el reloj del sistema, no usa ninguna fuente de azar y no importa nada de React Native",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia con una sola posición, cuando se clasifica, entonces se obtiene una traza vacía, y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una secuencia de una sola posición o vacía da una traza vacía, y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia vacía, cuando se clasifica, entonces se obtiene una traza vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una secuencia de una sola posición o vacía da una traza vacía, y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una posición sin marca de tiempo, o con una marca anterior a la anterior, cuando se clasifica, entonces falla nombrando la posición, en lugar de reordenarla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una posición sin marca de tiempo o con la marca hacia atrás falla nombrándola, en lugar de reordenarla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una posición cuya latitud o longitud no es un número finito, cuando se clasifica, entonces falla nombrando lo recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una posición cuya coordenada o cuya precisión no es un número falla nombrando lo recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia sostenida por encima del umbral de vehículo durante más del tiempo de confirmación, cuando se clasifica, entonces esos segmentos son de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una velocidad de vehículo sostenida más del tiempo de confirmación es vehículo, y menos no lo es",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia sostenida por encima del umbral de vehículo durante menos del tiempo de confirmación, cuando se clasifica, entonces ningún segmento es de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una velocidad de vehículo sostenida más del tiempo de confirmación es vehículo, y menos no lo es",
+      "hueco_de_bateria": true,
+      "nota": "Los dos lados del borde en el mismo caso: 666 m a 40 km/h son 60 s justos de racha y 655 m son 59."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia andando con una sola muestra que salta por encima del umbral de vehículo, cuando se clasifica, entonces ningún segmento es de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un pico de una sola muestra no convierte una caminata en un viaje en coche",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia a velocidad de bicicleta sostenida, cuando se clasifica, entonces sus segmentos son ambiguos y no de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una bicicleta sostenida es ambigua y no vehículo, y por debajo del umbral de andar no hay ambiguos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia por debajo del umbral de andar, cuando se clasifica, entonces sus segmentos son de andando o de parada, y ninguno ambiguo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una bicicleta sostenida es ambigua y no vehículo, y por debajo del umbral de andar no hay ambiguos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia a la velocidad exacta de cada uno de los dos umbrales, cuando se clasifica, entonces el resultado es el declarado por esta spec para el borde, y está escrito y no depende de la comparación que se use.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Los bordes de los dos umbrales son los declarados: 6 km/h es andando y 25 es vehículo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado un autobús clasificado como vehículo que se para en un semáforo un minuto, cuando se clasifica, entonces sigue en vehículo: salir de vehículo exige el tiempo de salida por debajo del umbral de andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un autobús parado en un semáforo un minuto sigue en vehículo, y bajarse de él devuelve la traza a andando",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado ese mismo autobús del que la jugadora se baja y echa a andar, cuando transcurre el tiempo de salida, entonces los segmentos vuelven a ser de andando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un autobús parado en un semáforo un minuto sigue en vehículo, y bajarse de él devuelve la traza a andando",
+      "hueco_de_bateria": true,
+      "nota": "Con las dos mitades del borde: 115 s andando siguen siendo el viaje y 180 s lo terminan."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado los dos umbrales y los dos tiempos, cuando se busca de dónde salen, entonces son cuatro constantes declaradas en un solo sitio y con su justificación escrita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Los umbrales, los tiempos, el error máximo y el hueco están declarados en un solo sitio y con su justificación",
+      "hueco_de_bateria": true,
+      "nota": "Se afirman las seis, no las cuatro: los dos umbrales, los dos tiempos, el error máximo fiable y el hueco máximo."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una posición cuya precisión es peor que la precisión máxima fiable, cuando se clasifica el tramo que la contiene, entonces no puede ser de vehículo: cae a ambigua.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una precisión peor que la fiable, o ausente, no funda un vehículo: cae a ambigua",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia entera con precisión mala, cuando se clasifica, entonces ningún segmento es de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una precisión peor que la fiable, o ausente, no funda un vehículo: cae a ambigua",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una posición sin dato de precisión, cuando se clasifica, entonces se trata como precisión desconocida y tampoco funda una clasificación de vehículo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una precisión peor que la fiable, o ausente, no funda un vehículo: cae a ambigua",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia con un hueco mayor que el hueco máximo entre dos posiciones consecutivas, cuando se clasifica, entonces la traza se parte en ese punto y los metros del salto no pertenecen a ningún segmento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un hueco mayor que el máximo parte la traza y sus metros no pertenecen a ningún segmento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado ese mismo salto, cuando se mira si se clasificó como vehículo, entonces no se clasificó de ninguna manera: no existe como segmento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un hueco mayor que el máximo parte la traza y sus metros no pertenecen a ningún segmento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado esa misma traza, cuando se cuentan sus metros para el motor de pasos, entonces los del salto no cuentan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un viaje en tren no hace avanzar el mundo",
+      "escenario": "Un viaje en tren no hace avanzar el mundo"
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una jugadora que cierra la app en una estación, viaja 30 km en tren y la vuelve a abrir, cuando se clasifica la secuencia, entonces el mundo no avanza ningún paso por ese salto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un viaje en tren no hace avanzar el mundo",
+      "escenario": "Un viaje en tren no hace avanzar el mundo",
+      "nota": "El escenario está etiquetado @app en la batería; aquí vive su mitad de núcleo, y por su peor camino: 30 km que la app no vio."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado un hueco menor que el hueco máximo, cuando se clasifica, entonces sí produce segmento y se clasifica por su velocidad como cualquier otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un hueco menor que el máximo sí produce segmento y se clasifica por su velocidad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado el hueco máximo, cuando se busca de dónde sale, entonces es una constante declarada con su justificación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Los umbrales, los tiempos, el error máximo y el hueco están declarados en un solo sitio y con su justificación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la misma secuencia con hueco entregada de una vez o troceada en lotes, cuando se clasifica, entonces la traza y sus cortes son los mismos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "El troceado y el orden no cambian nada de lo que el hueco produce",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia de referencia que produce al menos un segmento ambiguo, cuando se pregunta a los tres efectos por esos metros, entonces cuentan para el motor de pasos, validan una llegada y no entran en la medida del tramo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "En la duda, cuenta",
+      "escenario": "En la duda, cuenta",
+      "nota": "La diferencia con la entrada de SPEC-004: aquí la duda la deduce el detector a partir de 12 km/h sostenidos, no la declara la prueba."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado esa misma traza, cuando se comparan las tres respuestas, entonces la de la medición del tramo es la contraria a las otras dos, y las tres salen del mismo módulo de SPEC-004.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "La medición del tramo sí excluye la velocidad ambigua",
+      "escenario": "La medición del tramo sí excluye la velocidad ambigua"
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado el módulo del detector, cuando se inspecciona su código, entonces no declara ninguna regla por efecto y no contiene la palabra que nombra a ninguno de los tres: la asimetría se consulta, no se copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "El detector no declara ninguna regla por efecto: la asimetría se consulta y no se copia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado el módulo del detector, cuando se inspecciona su código, entonces no declara ninguna regla por efecto y no contiene la palabra que nombra a ninguno de los tres: la asimetría se consulta, no se copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "En la duda, cuenta",
+      "escenario": "En la duda, cuenta",
+      "nota": "El guardián de SPEC-004 —«ningún otro módulo decide sobre lo ambiguo»— se ensancha aquí para dejar producir la clasificación al detector y seguir exigiéndole que no decida por efecto."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia de referencia con un tramo de vehículo, cuando se cuentan sus metros para el motor de pasos, entonces no cuentan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Volver a casa en autobús echa el telón igual",
+      "escenario": "Volver a casa en autobús echa el telón igual",
+      "nota": "La vuelta la clasifica el detector, y el regreso echa el telón sin mirar la clasificación."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado esa misma secuencia, cuando se mide el ritmo para corregir el tramo, entonces esos metros no entran en la media.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una salida entera a velocidad de vehículo no cuenta ni un metro y no aporta ninguna medida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado esa misma secuencia, cuando se atraviesa el geofence de un beat durante el tramo de vehículo, entonces el beat sigue sin validar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Pasar en coche por delante de un beat no lo valida",
+      "escenario": "Pasar en coche por delante de un beat no lo valida"
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia de referencia entera a velocidad de vehículo, cuando se cuentan sus metros para el motor, entonces el total es cero y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una salida entera a velocidad de vehículo no cuenta ni un metro y no aporta ninguna medida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una secuencia de referencia entera a velocidad de vehículo, cuando se mide el ritmo, entonces la salida no aporta medida y no se registra como salida medida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una salida entera a velocidad de vehículo no cuenta ni un metro y no aporta ninguna medida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una salida cuya traza mezcla andando, parada, ambigua y vehículo, cuando se reparten sus metros entre los tres efectos, entonces los tres repartos son distintos entre sí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Una salida que mezcla andando, parada, ambiguo y vehículo reparte metros distintos a los tres efectos",
+      "hueco_de_bateria": true,
+      "nota": "Medido: 3 000 m para el motor, 1 000 para la medida del tramo y 3 002 para la validación de llegadas."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la traza que el detector deduce de una parada, cuando se mide el ritmo, entonces la parada no baja el ritmo medido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Las paradas no cuentan para medir el ritmo",
+      "escenario": "Las paradas no cuentan para medir el ritmo",
+      "nota": "La otra mitad que la spec nombra: la parada se detecta, no se declara."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una traza deducida de una caminata de seis kilómetros y un tramo de 2 km, cuando se cuentan sus metros para el motor, entonces el mundo avanza tres pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un tramo andado es un paso del mundo",
+      "escenario": "Un tramo andado es un paso del mundo",
+      "nota": "El escenario de SPEC-011 sobre una traza deducida en lugar de escrita."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la fuente de posiciones no cableada, cuando alguien pide la traza de una salida, entonces falla nombrando la fuente que falta, en lugar de devolver una traza vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Sin fuente de posiciones cableada, pedir la traza falla nombrando la fuente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado el detector no cableado, cuando el motor de pasos pide los metros que cuentan, entonces falla nombrando el detector, en lugar de recibir una traza con todo clasificado como andando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Sin detector cableado, el motor de pasos no recibe una traza con todo clasificado como andando",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una traza producida por el detector, cuando se comprueba, entonces ningún segmento sale sin clasificar: el detector no delega en nadie la decisión de qué es un segmento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Ningún segmento que produce el detector sale sin clasificar, con metros negativos ni con duración cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado una traza con un segmento sin clasificar, cuando llega a cualquiera de los tres efectos, entonces falla nombrando el segmento, tal y como ya hacen SPEC-004 y SPEC-011.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Ningún segmento que produce el detector sale sin clasificar, con metros negativos ni con duración cero",
+      "hueco_de_bateria": true,
+      "nota": "El fallo de los tres efectos ya está cubierto por SPEC-004 y SPEC-011; lo que esta fila añade es que el detector nunca produce esa traza."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado el detector devolviendo una traza, cuando se busca si algún segmento tiene metros negativos o duración negativa, entonces no hay ninguno, y producirlo es un error y no un aviso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Dos fijos con la misma marca no producen un segmento de duración cero ni pierden sus metros",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado los umbrales de conveniencia del GPS simulado, cuando se comparan con los de esta spec, entonces las pruebas que declaran el modo explícitamente siguen valiendo, y las que usan el atajo por velocidad quedan señaladas como medidas contra otros números.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Los umbrales de conveniencia del GPS simulado no son los de esta spec",
+      "hueco_de_bateria": true,
+      "nota": "HUECO ABIERTO: las pruebas de ritmo.test.mjs y kilometros.test.mjs que usan el atajo por `velocidadKmH` siguen midiendo contra los 15 km/h del doble, no contra los 25 del detector."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la superficie pública del detector, cuando se inspecciona, entonces no exporta ningún texto destinado a mostrarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "La superficie pública del detector no exporta ningún texto destinado a mostrarse",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado cualquier texto que el núcleo produce para mostrarse dentro del juego, cuando se buscan las palabras vehículo, coche, autobús, tren, velocidad o transporte, entonces no aparece ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "La superficie pública del detector no exporta ningún texto destinado a mostrarse",
+      "hueco_de_bateria": true,
+      "nota": "CUBIERTO A MEDIAS: se afirma sobre lo que el detector exporta y devuelve. El barrido sobre todos los textos del núcleo no se hace aquí, y recorrer las pantallas es @app."
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado los ajustes del juego, cuando se enumeran, entonces no hay ninguno que active, desactive ni calibre la detección.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Ningún ajuste del juego activa, desactiva ni calibra la detección",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-031",
+      "criterio": "Dado la clasificación de una traza, cuando se busca dónde se guarda, entonces no viaja con la partida más allá de lo que la salida en curso necesita, y no queda ningún historial de por dónde se fue ni en qué.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "La clasificación no viaja con la partida: nadie del paquete guarda la traza",
+      "hueco_de_bateria": true
     }
   ]
 }
