@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": null,
-  "fase": "B4-cerrado",
+  "spec_actual": "SPEC-028",
+  "fase": "dev",
   "iteracion": 0,
   "historial": [
     {
@@ -268,6 +268,16 @@
       "casos": "1645 casos: 1642 pasan, 0 fallan, 3 saltados",
       "app": "tres flujos escritos, ninguno ejecutado: sin simulador",
       "nota": "el minuto medido en Node (urbano-denso 3222 ms sobre 60000), no en dispositivo de referencia. Ver decisiones 6t."
+    },
+    {
+      "spec": "SPEC-027",
+      "slug": "onboarding-arranque",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-027-run.md",
+      "casos": "1726 casos: 1723 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado",
+      "nota": "dos partes no entregadas y declaradas: modulo nativo de ubicacion y capa de teselas, sin dependencia nombrada por ninguna spec."
     }
   ],
   "bloqueos": [],
@@ -291,22 +301,7 @@
       "estado": "implementados y en verde"
     }
   ],
-  "specs_escritas": [
-    "SPEC-001-andamiaje-pruebas",
-    "SPEC-002-paquete-compartido",
-    "SPEC-003-rejilla-celdas-semilla",
-    "SPEC-004-tramo-personal",
-    "SPEC-005-pool-anclajes-filtros",
-    "SPEC-006-parajes-cobertura-escenas",
-    "SPEC-007-grafo-cosido-ramales",
-    "SPEC-008-filtro-accesibilidad-grafo",
-    "SPEC-009-serializacion-mundo-congelado",
-    "SPEC-010-casting-quests",
-    "SPEC-011-motor-pasos",
-    "SPEC-012-propagacion-rumores",
-    "SPEC-013-prologo-mundo",
-    "SPEC-014-npcs-capa"
-  ],
+  "specs_escritas": "las 42, todas en docs/specs/",
   "veredictos": [
     {
       "spec": "SPEC-001",
