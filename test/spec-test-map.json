@@ -19197,6 +19197,708 @@
       "caso": "En el código que esta fila añade no aparece Math.random ni Date.now",
       "hueco_de_bateria": true,
       "nota": "Bloqueante (@determinismo). Se recorren los seis módulos de núcleo y las cinco piezas de app/ de esta fila, y se comprueba además que el reloj sigue estando donde tiene que estar: app/datos/calendario.js."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando con una aventura aceptada, cuando mira la pantalla, entonces no hay ningún elemento tocable dentro de la app: la lista de tocables del momento sale vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "La ausencia se afirma como igualdad contra la lista de tocables, con la aventura puesta, sin ella y sin posición, y además se comprueba que la pantalla no importa ningún componente tocable (leyendo el código sin comentarios, porque los comentarios nombran a propósito lo que no se hace)."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando con una aventura aceptada, cuando mira la pantalla, entonces no hay ningún elemento tocable dentro de la app: la lista de tocables del momento sale vacía.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). Y hay un segundo bloqueo, propio de esta fila: `App.js` no monta `PantallaEnMarcha`, así que hoy no existe ninguna puerta que lleve a la pantalla en un dispositivo. El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita dispositivo: que ninguno de los controles prohibidos llegue a montarse y que arrastrar no haga aparecer ninguno."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha compuesto, cuando se leen sus elementos, entonces son exactamente: la lámina, la marca de posición, las marcas de aviso si las hay, la guía, y el zócalo si hay algo que declarar. Ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Los elementos del momento son exactamente los declarados y ninguno más",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: docs/testing.md no tiene ningún escenario sobre la composición del momento. Se afirma como igualdad contra el vocabulario cerrado, con marcas y sin ellas, y el caso «Un elemento que el vocabulario no declara falla enumerando los que hay y los que no puede haber» cubre la otra mitad."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando, cuando mira la pantalla, entonces no aparecen kilómetros, ritmo, pasos, calorías, tiempo ni porcentaje de progreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "No se enseña ninguna cifra de esfuerzo",
+      "escenario": "No se enseña ninguna cifra de esfuerzo",
+      "nota": "Las dos mitades: los nueve elementos de A3P7 están declarados como que no existen, ninguno está en el vocabulario de elementos y las dos listas no se solapan."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando, cuando mira la pantalla, entonces no aparecen kilómetros, ritmo, pasos, calorías, tiempo ni porcentaje de progreso.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). Y hay un segundo bloqueo, propio de esta fila: `App.js` no monta `PantallaEnMarcha`, así que hoy no existe ninguna puerta que lleve a la pantalla en un dispositivo. El runner lo registra como infraestructura ausente y nunca como verde. El flujo comprueba además que ninguno de los identificadores de cifra de A3P7 está visible."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado todos los textos que este momento compone, cuando se buscan cifras, entonces no aparece ninguna, ni siquiera dentro de una frase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "No se enseña ninguna cifra de esfuerzo",
+      "escenario": "No se enseña ninguna cifra de esfuerzo",
+      "nota": "Se pasan todos los textos compuestos por el mismo cribado del filtro de aptitud, que además caza las cifras escritas con letra; el caso «Una guía con una cifra dentro falla donde nace y no llega a ninguna pantalla» comprueba que además falla donde nace."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado todos los textos que este momento compone, cuando se buscan cifras, entonces no aparece ninguna, ni siquiera dentro de una frase.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Una guía con una cifra dentro falla donde nace y no llega a ninguna pantalla",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería no tiene ningún escenario sobre dónde falla un texto con cifra. Se comprueba sobre la guía y sobre el texto de una marca de aviso."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha, cuando se busca una racha, un logro o una cuenta de días, entonces no existe ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "No se enseña ninguna cifra de esfuerzo",
+      "escenario": "No se enseña ninguna cifra de esfuerzo",
+      "nota": "Racha, logros y cuenta de días son tres de los nueve elementos declarados como que no existen, y ninguno está en el vocabulario del momento."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando hacia el sur, cuando mira el mapa, entonces el norte sigue arriba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El norte está siempre arriba",
+      "escenario": "El norte está siempre arriba",
+      "nota": "Se comprueba con las cuatro clasificaciones, incluida la de vehículo, y sobre la lámina además de sobre el momento: la cámara no rota."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando hacia el sur, cuando mira el mapa, entonces el norte sigue arriba.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "El norte está siempre arriba",
+      "escenario": "El norte está siempre arriba",
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). Y hay un segundo bloqueo, propio de esta fila: `App.js` no monta `PantallaEnMarcha`, así que hoy no existe ninguna puerta que lleve a la pantalla en un dispositivo. El runner lo registra como infraestructura ausente y nunca como verde."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado la lámina en marcha, cuando se mira su marca de posición, entonces es una marca roja del propio mapa y no un punto de sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La marca de posición es del propio mapa y no un punto de sistema",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: no hay escenario sobre la marca de posición. Se afirma sobre los dos valores declarados —delMapa y deSistema— y sobre el acento del estilo, que es de dónde sale el rojo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado la guía, cuando se lee, entonces nombra la calzada por la que se va y el sitio hacia el que se va, y no da ninguna indicación de giro ni de metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La guía nombra la calzada y el sitio, y no da ninguna indicación de giro ni de metros",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería no tiene ningún escenario sobre la guía. Las dos ausencias van declaradas en el dato (giro y metros a null) y además se criba el texto contra las palabras de navegación."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que atraviesa territorio que no conocía, cuando mira el mapa a mitad de camino, entonces el mapa está como al salir de casa, y solo se ha movido su marca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida",
+      "nota": "Se compone dos veces con la posición avanzada y se comparan las dos serializaciones completas menos el punto de la marca: si cambiase algo más, mirar aportaría algo nuevo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que atraviesa territorio nuevo, cuando ocurre, entonces no vibra, no se felicita y no se dibuja nada en vivo: se registra en silencio y se cobra al echar el telón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Atravesar territorio nuevo no vibra, no felicita y no dibuja nada en vivo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: el entintado y su cobro son de la fila 36 y la batería los cubre allí; lo que aquí se afirma es la nada, y por eso existe como función."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una aventura aceptada, cuando se mira el mapa, entonces los sitios a los que la aventura manda están rotulados con su nombre aunque no se hayan pisado nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Los sitios a los que la aventura manda van rotulados aunque no se hayan pisado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: no hay escenario sobre el rotulado por encargo. Se rotulan por estar en el lazo aceptado y no por un nivel de conocimiento, y un sitio que el mundo no tiene falla en vez de inventar un nombre."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una salida sin aventura aceptada, cuando se mira el mapa, entonces se ve igual, con la marca de posición y sin guía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Una salida sin aventura aceptada se ve igual, con la marca de posición y sin guía",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Es el estado vacío del momento: dos elementos, ningún zócalo, ningún rotulado y ningún texto que cribar."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha, cuando se busca una barra de pestañas, una cabecera, un control de zoom, un botón de centrar o una leyenda, entonces no hay ninguno: acercar y arrastrar son gestos, y ni siquiera hacen falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "No hay barra de pestañas, cabecera, pie, control de zoom, botón de centrar ni leyenda",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "Y los gestos siguen: el caso «La pantalla del mapa no tiene ni un control» afirma que acercar y arrastrar están declarados como gestos y no como tocables."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha, cuando se busca una barra de pestañas, una cabecera, un control de zoom, un botón de centrar o una leyenda, entonces no hay ninguno: acercar y arrastrar son gestos, y ni siquiera hacen falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Un elemento que el vocabulario no declara falla enumerando los que hay y los que no puede haber",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. La otra mitad de la ausencia: el vocabulario está congelado y no se puede ampliar en caliente, y un elemento de fuera falla enumerando los que hay y los que no puede haber."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una noticia, cuando se lee su zócalo en el mapa, entonces dice que hay algo y dónde, y el contenido se oye llegando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El zócalo de una noticia dice que hay algo y dónde, y el contenido se oye llegando",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería cubre el aviso, no el zócalo. Se comprueba que nombra el sitio, que el antetítulo es el de A3P3 y que no hay ninguna llamada a tocar."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha compuesto, cuando se leen sus elementos, entonces son exactamente: la lámina, la marca de posición, las marcas de aviso si las hay, la guía, y el zócalo si hay algo que declarar. Ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Las clases de zócalo son cuatro y la prioridad las ordena",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. El zócalo tiene un solo contenido a la vez y la prioridad —camino evitado, desvío, noticia, guía— cubre exactamente las cuatro clases declaradas."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha compuesto, cuando se leen sus elementos, entonces son exactamente: la lámina, la marca de posición, las marcas de aviso si las hay, la guía, y el zócalo si hay algo que declarar. Ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Con los cuatro contenidos disponibles gana el camino evitado, y bajando por la lista gana el siguiente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se recorre la prioridad entera y se comprueba que no se apilan: lo que sale es uno y solo uno."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha compuesto, cuando se leen sus elementos, entonces son exactamente: la lámina, la marca de posición, las marcas de aviso si las hay, la guía, y el zócalo si hay algo que declarar. Ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Un zócalo declarado con una clase que no es la de su hueco falla nombrando el vocabulario",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. La validación de entrada del vocabulario de clases de zócalo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el catálogo completo de avisos del juego, cuando se revisa cada uno, entonces todos tienen al menos una capa de bolsillo y una de pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Ningún aviso viaja por una sola capa",
+      "escenario": "Ningún aviso viaja por una sola capa",
+      "nota": "Se recorre el catálogo entero y no los dos tipos de hoy escritos a mano: es la regla de mantenimiento de accesibilidad.md §3 convertida en criterio, y un tipo nuevo sin par la pone roja sin que nadie tenga que acordarse."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un aviso declarado con dos capas de bolsillo, cuando se declara, entonces falla nombrando el aviso: háptico y sonido fallan a la vez para la misma persona y duplicar así no es duplicar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Un aviso declarado con dos capas de bolsillo falla nombrando el aviso",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería afirma la regla, no su violación. El caso «Un aviso declarado con dos capas de pantalla falla igual» cubre la simétrica, y «Un aviso sin capas y un aviso con una capa que no existe fallan enumerando las que hay» el resto de la validación."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un rumor que alcanza un sitio del mapa, cuando llega el aviso, entonces vibra el móvil y aparece una marca en el mapa, pero no salta ninguna notificación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Una noticia va por háptico y marca",
+      "escenario": "Una noticia va por háptico y marca",
+      "nota": "Las dos mitades sobre el registro de los dobles y no sobre fe: vibró de verdad, y el canal de notificación no se tocó ni está declarado para la noticia."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un rumor que alcanza un sitio del mapa, cuando llega el aviso, entonces vibra el móvil y aparece una marca en el mapa, pero no salta ninguna notificación.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "Una noticia va por háptico y marca",
+      "escenario": "Una noticia va por háptico y marca",
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). Y hay un segundo bloqueo, propio de esta fila: `App.js` no monta `PantallaEnMarcha`, así que hoy no existe ninguna puerta que lleve a la pantalla en un dispositivo. El runner lo registra como infraestructura ausente y nunca como verde. Es la mitad que necesita dispositivo: que la marca de aviso se pinte sobre su sitio y que el háptico salga por su canal. Que se note desde el bolsillo es @manual."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una noticia, cuando llega, entonces la pantalla no se enciende.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "La oportunidad es el único aviso que enciende la pantalla",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería lo dice de la oportunidad y no de la noticia. Se afirma sobre el catálogo entero, que es donde se protege la reserva del canal."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un micro-encuentro disponible, cuando el jugador entra en su geofence, entonces salta una notificación y vibra el móvil.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Una oportunidad va por notificación y háptico",
+      "escenario": "Una oportunidad va por notificación y háptico",
+      "nota": "Sobre el registro de los dos dobles: la notificación salió y el móvil vibró. Cuándo salta el micro-encuentro es de SPEC-019 y se prueba en test/nucleo/microencuentros.test.mjs."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una oportunidad, cuando salta, entonces es el único aviso del juego que enciende la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "La oportunidad es el único aviso que enciende la pantalla",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se recorre el catálogo entero: enciende la pantalla exactamente un tipo, y el caso «Con el permiso de notificaciones denegado la oportunidad se emite por las capas que quedan» comprueba que sin notificación tampoco se da por encendida."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una notificación de oportunidad, cuando se lee su texto, entonces cabe en una línea, nombra el sitio, y no contiene ningún «toca para saber más».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "El aviso se lee entero de un vistazo",
+      "escenario": "El aviso se lee entero de un vistazo",
+      "nota": "Las tres condiciones a la vez, y el sitio se comprueba contra los nombres del mundo y nunca contra un umbral de parecido."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un texto de aviso que no nombra ningún sitio del mundo, cuando se valida, entonces falla nombrando el aviso: «completo incluye dónde».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Un texto de aviso que no nombra ningún sitio del mundo falla",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería afirma la regla, no su violación. El caso «Validar un texto sin la lista de sitios del mundo falla en vez de dar el aviso por bueno» cubre la puerta de atrás: lo que no se puede comprobar no se da por bueno."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un texto de aviso que no cabe en una línea, cuando se valida, entonces falla, y no se recorta para que quepa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Un texto de aviso que no cabe en una línea falla y no se recorta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se comprueba además que no devolvió nada recortado: un aviso recortado es un «toca para saber más» sin decirlo. «Un texto de aviso con un salto de línea falla», «...que llama a tocar falla, en las cinco formas» y «...con una cifra dentro falla» cubren el resto de la validación del texto."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador dentro de una escena de la aventura principal, cuando el mundo produce una oportunidad, entonces no salta ningún aviso hasta que la escena termina.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "No se avisa durante un beat en curso",
+      "escenario": "No se avisa durante un beat en curso",
+      "nota": "Ni siquiera se llamó al vibrador: la retención va antes de tocar ningún canal. El caso «Los dos tipos de aviso se retienen durante un beat, y no solo la oportunidad» comprueba que la regla no distingue tipo, y «El estado del beat es un dato de dos valores y una tercera cosa falla» que no se deduce del reloj."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una oportunidad retenida por un beat en curso, cuando la escena termina, entonces el aviso sale entonces y no se pierde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Una oportunidad retenida por un beat en curso sale al terminar la escena y no se pierde",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería cubre la retención, no la salida. Salen los dos y en el orden en que llegaron, que es lo que hace comparable el mismo recorrido dos veces; «Terminar el beat sin nada retenido no emite nada» cubre el caso vacío."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una notificación de oportunidad, cuando el jugador la toca mientras anda, entonces se abre el mapa con la marca del encuentro, y no se acepta ninguna aventura ni se abre ninguna escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Tocar un aviso no acepta nada",
+      "escenario": "Tocar un aviso no acepta nada",
+      "nota": "Las dos mitades: el aviso no lleva ninguna acción y declara qué hace tocarlo, y abrir por la puerta del aviso da el mapa con la marca y con acepta, abreEscena y abreVisor en falso."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una notificación de oportunidad, cuando el jugador la toca mientras anda, entonces se abre el mapa con la marca del encuentro, y no se acepta ninguna aventura ni se abre ninguna escena.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "Tocar un aviso no acepta nada",
+      "escenario": "Tocar un aviso no acepta nada",
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —no hay Xcode completo ni SDK de Android—, así que ningún flujo @app se puede correr aquí (pipeline/decisiones-orquestador.md §4). Y hay un segundo bloqueo, propio de esta fila: `App.js` no monta `PantallaEnMarcha`, así que hoy no existe ninguna puerta que lleve a la pantalla en un dispositivo. El runner lo registra como infraestructura ausente y nunca como verde. Y hay un tercer límite: Maestro no interactúa con la pantalla de bloqueo ni con el centro de notificaciones del sistema, así que el toque sobre la notificación de verdad es @manual; el flujo comprueba la otra mitad, que entrar por el aviso no abre escena ni visor."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una oportunidad, cuando se busca una acción de aceptar o de rechazar, entonces no existe ninguna: se acepta yendo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Ningún aviso lleva acción de aceptar, de rechazar ni llamada a tocar",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se afirma sobre los dos tipos y contra el vocabulario de lo que un aviso no lleva, que es lo que obliga a escribirlo aquí el día que alguien meta un botón."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una oportunidad ignorada, cuando el jugador sale otro día, entonces se le ofrece una vez más, en otro sitio; y si vuelve a ignorarla, sedimenta sin volver a ofrecerse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Una oportunidad ignorada se ofrece una segunda vez",
+      "escenario": "Una oportunidad ignorada se ofrece una segunda vez",
+      "nota": "CONSUMIDO DE SPEC-019: el ciclo de dos ofertas es de la cola de entregas y ya está vivo en test/nucleo/entregas.test.mjs. Esta fila lo consume y no lo respecifica, así que no se duplica la prueba."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una oportunidad sedimentada, cuando el jugador recorre el juego entero, entonces ningún texto menciona que no fuese.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/entregas.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha",
+      "nota": "CONSUMIDO DE SPEC-019, igual que el anterior."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un tipo de aviso que no está en el enumerado, cuando se intenta emitir, entonces falla nombrando los que sí valen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Un tipo de aviso que no está en el enumerado falla nombrando los que sí valen",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Cinco intrusos por la puerta del catálogo y uno por la del emisor, y el error enumera los dos que valen. «Los tipos de aviso son los mismos dos de la cola de entregas» comprueba además que el enumerado no se ha duplicado."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando, cuando abre la app por el icono, entonces ve el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Andando, abrir la app por el icono enseña el mapa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: la batería no tiene ninguna característica sobre la puerta de entrada. Andando dentro de un geofence también da el mapa: la escena es de pararse, no de pasar."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador parado dentro de un geofence, cuando abre la app por el icono, entonces ve la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Parado dentro de un geofence, abrir la app enseña la escena",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. La clasificación sale del seguidor, que la entrega ya hecha desde SPEC-004."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador parado dentro de un geofence, cuando entra tocando el aviso o el rótulo del sistema, entonces ve lo mismo que entrando por el icono: quien decide qué hay es el estado y no la puerta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Las tres puertas dan lo mismo: ninguna tiene comportamiento propio",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se recorren las tres puertas por cinco combinaciones de estado y se comprueba que el destino es uno solo en cada una."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado las tres puertas de entrada, cuando se comparan, entonces ninguna tiene comportamiento propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Las tres puertas dan lo mismo: ninguna tiene comportamiento propio",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Además de los destinos se comparan las salidas enteras quitando de cuál se vino: lo único que cambia entre puertas es eso, que no decide nada. «Una puerta o una clasificación que no están declaradas fallan enumerando las que valen» cubre la validación de entrada."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador andando que toca un aviso, cuando se abre el mapa, entonces trae la marca del encuentro puesta y nada más ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Abrir el mapa desde un aviso trae la marca del encuentro puesta y nada más ha cambiado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se comparan las dos salidas —con marca y sin ella— quitando la marca: si algo más cambiase, tocar habría hecho algo además de ubicar."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que va a su destino por otra calle, cuando llega, entonces el juego no se ha enterado y nada lo menciona.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Ir por otra calle no se entera nadie: ni texto, ni marca que parpadee, ni recálculo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Existe como función para poder afirmar la nada: sin ella, «el juego no se entera» se comprobaría no encontrando código, que es lo que no se puede poner rojo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que se va a otro sitio, cuando ocurre, entonces no aparece ningún «te has desviado», ninguna marca que parpadee y ningún recálculo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Ir por otra calle no se entera nadie: ni texto, ni marca que parpadee, ni recálculo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Los tres valores van declarados en el dato: ningún texto, ninguna marca que parpadee y ningún recálculo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el estado de una salida en marcha, cuando se lee su esquema, entonces no tiene ningún campo de recorrido, de desviación ni de adherencia al trazado: no existe la cuenta que habría que llevar para reprochar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El estado de una salida en marcha no tiene ningún campo de recorrido, desviación ni adherencia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. El criterio se escribe sobre el esquema y no sobre una pantalla: es la única forma de que «no hay reproche» siga siendo cierto el día que alguien añada un panel. «No existe ninguna función que compare lo andado con el trazado ni que recalcule la ruta en marcha» cubre la otra mitad, la de las capacidades."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que pasa cerca de un beat camino del supermercado, cuando entra en su geofence, entonces valida igual y la escena queda esperando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Pasar cerca de un beat camino del supermercado valida igual, y la llegada nunca depende del trazado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: el escenario que hay en docs/testing.md es «La escena queda disponible y espera», que es de la fila 32. Aquí se afirma la mitad de esta fila: de qué depende la validación, que es del geofence y del vehículo y nunca de ir por el trazado."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado la validación de una llegada, cuando se comprueba de qué depende, entonces depende del geofence del sitio y nunca de ir por el trazado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Pasar cerca de un beat camino del supermercado valida igual, y la llegada nunca depende del trazado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. La lista de qué decide la llegada tiene un solo elemento, y las cuatro clasificaciones se recorren: en la duda se valida y el vehículo se aparta, que es de SPEC-004 y aquí se consume."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una aventura aceptada, cuando el jugador anda por donde le da la gana, entonces la aventura sigue abierta hasta que llega a casa o la cierra a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Una salida abierta sigue abierta días después: el juego no la da por muerta por su cuenta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se compone el momento doscientas veces y la salida sigue abierta con su aventura; solo se cierra por volver o a mano, que son las dos vías declaradas en SPEC-028."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una salida abierta desde hace días, cuando se consulta, entonces el juego no la ha dado por muerta por su cuenta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Una salida abierta sigue abierta días después: el juego no la da por muerta por su cuenta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. No hay reloj en esta capa, así que «días después» es «después de cualquier número de lecturas de posición»: si hubiera caducidad tendría que estar aquí, y no está."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que llega a un cruce con un paraje fuera del lazo, cuando mira, entonces se le ofrece el desvío nombrando el ramal y el paraje.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La oferta del desvío nombra el ramal y el paraje, y dice el coste con una frase",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: docs/testing.md no tiene ninguna característica sobre el desvío. El ramal va en el antetítulo y el paraje en la línea grande, que es como está dibujado A3P5."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado la oferta del desvío, cuando se lee, entonces dice lo que cuesta con una frase y con el dibujo del ramal, y no con metros ni con minutos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La oferta del desvío nombra el ramal y el paraje, y dice el coste con una frase",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. El coste va declarado en el dato con sus cuatro valores —con el dibujo, con la frase, y metros y minutos a null— y además se criba el texto contra cifras y contra las palabras de distancia."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado la oferta del desvío, cuando se busca una acción de aceptar, entonces no existe ninguna: se acepta girando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La oferta del desvío no tiene ninguna acción de aceptar ni de descartar",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Se afirma contra la lista vacía de acciones y contra los nombres que tendría que declarar quien metiese un botón."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un ramal sin nombre, cuando se intenta componer la oferta, entonces falla nombrando el ramal, y no se ofrece un desvío anónimo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Un ramal sin nombre falla nombrando el ramal, y no se ofrece un desvío anónimo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Cuatro formas de llegar sin nombre, y las cuatro fallan nombrando el ramal: es la deuda que accesibilidad.md §2 dejó y que SPEC-007 cerró."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que no gira, cuando sigue andando, entonces no pasa nada, ningún texto lo menciona, y el paraje sigue ahí para otro día.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "No girar no cambia nada, no se anota y el paraje sigue ahí para otro día",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Y no se anota: anotarlo sería el primer paso de un reproche."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que gira y llega, cuando entra en el geofence del paraje, entonces ocurre lo que ocurre al llegar a cualquier sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Pasar cerca de un beat camino del supermercado valida igual, y la llegada nunca depende del trazado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Es el mismo criterio por el otro lado: la llegada depende del geofence del sitio y de nada más, así que llegar por un ramal no es un caso aparte. La secuencia de la llegada es de la fila 32."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el desvío ofrecido, cuando se compara con un micro-encuentro, entonces son cosas distintas: el micro-encuentro está en el camino y cuesta cero, y el desvío está fuera del lazo y cuesta piernas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El desvío está fuera del lazo y el micro-encuentro está en el camino: son cosas distintas",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. La oferta declara que está fuera del lazo; que el micro-encuentro no cuesta ni un metro de desvío se prueba en test/nucleo/microencuentros.test.mjs, que es de SPEC-019."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un jugador que ha marcado que evita escalones y una ruta que rodea unas escaleras, cuando llega al punto donde la ruta rodea, entonces el juego nombra el camino evitado y dice por qué, y no aparece la palabra «accesibilidad» en ningún texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El camino evitado se declara con nombre propio",
+      "escenario": "El camino evitado se declara con nombre propio",
+      "nota": "Se parte de la declaración que filtro.js deja sobre un lazo de verdad —grafo sintético con una escalera y un rodeo— y no de una declaración escrita a mano: lo que esta fila entrega es el pintado de ese dato. El caso homónimo de test/nucleo/accesibilidad.test.mjs cubre el otro extremo, el del dato."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado la declaración del camino evitado, cuando se lee, entonces habla en lenguaje del mundo, con nombre propio y una razón concreta, y no lleva iconos ni etiquetas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "La declaración habla en lenguaje del mundo y sin ninguna cifra, con una razón por criterio",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Hay una razón por criterio de world/aptitud.js, para que un criterio nuevo no se quede sin frase; ninguna lleva cifra y ninguna dice accesibilidad, filtro, criterio, perfil ni ajuste. «Un camino difícil sin nombre propio falla, y no se declara anónimo» cubre la validación de entrada."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el camino evitado, cuando se mira el mapa, entonces sigue existiendo y dibujado: el filtro evita, no borra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El camino evitado sigue existiendo y dibujado: el filtro evita, no borra",
+      "escenario": "El trazado rodea lo que el filtro evita",
+      "nota": "La declaración lo dice en el dato y el grafo lo conserva: la escalera sigue entre sus aristas después de trazar el lazo que la rodea."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un tramo cosido o inventado, cuando se compone cualquier declaración, entonces no se da por transitable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Lo que nos inventamos no se promete como transitable",
+      "escenario": "Lo que nos inventamos no se promete como transitable",
+      "nota": "Aquí por el lado de la declaración: las dos marcas de suposición no se dan por transitables y ninguna se puede declarar como camino evitado. El caso homónimo de test/nucleo/accesibilidad.test.mjs lo cubre por el lado del grafo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una ruta que no pudo rodear y pasa por un tramo no apto, cuando se llega, entonces se declara igual, con su nombre y su motivo: se avisa, no se oculta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "Una ruta que no pudo rodear se declara igual, con su nombre y su motivo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Lo que cambia entre evitar y atravesar es la frase y el antetítulo, no que se declare."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha sin seguidor de posición cableado, cuando se construye, entonces falla nombrando la pieza que falta, y no enseña un mapa con la marca quieta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El momento en marcha sin seguidor de posición cableado falla nombrando la pieza que falta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería: es una aplicación de pipeline/decisiones-orquestador.md §6h, que no tiene característica propia. Cuatro formas de no estar cableado, y las cuatro fallan nombrando la pieza."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha sin vibrador cableado, cuando se construye, entonces falla nombrando la pieza que falta, y no emite avisos de una sola capa en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El momento en marcha sin vibrador cableado falla nombrando la pieza que falta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. El caso «El emisor sin vibrador cableado falla nombrando la pieza que falta» de test/nucleo/avisos.test.mjs cubre la misma avería por la puerta del emisor."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el momento en marcha sin vibrador cableado, cuando se construye, entonces falla nombrando la pieza que falta, y no emite avisos de una sola capa en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "El emisor sin vibrador cableado falla nombrando la pieza que falta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Y «El emisor sin notificador cableado falla, y no lo confunde con un permiso denegado» comprueba la distinción que gobierna esta fila: ausente es avería, denegado es estado y sí construye."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el permiso de notificaciones denegado por quien juega, cuando salta una oportunidad, entonces el aviso se emite igual por las capas que quedan, y la falta queda declarada en el dato con su motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Con el permiso de notificaciones denegado la oportunidad se emite por las capas que quedan",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Emitido en verdadero, salieron háptico, faltaron notificación con motivo permiso-denegado, y la pantalla no se da por encendida. No se promueve a otro canal: eso inventaría un par que accesibilidad.md §3 no autoriza."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un aviso emitido con una capa caída, cuando se inspecciona lo que quedó anotado, entonces dice qué capa faltó: el error caro es creer que un aviso llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Una capa que estaba cableada y no respondió se anota con otro motivo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Los dos motivos van separados a propósito —permiso denegado se arregla en los ajustes del sistema y canal sin respuesta en la app—, y «Todo aviso emitido dice qué capas salieron y cuáles faltaron, aunque no faltase ninguna» comprueba que lo que salió más lo que faltó suma siempre las capas declaradas."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el seguidor de posición que deja de responder, cuando ocurre, entonces el mapa se queda como estaba y ninguna pantalla lo cuenta como avería del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El seguidor que deja de responder deja el mapa como estaba y no lo cuenta como avería del mundo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. `null` no es un error: es un túnel. Se comprueba con el recuento de lecturas que sí se preguntó —sin él «se quedó como estaba» sería fe— y que ningún texto del momento lo menciona."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el trazado que llega sin la lista de sitios, cuando se compone el momento, entonces falla, y no calcula la pertenencia con un umbral de distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El trazado que llega sin la lista de sitios falla, y no se calcula con un umbral de distancia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de la batería. Tres formas de llegar sin lista, y además se comprueba leyendo el módulo que no hay ningún umbral con el que se pudiera calcular. «El momento sin mundo congelado falla en vez de componer un mapa vacío» y «Una marca de aviso sin sitio falla» cubren las otras dos entradas obligatorias."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el mismo recorrido simulado dos veces, cuando se recorre, entonces da la misma secuencia de avisos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El mismo recorrido simulado dos veces da la misma secuencia de avisos",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-002). Hueco de la batería: la característica de determinismo de docs/testing.md es sobre el mundo generado, no sobre la secuencia de avisos. Se compara por serialización completa del recorrido entero —avisos, toques, notificaciones y momentos—, no campo a campo."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el mismo recorrido simulado dos veces, cuando se recorre, entonces da la misma secuencia de avisos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "El mismo recorrido simulado dos veces da la misma secuencia de avisos",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo). La misma afirmación por la puerta del emisor, con retención por beat en medio: lo retenido sale en el orden en que llegó."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece `Math.random` ni `Date.now`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "El código de esta fila no usa Math.random ni Date.now",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo). Se recorren los dos módulos de núcleo y las cuatro piezas de app/ de esta fila: la pantalla, el seguidor, el vibrador y el notificador."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una salida entera, cuando se inspecciona lo que quedó guardado, entonces no hay ningún histórico de posiciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/en-marcha.test.mjs",
+      "caso": "De una salida entera no queda ningún histórico de posiciones",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@privacidad, RF-PRIV-002). Cincuenta composiciones y del registro no sale ni una coordenada; el estado tiene exactamente los cuatro campos declarados y el seguidor no acumula en ninguna lista. «Lo emitido no guarda ninguna posición» cubre la otra mitad, la del emisor."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una salida entera, cuando se inspecciona lo que quedó guardado, entonces no hay ningún histórico de posiciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/avisos.test.mjs",
+      "caso": "Lo emitido no guarda ninguna posición",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@privacidad). Lo que se anota de un aviso es el tipo, el texto, el sitio y las capas, y los diez campos van comprobados uno a uno."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado un rumor que alcanza un sitio del mapa, cuando llega el aviso, entonces vibra el móvil y aparece una marca en el mapa, pero no salta ninguna notificación.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Una noticia va por háptico y marca",
+      "escenario": "Una noticia va por háptico y marca",
+      "nota": "Que el háptico se note DESDE EL BOLSILLO no lo puede afirmar ningún runner: el simulador no vibra y Maestro no ve el motor háptico. Es lista de revisión para una persona, con el móvil guardado."
+    },
+    {
+      "spec": "SPEC-029",
+      "criterio": "Dado una noticia, cuando llega, entonces la pantalla no se enciende.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "La salida sigue viva con el móvil bloqueado",
+      "escenario": "La salida sigue viva con el móvil bloqueado",
+      "nota": "Andar veinte minutos con el móvil bloqueado y comprobar que la pantalla no se enciende ni una vez. La mitad automatizable —que la noticia no usa el canal de notificación— está en «La oportunidad es el único aviso que enciende la pantalla»."
     }
   ]
 }
