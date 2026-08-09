@@ -24152,6 +24152,591 @@
       "fichero": "test/nucleo/capitulos.test.mjs",
       "caso": "Leer el diario no mueve ni un byte de los documentos congelados del mapa",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una partida con cuatro objetos, cuando el jugador abre la repisa, entonces no hay peso, ni huecos, ni manera de tirar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La repisa no es un inventario",
+      "escenario": "La repisa no es un inventario",
+      "nota": "Escenario etiquetado `@app` en docs/testing.md, implementado en `@nucleo` sobre la proyección: es el nivel al que hoy se puede ejecutar y donde de verdad vive la afirmación."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una partida con cuatro objetos, cuando el jugador abre la repisa, entonces no hay peso, ni huecos, ni manera de tirar nada.",
+      "nivel": "@app",
+      "fichero": "test/app/repisa.yaml",
+      "caso": "La repisa no es un inventario",
+      "escenario": "La repisa no es un inventario",
+      "nota": "La mitad que necesita dispositivo: que los tres gestos de inventario —pulsación larga, deslizar, arrastrar— no estén conectados a nada."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la superficie de la repisa, cuando se buscan una acción de equipar, de ordenar, de combinar o de descartar, entonces no existe ninguna de las cuatro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La repisa no es un inventario",
+      "escenario": "La repisa no es un inventario",
+      "nota": "Escenario etiquetado `@app` en docs/testing.md, implementado en `@nucleo` sobre la proyección: es el nivel al que hoy se puede ejecutar y donde de verdad vive la afirmación."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado cada objeto de la repisa, cuando se lee, entonces dice de quién viene y de qué día.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La repisa no es un inventario",
+      "escenario": "La repisa no es un inventario",
+      "nota": "Escenario etiquetado `@app` en docs/testing.md, implementado en `@nucleo` sobre la proyección: es el nivel al que hoy se puede ejecutar y donde de verdad vive la afirmación."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un objeto obtenido sin ninguna cara detrás —un hallazgo de cuneta—, cuando se lee su procedencia, entonces declara cómo apareció y no queda en blanco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Un hallazgo de cuneta declara cómo apareció y no queda en blanco",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado los objetos de la repisa, cuando se leen en orden, entonces salen del más reciente al más antiguo por el día en que se obtuvieron, con un desempate declarado y estable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Los objetos salen del más reciente al más antiguo, con desempate declarado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un objeto de clase llave y otro de clase recuerdo, cuando se leen en la repisa, entonces se presentan igual y nada distingue al que abre puertas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Una llave y un recuerdo se presentan igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un objeto obtenido en otro mapa, cuando se abre la repisa en el mapa activo, entonces aparece: los objetos son de la jugadora y no del sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Un objeto obtenido en otro mapa aparece en la repisa del mapa activo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una partida sin ningún objeto, cuando se abre la repisa, entonces se enseña vacía en voz de mundo y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La repisa sin objetos se enseña vacía y no es un error",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 3 de los que la spec deja al descubierto: la repisa vacía es el estado de las primeras horas de juego de todo el mundo y no tiene escenario."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un objeto sin procedencia declarada, cuando se proyecta la repisa, entonces falla nombrando el objeto, en lugar de pintar una línea a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Un objeto sin procedencia declarada falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la repisa entera, cuando se buscan cifras, entonces la única es el saldo de oro, y no hay ninguna de distancia, tiempo, ritmo, pasos ni progreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La única cifra de la repisa es el saldo de oro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una partida con motes en dos núcleos, cuando se abre la repisa, entonces debajo de los objetos aparecen los motes, cada uno con el núcleo donde te llaman así.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "El mote nace del rumor y es por núcleo",
+      "escenario": "El mote nace del rumor y es por núcleo",
+      "nota": "Del escenario `@app` aquí vive la mitad de pantalla —que los motes se vean por núcleo y juntos—; la de datos es de SPEC-015."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado los motes, cuando se leen, entonces son solo los del mapa activo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Los motes son solo los del mapa activo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un núcleo sin mote, cuando se lee la lista, entonces no aparece, y su ausencia no se declara con ninguna línea vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Un núcleo sin mote no aparece, y su ausencia no se declara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un mapa recién levantado, cuando se abre la repisa, entonces no hay ningún mote y el hueco lo dice en voz de mundo, sin explicar por qué.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Un mapa recién levantado no tiene ningún mote y el hueco lo dice en voz de mundo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 3 de la spec: la partida sin motes tampoco tiene escenario."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la lista de motes, cuando se busca una barra de reputación, una lista de escalones o un número junto a un pueblo, entonces no hay ninguna de las tres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La lista de motes no lleva barra, escalones ni número junto a un pueblo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la lista de motes, cuando se lee su orden, entonces sale de un criterio declarado y estable y no del orden en que llegaron los rumores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "El orden de los motes sale del rumor más reciente y no del orden en que llegaron",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un mote, cuando se lee, entonces es el texto del candidato que SPEC-015 declara pegado en ese núcleo, y esta entrega no elige ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "El mote es el candidato que SPEC-015 declara pegado en ese núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una partida con oro, cuando se abre la repisa, entonces el saldo aparece al pie, en una línea compuesta en tiempo de ejecución a partir del saldo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "El saldo se compone en tiempo de ejecución a partir de la bolsa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una bolsa a cero, cuando se abre la repisa, entonces la línea del oro lo dice sin cifra escrita a mano y sin reproche.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Una bolsa a cero lo dice sin cifra escrita a mano y sin reproche",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la repisa, cuando se busca el oro ganado a lo largo de la partida, entonces no aparece: solo está el saldo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "El oro ganado a lo largo de la partida no aparece: solo está el saldo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado los ajustes, cuando se enumeran sus filas, entonces el catálogo es cerrado y cada fila declara su identificador, su grupo, su orden, su tipo y la fila del checklist que la posee.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El catálogo es cerrado y cada fila declara su identificador, su grupo, su orden, su tipo y su dueña",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de los que la spec deja al descubierto: el catálogo de ajustes no tiene escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado los ajustes, cuando se enumeran sus grupos, entonces son cinco y en este orden: cómo andas, tu personaje, el mapa, el mundo y tus cosas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Los cinco grupos van en su orden",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de los que la spec deja al descubierto: el catálogo de ajustes no tiene escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el grupo «cómo andas», cuando se leen sus filas, entonces están el tramo, preguntado en lenguaje de sitios, y los caminos que evitar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El grupo «cómo andas» tiene el tramo y los caminos que evitar",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de los que la spec deja al descubierto: el catálogo de ajustes no tiene escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la fila del tramo, cuando se lee su valor, entonces es la respuesta declarada del catálogo de SPEC-004 y nunca una distancia, un tiempo ni un ritmo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "La fila del tramo enseña la respuesta declarada y nunca una distancia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la fila de los caminos que evitar, cuando se lee su etiqueta y su valor, entonces en ninguno aparece la palabra accesibilidad ni ningún sinónimo de modo, ayuda o adaptación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Ni la etiqueta ni el valor de los caminos que evitar dicen accesibilidad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el grupo «el mapa», cuando se leen sus filas, entonces están cómo se pinta, con el nombre visible del estilo activo, y el tamaño de la letra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El grupo «el mapa» tiene cómo se pinta, con el nombre visible del estilo, y el tamaño de la letra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la fila de cómo se pinta, cuando se elige otro estilo, entonces el mundo sigue idéntico byte a byte y solo cambian colores, grosores y tipografías.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Cambiar el estilo de pintado no resiembra nada",
+      "escenario": "Cambiar el estilo de pintado no resiembra nada",
+      "nota": "De este escenario aquí se sostiene lo que esta fila posee: que el estilo se cambia desde esta pantalla y que cambiarlo no toca el documento del mundo. El repintado sin resembrar es de SPEC-021."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el grupo «el mundo», cuando se leen sus filas, entonces están contar los pasos del día a día y solo de día.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Los pasos de fondo vienen apagados",
+      "hueco_de_bateria": true,
+      "nota": "La composición del grupo «el mundo» se afirma en este caso; el escenario de la batería cubre solo el valor de origen."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una instalación nueva, cuando se abren los ajustes, entonces «contar los pasos del día a día» está desactivado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Los pasos de fondo vienen apagados",
+      "escenario": "Los pasos de fondo vienen apagados",
+      "nota": "Aquí se afirma la mitad de fila —que el valor mostrado sea el real y nunca el pedido—; la mitad del valor de origen vive en test/nucleo/onboarding.test.mjs."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una instalación nueva, cuando se abren los ajustes, entonces «contar los pasos del día a día» está desactivado.",
+      "nivel": "@app",
+      "fichero": "test/app/ajustes.yaml",
+      "caso": "Los pasos de fondo vienen apagados",
+      "escenario": "Los pasos de fondo vienen apagados",
+      "nota": "La mitad que necesita dispositivo: que tocar el interruptor no lo encienda, porque lo que hace es pedirlo."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una instalación nueva, cuando se abren los ajustes, entonces «solo de día» está activado, y se puede desactivar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El horario diurno viene encendido",
+      "escenario": "El horario diurno viene encendido",
+      "nota": "Aquí se afirma la mitad de fila —el valor mostrado y que se puede desactivar—; la del valor de origen vive en test/nucleo/onboarding.test.mjs."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el grupo «tus cosas», cuando se leen sus filas, entonces están los sitios que marcaste, con su cuenta, guardar una copia y empezar de nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El grupo «tus cosas» tiene los sitios marcados, la copia y empezar de nuevo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado la fila de empezar de nuevo, cuando se lee su presentación, entonces es la última de la última agrupación y no es la acción principal de la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Empezar de nuevo es la última de todas y no es la acción principal",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el catálogo entero, cuando se busca una fila del oficio, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El oficio no aparece en ajustes",
+      "escenario": "El oficio no aparece en ajustes",
+      "nota": "Escenario etiquetado `@app` en docs/testing.md, implementado en `@nucleo` sobre la proyección: es el nivel al que hoy se puede ejecutar y donde de verdad vive la afirmación."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el catálogo entero, cuando se busca una fila del oficio, entonces no existe.",
+      "nivel": "@app",
+      "fichero": "test/app/ajustes.yaml",
+      "caso": "El oficio no aparece en ajustes",
+      "escenario": "El oficio no aparece en ajustes",
+      "nota": "La mitad que necesita dispositivo: que ninguna fila del oficio se vea en la pantalla montada."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el catálogo entero, cuando se busca una fila que cambie el mapa activo, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El catálogo no tiene ninguna fila del mapa activo, de la red, de una cuenta, de una suscripción ni de analítica",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de los que la spec deja al descubierto: el catálogo de ajustes no tiene escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el catálogo entero, cuando se busca una fila que hable de la red, de una cuenta, de una suscripción o de analítica, entonces no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El catálogo no tiene ninguna fila del mapa activo, de la red, de una cuenta, de una suscripción ni de analítica",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de los que la spec deja al descubierto: el catálogo de ajustes no tiene escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado una fila cuyo dueño no está cableado, cuando se construye la pantalla, entonces falla nombrando la fila y la pieza que falta, en lugar de pintarla apagada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Una fila cuyo dueño no está cableado impide componer la pantalla, nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de los que la spec deja al descubierto: el catálogo de ajustes no tiene escenario propio en docs/testing.md."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un identificador de fila que el catálogo no tiene, cuando se pide su valor, entonces falla nombrando el identificador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un identificador de fila que el catálogo no tiene falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un estilo guardado que ya no existe en el catálogo de SPEC-021, cuando se abren los ajustes, entonces falla nombrando el estilo, en lugar de caer al de por defecto sin decirlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un estilo guardado que ya no existe en el catálogo falla nombrándolo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un jugador que abre los ajustes, cuando los recorre, entonces puede cambiar su nombre y su género gramatical, pero no su oficio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El oficio no aparece en ajustes",
+      "escenario": "El oficio no aparece en ajustes",
+      "nota": "Escenario etiquetado `@app` en docs/testing.md, implementado en `@nucleo` sobre la proyección: es el nivel al que hoy se puede ejecutar y donde de verdad vive la afirmación."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre cambiado, cuando se comparan los documentos congelados de todas las celdas antes y después, entonces son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Cambiar el nombre no mueve un byte de ningún documento congelado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 1 de los que la spec deja al descubierto: nada de la batería afirma que cambiar el nombre no toque el mundo, siendo la mitad de RF-PJ-010."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre cambiado, cuando se compara la semilla de la partida, entonces es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Cambiar el nombre no toca la semilla de la partida",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 1 de los que la spec deja al descubierto: nada de la batería afirma que cambiar el nombre no toque el mundo, siendo la mitad de RF-PJ-010."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre cambiado, cuando se recorren los nombres de núcleos, servicios, parajes, calzadas y ramales, entonces ninguno ha cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Cambiar el nombre no mueve un byte de ningún documento congelado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 1 de los que la spec deja al descubierto: nada de la batería afirma que cambiar el nombre no toque el mundo, siendo la mitad de RF-PJ-010."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un género cambiado, cuando se compone un texto de plantilla que se dirige a la jugadora, entonces concuerda con el género nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un género cambiado concuerda los textos nuevos y no reescribe los del narrador",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 5 de la spec: el cambio de género con textos ya escritos no tiene escenario."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un género cambiado, cuando se leen los textos del narrador ya escritos y guardados, entonces siguen tal cual, y ninguno se vuelve a pedir ni se reescribe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un género cambiado concuerda los textos nuevos y no reescribe los del narrador",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 5 de la spec: el cambio de género con textos ya escritos no tiene escenario."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre vacío o compuesto solo de espacios, cuando se intenta guardar, entonces se rechaza diciendo qué falta, y el nombre anterior sigue.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un nombre vacío o de solo espacios se rechaza diciendo qué falta, y el anterior sigue",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre más largo que el tope declarado, cuando se intenta guardar, entonces se rechaza nombrando el tope.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un nombre más largo que el tope se rechaza nombrando el tope",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un género fuera del enumerado declarado, cuando se intenta guardar, entonces falla nombrando el valor recibido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un género fuera del enumerado falla nombrando el valor recibido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado las sugerencias de nombre, cuando se leen, entonces las femeninas van primero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Las sugerencias de nombre llevan las femeninas primero",
+      "hueco_de_bateria": true,
+      "nota": "La edición de esta pantalla; el reparto de género de las sugerencias ya se afirma en test/nucleo/personaje.test.mjs."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre igual al de un NPC del mundo, cuando se guarda, entonces se acepta: el índice de nombres únicos es del mundo y el personaje no entra en él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Un nombre igual al de un NPC del mundo se acepta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el ajuste del tramo, cuando se lee cualquier texto de la pantalla, entonces ninguno insinúa que la jugadora haya andado más o menos últimamente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "La fila del tramo enseña la respuesta declarada y nunca una distancia",
+      "hueco_de_bateria": true,
+      "nota": "«El ajuste no se comenta nunca» es de la fila 4; aquí se afirma sobre los textos de esta pantalla."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el jugador que abre los ajustes, entonces se habla como aplicación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "Los ajustes son la única excepción",
+      "escenario": "Los ajustes son la única excepción",
+      "nota": "Escenario etiquetado `@app` en docs/testing.md, implementado en `@nucleo` sobre la proyección: es el nivel al que hoy se puede ejecutar y donde de verdad vive la afirmación."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el jugador que abre los ajustes, entonces se habla como aplicación.",
+      "nivel": "@app",
+      "fichero": "test/app/ajustes.yaml",
+      "caso": "Los ajustes son la única excepción",
+      "escenario": "Los ajustes son la única excepción",
+      "nota": "La mitad que necesita dispositivo: que la pantalla montada declare registro de aplicación y que la frontera se cruce al salir."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado ese registro, cuando se recorre cualquier otra pantalla del juego, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "Los ajustes son la única excepción",
+      "escenario": "Los ajustes son la única excepción",
+      "nota": "La segunda mitad del escenario —«y ese registro no aparece en ninguna otra pantalla»— se afirma sobre el corpus entero del paquete, no sobre las dos pantallas de esta fila."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado cualquier texto que el juego entrega para pintar, cuando se lee, entonces declara su registro, y el registro sale de un enumerado cerrado de dos valores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "Todo texto que el juego entrega para pintar declara su registro",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 4 de los que la spec deja al descubierto: el registro como dato no tiene escenario, y es lo único que permite afirmar RF-LANG-002 sobre el conjunto en vez de recorriendo pantallas."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado cualquier texto que el juego entrega para pintar, cuando se lee, entonces declara su registro, y el registro sale de un enumerado cerrado de dos valores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "El registro sale de un enumerado cerrado de dos valores",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 4 de los que la spec deja al descubierto: el registro como dato no tiene escenario, y es lo único que permite afirmar RF-LANG-002 sobre el conjunto en vez de recorriendo pantallas."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado los textos con registro de aplicación, cuando se enumera dónde viven, entonces están en el onboarding y en los ajustes, y en ninguna pantalla más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "Los ajustes son la única excepción",
+      "escenario": "Los ajustes son la única excepción"
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un texto con registro de aplicación colocado en una pantalla del bucle, cuando se compone, entonces falla nombrando el texto y la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "El juego habla como mundo",
+      "escenario": "El juego habla como mundo",
+      "nota": "De este escenario aquí vive la mitad que esta fila sostiene: que ningún texto del bucle lleve registro de aplicación, y que colocarlo falle nombrando el texto y la pantalla."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un texto de los ajustes, cuando se resuelve su tipografía, entonces sale del registro y es la sans, sin que ninguna pantalla la elija a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "La tipografía se deriva del registro y ninguna pantalla la elige a mano",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 4 de los que la spec deja al descubierto: el registro como dato no tiene escenario, y es lo único que permite afirmar RF-LANG-002 sobre el conjunto en vez de recorriendo pantallas."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un texto de la repisa o del diario, cuando se resuelve su tipografía, entonces es la serif, por el mismo camino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "La tipografía se deriva del registro y ninguna pantalla la elige a mano",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 4 de los que la spec deja al descubierto: el registro como dato no tiene escenario, y es lo único que permite afirmar RF-LANG-002 sobre el conjunto en vez de recorriendo pantallas."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el ajuste de tamaño de letra de la escena, cuando se busca su etiqueta, entonces no lleva ninguna palabra de la voz de aplicación dentro del bucle: se cuela sin etiqueta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/lenguaje.test.mjs",
+      "caso": "El tamaño de letra de la escena se cuela sin palabra de la voz de aplicación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el mismo estado, cuando se compone el catálogo de ajustes dos veces, entonces las dos composiciones son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Dos composiciones del mismo estado son idénticas",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-003)."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el mismo estado, cuando se proyecta la repisa dos veces, entonces las dos proyecciones son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "Dos proyecciones del mismo estado son idénticas",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-003)."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado un nombre, un género y un estilo cambiados, cuando se serializa la partida y se vuelve a cargar, entonces vuelven los tres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "El nombre y el género cambiados vuelven al guardar y cargar la partida",
+      "hueco_de_bateria": true,
+      "nota": "CUBIERTO A MEDIAS: vuelven el nombre y el género, que viven en el área del personaje. El estilo NO: no hay ninguna área del estado que lo guarde —AJUSTES_DE_ORIGEN solo declara soloDeDia y pasosDelDiaADia— y ni SPEC-021 ni esta entrega lo persisten, así que hoy no puede volver. Es un criterio bloqueante (@determinismo) sin cubrir, y necesita iteración."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece `Math.random`, `Date.now` ni ninguna lectura del reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repisa.test.mjs",
+      "caso": "La repisa no lee el reloj del sistema ni el azar",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-003)."
+    },
+    {
+      "spec": "SPEC-038",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece `Math.random`, `Date.now` ni ninguna lectura del reloj del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ajustes.test.mjs",
+      "caso": "Los ajustes no leen el reloj del sistema ni el azar",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo, RNF-DET-003)."
     }
   ]
 }
