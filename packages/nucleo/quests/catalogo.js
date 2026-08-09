@@ -144,6 +144,38 @@ export function textosDelCatalogo(catalogo = CATALOGO) {
 }
 
 /**
+ * Los huecos que una plantilla puede pedirle al narrador, cada uno con su tope y **su
+ * texto de fallback**.
+ *
+ * Es la lista que consume SPEC-018 y la que hace comprobable su exigencia: cada hueco
+ * declara un fallback, y una plantilla a la que le falte uno se rechaza **al cargar el
+ * catálogo**. Con la declaración opcional, «esta plantilla no necesita fallback» y «se
+ * me olvidó» serían indistinguibles, que es el mismo argumento con el que la
+ * declaración de rumor se hizo obligatoria.
+ *
+ * La clave es **local a la plantilla** —`titulo`, `gancho`, `beat:3`— y la clave con la
+ * que el texto vive en la partida la compone el narrador, añadiéndole el mapa y el
+ * punto de invocación.
+ *
+ * El `tipo` es el del catálogo cerrado de campos inertes: cinco de los seis salen de
+ * aquí, y el sexto —el envoltorio del zurrón— no es de ninguna plantilla.
+ */
+export function huecosDePlantilla(plantilla) {
+  const huecos = [];
+  const mete = (clave, tipo, clase, texto) => huecos.push({ clave, tipo, clase, tope: TOPES_DE_TEXTO[clase], fallback: texto });
+  mete('titulo', 'titulo', 'titulo', plantilla.titulo);
+  mete('gancho', 'gancho', 'gancho', plantilla.gancho);
+  plantilla.beats.forEach((b, i) => {
+    mete(`beat:${i + 1}`, 'escena', 'beat', b.texto);
+    if (b.disparador.tipo === 'franja') mete(`beat:${i + 1}:variante`, 'escena', 'variante', b.disparador.variante);
+    if (b.disparador.tipo === 'con_objeto') mete(`beat:${i + 1}:alternativa`, 'escena', 'alternativa', b.disparador.viaAlternativa?.texto);
+  });
+  mete('desenlace', 'escena', 'desenlace', plantilla.desenlace?.texto);
+  for (const cual of REPUESTOS) mete(`repuesto:${cual}`, 'escena', 'repuesto', plantilla.repuesto?.[cual]);
+  return huecos;
+}
+
+/**
  * El vocabulario de escenas de paraje que pide un catálogo, con **el peso mínimo más
  * exigente** de cada escena y ordenado por escena.
  *
@@ -384,7 +416,22 @@ function compruebaPlantilla(plantilla, indice) {
   // catálogo cerrado y sin ninguna de las fórmulas que el paquete de idioma prohíbe.
   for (const t of textosDelCatalogo([plantilla])) exigeTexto(plantilla, t.clase, t.donde, t.texto);
 
-  // 10 · Los disparadores que traen texto propio.
+  // 10 · Cada hueco que la plantilla puede pedirle al narrador, con su fallback. Sin
+  // uno de ellos la plantilla se rechaza **aquí**, al cargar el catálogo, y no la
+  // primera vez que alguien se quede sin cobertura: el fallback es el camino normal.
+  for (const hueco of huecosDePlantilla(plantilla)) {
+    if (typeof hueco.fallback !== 'string' || !hueco.fallback.trim()) {
+      throw new Error(
+        `el hueco "${hueco.clave}" de la plantilla "${id}" no declara texto de fallback: ` +
+        'todo hueco que se le puede pedir al narrador tiene el suyo, porque sin red la aventura se juega entera igual',
+      );
+    }
+    if (hueco.fallback.length > hueco.tope) {
+      throw new Error(`el fallback del hueco "${hueco.clave}" de la plantilla "${id}" ocupa ${hueco.fallback.length} caracteres y su tope es ${hueco.tope}`);
+    }
+  }
+
+  // 11 · Los disparadores que traen texto propio.
   plantilla.beats.forEach((b, i) => {
     if (b.disparador.tipo === 'franja' && !b.disparador.variante) {
       throw new Error(`el beat ${i + 1} de la plantilla "${id}" dispara en franja y no trae la variante de escena de llegar dentro de ella`);

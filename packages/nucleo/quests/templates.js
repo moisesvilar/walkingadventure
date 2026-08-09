@@ -736,7 +736,7 @@ export const TEMPLATES = [
     },
     mote: 'la-del-inventario',
     desenlace: {
-      texto: 'El inventario se cierra con un margen de error que nadie mira. Se guarda en un cajón y se celebra como una victoria, que lo es.',
+      texto: 'El inventario se cierra con un descuadre que nadie quiere mirar. Se guarda en un cajón y se celebra como una victoria, que lo es.',
       oro: 14,
       objetos: [],
     },
@@ -783,7 +783,7 @@ export const TEMPLATES = [
       conLoConseguido: 'Vuelves con lo que te dejaron leer. No es la página entera, pero es la parte que hacía falta.',
     },
     relacion: [
-      { rol: 'quien_guarda', signo: 'feo', beat: 2, decision: 'llevarse-el-libro-sin-permiso' },
+      { rol: 'quien_guarda', signo: 'feo', beat: 2, decision: 'llevarse-el-libro-sin-pedirlo' },
       { rol: 'quien_guarda', signo: 'reparador', beat: 3, decision: 'devolverlo-antes-de-que-lo-echen-de-menos' },
     ],
     revision: 'El humor es el celo del custodio, tratado con respeto: su norma es razonable y su solución, generosa.',
@@ -1007,31 +1007,37 @@ export const TEMPLATES = [
     ],
   },
   {
+    // La premisa cambió entera y el identificador no: lo que se discute en la sala
+    // es **una porfía vieja**, no una apuesta, y se salda con trabajo y no con
+    // bebida. El contenido es apto para menores por especificación, así que una
+    // plantilla que necesitara disfrazar su tema para pasar el filtro estaría apta a
+    // medias; esta ya no lo necesita. El `id` se queda porque vive en partidas
+    // guardadas y en los extractos de referencia, igual que el de las seis portadas.
     id: 'la-apuesta-de-la-taberna',
-    titulo: 'La apuesta que se fue de las manos',
-    gancho: 'En la taberna se ha apostado algo que nadie sabe cómo comprobar. Hace falta quien camine y quien tenga criterio, y resulta que traes lo que hace falta.',
+    titulo: 'La porfía que nadie sabía zanjar',
+    gancho: 'En la taberna llevan años discutiendo algo que desde la sala no hay manera de comprobar. Hace falta quien camine hasta allí y vuelva con criterio, y resulta que traes justo eso.',
     tamano: 'paseo',
     oficios: ['taberna'],
     rumor: {
       notable: true,
       signo: 'bueno',
-      semilla: { asunto: 'apuesta-resuelta', escala: { veces: 1 }, detalle: { con: 'taberna', motivo: 'apuesta-imposible' } },
+      semilla: { asunto: 'porfia-zanjada', escala: { veces: 1 }, detalle: { con: 'taberna', motivo: 'porfia-antigua' } },
     },
-    mote: 'la-que-zanjó-la-apuesta',
+    mote: 'la-que-zanjó-la-porfía',
     desenlace: {
-      texto: 'Gana quien menos gritaba. La apuesta se paga en rondas y la discusión continúa por costumbre y con mejor humor.',
+      texto: 'Tenía razón quien menos gritaba. La porfía se salda acarreando leña hasta la siega, y la discusión sigue por costumbre y con mejor humor.',
       oro: 12,
       objetos: [],
     },
     repuesto: {
-      sinTi: 'La apuesta quedó en tablas por acuerdo tácito y desgaste. Aquí se resuelve así casi todo.',
+      sinTi: 'La porfía quedó en tablas por acuerdo tácito y desgaste. Aquí se resuelve así casi todo.',
       conLoConseguido: 'Vuelves con lo que sí has comprobado. Sirve para desmentir a alguien, que ya es motivo suficiente.',
     },
     relacion: [
       { rol: 'quien_sirve', signo: 'feo', beat: 4, decision: 'cobrar-comisión-por-arbitrar' },
       { rol: 'quien_sirve', signo: 'reparador', beat: 4, decision: 'dar-el-veredicto-sin-cobrar' },
     ],
-    revision: 'Exclusiva de taberna. Se ríe de la apuesta y del vozarrón, nunca del local ni de la clientela.',
+    revision: 'Exclusiva de taberna. Se ríe de la porfía y del vozarrón, nunca del local ni de quien lo regenta: lo que se ventila es quién tenía razón, y se paga con trabajo.',
     orden: ['taberna', 'quien_sirve', 'lejos'],
     roles: {
       taberna: { tipo: 'servicio', kind: 'taberna' },
@@ -1039,10 +1045,10 @@ export const TEMPLATES = [
       lejos: { tipo: 'nucleo', types: ['aldea', 'granja', 'pueblo'] },
     },
     beats: [
-      { rol: 'taberna', escena: 'encargo', texto: 'Te ponen a arbitrar por unanimidad y sin preguntarte. El cargo no tiene sueldo ni salida.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'lejos', escena: 'comprobación', texto: 'Compruebas el asunto en el sitio. Resulta ser mucho menos épico de lo apostado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'taberna', escena: 'encargo', texto: 'Te ponen a arbitrar por aclamación y sin preguntarte. El cargo no trae sueldo, ni relevo, ni manera decente de escaquearse.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'lejos', escena: 'comprobación', texto: 'Compruebas el asunto en el sitio. Resulta ser mucho menos épico de lo que se cuenta en la sala.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'lejos', escena: 'testigo', texto: 'Consigues un testimonio que lo confirma, dicho con una sequedad envidiable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'taberna', escena: 'veredicto', texto: 'Vuelves y das el veredicto. Se acata a regañadientes y se celebra a gritos.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'taberna', escena: 'veredicto', texto: 'Vuelves y das el veredicto. Se acata a regañadientes y se celebra a gritos, que aquí viene a ser lo mismo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
 
@@ -1185,9 +1191,9 @@ export const TEMPLATES = [
       { rol: 'cruce', escena: 'encuentro', texto: 'En el cruce avisas a quien viene. La noticia se adelanta a la feria por el camino corto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'campa', escena: 'gestión', texto: 'Hay una campa que serviría. Quien la tiene pone condiciones razonables y una absurda.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'cruce', escena: 'aviso', texto: 'Otra vez el cruce, ahora en sentido contrario y con el plan aún sin cerrar. Aquí se entera todo el mundo antes que nadie.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'aldea', escena: 'permiso', texto: 'Quien manda escucha el plan y pone pegas por deporte. Luego dice que sí.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'aldea', escena: 'venia', texto: 'Quien manda escucha el plan y pone pegas por deporte. Luego dice que sí.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'cruce', escena: 'trato', texto: 'En el cruce se cierra el trato de pie, que es como se cierran los tratos que importan. La condición absurda se acepta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'feria', escena: 'cierre', texto: 'Vuelves con el sitio y el permiso. Se monta todo en un suspiro y con una eficacia sospechosa.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'feria', escena: 'cierre', texto: 'Vuelves con el sitio y con la venia de quien manda. Se monta todo en un suspiro y con una eficacia sospechosa.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1277,7 +1283,7 @@ export const TEMPLATES = [
     beats: [
       { rol: 'reparto', escena: 'encargo', texto: 'Te dan el saco vacío, la lista de casas y un consejo sobre el calzado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'alto', escena: 'encuentro', texto: 'En el alto te cruzas con quien va en sentido contrario y os contáis las novedades.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'salina', escena: 'carga', texto: 'Cargas la sal. Pesa exactamente lo que te habían prometido que no pesaría.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'saco de sal' } },
+      { rol: 'salina', escena: 'acarreo', texto: 'Cargas la sal. Pesa exactamente lo que te habían prometido que no pesaría.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'saco de sal' } },
       { rol: 'alto', escena: 'descanso', texto: 'Otra vez el alto, ahora con el saco a cuestas. Paras a respirar y a maldecir el consejo del calzado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'primera_parada', escena: 'entrega', texto: 'En la casa de la lista piden más de lo apuntado, con una sonrisa muy trabajada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'alto', escena: 'espera', texto: 'De nuevo el alto. Aquí se decide siempre lo mismo: seguir un poco más antes de parar.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
