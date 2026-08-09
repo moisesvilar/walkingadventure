@@ -18,8 +18,47 @@ import { seSolapan } from '../../packages/nucleo/core/cajas.js';
 import { HOLGURA } from '../../packages/nucleo/core/rotulos.js';
 import { colocadorDeRotulos } from '../../packages/nucleo/render/colocador.js';
 import { medidorNominal } from '../../packages/nucleo/render/medidor-nominal.js';
+import { componeEscena } from '../../packages/nucleo/render/escena.js';
+import { ESTILO_POR_DEFECTO } from '../../packages/nucleo/render/estilos.js';
+import {
+  CLAVES,
+  cargaCelda,
+  cargaMapa,
+  celdaAbierta,
+  celdasAbiertas,
+  creaMapa,
+  guardaMapa,
+  listaMapas,
+  pisa,
+} from '../../packages/nucleo/partida/mapa.js';
+import { claveDeCelda, creaRejilla } from '../../packages/nucleo/world/rejilla.js';
 import { creaReloj } from '../dobles/reloj.mjs';
 import { SEMILLA_A, SEMILLA_B, consultaDeFixture, coordenadaDe } from './celda-de-prueba.mjs';
+
+/**
+ * El generador, armado como la pieza que `creaLevantamiento` exige en su `DEL_NUCLEO`.
+ *
+ * Es el mismo objeto que arma `app/nucleo/piezas.js` para la app, con una diferencia
+ * deliberada: allí las importaciones citan el paquete por su nombre y aquí van por ruta
+ * relativa. Es lo que deja estas pruebas arrancando sin resolver ningún especificador
+ * instalado, que es el criterio duro de SPEC-020; y es también por lo que el bundle se
+ * arma aquí y no se importa de `app/nucleo/piezas.js`.
+ */
+export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
+  componeEscena,
+  ESTILO_POR_DEFECTO,
+  CLAVES,
+  cargaCelda,
+  cargaMapa,
+  celdaAbierta,
+  celdasAbiertas,
+  creaMapa,
+  guardaMapa,
+  listaMapas,
+  pisa,
+  claveDeCelda,
+  creaRejilla,
+});
 
 /**
  * La semilla de partida de estas pruebas, y otra distinta. Salen de
@@ -50,14 +89,15 @@ export const EN_GALICIA = 'costero';
 export const EN_EL_INTERIOR = 'urbano-denso';
 
 /**
- * Monta el levantamiento con las cinco piezas cableadas.
+ * Monta el levantamiento con las seis piezas cableadas.
  *
  * @param {object} [opciones]
  *   `consultaOsm` el traedor doblado; `nombre` el extracto que sirve si no se pasa
- *   traedor; `almacen` para reutilizar uno ya escrito; `reloj` el inyectable.
+ *   traedor; `almacen` para reutilizar uno ya escrito; `reloj` el inyectable; `nucleo`
+ *   para pasar un generador distinto del completo.
  * @returns {{ levantamiento, almacen, reloj, cronometro, consultaOsm }}
  */
-export function montaLevantamiento({ nombre = 'costero', consultaOsm, almacen, reloj } = {}) {
+export function montaLevantamiento({ nombre = 'costero', consultaOsm, almacen, reloj, nucleo } = {}) {
   const elReloj = reloj ?? creaReloj();
   const elAlmacen = almacen ?? creaAlmacenEnMemoria();
   const elTraedor = consultaOsm ?? consultaDeFixture(nombre);
@@ -68,6 +108,7 @@ export function montaLevantamiento({ nombre = 'costero', consultaOsm, almacen, r
     cronometro,
     colocador: colocadorDeRotulos,
     medidor: medidorNominal,
+    nucleo: nucleo ?? NUCLEO_DEL_LEVANTAMIENTO,
   });
   return { levantamiento, almacen: elAlmacen, reloj: elReloj, cronometro, consultaOsm: elTraedor };
 }

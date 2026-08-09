@@ -9,12 +9,24 @@
     "scheme": "walkingadventure",
     "ios": {
       "bundleIdentifier": "com.walkingadventure.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSSupportsLiveActivities": true,
+        "UIBackgroundModes": ["location"],
+        "NSLocationWhenInUseUsageDescription": "Para saber por dónde andas mientras hay una salida abierta, y solo mientras la hay."
+      }
     },
     "android": {
       "package": "com.walkingadventure.app",
       "allowBackup": true,
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS"
+      ]
     }
   }
 }

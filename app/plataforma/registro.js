@@ -79,7 +79,7 @@ export function creaRegistro(modulos = [], { ausentes = [] } = {}) {
       return out.slice();
     },
 
-    /** Las cuatro capacidades en orden estable. Antes de sondear, la lista está vacía. */
+    /** Las cinco capacidades en orden estable. Antes de sondear, la lista está vacía. */
     estado: () => (sondeado ? sondeado.slice() : []),
 
     /**

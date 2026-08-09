@@ -272,6 +272,26 @@ const NOMBRES_DE_POSICION = /^(lat|lon|lng|latitud|longitud|coord|coords|coorden
 const NOMBRES_DE_RELOJ = /^(timestamp|epoch|reloj|hora|ahora|now|fechaReal|capturado|capturadoEn|capturadaEn|utc)$/i;
 
 /**
+ * **La única posición de quien juega que la partida guarda**, declarada aquí y no
+ * dentro del área que la escribe, para que ampliarla se vea en este diff y no en otro.
+ *
+ * Es el punto de partida de la salida en curso: **un punto, no un histórico**. Lo que
+ * RF-PRIV-002 prohíbe es el rastro —«no se guarda histórico de posiciones»—, y sin
+ * este ancla la salida no se puede cerrar por regreso después de que el sistema haya
+ * matado el proceso, que es exactamente el caso de Android del riesgo 4 del PRD: se
+ * vuelve a casa andando y el telón no cae. Vive mientras la salida vive y desaparece
+ * con ella; el esquema del área lo cierra a dos números y nada más cuelga de él.
+ *
+ * Todo lo demás sigue fallando, incluidas las posiciones de esa misma área que no sean
+ * esta: la excepción es una ruta exacta, no un permiso para el área.
+ */
+export const POSICIONES_DECLARADAS = Object.freeze([
+  'areas.salidas.salida.partida',
+]);
+
+const RUTA_DECLARADA = new RegExp(`(^|\\.)(${POSICIONES_DECLARADAS.map((r) => r.replace(/\./g, '\\.')).join('|')})$`);
+
+/**
  * Recorre un documento de la partida y falla **nombrando el campo** si lleva un
  * rastro de ubicación o una marca del reloj real.
  *
@@ -280,9 +300,14 @@ const NOMBRES_DE_RELOJ = /^(timestamp|epoch|reloj|hora|ahora|now|fechaReal|captu
  * decoración. **No se aplica a los documentos del mundo**, que sí llevan coordenadas
  * por definición: lo que RF-PRIV-002 prohíbe es el histórico de posiciones de quien
  * juega, y ese solo cabría aquí.
+ *
+ * La única ruta exenta es la de `POSICIONES_DECLARADAS`, y está escrita arriba con su
+ * motivo: un punto no es un histórico, y sin él la salida no se puede cerrar por
+ * regreso tras un reinicio del proceso.
  */
 export function sinRastroDeUbicacion(valor, ruta = 'documento') {
   if (valor === null || typeof valor !== 'object') return valor;
+  if (RUTA_DECLARADA.test(ruta)) return valor;
   if (Array.isArray(valor)) {
     valor.forEach((v, i) => sinRastroDeUbicacion(v, `${ruta}[${i}]`));
     return valor;

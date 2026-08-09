@@ -22,6 +22,7 @@ import { entropiaDelDispositivo } from '../datos/entropia.js';
 import { puertaDeRed } from '../datos/red.js';
 import { creaTraedorDeOsm } from '../datos/traedor.js';
 import { creaCronometro } from '../mapa/cronometro.js';
+import { NUCLEO_DEL_LEVANTAMIENTO } from '../nucleo/piezas.js';
 import { creaLevantamiento } from '../mapa/levantamiento.js';
 import { componePrimeraLista } from '../mapa/primera-lista.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
@@ -75,6 +76,7 @@ export function ArranqueMontado({
         cronometro,
         colocador: colocadorDeRotulos,
         medidor: creaMedidorSkia(enlace.fuente),
+        nucleo: NUCLEO_DEL_LEVANTAMIENTO,
       });
       const arranque = creaArranque({
         // Sin módulo nativo de ubicación se monta el que **dice que no está**, nunca

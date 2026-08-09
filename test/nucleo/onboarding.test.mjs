@@ -355,13 +355,32 @@ describe('El punto de partida y el permiso', () => {
     // Y la mitad que se comprueba: ni el manifiesto de la app ni ninguno de sus
     // módulos nombra el permiso de segundo plano. Es lo que impide que la promesa de
     // la pantalla y lo que la app solicita se separen sin que nadie lo note.
+    //
+    // REEXPRESADO EN SPEC-030, y la reexpresión es el contenido del caso. Antes esta
+    // lista prohibía además la cadena `UIBackgroundModes`, y esa prohibición era
+    // **demasiado ancha**: metía en el mismo saco dos cosas que el diseño separa a
+    // propósito.
+    //
+    // - **El permiso permanente** es `ACCESS_BACKGROUND_LOCATION` en Android y
+    //   «Siempre» en iOS —`NSLocationAlways…`—. Es la exclusión 12 del PRD y lo que
+    //   esta prueba existe para cazar. Sigue prohibido, y sin matices.
+    // - **`UIBackgroundModes: ["location"]`** no es ese permiso: es lo que sostiene
+    //   «mientras se usa» con la app contando como en uso, y es exactamente lo que
+    //   `seguridad-privacidad.md` §2 pide para no tener que pedir el otro. SPEC-030 lo
+    //   **exige** para la Actividad en Vivo de iOS. Prohibirlo obligaba a elegir entre
+    //   cumplir la spec y tener esta red, y la salida no es ablandar la red: es
+    //   afinarla hasta que distinga las dos cosas.
+    //
+    // Así que el modo de fondo se comprueba **por su valor y no por su nombre**: se
+    // admite exactamente `["location"]` y nada más. Un `processing`, un `fetch` o un
+    // `remote-notification` colados ahí siguen poniendo esto rojo, igual que antes.
     const permanentes = [
       /ACCESS_BACKGROUND_LOCATION/,
       /NSLocationAlwaysAndWhenInUseUsageDescription/,
       /NSLocationAlwaysUsageDescription/,
       /\bAlways\b/,
       /backgroundLocation/,
-      /UIBackgroundModes/,
+      /allowsBackgroundLocationUpdates/,
     ];
     const aRevisar = ['app/app.json', 'app/plataforma/ubicacion.js', 'app/pantallas/arranque.jsx', 'app/pantallas/arranque-montado.jsx'];
     for (const fichero of aRevisar) {
@@ -369,6 +388,36 @@ describe('El punto de partida y el permiso', () => {
       for (const patron of permanentes) {
         assert.equal(patron.test(texto), false, `${fichero} nombra un permiso de ubicación permanente (${patron})`);
       }
+    }
+
+    // El manifiesto, leído como dato y no como texto: es la única manera de decir
+    // «este modo de fondo sí y ningún otro».
+    const manifiesto = JSON.parse(fuente('app/app.json'));
+    const infoPlist = manifiesto.expo.ios.infoPlist ?? {};
+    assert.deepEqual(
+      infoPlist.UIBackgroundModes ?? [],
+      ['location'],
+      'los modos de fondo de iOS no son exactamente ["location"]: el de la ubicación en primer plano es el único que SPEC-030 declara',
+    );
+
+    // Y la descripción de uso que la app declara es **una sola**, la de «mientras se
+    // usa». Es la mitad positiva del criterio: sin ella, «no pide el permiso
+    // permanente» se cumpliría también en una app que no pidiera ninguno.
+    const descripciones = Object.keys(infoPlist).filter((k) => /^NSLocation/.test(k));
+    assert.deepEqual(descripciones, ['NSLocationWhenInUseUsageDescription']);
+
+    // Android, por su lista de permisos: los del servicio en primer plano sí, y el de
+    // segundo plano no aparece por ningún lado.
+    const permisos = manifiesto.expo.android.permissions ?? [];
+    assert.equal(permisos.includes('ACCESS_BACKGROUND_LOCATION'), false, 'el manifiesto de Android pide la ubicación en segundo plano');
+    for (const necesario of ['ACCESS_FINE_LOCATION', 'FOREGROUND_SERVICE', 'FOREGROUND_SERVICE_LOCATION']) {
+      assert.ok(permisos.includes(necesario), `falta el permiso "${necesario}", que es lo que sostiene «mientras se usa» con la pantalla apagada`);
+    }
+
+    // Y las dos implementaciones del rótulo lo declaran escrito, no sobreentendido:
+    // una ausencia solo se puede poner roja contra una enumeración de lo que sí hay.
+    for (const p of ['ios', 'android']) {
+      assert.match(fuente(`app/plataforma/rotulo.${p}.js`), /permisoPermanente:\s*false/, `rotulo.${p}.js no declara que no pide el permiso permanente`);
     }
   });
 

@@ -21,6 +21,7 @@ import { creaClienteDeProxy } from '../datos/cliente-proxy.js';
 import { creaTraedorDeOsm } from '../datos/traedor.js';
 import { puertaDeRed } from '../datos/red.js';
 import { creaCronometro } from '../mapa/cronometro.js';
+import { NUCLEO_DEL_LEVANTAMIENTO } from '../nucleo/piezas.js';
 import { creaLevantamiento } from '../mapa/levantamiento.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
@@ -88,6 +89,7 @@ export function MapaMontado({
         cronometro,
         colocador: colocadorDeRotulos,
         medidor: creaMedidorSkia(enlace.fuente),
+        nucleo: NUCLEO_DEL_LEVANTAMIENTO,
       });
       return { enlace, cronometro, levantamiento, fallo: null };
     } catch (e) {

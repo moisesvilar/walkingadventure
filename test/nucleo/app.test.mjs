@@ -414,12 +414,19 @@ describe('Una sola base para iOS y Android', () => {
 
   test('El módulo de respaldo se importa sin extensión, que es como Metro elige la plataforma', () => {
     // Con `./respaldo.js` la selección por plataforma no ocurre y las dos
-    // implementaciones sobran. Es la única importación sin extensión de la app y va
-    // documentada como tal.
+    // implementaciones sobran. Eran la única importación sin extensión de la app;
+    // desde SPEC-030 son **dos**, porque el rótulo del sistema se parte igual, y las
+    // dos siguen documentadas como tales. La regla no es «hay una excepción» sino
+    // «solo las capacidades con ciclo de vida propio por sistema la tienen».
     const indice = fuente('app/plataforma/index.js');
-    assert.match(indice, /from '\.\/respaldo'/);
-    assert.doesNotMatch(indice, /from '\.\/respaldo\.js'/);
-    assert.match(indice, /MODULOS_DE_PLATAFORMA = \[salud, haptico, notificaciones, respaldo\]/);
+    for (const partida of ['respaldo', 'rotulo']) {
+      assert.match(indice, new RegExp(`from '\\./${partida}'`), `${partida} no se importa sin extensión`);
+      assert.doesNotMatch(indice, new RegExp(`from '\\./${partida}\\.js'`), `${partida} se importa con extensión y Metro no elegiría plataforma`);
+    }
+    // La lista es la que se inyecta en el registro, y **el rótulo va dentro**: es una
+    // capacidad más del contrato de SPEC-020, aunque su ausencia no se degrade como
+    // la de las otras cuatro (eso lo afirma test/nucleo/salidas.test.mjs).
+    assert.match(indice, /MODULOS_DE_PLATAFORMA = \[salud, haptico, notificaciones, respaldo, rotulo\]/);
   });
 });
 
