@@ -15,7 +15,7 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { exigeNivel, exigeSigno } from './deformacion.js';
-import { campos, dic, escribe, lista } from './formato.js';
+import { campos, dic, escribe, lista, uno } from './formato.js';
 import { ESQUEMA_HECHOS_DE_RUMOR } from './hechos.js';
 import { exigeMapaId } from './pasos.js';
 import { exigeCara } from './puestos.js';
@@ -47,13 +47,23 @@ const SEPARADOR = String.fromCharCode(0);
 /**
  * El estado del diario de una partida.
  *
- * `triangulado` es el **marcador de una sola vez** que la fila 37 encenderá cuando
- * ponga en escena la primera coincidencia. Se reserva aquí —como SPEC-009 reservó
- * los huecos de recursos— para que esa fila no tenga que tocar el formato del
- * estado; **esta spec no decide cuándo se enciende** y lo deja en falso.
+ * `triangulado` es el **marcador de una sola vez** que SPEC-016 reservó y que
+ * SPEC-037 enciende, y `escena` es lo que hace que el marcador tenga **tres estados
+ * y no dos**: `nunca` (marcador apagado y sin escena), `pendiente` (encendido, con
+ * las dos versiones que la componen guardadas y sin enseñar) y `hecho` (enseñada y
+ * cerrada). Quién lee y quién escribe esos tres estados es de `triangulacion.js`;
+ * aquí solo viven el hueco y su forma.
+ *
+ * El estado intermedio existe porque la escena ocurre en la calle: con dos estados,
+ * cerrar la app entre detectarla y enseñarla o regalaba la vista por historias sin
+ * la escena o perdía la escena para siempre, y las dos cosas en silencio.
+ *
+ * La escena guarda **la identidad de sus dos versiones y no una copia de ellas**: el
+ * mapa, el suceso y las dos fuentes bastan para recomponer las dos entradas por su
+ * clave, y copiarlas sería tener dos veces el mismo dato pudiendo desincronizarse.
  */
 export function estadoDeDiario() {
-  return { entradas: [], triangulado: false };
+  return { entradas: [], triangulado: false, escena: null };
 }
 
 /** El área de textos del estado: cada texto una sola vez, por su clave. */
@@ -170,11 +180,13 @@ export function entradaDeDiario({
  * ya están en la entrada, y guardarla era repetir setenta bytes por entrada de algo
  * que se deriva. `levantaDiario` la recompone.
  */
+const ESQUEMA_FUENTE = campos({ tipo: 'texto', sitio: 'texto', puesto: 'texto?' });
+
 export const ESQUEMA_ENTRADA = campos({
   mapa: 'texto',
   clase: 'texto',
   suceso: 'texto',
-  fuente: campos({ tipo: 'texto', sitio: 'texto', puesto: 'texto?' }),
+  fuente: ESQUEMA_FUENTE,
   lugar: 'texto',
   dia: 'entero',
   paso: 'entero',
@@ -186,8 +198,23 @@ export const ESQUEMA_ENTRADA = campos({
   texto: 'texto?',
 });
 
+// La escena que se debe: qué dos versiones la componen y si ya se enseñó. Nulo
+// mientras el marcador está en `nunca`, que es la única combinación además de las
+// dos legítimas —encendido con escena sin enseñar, y encendido con escena enseñada.
+const ESQUEMA_ESCENA = campos({
+  mapa: 'texto',
+  suceso: 'texto',
+  nueva: ESQUEMA_FUENTE,
+  previa: ESQUEMA_FUENTE,
+  vista: 'booleano',
+});
+
 /** El área del diario dentro del estado. */
-export const ESQUEMA_DIARIO = campos({ entradas: lista(ESQUEMA_ENTRADA), triangulado: 'booleano' });
+export const ESQUEMA_DIARIO = campos({
+  entradas: lista(ESQUEMA_ENTRADA),
+  triangulado: 'booleano',
+  escena: uno([ESQUEMA_ESCENA, 'nulo']),
+});
 
 /** El área de textos del estado: cada texto una vez, por su clave. */
 export const ESQUEMA_TEXTOS = campos({ textos: dic(campos({ clave: 'texto', texto: 'texto', origen: 'texto' })) });
@@ -494,20 +521,60 @@ export function textoDe(estado, entrada) {
 
 // --- Serialización ------------------------------------------------------------
 
-/** El diario en forma serializable, con las entradas en el orden en que se oyeron. */
-export function congelaDiario(estado) {
-  exigeDiario(estado);
+/** La escena que se debe, en su forma canónica, o `null` si el marcador nunca se encendió. */
+function documentoDeEscena(escena) {
+  if (escena == null) return null;
+  const fuente = (f, cual) => {
+    const suya = exigeFuente(f, `la ${cual} de la escena de la primera coincidencia`);
+    return { tipo: suya.tipo, sitio: suya.sitio, puesto: suya.puesto ?? null };
+  };
   return {
-    entradas: estado.entradas.slice().sort(porMomento).map(documentoDeEntrada),
-    triangulado: estado.triangulado === true,
+    mapa: exigeMapaId(escena.mapa, 'la escena de la primera coincidencia'),
+    suceso: escena.suceso,
+    nueva: fuente(escena.nueva, 'versión que se acaba de oír'),
+    previa: fuente(escena.previa, 'versión que ya estaba apuntada'),
+    vista: escena.vista === true,
   };
 }
 
-/** El diario de vuelta de su documento, con el nivel y el signo intactos. */
+/**
+ * El diario en forma serializable, con las entradas en el orden en que se oyeron.
+ *
+ * El marcador y su escena viajan juntos **y coherentes**: encendido sin escena sería
+ * una escena que se debe y no se puede componer, y apagado con escena sería una
+ * escena que nadie debe. Las dos se rechazan aquí, al escribir, y no al leer.
+ */
+export function congelaDiario(estado) {
+  exigeDiario(estado);
+  const escena = documentoDeEscena(estado.escena ?? null);
+  const triangulado = estado.triangulado === true;
+  exigeMarcadorCoherente(triangulado, escena, 'al escribir el diario');
+  return {
+    entradas: estado.entradas.slice().sort(porMomento).map(documentoDeEntrada),
+    triangulado,
+    escena,
+  };
+}
+
+// Encendido implica escena, y escena implica encendido. Sin esta comprobación, un
+// documento a medias reabriría en silencio la puerta que los tres estados cierran:
+// la vista por historias disponible sin haber visto la escena, o la escena perdida.
+function exigeMarcadorCoherente(triangulado, escena, donde) {
+  if (triangulado && escena === null) {
+    throw new Error(`${donde}: el marcador de la primera coincidencia está encendido y no hay escena guardada, así que la escena que se debe no se podría componer`);
+  }
+  if (!triangulado && escena !== null) {
+    throw new Error(`${donde}: hay una escena de primera coincidencia guardada con el marcador apagado, y una escena que nadie debe no existe`);
+  }
+}
+
+/** El diario de vuelta de su documento, con el nivel, el signo y el marcador intactos. */
 export function levantaDiario(doc) {
   const estado = estadoDeDiario();
   estado.entradas = (doc?.entradas ?? []).map((e) => entradaDeDiario(e)).sort(porMomento);
   estado.triangulado = doc?.triangulado === true;
+  estado.escena = documentoDeEscena(doc?.escena ?? null);
+  exigeMarcadorCoherente(estado.triangulado, estado.escena, 'al levantar el diario');
   return estado;
 }
 
