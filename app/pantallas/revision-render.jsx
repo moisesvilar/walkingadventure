@@ -31,7 +31,14 @@ export const MUNDOS_DE_REFERENCIA = Object.freeze([
  *   enlace con Skia; `tamano` el hueco de la lámina.
  */
 export function PantallaRevisionRender({ documentos, enlace, tamano }) {
-  const nombres = MUNDOS_DE_REFERENCIA.filter((nombre) => documentos[nombre]);
+  // Los ocho de referencia van primero y en su orden, que es el de la revisión de
+  // paridad. Detrás, cualquier otro documento que se inyecte: hasta que llegue la
+  // capa de datos de la fila 26, lo que se pinta en el dispositivo es un mundo
+  // sintético, y sin esto la pantalla no enseñaría ninguno.
+  const nombres = [
+    ...MUNDOS_DE_REFERENCIA,
+    ...Object.keys(documentos).filter((nombre) => !MUNDOS_DE_REFERENCIA.includes(nombre)),
+  ].filter((nombre) => documentos[nombre]);
   const [mundo, setMundo] = useState(nombres[0] ?? null);
   const [estilo, setEstilo] = useState(ESTILO_POR_DEFECTO);
   const documento = mundo ? documentos[mundo] : null;

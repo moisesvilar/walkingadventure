@@ -25,7 +25,7 @@ De aquí sale una regla que es la que hace que la elección valga la pena: **el 
 
 ### 2. El generador vive en un paquete compartido, portado y refactorizado
 
-El núcleo pasa a un paquete sin dependencias de plataforma que corre igual en Node y en la app: `core/`, `world/`, `names/`, `quests/` y la capa de partida. `test/headless.mjs` y `test/casting-report.mjs` siguen vivos desde el primer día.
+El núcleo pasa a un paquete sin dependencias de plataforma que corre igual en Node y en la app: `core/`, `world/`, `names/`, `quests/`, la capa de partida y —desde SPEC-021, corrigiendo lo que este documento daba por hecho— `render/`, con los estilos, la composición de la escena y la colocación de rótulos. El render entra en el paquete por el criterio duro de que la suite de núcleo arranque sin `node_modules`: sus pruebas componen escenas de verdad sobre los ocho mundos de referencia, y un módulo que viviera en `app/` colgaría de un `package.json` de React Native que ni declara módulos ESM ni se resuelve sin instalar. En `app/render/` se queda solo lo que toca la plataforma —ejecutar la escena en Skia, medir el texto con las tipografías cargadas y la lámina—, y en el paquete no entra ni una línea que importe React Native o Skia. `test/headless.mjs` y `test/casting-report.mjs` siguen vivos desde el primer día.
 
 Se hacen **de cero** el render, las pantallas y la capa de datos. Esto corrige la idea previa de reimplementar la aplicación entera: con JavaScript en el cliente, tirar el generador significaría quedarse sin garantía de determinismo mientras se rehacen sus tests, y eso no compensa.
 

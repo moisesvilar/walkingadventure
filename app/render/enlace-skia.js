@@ -4,10 +4,10 @@
 // contra un doble, y lo que impide que la única pieza dependiente de la plataforma
 // se extienda por el resto del render.
 //
-// Ojo: la dependencia `@shopify/react-native-skia` **todavía no está declarada** en
-// `app/package.json`. El punto de montaje que la traiga es quien construye este
-// enlace; hasta entonces la lámina se puede componer y ejercitar, pero no se pinta
-// en un dispositivo. Es una ausencia declarada, no una degradación silenciosa.
+// Quien monta el enlace de verdad es `enlace-real.js`, el único módulo que importa
+// `@shopify/react-native-skia` —declarada en `app/package.json` desde esta fila—.
+// Este fichero solo declara y comprueba el contrato, y por eso sigue corriendo en
+// Node sin la biblioteca instalada.
 
 /** Lo que un enlace tiene que traer para que la lámina se pueda pintar. */
 export const PIEZAS_DEL_ENLACE = Object.freeze(['Skia', 'enums', 'fuente', 'Canvas', 'Picture', 'creaCuadro']);
