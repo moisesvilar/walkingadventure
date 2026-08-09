@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-032",
+  "spec_actual": "SPEC-033",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -316,6 +316,16 @@
       "report": "test/reports/SPEC-031-run.md",
       "casos": "1978 casos: 1975 pasan, 0 fallan, 3 saltados",
       "app": "sin flujo"
+    },
+    {
+      "spec": "SPEC-032",
+      "slug": "llegadas-geofence",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-032-run-20260809T172029Z.md",
+      "casos": "2041 casos: 2038 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado",
+      "nota": "dos defectos destapados: la permanencia media tiempo dentro y no parada; y el visor se abria solo la segunda vez."
     }
   ],
   "bloqueos": [],
