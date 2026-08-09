@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { componeEscena } from '@walkingadventure/nucleo/render/escena.js';
-import { colocadorSimple } from '@walkingadventure/nucleo/render/colocador-simple.js';
+import { colocadorDeRotulos } from '@walkingadventure/nucleo/render/colocador.js';
 import { ESTILOS, ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
 
 import { exigeEnlace } from './enlace-skia.js';
@@ -23,8 +23,8 @@ import { pintaEscena } from './skia.js';
  *   `documento` el mundo congelado de la celda —el **mismo objeto** entre dos
  *   estilos—; `estilo` el identificador elegido; `vista` `{ cx, cy, r, foco,
  *   paraje, escala }`; `tamano` `{ ancho, alto }` en px; `factorTexto` el ajuste
- *   de tamaño de letra; `enlace` el enlace con Skia; `colocador` el de rótulos,
- *   que por defecto es el provisional de esta fila.
+ *   de tamaño de letra; `enlace` el enlace con Skia; `colocador` el de rótulos, que
+ *   por defecto es el que garantiza que ninguna caja pisa a otra.
  */
 export function Lamina({
   documento,
@@ -34,7 +34,7 @@ export function Lamina({
   tamano,
   factorTexto = 1,
   enlace,
-  colocador = colocadorSimple,
+  colocador = colocadorDeRotulos,
 }) {
   const { Skia, enums, fuente, Canvas, Picture, creaCuadro } = exigeEnlace(enlace);
 
@@ -65,8 +65,21 @@ export function Lamina({
       {escena.rotulos.map((rotulo) => (
         <View key={rotulo.id} testID="mapa-rotulo" accessibilityLabel={`${rotulo.rol}:${rotulo.texto}`} style={estilos.marca} />
       ))}
+      {EN_DESARROLLO ? (
+        <View testID="mapa-colocacion" accessibilityLabel={volcadoDeColocacion(escena)} style={estilos.marca} />
+      ) : null}
     </View>
   );
+}
+
+// `__DEV__` lo define el empaquetador: el volcado de la colocación existe en las
+// compilaciones de prueba y no en las de producción. No es interfaz —un lienzo no
+// tiene nodos que alcanzar—: es el equivalente de los hooks `__wa` de la consola.
+const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
+
+/** Las cajas colocadas y lo retirado con su motivo, en una cadena inerte. */
+function volcadoDeColocacion(escena) {
+  return JSON.stringify({ colocados: escena.colocacion ?? [], retirados: escena.retirados ?? [] });
 }
 
 const estilos = StyleSheet.create({

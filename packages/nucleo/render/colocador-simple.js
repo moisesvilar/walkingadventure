@@ -1,8 +1,10 @@
 // El colocador provisional de rótulos: cada rótulo se queda en el anclaje de su
-// elemento, exactamente como hace el prototipo. **Puede solapar, y se declara**:
-// el algoritmo que garantiza que ninguna caja pisa a otra es de la fila 22
-// (RF-MAPA-003) y entra por este mismo argumento, sin tocar ni el módulo que
-// compone la escena ni el que ejecuta el dibujo. Esa es toda la deuda de SPEC-021.
+// elemento, exactamente como hace el prototipo. **Puede solapar, y se declara**.
+//
+// Ya no es el que usa la app: lo sustituye `colocador.js`, que entró por este mismo
+// argumento sin tocar ni el módulo que compone la escena ni el que ejecuta el dibujo,
+// que era justo lo que SPEC-021 dejó preparado. Se queda como referencia contra la
+// que medir la deuda que la fila 22 cierra: `solapes()` cuenta lo que costaba.
 
 /** Lo que este colocador promete y lo que no, como dato y no como comentario. */
 export const COLOCADOR_SIMPLE = Object.freeze({
