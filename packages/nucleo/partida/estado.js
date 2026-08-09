@@ -28,6 +28,7 @@ import {
   levantaDiario,
   levantaTextos,
 } from './diario.js';
+import { congelaEntregas, estadoDeEntregas, levantaEntregas } from './entregas.js';
 import {
   CLASES,
   VALOR_INERTE,
@@ -182,6 +183,35 @@ const AREA_SITIOS = campos({ mapas: dic(lista('texto')) });
  */
 const AREA_TOPICOS = campos({ mundos: dic(campos(Object.fromEntries(CATEGORIAS_DE_TOPICO.map((c) => [c, lista('texto')])))) });
 
+/**
+ * La cola de entregas, por mapa: lo que el mundo debe y todavía no ha entregado.
+ *
+ * Va por mapa como el contador de pasos, y **nunca dentro del documento congelado de
+ * una celda**: el mundo no cambia porque a alguien le deban un recado. Cada entrada
+ * lleva su ciclo entero —estado, ofertas con su salida, su sitio y su paso— porque
+ * es exactamente lo que tiene que sobrevivir a guardar y volver a abrir para que la
+ * segunda oferta siga exigiendo otra salida y otro sitio.
+ */
+const AREA_ENTREGAS = campos({
+  mapas: dic(campos({
+    entradas: lista(campos({
+      id: 'texto',
+      tipo: 'texto',
+      asunto: 'texto',
+      clase: 'texto?',
+      escena: 'texto?',
+      origen: 'texto?',
+      procedencia: campos({ mapa: 'texto', paso: 'entero' }),
+      estado: 'texto',
+      sitio: 'texto?',
+      aceptadaEn: 'texto?',
+      apariciones: 'entero',
+      ultimaLista: 'entero?',
+      ofertas: lista(campos({ salida: 'texto', sitio: 'texto?', paso: 'entero', via: 'texto' })),
+    })),
+  })),
+});
+
 // --- El registro de áreas -----------------------------------------------------
 
 const AREAS = [];
@@ -192,13 +222,19 @@ const POR_ID = {};
  * vuelta. Un área **sin esquema** solo aporta tipos de hecho al registro y no ocupa
  * ningún campo del estado, que es el sitio de las filas que todavía no han entregado
  * el suyo.
+ *
+ * `reproduce` dice si sus hechos se pueden reproducir sobre el estado. Por defecto
+ * es «sí cuando tiene estado», que es lo que era antes de existir el campo; se pone
+ * a `false` cuando el hecho **no lleva dentro lo que haría falta** para reconstruir
+ * el área, porque entonces reproducirlo sería inventárselo y saltárselo en silencio
+ * sería peor. Declararlo es lo que permite reconocerlo sin perderlo.
  */
-export function declaraArea({ id, esquema = null, inicial = null, congela = null, levanta = null }) {
+export function declaraArea({ id, esquema = null, inicial = null, congela = null, levanta = null, reproduce = null }) {
   if (typeof id !== 'string' || !id) {
     throw new Error(`un área del estado se declara con su identificador y llegó ${JSON.stringify(id) ?? String(id)}`);
   }
   if (POR_ID[id]) throw new Error(`el área "${id}" ya está declarada: dos declaraciones de la misma área escribirían el campo dos veces`);
-  const area = congelaHondo({ id, esquema, inicial, congela, levanta, tipos: tiposDelArea(id) });
+  const area = congelaHondo({ id, esquema, inicial, congela, levanta, reproduce: reproduce ?? !!esquema, tipos: tiposDelArea(id) });
   POR_ID[id] = area;
   AREAS.push(area);
   return area;
@@ -219,13 +255,17 @@ declaraArea({ id: 'diario', esquema: ESQUEMA_DIARIO, inicial: estadoDeDiario, co
 declaraArea({ id: 'textos', esquema: ESQUEMA_TEXTOS, inicial: estadoDeTextos, congela: congelaTextos, levanta: levantaTextos });
 declaraArea({ id: 'topicos', esquema: AREA_TOPICOS, inicial: estadoDeTopicos, congela: congelaTopicos, levanta: levantaTopicos });
 
-// Las tres que solo aportan tipos de hecho. Su estado es de las filas que las
-// poseen —19 la cola de entregas, y la de aventuras y anclajes su propia fila— y
+// La cola de entregas de SPEC-019: tiene estado y **no se reproduce desde el
+// registro**, que son dos cosas distintas. Sus hechos dicen qué entrada se atendió,
+// no qué contenía; reproducir la cola a partir de ellos sería inventarse las
+// entradas, así que se reconocen y se declaran en lugar de aplicarse.
+declaraArea({ id: 'entregas', esquema: AREA_ENTREGAS, inicial: estadoDeEntregas, congela: congelaEntregas, levanta: levantaEntregas, reproduce: false });
+
+// Las dos que solo aportan tipos de hecho. Su estado es de la fila que las posee y
 // **se declaran igual**, para que sus hechos entren en el registro desde hoy: sin
 // ellos, «cada cosa que altera el estado deja hecho» sería falso el día que esas
 // filas lleguen, y el registro de las partidas anteriores ya no se podría completar.
 declaraArea({ id: 'aventuras' });
-declaraArea({ id: 'entregas' });
 declaraArea({ id: 'anclajes' });
 
 /** Las áreas declaradas, en el orden en que se escriben. */
@@ -236,6 +276,13 @@ export const AREAS_CON_ESTADO = congelaHondo(AREAS.filter((a) => a.esquema).map(
 
 /** Las áreas que solo aportan tipos de hecho, en orden estable. */
 export const AREAS_SIN_ESTADO = congelaHondo(AREAS.filter((a) => !a.esquema).map((a) => a.id));
+
+/**
+ * Las áreas cuyos hechos **se reconocen pero no se reproducen**: las que todavía no
+ * tienen estado, y las que lo tienen pero cuyo hecho no lleva dentro con qué
+ * reconstruirlo. La reconstrucción de emergencia las declara en su resultado.
+ */
+export const AREAS_QUE_NO_REPRODUCEN = congelaHondo(AREAS.filter((a) => !a.reproduce).map((a) => a.id));
 
 /** El área declarada con ese identificador, o un error que nombra las declaradas. */
 export function areaDe(id) {

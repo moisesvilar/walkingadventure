@@ -49,14 +49,21 @@ export const CLASES_DE_ENTREGA = Object.freeze({ OPORTUNIDAD: 'oportunidad', ENC
 /**
  * Lo que se siembra en la cola. `personaje.md` §3 pide que un día sin aventura del
  * oficio no sea un día vacío, y para eso hacen falta las dos clases.
+ *
+ * Cada una **declara su escena**, que es el vocabulario de SPEC-006 con el que la
+ * cola decide después si un sitio del trazado es apto. Se declara aquí, junto al
+ * asunto, y no se supone en la cola: una escena supuesta resolvería el lugar contra
+ * cualquier sitio y el lugar diferido dejaría de significar nada. Las tres elegidas
+ * —encuentro, refugio y misterio— son las que más tipos de paraje cubren, que es lo
+ * que hace que el recado también salve el día en un barrio de tres calles.
  */
 export const ENTREGAS_DEL_MUNDO = congelaHondo([
-  { id: 'aceite-a-la-botica', clase: CLASES_DE_ENTREGA.ENCARGO, asunto: 'aceite-para-la-botica' },
-  { id: 'carta-sin-echar', clase: CLASES_DE_ENTREGA.ENCARGO, asunto: 'carta-que-nadie-echó' },
-  { id: 'gato-en-el-tejado', clase: CLASES_DE_ENTREGA.OPORTUNIDAD, asunto: 'gato-en-el-tejado' },
-  { id: 'herramienta-prestada', clase: CLASES_DE_ENTREGA.ENCARGO, asunto: 'herramienta-por-devolver' },
-  { id: 'setas-de-temporada', clase: CLASES_DE_ENTREGA.OPORTUNIDAD, asunto: 'setas-de-temporada' },
-  { id: 'tejas-por-recoger', clase: CLASES_DE_ENTREGA.OPORTUNIDAD, asunto: 'tejas-que-tiró-el-viento' },
+  { id: 'aceite-a-la-botica', clase: CLASES_DE_ENTREGA.ENCARGO, asunto: 'aceite-para-la-botica', escena: 'encuentro' },
+  { id: 'carta-sin-echar', clase: CLASES_DE_ENTREGA.ENCARGO, asunto: 'carta-que-nadie-echó', escena: 'encuentro' },
+  { id: 'gato-en-el-tejado', clase: CLASES_DE_ENTREGA.OPORTUNIDAD, asunto: 'gato-en-el-tejado', escena: 'refugio' },
+  { id: 'herramienta-prestada', clase: CLASES_DE_ENTREGA.ENCARGO, asunto: 'herramienta-por-devolver', escena: 'refugio' },
+  { id: 'setas-de-temporada', clase: CLASES_DE_ENTREGA.OPORTUNIDAD, asunto: 'setas-de-temporada', escena: 'misterio' },
+  { id: 'tejas-por-recoger', clase: CLASES_DE_ENTREGA.OPORTUNIDAD, asunto: 'tejas-que-tiró-el-viento', escena: 'misterio' },
 ]);
 
 // Los dos catálogos se comprueban a sí mismos al cargarse. Es barato y cierra las
@@ -82,6 +89,33 @@ for (const catalogo of [SUCESOS_DEL_MUNDO, ENTREGAS_DEL_MUNDO]) {
       }
     }
   }
+}
+
+// Y la escena, que solo declara el catálogo de entregas: una entrada sin ella
+// dejaría a la cola sin contra qué medir la aptitud de un sitio, y el fallo saldría
+// mucho más tarde y muy lejos de aquí.
+for (const entrada of ENTREGAS_DEL_MUNDO) {
+  if (typeof entrada.escena !== 'string' || !entrada.escena) {
+    throw new Error(`la entrada "${entrada.id}" del catálogo de entregas no declara escena: sin ella el lugar diferido no se puede resolver contra ningún sitio`);
+  }
+}
+
+/**
+ * La escena que declara una entrada de la cola por su asunto.
+ *
+ * Existe para que la cola no tenga que suponerla: el asunto y su escena se declaran
+ * en el mismo sitio, y un asunto que no esté en el catálogo falla nombrándolo en
+ * lugar de encolarse sin escena.
+ */
+export function escenaDeEntrega(asunto) {
+  const entrada = ENTREGAS_DEL_MUNDO.find((e) => e.asunto === asunto);
+  if (!entrada) {
+    throw new Error(
+      `el asunto ${JSON.stringify(asunto) ?? String(asunto)} no está en el catálogo de entregas, así que no declara escena: ` +
+      `los declarados son ${ENTREGAS_DEL_MUNDO.map((e) => e.asunto).join(', ')}`,
+    );
+  }
+  return entrada.escena;
 }
 
 /**
