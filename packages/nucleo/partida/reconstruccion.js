@@ -22,6 +22,7 @@
 // el fallo, que es justo lo que `partida-guardada.md` §2 prohíbe.
 
 import { congelaHondo } from '../core/congelar.js';
+import { COMO_ACABO, HECHO_QUE_NADIE_EMITE } from './aventura-en-curso.js';
 import { apunta as apuntaEnDiario, entradaDeHecho } from './diario.js';
 import { AREAS_QUE_NO_REPRODUCEN, congelaEstado, estadoInicial, levantaEstado, pisaSitio } from './estado.js';
 import { VERSION_GENERADOR, lee, texto as textoCanonico } from './formato.js';
@@ -67,6 +68,36 @@ const APLICADORES = {
   'objeto-obtenido'(vivo, h) {
     guardaObjeto(vivo.objetos, { id: h.carga.id, clase: h.carga.clase, procedencia: h.carga.procedencia, dia: h.carga.diaDeRepisa });
   },
+  // --- El área de aventuras -------------------------------------------------
+  //
+  // Los tres hechos que el motor emite reproducen **qué aventura está en curso y cómo
+  // acabaron las cerradas**, que es lo que llevan dentro. Por qué beat iba no deja hecho
+  // propio, así que vuelve en el primero: eso es reproducir menos, no inventar más, y la
+  // diferencia con el estado guardado sale nombrada en el diagnóstico de discrepancia.
+  'aventura-aceptada'(vivo, h) {
+    vivo.aventuras.enCurso = {
+      aventura: h.carga.aventura,
+      plantilla: h.carga.plantilla ?? h.carga.aventura,
+      mapa: h.mapa,
+      beatEnCurso: 1,
+      resueltos: [],
+    };
+  },
+  'aventura-cerrada'(vivo, h) {
+    cierraAlReproducir(vivo, h, { comoAcabo: COMO_ACABO.TERMINADA, desenlace: h.carga.desenlace ?? null, motivo: null });
+  },
+  'aventura-abandonada'(vivo, h) {
+    cierraAlReproducir(vivo, h, { comoAcabo: COMO_ACABO.A_MEDIAS, desenlace: null, motivo: h.carga.motivo ?? null });
+  },
+  // Ninguna transición lo emite y la ramificación es exclusión 9 del PRD, así que
+  // reproducirlo **falla nombrándolo** en lugar de aplicar una rama que este motor no
+  // tiene. Callarlo sería exactamente la degradación silenciosa de §6h.
+  [HECHO_QUE_NADIE_EMITE](vivo, h) {
+    throw new Error(
+      `el hecho "${h.tipo}" dice que la aventura "${h.carga.aventura}" pidió elegir en su beat "${h.carga.beat}", y esta versión del juego ` +
+      'no tiene beats que ramifiquen (exclusión 9 del PRD): reproducirlo sería inventarse la rama que se tomó',
+    );
+  },
   'version-oida'(vivo, h) {
     const entrada = entradaDeHecho(h);
     apuntaEnDiario(vivo.diario, entrada);
@@ -92,6 +123,32 @@ const APLICADORES = {
     });
   },
 };
+
+/**
+ * El cierre de una aventura al reproducir el registro.
+ *
+ * Un cierre sin aceptación delante **falla nombrando la aventura**: significa que el
+ * registro está incompleto, y anotar una aventura cerrada que nadie aceptó produciría un
+ * estado reconstruido que además se declara correcto.
+ */
+function cierraAlReproducir(vivo, h, { comoAcabo, desenlace, motivo }) {
+  const enCurso = vivo.aventuras.enCurso;
+  if (!enCurso || enCurso.aventura !== h.carga.aventura) {
+    throw new Error(
+      `el hecho "${h.tipo}" cierra la aventura "${h.carga.aventura}" y el registro no trae antes su aceptación ` +
+      `(en curso: ${JSON.stringify(enCurso?.aventura ?? null)}): sin ella no se sabe de qué plantilla era`,
+    );
+  }
+  vivo.aventuras.cerradas = [...vivo.aventuras.cerradas, {
+    aventura: enCurso.aventura,
+    plantilla: enCurso.plantilla,
+    mapa: enCurso.mapa,
+    comoAcabo,
+    desenlace,
+    motivo,
+  }];
+  vivo.aventuras.enCurso = null;
+}
 
 /**
  * Aplica un hecho sobre un estado vivo.

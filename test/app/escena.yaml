@@ -1,0 +1,164 @@
+# @app — La escena de un beat y lo que te llevas dentro del móvil (SPEC-034).
+#
+# Aquí vive **solo lo que necesita dedo o pantalla**: que la escena tenga una sola acción
+# tocable y ninguna flecha de volver, que el ajuste de tamaño de letra recorra la escala
+# con toques sin abrir panel ni recargar nada, y que el escalón elegido siga puesto al
+# entrar en la escena siguiente. Todo lo demás —la composición de la escena, el titular y
+# el verbo de cada tipo, el cierre por resultado, la variante de franja, las dos vías del
+# objeto, que no aparezca ninguna cifra y que ningún texto se disculpe— se afirma en
+# `test/nucleo/escena.test.mjs`, que corre sin simulador. **La decisión vive en el paquete
+# justamente para que no haga falta un dispositivo para ponerla roja**, y duplicarla aquí
+# solo añadiría un flujo lento.
+#
+# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
+# Android, así que ningún flujo `@app` se puede correr aquí
+# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
+# registra como infraestructura ausente, nunca como verde.
+#
+# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
+#
+# - **Las dos pantallas.** SPEC-034 entregó el paquete entero y **ni una línea de `app/`**:
+#   no existen `app/pantallas/escena.js` ni `app/pantallas/lo-que-te-llevas.js`, así que
+#   ninguno de los identificadores que la spec declara —`escena-estado`, `escena`,
+#   `escena-cara`, `escena-accion`, `escena-tamano-texto`, `escena-texto`,
+#   `lo-que-te-llevas`, `siguiente-sitio`— existe en el árbol de vistas. Es el hueco más
+#   grande de esta fila y está declarado en el resumen de cobertura.
+# - **Una puerta hasta la pantalla.** El primer paso va contra `paso-escena`, que es el
+#   nombre que le corresponde por la convención de los otros pasos provisionales
+#   (`paso-mapa`, `paso-marcha`, `paso-llegada`, `paso-revision-render`) y que **tampoco
+#   existe**: `App.js` no monta ninguna de estas pantallas. Es el mismo hueco de cableado
+#   que declaran `test/app/llegada.yaml` y `test/app/visor.yaml`.
+# - **Una aventura aceptada y en curso en el mundo de andamiaje**, con al menos dos beats,
+#   para que exista una escena siguiente a la que entrar y comprobar que el tamaño
+#   elegido sigue puesto.
+#
+# **Lo que este flujo NO puede comprobar, y por qué:**
+#
+# - **Que el texto se vea más grande.** Maestro no mide tipografías. Lo que sí se comprueba
+#   es que el control existe, que tocarlo no saca a nadie de la escena y que el estado del
+#   momento no cambia; el tamaño en píxeles es pintado y va en la revisión `@manual`.
+# - **Que el ajuste sea el mismo que enseña la pantalla de ajustes (A6P6).** Esa pantalla
+#   es de la fila 38 y todavía no existe; el paquete ya comparte la escala
+#   (`ESCALA_DE_TEXTO`) y eso se afirma en `@nucleo`.
+#
+# Los elementos se localizan por los identificadores que declara la spec y nunca por su
+# posición en pantalla.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «Un solo botón y ninguna manera de volver atrás»
+#   «El tamaño del texto se cambia sin salir de la escena»
+#   «El tamaño elegido sigue puesto en la escena siguiente»
+#
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+# El paso a la escena, provisional como el del mapa y el de la llegada. Hoy no existe.
+- tapOn:
+    id: 'paso-escena'
+
+# ── Un solo botón y ninguna manera de volver atrás ─────────────────────────────
+
+- assertVisible:
+    id: 'escena-estado'
+    text: 'escena'
+- assertVisible:
+    id: 'escena'
+- assertVisible:
+    id: 'escena-texto'
+
+# La única acción que avanza. Su rótulo es el verbo de lo que se hace y nunca
+# «Continuar», que sería un botón de aplicación.
+- assertVisible:
+    id: 'escena-accion'
+- assertNotVisible: 'Continuar'
+
+# Ninguna flecha de volver: la llegada encadena y no se navega (`bucle-jugable.md` §2).
+# Una flecha convertiría la secuencia en un menú y dejaría un beat a medio resolver, que
+# es un estado que el motor no tiene.
+- assertNotVisible:
+    id: 'volver'
+- assertNotVisible:
+    id: 'cabecera-atras'
+
+# Y ningún retrato de quien habla: exclusión 6 del PRD. El bloque de la cara está, con su
+# nombre y su puesto, y no lleva imagen.
+- assertVisible:
+    id: 'escena-cara'
+- assertNotVisible:
+    id: 'escena-cara-retrato'
+
+# Tampoco se anuncia la franja: ni reloj en pantalla, ni aviso de haber llegado tarde.
+- assertNotVisible:
+    id: 'escena-reloj'
+- assertNotVisible: 'Llegas tarde'
+
+# ── El tamaño del texto se cambia sin salir de la escena ───────────────────────
+
+- assertVisible:
+    id: 'escena-tamano-texto'
+    text: 'Tamaño del texto'
+
+# Cada toque avanza un escalón. Ni panel, ni deslizador, ni previsualización: después de
+# tocar se sigue en la misma escena y el texto sigue ahí.
+- tapOn:
+    id: 'escena-tamano-texto'
+- assertVisible:
+    id: 'escena-estado'
+    text: 'escena'
+- assertVisible:
+    id: 'escena-texto'
+- assertNotVisible:
+    id: 'ajustes-panel'
+
+# Y no hay ninguna cifra: ni número de escalón, ni porcentaje.
+- assertNotVisible: '100%'
+- assertNotVisible: '125%'
+
+# Tres escalones y vuelta al principio: tres toques más dejan la escena donde estaba, sin
+# haber salido de ella en ningún momento.
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          id: 'escena-tamano-texto'
+      - assertVisible:
+          id: 'escena-estado'
+          text: 'escena'
+
+# ── El tamaño elegido sigue puesto en la escena siguiente ──────────────────────
+
+# Se deja el escalón en el segundo y se avanza el beat.
+- tapOn:
+    id: 'escena-tamano-texto'
+- tapOn:
+    id: 'escena-accion'
+
+# Lo que te llevas — A4P4. Misma voz, una sola acción, y el nombre del sitio siguiente.
+- assertVisible:
+    id: 'escena-estado'
+    text: 'lo-que-te-llevas'
+- assertVisible:
+    id: 'lo-que-te-llevas'
+    text: 'Llevas encima'
+- assertVisible:
+    id: 'siguiente-sitio'
+- assertNotVisible:
+    id: 'volver'
+- tapOn:
+    id: 'escena-accion'
+    text: 'Seguir andando'
+
+# Y en la escena del beat siguiente el control sigue donde se dejó: el modo compañía es
+# una condición de la partida y no de una escena (`personaje.md` §4).
+- tapOn:
+    id: 'paso-escena'
+- assertVisible:
+    id: 'escena-estado'
+    text: 'escena'
+- assertVisible:
+    id: 'escena-tamano-texto'
+    text: 'Tamaño del texto'
+- assertVisible:
+    id: 'escena-texto'

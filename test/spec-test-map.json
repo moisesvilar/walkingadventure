@@ -21998,6 +21998,440 @@
       "fichero": "test/nucleo/visor.test.mjs",
       "caso": "Ningún texto de esta capa lleva el nombre real de un sitio al que no se haya llegado",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado cualquier plantilla del catálogo casteada sobre cualquiera de los ocho mundos de referencia, cuando se recorre su cadena de beats, entonces cada beat apunta a un único beat siguiente y solo el último no apunta a ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Cada beat apunta a un único siguiente y solo el último no apunta a ninguno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado esa misma cadena, cuando se cuenta cuántas continuaciones ofrece un beat resuelto, entonces es exactamente una.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Un beat resuelto ofrece exactamente una continuación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat con disparador `con_objeto` resuelto con el objeto y el mismo beat resuelto sin él, cuando se comparan, entonces el resultado y el beat siguiente son el mismo y solo cambia el texto de la vía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat",
+      "nota": "El escenario ya tiene media implementación en test/nucleo/objetos.test.mjs y test/nucleo/casting.test.mjs, que afirman la estructura de la bifurcación. Aquí se afirma la mitad que esta fila entrega: que la escena se compone por las dos vías y que el motor resuelve el beat igual por las dos."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una plantilla que declarase dos beats siguientes para un mismo beat, cuando se valida, entonces falla nombrando la plantilla y el beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Una plantilla que declarase dos beats siguientes falla nombrando la plantilla y el beat",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura recorrida entera, cuando se cuenta cuántas decisiones se le pidieron a quien juega, entonces cero: ningún beat pregunta nada, y el hecho `decision-en-aventura` no se emite en ninguna aventura del catálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Ninguna aventura del catálogo pide una decisión",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat con disparador de franja y una llegada dentro de su franja, cuando se resuelve, entonces el beat queda resuelto con la variante de dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible",
+      "nota": "El escenario de la batería dice «ningún beat se pierde por tiempo» y casting.test.mjs ya lo afirma sobre la estructura casteada. Aquí se afirma sobre el motor: los dos ciclos completos, dentro y fuera, comparados lado a lado. La mitad fina de RF-QUEST-004 va en los casos declarados como hueco de esta misma característica."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado ese mismo beat y una llegada fuera de su franja, cuando se resuelve, entonces el beat queda resuelto igual, con la variante de fuera, y el resultado y el beat siguiente son idénticos a los de la llegada dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible",
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado las dos resoluciones del mismo beat, dentro y fuera, cuando se comparan sus efectos sobre la partida —objetos, oro, hechos y avance de la cadena—, entonces no difieren en nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible",
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el texto de la variante de fuera de cualquier beat de franja del catálogo, cuando se busca en él el vocabulario de reproche, entonces no aparece ninguna de sus palabras.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La variante de fuera de franja no reprocha nada",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat de franja cuya variante de fuera no está escrita en la plantilla, cuando se valida la plantilla, entonces falla nombrando la plantilla y el beat, en lugar de resolver el beat con el texto de dentro como si nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Un beat de franja sin variante de fuera falla nombrando la plantilla y el beat",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado la franja `noche`, que cruza la medianoche, cuando se resuelve un beat suyo a las 23:30 y otro a las 02:00, entonces las dos llegadas cuentan como dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La franja de noche cuenta dentro a las once y media y a las dos",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura con un beat de franja, cuando se recorre entera llegando siempre fuera de franja, entonces la aventura termina y su desenlace es el de una aventura terminada, no un cierre en corto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Fallar por no llegar es casi imposible",
+      "escenario": "Fallar por no llegar es casi imposible",
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado todas las plantillas del catálogo con beats de franja, cuando se resuelven sus cadenas llegando siempre fuera de franja, entonces ninguna queda bloqueada en ningún beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Ninguna plantilla con franja se bloquea llegando siempre fuera",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-QUEST-004 está marcado «⚠ sin escenario (franjas)» en docs/prd.md §4.2, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica de las franjas en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una partida sin ninguna aventura en curso, cuando se acepta una aventura casteada, entonces queda en curso con su cadena de beats, su beat en curso puesto en el primero y ningún beat resuelto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Aceptar deja la aventura en curso en su primer beat y sin ninguno resuelto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura en curso, cuando se resuelve el beat que toca, entonces el beat en curso pasa a ser el siguiente y el resuelto queda anotado con su vía y su variante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Resolver el beat que toca avanza y anota la vía y la variante",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura en curso, cuando se resuelve un beat que no es el que toca, entonces falla nombrando el beat que llegó y el que se esperaba, y no se avanza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Resolver el beat que no toca falla nombrando el que llegó y el que se esperaba",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura en curso, cuando se resuelve dos veces el mismo beat, entonces la segunda no cambia nada y no duplica ningún hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Resolver dos veces el mismo beat no cambia nada ni duplica ningún hecho",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura en curso con el último beat resuelto, cuando se cierra, entonces queda declarada terminada con el desenlace de su plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Con el último beat resuelto la aventura queda terminada con el desenlace de su plantilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura en curso con beats sin resolver, cuando se cierra, entonces queda declarada a medias, con cuántos beats se resolvieron y qué se llegó a conseguir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Con beats sin resolver la aventura queda a medias, con cuántos se resolvieron y qué se consiguió",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura ya cerrada, cuando se le pide resolver un beat, entonces falla nombrando la aventura y su estado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Una aventura ya cerrada falla nombrando la aventura y su estado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado cualquiera de esas tres transiciones, cuando se mira el registro de hechos, entonces hay exactamente un hecho `aventura-aceptada`, uno `aventura-cerrada` o uno `aventura-abandonada` según corresponda, con el identificador de la aventura dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Aceptar deja la aventura en curso en su primer beat y sin ninguno resuelto",
+      "hueco_de_bateria": true,
+      "nota": "Se cubre con tres casos, uno por transición: el de aceptar cuenta el hecho de aceptación, «Con el último beat resuelto...» el de cierre y «Con beats sin resolver...» el de abandono. Los tres afirman que hay exactamente uno y que lleva el identificador de la aventura dentro."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una partida guardada con una aventura en curso, cuando se congela y se vuelve a levantar, entonces el estado de la aventura vuelve idéntico y el beat en curso es el mismo. (Bloqueante con RF-PERS-001.)",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Una partida a medias se congela y se levanta idéntica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una partida guardada con una aventura en curso, cuando se reconstruye desde el registro de hechos, entonces el área `aventuras` se reproduce en lugar de declararse no reproducible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "El estado manda sobre el registro",
+      "escenario": "El estado manda sobre el registro",
+      "nota": "El caso afirma además el límite que el implementador declara: por qué beat iba la aventura no deja hecho propio, así que la reconstrucción vuelve por el primero y manda el estado guardado. Eso es exactamente lo que el escenario de la batería dice, y por eso se implementa con su nombre."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una aventura aceptada y la misma partida reproducida dos veces con las mismas entradas, cuando se comparan los dos estados, entonces son idénticos byte a byte. (Bloqueante, `@determinismo`, RNF-DET-003.)",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La misma partida reproducida dos veces sale idéntica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat resuelto en un sitio con una cara del reparto, cuando se compone su escena, entonces lleva el título del sitio, la línea de situación, el nombre y el puesto de quien habla, su parlamento, y el cierre de la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La escena lleva sitio, titular, situación, quien habla, su parlamento y el cierre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat resuelto en un sitio con una cara del reparto, cuando se compone su escena, entonces lleva el título del sitio, la línea de situación, el nombre y el puesto de quien habla, su parlamento, y el cierre de la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La escena sin cara pierde el bloque de la cara y no mueve nada más",
+      "hueco_de_bateria": true,
+      "nota": "La otra mitad del criterio: el wireframe dice que una escena sin nadie pierde el bloque de la cara y no mueve de sitio ningún otro elemento, y eso solo se puede afirmar restando dos composiciones."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat resuelto en un sitio con una cara del reparto, cuando se compone su escena, entonces lleva el título del sitio, la línea de situación, el nombre y el puesto de quien habla, su parlamento, y el cierre de la escena.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Toda escena del catálogo tiene marco, y una sin él pone el módulo rojo",
+      "hueco_de_bateria": true,
+      "nota": "El titular y el verbo salen del marco de la escena, que es catálogo cerrado: una escena sin marco dejaría la pantalla con un hueco y el botón sin nada escrito (§6h). Es la precondición del criterio y por eso cuelga de él."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado esa misma escena, cuando se cuentan sus acciones, entonces hay exactamente una que avanza. (Escenario derivado de A4P3, «Un solo botón».)",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Un beat resuelto ofrece exactamente una continuación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado esa misma escena, cuando se cuentan sus acciones, entonces hay exactamente una que avanza. (Escenario derivado de A4P3, «Un solo botón».)",
+      "nivel": "@app",
+      "fichero": "test/app/escena.yaml",
+      "caso": "Un solo botón y ninguna manera de volver atrás",
+      "hueco_de_bateria": true,
+      "nota": "La mitad que necesita pantalla: que en el móvil solo haya un elemento tocable que avanza y ninguna flecha de volver. NO SE PUEDE EJECUTAR: SPEC-034 no entregó ninguna pantalla en app/, así que ninguno de los identificadores existe todavía."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado esa misma escena, cuando se busca un retrato de la cara, entonces no hay ninguno: los retratos son exclusión 6 del PRD.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La escena lleva sitio, titular, situación, quien habla, su parlamento y el cierre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un beat cuyo texto del LLM está residente, cuando se compone la escena, entonces el texto que se enseña es el del LLM y su origen queda declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica",
+      "nota": "El escenario ya está implementado sobre el casting en test/nucleo/casting.test.mjs y test/nucleo/narrador.test.mjs. Aquí se afirma sobre la composición de la escena, que es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado ese mismo beat sin el texto del LLM, cuando se compone la escena, entonces se enseña el texto de la plantilla, con la misma composición, y ningún texto de la pantalla menciona que falte nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Con LLM y sin LLM la estructura es idéntica",
+      "escenario": "Con LLM y sin LLM la estructura es idéntica"
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el resultado del beat, cuando se compone la pantalla de lo que te llevas, entonces lleva lo que se lleva, la información que empuja al siguiente y el nombre del sitio siguiente con su marca en el mapa. (A4P4.)",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Lleva lo que se lleva, el empuje y el nombre del sitio siguiente con su marca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado esa misma pantalla, cuando se busca en ella cualquier cifra, entonces no hay ninguna: ni cuánto falta, ni cuántos beats quedan, ni cuánto oro se lleva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "En la pantalla de lo que te llevas no aparece ninguna cifra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el último beat de una aventura, cuando se resuelve, entonces la pantalla de lo que te llevas no nombra ningún sitio siguiente y la aventura queda lista para cerrarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "El último beat no nombra ningún sitio siguiente y la aventura queda lista para cerrarse",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado todos los textos de escena del catálogo y todos los textos del LLM adoptados, cuando se buscan en ellos cifras, abreviaturas, siglas y símbolos que no se leen en voz alta, entonces no aparece ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Ningún texto de escena del catálogo lleva nada que no se lea en voz alta",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un texto que contuviera uno de ellos, cuando se ejecuta la comprobación, entonces falla nombrando el texto y lo que encontró: el criterio se puede poner rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La comprobación de lectura en voz alta falla nombrando el texto y lo que encontró",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado todos los textos de escena del catálogo, cuando se buscan ranuras sin resolver, entonces no queda ninguna: la concordancia de género la resolvió el paquete de idioma antes de llegar a la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Ningún texto de escena del catálogo deja una ranura sin resolver",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado la escena en pantalla, cuando se enumeran sus elementos y el registro de cada uno, entonces el único de registro de aplicación es el ajuste de tamaño de letra, y todo lo demás es voz del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "El único registro de aplicación de la escena es el tamaño de letra",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado la escena, cuando se cambia el tamaño de letra, entonces el texto de la escena cambia de tamaño sin salir de la escena y sin recargar nada.",
+      "nivel": "@app",
+      "fichero": "test/app/escena.yaml",
+      "caso": "El tamaño del texto se cambia sin salir de la escena",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería. NO SE PUEDE EJECUTAR: SPEC-034 no entregó ninguna pantalla en app/, así que el control no existe todavía. Que cambiar el escalón no mueva ningún otro elemento de la escena sí se afirma en @nucleo."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado ese cambio, cuando se sale de la escena y se entra en otra, entonces el tamaño elegido sigue puesto, y es el mismo valor que enseña la pantalla de ajustes.",
+      "nivel": "@app",
+      "fichero": "test/app/escena.yaml",
+      "caso": "El tamaño elegido sigue puesto en la escena siguiente",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería. NO SE PUEDE EJECUTAR, y además la mitad de «el mismo valor que enseña la pantalla de ajustes» no es comprobable todavía: A6P6 es de la fila 38 y no existe. Lo que sí se afirma en @nucleo es que la escala es una sola y se declara en el paquete."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado un tamaño de letra fuera de la escala declarada, cuando se aplica, entonces falla nombrando el valor y la escala.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Un tamaño de letra fuera de la escala falla nombrando el valor y la escala",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el ajuste de tamaño de letra, cuando se lee su etiqueta y su ayuda, entonces no aparece ninguna mención de accesibilidad, de dificultad de lectura ni de modo alguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "El único registro de aplicación de la escena es el tamaño de letra",
+      "hueco_de_bateria": true,
+      "nota": "HUECO DE LA BATERÍA DECLARADO POR LA SPEC: RF-PJ-009 está marcado «⚠ sin escenario» en docs/prd.md §4.8, así que sus criterios se escriben aquí por primera vez y no hay ningún escenario de docs/testing.md que reutilizar. Alguien tiene que cerrar el hueco escribiendo la característica del modo compañía en la batería."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el motor de la aventura en curso sin el reloj de pared cableado, cuando se resuelve un beat de franja, entonces falla nombrando el reloj, y no resuelve todas las llegadas como si fueran dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin el reloj de pared, un beat de franja falla nombrando el reloj",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el motor sin la vista de tenencia cableada, cuando se resuelve un beat `con_objeto`, entonces falla nombrando la tenencia, y no elige la vía alternativa por defecto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin la vista de tenencia, un beat con objeto falla nombrando la tenencia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el motor sin el registro de hechos cableado, cuando se acepta una aventura, entonces falla nombrando el registro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin el registro de hechos, aceptar una aventura falla nombrando el registro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una escena compuesta, cuando se inspecciona qué recibió, entonces recibió el beat casteado entero de SPEC-010 y no una copia recortada de su texto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La escena se compone sobre el beat casteado entero y no sobre una copia recortada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el área `aventuras` del estado, cuando se consultan las áreas que no reproducen, entonces ya no está entre ellas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "El estado manda sobre el registro",
+      "escenario": "El estado manda sobre el registro"
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado una escena compuesta y un beat resuelto, cuando se cuenta cuántas peticiones de red se hicieron, entonces cero: en marcha no se invoca al LLM ni a nada. (RF-QUEST-008.)",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin red, la aventura funciona entera",
+      "escenario": "Sin red, la aventura funciona entera",
+      "nota": "El escenario ya está implementado en test/nucleo/sin-red.test.mjs y test/nucleo/narrador.test.mjs sobre el casting y los textos. Aquí se afirma sobre la escena y el recorrido entero, que es lo que esta fila entrega: se sustituyen fetch, XMLHttpRequest y WebSocket por espías que fallan y la aventura se completa igual."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Dado el estado de una aventura en curso guardado, cuando se inspecciona, entonces no contiene ninguna coordenada: los lugares son identificadores de sitios del mundo congelado. (RF-PRIV-002.)",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "El minuto en que se resolvió un beat no está en el estado ni en el registro",
+      "hueco_de_bateria": true,
+      "nota": "El mismo caso recorre el documento entero y el registro entero: ni el minuto en que se resolvió el beat, ni ningún campo de hora, ni ninguno de coordenada."
+    },
+    {
+      "spec": "SPEC-034",
+      "criterio": "Decisión no cubierta por el design system: qué pasa si la app se cierra con la escena abierta y sin resolver. Se resuelve dejando el beat sin resolver y la escena disponible, igual que si no se hubiera mirado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La escena queda disponible y espera",
+      "escenario": "La escena queda disponible y espera",
+      "nota": "El escenario ya está implementado en test/app/llegada.yaml y test/nucleo/llegadas.test.mjs desde el lado de la llegada. Aquí se afirma desde el motor: componer la escena tres veces no mueve el estado ni deja hecho, que es lo que hace que abrir la app no sea una acción de juego."
     }
   ]
 }
