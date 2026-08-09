@@ -37,6 +37,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MODOS, TIPOS_DE_PASO } from '@walkingadventure/nucleo/partida/secuencia.js';
 import { TEXTOS as TEXTOS_DEL_VISOR } from '@walkingadventure/nucleo/partida/visor.js';
 
+import { CapaDescarte } from './descarte.jsx';
 import { PantallaFicha } from './ficha.js';
 import { PantallaLoQueSeCuenta } from './lo-que-se-cuenta.js';
 import { PantallaVisor } from './visor.js';
@@ -77,7 +78,10 @@ function encadenadoDesde(secuencia, desde) {
  *   `pantallas` las de la fila 34, por tipo de paso; `alSeguir` avanzar al siguiente paso
  *   —lo único que mueve la secuencia—; `alVisor` abrir el visor que quedó a un toque, que
  *   **no se abre solo**; `visorAbierto` si esa capa está puesta ahora mismo; `alCerrarVisor`
- *   quitarla; `alDescartar` el sitio donde se toca «Este sitio no pega», de la fila 35.
+ *   quitarla; `alDescartar` el sitio donde se toca «Este sitio no pega»; `descarte` la
+ *   capa de A4P8 ya compuesta cuando está puesta, o `null` cuando no; `alMarcar` el
+ *   segundo y último toque del gesto, que recibe el motivo elegido o `null`;
+ *   `alCerrarDescarte` volver a la ficha sin marcar nada.
  *
  * No hay ninguna propiedad para ir a un paso concreto, y su ausencia es la pieza.
  */
@@ -93,6 +97,9 @@ export function PantallaLlegada({
   visorAbierto = false,
   alCerrarVisor = null,
   alDescartar = null,
+  descarte = null,
+  alMarcar = null,
+  alCerrarDescarte = null,
 }) {
   if (!llegada) {
     return (
@@ -143,6 +150,10 @@ export function PantallaLlegada({
       )}
 
       {capaPuesta ? <PantallaVisor visor={visor} alCerrar={enVisor ? alSeguir : alCerrarVisor} /> : null}
+
+      {/* A4P8, encima de la ficha y no en su lugar: la ficha sigue montada debajo, así
+          que cerrar la capa la devuelve con todo como estaba. */}
+      {descarte ? <CapaDescarte capa={descarte} alMarcar={alMarcar} alCerrar={alCerrarDescarte} /> : null}
     </View>
   );
 }

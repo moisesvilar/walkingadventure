@@ -66,7 +66,14 @@ export function PantallaLoQueHayHoy({ lista, alAbrirFicha = null, alEstiron = nu
           // hay nada por aquí, no un extra.
           <View testID="sin-reparto" style={estilos.tarjeta}>
             <Text style={estilos.tarjetaGancho}>{lista.sinReparto.texto}</Text>
-            {lista.estiron ? <Accion testID="estiron" texto={lista.estiron.texto} onPress={alEstiron} /> : null}
+            {/* La oferta es siempre la misma, aparezca por el mundo pequeño, por el
+                filtro o por los sitios que quien juega marcó (SPEC-035): el texto no
+                nombra ninguna de las tres causas, y menos aún los descartes. */}
+            {lista.estiron ? (
+              <View testID="estiron-oferta" accessibilityLabel={lista.motivo}>
+                <Accion testID="estiron" texto={lista.estiron.texto} onPress={alEstiron} />
+              </View>
+            ) : null}
           </View>
         )}
 

@@ -39,6 +39,18 @@ export const RANGO_DE_BEATS = congelaHondo({
 /** Los identificadores válidos, en el orden del catálogo. */
 export const IDS_DE_TAMANO = congelaHondo(TAMANOS_DE_SALIDA.map((t) => t.id));
 
+/**
+ * Cuánto se sugiere alejarse cuando el mundo no da para un lazo. Uno, literalmente:
+ * `bucle-jugable.md` §7 dice «alejarse un tramo más», y calcular el mínimo suficiente
+ * obligaría a repartir varias veces antes de preguntar.
+ *
+ * Vive aquí y no en `aventuras.js` —de donde se reexporta, así que nadie tiene que
+ * cambiar de sitio para pedirlo— porque el estirón es un tramo más de **alcance de
+ * salida**, y desde SPEC-035 lo pide también la alarma de los descartes: dejarlo donde
+ * estaba obligaba a que aquel módulo importara este y este aquel.
+ */
+export const TRAMOS_DEL_ESTIRON = 1;
+
 function exigeTamano(tamano) {
   const id = typeof tamano === 'string' ? tamano : tamano?.id;
   const encontrado = TAMANOS_DE_SALIDA.find((t) => t.id === id);

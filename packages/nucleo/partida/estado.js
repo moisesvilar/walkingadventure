@@ -20,6 +20,7 @@ import { exigeSemilla } from '../core/semilla.js';
 import { IDS_DE_AJUSTE, congelaAjustes, estadoDeAjustes, levantaAjustes } from './ajustes.js';
 import { congelaArranque, estadoDeArranque, levantaArranque } from './arranque.js';
 import { congelaAventuras, estadoDeAventuras, levantaAventuras } from './aventura-en-curso.js';
+import { congelaDescartes, estadoDeDescartes, levantaDescartes } from './descartes.js';
 import { congelaPersonaje, estadoDePersonaje, levantaPersonaje } from './personaje.js';
 import {
   ESQUEMA_DIARIO,
@@ -335,6 +336,19 @@ const AREA_LLEGADAS = campos({
   })),
 });
 
+/**
+ * Los sitios que quien juega marcó, por mapa: **el identificador, el rol que ocupaba y
+ * el motivo si lo hubo**, y ninguna coordenada (SPEC-035, RF-PRIV-004).
+ *
+ * Va por mapa y no por partida porque dos mapas no comparten sitios, y viaja **dentro**
+ * de la copia exportable: RF-PRIV-004 prohíbe reportar los descartes a un sitio, no
+ * guardarlos — son de quien juega, y sacarlos de la copia haría que restaurar una
+ * partida devolviera al jugador a la casa de alguien.
+ */
+const AREA_ANCLAJES = campos({
+  mapas: dic(lista(campos({ anclaje: 'texto', rol: 'texto?', porque: 'texto?' }))),
+});
+
 // --- El registro de áreas -----------------------------------------------------
 
 const AREAS = [];
@@ -428,11 +442,18 @@ declaraArea({
   reproduce: false,
 });
 
-// La que todavía solo aporta tipos de hecho. Su estado es de la fila que la posee y **se
-// declara igual**, para que sus hechos entren en el registro desde hoy: sin ellos, «cada cosa
-// que altera el estado deja hecho» sería falso el día que esa fila llegue, y el registro de
-// las partidas anteriores ya no se podría completar.
-declaraArea({ id: 'anclajes' });
+// Los descartes de anclaje, de SPEC-035. El área estaba declarada **sin esquema** desde
+// SPEC-016 precisamente para que sus hechos entraran en el registro desde antes de que
+// existiera esta fila; aquí se le pone estado y **sí se reproduce**, así que deja de estar
+// entre las que solo se reconocen. Sus dos hechos llevan dentro todo lo que hace falta para
+// reconstruirla: qué sitio, con qué rol, con qué motivo, y cuál se deshizo después.
+declaraArea({
+  id: 'anclajes',
+  esquema: AREA_ANCLAJES,
+  inicial: estadoDeDescartes,
+  congela: congelaDescartes,
+  levanta: levantaDescartes,
+});
 
 /** Las áreas declaradas, en el orden en que se escriben. */
 export const IDS_DE_AREA = congelaHondo(AREAS.map((a) => a.id));

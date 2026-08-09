@@ -41,6 +41,14 @@ export const MOTIVOS_DE_FALTA = Object.freeze({
   MUNDO: 'mundo',
   /** No hay callejero con el que trazar nada. */
   SIN_VIARIO: 'sin-viario',
+  /**
+   * Los sitios que quien juega marcó han dejado el mundo sin ni un lazo que quepa
+   * (SPEC-035). Se atribuye aquí y no al mundo **solo si sin ellos había reparto**, que
+   * es la misma regla de atribución que ya distingue el filtro del mundo pequeño: sin
+   * ella, un barrio de tres calles que nunca dio para un lazo empezaría a echarle la
+   * culpa a quien juega, que es la mentira que el motivo del mundo existe para no contar.
+   */
+  DESCARTES: 'descartes',
 });
 
 /**

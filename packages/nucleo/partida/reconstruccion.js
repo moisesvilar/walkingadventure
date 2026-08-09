@@ -23,6 +23,7 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { COMO_ACABO, HECHO_QUE_NADIE_EMITE } from './aventura-en-curso.js';
+import { anotaDescarte, quitaDescarte } from './descartes.js';
 import { apunta as apuntaEnDiario, entradaDeHecho } from './diario.js';
 import { AREAS_QUE_NO_REPRODUCEN, congelaEstado, estadoInicial, levantaEstado, pisaSitio } from './estado.js';
 import { VERSION_GENERADOR, lee, texto as textoCanonico } from './formato.js';
@@ -67,6 +68,27 @@ const APLICADORES = {
   },
   'objeto-obtenido'(vivo, h) {
     guardaObjeto(vivo.objetos, { id: h.carga.id, clase: h.carga.clase, procedencia: h.carga.procedencia, dia: h.carga.diaDeRepisa });
+  },
+  // --- Los descartes de anclaje ---------------------------------------------
+  //
+  // Los dos hechos llevan dentro todo lo que el área es, así que reproducirlos la
+  // devuelve entera: el descarte anota y el deshacer quita. El orden del registro es el
+  // que decide el resultado, que es exactamente lo que «se reconstruye desde el registro
+  // y salen los mismos descartes» quiere decir.
+  'anclaje-descartado'(vivo, h) {
+    anotaDescarte(vivo.anclajes, { mapaId: h.mapa, anclaje: h.carga.anclaje, rol: h.carga.rol ?? null, porque: h.carga.porque ?? null });
+  },
+  // Un deshacer sin su descarte delante **falla nombrando el anclaje**: significa que el
+  // registro está incompleto, y quitar en silencio lo que nadie marcó dejaría un estado
+  // reconstruido que además se declara correcto.
+  'anclaje-devuelto'(vivo, h) {
+    const quitado = quitaDescarte(vivo.anclajes, { mapaId: h.mapa, anclaje: h.carga.anclaje });
+    if (!quitado.deshecho) {
+      throw new Error(
+        `el hecho "${h.tipo}" devuelve el anclaje "${h.carga.anclaje}" del mapa ${h.mapa} y el registro no trae antes su descarte: ` +
+        'sin él, deshacer no deshace nada y el estado reconstruido diría que nunca se marcó',
+      );
+    }
   },
   // --- El área de aventuras -------------------------------------------------
   //

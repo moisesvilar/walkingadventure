@@ -29,6 +29,7 @@ import { congelaHondo } from '../core/congelar.js';
 import { exigeGrafo, nodoMasCercano, SNAP_MAX } from '../world/grafo.js';
 import { PESO_MINIMO_DE_ESCENA } from '../world/escenas.js';
 import { namesFor } from '../names/index.js';
+import { SIN_DESCARTES, exigeDescartes } from '../partida/descartes.js';
 import { arbolDeCaminos, caminoDesdeArbol, normalizaCriterios, tramosDelCamino } from '../partida/filtro.js';
 import { caraDeSitio } from '../partida/npcs.js';
 import { SIN_OBJETOS, exigeTenencia } from '../partida/objetos.js';
@@ -89,25 +90,32 @@ export function requisitoDeRol(req) {
  * exactamente igual que uno visitado, y por eso cada candidato viaja con su nombre
  * propio y su anclaje real —a un sitio al que te mandan te lo nombran aunque no
  * hayas ido—.
+ *
+ * **Aquí es donde entra el descarte** (SPEC-035), y en ningún otro sitio: un sitio que
+ * quien juega marcó deja de ser candidato de cualquier rol, exactamente como los
+ * criterios de caminos evitados entran al trazar el lazo. El mundo sigue entero —el
+ * sitio se dibuja, conserva su nombre y su posición— y ninguna celda se resiembra.
  */
-export function candidatosDeRol(mundo, req) {
+export function candidatosDeRol(mundo, req, { descartes = SIN_DESCARTES } = {}) {
+  const marcados = exigeDescartes(descartes, `los candidatos del rol ${JSON.stringify(req?.tipo)}`);
+  const vivo = (nombre) => !marcados.descartado(nombre);
   if (req.tipo === 'servicio') {
     return (mundo.settlements ?? []).flatMap((s) =>
       s.services
-        .filter((v) => v.kind === req.kind && v.x != null)
+        .filter((v) => v.kind === req.kind && v.x != null && vivo(v.name))
         .map((v) => ({ tipo: 'servicio', kind: v.kind, nombre: v.name, x: v.x, y: v.y, en: s.name, real: v.real })),
     );
   }
   if (req.tipo === 'nucleo') {
     return (mundo.settlements ?? [])
-      .filter((s) => req.types.includes(s.type))
+      .filter((s) => req.types.includes(s.type) && vivo(s.name))
       .map((s) => ({ tipo: 'nucleo', kind: s.type, nombre: s.name, x: s.x, y: s.y, en: null, real: s.anchor }));
   }
   if (req.tipo === 'paraje') {
     const escenas = escenasDelRol(req);
     const pesoMinimo = req.minPeso ?? PESO_MINIMO_DE_ESCENA;
     return (mundo.parajes ?? [])
-      .filter((p) => escenas.some((e) => (p.scenes[e] ?? 0) >= pesoMinimo))
+      .filter((p) => vivo(p.name) && escenas.some((e) => (p.scenes[e] ?? 0) >= pesoMinimo))
       .map((p) => ({
         tipo: 'paraje',
         kind: p.type,
@@ -215,8 +223,9 @@ function exigePartida(partida) {
  *   objetos de la partida (SPEC-015), que **solo decide por qué vía se atraviesa un
  *   beat `con_objeto`** y no toca ni el reparto ni el lazo: es la frontera de
  *   inyección entera de `progresion.md` —«que `castTemplate` reciba también el
- *   estado de la partida, sin que eso cambie los beats»—; `semilla` la del mundo si
- *   no se da otra.
+ *   estado de la partida, sin que eso cambie los beats»—; `descartes` la vista de los
+ *   sitios que quien juega marcó (SPEC-035), que sacan candidatos del reparto **sin
+ *   resembrar nada**; `semilla` la del mundo si no se da otra.
  * @returns `{ ok: true, tpl, aventura, beats, ... }` o `{ ok: false, tpl, motivo }`
  *   con el motivo estructurado del catálogo cerrado.
  */
@@ -231,10 +240,12 @@ export function casteaPlantilla({
   resuelveRolHumano = rolHumanoDelSitio,
   medidor = null,
   tenencia = SIN_OBJETOS,
+  descartes = SIN_DESCARTES,
   semilla = mundo?.seed,
 }) {
   const metrosPorTramo = exigeTramoM(tramoM, 'el casting de aventuras');
   const laTenencia = exigeTenencia(tenencia, 'el casting de aventuras');
+  const losDescartes = exigeDescartes(descartes, 'el casting de aventuras');
   const desde = exigePartida(partida);
   const orden = validaPlantilla(plantilla);
   const medida = medidor ?? medidorDeTrechos(grafo, criterios);
@@ -279,7 +290,7 @@ export function casteaPlantilla({
   const ordenDeLugares = orden.filter((rid) => roles[rid].tipo !== 'humano');
   const pools = {};
   for (const rid of ordenDeLugares) {
-    const pool = candidatosDeRol(mundo, roles[rid]);
+    const pool = candidatosDeRol(mundo, roles[rid], { descartes: losDescartes });
     if (!pool.length) {
       return fallo(plantilla, motivoDeCasting({
         clave: MOTIVOS_DE_CASTING.SIN_CANDIDATOS,
@@ -549,11 +560,17 @@ export function exigeEncuadre(mundo) {
  * como opción y no como estado entero: con objetos y sin ninguno el reparto es el
  * mismo, y lo único que cambia es por qué vía se atraviesa un beat `con_objeto`.
  */
-export function castTemplate(mundo, plantilla, semilla = mundo.seed, { tenencia = SIN_OBJETOS } = {}) {
-  return casteaPlantilla({ ...exigeEncuadre(mundo), mundo, plantilla, semilla, tenencia });
+export function castTemplate(mundo, plantilla, semilla = mundo.seed, { tenencia = SIN_OBJETOS, descartes = SIN_DESCARTES } = {}) {
+  return casteaPlantilla({ ...exigeEncuadre(mundo), mundo, plantilla, semilla, tenencia, descartes });
 }
 
-/** Castea el catálogo contra un mundo, con su encuadre. */
-export function castAll(mundo, semilla = mundo.seed, { tenencia = SIN_OBJETOS } = {}) {
-  return casteaCatalogo({ ...exigeEncuadre(mundo), mundo, catalogo: CATALOGO, semilla, tenencia });
+/**
+ * Castea el catálogo contra un mundo, con su encuadre.
+ *
+ * Volver a llamarla con un descarte más es barato y **no toca nada del mundo**: SPEC-009
+ * dejó el casting fuera del documento congelado, y por eso «anota sin resembrar» es
+ * literal en lugar de aproximado.
+ */
+export function castAll(mundo, semilla = mundo.seed, { tenencia = SIN_OBJETOS, descartes = SIN_DESCARTES } = {}) {
+  return casteaCatalogo({ ...exigeEncuadre(mundo), mundo, catalogo: CATALOGO, semilla, tenencia, descartes });
 }
