@@ -137,16 +137,16 @@ componente heredado de ninguna spec anterior y se declara aquí.
 
 ### data-testid
 
-Los dos que `design-system.md` pide siempre son aquí el estado del momento y el mapa; el mapa queda debajo y no lo toca esta fila, así que de ella cuelga el estado:
+Los dos que `design-system.md` pide siempre son aquí el estado del momento y el mapa; el mapa queda debajo y no lo toca esta fila, así que de ella cuelga el estado. **Cuatro de estos identificadores ya los declaró SPEC-025** —`visor-anclaje`, `visor-lado-real`, `visor-cartela` y `ficha-texto`— y aquí se conservan literales en lugar de renombrarse: cambiarlos rompería las pruebas de aquella fila sin ganar nada.
 
 - `llegada-estado` — el estado del momento al parar, con un valor de un vocabulario cerrado: `visor`, `visor-sin-foto`, `ficha`, `visor-a-un-toque`
-- `visor` — la capa entera, para afirmar que está y que se cierra
-- `visor-lado` — qué lado está puesto, con valor `ficcion` o `real`
+- `visor-anclaje` — la capa entera, para afirmar que está y que se cierra *(ya declarado en SPEC-025)*
+- `visor-lado-real` — el lado real, el que aparece al arrastrar, con o sin foto *(ya declarado en SPEC-025)*
+- `visor-cartela` — la cartela, para leer qué nombre dice *(ya declarado en SPEC-025)*
+- `ficha-texto` — la ficha de texto entera *(ya declarado en SPEC-025)*
 - `visor-tirador` — el tirador, sobre el que se hace el gesto
-- `visor-cartela` — la cartela, para leer qué nombre dice
 - `visor-cerrar` — la flecha `▾`
 - `visor-abrir` — la acción de «volver a mirar», la que existe solo la segunda vez
-- `ficha-sitio` — la ficha de texto entera
 
 Sin más: el tipo, el nombre de fantasía, el nombre real, la línea de «en realidad» y el párrafo de la escena son texto único dentro de sus contenedores y se localizan por su contenido.
 
