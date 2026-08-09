@@ -16,31 +16,26 @@
 import { filtraPrimeraAventura } from '@walkingadventure/nucleo/partida/arranque.js';
 import { repartoDeAventuras } from '@walkingadventure/nucleo/partida/aventuras.js';
 import { correPrologo } from '@walkingadventure/nucleo/partida/prologo.js';
+import { MEDIDA_DE_TAMANO, medidaDe } from '@walkingadventure/nucleo/partida/guion-de-antes-de-salir.js';
 import { CATALOGO } from '@walkingadventure/nucleo/quests/catalogo.js';
 import { plantillasDeOficio } from '@walkingadventure/nucleo/quests/oficios.js';
 
 /**
- * La medida de cada tamaño **en palabra del mundo y con su equivalencia orientativa**.
+ * La medida de cada tamaño **en palabra del mundo**, reexportada del núcleo.
  *
- * Las horas son lo único de las mecánicas que conviene decir en voz alta, y se dicen
- * aquí porque son texto de pantalla: el núcleo declara los tamaños en tramos y en
- * beats, que es lo que no cambia de una persona a otra, y la equivalencia en tiempo es
- * de esta capa. La regla del reloj se explica al pie de la lista, no dentro de cada
- * tarjeta.
+ * Vivió aquí mientras solo la usaba A1P7. Desde SPEC-028 la lista de hoy dice exactamente lo
+ * mismo, y dos copias del mismo texto acabarían diciendo cosas distintas: ahora es una pieza
+ * del guion de antes de salir, donde además se revisa que no lleve ninguna distancia.
  */
-export const MEDIDA_DE_TAMANO = Object.freeze({
-  paseo: 'Un paseo · una hora',
-  aventura: 'Una aventura · unas dos horas',
-  jornada: 'Una jornada · una tarde entera',
-});
+export { MEDIDA_DE_TAMANO };
 
 /**
  * El punto desde el que se resuelve la alcanzabilidad del prólogo.
  *
- * Es **el anclaje**, que en el marco métrico del documento es el origen, y es
- * exactamente lo único que el arranque conservó: la posición donde se soltó la marca
- * no se guarda en ninguna parte (RF-PRIV-002). No es «suponer el centro del mapa»
- * —eso sería inventárselo teniendo otra cosa—: es usar el único punto que existe.
+ * Es **el anclaje**, que en el marco métrico del documento es el origen, y es exactamente lo
+ * único que el arranque conservó: la posición donde se soltó la marca no se guarda en ninguna
+ * parte (RF-PRIV-002). No es «suponer el centro del mapa» —eso sería inventárselo teniendo
+ * otra cosa—: es usar el único punto que existe.
  */
 export const PUNTO_DEL_ANCLAJE = Object.freeze({ x: 0, y: 0 });
 
@@ -56,10 +51,7 @@ function plantillaDe(id) {
 /** Una tarjeta de aventura: lo que A1P7 pinta y nada más. */
 function tarjetaDe(aventura) {
   const plantilla = plantillaDe(aventura.plantilla);
-  const medida = MEDIDA_DE_TAMANO[plantilla.tamano];
-  if (!medida) {
-    throw new Error(`la plantilla "${plantilla.id}" declara el tamaño "${plantilla.tamano}" y no hay palabra con la que decirlo: las declaradas son ${Object.keys(MEDIDA_DE_TAMANO).join(', ')}`);
-  }
+  const medida = medidaDe(plantilla.tamano);
   return Object.freeze({
     id: plantilla.id,
     titulo: plantilla.titulo,

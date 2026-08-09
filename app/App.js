@@ -16,9 +16,13 @@
 import React, { useEffect, useState } from 'react';
 import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native';
 
+import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
+
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
+import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
 import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
+import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
@@ -39,6 +43,10 @@ export function App() {
   // el botón «Salir a andar» de A1P7, que es la frontera de registro y el único
   // camino: no hay manera de volver a entrar salvo por «empezar de nuevo».
   const [enArranque, setEnArranque] = useState(true);
+  // Lo que el arranque dejó: el personaje, el mapa levantado y el estado de la partida. Es lo
+  // que la portada necesita, y es de esta fila que exista una portada a la que ir. Mientras no
+  // haya partida guardada —que es de otra fila—, vive aquí y solo dura la sesión.
+  const [partida, setPartida] = useState(null);
 
   useEffect(() => {
     let vivo = true;
@@ -59,7 +67,41 @@ export function App() {
   if (enArranque) {
     return (
       <SafeAreaView style={estilos.raiz}>
-        <ArranqueMontado alSalirAAndar={() => setEnArranque(false)} />
+        <ArranqueMontado
+          alSalirAAndar={(cerrado, lista, levantado) => {
+            if (cerrado && levantado) {
+              setPartida({
+                estado: estadoInicial({ semilla: cerrado.semilla }),
+                // El oficio viaja dos veces y no es redundancia: la clave es con la que se
+                // filtra el catálogo, y la palabra —con género, que por eso vive en la app— es
+                // la que se lee bajo el nombre.
+                personaje: {
+                  ...cerrado.personaje,
+                  oficioDicho: nombreCortoDeOficio(cerrado.personaje.oficio, cerrado.personaje.genero),
+                },
+                mundo: { mapaId: levantado.mapaId, documento: levantado.documento, titulo: levantado.documento?.title ?? null },
+                arrancadaEn: Date.now(),
+              });
+            }
+            setEnArranque(false);
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // La portada: lo que se ve al abrir la app cualquier día que no sea el primero. Sin partida
+  // —una compilación abierta directamente en el andamiaje— se queda el andamiaje, que es lo
+  // que había antes de esta fila.
+  if (partida) {
+    return (
+      <SafeAreaView style={estilos.raiz}>
+        <AntesDeSalirMontado
+          partida={partida.estado}
+          personaje={partida.personaje}
+          mundo={partida.mundo}
+          arrancadaEn={partida.arrancadaEn}
+        />
       </SafeAreaView>
     );
   }

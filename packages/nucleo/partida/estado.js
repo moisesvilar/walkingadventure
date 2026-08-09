@@ -56,6 +56,7 @@ import { congelaOro, estadoDeOro, levantaOro } from './oro.js';
 import { congelaPasos, estadoDePasos, levantaPasos } from './pasos.js';
 import { congelaRelaciones, estadoDeRelaciones, levantaRelaciones } from './relacion.js';
 import { congelaRumores, estadoDeRumores, levantaRumores } from './rumores.js';
+import { congelaSalidaAbierta, estadoDeSalidaAbierta, levantaSalidaAbierta } from './salida-abierta.js';
 import { CATEGORIAS_DE_TOPICO, congelaTopicos, estadoDeTopicos, levantaTopicos } from './topicos.js';
 
 // --- Los esquemas de las áreas que ya existen --------------------------------
@@ -238,6 +239,17 @@ const AREA_ENTREGAS = campos({
   })),
 });
 
+/**
+ * La salida abierta, si la hay: identidad, mapa, aventura aceptada y dónde se quedó.
+ *
+ * **Ninguna coordenada y ninguna marca de tiempo** (RF-PRIV-002): el sitio va con el
+ * nombre del mundo, y sin marca de tiempo una salida abierta desde hace días se lee
+ * exactamente igual que la de hace un rato, que es lo que pide `bucle-jugable.md` §4.
+ */
+const AREA_AVENTURAS = campos({
+  abierta: uno(['nulo', campos({ salida: 'texto', mapa: 'texto', aventura: 'texto?', sitio: 'texto?' })]),
+});
+
 // --- El registro de áreas -----------------------------------------------------
 
 const AREAS = [];
@@ -292,11 +304,23 @@ declaraArea({ id: 'topicos', esquema: AREA_TOPICOS, inicial: estadoDeTopicos, co
 // entradas, así que se reconocen y se declaran en lugar de aplicarse.
 declaraArea({ id: 'entregas', esquema: AREA_ENTREGAS, inicial: estadoDeEntregas, congela: congelaEntregas, levanta: levantaEntregas, reproduce: false });
 
-// Las dos que solo aportan tipos de hecho. Su estado es de la fila que las posee y
-// **se declaran igual**, para que sus hechos entren en el registro desde hoy: sin
-// ellos, «cada cosa que altera el estado deja hecho» sería falso el día que esas
-// filas lleguen, y el registro de las partidas anteriores ya no se podría completar.
-declaraArea({ id: 'aventuras' });
+// El registro de la salida abierta, de SPEC-028. Es el estado del área de aventuras, que
+// hasta esta fila solo aportaba tipos de hecho. **No se reproduce desde el registro**: sus
+// hechos dicen qué aventura se aceptó y cuál se cerró, no dónde se quedó quien la llevaba, y
+// reconstruir la tarjeta de a medias a partir de ellos sería inventarse el sitio.
+declaraArea({
+  id: 'aventuras',
+  esquema: AREA_AVENTURAS,
+  inicial: estadoDeSalidaAbierta,
+  congela: congelaSalidaAbierta,
+  levanta: levantaSalidaAbierta,
+  reproduce: false,
+});
+
+// La que todavía solo aporta tipos de hecho. Su estado es de la fila que la posee y **se
+// declara igual**, para que sus hechos entren en el registro desde hoy: sin ellos, «cada cosa
+// que altera el estado deja hecho» sería falso el día que esa fila llegue, y el registro de
+// las partidas anteriores ya no se podría completar.
 declaraArea({ id: 'anclajes' });
 
 /** Las áreas declaradas, en el orden en que se escriben. */
