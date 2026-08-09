@@ -16845,6 +16845,503 @@
       "caso": "Un día sin una sola generación tiene el recuento por eslabón a cero y no le falta ninguno",
       "hueco_de_bateria": true,
       "nota": "docs/testing.md no tiene ni una línea sobre el origen de los datos de OSM (RF-INFRA-003, ⚠ sin escenario). Hueco declarado."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un elemento del mundo congelado, cuando se construye su prompt de ilustración, entonces se construye sin hacer ninguna petición de red.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El prompt de una ilustración se construye sin abrir ninguna conexión",
+      "hueco_de_bateria": true,
+      "nota": "La batería tiene «El prompt del LLM no lleva ningún dato real» para el prompt de texto, pero ningún escenario afirma que construir un prompt no abra conexión. Se afirma con el inspector de tráfico en modo estricto: sin él la ausencia sería fe."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un anclaje real cuyo nombre en OSM es \"Casa Manuela\" y cuyo nombre de fantasía es \"O Torreón Esquecido\", cuando se construye el prompt de su ilustración, entonces el prompt no contiene \"Casa Manuela\".",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real",
+      "nota": "Esta fila sostiene la mitad de imagen del escenario; la de texto ya está viva en test/nucleo/narrador.test.mjs (SPEC-018) y la del servidor en test/nucleo/proxy.test.mjs (SPEC-023). Se criban los 81 elementos ilustrables de los ocho mundos de referencia contra sus datos reales."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el prompt ya construido de cualquier elemento de los ocho mundos de referencia, cuando se busca en él, entonces no aparece ninguna coordenada, ningún identificador de OSM, ningún place_id ni ningún texto que la jugadora haya tecleado.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El prompt del LLM no lleva ningún dato real",
+      "escenario": "El prompt del LLM no lleva ningún dato real"
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un anclaje real cuyo nombre en OSM es \"Casa Manuela\" y cuyo nombre de fantasía es \"O Torreón Esquecido\", cuando se construye el prompt de su ilustración, entonces el prompt no contiene \"Casa Manuela\".",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un nombre de fantasía que coincide con el del anclaje hace fallar la construcción",
+      "hueco_de_bateria": true,
+      "nota": "El caso rojo de la afirmación de privacidad (§6o): sin él, «el prompt no lleva el nombre real» podría estar cumpliéndose porque nadie mira. Se pone el nombre de fantasía igual al del anclaje y la construcción falla."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un mundo entero, cuando se construyen los prompts de todos sus elementos ilustrables, entonces ninguno es igual a otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Dos elementos de un mundo nunca comparten prompt",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el mismo mundo generado dos veces con la misma semilla, cuando se comparan los prompts de un mismo elemento, entonces son idénticos carácter a carácter, y también lo es su clave de caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El mismo mundo con la misma semilla da el mismo prompt y la misma clave de caché",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el mismo mundo generado dos veces con la misma semilla, cuando se comparan los prompts de un mismo elemento, entonces son idénticos carácter a carácter, y también lo es su clave de caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El prompt de un lugar del reparto es el mismo que el de su elemento del mundo",
+      "hueco_de_bateria": true,
+      "nota": "ROJO. La clave de caché tiene que identificar al elemento y no a quien construyó el prompt. planDeIlustraciones indexa el mundo por `${e.type}:${e.name}` («ruina:A Torre Rota») y busca por la clave del reparto, que usa el rol del casting («paraje:A Torre Rota»): nunca acierta, así que todo prompt de una salida se construye con el elemento de repuesto y pierde la escena y el rasgo."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un elemento sin nombre de fantasía, cuando se pide su prompt, entonces falla nombrando el elemento, y no devuelve un prompt genérico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un elemento sin nombre de fantasía falla nombrando el elemento y no devuelve un prompt genérico",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un mundo en gallego y el mismo mundo en castellano, cuando se comparan los prompts de un mismo elemento, entonces difieren, porque el idioma del mundo es parte del prompt.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El idioma del mundo es parte del prompt",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un sobre de petición de imagen ya construido, cuando se valida contra el esquema cerrado de la ruta de imagen del proxy, entonces lleva el prompt de ficción y los parámetros de formato, y ningún campo más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El sobre de la petición de imagen lleva el prompt y el formato, y ningún campo más",
+      "hueco_de_bateria": true,
+      "nota": "Compara las dos listas declaradas: CAMPOS_DE_PETICION_DE_IMAGEN del núcleo y ESQUEMAS.imagen de server/proxy.mjs. El paquete no puede importar el servidor, así que este caso es lo único que se pone rojo el día que una se mueva sin la otra."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una celda recién generada con anclajes admitidos desde Places, cuando termina la generación, entonces se pide un único lote de fotos con los place_id de los anclajes que acabaron siendo núcleo, servicio o paraje.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Al terminar la generación se pide un único lote con los place_id de los anclajes consumidos",
+      "hueco_de_bateria": true,
+      "nota": "Se cuenta el número de llamadas y no el de peticiones: dos peticiones dentro de una llamada y una llamada por petición se parecen mucho si solo se cuentan peticiones. Medido: 1 llamada con 2 peticiones."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado ese lote, cuando se inspecciona cada petición, entonces lleva un place_id y ningún campo más.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Cada petición de foto lleva un place_id y ningún campo más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un anclaje que quedó en el pool sin llegar a ser nada, cuando se compone el lote de fotos, entonces su place_id no entra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un anclaje que se quedó en el pool sin llegar a ser nada no entra en el lote",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un mapa ya generado y una jugadora que acepta cinco aventuras a lo largo de una semana, cuando se inspecciona el tráfico saliente de esa semana, entonces no hay ninguna petición de foto.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Las fotos de Places se piden al crear el mapa",
+      "escenario": "Las fotos de Places se piden al crear el mapa",
+      "nota": "Medido: 1 llamada de fotos al terminar la celda y 0 en las cinco salidas siguientes, con el inspector de tráfico en modo estricto y las fotos ya residentes."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una foto ya residente, cuando se juega el sitio al que pertenece, entonces no se vuelve a pedir.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una foto ya residente no se vuelve a pedir",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una foto conseguida, cuando se congela la celda, entonces el documento guarda el place_id, la referencia local y la fecha de captura, y ninguna URL de Places.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El documento guarda el place_id, la referencia local y la fecha de captura, y ninguna URL de Places",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un anclaje de OSM sin place_id, cuando se compone el lote de fotos, entonces no entra, y su foto queda declarada ausente con el motivo «sin sitio de Places».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un anclaje de OSM sin place_id queda ausente con el motivo «sin sitio de Places»",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una celda vecina que se abre más tarde, cuando termina su generación, entonces pide su propio lote de fotos y no vuelve a pedir ninguna de la celda ya generada.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una celda vecina pide su propio lote y no vuelve a pedir las de la celda ya generada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado los ocho mundos de referencia con una fuente de Places doblada, cuando se mide la cobertura de fotos, entonces queda declarada mundo a mundo, y ningún mundo la promete donde no la tiene.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "La cobertura de fotos queda declarada mundo a mundo y ninguno la promete donde no la tiene",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma que la cuenta cuadra sin restos —lote + ausencias = anclajes consumidos—, que es lo que impide prometer cobertura donde no la hay. Medido sobre los cuatro mundos congelados: costero 21 consumidos → 0 de lote y 21 «sin-sitio»; urbano denso 36 → 0 y 36."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una aventura recién aceptada, cuando arranca la preparación, entonces se pide un único lote con las ilustraciones de los lugares distintos de sus beats que no estén ya residentes.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "La preparación pide un único lote con los lugares que no están residentes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una aventura cuyos beats caen en cuatro lugares distintos, cuando se compone el lote, entonces lleva cuatro peticiones y no una por beat.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Cuatro lugares distintos componen cuatro peticiones y no una por beat",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una aventura cuyo reparto tiene más lugares distintos que el tope declarado, cuando se compone el lote, entonces entran los primeros por orden de aparición hasta el tope, y los demás quedan ausentes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El reparto que se pasa del tope entra hasta el tope y lo demás queda ausente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una aventura cuyo reparto ya está entero residente de una salida anterior, cuando arranca la preparación, entonces no se pide ninguna ilustración y la preparación se cierra igual.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un reparto entero residente no pide ninguna ilustración y la preparación se cierra igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado dos aventuras distintas que pasan por el mismo paraje, cuando se prepara la segunda, entonces su ilustración no se vuelve a pedir.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Dos aventuras que pasan por el mismo paraje no vuelven a pedir su ilustración",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una ilustración conseguida, cuando se congela la celda, entonces el documento guarda el prompt, su clave derivada y la referencia al recurso local, y no el binario ni en línea ni codificado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El documento guarda el prompt, su clave derivada y la referencia, y no el binario",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una salida preparada entera, cuando se pregunta a queFaltaParaJugarSinRed por su aventura, entonces responde que no falta ninguna ilustración.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Con la salida preparada entera no falta ninguna ilustración",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un lote que se pasaría del tope de pago que el proxy declara por lote de mapa, cuando se compone, entonces se recorta hasta el tope y lo recortado queda ausente, sin que ninguna petición se rechace aguas arriba.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El lote que se pasaría del tope de pago se recorta y lo recortado queda ausente",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por los dos lados: 60 peticiones llegan al cliente doblado y las 5 de más quedan declaradas con el motivo «tope», que es lo que las distingue de un «no hay» del proveedor."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una preparación con el proxy respondiendo dentro del presupuesto declarado, cuando termina, entonces ha tardado segundos y no minutos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Los dos presupuestos están declarados en el núcleo y el conseguidor no arranca sin ellos",
+      "hueco_de_bateria": true,
+      "nota": "El tiempo de pared no se mide con el reloj del sistema, que haría la prueba dependiente de la máquina: se afirma que los dos presupuestos son los declarados —20 s y 15 s— y que sin ellos el conseguidor no arranca, que es lo que impide esperar sin límite."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una preparación cuyo lote de ilustraciones no ha terminado al agotarse el presupuesto de espera, cuando se agota, entonces la preparación se cierra igual con lo que tenga y deja salir a andar.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "La preparación cuyo lote no termina se cierra igual con lo que tenga",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una preparación cuyo lote de ilustraciones no ha terminado al agotarse el presupuesto de espera, cuando se agota, entonces la preparación se cierra igual con lo que tenga y deja salir a andar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "La pared se cancela al volver la respuesta y no deja ningún temporizador vivo",
+      "hueco_de_bateria": true,
+      "nota": "La otra mitad de la pared: que se pida con el presupuesto declarado y que se cancele al llegar la respuesta. Una pared sin cancelar deja el proceso vivo detrás de la suite."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado esa misma preparación, cuando se lee la pantalla, entonces dice exactamente lo mismo que una que terminó entera.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Sin cobertura, la preparación dice lo mismo",
+      "escenario": "Sin cobertura, la preparación dice lo mismo",
+      "nota": "Esta fila sostiene la mitad de datos: con cobertura y sin ella la preparación hace el mismo número de llamadas, declara los mismos lugares y cierra sin lanzar. Los literales de la pantalla son de la fila 28 (A2P5) y su comparación es @app."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una generación de mapa cuyo lote de fotos no responde, cuando se mide la generación de punta a punta, entonces sigue por debajo del minuto y el mapa queda completo con las fotos declaradas ausentes.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un lote de fotos que no responde no impide que el mapa quede completo",
+      "hueco_de_bateria": true,
+      "nota": "Del criterio se afirma la mitad comprobable sin reloj real: el mapa queda completo, se congela y se levanta con las fotos declaradas ausentes. El minuto de punta a punta es @manual, porque medirlo con el reloj del sistema ataría la prueba a la máquina."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un lote de fotos que se queda a medias, cuando se juega después, entonces no se reintenta por aventura ni en marcha: lo ausente se queda ausente hasta que se vuelva a pedir un lote de mapa.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Lo ausente se queda ausente: no se reintenta por aventura ni en marcha",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una jugadora sin conexión, cuando acepta una aventura y llega a la pantalla de preparación, entonces el texto es el mismo que con conexión.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Sin cobertura, la preparación dice lo mismo",
+      "escenario": "Sin cobertura, la preparación dice lo mismo"
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado esa misma pantalla, cuando se recorren todos sus textos, entonces ninguno menciona la red, la cobertura, la conexión, un error, un reintento ni una espera fallida.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Ningún texto que el conseguidor devuelve nombra la red, un fallo, un proveedor ni una caché",
+      "hueco_de_bateria": true,
+      "nota": "Sin pantallas todavía (A2P5 es de la fila 28), se afirma lo que sí existe: ni un texto del resultado del conseguidor es una frase —todos son clave, familia o motivo del catálogo cerrado— y ninguno de los 32 literales del módulo que pueden viajar (de 40 en total; los otros 8 son mensajes de `throw`, que van a quien programa) nombra la red ni un fallo."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado cualquier texto que esta spec añada a la app, cuando se recorre el catálogo de textos, entonces ninguno nombra un recurso, un lote, una caché ni un proveedor.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Ningún texto que el conseguidor devuelve nombra la red, un fallo, un proveedor ni una caché",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un sitio del que Places no tiene foto, cuando se abre su visor, entonces se ve la ilustración de ficción y al arrastrar aparece la cartela con el nombre real sobre fondo liso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Sin foto de Places, el visor abre igual",
+      "escenario": "Sin foto de Places, el visor abre igual",
+      "nota": "Esta fila sostiene la mitad de material: con la ilustración residente y ninguna foto, el anclaje sigue teniendo con qué pintar la cartela y la ausencia se declara sin decir que falte nada. Lo que se ve al arrastrar es @app y de la fila 33 (A4P2)."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un sitio sin ilustración residente, cuando se llega a él, entonces se da la ficha de texto con el nombre de fantasía, qué es en realidad y la escena, sin anunciar que falte nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una salida sin una sola ilustración y sin una sola foto se completa igual",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma el material de la ficha de texto —nombre de fantasía, anclaje real y texto de escena siguen ahí— y que lo que falta se enumera en vez de rechazarse. La pantalla A4P7 es de la fila 33."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una salida entera jugada sin una sola ilustración y sin una sola foto, cuando se recorre de principio a fin, entonces se completa igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una salida sin una sola ilustración y sin una sola foto se completa igual",
+      "hueco_de_bateria": true,
+      "nota": "El escenario «Una salida entera se juega sin red» ya está vivo en test/nucleo/sin-red.test.mjs (SPEC-009); aquí se afirma lo propio de esta fila, que el lazo sigue trazado y ningún beat se queda mudo sin ilustración."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el interruptor de Places apagado, cuando se genera un mapa entero, entonces no sale ninguna petición a la ruta de fotos ni a la de Places.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Con el interruptor apagado no sale ninguna petición de foto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el interruptor apagado, cuando se construye el pool de anclajes, entonces se construye solo con OSM y el mundo se genera igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Con el interruptor apagado el pool se construye solo con OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el interruptor apagado y el mismo mundo con el interruptor encendido pero sin déficit de pool que cubrir, cuando se comparan las dos capas de ficción, entonces no ha cambiado ni un nombre, ni un tipo, ni una posición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Con el interruptor apagado el mundo se genera igual, byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "ROJO. `placesActivo` se queda en construyePool: ni buildWorld ni generaCelda lo aceptan ni lo reenvían, así que el interruptor no es alcanzable desde la generación de una celda y el mundo apagado sale distinto del que se genera sin fuente de relleno."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una foto conseguida y ya residente, cuando se apaga el interruptor, entonces el mundo congelado sigue levantándose sin fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una foto ya residente sobrevive a apagar el interruptor",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el interruptor de Places apagado, cuando se pregunta por qué no hay fotos, entonces la respuesta es el interruptor y no un fallo de red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Preguntar por qué no hay fotos responde el interruptor y no un fallo de red",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el proveedor de imágenes caído, cuando se prepara una salida, entonces las ilustraciones quedan ausentes con el motivo «no se pudo pedir» y la salida se prepara igual.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El proveedor de imágenes caído deja las ilustraciones ausentes y la salida se prepara igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado Places caído, cuando se pide el lote de fotos de un mapa, entonces las fotos quedan ausentes con el motivo «no se pudo pedir» y la generación termina.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Places caído deja las fotos ausentes con «no se pudo pedir» y la generación termina",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una respuesta del proxy que no encaja en el esquema del sobre, cuando se recibe, entonces se descarta sin interpretarse y el recurso queda ausente.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una respuesta que no encaja en el esquema del sobre se descarta sin interpretarse",
+      "hueco_de_bateria": true,
+      "nota": "ROJO en un caso de los seis. imagenValida y fotoValida comprueban que estén los campos obligatorios pero no que no haya ninguno de más, así que una respuesta con una URL de Places dentro pasa el filtro y se guarda entera en el almacén. El esquema del proxy es lista blanca cerrada (campoDeMas en server/proxy.mjs); esta mitad no lo es."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una respuesta que dice «no hay», cuando se registra el recurso, entonces su motivo es «sin foto en el sitio» y no «no se pudo pedir».",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una respuesta que dice «no hay» es «sin foto en el sitio» y no «no se pudo pedir»",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado los dos motivos anteriores, cuando se cuentan los recursos ausentes de un mapa, entonces se pueden contar por separado.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Los dos motivos se cuentan por separado en un mismo mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado los dos motivos anteriores, cuando se cuentan los recursos ausentes de un mapa, entonces se pueden contar por separado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El vocabulario de la ausencia es cerrado y uno de fuera hace fallar el recuento",
+      "hueco_de_bateria": true,
+      "nota": "El catálogo cerrado es lo que hace posible contar por separado: sin-sitio, sin-foto, no-se-pudo-pedir, tope, interruptor. Un motivo de fuera hace fallar el recuento nombrándolo, y una ausencia sin motivo va a `sinMotivo` en vez de repartirse."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una respuesta del proxy que no encaja en el esquema del sobre, cuando se recibe, entonces se descarta sin interpretarse y el recurso queda ausente.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un lote que vuelve descuadrado no se interpreta a medias",
+      "hueco_de_bateria": true,
+      "nota": "Un lote con menos respuestas que peticiones se emparejaría a ciegas si se recorriera por índice sin comprobar la longitud; aquí se afirma que no se guarda nada."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el conseguidor de recursos construido sin cliente de imágenes, cuando se construye, entonces falla nombrando el cliente que falta, y no devuelve un lote vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El conseguidor construido sin clienteDeImagenes falla nombrando la pieza que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el conseguidor construido sin cliente de fotos, cuando se construye, entonces falla nombrando el cliente que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El conseguidor construido sin clienteDeFotos falla nombrando la pieza que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el conseguidor construido sin almacén de recursos binarios, cuando se construye, entonces falla nombrando el almacén que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El conseguidor construido sin almacen falla nombrando la pieza que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado un mapa con anclajes de Places y ningún cliente de fotos cableado, cuando se genera, entonces no termina con «cero fotos» como si Places no tuviera ninguna: falla nombrando el cableado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "El conseguidor construido sin clienteDeFotos falla nombrando la pieza que falta",
+      "hueco_de_bateria": true,
+      "nota": "La ausencia del cliente impide construir el conseguidor, así que no hay ningún camino por el que un mapa con anclajes de Places acabe con «cero fotos» por falta de cableado."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el conseguidor de recursos construido sin cliente de imágenes, cuando se construye, entonces falla nombrando el cliente que falta, y no devuelve un lote vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un cliente que no expone «pideLote» falla nombrando el método",
+      "hueco_de_bateria": true,
+      "nota": "La otra forma del mismo fallo: una pieza que está pero no sabe hacer lotes pediría una petición por vez sin que nada se pusiera rojo."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el conseguidor de recursos construido sin cliente de imágenes, cuando se construye, entonces falla nombrando el cliente que falta, y no devuelve un lote vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Un plan sin el vocabulario de motivos falla en vez de contar con un catálogo viejo",
+      "hueco_de_bateria": true,
+      "nota": "El catálogo de motivos llega dentro del plan y no escrito en la app: con dos copias, añadir un motivo en el núcleo dejaría esta mitad contando con el viejo sin que nada se pusiera rojo."
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado una foto declarada residente cuyo binario no está en el almacén, cuando se levanta el mundo congelado, entonces falla nombrando el recurso, porque «perderlo» y «no haberlo tenido nunca» tienen que ser distinguibles.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "Una foto declarada residente cuyo binario no está falla nombrando el recurso",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-025",
+      "criterio": "Dado el conseguidor construido sin almacén de recursos binarios, cuando se construye, entonces falla nombrando el almacén que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/recursos.test.mjs",
+      "caso": "exigeResidentes sin almacén inyectado falla en vez de decir que está todo",
+      "hueco_de_bateria": true,
+      "nota": "El mismo §6h en el lado del núcleo: sin almacén inyectado, responder «está todo» sin haber mirado es la degradación silenciosa que esto viene a impedir."
     }
   ]
 }
