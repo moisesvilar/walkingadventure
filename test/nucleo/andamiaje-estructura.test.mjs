@@ -57,10 +57,29 @@ describe('Estructura y frontera del andamiaje', () => {
   test('node --test test/nucleo/ arranca sin instalar ninguna dependencia', () => {
     // No se invoca `node --test test/nucleo/` de verdad porque eso es
     // precisamente lo que ejecuta este fichero: se afirma la propiedad que hace
-    // que arranque sin instalar nada, que es que no hay nada que instalar y que
-    // ningún módulo pide un paquete de fuera.
-    assert.equal(existsSync(join(RAIZ_REPO, 'package.json')), false, 'el repo no tiene package.json a propósito');
-    assert.equal(existsSync(join(RAIZ_REPO, 'node_modules')), false, 'el repo no tiene node_modules');
+    // que arranque sin instalar nada.
+    //
+    // REEXPRESADO EN SPEC-020. Antes esta propiedad se afirmaba con
+    // `existsSync('package.json') === false` y `existsSync('node_modules') === false`,
+    // y las dos las invalidó el espacio de trabajo de la raíz: la app de Expo trae
+    // package.json y se instala. Ese criterio obligaba a elegir entre tener app y
+    // tener red de seguridad, y la red de seguridad no se negocia — pero tampoco
+    // se negocia tener app.
+    //
+    // El criterio de verdad nunca fue «no hay nada instalado» sino «la suite no
+    // necesita nada instalado»: ni el package.json de la raíz mete dependencias en
+    // el camino, ni ningún módulo de test/nucleo/ o test/dobles/ pide un paquete
+    // que haya que resolver. Eso se pone rojo el día que alguien meta una
+    // dependencia en medio, que es exactamente lo que hay que impedir.
+    const raizJson = JSON.parse(readFileSync(join(RAIZ_REPO, 'package.json'), 'utf8'));
+    for (const campo of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+      assert.deepEqual(
+        raizJson[campo] ?? {},
+        {},
+        `el package.json de la raíz declara ${campo}: la suite de núcleo pasaría a depender de una instalación`,
+      );
+    }
+    assert.deepEqual(raizJson.workspaces, ['app', 'packages/*'], 'la raíz solo existe para declarar el espacio de trabajo');
 
     const externos = [];
     for (const f of [...modulos(join(RAIZ_REPO, 'test', 'nucleo')), ...modulos(join(RAIZ_REPO, 'test', 'dobles'))]) {

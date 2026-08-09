@@ -7,7 +7,7 @@
       "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
       "caso": "node --test test/nucleo/ arranca sin instalar ninguna dependencia",
       "hueco_de_bateria": true,
-      "nota": "Se afirma la propiedad, no la invocación: ejecutar `node --test test/nucleo/` desde test/nucleo/ sería ejecutar este mismo fichero sin fondo. Se comprueba que no hay package.json ni node_modules y que ningún módulo de test/nucleo/ ni de test/dobles/ importa nada que no sea node: o una ruta relativa."
+      "nota": "REEXPRESADO EN SPEC-020: el criterio ya no es «no existe package.json ni node_modules» —el espacio de trabajo de la raíz lo invalidó— sino «la suite no necesita nada instalado»: la raíz no declara ninguna dependencia y ningún módulo de test/nucleo/ ni de test/dobles/ importa un especificador que haya que resolver. Es lo que de verdad protege la red de seguridad del determinismo, y lo que se pone rojo el día que alguien meta una dependencia en el camino."
     },
     {
       "spec": "SPEC-001",
@@ -886,7 +886,7 @@
       "fichero": "test/nucleo/paquete.test.mjs",
       "caso": "Cualquier módulo del paquete arranca en Node sin instalar ninguna dependencia",
       "hueco_de_bateria": true,
-      "nota": "Se importan los trece módulos en un Node aparte, con el repo por cwd, y se comprueba además que no hay node_modules ni en el paquete ni en la raíz."
+      "nota": "Se importan los módulos en un Node aparte, con el repo por cwd. REEXPRESADO EN SPEC-020: antes se exigía además que no existiera node_modules en la raíz, y eso lo invalidó el espacio de trabajo (la app de Expo se instala). Ahora se comprueba que el paquete no traiga node_modules propio y que ninguno de sus módulos cite un especificador que haya que instalar."
     },
     {
       "spec": "SPEC-002",
@@ -1299,35 +1299,39 @@
     },
     {
       "spec": "SPEC-002",
-      "criterio": "Dado el repositorio tras el porte, cuando se listan los directorios de `app/js/`, entonces ya no existen `core/`, `world/`, `names/` ni `quests/`.",
+      "criterio": "Dado el repositorio tras el porte, cuando se listan los directorios del prototipo web, entonces ya no existen `core/`, `world/`, `names/` ni `quests/`.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/paquete.test.mjs",
-      "caso": "app/js ya no tiene core, world, names ni quests",
-      "hueco_de_bateria": true
+      "caso": "El prototipo web ya no tiene core, world, names ni quests",
+      "hueco_de_bateria": true,
+      "nota": "REAPUNTADO EN SPEC-020: el prototipo web se mudó de app/js/ a prototipo/js/. Sobre app/js/ la comprobación habría pasado por vacía —ese directorio ya no existe—, que es peor que fallar: un criterio que no puede ponerse rojo. Se comprueban los dos sitios."
     },
     {
       "spec": "SPEC-002",
-      "criterio": "Dado cualquier módulo de `app/`, cuando se inspeccionan los imports con los que consume el generador, entonces todos apuntan a `packages/nucleo/` y ninguno a una copia dentro de `app/`.",
+      "criterio": "Dado cualquier módulo de `app/`, cuando se inspeccionan los imports con los que consume el generador, entonces todos citan el paquete y ninguno una copia dentro de `app/`.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/paquete.test.mjs",
-      "caso": "Los imports con los que app/ consume el generador apuntan todos a packages/nucleo/",
-      "hueco_de_bateria": true
+      "caso": "Los imports con los que app/ consume el generador citan el paquete por su nombre",
+      "hueco_de_bateria": true,
+      "nota": "REEXPRESADO EN SPEC-020: exigir la ruta `packages/nucleo/` era cierto mientras el prototipo web vivía en app/; con el espacio de trabajo montado, SPEC-020 exige justo lo contrario para la app de Expo, `@walkingadventure/nucleo/...`, sin ninguna ruta relativa que salga de app/. Se comprueban las dos formas —la app por nombre, el prototipo por ruta— porque son la misma regla: una sola copia del generador."
     },
     {
       "spec": "SPEC-002",
-      "criterio": "Dado `app/js/data/overpass.js`, cuando se leen sus exportaciones, entonces conserva la construcción de las consultas y el transporte.",
+      "criterio": "Dado `prototipo/js/data/overpass.js`, cuando se leen sus exportaciones, entonces conserva la construcción de las consultas y el transporte.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/paquete.test.mjs",
-      "caso": "app/js/data/overpass.js conserva la construcción de las consultas y el transporte",
-      "hueco_de_bateria": true
+      "caso": "prototipo/js/data/overpass.js conserva la construcción de las consultas y el transporte",
+      "hueco_de_bateria": true,
+      "nota": "REAPUNTADO EN SPEC-020: el transporte se mudó con el prototipo, de app/js/data/ a prototipo/js/data/."
     },
     {
       "spec": "SPEC-002",
-      "criterio": "Dado `app/js/data/overpass.js`, cuando se lee su código, entonces ya no contiene el parseo de la respuesta de OSM, que ha pasado al paquete.",
+      "criterio": "Dado `prototipo/js/data/overpass.js`, cuando se lee su código, entonces ya no contiene el parseo de la respuesta de OSM, que ha pasado al paquete.",
       "nivel": "@nucleo",
       "fichero": "test/nucleo/paquete.test.mjs",
-      "caso": "app/js/data/overpass.js ya no contiene el parseo de la respuesta de OSM",
-      "hueco_de_bateria": true
+      "caso": "prototipo/js/data/overpass.js ya no contiene el parseo de la respuesta de OSM",
+      "hueco_de_bateria": true,
+      "nota": "REAPUNTADO EN SPEC-020: el transporte se mudó con el prototipo, de app/js/data/ a prototipo/js/data/."
     },
     {
       "spec": "SPEC-002",
@@ -1927,7 +1931,7 @@
       "fichero": "test/nucleo/mapa.test.mjs",
       "caso": "Cambiar el estilo de pintado no resiembra nada",
       "escenario": "Cambiar el estilo de pintado no resiembra nada",
-      "nota": "El estilo es solo pintado y vive fuera del paquete, en app/js/render/styles.js: desde el núcleo se afirma que el mundo está congelado —el pintor no tiene por dónde tocarlo— y que ningún estilo entra en la generación. Que al repintar se vea lo mismo es @manual."
+      "nota": "El estilo es solo pintado y vive fuera del paquete, en prototipo/js/render/styles.js (reapuntado en SPEC-020): desde el núcleo se afirma que el mundo está congelado —el pintor no tiene por dónde tocarlo— y que ningún estilo entra en la generación. Que al repintar se vea lo mismo es @manual."
     },
     {
       "spec": "SPEC-003",
@@ -4172,7 +4176,7 @@
       "fichero": "test/nucleo/accesibilidad.test.mjs",
       "caso": "La consulta de callejero pide los tags de las vías y los nodos de bordillo",
       "hueco_de_bateria": true,
-      "nota": "Se afirma sobre el texto de la consulta de app/js/data/overpass.js —que `out geom` ya devuelve los tags— y sobre el parseo, que es donde se tiraban. Los cuatro fixtures se capturaron con la consulta vieja, así que la respuesta real de esta consulta no está verificada."
+      "nota": "Se afirma sobre el texto de la consulta de prototipo/js/data/overpass.js (reapuntado en SPEC-020) —que `out geom` ya devuelve los tags— y sobre el parseo, que es donde se tiraban. Los cuatro fixtures se capturaron con la consulta vieja, así que la respuesta real de esta consulta no está verificada."
     },
     {
       "spec": "SPEC-008",
@@ -13959,6 +13963,592 @@
       "fichero": "test/nucleo/entregas.test.mjs",
       "caso": "La cola no exporta ningún texto destinado a mostrarse dentro del juego",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un clon limpio del repositorio, cuando se listan los directorios de la raíz, entonces `app/` es el proyecto de Expo y `prototipo/` es el prototipo web.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "app/ es el proyecto de Expo y prototipo/ es el prototipo web",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `app/`, cuando se leen sus ficheros, entonces no queda ninguno del prototipo web: ni `index.html`, ni `style.css`, ni `js/render/`, ni `js/main.js`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "En app/ no queda ningún fichero del prototipo web",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `app/package.json`, cuando se leen sus dependencias, entonces están exactamente las que esta spec nombra en «Las dependencias que entran» y ninguna más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "app/package.json declara exactamente las dependencias que la spec nombra",
+      "hueco_de_bateria": true,
+      "nota": "La lista prohibida nombra cada paquete con la fila que lo trae (navegación 27, Skia 21, HTTP 26, partida 39, primer plano 30): es la única barrera contra que una app vacía se llene de librerías que nadie pidió."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el `package.json` de la raíz, cuando se lee, entonces declara el espacio de trabajo con `app` y `packages/*` y ninguna dependencia de runtime propia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El package.json de la raíz declara el espacio de trabajo y ninguna dependencia de runtime",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el repositorio entregado, cuando se listan los ficheros versionados con `git ls-files app`, entonces aparece el código de la app y no aparece ni `node_modules`, ni la caché de Expo, ni ningún artefacto de compilación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "git ls-files app trae el código de la app y ningún artefacto de compilación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `.gitignore`, cuando se leen las reglas nuevas, entonces todas van ancladas con barra inicial.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Todas las reglas de .gitignore van ancladas con barra inicial",
+      "hueco_de_bateria": true,
+      "nota": "Se admite `.DS_Store` sin anclar y se afirma que es la única: es global a propósito."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el repositorio entregado, cuando se busca `archive/`, entonces no ha cambiado ni un fichero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Estrenar la app no ha tocado ni un fichero de archive/",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un simulador de iOS con la compilación de desarrollo instalada, cuando se abre la app, entonces aparece la pantalla de andamiaje y no una pantalla en blanco.",
+      "nivel": "@app",
+      "fichero": "test/app/andamiaje.yaml",
+      "caso": "La pantalla de andamiaje aparece entera al abrir la app",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un emulador de Android con la compilación de desarrollo instalada, cuando se abre la app, entonces aparece la misma pantalla de andamiaje.",
+      "nivel": "@app",
+      "fichero": "test/app/andamiaje.yaml",
+      "caso": "La pantalla de andamiaje aparece entera al abrir la app",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec. El flujo es el mismo para las dos plataformas, que es justamente lo que afirma «una sola base»."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el proyecto de la app, cuando se lee su identificador de aplicación, entonces es `com.walkingadventure.app` en las dos plataformas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El identificador de aplicación es com.walkingadventure.app en las dos plataformas",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba además que es el mismo `appId` que declaran los dos flujos de Maestro: si divergen, el flujo lanzaría otra app y pasaría en verde sin haber tocado esta."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cualquier módulo de `app/`, cuando se inspeccionan los imports con los que consume el generador, entonces todos citan el paquete por su nombre `@walkingadventure/nucleo` y ninguno lo alcanza por una ruta relativa que salga de `app/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Los imports con los que app/ consume el generador citan el paquete por su nombre",
+      "hueco_de_bateria": true,
+      "nota": "La misma afirmación vive en test/nucleo/paquete.test.mjs desde el lado del paquete; aquí se mira desde el lado de la app, y se comprueba también el mapa de exportaciones y la configuración de Metro que la hacen posible."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app abierta con la semilla de andamiaje `42.40,-8.81#1`, cuando se lee el título de mundo que muestra, entonces es idéntico al que produce el mismo paquete ejecutado en Node con esa misma semilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El título que sortea la app coincide con el que produce el mismo paquete en Node",
+      "escenario": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "nota": "Es la mitad que se puede afirmar sin dispositivo: se sortea el título en Node («Reinos de Vaeloria», idioma gl) y se comprueba que el literal del flujo de Maestro es ese, y que app/nucleo/andamiaje.js lo sortea llamando al paquete en vez de tenerlo escrito. La otra mitad —que el móvil lo pinte— es el flujo de @app, no ejecutado."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app abierta con la semilla de andamiaje `42.40,-8.81#1`, cuando se lee el título de mundo que muestra, entonces es idéntico al que produce el mismo paquete ejecutado en Node con esa misma semilla.",
+      "nivel": "@app",
+      "fichero": "test/app/andamiaje.yaml",
+      "caso": "El título de mundo que pinta la app es «Reinos de Vaeloria»",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app abierta dos veces seguidas, cuando se lee el título de mundo, entonces es el mismo las dos veces.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Dos sorteos con la misma semilla dan el mismo título",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "Se comprueba además que otra semilla da otro título: sin eso, «da lo mismo dos veces» lo cumpliría también una función que devuelve siempre lo mismo."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app recién instalada, cuando se abre sin ninguna conexión de red, entonces arranca igual y muestra la pantalla completa.",
+      "nivel": "@app",
+      "fichero": "test/app/andamiaje.yaml",
+      "caso": "La pantalla de andamiaje aparece entera al abrir la app",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec. Además, ningún módulo de app/ tiene puerta de red que abrir, y eso sí se afirma en @nucleo."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el arranque de la app, cuando se inspecciona el tráfico saliente, entonces no sale ninguna petición.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El arranque de la app no abre ninguna conexión de red",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma por ausencia de puerta —ni fetch, ni XMLHttpRequest, ni WebSocket, ni cliente HTTP en ningún módulo de app/—, que es lo comprobable sin dispositivo. La app no tiene capa de datos hasta la fila 26."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el núcleo que falla al sortear el título, cuando se abre la app, entonces la pantalla muestra que el núcleo no respondió, con el mensaje del error, en lugar de quedarse en blanco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Cuando el núcleo falla al sortear, la pantalla lo dice en lugar de quedarse en blanco",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma leyendo la pantalla: el sorteo va en try/catch, el mensaje del error se pinta bajo `nucleo-error` y la lista de capacidades no cuelga del título. Forzar el fallo dentro del móvil pediría un gancho que esta spec no expone, y por eso la mitad de dispositivo queda sin verificar."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cualquier módulo de `packages/nucleo/`, cuando se inspeccionan sus imports, entonces ninguno importa de `app/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Ningún módulo del paquete importa de app/, server.mjs, scripts/ ni test/",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el repositorio con la app dentro, cuando se ejecuta `node scripts/comprueba-nucleo.mjs`, entonces termina con código 0 y su veredicto dice que la frontera está intacta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La frontera del núcleo sigue intacta con la app dentro del repositorio",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma también que packages/nucleo/ sigue con cero dependencias de runtime: tener un empaquetador delante no relaja eso."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un clon limpio sin ejecutar ninguna instalación de dependencias, cuando se ejecuta `node test/headless.mjs`, entonces termina en verde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La suite de núcleo y las herramientas headless arrancan sin instalar nada",
+      "hueco_de_bateria": true,
+      "nota": "EL CRITERIO DURO DE ESTA FILA. Se afirma como propiedad y no lanzando un `npm ci` en un árbol aparte: lo que hay que impedir es que alguien meta una dependencia en el camino, y eso se ve recorriendo los imports alcanzables desde test/headless.mjs, test/nucleo/, test/dobles/ y packages/nucleo/. Ninguno puede citar un especificador que haya que resolver. Se ejecuta además headless de verdad y se exige su «Todo OK»."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un clon limpio sin ejecutar ninguna instalación de dependencias, cuando se ejecuta `node --test test/nucleo/`, entonces las pruebas arrancan y pasan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "node --test test/nucleo/ arranca sin instalar ninguna dependencia",
+      "hueco_de_bateria": true,
+      "nota": "Reexpresado en esta fila: el criterio pasa de «no existe package.json ni node_modules» a «la raíz no declara ninguna dependencia y ningún módulo de la suite pide un paquete que haya que resolver». Complementa al caso de app.test.mjs, que recorre además packages/nucleo/ y test/headless.mjs."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cualquier módulo de `app/`, cuando se busca en su código, entonces no aparece ninguna copia de lógica que ya viva en el paquete compartido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Ningún módulo de app/ duplica lógica que ya vive en el paquete compartido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `app/plataforma/`, cuando se enumeran los módulos de capacidad, entonces están los cuatro: salud, háptico, notificaciones y respaldo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Los cuatro módulos de plataforma están y declaran nombre, capa y sonda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cualquiera de los cuatro módulos, cuando se lee lo que expone, entonces declara su nombre, la capa a la que pertenece —de bolsillo, de pantalla o ninguna— y una sonda de disponibilidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Las capas de cada capacidad son las de accesibilidad.md §3",
+      "hueco_de_bateria": true,
+      "nota": "Los dos módulos que importan de Expo se leen en vez de cargarse: importar Expo desde una prueba de @nucleo obligaría a instalar, que es justo lo que la fila prohíbe."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el registro de capacidades, cuando se le pregunta por el estado, entonces devuelve las cuatro capacidades en un orden estable, cada una con si está montada, si está disponible y el motivo cuando no lo está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "El registro devuelve las cuatro capacidades en un orden estable",
+      "hueco_de_bateria": true,
+      "nota": "Estable de verdad: se monta el mismo registro con los módulos inyectados al revés y se exige el mismo estado, campo a campo."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado una capacidad que no está disponible, cuando alguien se la pide al registro, entonces el registro devuelve que no la hay y no lanza ningún error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Pedirle al registro una capacidad que no está devuelve que no la hay y no lanza",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado una capacidad cuya sonda lanza un error, cuando se abre la app, entonces esa capacidad queda registrada como no disponible con el motivo, y la app arranca igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Una capacidad cuya sonda lanza queda no disponible con el motivo y las demás siguen",
+      "hueco_de_bateria": true,
+      "nota": "Es uno de los tres escenarios que la spec señala como los que un bloque escrito de memoria se dejaría. Se cubre además el caso de una sonda que lanza algo que no es un Error."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el háptico ausente, cuando se abre la app, entonces arranca, lo declara ausente y ninguna parte de la pantalla queda vacía por ello.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Sin háptico la app arranca igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado las notificaciones ausentes, cuando se abre la app, entonces arranca y lo declara ausente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Sin notificaciones la app arranca igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el respaldo ausente, cuando se abre la app, entonces arranca y lo declara ausente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Sin respaldo la app arranca igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado las cuatro capacidades ausentes a la vez, cuando se abre la app, entonces arranca, la lista las muestra las cuatro como ausentes y la pantalla sigue siendo legible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Con las cuatro capacidades ausentes a la vez la lista las muestra las cuatro",
+      "hueco_de_bateria": true,
+      "nota": "Y el caso de las tres degradables a la vez —háptico, notificaciones y respaldo—, que es el que nombra RF-INFRA-006, va en «Con las tres ausentes a la vez la app sigue en pie»."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado las cuatro capacidades ausentes a la vez, cuando se abre la app, entonces arranca, la lista las muestra las cuatro como ausentes y la pantalla sigue siendo legible.",
+      "nivel": "@app",
+      "fichero": "test/app/gancho-capacidad-ausente.yaml",
+      "caso": "Con las tres degradables forzadas a ausentes la pantalla sigue entera",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un registro construido sin ningún módulo, cuando se abre la app, entonces la lista muestra que no hay ninguna capacidad montada, con esa frase, y no una lista vacía sin explicación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Un registro construido sin ningún módulo lo dice con una frase, no con una lista vacía",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el háptico y las notificaciones ausentes, cuando se le pregunta al registro qué capas quedan, entonces queda declarada al menos una capa de pantalla, porque ninguna capa es portadora única.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Sin háptico y sin notificaciones sigue quedando declarada al menos una capa de pantalla",
+      "escenario": "Ningún aviso viaja por una sola capa",
+      "nota": "El escenario de la batería mira el catálogo de avisos, que es de la fila 29; aquí se afirma su premisa, que es la que esta fila sí entrega. Se comprueba además quitando cada capacidad por separado («Ninguna capacidad de plataforma es portadora única de una capa») y que una capacidad montada sin poder usarse no aporta capa."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cualquiera de las sondas, cuando se ejecuta, entonces no pide ningún permiso al sistema ni muestra ningún diálogo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Ninguna sonda pide un permiso al sistema ni abre un diálogo",
+      "hueco_de_bateria": true,
+      "nota": "Se buscan las formas con las que se pide de verdad (requestPermissionsAsync, Alert.alert, openSettings), no la palabra «permiso», y se exige que la de notificaciones sí lea el permiso ya concedido."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la sonda de salud, cuando se ejecuta en esta entrega, entonces declara la capacidad como no montada, nombrando la fila que la monta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "La sonda de salud declara la capacidad no montada y nombra la fila que la monta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado una compilación de desarrollo, cuando se abre el enlace profundo de andamiaje pidiendo que el háptico esté ausente, entonces la lista pasa a mostrar el háptico como ausente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "El gancho con una capacidad la deja ausente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el gancho usado con varias capacidades a la vez, cuando se abre el enlace, entonces todas las nombradas quedan ausentes y las demás mantienen su estado real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "El gancho con varias capacidades las deja todas ausentes y no toca las demás",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba que el orden de salida es el de las capacidades y no el del enlace: el estado de la app no puede depender de en qué orden se escribieron los parámetros."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el gancho usado con un nombre que no es ninguna de las cuatro capacidades, cuando se abre el enlace, entonces no cambia nada y la pantalla dice qué nombre no reconoció.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "El gancho con un nombre que no es ninguna capacidad no cambia nada y dice cuál fue",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el gancho usado con un nombre que no es ninguna de las cuatro capacidades, cuando se abre el enlace, entonces no cambia nada y la pantalla dice qué nombre no reconoció.",
+      "nivel": "@app",
+      "fichero": "test/app/gancho-capacidad-ausente.yaml",
+      "caso": "El gancho con un nombre no reconocido lo dice al pie de la pantalla",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el gancho usado, cuando se cierra y se vuelve a abrir la app, entonces las capacidades vuelven a su estado real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Volver a abrir sin enlace devuelve las capacidades a su estado real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el gancho usado, cuando se cierra y se vuelve a abrir la app, entonces las capacidades vuelven a su estado real.",
+      "nivel": "@app",
+      "fichero": "test/app/gancho-capacidad-ausente.yaml",
+      "caso": "Al relanzar sin enlace las capacidades vuelven a su estado real",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado una compilación de producción, cuando se abre el enlace profundo de andamiaje, entonces no ocurre nada y ninguna capacidad cambia de estado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "En una compilación de producción el enlace de andamiaje es inerte",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba además que el gancho se lee con `__DEV__`, que es lo que lo apaga, y que un enlace que no es el de andamiaje tampoco hace nada."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el gancho en cualquiera de sus formas, cuando se ejecuta, entonces no escribe nada en el almacenamiento del dispositivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "El gancho no escribe nada en el almacenamiento del dispositivo",
+      "hueco_de_bateria": true,
+      "nota": "Ni el gancho ni la raíz ni el registro tocan almacenamiento, y el estado del gancho vive en un useState que se pierde al cerrar la app. Es lo que hace que «al reabrir vuelve el estado real» sea cierto por construcción."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cualquier fichero de `app/` que esté fuera de `app/plataforma/`, cuando se busca en su código, entonces no aparece ninguna bifurcación por sistema operativo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Fuera de app/plataforma/ no hay ninguna bifurcación por sistema operativo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `app/plataforma/`, cuando se enumeran los ficheros con sufijo de plataforma, entonces cada uno tiene su pareja en la otra plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Cada fichero con sufijo de plataforma tiene su pareja en la otra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un par de ficheros de plataforma, cuando se comparan sus exportaciones, entonces exportan exactamente los mismos nombres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Las dos implementaciones de una pareja exportan exactamente los mismos nombres",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el módulo de respaldo, cuando se lee su implementación, entonces hay una por plataforma y las dos responden a la misma sonda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El respaldo tiene una implementación por plataforma y las dos responden a la misma sonda",
+      "hueco_de_bateria": true,
+      "nota": "Se exige además que los dos mecanismos declarados sean distintos —directorio en iOS, manifiesto en Android—: si fueran el mismo, la partición sería decorativa y la comprobación de RNF-COM-001 se cumpliría sobre nada. Y que el índice importe `./respaldo` sin extensión, que es como Metro elige."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app abierta en iOS y en Android, cuando se comparan las dos pantallas de andamiaje, entonces solo difieren en el estado de las capacidades.",
+      "nivel": "@app",
+      "fichero": "test/app/andamiaje.yaml",
+      "caso": "La pantalla de andamiaje aparece entera al abrir la app",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec. Es el criterio que más pierde por no haber dispositivo: sin las dos plataformas delante, «solo difieren en las capacidades» solo se puede afirmar por construcción (una sola base, sin bifurcaciones fuera de app/plataforma/)."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app abierta, cuando se mira la pantalla, entonces muestra el título de mundo sorteado por el núcleo y la lista de las cuatro capacidades.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La pantalla declara todos los identificadores que la spec nombra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la app abierta, cuando se mira la pantalla, entonces muestra el título de mundo sorteado por el núcleo y la lista de las cuatro capacidades.",
+      "nivel": "@app",
+      "fichero": "test/app/andamiaje.yaml",
+      "caso": "La pantalla de andamiaje aparece entera al abrir la app",
+      "hueco_de_bateria": true,
+      "nota": "NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la pantalla de andamiaje, cuando se buscan controles, entonces no hay ninguno tocable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La pantalla no tiene ningún control tocable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la pantalla de andamiaje, cuando se lee su texto, entonces no aparece ninguna cifra de distancia, de tiempo, de ritmo, de pasos ni de porcentaje de progreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La pantalla no enseña ninguna cifra de distancia, tiempo, ritmo, pasos ni progreso",
+      "hueco_de_bateria": true,
+      "nota": "Se recorren los literales de la pantalla, no el fichero entero: la coordenada de la semilla es un dato de la partida y tiene que poder seguir ahí."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado la pantalla de andamiaje, cuando se lee su texto, entonces dice que es andamiaje y que desaparece cuando llegue el arranque de verdad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La pantalla dice que es andamiaje y que desaparece cuando llegue el arranque de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado cada fila de capacidad, cuando se lee, entonces dice el nombre de la capacidad, su estado y, si no está disponible, el motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Cada fila de capacidad dice el nombre, el estado y, si no está disponible, el motivo",
+      "hueco_de_bateria": true,
+      "nota": "Los tres estados legibles —disponible, montada sin poder usarse, no montada— se afirman aparte, en test/nucleo/plataforma.test.mjs."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `docs/flujo.md`, cuando se ejecuta `node scripts/verifica-flujo.mjs`, entonces sigue en verde, porque la pantalla de andamiaje no es ninguna de las cuarenta y no se añade al diagrama.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La pantalla de andamiaje no entra en docs/flujo.md y el diagrama sigue en verde",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el repositorio entregado, cuando se lee la documentación de la app, entonces hay un comando único y documentado que produce una compilación de desarrollo instalable en el simulador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Hay un comando único y documentado que produce una compilación de desarrollo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado esa compilación instalada y Maestro disponible, cuando se ejecuta `scripts/qa-tester-run.sh SPEC-020 --app-only`, entonces el flujo se ejecuta contra la app y el report recoge su resultado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Los flujos de Maestro de esta fila existen y son los dos que la spec pide",
+      "hueco_de_bateria": true,
+      "nota": "Lo que se puede afirmar sin dispositivo es que los flujos existen y son los dos que la spec pide. Que el runner recoja su resultado NO se ha podido comprobar contra una app real: en esta máquina no hay dispositivo. NO EJECUTADO: el flujo existe y está escrito, pero en la máquina de este pipeline no hay dispositivo donde instalar la app —Maestro 2.8.0 arranca, y no hay ni Xcode completo (sin simctl ni simulador) ni herramientas de Android—. El runner lo registra como infraestructura ausente y nunca como verde. Hueco 2 de la spec."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado Maestro presente pero sin simulador arrancado, cuando se ejecuta el runner, entonces el report lo registra como infraestructura ausente y no como una prueba en rojo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-runner.test.mjs",
+      "caso": "Maestro ausente no es una prueba en rojo",
+      "escenario": "Maestro ausente no es una prueba en rojo",
+      "nota": "Lo cubre SPEC-001 y su iteración 1, que es donde se arregló: los dos estados —Maestro ausente y Maestro presente sin dispositivo— se registran en la sección 3 del report y nunca producen un verde. Esta fila lo hereda y es lo que hace que sus dos flujos no tiñan de rojo el bucle."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado un flujo de Maestro, cuando localiza los elementos de la pantalla de andamiaje, entonces los encuentra por los identificadores que declara esta spec.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Los flujos de Maestro localizan la pantalla solo por los identificadores declarados",
+      "hueco_de_bateria": true,
+      "nota": "Se cruzan los identificadores que usan los flujos con los que declara la spec: uno de más significa o un selector frágil inventado o un hueco de la spec, y las dos cosas hay que verlas."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `prototipo/` y `node server.mjs`, cuando se abre el navegador en el puerto de desarrollo, entonces el prototipo genera y dibuja un mundo como antes de la mudanza.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El servidor sirve los estáticos de prototipo/ y conserva su proxy",
+      "hueco_de_bateria": true,
+      "nota": "Que dibuje IGUAL que antes de la mudanza es @manual y ya está anotado como tal desde SPEC-002: una comparación de pintado no se afirma con una aserción."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `prototipo/` y `node server.mjs`, cuando se abre el navegador en el puerto de desarrollo, entonces el prototipo genera y dibuja un mundo como antes de la mudanza.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El prototipo abierto en el navegador dibuja el mundo como antes del porte",
+      "hueco_de_bateria": true,
+      "nota": "Mismo caso manual que dejó SPEC-002; la mudanza no cambió ni una línea del prototipo, solo su sitio."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el servidor levantado, cuando se ejecuta `node test/casting-report.mjs`, entonces produce su informe con los mismos recuentos que antes de la mudanza.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "node test/casting-report.mjs produce su informe igual que antes del porte",
+      "hueco_de_bateria": true,
+      "nota": "Requiere el servidor levantado y Overpass: no es ejecutable en la suite. Lo que sí se afirma en @nucleo es de dónde toma cada import."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `test/casting-report.mjs`, cuando se leen sus imports, entonces el transporte de Overpass lo toma de `prototipo/` y todo lo demás del paquete compartido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "casting-report toma el transporte de prototipo/ y todo lo demás del paquete",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el proxy `/api/overpass` de `server.mjs`, cuando se consulta, entonces responde igual que antes, con su caché en el mismo sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "El servidor sirve los estáticos de prototipo/ y conserva su proxy",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma que el proxy sigue declarado y que la raíz de estáticos es prototipo/. Consultarlo de verdad pide red y queda fuera de la suite."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado `CLAUDE.md` y `README.md`, cuando se leen los párrafos de estructura y de comandos, entonces ya no dicen que `app/` es el prototipo web.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "CLAUDE.md y README.md ya no dicen que app/ es el prototipo web",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba por las rutas que la mudanza dejó falsas y no por la prosa: una guía que miente sobre dónde está el prototipo es lo primero que lee el siguiente agente."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el prototipo tras la mudanza, cuando se buscan sus ganchos de depuración en la consola del navegador, entonces siguen siendo los mismos y funcionan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Los ganchos de depuración del prototipo siguen siendo los mismos",
+      "hueco_de_bateria": true,
+      "nota": "Que funcionen en la consola es @manual: aquí se afirma que los cinco siguen declarados en prototipo/js/main.js."
+    },
+    {
+      "spec": "SPEC-020",
+      "criterio": "Dado el repositorio con la app dentro, cuando se ejecuta `scripts/qa-tester-run.sh SUITE`, entonces el report no registra ninguna comprobación de infraestructura nueva como saltada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "Estrenar la app no añade ninguna comprobación de infraestructura saltada al report",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueban las dos fuentes de la sección 3 del report —el veredicto de la frontera del núcleo y el del validador del mapa—, y que ninguno diga «sin-paquete», «no-comprobada», «sin-mapa» ni «no-validado». No se lanza el runner de verdad porque se llamaría a sí mismo: quien lo hace es el sandbox de test/nucleo/andamiaje-veredicto.test.mjs. Lo que esta fila SÍ añade a la sección 3 y no se puede quitar es Maestro sin dispositivo, y eso es infraestructura ausente por diseño, no una comprobación saltada."
     }
   ]
 }

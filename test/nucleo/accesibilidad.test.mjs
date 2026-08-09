@@ -146,7 +146,9 @@ const TRAMO_DEL_MUNDO_SIN_REPARTO = 200;
 
 describe('Los tags que hacen falta y los cuatro criterios', () => {
   test('La consulta de callejero pide los tags de las vías y los nodos de bordillo', () => {
-    const texto = fuente('app/js/data/overpass.js');
+    // El transporte de Overpass es del prototipo web, que SPEC-020 mudó de app/ a
+    // prototipo/. Solo cambia dónde está el fichero: la consulta es la misma.
+    const texto = fuente('prototipo/js/data/overpass.js');
     const consulta = texto.split('export async function fetchStreets')[1];
     assert.ok(consulta, 'no hay consulta de callejero que inspeccionar');
     assert.match(consulta, /node\["kerb"\]/, 'la consulta no pide los nodos con kerb, que es donde OSM mapea los bordillos');

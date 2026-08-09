@@ -41,7 +41,10 @@ import { declaraTramo, cambiaTramo } from '../../packages/nucleo/partida/tramo.j
 import { incorporaMedida, mideRitmoDeSalida } from '../../packages/nucleo/partida/ritmo.js';
 import { limitesDeCelda, proyectorDeRejilla } from '../../packages/nucleo/world/rejilla.js';
 import { PRECISION_M } from '../../packages/nucleo/core/geo.js';
-import { STYLES, getStyle } from '../../app/js/render/styles.js';
+// El catálogo de estilos vive en el PROTOTIPO web, que SPEC-020 mudó de app/ a
+// prototipo/: app/ es ahora la app de Expo. Solo se mueve la ruta — lo que se
+// verifica con estos estilos no cambia.
+import { STYLES, getStyle } from '../../prototipo/js/render/styles.js';
 import { creaInspectorDeRed } from '../dobles/inspector-red.mjs';
 import { simulaRecorrido } from '../dobles/gps-simulado.mjs';
 import { SEMILLA_A, consultaDeFixture, consultaSintetica, coordenadaDe, serializado } from './celda-de-prueba.mjs';

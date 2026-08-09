@@ -34,11 +34,18 @@ function importsDe(modulo) {
   return rutas;
 }
 
+// Lo que nunca es código del repo: dependencias instaladas y artefactos del
+// empaquetador. Recorrerlos no solo sería lento — daría hallazgos de código ajeno
+// atribuidos a la app.
+const NO_ES_CODIGO = new Set(['node_modules', '.expo', 'ios', 'android', 'dist', '.git']);
+
 function ficherosDe(dir, filtro = () => true, base = dir, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
     const p = join(dir, e.name);
-    if (e.isDirectory()) ficherosDe(p, filtro, base, out);
-    else if (filtro(e.name)) out.push(p);
+    if (e.isDirectory()) {
+      if (NO_ES_CODIGO.has(e.name)) continue;
+      ficherosDe(p, filtro, base, out);
+    } else if (filtro(e.name)) out.push(p);
   }
   return out;
 }
@@ -53,8 +60,25 @@ describe('El paquete compartido y su disposición', () => {
   });
 
   test('Cualquier módulo del paquete arranca en Node sin instalar ninguna dependencia', () => {
-    assert.equal(hay('packages/nucleo/node_modules'), false, 'el paquete no puede traer node_modules');
-    assert.equal(hay('node_modules'), false, 'el repo no instala dependencias');
+    // REEXPRESADO EN SPEC-020. Antes esto decía `hay('node_modules') === false`, y
+    // ese criterio lo invalidó el espacio de trabajo de la raíz: la app de Expo se
+    // instala, y con ella aparece un node_modules en la raíz. Afirmar «no existe»
+    // habría obligado a elegir entre tener app o tener red de seguridad.
+    //
+    // El criterio de verdad nunca fue la ausencia del directorio sino que el
+    // paquete no NECESITE nada de él: ningún módulo del núcleo cita un
+    // especificador que haya que instalar. Eso es lo que se afirma aquí, y es lo
+    // que se pone rojo el día que alguien meta una dependencia en el camino.
+    assert.equal(hay('packages/nucleo/node_modules'), false, 'el paquete no puede traer node_modules propio');
+
+    const externos = [];
+    for (const modulo of modulosDelPaquete()) {
+      for (const ruta of importsDe(modulo)) {
+        const interno = ruta.startsWith('.') || ruta.startsWith('/') || ruta.startsWith('node:');
+        if (!interno) externos.push(`${modulo} → ${ruta}`);
+      }
+    }
+    assert.deepEqual(externos, [], 'el paquete importa algo que habría que instalar antes de poder ejecutarlo');
 
     const imports = modulosDelPaquete()
       .map((m) => `await import(${JSON.stringify(join(RAIZ_REPO, m))});`)
@@ -195,36 +219,65 @@ describe('La frontera dura con la plataforma', () => {
 });
 
 describe('Lo que se queda fuera del paquete', () => {
-  test('app/js ya no tiene core, world, names ni quests', () => {
+  test('El prototipo web ya no tiene core, world, names ni quests', () => {
+    // REEXPRESADO EN SPEC-020: el prototipo web se mudó de app/js/ a prototipo/js/,
+    // así que lo que hay que vigilar es que el generador no reaparezca allí. La
+    // comprobación sobre app/js/ habría pasado por vacía —ese directorio ya no
+    // existe— y eso es peor que fallar: un criterio que no puede ponerse rojo.
     for (const area of ['core', 'world', 'names', 'quests']) {
-      assert.equal(hay(`app/js/${area}`), false, `app/js/${area}/ sigue ahí: el generador se ha duplicado, no movido`);
+      assert.equal(hay(`prototipo/js/${area}`), false, `prototipo/js/${area}/ sigue ahí: el generador se ha duplicado, no movido`);
+      assert.equal(hay(`app/js/${area}`), false, `app/js/${area}/ ha reaparecido: app/ es la app de Expo`);
     }
   });
 
-  test('Los imports con los que app/ consume el generador apuntan todos a packages/nucleo/', () => {
-    const dellApp = ficherosDe(join(RAIZ_REPO, 'app'), (n) => /\.(js|mjs)$/.test(n)).map((p) => p.slice(RAIZ_REPO.length + 1));
-    const modulosDelNucleo = /(core|world|names|quests)\/(rng|geo|build|osm|seamask|settlements|routes|parajes|index|es|gl|casting|templates)\.js$/;
-    let vistos = 0;
-    for (const fichero of dellApp) {
+  test('Los imports con los que app/ consume el generador citan el paquete por su nombre', () => {
+    // REEXPRESADO EN SPEC-020. Antes se exigía la ruta `packages/nucleo/`, y eso
+    // era cierto mientras el prototipo web vivía en app/. Con el espacio de
+    // trabajo montado, SPEC-020 exige justo lo contrario para la app de Expo:
+    // `@walkingadventure/nucleo/...`, por su nombre, sin ninguna ruta relativa que
+    // salga de app/. El prototipo, que no pasa por el empaquetador, sigue con la
+    // ruta relativa, y las dos formas se comprueban aquí porque las dos son la
+    // misma regla: una sola copia del generador, la del paquete.
+    const consumidores = /(core|world|names|quests|partida)\/[a-z-]+\.js$/;
+
+    const deLaApp = ficherosDe(join(RAIZ_REPO, 'app'), (n) => /\.(js|mjs)$/.test(n))
+      .map((p) => p.slice(RAIZ_REPO.length + 1))
+      .filter((p) => !p.includes('node_modules'));
+    let vistosEnApp = 0;
+    for (const fichero of deLaApp) {
       for (const ruta of importsDe(fichero)) {
-        if (!modulosDelNucleo.test(ruta)) continue;
-        vistos += 1;
+        if (!consumidores.test(ruta)) continue;
+        vistosEnApp += 1;
+        assert.match(ruta, /^@walkingadventure\/nucleo\//, `${fichero}: importa "${ruta}", que no cita el paquete por su nombre`);
+      }
+      for (const ruta of importsDe(fichero)) {
+        assert.doesNotMatch(ruta, /\.\.\/\.\.\//, `${fichero}: importa "${ruta}", una ruta relativa que sale de app/`);
+      }
+    }
+    assert.ok(vistosEnApp > 0, 'ningún fichero de app/ consume el generador: algo se ha perdido por el camino');
+
+    const delPrototipo = ficherosDe(join(RAIZ_REPO, 'prototipo'), (n) => /\.(js|mjs)$/.test(n)).map((p) => p.slice(RAIZ_REPO.length + 1));
+    let vistosEnPrototipo = 0;
+    for (const fichero of delPrototipo) {
+      for (const ruta of importsDe(fichero)) {
+        if (!consumidores.test(ruta)) continue;
+        vistosEnPrototipo += 1;
         assert.match(ruta, /packages\/nucleo\//, `${fichero}: importa "${ruta}", que no es el paquete`);
       }
     }
-    assert.ok(vistos > 0, 'ningún fichero de app/ consume el generador: algo se ha perdido por el camino');
+    assert.ok(vistosEnPrototipo > 0, 'ningún fichero de prototipo/ consume el generador: la mudanza ha perdido algo');
   });
 
-  test('app/js/data/overpass.js conserva la construcción de las consultas y el transporte', () => {
-    const texto = fuente('app/js/data/overpass.js');
+  test('prototipo/js/data/overpass.js conserva la construcción de las consultas y el transporte', () => {
+    const texto = fuente('prototipo/js/data/overpass.js');
     for (const exportado of ['fetchGeoFeatures', 'fetchPois', 'fetchStreets']) {
       assert.match(texto, new RegExp(`export\\s+(async\\s+)?function\\s+${exportado}\\b`), `falta ${exportado}`);
     }
     assert.match(texto, /\[out:json\]/, 'la construcción de la consulta Overpass tiene que quedarse aquí');
   });
 
-  test('app/js/data/overpass.js ya no contiene el parseo de la respuesta de OSM', () => {
-    const texto = fuente('app/js/data/overpass.js');
+  test('prototipo/js/data/overpass.js ya no contiene el parseo de la respuesta de OSM', () => {
+    const texto = fuente('prototipo/js/data/overpass.js');
     for (const parseo of ['parseGeo', 'parseStreets', 'parsePois']) {
       assert.doesNotMatch(texto, new RegExp(`function\\s+${parseo}\\b`), `${parseo} sigue en la capa de datos`);
     }
