@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-023",
+  "spec_actual": "SPEC-024",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -228,6 +228,16 @@
       "casos": "1413 casos: 1410 pasan, 0 fallan, 3 saltados",
       "app": "sin dispositivo",
       "nota": "cierra el hueco de RF-MAPA-003 con ocho escenarios nuevos en docs/testing.md. Tipografias escaladas por lamina: 61 retiros por 'no cabe' -> 0."
+    },
+    {
+      "spec": "SPEC-023",
+      "slug": "proxy-ciego",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-023-run.md",
+      "casos": "1488 casos: 1485 pasan, 0 fallan, 3 saltados",
+      "app": "sin dispositivo",
+      "nota": "defecto @privacidad corregido: el reto guardaba instante en ms; y la comprobacion de arranque pasa a validar campos, no solo entradas."
     }
   ],
   "bloqueos": [],
