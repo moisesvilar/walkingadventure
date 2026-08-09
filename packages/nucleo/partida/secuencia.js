@@ -188,6 +188,21 @@ export function formaDeSecuencia(secuencia) {
   return visorEncadenado ? FORMAS.FICHA_CON_VISOR : FORMAS.SOLO_FICHA;
 }
 
+/**
+ * El primer paso encadenado desde `desde`, o el final de la lista si no queda ninguno.
+ *
+ * Es la pieza que hace que «a un toque» signifique **disponible a un toque** y no
+ * **primero**: un paso a un toque no lo trae llegar, así que no puede ser nunca el paso
+ * vigente. Sin esto, la segunda visita a un sitio con ilustración ofrecía el visor como
+ * paso vigente y la pantalla que monta el paso vigente lo abría sola, que es justo lo que
+ * `bucle-jugable.md` §2 prohíbe: volver tiene que abrir por lo que ha cambiado.
+ */
+function encadenadoDesde(lista, desde) {
+  let i = desde;
+  while (i < lista.length && lista[i].modo !== MODOS.ENCADENADO) i += 1;
+  return i;
+}
+
 function exigeIndice(paso, lista, quien) {
   if (!Number.isInteger(paso) || paso < 0 || paso > lista.length) {
     throw new Error(`${quien}: el paso vigente llega como ${JSON.stringify(paso) ?? String(paso)} y la secuencia tiene ${lista.length} pasos`);
@@ -201,21 +216,30 @@ function exigeIndice(paso, lista, quien) {
  * Es una **lectura del estado**, no un salto: quien la llama pregunta por dónde iba,
  * no elige por dónde va. La diferencia está en que no hay ninguna operación que
  * escriba ese índice a voluntad.
+ *
+ * Lo que devuelve es siempre un paso **encadenado**: los de a un toque quedan
+ * disponibles y esperan un dedo, y por eso no son nunca lo que la llegada ofrece.
  */
 export function pasoVigente(secuencia, paso) {
   const lista = exigeSecuencia(secuencia);
-  const i = exigeIndice(paso, lista, 'el paso vigente de la secuencia');
+  const i = encadenadoDesde(lista, exigeIndice(paso, lista, 'el paso vigente de la secuencia'));
   return i >= lista.length ? null : congelaHondo({ ...lista[i], indice: i });
 }
 
 /**
  * Avanza al siguiente paso. **La única manera de moverse por la secuencia**, y solo
  * hacia adelante: recorrida hasta el final, la llegada queda cerrada.
+ *
+ * Avanza de encadenado a encadenado, que son los que trae llegar. Saltarse los de a un
+ * toque no es saltar un paso: es no encadenar el que nadie ha tocado.
  */
 export function avanzaLaSecuencia(secuencia, paso) {
   const lista = exigeSecuencia(secuencia);
   const i = exigeIndice(paso, lista, 'avanzar la secuencia');
-  const siguiente = Math.min(i + 1, lista.length);
+  // Se avanza desde el paso vigente, no desde el índice: si por delante solo quedaban
+  // pasos a un toque, la secuencia ya estaba en el final.
+  const vigente = encadenadoDesde(lista, i);
+  const siguiente = encadenadoDesde(lista, Math.min(vigente + 1, lista.length));
   const cerrada = siguiente >= lista.length;
   return congelaHondo({
     paso: siguiente,

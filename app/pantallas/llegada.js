@@ -16,6 +16,11 @@
 // de esa pantalla. Aquí no hay barra, ni flecha de atrás entre pasos, ni manera de saltar
 // al siguiente ni de volver al anterior.
 //
+// Y por eso el paso vigente se monta tal cual llega, sin mirar su modo: **el núcleo no
+// entrega nunca un paso a un toque como vigente**. Lo que está a un toque se pinta aquí
+// como lo que es —el acceso de arriba, que espera un dedo— y montarlo además como paso
+// vigente sería abrirlo solo, que es lo que la segunda visita no puede hacer.
+//
 // Las pantallas del visor (A4P1, A4P2), de la escena (A4P3, A4P4) y de la ficha (A4P7)
 // son de las filas 33 y 34 y **no están en disco**: entran inyectadas por su tipo de
 // paso, y mientras no existan se monta el hueco con el paso nombrado, en lugar de saltar

@@ -13,7 +13,8 @@
 // - **No clasifica velocidades.** Consulta `validaLlegadaPorGeofence` de `ritmo.js`,
 //   que es donde vive la asimetría de `bucle-jugable.md` §9: en la duda se valida,
 //   porque una llegada de más no le quita nada a nadie, y solo el vehículo la invalida.
-//   La regla se lee del mismo módulo del que la lee el motor de pasos.
+//   Y consulta ahí mismo `esUnaParada`, que es lo que separa haberse parado de haber
+//   estado dentro. La regla se lee del mismo módulo del que la lee el motor de pasos.
 // - **No lee el reloj ni sortea nada.** Las marcas de tiempo viajan dentro de cada
 //   posición, como en el regreso de SPEC-030.
 // - **No decide si hay beat, ni si hay micro-encuentro, ni qué se cuenta.** Todo eso
@@ -24,6 +25,11 @@
 // es la contraria —en la duda no se cierra— y por eso la permanencia es un minuto. Aquí
 // son veinte segundos, porque validar es barato y un beat que se atiende de paso tiene
 // que validar igual.
+//
+// Los veinte segundos se cuentan **parada**, y esa palabra es toda la pieza: un geofence
+// de cuarenta metros se cruza en línea recta a cinco kilómetros por hora en casi un
+// minuto, así que contar tiempo *dentro* validaba cualquier paso a pie por delante de un
+// sitio y «el visor no aparece nunca andando» se caía sin que nada se pusiera rojo.
 
 import { congelaHondo } from '../core/congelar.js';
 import { infraccionesDeTexto } from '../names/lenguaje.js';
@@ -31,7 +37,7 @@ import { PROTAGONISTAS } from './deformacion.js';
 import { apuntaLoQueSeCuenta, sucesosConVariasVersiones } from './diario.js';
 import { paraLaCapaQuePinta } from './nucleos.js';
 import { exigeMapaId } from './pasos.js';
-import { validaLlegadaPorGeofence } from './ritmo.js';
+import { esUnaParada, validaLlegadaPorGeofence } from './ritmo.js';
 import {
   MODOS,
   TIPOS_DE_PASO,
@@ -55,7 +61,11 @@ import {
 export const RADIO_DE_GEOFENCE_M = 40;
 
 /**
- * Cuánto hay que quedarse dentro para que la llegada valide.
+ * Cuánto hay que estar **parada dentro** para que la llegada valide.
+ *
+ * Es tiempo de parada, no tiempo dentro: el diseño dice «parada dentro» y la diferencia
+ * no es un matiz, porque atravesar andando este radio ya dura más que esto. Quien lo
+ * mide es `esUnaParada` de `ritmo.js`, que es donde vive el umbral.
  *
  * Corto, y es deliberado: **validar es barato**. Lo que la permanencia distingue es
  * pararse de pasar de largo — sin ella, atravesar el geofence validaría y «el visor no
@@ -397,9 +407,17 @@ export function creaLlegadas({
 
   const yaValidada = (nombre) => registro.llegadas.some((l) => l.sitio === nombre);
 
-  // El reloj de permanencia, por sitio. Vive mientras dura la vigilancia y no se
-  // guarda: son veinte segundos de sensor, no un hecho de la partida.
-  const dentroDesde = new Map();
+  // El reloj de la parada, por sitio: desde cuándo lleva parada dentro de este geofence.
+  // Vive mientras dura la vigilancia y no se guarda: son veinte segundos de sensor, no un
+  // hecho de la partida. Lo que cuenta es parada seguida — echar a andar dentro del
+  // geofence lo borra, igual que salirse —, porque dos paradas cortas con un paseo en
+  // medio no son haberse parado aquí.
+  const paradaDesde = new Map();
+
+  // La última posición vista, que es con la que se forma el enlace cuando las posiciones
+  // llegan de una en una y no en tandas. Una sola posición no distingue estar parada de
+  // ir de paso: hacen falta dos.
+  let anterior = null;
 
   const exigeDetector = () => {
     if (!detector || detector.montado !== true) {
@@ -503,18 +521,32 @@ export function creaLlegadas({
         // valida, y solo el vehículo aparta la llegada.
         const puedeValidar = validaLlegadaPorGeofence(clasificacion);
 
+        // El enlace que termina en esta posición, que es lo único que sabe si se estaba
+        // parada. Una marca que no avanza no forma enlace: una traza que retrocede en el
+        // tiempo es otra traza, y se vuelve a anclar en lugar de medir una duración
+        // negativa.
+        const previa = anterior;
+        anterior = posicion;
+        const enlace = previa && posicion.tMs > previa.tMs
+          ? { metros: Math.hypot(posicion.x - previa.x, posicion.y - previa.y), duracionS: (posicion.tMs - previa.tMs) / 1000 }
+          : null;
+        const parada = enlace !== null && esUnaParada({ ...enlace, clasificacion });
+
         const validadasAqui = [];
         for (const [nombre, geofence] of sitios) {
           const distanciaM = distanciaAlGeofence(geofence, posicion);
-          const cuenta = distanciaM <= geofence.radioM && puedeValidar;
+          const cuenta = distanciaM <= geofence.radioM && puedeValidar && parada;
           if (!cuenta) {
-            // Salir del geofence —o entrar en un vehículo dentro de él— borra el reloj:
-            // atravesarlo dos veces no suma veinte segundos entre las dos.
-            dentroDesde.delete(nombre);
+            // Salir del geofence, echar a andar dentro de él o subirse a un vehículo
+            // borran el reloj: cruzarlo dos veces no suma veinte segundos entre las dos,
+            // y pararse diez a la ida y diez a la vuelta tampoco.
+            paradaDesde.delete(nombre);
             continue;
           }
-          const desde = dentroDesde.get(nombre) ?? posicion.tMs;
-          dentroDesde.set(nombre, desde);
+          // El reloj arranca donde arrancó la parada, que es el principio del enlace y no
+          // esta posición: si no, la primera muestra de cada parada no contaría.
+          const desde = paradaDesde.get(nombre) ?? previa.tMs;
+          paradaDesde.set(nombre, desde);
           if (posicion.tMs - desde < PERMANENCIA_MS) continue;
           if (yaValidada(nombre)) continue;
           validadasAqui.push({ nombre, distanciaM });
