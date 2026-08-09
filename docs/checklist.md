@@ -46,13 +46,13 @@
 | 23 | proxy-ciego | RF-INFRA-002, RNF-PRIV-001, RNF-COST-001 | must | done |
 | 24 | overpass-produccion | RF-INFRA-003, RNF-PER-001 | must | done |
 | 25 | imagenes-ficcion-fotos-places | RF-MUNDO-016, RF-BUCLE-003 | should | done |
-| 26 | mapa-en-movil | RF-MUNDO-001, RF-MUNDO-012, RNF-PER-001 | must | wip |
+| 26 | mapa-en-movil | RF-MUNDO-001, RF-MUNDO-012, RNF-PER-001 | must | done |
 
 ## B5 · El bucle en la calle
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 27 | onboarding-arranque | RF-PJ-001, RF-PJ-002, RF-PJ-003, RF-PJ-005, RF-PJ-006, RF-PJ-007, RF-PJ-008, RF-PRIV-005, RF-PRIV-006 | must | pending |
+| 27 | onboarding-arranque | RF-PJ-001, RF-PJ-002, RF-PJ-003, RF-PJ-005, RF-PJ-006, RF-PJ-007, RF-PJ-008, RF-PRIV-005, RF-PRIV-006 | must | wip |
 | 28 | portada-antes-de-salir | RF-BUCLE-002, RF-QUEST-011, RF-QUEST-012, RNF-RED-001 | must | pending |
 | 29 | en-marcha-mapa-avisos | RF-BUCLE-001, RF-BUCLE-004, RF-BUCLE-009, RF-BUCLE-014, RF-BUCLE-016, RF-MAPA-005 | must | pending |
 | 30 | rotulo-sistema | RF-INFRA-004, RF-BUCLE-010, RF-BUCLE-017 | must | pending |

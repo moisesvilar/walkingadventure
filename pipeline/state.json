@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-026",
-  "fase": "dev",
+  "spec_actual": null,
+  "fase": "B4-cerrado",
   "iteracion": 0,
   "historial": [
     {
@@ -258,6 +258,16 @@
       "casos": "1589 casos: 1586 pasan, 0 fallan, 3 saltados",
       "app": "sin dispositivo",
       "nota": "tres defectos destapados por las pruebas: indice que nunca acertaba, interruptor inalcanzable y filtro que dejaba pasar campos de mas."
+    },
+    {
+      "spec": "SPEC-026",
+      "slug": "mapa-en-movil",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-026-run.md",
+      "casos": "1645 casos: 1642 pasan, 0 fallan, 3 saltados",
+      "app": "tres flujos escritos, ninguno ejecutado: sin simulador",
+      "nota": "el minuto medido en Node (urbano-denso 3222 ms sobre 60000), no en dispositivo de referencia. Ver decisiones 6t."
     }
   ],
   "bloqueos": [],
@@ -314,10 +324,9 @@
     }
   ],
   "suite_final": {
-    "report": "test/reports/SUITE-run-20260808T203056Z.md",
-    "casos": "1042: 1039 pasan, 0 fallan, 3 saltados",
-    "app": "sin flujos: test/app/ vacio"
+    "casos": "1645: 1642 pasan, 0 fallan, 3 saltados",
+    "app": "3 flujos escritos, 0 ejecutados"
   },
-  "bloque": "B4",
+  "bloque": "B5",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos."
 }
