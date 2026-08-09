@@ -40,6 +40,15 @@ export const IDS_MEDIDOS = Object.freeze(FASES_MEDIDAS.map((f) => f.id));
 const DUEÑA = Object.freeze(Object.fromEntries(FASES_MEDIDAS.map((f) => [f.id, f.dueña])));
 
 /**
+ * Cómo se dice el estado de la caché del proxy en la medida.
+ *
+ * Son tres y no dos: que no se sepa es un estado, y **declararlo es el punto**. Una
+ * medida que no sabe si la caché estaba fría vale menos que ninguna, porque se
+ * compara con una que sí lo sabía y la comparación no significa nada.
+ */
+const CACHE = Object.freeze({ true: 'fría', false: 'caliente', null: 'sin declarar' });
+
+/**
  * Monta el cronómetro.
  *
  * @param {object} deps
@@ -156,6 +165,12 @@ export function creaCronometro({ ahora } = {}) {
      */
     medida({ coordenada = null, cacheFria = null } = {}) {
       exigeArrancado();
+      if (cacheFria !== null && typeof cacheFria !== 'boolean') {
+        throw new Error(
+          `la medida no acepta "${cacheFria}" como estado de la caché del proxy: es true (fría), ` +
+          'false (caliente) o null (no se sabe). Inventarse el estado hace incomparables dos medidas',
+        );
+      }
       const cierre = fin ?? lee();
       const fases = IDS_MEDIDOS.map((id) => ({ id, ms: acumulado[id], dueña: DUEÑA[id] }));
       const total = cierre - inicio;
@@ -166,6 +181,10 @@ export function creaCronometro({ ahora } = {}) {
         sinRepartir: total - fases.reduce((s, f) => s + f.ms, 0),
         coordenada,
         cacheFria,
+        // El mismo dato dicho en voz alta. Existe porque una medida sin contexto de
+        // caché no se compara con otra, y `cacheFria: null` en un volcado se lee como
+        // un hueco: aquí el hueco tiene nombre y se ve donde se ve el número.
+        cache: CACHE[String(cacheFria)],
         presupuestoMs: PRESUPUESTO_MS,
       });
     },
@@ -184,8 +203,12 @@ export function compruebaPresupuesto(medida, { presupuestoMs = PRESUPUESTO_MS } 
   if (medida.total <= presupuestoMs) return medida;
   const peor = medida.fases.reduce((a, b) => (b.ms > a.ms ? b : a));
   const donde = medida.coordenada ? `en ${medida.coordenada}` : 'en la coordenada medida';
+  // El estado de la caché va en el fallo porque es lo que decide si el número se puede
+  // comparar con el de otra medida: 40 s con la caché caliente y 40 s con la caché fría
+  // no son el mismo incumplimiento.
+  const conCache = medida.cache ?? CACHE[String(medida.cacheFria ?? null)];
   throw new Error(
-    `levantar el mapa ${donde} tardó ${medida.total} ms y el presupuesto es ${presupuestoMs} ms. ` +
+    `levantar el mapa ${donde} con la caché ${conCache} tardó ${medida.total} ms y el presupuesto es ${presupuestoMs} ms. ` +
     `La fase que se lo comió es "${peor.id}" con ${peor.ms} ms (${peor.dueña}). ` +
     `Reparto: ${medida.fases.map((f) => `${f.id} ${f.ms} ms`).join(', ')}; sin repartir ${medida.sinRepartir} ms`,
   );

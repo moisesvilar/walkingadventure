@@ -105,10 +105,36 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
   // instrumentar la red por dentro.
   const cuenta = { generaciones: 0, consultas: 0, aperturas: 0 };
 
+  /**
+   * Qué dijeron las consultas de este levantamiento sobre la caché del proxy.
+   *
+   * Se acumula y no se guarda la última porque un levantamiento puede consultar más
+   * de una vez —el radio dinámico de la costa vuelve a pedir— y una sola respuesta
+   * servida de caché ya deja de ser una medida en frío. `sinDecir` está aparte a
+   * propósito: una consulta que no dice de dónde vino no se cuenta como fría.
+   */
+  const cache = { vistas: 0, deCache: 0, sinDecir: 0 };
+
+  /**
+   * Si la caché del proxy estaba fría, tal como lo dicen las consultas: `true` fría,
+   * `false` caliente, `null` no se sabe. **No hay valor por defecto**: una medida que
+   * no sabe si la caché estaba fría vale menos que ninguna, así que se declara
+   * desconocida en vez de darla por fría.
+   */
+  function cacheFriaDeclarada() {
+    if (cache.vistas === 0 || cache.sinDecir > 0) return null;
+    return cache.deCache === 0;
+  }
+
   /** El traedor, envuelto para que su tiempo se le cobre a la consulta y no a la generación. */
   const consultaMedida = async (peticion) => {
     cuenta.consultas += 1;
-    return cronometro.mide('consulta', () => consultaOsm(peticion));
+    const bloques = await cronometro.mide('consulta', () => consultaOsm(peticion));
+    cache.vistas += 1;
+    const dicho = bloques ? bloques.deCache : undefined;
+    if (typeof dicho !== 'boolean') cache.sinDecir += 1;
+    else if (dicho) cache.deCache += 1;
+    return bloques;
   };
 
   /**
@@ -130,7 +156,7 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
   }
 
   /** El resultado que se le entrega a la pantalla, con la misma forma venga de donde venga. */
-  function entrega({ mapa, registro, camara, escena, medida, generada }) {
+  function entrega({ mapa, registro, camara, escena, medida, generada, cacheFria = null }) {
     return {
       estado: 'pintado',
       mapa,
@@ -144,6 +170,10 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
       escena,
       medida,
       generada,
+      // Lo que dijeron las consultas sobre la caché del proxy, para que quien cierra
+      // la medida no tenga que suponerlo. Abrir un mapa ya levantado no consulta, así
+      // que ahí es `null` y significa que no hay nada que declarar.
+      cacheFria,
       jugable: !registro.sinContenidoJugable,
       carencias: carenciasDe(registro),
     };
@@ -200,6 +230,10 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
       if (yaEstaba !== null) return abre({ id: rejilla.id, semilla, tamano, estilo, factorTexto });
 
       cronometro.arranca();
+      // Lo que dijeron las consultas del levantamiento anterior no es de este.
+      cache.vistas = 0;
+      cache.deCache = 0;
+      cache.sinDecir = 0;
       const fases = creaSeguimientoDeFases(onFases);
       // El coste de la coordenada exacta acaba aquí: la rejilla se queda con el
       // anclaje redondeado y lo que entró no se guarda en ninguna parte.
@@ -238,6 +272,7 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
         // pantalla: aquí se entrega el cronómetro corriendo y quien pinta lo para.
         medida: null,
         generada: true,
+        cacheFria: cacheFriaDeclarada(),
       });
     },
 

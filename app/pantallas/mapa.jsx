@@ -136,7 +136,14 @@ export function PantallaMapa({
   useEffect(() => {
     if (momento !== 'pintado' || !resultado || !resultado.generada || medida || !cronometro.enMarcha()) return;
     cronometro.para();
-    setMedida(cronometro.medida({ coordenada: `${punto.lat},${punto.lon}`, cacheFria: null }));
+    // Si la caché del proxy estaba fría lo dicen las consultas y llega con el
+    // resultado: la pantalla lo traslada tal cual, incluido el «no se sabe». Ponerle
+    // un valor por defecto convertiría una medida sin contexto en una medida en frío
+    // que nadie ha comprobado, y esa es peor que no tener medida.
+    setMedida(cronometro.medida({
+      coordenada: `${punto.lat},${punto.lon}`,
+      cacheFria: resultado.cacheFria ?? null,
+    }));
   }, [momento, resultado, medida, cronometro, punto]);
 
   /**
