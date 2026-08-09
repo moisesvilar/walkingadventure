@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-031",
+  "spec_actual": "SPEC-032",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -307,6 +307,15 @@
       "casos": "1939 casos: 1936 pasan, 0 fallan, 3 saltados",
       "app": "sin flujo: ninguna superficie de la salida montada todavia",
       "nota": "restaura el criterio duro de SPEC-020 (decisiones 6u): 67 casos no se descubrian sin node_modules."
+    },
+    {
+      "spec": "SPEC-031",
+      "slug": "deteccion-vehiculo",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-031-run.md",
+      "casos": "1978 casos: 1975 pasan, 0 fallan, 3 saltados",
+      "app": "sin flujo"
     }
   ],
   "bloqueos": [],
