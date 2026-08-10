@@ -365,14 +365,18 @@ describe('La lámina en el móvil', () => {
       'mapa-pantalla', 'mapa-motivo', 'mapa-jugable', 'mapa-minuto', 'mapa-no-se-pudo', 'mapa-sin-cablear',
       ...FASES.map((f) => `fase-${f.id}`),
       'paso-mapa',
-      // `arranque` no localiza nada del mapa: es la guarda que declara que **hoy no se
-      // llega a `paso-mapa`**. El paso existe en `App.js`, pero vive en el andamiaje, y
-      // al andamiaje solo se llega saliendo del arranque sin partida levantada —la app
-      // abre con `enArranque = true`—. El flujo hacía `launchApp` y tocaba `paso-mapa`
-      // acto seguido, que es una pantalla que la app dejó de tener al abrir. Mientras el
-      // paso no esté a la vista, el flujo afirma que se abrió en el arranque y el cuerpo
-      // espera; sale de esta lista el día que haya camino.
+      // **Los dos del camino de entrada, y ninguno más.** No localizan nada del mapa: son
+      // por dónde se llega hasta él. Desde la fila 45 el flujo espera a que la app esté
+      // viva —`arranque`—, abre la puerta de desarrollo y aterriza en el andamiaje
+      // —`pantalla-andamiaje`—, que es donde vive `paso-mapa`.
+      //
+      // Antes esta lista traía `arranque` por el motivo contrario: era la guarda que
+      // declaraba que **no se llegaba** al paso. Ahora se llega, y los dos siguen aquí
+      // porque el flujo los atraviesa de verdad. La guarda no se ha ablandado: sigue
+      // rechazando cualquier otro identificador que no sea del mapa, y son estos dos y
+      // no «los del andamiaje» en general.
       'arranque',
+      'pantalla-andamiaje',
     ]);
     const flujo = fuente(FLUJO_DE_APP);
     const usados = [...flujo.matchAll(/^\s*id:\s*'([^']+)'/gm)].map((m) => m[1]);
