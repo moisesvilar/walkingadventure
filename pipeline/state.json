@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-040",
+  "spec_actual": "SPEC-041",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -393,6 +393,15 @@
       "casos": "2438 casos: 2435 pasan, 0 fallan, 3 saltados",
       "app": "flujos escritos, no ejecutados",
       "nota": "expo-file-system declarada por veredicto: la spec no la nombra y hace falta iterarla. La lista cerrada de dependencias ya caza lo importado sin declarar."
+    },
+    {
+      "spec": "SPEC-040",
+      "slug": "empezar-de-nuevo",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-040-run-20260810T012025Z.md",
+      "casos": "2463 casos: 2460 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado"
     }
   ],
   "bloqueos": [],
