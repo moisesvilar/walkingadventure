@@ -5,7 +5,7 @@
 import { buildWorld } from './build.js';
 import { COSER_MAX } from './routes.js';
 import { cuposDeCelda } from './cupos.js';
-import { centroDeCelda, exigeCelda, claveDeCelda, limitesDeCelda } from './rejilla.js';
+import { centroDeCelda, exigeCelda, claveDeCelda, limitesDeCelda, repartoDeCelda } from './rejilla.js';
 import { congelaHondo } from '../core/congelar.js';
 import { exigeSemilla, semillaDeCelda } from '../core/semilla.js';
 
@@ -53,6 +53,12 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
   const centro = centroDeCelda(rejilla, celda);
   const semillaCelda = semillaDeCelda(semillaPartida, mapaId, celda);
 
+  // La porción del repertorio de nombres que le toca a esta celda. Se calcula aquí y
+  // **no depende de ninguna vecina**: sale de la semilla, del mapa y del índice, así
+  // que esta celda sale idéntica byte a byte se genere antes o después que las que la
+  // rodean, que es lo que impide que el determinismo dependa del itinerario.
+  const reparto = repartoDeCelda({ semilla: semillaPartida, mapaId, celda });
+
   // Los cupos se calculan **aquí y una sola vez**, con el tramo de hoy: la
   // geometría de la rejilla no se mueve nunca —eso rompería los índices y las
   // costuras—, pero una celda abierta después de recalibrar el tramo mide otra cosa
@@ -89,6 +95,7 @@ export async function generaCelda({ rejilla, semilla, mapaId, celda, motivo = 'p
     // ni quitar un paraje. El suelo, en cambio, sale del catálogo y no del tamaño.
     radioEnTramos: rejilla.radioInscritoM / rejilla.tramoM,
     vocabulario: cupos.parajes.vocabulario,
+    repartoDeNombres: reparto,
     // La fuente de relleno es opcional y su ausencia es el caso normal: sin ella la
     // celda se genera igual y queda registrada como generada sin relleno.
     ...(places ? { places } : {}),

@@ -8,6 +8,7 @@ import { makeRng } from '../core/rng.js';
 import { SUFIJOS_DE_FASE, exigeSemilla, semillaDeCelda } from '../core/semilla.js';
 import { generaCelda } from '../world/celda.js';
 import { coseCeldas, semillaDeCostura } from '../world/costura.js';
+import { crearIndiceDeMapa, nombresDelMundo } from '../names/index.js';
 import {
   celdaEnPosicion,
   celdasContiguas,
@@ -15,6 +16,7 @@ import {
   creaRejilla,
   exigeCelda,
   ordenCanonico,
+  repartoDeCelda,
 } from '../world/rejilla.js';
 import { CLASES, VERSION_FORMATO, VERSION_GENERADOR, compruebaVersion, escribe, esquemaDe, lee, texto } from './formato.js';
 import { congelaCelda, levantaCelda } from './mundo.js';
@@ -44,6 +46,11 @@ export function creaMapa({ semilla, lat, lon, anclaje, tramoM }) {
     idioma: null,
     celdas: [],
     costuras: [],
+    // El índice de nombres del mapa. Desde SPEC-041 **no produce la unicidad, la
+    // comprueba**: quien la produce es el reparto del repertorio por celda, que no
+    // consulta a ninguna vecina. Esto está aquí para que un reparto roto se note al
+    // registrar la celda y no tres pantallas después, con dos sitios llamándose igual.
+    nombres: crearIndiceDeMapa({ semilla: semillaPartida, mapaId: rejilla.id, reparto: repartoDeCelda }),
   };
 }
 
@@ -105,6 +112,10 @@ function registra(mapa, registro) {
     mapa.idioma = registro.mundo.locale;
   }
   mapa.celdas.push(registro);
+  // Lo que la celda ha nombrado, contra el índice del mapa. Si el reparto se hubiera
+  // roto, aquí se dice nombrando el elemento en lugar de dejar dos «Casal da Colmea»
+  // en el mismo mapa, que es exactamente lo que ya pasó en `costero#2`.
+  if (mapa.nombres && registro.mundo) mapa.nombres.registra(registro.celda, nombresDelMundo(registro.mundo));
   for (const vecina of celdasContiguas(registro.celda)) {
     const otra = celdaAbierta(mapa, vecina);
     if (!otra) continue;
@@ -356,6 +367,11 @@ export function levantaIndice(doc, { semilla } = {}) {
       sinContenidoJugable: c.sinContenidoJugable,
       cargada: false,
     })),
+    // Un mapa cargado llega con sus celdas como fichas, así que su índice de nombres
+    // nace vacío y se va llenando conforme se leen los documentos. No es una pérdida:
+    // lo que garantiza la unicidad es el reparto, que se recalcula igual de la semilla
+    // y del identificador del mapa; esto solo comprueba lo que pasa por delante.
+    nombres: crearIndiceDeMapa({ semilla: semillaPartida, mapaId: d.id, reparto: repartoDeCelda }),
     costuras: d.costuras.map((c) => {
       const [p, q] = c.celdas;
       const aIndice = (clave) => {
@@ -488,6 +504,9 @@ export async function cargaCelda(mapa, celda, { almacen } = {}) {
   if (crudo == null) throw new Error(`el almacén no tiene el documento de la celda ${clave} del mapa ${mapa.id}`);
   const registro = levantaCelda(lee(crudo, `el documento de la celda ${clave}`), { semilla: mapa.semilla });
   mapa.celdas[i] = registro;
+  // Leer una celda guardada la pasa por el índice igual que generarla: un reparto que
+  // se rompiera en una versión anterior se caza al abrir la partida, no al pintarla.
+  if (mapa.nombres && registro.mundo) mapa.nombres.registra(registro.celda, nombresDelMundo(registro.mundo));
   return registro;
 }
 

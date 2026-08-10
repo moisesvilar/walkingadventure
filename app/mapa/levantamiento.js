@@ -44,6 +44,24 @@ export const DEL_NUCLEO = Object.freeze([
   'celdasAbiertas', 'creaMapa', 'guardaMapa', 'listaMapas', 'pisa', 'claveDeCelda', 'creaRejilla',
 ]);
 
+/**
+ * Lo que hace falta **además** para andar por un mapa: el mapa activo, la apertura de
+ * celdas vecinas y su guardado (SPEC-041).
+ *
+ * Va en una lista aparte y se comprueba **al usarse y no al construir**, y la razón es
+ * que no todo el que monta esta orquestación anda: pintar una lámina ya levantada no
+ * necesita ni resolver el mapa activo ni abrir una celda, y exigírselo dejaría sin
+ * arrancar a quien solo quiere dibujar. Lo que no cambia es que la ausencia **se dice
+ * nombrando la pieza** y no degrada en silencio, que es lo de §6h.
+ *
+ * Entran por el mismo objeto y por la misma puerta que el resto (§6u): quien orquesta
+ * recibe el generador, quien lo monta lo importa.
+ */
+export const DEL_NUCLEO_PARA_ANDAR = Object.freeze([
+  'completaCelda', 'guardaCelda', 'guardaIndice', 'resuelvePosicion',
+  'resuelveMapaActivo', 'listaDeMapas', 'ESTADOS_DE_APERTURA', 'SIN_MAPA_ACTIVO',
+]);
+
 /** Los cuatro estados del momento, tal como los declara la spec. Vocabulario cerrado. */
 export const ESTADOS = Object.freeze(['sin-mapa', 'levantando', 'pintado', 'no-se-pudo']);
 
@@ -115,13 +133,29 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
     CLAVES, cargaCelda, cargaMapa, celdaAbierta, celdasAbiertas,
     claveDeCelda, creaMapa, creaRejilla, guardaMapa, listaMapas, pisa,
   } = nucleo;
+
+  /**
+   * Las piezas de andar, comprobadas al usarse. Falla nombrando la que falta y para qué
+   * es: un núcleo a medias que se descubre tres pantallas después es la forma de fallo
+   * que este repositorio ha pagado siete veces.
+   */
+  const paraAndar = (quien) => {
+    const faltan = DEL_NUCLEO_PARA_ANDAR.filter((n) => nucleo[n] == null);
+    if (faltan.length) {
+      throw new Error(
+        `${quien} necesita del núcleo ${faltan.join(', ')}, que no llegaron: sin ellas no hay mapa activo que resolver ` +
+        `ni celda vecina que abrir. Las de andar son ${DEL_NUCLEO_PARA_ANDAR.join(', ')}`,
+      );
+    }
+    return nucleo;
+  };
   const ESTILO_POR_DEFECTO = nucleo.ESTILO_POR_DEFECTO;
   const componeLaEscena = compone ?? nucleo.componeEscena;
 
   // Cuántas veces se ha llamado al generador y cuántas se ha pedido a OSM. Es
   // diagnóstico y es lo que permite afirmar «arrastrar no ha regenerado nada» sin
   // instrumentar la red por dentro.
-  const cuenta = { generaciones: 0, consultas: 0, aperturas: 0 };
+  const cuenta = { generaciones: 0, consultas: 0, aperturas: 0, celdas: 0 };
 
   /**
    * Qué dijeron las consultas de este levantamiento sobre la caché del proxy.
@@ -216,12 +250,106 @@ export function creaLevantamiento({ consultaOsm, almacen, cronometro, colocador,
     return entrega({ mapa, registro, camara, escena, medida: null, generada: false });
   }
 
+  /**
+   * Abre una celda y la deja guardada: o hay documento completo o no hay documento.
+   *
+   * El estado que devuelve es el vocabulario cerrado de `celda-apertura`, y ese es todo
+   * el contrato con la pantalla: en marcha no se enseña nada —la regla de que en marcha
+   * no hay nada que tocar no tiene excepciones— y antes de salir se cuenta con las
+   * mismas fases que ya usa la generación del arranque.
+   */
+  async function abreYGuarda(mapa, ejecuta, { onFases = null, onApertura = null, quien } = {}) {
+    const { guardaCelda, guardaIndice } = paraAndar(quien);
+    const avisa = (estado) => (onApertura ? onApertura(estado) : null);
+    avisa('abriendo');
+    const fases = creaSeguimientoDeFases(onFases);
+    try {
+      const resultado = await ejecuta(fases);
+      if (resultado.generada && resultado.registro) {
+        cuenta.celdas += 1;
+        // Primero la celda y después el índice: si escribir falla, lo que queda es un
+        // índice que no declara la celda, y no un índice que declara una que no está.
+        await guardaCelda(mapa, resultado.registro.celda, { almacen });
+        await guardaIndice(mapa, { almacen });
+        fases.termina();
+      }
+      avisa(resultado.registro ? 'abierta' : 'inactiva');
+      return { ...resultado, apertura: resultado.registro ? 'abierta' : 'inactiva' };
+    } catch (e) {
+      // Nada a medias: el registro del núcleo solo se toca cuando hay mundo entero, y
+      // aquí no se escribe nada si la consulta falló.
+      avisa('no-se-pudo');
+      return { registro: null, generada: false, apertura: 'no-se-pudo', motivo: e.message };
+    }
+  }
+
   return {
     recuento: () => ({ ...cuenta }),
+
+    /** El vocabulario del estado de apertura, tal cual lo declara el núcleo. */
+    estadosDeApertura: () => [...paraAndar('el vocabulario del estado de apertura').ESTADOS_DE_APERTURA],
 
     /** Los mapas ya levantados que hay en el almacén. Ninguno todavía es un estado normal. */
     async mapasLevantados() {
       return listaMapas({ almacen });
+    },
+
+    /** Los mapas de la partida con lo que cada uno declara. Solo lo lee el diario. */
+    async mapasDeLaPartida({ pasos = null, rangos = null } = {}) {
+      const { listaDeMapas } = paraAndar('la lista de mapas de la partida');
+      return listaDeMapas({ almacen, pasos, rangos });
+    },
+
+    /**
+     * Qué mapa toca donde estás. **No hay ninguna manera de fijarlo a mano**: se
+     * resuelve desde la posición cada vez, y por eso no puede quedarse pegado a un mapa
+     * antiguo. Sin ninguno cerca devuelve `SIN_MAPA_ACTIVO`, que no es un error.
+     *
+     * Lee los índices y ninguna celda: saber dónde estás no cuesta un documento de
+     * mundo por mapa.
+     */
+    async mapaActivo({ lat, lon, semilla, tramoM = null }) {
+      const { resuelveMapaActivo } = paraAndar('la resolución del mapa activo');
+      const ids = await listaMapas({ almacen });
+      const mapas = [];
+      for (const id of ids) mapas.push(await cargaMapa({ almacen, id, semilla }));
+      return { ...resuelveMapaActivo(mapas, { lat, lon, tramoM }), mapas };
+    },
+
+    /**
+     * El jugador pisa una posición de un mapa suyo.
+     *
+     * Si la celda ya estaba abierta **se lee del almacén y no se consulta OSM**; si no,
+     * se abre por pisarla, porque el mundo tiene que existir donde estás, y eso cubre a
+     * quien vive pegado a un borde. La celda propia no se toca: abrir la vecina la deja
+     * idéntica byte a byte.
+     */
+    async anda({ mapa, lat, lon, tramoM = null, onFases = null, onApertura = null }) {
+      const { resuelvePosicion } = paraAndar('andar por un mapa');
+      const donde = resuelvePosicion(mapa, lat, lon);
+      if (donde.estado === 'abierta') {
+        if (onApertura) onApertura('inactiva');
+        return { ...donde, registro: await cargaCelda(mapa, donde.celda, { almacen }), generada: false, apertura: 'inactiva' };
+      }
+      return abreYGuarda(mapa, (fases) => pisa(mapa, lat, lon, {
+        consultaOsm: consultaMedida,
+        onStatus: async (aviso) => { fases.avisa(aviso); },
+        tramoM,
+      }), { onFases, onApertura, quien: 'andar por un mapa' });
+    },
+
+    /**
+     * Llega la señal de que una celda se ha completado y se abre una vecina como
+     * acontecimiento. **La elige la semilla**, no quien juega: es acontecimiento y no
+     * decisión, y tiene que salir igual en dos ejecuciones iguales.
+     */
+    async completa({ mapa, celda, tramoM = null, onFases = null, onApertura = null }) {
+      const { completaCelda } = paraAndar('abrir una celda como acontecimiento');
+      return abreYGuarda(mapa, (fases) => completaCelda(mapa, celda, {
+        consultaOsm: consultaMedida,
+        onStatus: async (aviso) => { fases.avisa(aviso); },
+        tramoM,
+      }), { onFases, onApertura, quien: 'abrir una celda como acontecimiento' });
     },
 
     /**

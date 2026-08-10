@@ -89,7 +89,7 @@ export function demandaDeAnclajes(radius, cupoParajes = null) {
  * plantillas hasta que exista el catálogo de verdad. Orquestar es pasarlo; la fase
  * de parajes no lo importa.
  */
-export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = null, places = null, placesActivo = true, radioEnTramos = null, vocabulario = null, onStatus = async () => {} }) {
+export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = null, places = null, placesActivo = true, radioEnTramos = null, vocabulario = null, repartoDeNombres = null, onStatus = async () => {} }) {
   // El núcleo no llama a la red por su cuenta: si nadie le inyecta `fetchData`,
   // el fallo tiene que decirlo por su nombre y antes de empezar. Con la frontera
   // ya comprobable, un TypeError a mitad de la primera fase esconde el motivo.
@@ -97,12 +97,18 @@ export async function buildWorld({ lat, lon, rBase, seed, fetchData, demanda = n
     throw new Error('buildWorld necesita que se le inyecte fetchData(lat, lon, radius) → { geoJson, poiJson }');
   }
 
-  const names = namesFor(localeFor(lat, lon));
+  const locale = localeFor(lat, lon);
+  const names = namesFor(locale);
   // Un solo índice de nombres para todo el mundo, creado aquí y repartido a las
   // fases: la unicidad es del mundo entero y no de cada familia. Se crea en la
   // orquestación y no en un módulo con estado propio para que dos mundos
   // generados en el mismo proceso no se contaminen.
-  const indiceNombres = crearIndiceDeNombres();
+  //
+  // `reparto` es lo que hace que esa unicidad se extienda a las celdas vecinas sin
+  // preguntarles nada: llega inyectado desde `celda.js`, que es quien sabe de qué
+  // celda de qué mapa se trata. Sin él —un mundo suelto, como los de las
+  // herramientas— el índice se comporta exactamente como antes de SPEC-041.
+  const indiceNombres = crearIndiceDeNombres({ reparto: repartoDeNombres, idioma: locale });
 
   await onStatus('fetch');
   let data = await fetchData(lat, lon, rBase);
