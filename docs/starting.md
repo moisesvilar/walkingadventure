@@ -1506,6 +1506,10 @@ Así que lo que sobrevive hoy y se puede afirmar es **el personaje, la semilla, 
 
 Y de paso, `diario.yaml` y `repisa.yaml` llevaban desde la fila 43 diciendo que «no hay ninguna puerta que lleve hasta ella», que es falso desde que la portada tiene sus tres puertas. Corregido el motivo en los dos, sin tocar la guarda: el identificador que miran no existe ni va a existir, así que lo que decían era verdad; lo que mentía era el porqué.
 
+**Y un tercero, que no es de esta fila y salió porque la tanda se repitió: `assertNotVisible: 'Sabela'` no medía lo que decía medir.** La tanda salió roja con «Assertion is false: "Sabela" is not visible», y la pantalla donde falló era A1P1, que es donde el arranque **sortea cuatro sugerencias de nombre**. En la ejecución siguiente salieron Aldara, Xela, Froilán y Airas y la misma línea pasó. Por partida doble, además: `arranque.yaml` tampoco escribe el nombre —el campo llega relleno con una sugerencia sorteada—, así que «Sabela» ni siquiera era el nombre del personaje que se borraba. Es la misma forma que el `.*\d+\s*(km|m|…)` de la fila 45: una ausencia que se pone roja por una palabra que no tiene nada que ver. Se quitan las dos líneas y la del título del mundo, que se sortea igual.
+
+En su lugar, ese flujo pasa a afirmar algo que **antes de esta fila no significaba nada**: que después de borrar, volver a lanzar la app lleva al arranque y no a la portada ni a la avería. Con la app abriendo siempre en el arranque, esa comprobación era vacía; ahora dice que el borrado se llevó también el documento de partida.
+
 **Los otros dos rojos de `@app` son anteriores y siguen fichados.** `empezar-de-nuevo-copia.yaml` es el de la entrada XXVIII —`Share.dismissedAction` es de iOS y en Android la hoja resuelve siempre como compartida—, y `zurron.yaml` busca `paso-ajustes`, que no existe en `app/` ni en `main`: es de la fila 46.
 
 ## Un defecto que destapó la prueba
