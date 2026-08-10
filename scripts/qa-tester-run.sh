@@ -26,6 +26,15 @@
 # en la sección 3 y nunca producen un verde—, y solo un flujo que llegó a ejecutarse
 # y falló es rojo.
 #
+# Y desde §6w de `pipeline/decisiones-orquestador.md`, el verde de @app tampoco es
+# uno solo: hay flujos que se declaran **de límite declarado** —llevan
+# `# @limite-declarado` en cabecera— y lo único que ejecutan es una guarda que
+# comprueba que su pantalla sigue sin existir. Lo que dicen es honesto; sumarlo en la
+# misma casilla que un flujo que recorre la app no lo era. Por eso el recuento tiene
+# cuatro casillas —ejecutados · pasan · fallan · solo comprueban su límite— y un
+# marcado que sale verde no se suma a «pasan». Un marcado que sale rojo sigue siendo
+# rojo: el marcador cambia cómo se lee su verde, no da permiso para fallar.
+#
 # Lo que Maestro necesita para arrancar (JVM y SDK de Android) lo cablea el propio
 # runner más abajo, buscándolo y declarando en el report qué encontró. Se puede
 # forzar con WA_JAVA_HOME y WA_ANDROID_HOME.
@@ -247,6 +256,44 @@ fi
 
 if command -v maestro >/dev/null 2>&1; then HAY_MAESTRO=1; else HAY_MAESTRO=0; fi
 
+# --- quién se declara de límite ---------------------------------------------
+#
+# El marcador es un contrato entre el flujo y este runner, y la lista exacta de los
+# que lo llevan la fija `test/nucleo/limite-declarado.test.mjs`. Aquí no se decide
+# nada: se lee. La línea se compara recortada y entera, igual que allí, para que no
+# haya dos maneras distintas de estar marcado.
+#
+# La clasificación va antes de ejecutar nada y **no depende de que haya Maestro**,
+# porque lo que aporta es saber cómo se leerá cada verde, y eso hay que saberlo
+# aunque después no se pueda ejecutar. Un fichero que no se deja leer no se da por no
+# marcado: eso sería el patrón de §6h otra vez —la pieza que, al no estar, no
+# protesta— y aquí valdría un verde de límite contado como verde de verdad. No poder
+# saberlo es un fallo declarado, y ese flujo no se lanza a ciegas.
+MARCADOR_LIMITE='# @limite-declarado'
+
+# 0 marcado · 1 sin marcar · 2 no se ha podido saber.
+lleva_marcador() {
+  [ -r "$1" ] || return 2
+  LC_ALL=C grep -Eq "^[[:space:]]*${MARCADOR_LIMITE}[[:space:]]*$" "$1" 2>/dev/null
+  case $? in
+    0) return 0 ;;
+    1) return 1 ;;
+    *) return 2 ;;
+  esac
+}
+
+MARCAS=()
+APP_MARCADOS=0
+APP_SIN_CLASIFICAR=""
+for FLUJO in ${FLUJOS[@]+"${FLUJOS[@]}"}; do
+  lleva_marcador "$FLUJO"; MARCA=$?
+  MARCAS+=("$MARCA")
+  case "$MARCA" in
+    0) APP_MARCADOS=$((APP_MARCADOS + 1)) ;;
+    2) APP_SIN_CLASIFICAR="$APP_SIN_CLASIFICAR $FLUJO" ;;
+  esac
+done
+
 # --- 4 · pruebas de @nucleo -------------------------------------------------
 
 EJECUTADO=0
@@ -333,6 +380,13 @@ APP_INFRA_LINEA=""    # la línea literal de Maestro que lo dice
 APP_DISCREPANCIA=""
 APP_RECONOCIDO=0      # 1 solo si el informe JUnit se entendió, que es lo que permite contar
 APP_TOTAL=0; APP_FALLA=0
+# Las dos casillas verdes, separadas: `APP_PASAN` son casos que recorrieron la app y
+# salieron bien, `APP_LIMITE` son casos de un flujo marcado, cuyo verde solo dice que
+# su pantalla sigue sin existir. Se mantienen de forma que
+# APP_TOTAL = APP_PASAN + APP_FALLA + APP_LIMITE, sin excepciones: un recuento que no
+# cuadra es la manera fácil de colar un verde donde no lo hay.
+APP_PASAN=0; APP_LIMITE=0
+APP_LIMITE_FLUJOS=0   # cuántos flujos marcados salieron enteros en verde
 
 if [ "$ALCANCE" != "nucleo" ]; then
   if [ "$HAY_MAESTRO" -eq 0 ]; then
@@ -361,8 +415,16 @@ ${JAVA_PROBADAS}Se puede indicar uno con WA_JAVA_HOME."
 
     for FLUJO in "${FLUJOS[@]}"; do
       N=$((N + 1))
+      MARCA="${MARCAS[$((N - 1))]}"
       INFORME="$TMP/app-junit-$N.xml"
       SALIDA="$TMP/app-run-$N.txt"
+
+      # Un flujo cuyo marcador no se ha podido leer no se ejecuta: su resultado no se
+      # sabría dónde contar, y contarlo mal es peor que no tenerlo.
+      if [ "$MARCA" -eq 2 ]; then
+        echo "- \`$FLUJO\`: **no se pudo ejecutar** — no se pudo leer para saber si se declara de límite (\`$MARCADOR_LIMITE\`), así que no se lanza a ciegas" >>"$TMP/app-tabla.txt"
+        continue
+      fi
       # `--no-ansi` para que los colores no rompan los patrones, y `</dev/null` para
       # que el menú interactivo de «elige un dispositivo» no deje el runner colgado
       # esperando una tecla que en desatendido no llega nunca.
@@ -385,13 +447,39 @@ ${JAVA_PROBADAS}Se puede indicar uno con WA_JAVA_HOME."
         else
           APP_RECONOCIDO=1
           APP_TOTAL=$((APP_TOTAL + T))
-          APP_FALLA=$((APP_FALLA + F))
+
+          # Los fallos que se cuentan de verdad. Cuando el código y el informe se
+          # contradicen se toma el peor de los dos, y se cuenta **un** fallo dentro de
+          # los $T casos en vez de sumar uno suelto: así el reparto de abajo sigue
+          # cuadrando con el total.
+          FE="$F"
           if [ "$RC" -ne 0 ] && [ "$F" -eq 0 ]; then
             APP_DISCREPANCIA="$APP_DISCREPANCIA \`$FLUJO\` salió con código $RC y su informe declara 0 fallos; se toma el peor de los dos."
-            APP_FALLA=$((APP_FALLA + 1))
-            echo "- \`$FLUJO\`: **FALLO** (código $RC, informe sin fallos — se toma el peor)" >>"$TMP/app-tabla.txt"
-          elif [ "$F" -ne 0 ]; then
-            echo "- \`$FLUJO\`: **FALLO** ($F de $T en rojo)" >>"$TMP/app-tabla.txt"
+            FE=1
+          fi
+          APP_FALLA=$((APP_FALLA + FE))
+
+          # Y el resto del flujo, a su casilla. Todo lo verde de un flujo marcado es
+          # verde de límite, incluso si el flujo acabó en rojo: sigue sin haber
+          # recorrido ninguna pantalla.
+          VERDES=$((T - FE))
+          if [ "$MARCA" -eq 0 ]; then
+            APP_LIMITE=$((APP_LIMITE + VERDES))
+          else
+            APP_PASAN=$((APP_PASAN + VERDES))
+          fi
+
+          if [ "$FE" -ne 0 ]; then
+            SUFIJO=""
+            [ "$MARCA" -eq 0 ] && SUFIJO=" — flujo de límite declarado: ni su guarda pasa, y el marcador no lo salva"
+            if [ "$F" -eq 0 ]; then
+              echo "- \`$FLUJO\`: **FALLO** (código $RC, informe sin fallos — se toma el peor)$SUFIJO" >>"$TMP/app-tabla.txt"
+            else
+              echo "- \`$FLUJO\`: **FALLO** ($F de $T en rojo)$SUFIJO" >>"$TMP/app-tabla.txt"
+            fi
+          elif [ "$MARCA" -eq 0 ]; then
+            APP_LIMITE_FLUJOS=$((APP_LIMITE_FLUJOS + 1))
+            echo "- \`$FLUJO\`: límite declarado sigue en pie ($T caso(s)) — no verifica ninguna pantalla" >>"$TMP/app-tabla.txt"
           else
             echo "- \`$FLUJO\`: OK ($T caso(s))" >>"$TMP/app-tabla.txt"
           fi
@@ -415,19 +503,37 @@ ${JAVA_PROBADAS}Se puede indicar uno con WA_JAVA_HOME."
     # El orden importa: lo ilegible manda sobre lo rojo —«arregla la máquina o el
     # flujo, no el juego»— y lo rojo manda sobre lo verde. La infraestructura ausente
     # solo se declara cuando ningún flujo llegó a ejecutarse por eso.
-    if [ "$APP_TOTAL" -gt 0 ]; then EJECUTADO=1; fi
+    #
+    # Y lo que marca «se ejecutó algo» es `APP_PASAN`, no `APP_TOTAL`: un verde de
+    # límite declarado no afirma nada de la app, así que dieciséis de ellos siguen
+    # siendo cero verificación. Con esto, un `--app-only` en el que todo lo ejecutado
+    # fuera de límite sale con código 2 —no se pudo verificar nada— en lugar de con un
+    # PASS que no sostiene nadie.
+    if [ "$APP_PASAN" -gt 0 ] || [ "$APP_FALLA" -gt 0 ]; then EJECUTADO=1; fi
     if [ -n "$APP_ILEGIBLES" ]; then
       NO_EJECUTABLE=1
-      APP_ESTADO="no se pudo ejecutar entero: $APP_TOTAL flujo(s) contados ($APP_FALLA en rojo) y estos no dejaron nada que se pueda afirmar:${APP_ILEGIBLES}"
+      APP_ESTADO="no se pudo ejecutar entero: $APP_TOTAL flujo(s) contados ($APP_FALLA en rojo, $APP_LIMITE solo de límite) y estos no dejaron nada que se pueda afirmar:${APP_ILEGIBLES}"
     elif [ "$APP_FALLA" -ne 0 ]; then
       FALLO=1
-      APP_ESTADO="FALLO ($APP_FALLA flujo(s) en rojo de $APP_TOTAL)"
+      APP_ESTADO="FALLO ($APP_FALLA flujo(s) en rojo de $APP_TOTAL, $APP_LIMITE solo comprueban su límite declarado)"
     elif [ "$APP_TOTAL" -eq 0 ]; then
       APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas) — $APP_INFRA_N de ${#FLUJOS[@]} flujo(s)"
+    elif [ "$APP_PASAN" -eq 0 ]; then
+      # Verde entero y ninguna pantalla verificada. No es OK y no puede leerse como
+      # tal: es el estado que §6w vino a hacer visible.
+      APP_ESTADO="nada verificado: los $APP_TOTAL flujo(s) ejecutados son todos de límite declarado, así que solo consta que sus pantallas siguen sin existir"
     else
-      APP_ESTADO="OK ($APP_TOTAL flujo(s), 0 en rojo)"
+      APP_ESTADO="OK ($APP_PASAN flujo(s) recorren la app y pasan, 0 en rojo; $APP_LIMITE solo comprueban su límite declarado)"
     fi
     APP_DISCREPANCIA="${APP_DISCREPANCIA# }"
+  fi
+
+  # Fuera de la cadena a propósito: valga lo que valga el resto, si de algún flujo no
+  # se pudo leer si se declara de límite, esta ejecución no sabe cómo contar lo que
+  # tiene. Vale también cuando no había Maestro, porque lo que falta no es la máquina.
+  if [ -n "$APP_SIN_CLASIFICAR" ]; then
+    NO_EJECUTABLE=1
+    APP_ESTADO="no se pudo ejecutar entero: de estos flujos no se pudo leer si se declaran de límite, y no se lanzaron:${APP_SIN_CLASIFICAR} · lo demás: $APP_ESTADO"
   fi
 fi
 
@@ -485,6 +591,15 @@ fi
   echo "- Código de salida: \`$CODIGO\`"
   echo "- Alcance pedido: \`$ALCANCE\`"
   echo "- Node: \`$NODE_VERSION\`"
+  # El recuento de @app va arriba, en el veredicto, y con las cuatro casillas: quien
+  # lee el report tiene que poder ver cuántos flujos recorrieron la app de verdad sin
+  # bajar hasta la salida literal de Maestro.
+  if [ "$ALCANCE" != "nucleo" ] && [ "$APP_RECONOCIDO" -eq 1 ]; then
+    echo "- Flujos de \`@app\`: **$APP_TOTAL ejecutados · $APP_PASAN pasan · $APP_FALLA fallan · $APP_LIMITE solo comprueban su límite declarado**"
+    if [ "$APP_PASAN" -eq 0 ]; then
+      echo "- **De la app no se ha verificado nada.** Ninguno de los flujos que se ejecutaron recorre una pantalla: los verdes de límite declarado solo dicen que su pantalla sigue sin existir."
+    fi
+  fi
   echo
   echo "## 2 · Regresión de núcleo"
   echo
@@ -573,10 +688,22 @@ fi
   echo "## 5 · Resultados de @app"
   echo
   echo "- Estado: $APP_ESTADO"
-  echo "- Flujos: ${#FLUJOS[@]}"
+  if [ "${#FLUJOS[@]}" -gt 0 ]; then
+    if [ "$APP_MARCADOS" -eq 0 ]; then
+      echo "- Flujos: ${#FLUJOS[@]}, ninguno declarado de límite (\`$MARCADOR_LIMITE\`). No es un error: significa que todos dicen recorrer la app."
+    else
+      echo "- Flujos: ${#FLUJOS[@]}, de los cuales $APP_MARCADOS se declaran de límite con \`$MARCADOR_LIMITE\`. La lista exacta la fija \`test/nucleo/limite-declarado.test.mjs\`; este runner la lee, no la decide."
+    fi
+  else
+    echo "- Flujos: 0"
+  fi
+  if [ -n "$APP_SIN_CLASIFICAR" ]; then
+    echo "- **No se pudo leer si estos flujos se declaran de límite, y por eso no se ejecutaron:**${APP_SIN_CLASIFICAR}. Darlos por no marcados habría contado sus verdes como verdes de verdad; no saberlo se dice, no se supone."
+  fi
   if [ -f "$TMP/app-run.txt" ]; then
     if [ "$APP_RECONOCIDO" -eq 1 ]; then
-      echo "- Ejecutados: $APP_TOTAL · pasan: $((APP_TOTAL - APP_FALLA)) · fallan: $APP_FALLA"
+      echo "- Ejecutados: $APP_TOTAL · pasan: $APP_PASAN · fallan: $APP_FALLA · solo comprueban su límite: $APP_LIMITE"
+      echo "  - «Pasan» son casos que recorrieron la app. «Solo comprueban su límite» son casos de un flujo marcado: su verde afirma que la pantalla **sigue sin existir**, y por eso no se suma con los demás. $APP_LIMITE_FLUJOS flujo(s) marcados salieron enteros en verde."
     else
       echo "- Ejecutados: ninguno. Maestro no llegó a dejar un informe JUnit con recuento, así que de esta ejecución no se afirma ninguna cifra."
     fi
