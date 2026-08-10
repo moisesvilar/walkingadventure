@@ -1,17 +1,15 @@
 # @app — El primer flujo que toca un dispositivo (SPEC-020).
 #
-# @limite-declarado
+# **Recorre su pantalla desde el 10-ago-2026.** Hasta la fila 45 este flujo llevaba
+# `@limite-declarado`: la app abre en el arranque y al andamiaje no se llegaba por ningún
+# sitio. Ahora hay una **puerta declarada de desarrollo** —el enlace
+# `walkingadventure://desarrollo`—, y este flujo entra por ella.
 #
-# Este flujo **no recorre su pantalla**: la app abre en el arranque —`enArranque =
-# true`— y al andamiaje solo se llega saliendo de él sin partida levantada. Lo único
-# que llega a ejecutarse es la guarda de más abajo, así que su verde significa «el
-# límite sigue en pie» y nunca «la pantalla funciona», y por eso no se cuenta en la
-# misma casilla que un verde de verdad. El porqué entero y lo que haría falta para
-# levantarlo están en «LÍMITE DECLARADO», unas líneas más abajo.
-#
-# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
-# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
-# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+# Que la puerta sea de desarrollo y no del juego es deliberado y está razonado en
+# `pipeline/decisiones-orquestador.md` §6y: verificar una pantalla del juego por una puerta
+# que ningún jugador usa es deuda, y verificar una herramienta de desarrollo por la puerta
+# de desarrollo es la puerta correcta. Lo que decide el caso es si lo que hay detrás sale
+# en `docs/flujo.md`, y el andamiaje no sale ni puede salir.
 #
 # Comprueba lo único que esta fila entrega: que la app arranca, que la pantalla de
 # andamiaje está entera, que el título de mundo lo pinta el núcleo y que las cuatro
@@ -27,70 +25,74 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+# La puerta de desarrollo, que es como se llega al andamiaje desde la fila 45. No es
+# navegación del juego: el andamiaje no sale en `docs/flujo.md` porque no es una pantalla
+# de diseño, es la sonda de las cuatro capacidades de plataforma. En producción este enlace
+# no existe.
 #
-# Este flujo daba por hecho que la app abre en el andamiaje, y **no abre ahí**.
-# `app/App.js` arranca con `enArranque = true`, así que lo primero y lo único que se ve
-# al instalar es el arranque de A1P1. El andamiaje sigue existiendo y `PantallaAndamiaje` se monta, pero solo cuando se sale del arranque **sin partida levantada**: hay que recorrer las siete pantallas de A1 para llegar, y este flujo no las recorre.
-#
-# Mientras la app abra donde abre, este flujo **no recorre nada y lo dice**: comprueba
-# que sigue sin haber camino y que la app abre en el arranque. Su verde significa «el
-# límite declarado sigue en pie», nunca «la pantalla está verificada». El día que haya
-# camino, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
-- runFlow:
-    when:
-      notVisible:
-        id: 'pantalla-andamiaje'
-    commands:
-      - assertVisible:
-          id: 'arranque'
-      - assertNotVisible:
-          id: 'pantalla-andamiaje'
+# **Se espera a que la app esté viva antes de abrir el enlace.** Medido en `wa-pixel`: con
+# `clearState: true` el arranque en frío tarda unos veinte segundos en tener el puente de
+# JavaScript montado, y el enlace se entrega por `Linking.addEventListener`, que hasta
+# entonces no existe. Lanzarlo antes lo pierde sin que nada lo diga. Esto es espera y no
+# lógica, así que va con `extendedWaitUntil` y no bajando ninguna afirmación.
+- extendedWaitUntil:
+    visible:
+      id: 'arranque'
+    timeout: 60000
+- openLink: 'walkingadventure://desarrollo'
+- extendedWaitUntil:
+    visible:
+      id: 'pantalla-andamiaje'
+    timeout: 20000
 
-# El flujo de verdad, a la espera de su camino.
-- runFlow:
-    when:
-      visible:
-        id: 'pantalla-andamiaje'
-    commands:
-      - assertVisible:
-          id: 'pantalla-andamiaje'
+- assertVisible:
+    id: 'pantalla-andamiaje'
 
-      # La pantalla se declara herramienta: si esto desaparece sin que la fila 27 la
-      # haya sustituido, es que alguien la ha empezado a tratar como pantalla de juego.
-      - assertVisible: 'Andamiaje. Esto no es el juego.*'
+# La pantalla se declara herramienta: si esto desaparece sin que la fila 27 la
+# haya sustituido, es que alguien la ha empezado a tratar como pantalla de juego.
+- assertVisible: 'Andamiaje. Esto no es el juego.*'
 
-      - assertVisible:
-          id: 'titulo-de-mundo'
+- assertVisible:
+    id: 'titulo-de-mundo'
 
-      # Idéntico al de Node: namesFor(localeFor(42.40, -8.81)).worldTitle(makeRng('42.40,-8.81#1:title')).
-      - assertVisible: '«Reinos de Vaeloria»'
+# Idéntico al de Node: namesFor(localeFor(42.40, -8.81)).worldTitle(makeRng('42.40,-8.81#1:title')).
+- assertVisible: '«Reinos de Vaeloria»'
 
-      - assertVisible: 'semilla 42.40,-8.81#1 · idioma gl'
+- assertVisible: 'semilla 42.40,-8.81#1 · idioma gl'
 
-      - assertVisible:
-          id: 'capacidades'
+- assertVisible:
+    id: 'capacidades'
 
-      - assertVisible:
-          id: 'capacidad-salud'
-      - assertVisible:
-          id: 'capacidad-haptico'
-      - assertVisible:
-          id: 'capacidad-notificaciones'
-      - assertVisible:
-          id: 'capacidad-respaldo'
+- assertVisible:
+    id: 'capacidad-salud'
+- assertVisible:
+    id: 'capacidad-haptico'
+- assertVisible:
+    id: 'capacidad-notificaciones'
+- assertVisible:
+    id: 'capacidad-respaldo'
 
-      # La salud queda declarada no montada, nombrando a su dueña.
-      - assertVisible: 'Salud — no montada'
-      - assertVisible: '.*la monta la fila 42.*'
+# La salud queda declarada no montada, nombrando a su dueña.
+- assertVisible: 'Salud — no montada'
+# El motivo de la capacidad de salud, literal. Decía `'.*la monta la fila 42.*'` y el
+# texto de `app/plataforma/salud.js` es «la fila 42 monta el lector y su doble; la fuente
+# nativa de salud entra con la dependencia que su spec no nombra»: el orden de las palabras
+# nunca coincidió, y como el flujo no se había ejecutado, nadie lo vio. Se corrige la
+# prueba y no el texto — el del código dice más, porque distingue lo que la fila 42 sí
+# entregó de lo que no.
+- assertVisible: '.*la fila 42 monta el lector.*'
 
-      # Ni el núcleo caído ni la lista vacía: los dos estados existen y aquí no tocan.
-      - assertNotVisible:
-          id: 'nucleo-error'
-      - assertNotVisible:
-          id: 'capacidades-vacio'
-      - assertNotVisible:
-          id: 'gancho-no-reconocido'
+# Ni el núcleo caído ni la lista vacía: los dos estados existen y aquí no tocan.
+- assertNotVisible:
+    id: 'nucleo-error'
+- assertNotVisible:
+    id: 'capacidades-vacio'
+- assertNotVisible:
+    id: 'gancho-no-reconocido'
 
-      # Sin cifras de distancia, tiempo, ritmo, pasos ni progreso en toda la pantalla.
-      - assertNotVisible: '.*\d+\s*(km|m|min|pasos|%).*'
+# Sin cifras de distancia, tiempo, ritmo, pasos ni progreso en toda la pantalla.
+# Ninguna cifra de distancia, tiempo, ritmo, pasos ni progreso. El patrón llevaba `m` sin
+# frontera de palabra y casaba «la fila **42 m**onta el lector» del motivo de la capacidad
+# de salud: una ausencia que se ponía roja por una palabra que empieza por eme. Con `\b` mide
+# lo que quería medir.
+- assertNotVisible: '.*\d+\s*(km|m|min|pasos|%)\b.*'

@@ -48,14 +48,11 @@ import { fuente } from './mundo-de-prueba.mjs';
  */
 const FLUJOS_DE_LIMITE_DECLARADO = [
   'ajustes-filas-de-valor.yaml',
-  'andamiaje.yaml',
   'descarte.yaml',
   'diario.yaml',
   'en-marcha.yaml',
   'escena.yaml',
-  'gancho-capacidad-ausente.yaml',
   'llegada.yaml',
-  'mapa.yaml',
   'mapas.yaml',
   'repisa.yaml',
   'visor.yaml',

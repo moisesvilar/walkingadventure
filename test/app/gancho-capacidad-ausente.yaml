@@ -1,17 +1,15 @@
 # @app @accesibilidad — El gancho para poner una capacidad en rojo (SPEC-020).
 #
-# @limite-declarado
+# **Recorre su pantalla desde el 10-ago-2026.** Hasta la fila 45 este flujo llevaba
+# `@limite-declarado`: la app abre en el arranque y al andamiaje no se llegaba por ningún
+# sitio. Ahora hay una **puerta declarada de desarrollo** —el enlace
+# `walkingadventure://desarrollo`—, y este flujo entra por ella.
 #
-# Este flujo **no recorre su pantalla**: la app abre en el arranque, y el enlace
-# profundo tampoco saca de él —`leeGancho` anota qué capacidades faltan y no navega—.
-# Lo único que llega a ejecutarse es la guarda de más abajo, así que su verde
-# significa «el límite sigue en pie» y nunca «la pantalla funciona», y por eso no se
-# cuenta en la misma casilla que un verde de verdad. El porqué entero y lo que haría
-# falta para levantarlo están en «LÍMITE DECLARADO», unas líneas más abajo.
-#
-# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
-# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
-# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+# Que la puerta sea de desarrollo y no del juego es deliberado y está razonado en
+# `pipeline/decisiones-orquestador.md` §6y: verificar una pantalla del juego por una puerta
+# que ningún jugador usa es deuda, y verificar una herramienta de desarrollo por la puerta
+# de desarrollo es la puerta correcta. Lo que decide el caso es si lo que hay detrás sale
+# en `docs/flujo.md`, y el andamiaje no sale ni puede salir.
 #
 # Es lo que hace que «la app funciona aunque falten» se pueda poner ROJO en lugar
 # de afirmarse: se fuerzan capacidades a ausentes por enlace profundo y se
@@ -25,58 +23,66 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-# Los tres degradables a la vez, que es el caso que de verdad importa.
-
-# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+# La puerta de desarrollo, que es como se llega al andamiaje desde la fila 45. No es
+# navegación del juego: el andamiaje no sale en `docs/flujo.md` porque no es una pantalla
+# de diseño, es la sonda de las cuatro capacidades de plataforma. En producción este enlace
+# no existe.
 #
-# Este flujo daba por hecho que la app abre en el andamiaje, y **no abre ahí**.
-# `app/App.js` arranca con `enArranque = true`, así que lo primero y lo único que se ve
-# al instalar es el arranque de A1P1. Y el enlace profundo no lo arregla: `leeGancho` solo guarda qué capacidades faltan, no saca del arranque, así que `walkingadventure://andamiaje?ausentes=...` no lleva al andamiaje que nombra.
+# **Se espera a que la app esté viva antes de abrir el enlace.** Medido en `wa-pixel`: con
+# `clearState: true` el arranque en frío tarda unos veinte segundos en tener el puente de
+# JavaScript montado, y el enlace se entrega por `Linking.addEventListener`, que hasta
+# entonces no existe. Lanzarlo antes lo pierde sin que nada lo diga. Esto es espera y no
+# lógica, así que va con `extendedWaitUntil` y no bajando ninguna afirmación.
+- extendedWaitUntil:
+    visible:
+      id: 'arranque'
+    timeout: 60000
+- openLink: 'walkingadventure://desarrollo'
+- extendedWaitUntil:
+    visible:
+      id: 'pantalla-andamiaje'
+    timeout: 20000
+
+- openLink: 'walkingadventure://andamiaje?ausentes=haptico,notificaciones,respaldo'
+
+- assertVisible:
+    id: 'pantalla-andamiaje'
+- assertVisible:
+    id: 'capacidades'
+- assertVisible: 'Háptico — no montada'
+- assertVisible: 'Notificaciones — no montada'
+- assertVisible: 'Respaldo — no montada'
+- assertVisible: '.*ausente por el gancho de andamiaje.*'
+
+# Ninguna parte de la pantalla queda vacía por ello: el título sigue ahí.
+- assertVisible:
+    id: 'titulo-de-mundo'
+
+# Un nombre que no es ninguna de las cuatro no cambia nada y se dice cuál fue.
+- openLink: 'walkingadventure://andamiaje?ausentes=telepatia'
+- assertVisible:
+    id: 'gancho-no-reconocido'
+- assertVisible: '.*No reconozco la capacidad «telepatia».*'
+
+# Al relanzar sin enlace, el estado real vuelve: el gancho no persiste nada.
 #
-# Mientras la app abra donde abre, este flujo **no recorre nada y lo dice**: comprueba
-# que sigue sin haber camino y que la app abre en el arranque. Su verde significa «el
-# límite declarado sigue en pie», nunca «la pantalla está verificada». El día que haya
-# camino, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
-- runFlow:
-    when:
-      notVisible:
-        id: 'pantalla-andamiaje'
-    commands:
-      - assertVisible:
-          id: 'arranque'
-      - assertNotVisible:
-          id: 'pantalla-andamiaje'
-
-# El flujo de verdad, a la espera de su camino.
-- runFlow:
-    when:
-      visible:
-        id: 'pantalla-andamiaje'
-    commands:
-      - openLink: 'walkingadventure://andamiaje?ausentes=haptico,notificaciones,respaldo'
-
-      - assertVisible:
-          id: 'pantalla-andamiaje'
-      - assertVisible:
-          id: 'capacidades'
-      - assertVisible: 'Háptico — no montada'
-      - assertVisible: 'Notificaciones — no montada'
-      - assertVisible: 'Respaldo — no montada'
-      - assertVisible: '.*ausente por el gancho de andamiaje.*'
-
-      # Ninguna parte de la pantalla queda vacía por ello: el título sigue ahí.
-      - assertVisible:
-          id: 'titulo-de-mundo'
-
-      # Un nombre que no es ninguna de las cuatro no cambia nada y se dice cuál fue.
-      - openLink: 'walkingadventure://andamiaje?ausentes=telepatia'
-      - assertVisible:
-          id: 'gancho-no-reconocido'
-      - assertVisible: '.*No reconozco la capacidad «telepatia».*'
-
-      # Al relanzar sin enlace, el estado real vuelve: el gancho no persiste nada.
-      - launchApp:
-          clearState: false
-      - assertVisible:
-          id: 'capacidad-haptico'
-      - assertNotVisible: '.*ausente por el gancho de andamiaje.*'
+# Y **la puerta tampoco persiste**, que es la otra mitad del mismo criterio y desde la fila
+# 45 se ve aquí: al relanzar, la app abre donde le toca por su estado —el arranque— y no en
+# el andamiaje. Hay que volver a abrir la puerta para mirar las capacidades, y eso es lo
+# correcto: una puerta de desarrollo que sobreviviera al reinicio sería una puerta trasera.
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: 'arranque'
+    timeout: 60000
+- assertNotVisible:
+    id: 'pantalla-andamiaje'
+- openLink: 'walkingadventure://desarrollo'
+- extendedWaitUntil:
+    visible:
+      id: 'pantalla-andamiaje'
+    timeout: 20000
+- assertVisible:
+    id: 'capacidad-haptico'
+- assertNotVisible: '.*ausente por el gancho de andamiaje.*'
