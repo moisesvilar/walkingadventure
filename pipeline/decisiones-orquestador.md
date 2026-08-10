@@ -327,3 +327,23 @@ Tres filas nuevas del checklist, por el mismo bucle de cuatro roles que las cuar
 | 45 | `puerta-de-desarrollo` | el andamiaje y el mapa suelto tras `__DEV__`, y la retirada de la tira de pasos provisionales |
 
 Un flujo sale de la columna de límite declarado **solo** cuando recorre su pantalla de verdad, y su entrada se quita de `test/nucleo/limite-declarado.test.mjs` en el mismo commit. Un flujo que tarde diez segundos no ha recorrido nada.
+
+## 6z · La partida persistida, y la siembra que no cabe en su fila
+
+Octava aparición de §6h, y la más silenciosa de todas: `congelaEstado` y `levantaEstado` llevaban desde SPEC-016 escritos, probados de arriba abajo y **sin que los llamara nadie**. La máquina entera construida, verificada y sin conectar. Con una fila en `done` encima —la 39, el respaldo—, que funcionaba y no respaldaba nada de lo jugado.
+
+**Decisión: se cierra por contrato dos veces, no por vigilancia.** Arriba, la guarda `partida-persistida.test.mjs`, escrita antes que el cableado y roja a propósito. Abajo, dentro de la propia orquestación: todo lo que escribe pasa por un envoltorio del almacén que **exige que la clave cuelgue de `partida/`**, incluido lo que escribe `guardaPartida`. Una clave de la partida escrita fuera de ese prefijo no entraría ni en la copia exportada ni en el respaldo del sistema, y nadie la echaría de menos — que es exactamente la forma del fallo, un nivel más abajo.
+
+### Lo que la fila destapó al medirse, y no se estiró
+
+**Hoy nada de `app/` altera el estado de la partida después de que el arranque se cierre.** Las cuatro pantallas de consulta solo leen; el único interruptor que escribiría recibe su callback a `null` porque el zurrón no está montado (fila 46); y quien emite hechos espera al módulo de ubicación (fila 48) y a las dos pantallas que nunca se escribieron (fila 49).
+
+Consecuencia: lo que sobrevive y se puede afirmar en un dispositivo es **el personaje, la semilla, los ajustes y el mapa levantado**, y no un diario ni una repisa. Y **la columna de límite declarado no baja: sigue en 9** — el número anterior, 8, estaba mal contado.
+
+La siembra que haría falta para levantar `repisa.yaml` la produce el núcleo sin problema (`partidaCompleta` ya juega días en headless), pero para que llegue al dispositivo hace falta o una puerta que la importe o una vía de desarrollo que la escriba. Las dos son diseño. Y contra la segunda ya hay un argumento escrito en §6y: *verificar una pantalla del juego por una puerta que ningún jugador usa es deuda*. **Queda fichada, no hecha.**
+
+### Un flujo que la fila rompió, y por qué el arreglo es del flujo
+
+`mapas.yaml` declaraba como límite que «la app abre en el arranque». Desde que la partida se guarda eso deja de ser cierto, y con `clearState: false` su guarda afirmaba `arranque` visible y fallaba. Lo que le falta a ese flujo no era nunca la puerta —son dos mapas y el ofrecimiento cableado—, así que lo que se corrige es de qué depende su entrada, con la medida escrita dentro. Es un veredicto de defecto de prueba, tomado con el fallo reproducido tres veces para separarlo de la caída de `adb`.
+
+Y de paso: `diario.yaml` y `repisa.yaml` llevaban desde la fila 43 diciendo que no había puerta hasta sus pantallas, que es falso desde que la portada tiene las suyas. Corregido el motivo sin tocar la guarda — lo que decían seguía siendo verdad; lo que mentía era el porqué.

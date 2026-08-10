@@ -2,12 +2,18 @@
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: falta `paso-diario` en `app/App.js`, así que
-# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
-# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
-# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
-# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
-# DECLARADO», unas líneas más abajo.
+# Este flujo **no recorre su pantalla**. Lo único que llega a ejecutarse es la guarda de
+# más abajo, así que su verde significa «el límite sigue en pie» y nunca «la pantalla
+# funciona», y por eso no se cuenta en la misma casilla que un verde de verdad.
+#
+# **Corrección del motivo, 10-ago-2026.** Este párrafo decía que faltaba `paso-diario` y que
+# no hay ninguna puerta que lleve al diario. **Es falso desde la fila 43**: la puerta es
+# `puerta-diario`, la del pie de la portada. Lo que falta son las otras dos cosas que este
+# fichero ya pedía, y ninguna es una puerta: **la llegada al segundo núcleo**, que pasa por
+# `paso-llegada` y `setLocation` y por tanto por el módulo de ubicación de la fila 48, y
+# **una partida con dos versiones del mismo suceso ya apuntadas**, que la fila 47 midió que
+# hoy no se puede sembrar. El identificador de la guarda se deja como está: `paso-diario` no
+# existe y no va a existir, así que la guarda sigue siendo verdad.
 #
 # La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
 # poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es

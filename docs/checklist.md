@@ -84,7 +84,7 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 44 | navegacion-en-la-calle | RF-BUCLE-005, RF-BUCLE-007, RF-BUCLE-011, RF-QUEST-004, RF-PRIV-004 | must | pending |
 | 45 | puerta-de-desarrollo | RF-INFRA-007 | must | done |
 | 46 | fuente-de-salud-y-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
-| 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | wip |
+| 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | done |
 | 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | pending |
 | 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | pending |
 
@@ -94,9 +94,11 @@ La **47** tampoco es de este encargo, y es la más grave de las dos. Medido el 1
 
 Y la consecuencia que conviene tener escrita porque no se ve desde ninguna prueba de la fila 39: **una copia exportada hoy sale sin documento de partida**. El respaldo funciona y no respalda nada de lo jugado.
 
-Va con su guarda ya escrita y **en rojo a propósito** hasta que se cierre: `test/nucleo/partida-persistida.test.mjs`, tres casos rojos con nombre y dueño. Es la aplicación de la regla que más cara ha salido en este repo — lo que falta se exige, y su ausencia es error de construcción, nunca un valor por defecto — y por eso no es un comentario.
+Iba con su guarda ya escrita y **en rojo a propósito** hasta que se cerrara: `test/nucleo/partida-persistida.test.mjs`, tres casos rojos con nombre y dueño. Es la aplicación de la regla que más cara ha salido en este repo — lo que falta se exige, y su ausencia es error de construcción, nunca un valor por defecto — y por eso no fue un comentario. **Cerrada el 10-ago-2026 con SPEC-047**: los tres se apagaron por el cableado, sin tocar la prueba.
 
-La fila 39 sigue en `done` y no se reabre: entregó el mecanismo entero y sus pruebas lo demuestran. Lo que no entregó es el cableado, y eso es esta fila.
+La fila 39 sigue en `done` y no se reabre: entregó el mecanismo entero y sus pruebas lo demuestran. Lo que no entregó es el cableado, y eso fue esta fila.
+
+Y lo que la 47 **no** desbloqueó, con la cifra delante: la columna de límite declarado sigue en **9**, no baja. `repisa.yaml` era el único que dependía de ella y no puede pasar, porque hoy **nada de `app/` altera el estado de la partida después de que el arranque se cierre** — las cuatro pantallas de consulta solo leen, el interruptor de pasos de fondo recibe su callback a `null` (fila 46), y quien emite hechos espera a las filas 48 y 49. Sembrar una partida con contenido en el dispositivo pide una vía que no existe y que es diseño, no implementación; queda fichada aquí en lugar de estirar la fila.
 
 La **48** es el bloqueo más grande de todos, y sale de medir por qué la fila 44 no se podía hacer: **la app no tiene módulo de ubicación**. `app/package.json` no declara `expo-location` ni equivalente; `creaProveedorDeUbicacion` y `creaSeguidorDePosicion` son contratos que esperan el nativo inyectado, y hoy reciben el «sin montar» que protesta. Por eso A1P4 funciona —cae a la vía de elegir el punto a mano— y por eso **no hay geofences, ni llegadas, ni posición en marcha**: B5 entera. Trae dependencia nueva y su spec tiene que nombrarla.
 

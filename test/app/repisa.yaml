@@ -2,12 +2,20 @@
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: falta `paso-repisa` en `app/App.js`, así que
-# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
-# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
-# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
-# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
-# DECLARADO», unas líneas más abajo.
+# Este flujo **no recorre su pantalla**. Lo único que llega a ejecutarse es la guarda de
+# más abajo, así que su verde significa «el límite sigue en pie» y nunca «la pantalla
+# funciona», y por eso no se cuenta en la misma casilla que un verde de verdad.
+#
+# **Corrección del motivo, 10-ago-2026.** Este párrafo decía que faltaba `paso-repisa` y que
+# no hay ninguna puerta que lleve hasta la repisa. **Es falso desde la fila 43**: la puerta
+# es `puerta-repisa`, la del pie de la portada, y `App.js` monta la pantalla. Lo que falta
+# ahora es lo otro que este fichero ya pedía —**una partida con objetos y motes ya
+# ganados**—, y la fila 47 lo midió: hoy nada de `app/` altera el estado de la partida
+# después de que el arranque se cierre, así que la repisa de cualquier partida del
+# dispositivo son dos líneas y el oro. Sembrarla pide una vía que no existe y que no es de
+# esa fila. El identificador de la guarda se deja como está a propósito: `paso-repisa` no
+# existe y no va a existir, así que la guarda sigue siendo verdad — lo que cambia es lo que
+# hay que arreglar para levantarla, y eso es lo que dice este párrafo.
 #
 # La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
 # poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
