@@ -19,6 +19,7 @@
 // la degradación silenciosa de §6h con otro nombre.
 
 import { congelaHondo } from '../core/congelar.js';
+import { aventurasCerradas } from './aventura-en-curso.js';
 import { MOTIVOS_DE_FALTA, TRAMOS_DEL_ESTIRON, repartoDeAventuras } from './aventuras.js';
 import { diaDe } from './calendario.js';
 import { SIN_DESCARTES } from './descartes.js';
@@ -146,7 +147,9 @@ function sinReparto({ motivo, alcanceEnTramos, tramosDeMas }) {
  *   `mundo` el mapa levantado con su casting y su grafo; `oficio` el de quien juega, que filtra
  *   el catálogo; `tramo` el tramo personal; `criterios` los caminos que se evitan; `tamano` el
  *   de salida que se pide; `entregas` el estado de la cola; `mapaId` el mapa; `calendario` el de
- *   la partida, inyectado; `tramosDeMas` cuánto se ha estirado ya el alcance.
+ *   la partida, inyectado; `tramosDeMas` cuánto se ha estirado ya el alcance; `aventuras` el
+ *   registro de aventuras de la partida, que es **la memoria de la lista**: lo ya cerrado no
+ *   se vuelve a ofrecer.
  * @returns o la lista con hasta tres entradas y su línea de andar sin nada, o la falta de
  *   reparto con su motivo y su oferta. **Nunca una lista vacía.**
  */
@@ -163,6 +166,7 @@ export function componeLoQueHayHoy({
   descartes = SIN_DESCARTES,
   catalogo = CATALOGO,
   tope = TOPE_DE_LA_LISTA,
+  aventuras = null,
 }) {
   const dia = diaDe(calendario, 'la lista de hoy');
 
@@ -182,8 +186,17 @@ export function componeLoQueHayHoy({
   // personas con oficios distintos, y lo que cambia es esta lista. Hay plantillas que con este
   // personaje no aparecen nunca, y eso es la afinidad de SPEC-017 haciendo su trabajo.
   const suyas = new Set(plantillasDeOficio(oficio, catalogo).map((p) => p.id));
+
+  // La memoria de la lista. Sin ella los mismos tres títulos volvían el día 1 y el día 6, y
+  // una aventura ya vivida ofrecida otra vez es la promesa de un mundo que no se entera de
+  // nada. Cuenta lo cerrado **de cualquier manera**: terminarla y que se resolviera sin ti
+  // son dos finales, y ninguno de los dos se repite. Se mira por mapa cuando lo hay, porque
+  // lo cerrado en un mapa no dice nada de otro.
+  const cerradas = aventuras ? aventurasCerradas(aventuras) : [];
+  const vividas = new Set(cerradas.filter((c) => !mapaId || c.mapa === mapaId).map((c) => c.plantilla));
+
   const candidatas = reparto.hayReparto
-    ? reparto.aventuras.filter((a) => a.cabe && suyas.has(a.plantilla))
+    ? reparto.aventuras.filter((a) => a.cabe && suyas.has(a.plantilla) && !vividas.has(a.plantilla))
     : [];
 
   if (!candidatas.length && !recado) {
