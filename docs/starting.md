@@ -1521,7 +1521,11 @@ La bitácora la describía como «un flujo por tanda, siempre distinto, en menos
 3. Con el emulador ya recuperado, `partida-persistida.yaml` —que hace **dos** ciclos de `stopApp` + `launchApp`— sale verde, y `andamiaje.yaml` también. No era el emulador en general.
 4. Y el mismo flujo, sin tocar una línea, sale **EXIT=0** al quinto intento.
 
-Un rojo que se repite en el mismo punto no basta para llamarlo determinista si el mensaje no es una aserción. Cuatro veces seguidas casi lo convierte en una fila nueva que no existe.
+5. Y la medida que lo cierra: **el mismo flujo falla 3 de 3 en `main`**, con el cambio de esta fila fuera del árbol y el mismo `device offline` en el log. Lo que degradó es el emulador —lleva diecisiete horas levantado—, no el código.
+
+Un rojo que se repite en el mismo punto no basta para llamarlo determinista si el mensaje no es una aserción. Cuatro veces seguidas casi lo convierte en una fila nueva que no existe, y el experimento que lo evita es barato: **sacar el cambio del árbol y volver a medir**.
+
+Corolario para el runner: `device offline` va al `maestro.log` y **no a la salida estándar**, así que el report literal enseña un flujo rojo sin ninguna aserción y sin ningún motivo. Quien lea un report con un rojo mudo tiene que ir al log antes de atribuirlo a nada.
 
 ## Un defecto que destapó la prueba
 
