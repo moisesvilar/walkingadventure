@@ -25402,6 +25402,438 @@
       "caso": "Todo paquete que app/ importa está declarado, o es del SDK de Expo y se dice quién lo trae",
       "hueco_de_bateria": true,
       "nota": "AGUJERO CERRADO: la lista cerrada de SPEC-020 mira lo que app/package.json DECLARA, nunca lo que app/ IMPORTA. `expo-file-system` entró por ahí; ya está declarado y admitido en la lista cerrada por veredicto de quien orquesta —LA SPEC NO LO NOMBRA, y hace falta iterar SPEC-039 para dejarlo escrito—. La comprobación mira desde el lado de los imports: recoge todos los ficheros que piden cada paquete, entiende también require(), poda los artefactos de compilación y se pone roja si el barrido deja de ver los paquetes que hoy se importan de verdad."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que entra en «empezar de nuevo», cuando lee la pantalla, entonces se le dice que su mapa no se puede volver a generar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que entra en «empezar de nuevo», cuando lee la pantalla, entonces se le dice que su mapa no se puede volver a generar.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer",
+      "nota": "El párrafo del mundo congelado, visto en la pantalla real; el texto compuesto se afirma en @nucleo."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa explicación, cuando se lee, entonces nombra el mapa por su título y dice que se dibujó con los datos de aquel día y que esos datos ya han cambiado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa explicación, cuando se lee, entonces dice que empezar otra vez en la misma calle daría otro sitio con otros nombres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa explicación, cuando se busca en ella la frase de que la acción no se puede deshacer, entonces no aparece sola: siempre va con lo que se pierde en cosas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La frase de que no se puede deshacer no aparece nunca sola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla entera, cuando se lee su registro, entonces es el de aplicación, y su tipografía sale de ahí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Los ajustes son la única excepción",
+      "escenario": "Los ajustes son la única excepción",
+      "nota": "Esta pantalla es el caso extremo de la excepción: se habla como aplicación sin disfraz. La sans efectiva no se puede comparar con Maestro."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se lee, entonces dice que si se guarda una copia, el fichero se puede volver a abrir cuando se quiera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se buscan cifras, entonces las únicas son cuentas de cuánto hay dentro —los días de diario, los mapas— y ninguna de distancia, tiempo, ritmo ni progreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Las únicas cifras de la pantalla son cuentas de cuánto hay dentro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que entra en «empezar de nuevo», cuando lee la pantalla, entonces se enumera lo que pierde: personaje, mapas por su nombre, días de diario y lo que la gente sabe de él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que entra en «empezar de nuevo», cuando lee la pantalla, entonces se enumera lo que pierde: personaje, mapas por su nombre, días de diario y lo que la gente sabe de él.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa enumeración, cuando se lee el personaje, entonces aparece por su nombre y no como «tu personaje» a secas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa enumeración, cuando se lee el personaje, entonces aparece por su nombre y no como «tu personaje» a secas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Sin el nombre del personaje la enumeración no se compone",
+      "hueco_de_bateria": true,
+      "nota": "La otra mitad del criterio: no hay ningún camino en el que la frase salga sin nombre."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado una partida con dos mapas, cuando se lee la enumeración, entonces los dos aparecen por su título.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Se explica que el mundo no se puede rehacer",
+      "escenario": "Se explica que el mundo no se puede rehacer"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa enumeración, cuando se leen los días de diario, entonces la cuenta sale del diario de la partida en tiempo de ejecución y no hay ninguna cifra escrita a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La enumeración se compone en tiempo de ejecución y omite lo que no hay",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esa enumeración, cuando se lee lo que la gente sabe, entonces se dice en esos términos y no como una lista de rangos, escalones ni porcentajes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La enumeración se compone en tiempo de ejecución y omite lo que no hay",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado una partida del primer día, sin días de diario y sin motes, cuando se lee la enumeración, entonces enumera lo que hay y no inventa lo que no: nada aparece con cuenta cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Una partida del primer día enumera lo que hay y nada aparece con cuenta cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado una partida sin ningún mapa levantado, cuando se entra en la pantalla, entonces la explicación del mundo congelado no aparece, porque no hay mundo congelado que perder, y la enumeración sigue siendo correcta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Una partida del primer día enumera lo que hay y nada aparece con cuenta cero",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un mapa sin título en su índice, cuando se compone la enumeración, entonces falla nombrando el mapa, en lugar de enumerarlo sin nombre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Un mapa sin título en su índice falla nombrando el mapa en lugar de enumerarlo sin nombre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se enumeran sus acciones, entonces son tres: guardar una copia primero, borrar sin guardar nada, y dejarlo como está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Las acciones son tres, guardar va primero y dejarlo como está no desaparece",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se enumeran sus acciones, entonces son tres: guardar una copia primero, borrar sin guardar nada, y dejarlo como está.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esas tres acciones, cuando se lee su orden y su peso, entonces guardar una copia va primero y es la única con forma de acción principal.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Las acciones son tres, guardar va primero y dejarlo como está no desaparece",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado esas tres acciones, cuando se lee su orden y su peso, entonces guardar una copia va primero y es la única con forma de acción principal.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola",
+      "nota": "La jerarquía visual es lo único de esta spec que necesita simulador."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la acción de borrar sin guardar nada, cuando se lee su presentación, entonces es una elección explícita, con el color de lo destructivo y sin relleno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Las acciones son tres, guardar va primero y dejarlo como está no desaparece",
+      "hueco_de_bateria": true,
+      "nota": "El peso y el carácter destructivo, como dato. El color no se lee desde Maestro y queda @manual."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la acción de dejarlo como está, cuando se busca, entonces siempre está disponible y no desaparece en ningún estado de la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Las acciones son tres, guardar va primero y dejarlo como está no desaparece",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la acción de dejarlo como está, cuando se busca, entonces siempre está disponible y no desaparece en ningún estado de la pantalla.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola",
+      "nota": "Se mira durante la espera de la copia, que es el único estado en el que las otras dos no están."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que deja la pantalla sin hacer nada, cuando vuelve a los ajustes, entonces la partida está intacta y no queda ninguna marca de haber entrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Dejar la pantalla sin hacer nada no toca la partida ni deja marca de haber entrado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que deja la pantalla sin hacer nada, cuando vuelve a los ajustes, entonces la partida está intacta y no queda ninguna marca de haber entrado.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se busca una casilla de confirmación, un texto que haya que teclear o una cuenta atrás, entonces no hay ninguno de los tres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "No hay segundo aviso, ni casilla, ni texto que teclear, ni cuenta atrás",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se busca una casilla de confirmación, un texto que haya que teclear o una cuenta atrás, entonces no hay ninguno de los tres.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque",
+      "nota": "Una ausencia en pantalla solo se afirma mirando la pantalla entera."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la acción de borrar sin guardar nada, cuando se toca, entonces borra: no hay un segundo aviso encima del aviso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "No hay segundo aviso, ni casilla, ni texto que teclear, ni cuenta atrás",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la acción de borrar sin guardar nada, cuando se toca, entonces borra: no hay un segundo aviso encima del aviso.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que entra en «empezar de nuevo», cuando lee la pantalla, entonces se le ofrece guardar una copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que entra en «empezar de nuevo», cuando lee la pantalla, entonces se le ofrece guardar una copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Empezar de nuevo no se construye sin la copia, sin el almacén o sin el núcleo entero",
+      "hueco_de_bateria": true,
+      "nota": "Una pantalla que pudiera borrar sin poder ofrecer la copia convertiría la oferta en una promesa incumplible: se protesta al construir."
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que elige borrar sin guardar, cuando termina, entonces no queda ningún fichero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que elige guardar una copia primero, cuando la exportación termina bien, entonces el borrado continúa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia guardada se puede volver a abrir",
+      "escenario": "La copia guardada se puede volver a abrir"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que elige guardar una copia primero, cuando la exportación falla, entonces el borrado no ocurre y la partida sigue entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Una exportación que falla antes de borrar deja la partida entera y sin marca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que elige guardar una copia primero, cuando cancela la hoja del sistema sin guardar, entonces el borrado no ocurre y la partida sigue entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Cancelar la hoja del sistema deja la partida entera y las tres acciones vuelven",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que elige guardar una copia primero, cuando cancela la hoja del sistema sin guardar, entonces el borrado no ocurre y la partida sigue entera.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado una copia guardada y la partida borrada, cuando se importa el fichero, entonces se recupera el mundo, el personaje, el diario y los rangos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia guardada se puede volver a abrir",
+      "escenario": "La copia guardada se puede volver a abrir"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado la pantalla, cuando se busca una copia hecha por su cuenta antes de entrar, entonces no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "escenario": "La copia se ofrece pero no se hace sola"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que confirma el borrado, cuando termina, entonces está en la primera pantalla del arranque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que confirma el borrado, cuando termina, entonces está en la primera pantalla del arranque.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado ese mismo jugador, cuando se lista el almacén, entonces no queda nada de la partida anterior bajo ningún prefijo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado ese mismo jugador, cuando se busca la semilla de la partida anterior, entonces no está en ningún sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Después de borrar la semilla de la partida anterior no está en ninguna clave ni en ningún valor",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado el código de esta entrega, cuando se buscan rutas que creen una partida conservando la semilla anterior, o que regeneren el mismo mapa, entonces no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "No hay ninguna ruta que cree una partida conservando la semilla ni que regenere el mismo mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado el arranque después de un borrado, cuando se recorre, entonces es el mismo de una instalación nueva y no lleva ningún atajo ni ninguna mención a la partida anterior.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo.yaml",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un jugador que borra y empieza otra vez en la misma calle, cuando levanta el mapa, entonces la semilla es otra y el mundo es otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Empezar otra vez en la misma calle da otra semilla y otro mundo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado los ajustes después de un borrado y de una partida nueva, cuando se leen, entonces los valores de origen vuelven a ser los de una instalación nueva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Borrar lleva al arranque",
+      "escenario": "Borrar lleva al arranque"
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un borrado, cuando se observa cómo ocurre, entonces primero se marca la partida como en borrado y después se borra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Primero se marca la partida como en borrado y después se borra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un borrado interrumpido por un cierre de la app, cuando se vuelve a abrir, entonces el borrado se termina y se llega al arranque, en lugar de abrir una partida a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Un borrado interrumpido por un cierre de la app se termina al volver a abrir",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado una partida marcada como en borrado, cuando se intenta abrir por cualquier ruta, entonces no se abre: no hay forma de rescatarla a medio borrar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Una partida marcada como en borrado no se abre por ninguna ruta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un almacén que falla al borrar una clave, cuando se ejecuta el borrado, entonces el error se propaga nombrando la clave y la partida sigue marcada como en borrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Un almacén que falla al borrar una clave la nombra y la partida sigue marcada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-040",
+      "criterio": "Dado un borrado terminado, cuando se comprueba lo que queda fuera del directorio de la partida, entonces los ficheros exportados que el jugador guardó no se han tocado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Los ficheros que se exportaron no se tocan al borrar",
+      "hueco_de_bateria": true
     }
   ]
 }
