@@ -1437,3 +1437,23 @@ Cinco, y los cinco del mismo origen: **estos flujos no se habían ejecutado nunc
 `maestro test test/app/ajustes.yaml` → **EXIT=0, 131 comandos**, sobre `wa-pixel`. `test/app/empezar-de-nuevo.yaml` → **EXIT=0, 130 comandos**. Recorrido a mano de las tres puertas y la vuelta: portada → diario → repisa → ajustes → empezar de nuevo → dejarlo → ajustes → atrás → portada. Batería de núcleo: **2609 casos, 2603 pasan, 3 fallan, 3 saltados** — y los tres rojos son la guarda de la fila 47, puesta a propósito. `@app`: **la columna de límite declarado baja de 12 a 11**, con dos flujos saliendo de ella y uno nuevo entrando (`ajustes-filas-de-valor.yaml`, porque las cinco filas de valor de A6P6 no tienen pantalla de elección).
 
 Dos flujos verdes es poco al lado de los doce que el encargo esperaba. Es el número honesto: **de los doce, solo cinco estaban bloqueados por navegación**, y los otros siete piden un módulo nativo, dos pantallas que no existen y un documento de partida que nadie escribe. Decirlo con el número delante vale más que la columna a cero.
+
+# 10-ago-2026 (XXIX) · La puerta de desarrollo, y tres flujos más que recorren
+
+La fila 45, que es la más barata de las tres de B7 y la que más columna baja. El andamiaje —la sonda de las cuatro capacidades— y el mapa suelto llevaban desde SPEC-027 sin puerta: la app abre en el arranque y a la tira de pasos provisionales no se llegaba por ningún sitio.
+
+**Lo que se decidió:** no son pantallas del juego, no salen en `docs/flujo.md` y no pueden salir, así que su puerta correcta es una **puerta declarada de desarrollo** —`walkingadventure://desarrollo`—, inerte en producción y sin persistir nada, como el gancho de capacidades. La distinción que la justifica está en §6y y conviene tenerla a mano: *verificar una pantalla del juego por una puerta que ningún jugador usa es deuda; verificar una herramienta de desarrollo por la puerta de desarrollo es la puerta correcta*. Lo que decide el caso es si lo que hay detrás sale en el diagrama.
+
+**Anfitrión propio y no el del gancho**, y esto merece anotarse porque fue una tentación: reutilizar `walkingadventure://andamiaje` habría sido una línea. No se hizo porque `test/nucleo/plataforma.test.mjs` fija que ese enlace **sin parámetros no hace nada**, y darle un segundo significado obligaba a ablandar esa prueba para abrirse camino. Son dos módulos, se apagan con la misma llave y hacen cosas distintas.
+
+**Cuatro defectos de prueba más**, los cuatro del mismo origen que los cinco del día anterior —estos flujos no se habían ejecutado nunca— y uno de ellos con una lección que se repite: el enlace se entregaba **antes de que el puente de JavaScript existiera**, porque con `clearState: true` el arranque en frío tarda unos veinte segundos, y `Linking.addEventListener` hasta entonces no está. Esta vez sí era espera, y se arregla como tal.
+
+El más instructivo: `assertNotVisible: '.*\d+\s*(km|m|min|pasos|%).*'` —la ausencia de cifras, que es un criterio de diseño real— casaba **«la fila 42 monta»**, porque la eme no llevaba frontera de palabra. Una ausencia que se pone roja por una palabra que empieza por eme no está midiendo lo que dice medir.
+
+Y la guarda de identificadores de SPEC-026 hubo que ensancharla, porque `mapa.yaml` ahora atraviesa la puerta para llegar al mapa. Se le añaden **los dos del camino y ninguno más**, no «los del andamiaje» en general: sigue rechazando cualquier otro selector ajeno a la pantalla.
+
+## Verificado con
+
+`maestro test` sobre `wa-pixel`: **`andamiaje.yaml` EXIT=0 (20 comandos)**, **`gancho-capacidad-ausente.yaml` EXIT=0 (22)**, **`mapa.yaml` EXIT=0 (51)** — este último levanta un mundo de verdad y lo pinta. Batería de núcleo: **2609 casos, 2603 pasan, 3 fallan, 3 saltados**, y los tres rojos siguen siendo la guarda de la fila 47.
+
+**La columna de límite declarado baja de 12 a 8.** Los ocho que quedan no están bloqueados por navegación: seis esperan el módulo de ubicación (fila 48), uno la pantalla de elección de los ajustes (fila 38) y uno el documento de partida (fila 47).
