@@ -74,6 +74,12 @@ const APLICADORES = {
     registro.restoM = h.carga.restoM;
     registro.restoFondoM = h.carga.restoFondoM;
   },
+  // Vaciar es quitar de lo pendiente de narrar, no del mundo: los pasos ya ocurrieron y
+  // su número sigue dado. Reproducirlo es dejar la reserva vacía, y hacerlo dos veces da
+  // lo mismo que hacerlo una — que es lo que se le pide a un aplicador.
+  'reserva-vaciada'(vivo, h) {
+    estadoDeMapa(vivo.pasos, h.mapa).reserva = [];
+  },
   'sitio-pisado'(vivo, h) {
     pisaSitio(vivo.sitios, { mapaId: h.mapa, sitio: h.carga.sitio });
   },

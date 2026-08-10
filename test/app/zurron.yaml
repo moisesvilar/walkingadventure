@@ -1,0 +1,237 @@
+# @app — El zurrón y el interruptor de los pasos del día a día dentro del móvil (SPEC-042).
+#
+# Aquí vive **solo lo que necesita dispositivo**, y en esta fila es poco a propósito: el
+# reparto de la spec puso casi todo en el núcleo para que se pudiera poner rojo sin
+# simulador. Si hay zurrón o no, cuántas entradas trae, su orden, el tope de cinco, la
+# caída a plantilla, que la llamada sea una y no cinco y que la reserva se vacíe con su
+# hecho y entera se afirman en `test/nucleo/zurron.test.mjs`; la lectura de salud, la marca
+# de agua y lo que la app declara y no declara, en `test/nucleo/pasos-de-fondo.test.mjs`.
+#
+# Lo que no se puede ver sin un dispositivo es esto:
+#
+# 1. **Que el permiso de salud se pida en contexto**, al tocar el interruptor y solo
+#    entonces: el diálogo lo enseña el sistema y no hay manera de afirmarlo desde Node.
+# 2. **Que el interruptor refleje una revocación hecha desde fuera**, quitando el permiso
+#    en los ajustes del sistema y volviendo. Es el caso en el que el interruptor podría
+#    mentir, y es exactamente el que solo ocurre saliendo de la app.
+# 3. **Que el zurrón se intercale entre la portada y lo que hay hoy** y no se pueda saltar:
+#    `A2P1 → A2P2 → A2P3` es una secuencia de pantallas montadas de verdad.
+# 4. **Que no se llegue al zurrón desde ningún otro sitio** —ni ajustes, ni diario, ni
+#    repisa—, que es una ausencia y solo se comprueba recorriendo.
+#
+# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
+# Android, así que ningún flujo `@app` se puede correr aquí
+# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
+# registra como infraestructura ausente, nunca como verde.
+#
+# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
+#
+# - **La fuente nativa de salud.** `app/plataforma/salud.js` declara la capacidad como no
+#   montada y lo dice nombrando a quién le falta: el enlace con la app de salud del sistema
+#   es un módulo nativo y la spec de esta fila no nombra la dependencia. Sin él, tocar el
+#   interruptor devuelve `no-disponible` y la línea de aviso sale por «sin fuente» en lugar
+#   de por «denegado», que es un camino distinto del que este flujo quiere recorrer.
+# - **Una puerta hasta los ajustes.** La misma que le falta a `ajustes.yaml`: `App.js` no
+#   monta A6P6, y el primer paso va contra `paso-ajustes`, que todavía no existe.
+# - **Reserva que vaciar.** El zurrón solo aparece con el modo activo y con pasos sin
+#   narrar, y los pasos de fondo llegan de la app de salud: sin fuente nativa no hay manera
+#   de dejar una reserva puesta desde el dispositivo. Hace falta extender el gancho de
+#   andamiaje de SPEC-020 con `metrosDeFondo`, que **todavía no existe**: es un hueco de
+#   cableado y no de este flujo.
+#
+# **Lo que este flujo NO puede comprobar, y por qué:**
+#
+# - **Que el texto del envoltorio sea el del narrador y no el de plantilla.** Los dos se
+#   leen igual a propósito —es la promesa entera de «sin cobertura dice lo mismo»—, así que
+#   desde fuera no se distinguen. El origen se afirma como dato en `test/nucleo/`.
+# - **Que la llamada sea una y no cinco.** Se cuenta en el núcleo con el doble del
+#   narrador; Maestro no ve peticiones.
+#
+# Los elementos se localizan por los identificadores que declara la spec —`momento`,
+# `zurron`, `zurron-envoltorio`, `zurron-entrada`, `zurron-seguir`,
+# `ajustes-pasos-de-fondo`, `ajustes-pasos-de-fondo-aviso`— y nunca por su posición.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «El zurrón solo aparece si hay reserva que vaciar»
+#   «Los pasos de fondo vienen apagados»
+#   «El permiso de salud se pide al encender y denegarlo no se insiste»
+#   «Un permiso revocado desde el sistema apaga el interruptor y lo dice»
+#
+appId: com.walkingadventure.app
+---
+# A la portada se llega saliendo del arranque, que hoy es el único camino.
+- runFlow:
+    file: arranque.yaml
+
+# ── El zurrón solo aparece si hay reserva que vaciar ───────────────────────────
+# Instalación nueva: el modo viene apagado, así que abrir la salida lleva de la portada
+# directamente a lo que hay hoy. La pantalla del zurrón **no existe**, que es distinto de
+# existir vacía.
+
+- assertVisible:
+    id: 'portada'
+- assertNotVisible:
+    id: 'zurron'
+- tapOn:
+    id: 'ver-que-se-cuenta'
+- assertVisible:
+    id: 'lista-de-hoy'
+- assertNotVisible:
+    id: 'zurron'
+- assertNotVisible: 'Mientras no estabas'
+
+# ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
+# Y el juego es completo sin activarlo: hasta aquí no ha aparecido ninguna invitación a
+# encenderlo. La única mención vive en su fila de los ajustes.
+
+- back
+- assertVisible:
+    id: 'portada'
+- assertNotVisible: 'Contar los pasos del día a día'
+- assertNotVisible: 'salud'
+- assertNotVisible: 'podómetro'
+
+- tapOn:
+    id: 'paso-ajustes'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible: 'Contar los pasos del día a día'
+- assertVisible: 'no'
+- assertNotVisible:
+    id: 'ajustes-pasos-de-fondo-aviso'
+
+# ── El permiso de salud se pide al encender y denegarlo no se insiste ──────────
+# Tocar el interruptor **no lo enciende**: lo pide, en contexto y explicando para qué. Si
+# se deniega, la fila vuelve a «no» y bajo ella aparece la línea, una vez, en voz de
+# aplicación —el único sitio del juego donde eso está permitido—.
+
+- tapOn:
+    id: 'ajustes-pasos-de-fondo'
+# El diálogo lo enseña el sistema; se deniega desde ahí.
+- tapOn: 'No permitir'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible: 'no'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo-aviso'
+- assertVisible: 'Sin acceso a los pasos que guarda el móvil no se pueden contar.'
+# La línea no ofrece ir a los ajustes del sistema ni insiste después.
+- assertNotVisible: 'Ir a ajustes'
+- assertNotVisible: 'Abrir ajustes del sistema'
+- assertNotVisible: 'Volver a intentar'
+
+# Y volver más tarde no lo reintenta solo: no aparece ningún diálogo del sistema.
+- back
+- tapOn:
+    id: 'paso-ajustes'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible: 'no'
+- assertNotVisible: 'No permitir'
+
+# ── Un permiso revocado desde el sistema apaga el interruptor y lo dice ────────
+# El caso donde el interruptor podría mentir: encendido con el permiso concedido, y el
+# permiso quitado después desde fuera. Al volver, el valor que se pinta es el efectivo.
+
+- tapOn:
+    id: 'ajustes-pasos-de-fondo'
+- tapOn: 'Permitir'
+- assertVisible: 'sí'
+- assertNotVisible:
+    id: 'ajustes-pasos-de-fondo-aviso'
+
+# Se revoca desde los ajustes del sistema y se vuelve a la app.
+- stopApp
+- launchApp:
+    appId: 'com.apple.Preferences'
+- tapOn: 'Privacidad y seguridad'
+- tapOn: 'Salud'
+- tapOn: 'Walking Adventure'
+- tapOn: 'Pasos'
+- stopApp
+- launchApp
+- tapOn:
+    id: 'paso-ajustes'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo'
+- assertVisible: 'no'
+- assertVisible:
+    id: 'ajustes-pasos-de-fondo-aviso'
+
+# ── El zurrón se intercala entre la portada y lo que hay hoy ───────────────────
+# Con el modo activo y reserva sin narrar, abrir la salida pasa por A2P2 antes de A2P3. El
+# gancho de pruebas acredita los metros de fondo, que es lo que en el móvil de verdad haría
+# la app de salud al abrir. **Ese enlace todavía no existe**: es el hueco de cableado que
+# la cabecera declara, y hasta que exista este tramo no puede pasar.
+
+- tapOn:
+    id: 'ajustes-pasos-de-fondo'
+- tapOn: 'Permitir'
+- assertVisible: 'sí'
+- back
+- openLink: 'walkingadventure://andamiaje?metrosDeFondo=6000'
+
+- assertVisible:
+    id: 'portada'
+- tapOn:
+    id: 'ver-que-se-cuenta'
+
+- assertVisible:
+    id: 'zurron'
+- assertVisible:
+    id: 'momento'
+- assertVisible: 'antes-de-salir'
+- assertVisible: 'Mientras no estabas'
+- assertVisible:
+    id: 'zurron-envoltorio'
+- assertVisible:
+    id: 'zurron-entrada'
+- assertVisible: 'Todo eso sigue por ahí, esperando a que pases.'
+
+# Una sola acción, y ninguna manera de saltarlo ni de tocar una entrada.
+- assertVisible:
+    id: 'zurron-seguir'
+- assertVisible: 'Seguir'
+- assertNotVisible: 'Saltar'
+- assertNotVisible: 'Omitir'
+- assertNotVisible: 'Ver más'
+- assertNotVisible: 'Saber más'
+# Ninguna cifra: ni de pasos, ni de días, ni de cuántas cosas han pasado.
+- assertNotVisible: '.*\d+.*'
+# Y ninguna mención al modo que lo hizo posible ni a la red.
+- assertNotVisible: 'pasos del día a día'
+- assertNotVisible: '.*[Ss]in conexión.*'
+- assertNotVisible: '.*[Cc]obertura.*'
+
+# ── Se lee una vez y se va ─────────────────────────────────────────────────────
+# «Seguir» cierra y sigue hacia lo que hay hoy. Volver a abrir la salida el mismo día no lo
+# trae de vuelta: la reserva se vació al confirmar.
+
+- tapOn:
+    id: 'zurron-seguir'
+- assertVisible:
+    id: 'lista-de-hoy'
+- back
+- tapOn:
+    id: 'ver-que-se-cuenta'
+- assertNotVisible:
+    id: 'zurron'
+- assertVisible:
+    id: 'lista-de-hoy'
+
+# ── Al zurrón no se llega desde ningún otro sitio ──────────────────────────────
+# Ni desde los ajustes, ni desde el diario, ni desde la repisa: un zurrón consultable sería
+# el panel del estado del mundo que el design system descarta.
+
+- back
+- tapOn:
+    id: 'paso-ajustes'
+- assertNotVisible: 'Mientras no estabas'
+- back
+- tapOn:
+    id: 'paso-diario'
+- assertNotVisible: 'Mientras no estabas'
+- back
+- tapOn:
+    id: 'paso-repisa'
+- assertNotVisible: 'Mientras no estabas'

@@ -240,6 +240,12 @@ describe('El registro de hechos', () => {
       'hoja-propia',
       'objeto-obtenido',
       'paso-ejecutado',
+      // SPEC-042, y **tampoco es ablandable**: sin `reserva-vaciada` el vaciado del
+      // zurrón no dejaría rastro, así que una partida reconstruida amanecería con la
+      // reserva llena y volvería a enseñar lo que ya se leyó —que es exactamente lo que
+      // «se vacía al leerse» prohíbe—. Es además la mitad que hace atómico el vaciado:
+      // el hecho se escribe primero y la reserva se vacía detrás.
+      'reserva-vaciada',
       'sitio-pisado',
       'version-oida',
     ]);
@@ -686,6 +692,10 @@ describe('El tamaño, que se mide', () => {
     // aceptarlo— vuelve a ser de quien orquesta, no de quien escribe la prueba.
     const ejemplos = {
       'paso-ejecutado': { tipo: 'paso-ejecutado', mapa: MAPA, dia: 1, paso: 1, carga: { n: 1, restoM: 120.5, restoFondoM: 40 } },
+      // El vaciado del zurrón (SPEC-042). Es de los baratos y lo es por decisión: no
+      // repite los pasos de la reserva, que ya están en el registro con su
+      // `paso-ejecutado`, sino entre cuáles iba y cuántas entradas se llegaron a narrar.
+      'reserva-vaciada': { tipo: 'reserva-vaciada', mapa: MAPA, dia: 1, paso: 5, carga: { narrados: 5, primerPaso: 1, ultimoPaso: 5 } },
       'sitio-pisado': { tipo: 'sitio-pisado', mapa: MAPA, dia: 1, paso: 1, carga: { sitio: 'Monfrida' } },
       'cara-conocida': hechoDeCaraConocida({}),
       'objeto-obtenido': hechoDeObjeto({}),

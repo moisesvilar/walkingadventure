@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSSupportsLiveActivities": true,
         "UIBackgroundModes": ["location"],
-        "NSLocationWhenInUseUsageDescription": "Para saber por dónde andas mientras hay una salida abierta, y solo mientras la hay."
+        "NSLocationWhenInUseUsageDescription": "Para saber por dónde andas mientras hay una salida abierta, y solo mientras la hay.",
+        "NSHealthShareUsageDescription": "Para contar los pasos de tu día a día si activas ese ajuste. Se leen los metros andados al abrir el juego, nunca dónde has estado."
       }
     },
     "android": {
@@ -25,7 +26,10 @@
         "ACCESS_COARSE_LOCATION",
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_LOCATION",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.READ_STEPS"
       ]
     }
   }
