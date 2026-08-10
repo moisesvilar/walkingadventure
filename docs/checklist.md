@@ -74,6 +74,16 @@
 | 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | done |
 | 42 | pasos-fondo-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | done |
 
+## B7 · La navegación, que es la puerta que faltaba
+
+Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 de `pipeline/informe-final.md` §9: las pantallas de B5 y B6 están escritas y probadas en Node, y no hay máquina de estados en `app/` que las encadene. No añaden requisito nuevo — cablean el recorrido que `docs/flujo.md` ya declara.
+
+| # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
+| --- | --- | --- | --- | --- |
+| 43 | navegacion-de-consulta | RF-DIARIO-002, RF-PROG-007, RF-PJ-010, RF-PERS-006, RF-RUMOR-002 | must | pending |
+| 44 | navegacion-en-la-calle | RF-BUCLE-005, RF-BUCLE-007, RF-BUCLE-011, RF-QUEST-004, RF-PRIV-004 | must | pending |
+| 45 | puerta-de-desarrollo | RF-INFRA-007 | must | pending |
+
 ## Notas de derivación
 
 - **Una fila por spec implementable y testeable de una pasada**, no una por RF: los RF de una misma feature cohesionada comparten fila (la capa de NPCs son cinco RF y una spec), y los RF transversales (RNF-DET, RF-PRIV-001/002) aparecen en la spec donde se implementa su garantía y se verifican como bloqueantes en todas (`RNF-DET-003`).

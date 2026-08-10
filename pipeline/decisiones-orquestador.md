@@ -291,3 +291,39 @@ Es el mismo mecanismo que ya estaba anotado en `app/plataforma/area-segura.jsx` 
 **Y ahí aparece la siguiente, que solo se ve en pantalla:** con cuatro aventuras en la lista, A1P7 **no cabe** —las tarjetas llegan a 2242 de los 2277 útiles— y «Y puedes salir a andar sin coger ninguna» y **«Salir a andar», que es la frontera de registro**, quedan por debajo del borde. La pantalla es un `ScrollView`, así que la persona llega bajando; **quien no llega es la prueba**, que afirma sin desplazarse. Esto sí es defecto de prueba y no de código: va a wa-qa-dev.
 
 La lección se repite con una vuelta más: **cada defecto que el dispositivo destapa esconde al siguiente**. Tres capas hasta ahora —Reanimated que no dejaba arrancar, el área segura, LogBox— y cada una había que quitarla para ver la de debajo. Ninguna era visible desde Node.
+
+## 6y · Se cablea la navegación de verdad, y los pasos provisionales se retiran
+
+Doce de los dieciséis flujos de `@app` llevan `# @limite-declarado` y su verde afirma que su pantalla sigue sin existir. Los doce entran por identificadores de pasos provisionales —`paso-ajustes`, `paso-diario`, `paso-repisa`, `paso-llegada`, `paso-escena`, `paso-marcha`, `paso-mapa`, `pantalla-andamiaje`— que vivían en la pantalla de andamiaje y que desde SPEC-027 son inalcanzables, porque la app abre en el arranque. Había dos maneras de bajar esa columna y no son equivalentes: devolver la tira de pasos a algún sitio alcanzable, o cablear la navegación que declara `docs/flujo.md` y reescribir los flujos para que entren por donde entra una persona.
+
+**Se cablea la navegación.** El motivo es el patrón que más caro salió en toda la ejecución del checklist —§6h, siete apariciones: una pieza que, al no estar, no protesta— y una puerta de servicio que solo abre la prueba es exactamente eso, con el agravante de que aquí la pieza silenciosa sería el camino entero. Doce pantallas verificadas por una puerta que ningún jugador usa dejarían el recuento diciendo la verdad y el producto igual de roto, que es la forma de fallo que este repo ya pagó dos veces.
+
+Y hay un segundo motivo, medido, que quita a (a) hasta la ventaja de ser barata. **Buena parte del cableado ya está escrito y solo le falta la línea que lo conecta.** `componePortada` declara sus puertas y `portada.jsx` las pinta una a una como `puerta-<id>`; `PantallaAntesDeSalir` ya encadena sus cuatro pantallas y ya tiene la arista al zurrón con su condición; `AntesDeSalirMontado` ya acepta `alAbrirPuerta` y `alEcharElTelon`. Lo único que falta en B6 es que `App.js` pase esas funciones, que hoy no pasa ninguna. Devolver la tira de pasos costaría un trabajo parecido y dejaría la deuda puesta.
+
+### El matiz: dos flujos cuya pantalla no es del juego
+
+De los doce, `andamiaje.yaml` y `gancho-capacidad-ausente.yaml` apuntan a `pantalla-andamiaje`, y `mapa.yaml` a `mapa-pantalla`. **Ninguna de las dos está en `docs/flujo.md`, y no puede estarlo:** `verifica-flujo.mjs` saca las pantallas de los seis HTML de diseño, y el andamiaje no es una pantalla de diseño sino la sonda de las cuatro capacidades de plataforma. Cablearlas «por donde entra una persona» no tiene sentido, porque no entra ninguna.
+
+Para esas dos la puerta correcta es una **puerta declarada de desarrollo**, tras `__DEV__`, y hay precedente sin discusión en el propio `App.js`: `paso-revision-render` ya vive así y nadie lo llama deuda. La distinción que gobierna esto, y que conviene dejar escrita porque es la que evita que la excepción se estire: **verificar una pantalla del juego por una puerta que ningún jugador usa es deuda; verificar una herramienta de desarrollo por la puerta de desarrollo es la puerta correcta.** Lo que decide el caso no es la comodidad, es si lo que hay detrás sale en `docs/flujo.md`.
+
+En producción esa puerta no existe, así que la ausencia del andamiaje en la app instalada sigue siendo real.
+
+### Un hueco que aparece al mirar: el ofrecimiento no está en el diseño
+
+Al cruzar los flujos con `docs/flujo.md` sale una tercera cosa, que no es parte del encargo pero se declara porque callarla sería el mismo patrón. **`app/pantallas/ofrecimiento.jsx` existe en el código, lo afirma `mapas.yaml` y no tiene ningún nodo en `docs/flujo.md`.** Entró con los mapas múltiples (fila 41) y es la pantalla que sustituye a la portada cuando estás lejos de todos tus mapas.
+
+El verificador no podía cazarlo: compara el diagrama contra los HTML de diseño, de modo que detecta una pantalla dibujada que falta en el diagrama, pero **no una pantalla que el código tiene y el diseño no**. La comprobación es asimétrica y por ahí se cuela una pantalla entera.
+
+Añadir el nodo al diagrama es un cambio de diseño y se trata como tal: queda propuesto, no hecho por mi cuenta. Lo que sí hago es dejarlo anotado aquí y en `docs/starting.md` para que no dependa de que alguien vuelva a cruzarlo a mano.
+
+### Cómo se reparte
+
+Tres filas nuevas del checklist, por el mismo bucle de cuatro roles que las cuarenta y dos anteriores:
+
+| # | Slug | Qué cierra |
+| --- | --- | --- |
+| 43 | `navegacion-de-consulta` | las puertas de la portada: diario, repisa, ajustes, empezar de nuevo, y el zurrón entre A2P1 y A2P3 |
+| 44 | `navegacion-en-la-calle` | la máquina de una salida: en marcha, llegada, visor, escena, descarte, lo que se cuenta, telón |
+| 45 | `puerta-de-desarrollo` | el andamiaje y el mapa suelto tras `__DEV__`, y la retirada de la tira de pasos provisionales |
+
+Un flujo sale de la columna de límite declarado **solo** cuando recorre su pantalla de verdad, y su entrada se quita de `test/nucleo/limite-declarado.test.mjs` en el mismo commit. Un flujo que tarde diez segundos no ha recorrido nada.
