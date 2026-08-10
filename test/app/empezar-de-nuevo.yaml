@@ -44,9 +44,9 @@
 #   personaje y el mapa levantado, y no hay ni diario ni segundo mapa que enumerar — que
 #   es correcto y es lo que se afirma aquí. Los caminos con dos mapas y con días apuntados
 #   son de la **fila 47**, que carga un documento de partida al arrancar.
-# - **La hoja de compartir del sistema**, para el camino de guardar una copia primero. En
-#   el emulador se cancela, que además es el caso que interesa mirar: las tres acciones
-#   vuelven y la partida sigue.
+# El camino de guardar una copia antes de borrar **ya no está aquí**: vive en
+# `empezar-de-nuevo-copia.yaml` desde que se midió en `wa-pixel` y destapó un defecto
+# destructivo. Este flujo cubre el resto de A6P7, que sí se recorre entero.
 #
 # **Lo que este flujo NO puede comprobar, y por qué:**
 #
@@ -126,44 +126,16 @@ appId: com.walkingadventure.app
 - assertVisible: 'Dejarlo como está'
 
 # ── La copia se ofrece pero no se hace sola ───────────────────────────────────
-# Se toca guardar una copia: la espera se cuenta con una línea y sin cifra, y «dejarlo
-# como está» sigue estando mientras las otras dos no están.
-
-- tapOn:
-    id: 'empezar-de-nuevo-guardar'
-- assertVisible: 'Preparando la copia…'
-- assertVisible:
-    id: 'empezar-de-nuevo-dejarlo'
-- assertNotVisible: '%'
-- assertNotVisible: 'por ciento'
-
-# La hoja del sistema se cancela: no se ha guardado nada, **no se borra nada** y las tres
-# acciones vuelven tal cual.
-- back
-- assertVisible: 'No se ha guardado nada'
-- assertVisible: 'Tu partida sigue como estaba'
-- assertVisible:
-    id: 'empezar-de-nuevo-estado'
-- assertVisible: 'preguntando'
-- assertVisible:
-    id: 'empezar-de-nuevo-guardar'
-- assertVisible:
-    id: 'empezar-de-nuevo-borrar'
-- assertVisible:
-    id: 'empezar-de-nuevo-dejarlo'
-
-# Y dejarlo como está vuelve a los ajustes sin haber tocado nada: la fila sigue ahí.
-- tapOn:
-    id: 'empezar-de-nuevo-dejarlo'
-- assertVisible:
-    id: 'ajustes-lista'
-- assertVisible: 'Empezar de nuevo'
+# Este tramo vive ahora en `empezar-de-nuevo-copia.yaml`, y no por comodidad: al
+# ejecutarlo en `wa-pixel` destapó un **defecto destructivo** en el camino de guardar una
+# copia antes de borrar. Está descrito entero allí. Sacarlo deja que lo demás de esta
+# pantalla —que sí se recorre y sí pasa— cuente como verificado, y deja el rojo señalando
+# lo que de verdad está roto en vez de tapado detrás de él.
 
 # ── Borrar lleva al arranque ──────────────────────────────────────────────────
-# Se entra otra vez —la partida sigue entera, así que la pantalla se compone igual— y esta
-# vez se borra sin guardar nada. No hay un segundo aviso encima del aviso.
+# Sin salir de A6P7 —donde ya estamos, porque el tramo de la copia se fue a su fichero— se
+# borra sin guardar nada. No hay un segundo aviso encima del aviso.
 
-- tapOn: 'Empezar de nuevo'
 - assertVisible:
     id: 'empezar-de-nuevo-perdida'
 - tapOn:
@@ -183,7 +155,11 @@ appId: com.walkingadventure.app
     id: 'empezar-de-nuevo'
 - assertNotVisible: 'Sabela'
 - assertNotVisible: 'Marcas de Vaeloria'
-- assertNotVisible: 'Seguir'
+# Aquí había `assertNotVisible: 'Seguir'` y era imposible: **«Seguir» es el botón propio de
+# A1P1**, y `arranque.yaml` lo afirma presente tres líneas después de arrancar. Las dos
+# pruebas se contradecían y ninguna se había ejecutado nunca. Lo que este bloque quiere
+# decir —que no hay ningún atajo a la partida anterior— lo dicen las tres líneas de abajo,
+# que sí nombran atajos y no el botón de avanzar.
 - assertNotVisible: 'Continuar donde lo dejaste'
 - assertNotVisible: 'El mismo mundo otra vez'
 - assertNotVisible: 'Recuperar la partida'

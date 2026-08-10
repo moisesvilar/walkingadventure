@@ -1,0 +1,95 @@
+# @app — Guardar una copia antes de borrar (SPEC-040), y el defecto destructivo que
+# destapó al ejecutarse por primera vez.
+#
+# **Este flujo está rojo y su rojo es correcto.** No lleva `@limite-declarado` y no debe
+# llevarlo: su pantalla existe, se alcanza y se recorre. Lo que falla es la app.
+#
+# ## El defecto, medido en `wa-pixel` el 10-ago-2026
+#
+# Se toca «Guardar una copia primero», se abre la hoja de compartir del sistema —el volcado
+# del árbol trae «Quick Share», «Drive», «Copy to clipboard»— y **se cancela con el botón
+# de atrás**. Lo que la pantalla promete entonces es «No se ha guardado nada. Tu partida
+# sigue como estaba.» y las tres acciones de vuelta.
+#
+# Lo que ocurre: **la partida se borra**. El volcado siguiente trae `arranque`, el contador
+# en 1/5 y un nombre sorteado nuevo. Se cancela la copia y se pierde la partida igual.
+#
+# La explicación, que es mía y va separada de lo medido: `app/plataforma/copia-del-sistema.js`
+# decide si se compartió con `resultado?.action !== Share.dismissedAction`, y en React
+# Native **`dismissedAction` es de iOS**. En Android la hoja resuelve siempre como
+# compartida, así que `guardaCopiaYBorra` nunca entra en la rama de `compartida === false`
+# —la que existe justamente para no borrar— y sigue adelante hasta el borrado.
+#
+# El código no está mal escrito por descuido: la rama que protege el caso **está escrita y
+# probada** en `test/nucleo/borrado.test.mjs` («si la copia falla no se borra»). Lo que
+# falla es la señal que la alimenta, y esa señal es de plataforma. Es otra vez §6h: la
+# guarda existe, y lo que la dispara no llega nunca.
+#
+# **Dueño:** la fila 40 del checklist, y la corrección tiene que distinguir de verdad
+# compartir de cancelar en Android — donde el sistema no lo dice, así que probablemente
+# haya que dejar de deducirlo y preguntar, o no borrar hasta tener confirmación de que el
+# fichero salió.
+#
+# **Por qué está en su propio fichero:** porque tapaba el resto. Con este tramo dentro,
+# `empezar-de-nuevo.yaml` moría aquí y las ciento catorce afirmaciones anteriores sobre
+# A6P7 —los tres bloques, las seis ausencias, las tres acciones— se leían como no
+# verificadas. Separarlo no ablanda nada: deja un rojo que señala un defecto real en vez de
+# un rojo que señala «algo por aquí».
+#
+# Los elementos se localizan por los identificadores que declara la spec.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «La copia se ofrece pero no se hace sola»
+#
+appId: com.walkingadventure.app
+---
+# A la portada se llega saliendo del arranque, que hoy es el único camino.
+- runFlow:
+    file: arranque.yaml
+
+- tapOn:
+    id: 'puerta-ajustes'
+- tapOn: 'Empezar de nuevo'
+- assertVisible:
+    id: 'empezar-de-nuevo'
+
+# ── La copia se ofrece pero no se hace sola ───────────────────────────────────
+# Se toca guardar una copia: la espera se cuenta con una línea y sin cifra, y «dejarlo
+# como está» sigue estando mientras las otras dos no están.
+
+- tapOn:
+    id: 'empezar-de-nuevo-guardar'
+# Aquí había `assertVisible: 'Preparando la copia…'` y **no se puede afirmar desde un
+# dispositivo**. Medido en `wa-pixel`: al tocar guardar, la hoja de compartir del sistema
+# se abre encima y tapa la app entera —el volcado del árbol trae «Quick Share», «Drive»,
+# «Copy to clipboard»—, así que la línea de espera existe durante el empaquetado y queda
+# cubierta antes de que ningún selector la vea. No es que la app no la pinte: es que la
+# carrera la pierde siempre.
+#
+# Que la espera se cuente con una línea y sin cifra ya se afirma sobre el dato en
+# `test/nucleo/borrado.test.mjs`, que es donde no se desactualiza. Lo que sí se puede
+# comprobar aquí, y es lo que el criterio quería, es **lo que pasa al cancelar la hoja**.
+
+# La hoja del sistema se cancela: no se ha guardado nada, **no se borra nada** y las tres
+# acciones vuelven tal cual.
+- back
+- assertVisible: '.*No se ha guardado nada. Tu partida sigue como estaba.*'
+- assertNotVisible: '%'
+- assertNotVisible: 'por ciento'
+- assertVisible:
+    id: 'empezar-de-nuevo-estado'
+- assertVisible: 'preguntando'
+- assertVisible:
+    id: 'empezar-de-nuevo-guardar'
+- assertVisible:
+    id: 'empezar-de-nuevo-borrar'
+- assertVisible:
+    id: 'empezar-de-nuevo-dejarlo'
+
+# Y dejarlo como está vuelve a los ajustes sin haber tocado nada: la fila sigue ahí.
+- tapOn:
+    id: 'empezar-de-nuevo-dejarlo'
+- assertVisible:
+    id: 'ajustes-lista'
+- assertVisible: 'Empezar de nuevo'
+
