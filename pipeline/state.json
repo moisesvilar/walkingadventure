@@ -9,7 +9,7 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-039",
+  "spec_actual": "SPEC-040",
   "fase": "dev",
   "iteracion": 0,
   "historial": [
@@ -383,6 +383,16 @@
       "casos": "2344 casos: 2341 pasan, 0 fallan, 3 saltados",
       "app": "flujos escritos, no ejecutados",
       "nota": "tres defectos destapados, uno bloqueante @determinismo: el estilo no se persistia."
+    },
+    {
+      "spec": "SPEC-039",
+      "slug": "partida-respaldo-export",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-039-run-20260809T233145Z.md",
+      "casos": "2438 casos: 2435 pasan, 0 fallan, 3 saltados",
+      "app": "flujos escritos, no ejecutados",
+      "nota": "expo-file-system declarada por veredicto: la spec no la nombra y hace falta iterarla. La lista cerrada de dependencias ya caza lo importado sin declarar."
     }
   ],
   "bloqueos": [],
