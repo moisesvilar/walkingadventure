@@ -53,6 +53,11 @@ export const CLASES = Object.freeze({
   // migró» no caben en el estado sin abrir su esquema cerrado, y abrirlo por esto
   // metería en el estado un dato que no es del juego.
   PROCEDENCIA: 'procedencia-de-partida',
+  // La marca de que hay un borrado a medias (SPEC-040). Es de esta familia y no un
+  // fichero suelto por lo mismo que la importación en curso: comparte la constante de
+  // versión y la escritura canónica, y es lo único que distingue «esta partida está a
+  // medio borrar» de «esta partida tiene menos documentos de los que declaraba».
+  BORRADO: 'borrado-en-curso',
 });
 
 // --- El lenguaje del esquema ------------------------------------------------
