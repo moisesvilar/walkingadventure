@@ -10,11 +10,13 @@
 // haga nada, y del que `datos/respaldo.js` declara las reglas. La caché no: la caché la
 // borra el sistema cuando quiere, y una partida no es una caché.
 //
-// **La dependencia**: `expo-file-system`, que entra dentro del SDK de Expo que la app ya
-// declara. SPEC-039 no la nombra en su reparto —dice «el sistema de ficheros del
-// dispositivo» y nada más—, así que **no se añade a `app/package.json`**: la lista
-// cerrada de dependencias solo se abre cuando una spec nombra el paquete, y eso es de
-// quien mantenga la spec, no de quien la implementa.
+// **La dependencia**: `expo-file-system`, y ahora sí está **declarada** en
+// `app/package.json` con la versión que trae el SDK. Resolvía sola porque `expo@57` la
+// arrastra como dependencia directa, y por ahí entraban también `expo-asset`,
+// `expo-constants`, `expo-font` y `expo-keep-awake`: la lista cerrada mira lo que la app
+// **declara** y nunca lo que **importa**, así que un paquete que llega dentro del SDK
+// entraba en el móvil sin que nada lo dijera. Se declara lo que se importa; abrir la
+// lista cerrada para que deje de estar roja es de quien mantenga la spec.
 
 import { Directory, File, Paths } from 'expo-file-system';
 

@@ -15,21 +15,15 @@
 // más arriba. La consecuencia se dice entera: importar el fichero de otra persona abre
 // **su** partida, personaje incluido, que es lo que significa compartir mundo.
 
-import { VERSION_FORMATO, texto as textoCanonico } from '@walkingadventure/nucleo/partida/formato.js';
-import {
-  CLASES_DE_PARTE,
-  NOMBRE_DEL_MANIFIESTO,
-  componeExportacion,
-  importaPartida,
-  manifiestoDe,
-  medidaPorClaseDeParte,
-  nombreDeFichero,
-  parteDeDocumento,
-  validaManifiesto,
-} from '@walkingadventure/nucleo/partida/exportacion.js';
-import { CADENA_DEL_FORMATO, migra } from '@walkingadventure/nucleo/partida/migracion.js';
+// Y una regla de cableado que no es de estilo (SPEC-020, repetida en SPEC-039): **el
+// núcleo entra por la puerta**. Esto orquesta y no compone nada, así que recibe el
+// generador igual que recibe el almacén o la hoja de compartir. Citando
+// `@walkingadventure/nucleo` desde aquí, guardar y abrir una copia quedaban fuera del
+// alcance de `node --test` sin instalación, y con ellos todo lo que de verdad se puede
+// afirmar de esta fila. Quien monta la app sí lo cita por su nombre, en
+// `app/nucleo/piezas.js`.
 
-import { CAUSAS, desempaqueta, empaqueta, manifiestoDePartes } from './empaquetador.js';
+import { CAUSAS, creaEmpaquetador } from './empaquetador.js';
 
 /** El vocabulario cerrado del estado de guardar. Lo consume `guardar-copia-estado`. */
 export const ESTADOS_DE_GUARDAR = Object.freeze({
@@ -69,6 +63,17 @@ export const TEXTOS_DE_ERROR = Object.freeze({
   [CAUSAS_DE_ERROR.FALTA_MIGRACION]: 'Esta copia es de una versión que este juego todavía no entiende. Tu partida sigue como estaba.',
 });
 
+/**
+ * Lo que esto le pide al generador, enumerado. Va escrito y no sobreentendido por lo
+ * mismo que las piezas del sistema: un núcleo al que le falta media interfaz fallaría al
+ * abrir un fichero de otra persona y no al construir.
+ */
+export const DEL_NUCLEO = Object.freeze([
+  'VERSION_FORMATO', 'textoCanonico', 'CLASES_DE_PARTE', 'NOMBRE_DEL_MANIFIESTO', 'componeExportacion',
+  'importaPartida', 'manifiestoDe', 'medidaPorClaseDeParte', 'nombreDeFichero', 'parteDeDocumento',
+  'validaManifiesto', 'CADENA_DEL_FORMATO', 'migra',
+]);
+
 function exige(pieza, nombre) {
   if (typeof pieza !== 'function') {
     throw new Error(`guardar y abrir una copia necesitan ${nombre} inyectado: es del sistema y no lo envolvemos en una pantalla propia`);
@@ -83,12 +88,26 @@ function exige(pieza, nombre) {
  *   `almacen` el almacén duradero de la partida; `binarios` el almacén de recursos
  *   binarios residentes; `comparte` la hoja de compartir del sistema, que recibe el
  *   nombre y el contenido y decide dónde va; `elige` el selector de ficheros del
- *   sistema, que devuelve `{ cancelada }` o `{ nombre, contenido }`.
+ *   sistema, que devuelve `{ cancelada }` o `{ nombre, contenido }`; `nucleo` el
+ *   generador, con las trece funciones de `DEL_NUCLEO` y ni una menos.
  */
-export function creaCopia({ almacen, binarios = null, comparte, elige, cadena = CADENA_DEL_FORMATO } = {}) {
+export function creaCopia({ almacen, binarios = null, comparte, elige, nucleo, cadena = null } = {}) {
   if (!almacen) throw new Error('guardar y abrir una copia necesitan el almacén de la partida inyectado');
   exige(comparte, 'la hoja de compartir del sistema');
   exige(elige, 'el selector de ficheros del sistema');
+  if (!nucleo) throw new Error('guardar y abrir una copia necesitan el núcleo inyectado: es quien compone la exportación, valida el manifiesto y migra');
+  const faltan = DEL_NUCLEO.filter((n) => nucleo[n] === undefined);
+  if (faltan.length) {
+    throw new Error(`al núcleo de guardar y abrir una copia le faltan ${faltan.length} pieza(s): ${faltan.join(', ')}`);
+  }
+
+  const {
+    VERSION_FORMATO, textoCanonico, NOMBRE_DEL_MANIFIESTO,
+    componeExportacion, importaPartida, manifiestoDe, medidaPorClaseDeParte,
+    nombreDeFichero, parteDeDocumento, validaManifiesto,
+  } = nucleo;
+  const { empaqueta, desempaqueta, manifiestoDePartes } = creaEmpaquetador({ NOMBRE_DEL_MANIFIESTO });
+  const cadenaVigente = cadena ?? nucleo.CADENA_DEL_FORMATO;
 
   /**
    * Empaqueta la partida y se la da a la hoja de compartir.
@@ -165,7 +184,7 @@ export function creaCopia({ almacen, binarios = null, comparte, elige, cadena = 
     let vigente = manifiesto;
     let migradaDesde = null;
     try {
-      const resultado = migraPartes(partes, cadena);
+      const resultado = migraPartes(partes, cadenaVigente, nucleo);
       migradaDesde = resultado.desde;
       if (migradaDesde !== null) {
         // Migrar cambia el texto de los documentos y con él su longitud, así que el
@@ -234,7 +253,7 @@ function fallo(causa, e) {
  * Las de recurso no se migran: son bytes y no tienen versión. La original **no se
  * toca**: lo que sale es otra lista, y la copia de origen sigue en su fichero.
  */
-function migraPartes(partes, cadena) {
+function migraPartes(partes, cadena, { CLASES_DE_PARTE, migra, textoCanonico }) {
   let desde = null;
   const salida = partes.map((parte) => {
     if (parte.clase === CLASES_DE_PARTE.RECURSO) return parte;

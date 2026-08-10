@@ -14,13 +14,17 @@
 // lo marcado como excluido, y en Android lo que declara el manifiesto. Las dos cosas
 // dicen lo mismo que esto, y esto es lo que se puede comprobar sin dispositivo.
 
-import { PREFIJOS_DE_LA_PARTIDA } from '@walkingadventure/nucleo/partida/exportacion.js';
+// Y la lista de prefijos de la partida **entra por la puerta**, no por un import del
+// paquete (SPEC-020, repetida en SPEC-039): estas reglas tienen que poder leerse desde
+// `node --test` sin instalación, que es justo el sitio donde se ponen rojas. Quien monta
+// la app las arma en `app/nucleo/piezas.js` con la lista del núcleo, que sigue siendo una
+// sola: derivar de ella es el punto, y copiarla sería el defecto.
 
 import { PREFIJO as PREFIJO_DE_BINARIOS } from '../recursos/almacen-de-binarios.js';
 import { SUFIJO_TEMPORAL } from './almacen-duradero.js';
 
 /**
- * Lo que entra y lo que no.
+ * Lo que entra y lo que no, sobre la lista de prefijos que diga el núcleo.
  *
  * Los recursos binarios residentes están **dentro** y conviene decir por qué: son parte
  * del mundo congelado y no una caché. Sin ellos, un móvil restaurado abriría el mapa con
@@ -30,25 +34,35 @@ import { SUFIJO_TEMPORAL } from './almacen-duradero.js';
  * pedir, y respaldarla sería subir a la cuenta de quien juega megas de datos de OSM que
  * no son suyos.
  */
-export const REGLAS_DE_RESPALDO = Object.freeze({
-  incluye: Object.freeze([
-    ...PREFIJOS_DE_LA_PARTIDA,
-    PREFIJO_DE_BINARIOS,
-  ]),
-  excluye: Object.freeze([
-    'cache/',
-    'tmp/',
-  ]),
-  /** Lo que nunca se respalda venga donde venga: un fichero a medio escribir. */
-  excluyePorSufijo: Object.freeze([SUFIJO_TEMPORAL]),
-});
+export function creaReglasDeRespaldo({ PREFIJOS_DE_LA_PARTIDA } = {}) {
+  if (!Array.isArray(PREFIJOS_DE_LA_PARTIDA) || PREFIJOS_DE_LA_PARTIDA.length === 0) {
+    throw new Error('las reglas de respaldo necesitan PREFIJOS_DE_LA_PARTIDA inyectado: unas reglas sin prefijos dejarían la partida entera fuera de la copia sin protestar');
+  }
+  const reglas = Object.freeze({
+    incluye: Object.freeze([
+      ...PREFIJOS_DE_LA_PARTIDA,
+      PREFIJO_DE_BINARIOS,
+    ]),
+    excluye: Object.freeze([
+      'cache/',
+      'tmp/',
+    ]),
+    /** Lo que nunca se respalda venga donde venga: un fichero a medio escribir. */
+    excluyePorSufijo: Object.freeze([SUFIJO_TEMPORAL]),
+  });
+  return {
+    reglas,
+    cubre: (clave) => cubre(clave, reglas),
+    exigeCobertura: (claves, donde) => exigeCobertura(claves, reglas, donde),
+  };
+}
 
 /** Si una clave cae dentro de lo incluido. */
-export function cubre(clave) {
+export function cubre(clave, reglas) {
   if (typeof clave !== 'string' || !clave) return false;
-  if (REGLAS_DE_RESPALDO.excluyePorSufijo.some((s) => clave.endsWith(s))) return false;
-  if (REGLAS_DE_RESPALDO.excluye.some((p) => clave.startsWith(p))) return false;
-  return REGLAS_DE_RESPALDO.incluye.some((p) => clave.startsWith(p));
+  if (reglas.excluyePorSufijo.some((s) => clave.endsWith(s))) return false;
+  if (reglas.excluye.some((p) => clave.startsWith(p))) return false;
+  return reglas.incluye.some((p) => clave.startsWith(p));
 }
 
 /**
@@ -58,8 +72,8 @@ export function cubre(clave) {
  * Es el criterio que convierte RF-PERS-004 en algo que se puede poner rojo: basta con
  * que alguien estrene un prefijo de clave y no lo añada aquí.
  */
-export function exigeCobertura(claves, donde = 'las reglas de respaldo') {
-  const fuera = (claves ?? []).filter((c) => !cubre(c));
+export function exigeCobertura(claves, reglas, donde = 'las reglas de respaldo') {
+  const fuera = (claves ?? []).filter((c) => !cubre(c, reglas));
   if (fuera.length) {
     throw new Error(
       `${donde}: ${fuera.length} clave(s) que el almacén escribe se quedarían fuera de la copia del sistema (${fuera.join(', ')}). ` +

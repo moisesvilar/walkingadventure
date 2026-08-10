@@ -30,6 +30,7 @@ import { creaCopia } from './datos/copia.js';
 import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
 import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
+import { NUCLEO_DE_LA_COPIA } from './nucleo/piezas.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
@@ -62,7 +63,12 @@ export function App() {
   }));
   // Guardar y abrir una copia, con las dos piezas del sistema. La hoja de compartir y el
   // selector no se envuelven en ninguna pantalla nuestra: se usan tal cual.
-  const [copia] = useState(() => creaCopia({ almacen, comparte: comparteConElSistema, elige: eligeConElSistema }));
+  const [copia] = useState(() => creaCopia({
+    almacen,
+    comparte: comparteConElSistema,
+    elige: eligeConElSistema,
+    nucleo: NUCLEO_DE_LA_COPIA,
+  }));
   const [enRevision, setEnRevision] = useState(false);
   const [enMapa, setEnMapa] = useState(false);
   // La app abre en el arranque, que es lo que ve quien la instala. Se sale de él por

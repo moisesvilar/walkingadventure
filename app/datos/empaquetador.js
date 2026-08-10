@@ -14,8 +14,13 @@
 // La forma es una cabecera de líneas y los contenidos detrás, en el mismo orden. Los
 // binarios llegan ya en base64 desde el núcleo, así que aquí no hay ninguna
 // codificación que inventar y el fichero entero se lee como texto.
-
-import { NOMBRE_DEL_MANIFIESTO } from '@walkingadventure/nucleo/partida/exportacion.js';
+//
+// **El nombre del manifiesto entra por la puerta** (SPEC-020, y otra vez SPEC-039).
+// Citar `@walkingadventure/nucleo` desde aquí dejaba el contenedor fuera del alcance de
+// `node --test` sin instalación, y con él lo único que se puede afirmar de verdad de un
+// fichero de partida: que dos exportaciones dan el mismo contenedor y que uno truncado se
+// nombra. Quien monta la app lo importa por el nombre del paquete, y lo hace en
+// `app/nucleo/piezas.js`.
 
 /** La primera línea de todo fichero de partida. Es lo que se mira para decir que no lo es. */
 export const CABECERA = 'WALKINGADVENTURE-PARTIDA/1';
@@ -46,29 +51,56 @@ function exigeNombreDeParte(nombre) {
 }
 
 /**
- * Empaqueta una lista de partes.
+ * El contenedor, sobre el nombre de manifiesto que diga el núcleo.
  *
- * El orden es el que llega, y llega canónico del núcleo. La longitud que va en la
- * cabecera es la del contenido tal cual viaja, que es lo que permite comprobar si el
- * fichero está entero sin decodificar nada.
+ * @param {object} nucleo `NOMBRE_DEL_MANIFIESTO`, y nada más. Su ausencia es error de
+ *   construcción: un contenedor que empaqueta sin saber cuál es la primera parte
+ *   escribiría ficheros que nadie puede volver a abrir, y no protestaría al hacerlo.
  */
-export function empaqueta(partes) {
-  if (!Array.isArray(partes) || partes.length === 0) {
-    throw new Error('un fichero de partida lleva al menos su manifiesto: la lista de partes ha llegado vacía');
+export function creaEmpaquetador({ NOMBRE_DEL_MANIFIESTO } = {}) {
+  if (typeof NOMBRE_DEL_MANIFIESTO !== 'string' || !NOMBRE_DEL_MANIFIESTO) {
+    throw new Error('el contenedor necesita NOMBRE_DEL_MANIFIESTO inyectado: es lo que distingue la primera parte de un fichero de partida');
   }
-  if (partes[0].nombre !== NOMBRE_DEL_MANIFIESTO) {
-    throw new Error(`la primera parte de un fichero de partida es "${NOMBRE_DEL_MANIFIESTO}" y ha llegado "${partes[0].nombre}"`);
+
+  /**
+   * Empaqueta una lista de partes.
+   *
+   * El orden es el que llega, y llega canónico del núcleo. La longitud que va en la
+   * cabecera es la del contenido tal cual viaja, que es lo que permite comprobar si el
+   * fichero está entero sin decodificar nada.
+   */
+  function empaqueta(partes) {
+    if (!Array.isArray(partes) || partes.length === 0) {
+      throw new Error('un fichero de partida lleva al menos su manifiesto: la lista de partes ha llegado vacía');
+    }
+    if (partes[0].nombre !== NOMBRE_DEL_MANIFIESTO) {
+      throw new Error(`la primera parte de un fichero de partida es "${NOMBRE_DEL_MANIFIESTO}" y ha llegado "${partes[0].nombre}"`);
+    }
+    const cabeceras = [CABECERA, String(partes.length)];
+    for (const parte of partes) {
+      exigeNombreDeParte(parte.nombre);
+      cabeceras.push([parte.nombre, parte.clase, parte.codificacion, String(parte.contenido.length)].join('\t'));
+    }
+    return `${cabeceras.join(SEPARADOR)}${SEPARADOR}${SEPARADOR}${partes.map((p) => p.contenido).join('')}`;
   }
-  const cabeceras = [CABECERA, String(partes.length)];
-  for (const parte of partes) {
-    exigeNombreDeParte(parte.nombre);
-    cabeceras.push([parte.nombre, parte.clase, parte.codificacion, String(parte.contenido.length)].join('\t'));
+
+  /** El manifiesto de una lista de partes desempaquetada, ya parseado. */
+  function manifiestoDePartes(partes) {
+    const parte = partes.find((p) => p.nombre === NOMBRE_DEL_MANIFIESTO);
+    if (!parte) throw falloDelContenedor(CAUSAS.NO_ES_PARTIDA, 'el fichero no es una partida: no trae manifiesto');
+    try {
+      return JSON.parse(parte.contenido);
+    } catch (e) {
+      throw falloDelContenedor(CAUSAS.NO_ES_PARTIDA, `el fichero no es una partida: su manifiesto no se puede leer (${e.message})`);
+    }
   }
-  return `${cabeceras.join(SEPARADOR)}${SEPARADOR}${SEPARADOR}${partes.map((p) => p.contenido).join('')}`;
+
+  return { empaqueta, desempaqueta, manifiestoDePartes };
 }
 
 /**
- * Desempaqueta un fichero.
+ * Desempaqueta un fichero. No necesita nada del núcleo: leer la cabecera y trocear el
+ * cuerpo es aritmética sobre el propio fichero, así que se queda suelta.
  *
  * Tres fallos con nombre y ninguna interpretación optimista: **no es una partida** —la
  * cabecera no es la nuestra, y no se intenta leer nada más—, **está incompleto** —la
@@ -108,15 +140,4 @@ export function desempaqueta(texto) {
     throw falloDelContenedor(CAUSAS.INCOMPLETO, `el fichero trae ${cuerpo.length - desde} caracteres que ninguna parte declara`);
   }
   return partes;
-}
-
-/** El manifiesto de una lista de partes desempaquetada, ya parseado. */
-export function manifiestoDePartes(partes) {
-  const parte = partes.find((p) => p.nombre === NOMBRE_DEL_MANIFIESTO);
-  if (!parte) throw falloDelContenedor(CAUSAS.NO_ES_PARTIDA, 'el fichero no es una partida: no trae manifiesto');
-  try {
-    return JSON.parse(parte.contenido);
-  } catch (e) {
-    throw falloDelContenedor(CAUSAS.NO_ES_PARTIDA, `el fichero no es una partida: su manifiesto no se puede leer (${e.message})`);
-  }
 }
