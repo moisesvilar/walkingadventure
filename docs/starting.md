@@ -1334,3 +1334,37 @@ De ahí sale la regla que ya vale para lo que queda: **un criterio que se cumple
 `bash scripts/qa-tester-run.sh SUITE` → **PASS, 1042 casos, 1039 pasan, 0 fallan, 3 saltados** (`test/reports/SUITE-run-20260808T203056Z.md`). `node test/headless.mjs` en verde. `node test/casting-report.mjs` contra el Overpass local: **127/132**, mundos reales 23/24. `verifica-gherkin` (35 características, 183 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde.
 
 **Sigue sin ejecutarse ni un flujo `@app`**, y ahora no es por falta de Maestro —está instalado— sino porque `test/app/` está vacío: B1 y B2 son núcleo entero. El primero llegará con B4.
+
+# 10 de agosto de 2026 — El checklist entero
+
+Las **42 filas en `done`**, ninguna bloqueada. La suite pasa de no existir a **2597 casos, 2594 en verde, 0 rojos, 3 saltados**. El detalle de cada fila está en `pipeline/state.json` y los veredictos en `pipeline/decisiones-orquestador.md`; aquí va lo que merece quedar.
+
+## Lo que hay
+
+El juego entero corre en Node, sin red y sin dispositivo: arranque de siete pantallas, mundo generado por celdas y congelado, catálogo de treinta plantillas casteadas contra el mundo, motor de pasos con los kilómetros como reloj, rumores que se deforman por saltos, NPCs perezosos, rango y oro y objetos, diario que registra lo oído, salida de puerta a puerta con llegadas por geofence y telón, segundo mapa, exportar e importar, y empezar de nuevo. La app existe en Expo con Skia y el mapa se levanta dentro del móvil en **3222 ms sobre 60 000 de presupuesto**.
+
+## El día que 2583 pruebas en verde no significaban nada
+
+Con las 42 filas cerradas monté la partida completa de punta a punta, igual que al cerrar B2. **Ninguna aventura se podía terminar.**
+
+El último beat de un lazo cae **siempre** en un sitio ya visitado —el lazo es cerrado por diseño, es la mitad del juego— y la validación de llegada lo descartaba **en silencio**. Medido: **27 de 27, 12 de 12 y 28 de 28** aventuras de `costero`, `barrio-tres-calles` y `urbano-denso`. **El 100 %.** Toda aventura acababa a medias, con cierre en corto, cero oro, cero objetos, sin rumor y sin mote.
+
+Con él salieron cuatro cableados que faltaban: nadie componía el desenlace; la lista de hoy ofrecía los mismos tres títulos el día 1 y el día 6; el propagador de rumores solo corría dentro del prólogo, así que **la noticia de la jugadora no salía del pueblo**; y dos beats dentro del mismo geofence resolvían fuera de orden y **reventaban en mitad de la salida**.
+
+Están los cinco cerrados —**102 de 102 aventuras terminan**— y la prueba que faltaba escrita: recorre las 102 y **se pone roja con el defecto viejo**.
+
+## La forma de fallo que salió siete veces
+
+`pipeline/decisiones-orquestador.md` §6h la bautizó: **una pieza que, al no estar, no protesta**. Volvió en el informe de casting que no pedía el callejero y llevaba semanas midiendo un mundo que nadie juega; en un requisito **cumplido de forma vacía** —el prólogo componía su par y ninguna aventura pasaba por él—; en el criterio duro de arrancar sin `node_modules`, roto sin que nadie se enterara con 67 casos que no se descubrían; y tres veces más.
+
+De ahí salen las dos reglas que gobernaron el resto: **un criterio que se cumple casi siempre no es un criterio**, y **lo que falta se exige y su ausencia es error de construcción**, nunca un valor por defecto.
+
+## Lo que no se ha verificado, y va sin enterrar
+
+**Ni un flujo `@app` se ha ejecutado.** Hay **13 escritos** en `test/app/` y **cero corridos**: Maestro está instalado pero no hay simulador —sin Xcode completo ni SDK de Android—. El runner lo registra como infraestructura ausente y nunca como verde, que era el punto, pero conviene decirlo claro: **de los 2597 casos, ninguno ha tocado un dispositivo**.
+
+Y con eso, todo lo que solo se ve en pantalla sigue sin revisar: la paridad visual de los cinco estilos, la fluidez del render, el háptico desde el bolsillo, los gestos, y el minuto medido en un dispositivo de referencia que el repo **no declara en ningún sitio**.
+
+## Verificado con
+
+`bash scripts/qa-tester-run.sh SUITE` → **PASS, 2597 casos, 2594 pasan, 0 fallan, 3 saltados**. `node test/headless.mjs` en verde. `verifica-gherkin` (36 características, 191 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde. Y la partida completa jugada de punta a punta en Node, que es la que encontró lo que las otras no veían.
