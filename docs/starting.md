@@ -1393,3 +1393,47 @@ Dos cosas más, pequeñas y ciertas. **`node --test test/nucleo/` no funciona en
 ## Verificado con
 
 `bash scripts/qa-tester-run.sh SUITE` → **@nucleo 97 ficheros, 2603 casos, 2600 pasan, 0 fallan, 3 saltados**; **@app 16 ejecutados · 2 pasan · 2 fallan · 12 de límite declarado**. `maestro test test/app/arranque.yaml` en verde de punta a punta, dos ejecuciones seguidas, sobre `wa-pixel`. Y el mapa de A1P6 mirado con los ojos, que para el pintado no hay sustituto.
+
+# 10-ago-2026 (XXVIII) · La primera puerta de B6, y las cinco cosas que había detrás
+
+Se cablea la navegación de consulta —la fila 43—, y al hacerlo se destapan cinco huecos que ninguna prueba de Node podía ver. La entrada es larga porque el trabajo entregado es la parte pequeña de lo que ocurrió: lo que más vale de este día es lo que se midió.
+
+## Lo que se decidió antes de tocar nada
+
+`pipeline/decisiones-orquestador.md` §6y. Había dos maneras de bajar la columna de doce flujos de límite declarado: devolver la tira de pasos provisionales a un sitio alcanzable, o cablear el recorrido que `docs/flujo.md` declara y hacer que los flujos entren por donde entra una persona. Se eligió lo segundo, por el patrón que más caro ha salido en este repo —§6h, una pieza que al no estar no protesta— y porque una puerta de servicio que solo abre la prueba es exactamente eso. Con un matiz declarado: el andamiaje y el mapa suelto **no son pantallas del juego**, no están en `docs/flujo.md` y no pueden estarlo, así que su puerta correcta es una puerta de desarrollo, como ya lo es `paso-revision-render`.
+
+Y una asimetría que apareció al mirar: `verifica-flujo.mjs` compara el diagrama contra los HTML de diseño, así que caza una pantalla dibujada que falta en el diagrama pero **no una pantalla que el código tiene y el diseño no**. Por ahí se coló `app/pantallas/ofrecimiento.jsx` entero, de la fila 41. Queda propuesto como nodo, no añadido: eso es cambio de diseño.
+
+## Lo que se implementó
+
+`app/pantallas/consulta-montado.jsx`, el punto de montaje del momento de consulta, hermano de los del arranque y de antes de salir: junta la composición del núcleo con las piezas de la app y, si algo no se puede cablear, **enseña la avería con la pieza nombrada** en lugar de dibujar una lista vacía. Y en `App.js`, las tres puertas del pie de la portada pasando a llevar a algún sitio: el diario, la repisa, los ajustes, y de ahí a empezar de nuevo. El atrás de Android hace lo mismo que el «‹» de cada pantalla, porque que discrepen es un defecto de plataforma y no una decisión.
+
+Un arreglo que salió del emulador y no de ninguna prueba: **el personaje que cerraba el arranque no entraba en el área `personaje` del estado**, vivía en una propiedad hermana. No se notaba mientras nadie la leía; A6P7 la lee, y la partida no tenía nombre. Como el área es lo que se congela y lo que se exporta, una partida guardada habría salido sin nombre sin que nada protestara.
+
+## Los cinco huecos, que es lo que de verdad pasó este día
+
+1. **La partida no se guarda nunca.** `congelaEstado` y `levantaEstado` no se llaman desde ningún sitio de `app/`: el estado se crea con `estadoInicial` en cada arranque y vive en memoria. De los cuatro prefijos de `PREFIJOS_DE_LA_PARTIDA` la app escribe tres, y `partida/` no lo escribe nadie. Se pierden diario, repisa, oro, motes, aventuras, entregas, rumores y NPCs al cerrar. Y **una copia exportada hoy sale sin documento de partida**: el respaldo funciona y no respalda nada de lo jugado. Fila 47, con `test/nucleo/partida-persistida.test.mjs` en rojo hasta que se cierre.
+
+2. **Cancelar la hoja de compartir borra la partida.** Medido: se toca «Guardar una copia primero», se abre la hoja del sistema, se cancela con atrás, y la app queda en A1P1 con todo borrado. La rama que protege el caso existe y está probada; lo que falla es la señal que la alimenta —`Share.dismissedAction` es de iOS y en Android la hoja resuelve siempre como compartida—. §6h otra vez: la guarda está y nada la dispara. Aislado en `test/app/empezar-de-nuevo-copia.yaml`, cuyo rojo es correcto.
+
+3. **La app no tiene módulo de ubicación.** `app/package.json` no declara ninguno; los contratos esperan el nativo inyectado y reciben el «sin montar». Por eso A1P4 funciona cayendo a elegir el punto a mano, y por eso no hay geofences, ni llegadas, ni posición en marcha: **B5 entera**. Fila 48.
+
+4. **A4P3 y A5P1-A5P4 nunca se escribieron.** SPEC-034 y SPEC-036 son las dos únicas filas de B5 y B6 que no tocaron ni un fichero de `app/`. Siguen en `done` —entregaron el paquete con sus pruebas— y el checklist ya lo dice. Fila 49.
+
+5. **El zurrón no es navegación.** Necesita la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida, y ninguna de las tres sirve sola. Fila 46, y `SPEC-043-iter-1` lo saca de la 43 en vez de dejar un zurrón que aparece, se cierra y vuelve.
+
+## El número que mide el patrón
+
+Se contó cuántas de las dieciséis filas de B5 y B6 entregaron solo núcleo: **dos**. Ese número dice poco. El que dice algo sale del cierre transitivo de imports desde `App.js`: **pantallas escritas en `app/pantallas/` a las que no llega ni un import, 12 de 32 antes de esta fila y 8 después**.
+
+Es decir: el defecto sistemático no era que las filas no entregaran pantalla —doce de dieciséis la entregaron— sino que **una fila podía entregar una pantalla y darse por hecha sin que nadie pudiera abrirla**. Eso ya no puede volver a pasar en silencio: `test/nucleo/pantallas-huerfanas.test.mjs` fija el recuento y falla si sube.
+
+## Los defectos de prueba, y por qué salieron todos juntos
+
+Cinco, y los cinco del mismo origen: **estos flujos no se habían ejecutado nunca**. Una fila de interruptor no pinta su valor, así que `assertVisible: 'no'` no podía pasar en ninguna máquina. «Se borrará» no existe en el repositorio y las dos pruebas se contradecían. **Maestro casa el texto entero de un nodo, no subcadenas**, y seis afirmaciones sobre trozos de párrafo iban sin comodines. La línea de espera de la copia la tapa siempre la hoja del sistema. Y «Seguir» es el botón propio de A1P1, que `arranque.yaml` afirma presente. Los cinco corregidos **explicando el motivo en el propio fichero**, que es la regla.
+
+## Verificado con
+
+`maestro test test/app/ajustes.yaml` → **EXIT=0, 131 comandos**, sobre `wa-pixel`. `test/app/empezar-de-nuevo.yaml` → **EXIT=0, 130 comandos**. Recorrido a mano de las tres puertas y la vuelta: portada → diario → repisa → ajustes → empezar de nuevo → dejarlo → ajustes → atrás → portada. Batería de núcleo: **2609 casos, 2603 pasan, 3 fallan, 3 saltados** — y los tres rojos son la guarda de la fila 47, puesta a propósito. `@app`: **la columna de límite declarado baja de 12 a 11**, con dos flujos saliendo de ella y uno nuevo entrando (`ajustes-filas-de-valor.yaml`, porque las cinco filas de valor de A6P6 no tienen pantalla de elección).
+
+Dos flujos verdes es poco al lado de los doce que el encargo esperaba. Es el número honesto: **de los doce, solo cinco estaban bloqueados por navegación**, y los otros siete piden un módulo nativo, dos pantallas que no existen y un documento de partida que nadie escribe. Decirlo con el número delante vale más que la columna a cero.
