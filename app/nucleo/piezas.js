@@ -1,4 +1,4 @@
-// El único sitio de la app donde la orquestación del mapa y la de la salida cogen el
+// El único sitio de la app donde las orquestaciones que no generan nada cogen el
 // generador. Reúne lo que cada una necesita y lo entrega como una pieza más, igual que
 // `plataforma/index.js` reúne los módulos de plataforma para inyectarlos en el registro.
 //
@@ -7,10 +7,18 @@
 // ficheros de `test/nucleo/` dejaban de cargar en cuanto faltaba `node_modules` —sesenta
 // y siete casos que ni se descubrían—, y el guardián de SPEC-001 no lo veía porque solo
 // mira los imports directos de `test/nucleo/` y `test/dobles/`, nunca el cierre
-// transitivo por `app/`. Reunir aquí las importaciones deja las dos orquestaciones
+// transitivo por `app/`. Reunir aquí las importaciones deja las orquestaciones
 // alcanzables desde `node --test` sin resolver nada instalado, y a la vez mantiene lo que
 // pide SPEC-020: la app consume el generador **por el nombre del paquete**, jamás por una
 // ruta relativa.
+//
+// SPEC-039 estrenó la misma regresión y por eso hay tres bloques más abajo: `copia.js`,
+// `empaquetador.js` y `reglas-de-respaldo.js` citaban el paquete por su cuenta y dejaban
+// sin verificar el fichero de partida entero —los 175 264 B, las dos exportaciones
+// idénticas, el fichero truncado, el aviso de sustitución y la cobertura del respaldo—,
+// que solo se pudo afirmar leyendo su fuente. La lección es la de siempre: **quien
+// orquesta recibe el generador, quien lo monta lo importa**, y quien lo monta es este
+// fichero.
 //
 // Quien quiera un núcleo doblado —o a medias, para comprobar que se protesta al
 // construir— arma el suyo con otras funciones; por eso son objetos de datos y no un
@@ -41,6 +49,20 @@ import {
 } from '@walkingadventure/nucleo/partida/recursos.js';
 import { componePreparacion, resumenDeLaPreparacion } from '@walkingadventure/nucleo/partida/preparacion.js';
 import { redactaAventura } from '@walkingadventure/nucleo/quests/narrador.js';
+import { VERSION_FORMATO, texto as textoCanonico } from '@walkingadventure/nucleo/partida/formato.js';
+import {
+  CLASES_DE_PARTE,
+  NOMBRE_DEL_MANIFIESTO,
+  PREFIJOS_DE_LA_PARTIDA,
+  componeExportacion,
+  importaPartida,
+  manifiestoDe,
+  medidaPorClaseDeParte,
+  nombreDeFichero,
+  parteDeDocumento,
+  validaManifiesto,
+} from '@walkingadventure/nucleo/partida/exportacion.js';
+import { CADENA_DEL_FORMATO, migra } from '@walkingadventure/nucleo/partida/migracion.js';
 
 /** Lo que `creaLevantamiento` enumera en `DEL_NUCLEO`, ni una función más. */
 export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
@@ -72,3 +94,31 @@ export const NUCLEO_DE_LA_PREPARACION = Object.freeze({
   resumenDeLaPreparacion,
   redactaAventura,
 });
+
+/** Lo único que el contenedor necesita del núcleo: cómo se llama el manifiesto. */
+export const NUCLEO_DEL_CONTENEDOR = Object.freeze({ NOMBRE_DEL_MANIFIESTO });
+
+/** Lo que `creaCopia` enumera en `DEL_NUCLEO`, ni una función más. */
+export const NUCLEO_DE_LA_COPIA = Object.freeze({
+  VERSION_FORMATO,
+  textoCanonico,
+  CLASES_DE_PARTE,
+  NOMBRE_DEL_MANIFIESTO,
+  componeExportacion,
+  importaPartida,
+  manifiestoDe,
+  medidaPorClaseDeParte,
+  nombreDeFichero,
+  parteDeDocumento,
+  validaManifiesto,
+  CADENA_DEL_FORMATO,
+  migra,
+});
+
+/**
+ * Lo que las reglas de respaldo necesitan: la lista única de prefijos de la partida.
+ *
+ * Va por aquí y no por un import propio precisamente porque la gracia de las reglas es
+ * derivar de esa lista y no copiarla; lo que no puede es arrastrar el paquete consigo.
+ */
+export const NUCLEO_DEL_RESPALDO = Object.freeze({ PREFIJOS_DE_LA_PARTIDA });
