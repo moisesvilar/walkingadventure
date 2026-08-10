@@ -32,11 +32,26 @@ import {
   cargaMapa,
   celdaAbierta,
   celdasAbiertas,
+  completaCelda,
   creaMapa,
+  guardaCelda,
+  guardaIndice,
   guardaMapa,
   listaMapas,
   pisa,
+  resuelvePosicion,
 } from '@walkingadventure/nucleo/partida/mapa.js';
+import {
+  ACCIONES as ACCIONES_DEL_OFRECIMIENTO,
+  ALCANCE_EN_TRAMOS,
+  ESTADOS_DE_APERTURA,
+  SIN_MAPA_ACTIVO,
+  TESTIDS as TESTIDS_DE_MAPAS,
+  componeOfrecimiento,
+  hayQueOfrecerMapa,
+  listaDeMapas,
+  resuelveMapaActivo,
+} from '@walkingadventure/nucleo/partida/mapas.js';
 import { claveDeCelda, creaRejilla } from '@walkingadventure/nucleo/world/rejilla.js';
 import {
   PRESUPUESTO_PREPARACION_MS,
@@ -94,6 +109,28 @@ export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
   pisa,
   claveDeCelda,
   creaRejilla,
+  // SPEC-041. Otra vez por aquí y por lo mismo (§6u): el mapa activo, la apertura de
+  // celdas vecinas y la lista de mapas tienen que poder leerse desde `node --test` sin
+  // resolver nada instalado, que es el único sitio donde «no existe ninguna operación
+  // que fije el mapa activo» y «el contador es por mapa» se pueden poner rojos.
+  completaCelda,
+  guardaCelda,
+  guardaIndice,
+  resuelvePosicion,
+  resuelveMapaActivo,
+  listaDeMapas,
+  ESTADOS_DE_APERTURA,
+  SIN_MAPA_ACTIVO,
+});
+
+/** Lo que la pantalla del ofrecimiento necesita del núcleo, ni una función más. */
+export const NUCLEO_DEL_OFRECIMIENTO = Object.freeze({
+  ACCIONES_DEL_OFRECIMIENTO,
+  TESTIDS_DE_MAPAS,
+  ALCANCE_EN_TRAMOS,
+  SIN_MAPA_ACTIVO,
+  componeOfrecimiento,
+  hayQueOfrecerMapa,
 });
 
 /** Lo que `creaPreparacion` enumera en su `DEL_NUCLEO`, ni una función más. */

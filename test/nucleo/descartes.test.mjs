@@ -105,8 +105,16 @@ import { fuente, generaMundo, semillaDe } from './mundo-de-prueba.mjs';
 
 const DESCARTES = 'packages/nucleo/partida/descartes.js';
 
-/** El tamaño medido del documento de `costero`, escrito como dato y no como criterio. */
-const BYTES_DE_COSTERO = 283991;
+/**
+ * El tamaño medido del documento de `costero`, escrito como dato y no como criterio.
+ *
+ * Se remidió en SPEC-041: el reparto del repertorio por celda filtra los sorteos de
+ * nombre, y eso cambia tanto los nombres como el flujo de azar de cada fase, así que el
+ * documento de la misma celda mide otra cosa. Lo que este caso afirma —que marcar un
+ * anclaje no mueve ni un byte— no depende del número; el número está para que un
+ * cambio silencioso en el documento se note aquí y no tres filas después.
+ */
+const BYTES_DE_COSTERO = 282996;
 
 /**
  * La celda entera —mundo, cupos y mapa— sobre la que se monta la capa. Se pide la de

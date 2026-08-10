@@ -267,7 +267,11 @@ describe('Exportar la partida', () => {
     const fichero = empaqueta(partes);
     const cabecera = fichero.indexOf('\n\n') + 2;
     assert.equal(fichero.length, cabecera + medida.total, 'el fichero mide algo distinto de su cabecera más sus partes: el contenedor está añadiendo o perdiendo bytes');
-    assert.equal(fichero.length, 24057, `la partida de dos mapas y una salida ocupa ${fichero.length} B y estaba declarada en 24 057 B: el tamaño del fichero ha cambiado y hay que revisarlo, no actualizar el número a ciegas`);
+    // El número se remidió en SPEC-041: el reparto del repertorio por celda cambia los
+    // nombres —que ahora llevan epíteto cuando la porción de la celda no da— y con ellos
+    // lo que ocupa cada documento. Lo que el caso afirma sigue siendo lo mismo: que el
+    // fichero es su cabecera más sus partes, y que su tamaño está declarado y no estimado.
+    assert.equal(fichero.length, 24112, `la partida de dos mapas y una salida ocupa ${fichero.length} B y estaba declarada en 24 112 B: el tamaño del fichero ha cambiado y hay que revisarlo, no actualizar el número a ciegas`);
   });
 
   test('El fichero de una partida de mil días queda medido entero y cabe en el presupuesto de SPEC-016', async () => {
@@ -289,7 +293,7 @@ describe('Exportar la partida', () => {
     // El tamaño declarado, fase a fase y entero. El registro es lo que crece con los
     // días, así que los documentos dominan todavía más que en una partida corta: es el
     // dato con el que se decidiría podar, y por eso se dice y no se estima.
-    assert.equal(fichero.length, 718638, `la partida de mil días ocupa ${fichero.length} B y estaba declarada en 718 638 B: el tamaño del fichero ha cambiado y hay que revisarlo`);
+    assert.equal(fichero.length, 718693, `la partida de mil días ocupa ${fichero.length} B y estaba declarada en 718 693 B: el tamaño del fichero ha cambiado y hay que revisarlo`);
     assert.ok(medida.documento / medida.total > 0.99, 'los documentos han dejado de ser casi todo el fichero de una partida larga');
     assert.ok(fichero.length < 1024 * 1024, `el fichero de una partida de mil días pasa del mega: ${fichero.length} B`);
   });

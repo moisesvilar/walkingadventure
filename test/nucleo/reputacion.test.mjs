@@ -36,6 +36,7 @@ import {
   mundoDe,
   mundoLineal,
   mundoReal,
+  origenReal,
   propagacionSobre,
 } from './rumor-de-prueba.mjs';
 
@@ -244,7 +245,7 @@ describe('Dónde vive lo que se cuenta', () => {
     const { registro, arbol } = await mundoReal(CELDA_COSIDA);
     const antes = textoDeCelda(registro);
     const { prop, nucleos } = propagacionSobre(null, { arbol, tramo: 2000 });
-    prop.nace(desenlaceEn('Covatoño da Brétema'), 0);
+    prop.nace(desenlaceEn(origenReal(arbol)), 0);
     avanza(prop, 30);
 
     assert.equal(textoDeCelda(registro), antes, 'lo que hizo la jugadora ha repintado el mapa del mundo');

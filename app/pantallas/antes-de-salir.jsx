@@ -20,6 +20,7 @@ import { CATALOGO } from '@walkingadventure/nucleo/quests/catalogo.js';
 
 import { PantallaLoQueHayHoy, PantallaFicha } from './lo-que-hay-hoy.jsx';
 import { PantallaPortada } from './portada.jsx';
+import { PantallaOfrecimiento } from './ofrecimiento.jsx';
 import { PantallaPreparacion } from './preparacion.jsx';
 
 /** Las pantallas del momento, tal como las encadena `docs/flujo.md`. */
@@ -52,7 +53,11 @@ function plantillaDe(id) {
  *   el área de aventuras y la cola de entregas; `preparacion` la orquestación de A2P5;
  *   `zurron` el modo de pasos de fondo y lo que haya en reserva; `alAndar` qué ocurre al salir;
  *   `alEcharElTelon` qué ocurre al cerrar una salida —es de la fila 36 y aquí solo se avisa—;
- *   `alAbrirPuerta` el diario, la repisa y los ajustes, que son de las filas 37 y 38.
+ *   `alAbrirPuerta` el diario, la repisa y los ajustes, que son de las filas 37 y 38;
+ *   `ofrecimiento` lo que devuelve `componeOfrecimiento` cuando **no hay mapa activo**, que
+ *   es el caso de estar lejos de todos los mapas de la partida. Sustituye a la portada y no
+ *   se superpone a ella: sin mapa no hay portada que enseñar, y enseñar la de casa a
+ *   trescientos kilómetros ofrecería salir a andar en un mundo donde no estás.
  */
 export function PantallaAntesDeSalir({
   calendario,
@@ -63,6 +68,9 @@ export function PantallaAntesDeSalir({
   zurron = {},
   criterios = [],
   tamano = 'aventura',
+  ofrecimiento = null,
+  alLevantarMapa = null,
+  alDejarloEstar = null,
   alAndar = null,
   alEcharElTelon = null,
   alAbrirPuerta = null,
@@ -81,9 +89,9 @@ export function PantallaAntesDeSalir({
   const [preparado, setPreparado] = useState(null);
   const [refresco, setRefresco] = useState(0);
 
-  const mapaId = mundo.mapaId;
+  const mapaId = mundo?.mapaId ?? null;
   const peticion = useMemo(() => ({
-    mundo: mundo.documento,
+    mundo: mundo?.documento ?? null,
     oficio: personaje.oficio,
     tramo: personaje.tramo?.declaradoM ?? personaje.tramoM,
     criterios,
@@ -96,9 +104,25 @@ export function PantallaAntesDeSalir({
   const portada = useMemo(
     // `refresco` está en las dependencias a propósito: abrir o cerrar una salida cambia el
     // registro en sitio, y sin él la tarjeta de a medias se quedaría como estaba.
-    () => componePortada({ calendario, personaje, mundo, salidas: estado.aventuras, zurron }),
-    [calendario, personaje, mundo, estado, zurron, refresco],
+    //
+    // Sin mapa activo no se compone ninguna: una portada necesita un mapa dentro, y
+    // componerla con el último visitado sería enseñar un sitio en el que no se puede jugar.
+    () => (ofrecimiento ? null : componePortada({ calendario, personaje, mundo, salidas: estado.aventuras, zurron })),
+    [calendario, personaje, mundo, estado, zurron, refresco, ofrecimiento],
   );
+
+  // El ofrecimiento manda sobre todo lo demás y no es un paso de esta máquina: no se
+  // llega a él desde ninguna pantalla, se está en él porque no hay mapa donde estás.
+  if (ofrecimiento) {
+    return (
+      <PantallaOfrecimiento
+        ofrecimiento={ofrecimiento}
+        alLevantar={alLevantarMapa}
+        alDejarlo={alDejarloEstar}
+        alAbrirPuerta={alAbrirPuerta}
+      />
+    );
+  }
 
   const abre = useCallback(() => {
     if (haySalidaAbierta(estado.aventuras)) return;
@@ -169,7 +193,7 @@ export function PantallaAntesDeSalir({
             // la tarjeta: lo que se ilustra son los lugares del lazo.
             aventura: { id: elegida.id, tamano: elegida.tamano, beats: elegida.beats },
             plantilla: plantillaDe(elegida.id),
-            mundo: mundo.documento,
+            mundo: mundo?.documento ?? null,
           });
           setPreparado(hecho);
         }}

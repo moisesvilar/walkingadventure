@@ -23,9 +23,16 @@ export const MAPA = 'casa';
 /**
  * Los dos mundos reales sobre los que se mide con dato de OSM, y por qué son estos:
  * en `barrio-tres-calles` con tramo de 2 km, la celda del origen trae una calzada
- * **cosida** de 1553 m y la celda `1,-2` cae fuera del extracto, así que todas sus
+ * **cosida** de 1717 m y la celda `1,-2` cae fuera del extracto, así que todas sus
  * calzadas son **fallback** —una de ellas de 2153 m—. Son los dos casos que la
  * penalización distingue, medidos y no fabricados.
+ *
+ * Los **nombres** de esos núcleos no se escriben en ninguna prueba y salen siempre de
+ * `aristasDe`, `origenReal` y `saltosDesde`: desde SPEC-041 el reparto del repertorio
+ * por celda cambia cómo se llama cada sitio del extracto, y siete casos escritos con el
+ * nombre de un núcleo se ponían rojos por un renombrado sin que nada del comportamiento
+ * hubiera cambiado. Lo que estas pruebas afirman es de la calzada —sus metros y su
+ * marca— y del árbol, no de cómo se llame el pueblo del otro lado.
  */
 export const CELDA_COSIDA = { i: 0, j: 0 };
 export const CELDA_SIN_CALZADA_REAL = { i: 1, j: -2 };
@@ -34,6 +41,91 @@ export const CELDA_SIN_CALZADA_REAL = { i: 1, j: -2 };
 export async function mundoReal(celda = CELDA_COSIDA) {
   const registro = await celdaDeFixture('barrio-tres-calles', { celda, tramoM: 2000 });
   return { mundo: registro.mundo, registro, arbol: arbolDeCalzadas(registro.mundo) };
+}
+
+// --- Lo medido de un mundo real, sin escribir ningún nombre -------------------
+
+/**
+ * Las aristas del árbol de un mundo, cada una con lo que la propagación mira de ella:
+ * sus metros, si cruza el monte y qué marcas de suposición llevan sus tramos.
+ *
+ * En orden estable por identificador y sin repetir una arista por sus dos sentidos, para
+ * que elegir «la cosida» o «la más larga» dé siempre la misma en dos ejecuciones.
+ */
+export function aristasDe(mundo, arbol = arbolDeCalzadas(mundo)) {
+  const vistas = new Set();
+  const aristas = [];
+  for (const r of mundo?.routes ?? []) {
+    if (r?.ramal) continue;
+    const a = r?.from?.name;
+    const b = r?.to?.name;
+    if (typeof a !== 'string' || typeof b !== 'string' || a === b) continue;
+    if (!arbol.tiene(a) || !arbol.tiene(b)) continue;
+    const clave = [a, b].sort().join('|');
+    if (vistas.has(clave)) continue;
+    vistas.add(clave);
+    const marcas = [...new Set((r.tramos ?? []).map((t) => t.suposicion ?? SUPOSICIONES.NINGUNA))];
+    aristas.push({
+      a,
+      b,
+      metros: Math.round(arbol.metrosDe(a, b)),
+      cruzaElMonte: arbol.cruzaElMonteDe(a, b),
+      cosida: marcas.includes(SUPOSICIONES.COSIDA),
+      fallback: marcas.includes(SUPOSICIONES.FALLBACK),
+      limpia: marcas.every((m) => m === SUPOSICIONES.NINGUNA),
+    });
+  }
+  return aristas.sort((x, y) => (`${x.a}|${x.b}` < `${y.a}|${y.b}` ? -1 : 1));
+}
+
+/**
+ * La única arista que cumple una condición, o un fallo que dice qué había.
+ *
+ * Existe para que una prueba que pide «la calzada cosida de esta celda» se ponga roja
+ * cuando deja de haber exactamente una, en vez de elegir en silencio la primera y medir
+ * otra cosa.
+ */
+export function laUnicaArista(aristas, cumple, que) {
+  const candidatas = aristas.filter(cumple);
+  if (candidatas.length !== 1) {
+    const vistas = aristas.map((e) => `${e.a}↔${e.b} ${e.metros} m${e.cosida ? ' cosida' : ''}${e.fallback ? ' fallback' : ''}`).join('; ');
+    throw new Error(`se esperaba una sola arista ${que} y hay ${candidatas.length}. Las de esta celda son: ${vistas}`);
+  }
+  return candidatas[0];
+}
+
+/**
+ * El núcleo desde el que nace el rumor en un mundo real: el primero por orden estable
+ * **que tenga por dónde contarlo**. Un origen aislado dejaría los casos de la
+ * propagación afirmando sobre un rumor que no viaja a ninguna parte.
+ */
+export function origenReal(arbol) {
+  const origen = arbol.nucleos.find((n) => arbol.vecinos(n).length > 0);
+  if (!origen) throw new Error('ningún núcleo de esta celda tiene vecinos por calzada: no hay rumor que pueda viajar');
+  return origen;
+}
+
+/** Los saltos de calzada desde un núcleo hasta cada uno de los demás, por anchura. */
+export function saltosDesde(arbol, origen) {
+  const saltos = new Map([[origen, 0]]);
+  const cola = [origen];
+  while (cola.length) {
+    const actual = cola.shift();
+    for (const vecino of arbol.vecinos(actual)) {
+      if (saltos.has(vecino)) continue;
+      saltos.set(vecino, saltos.get(actual) + 1);
+      cola.push(vecino);
+    }
+  }
+  return saltos;
+}
+
+/** El primer núcleo, por orden estable, que está a exactamente `n` saltos del origen. */
+export function aSaltos(arbol, origen, n) {
+  const saltos = saltosDesde(arbol, origen);
+  const cual = arbol.nucleos.find((id) => saltos.get(id) === n);
+  if (!cual) throw new Error(`ningún núcleo de esta celda está a ${n} saltos de "${origen}": el caso no mediría nada`);
+  return cual;
 }
 
 // --- Mundos sintéticos ------------------------------------------------------

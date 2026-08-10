@@ -44,13 +44,17 @@ import {
   PLANTILLA_NO_NOTABLE,
   SEMILLA_A,
   SEMILLA_B,
+  aSaltos,
+  aristasDe,
   avanza,
   codigoDe,
   desenlaceEn,
+  laUnicaArista,
   mundoDe,
   mundoLineal,
   mundoReal,
   nivelEn,
+  origenReal,
   plantillaDe,
   propagacionSobre,
 } from './rumor-de-prueba.mjs';
@@ -178,7 +182,10 @@ describe('El nacimiento: dónde y con qué', () => {
 
   test('Un paraje del mundo real cuelga del núcleo al que se llega por menos metros de calzada', async () => {
     const { mundo, arbol } = await mundoReal(CELDA_COSIDA);
-    assert.ok(mundo.parajes.length >= 6, 'la celda del origen tiene que traer parajes con los que probar el enganche');
+    // La guarda existe para que el bucle de abajo mida algo, y el número es el medido:
+    // desde SPEC-041 el reparto del repertorio filtra los sorteos de nombre y con ellos
+    // el flujo de azar de cada fase, así que esta celda pasó de seis parajes a cinco.
+    assert.ok(mundo.parajes.length >= 5, `la celda del origen tiene que traer parajes con los que probar el enganche y trae ${mundo.parajes.length}`);
     for (const p of mundo.parajes) {
       const nucleo = arbol.nucleoDeParaje(p.name);
       assert.ok(arbol.tiene(nucleo), `"${p.name}" cuelga de "${nucleo}", que no está en el árbol`);
@@ -376,25 +383,33 @@ describe('El viaje: un tramo por paso, por el árbol', () => {
 });
 
 describe('El nivel sobre dato real: cosida no penaliza y fallback sí', () => {
-  test('Una calzada cosida de 1553 m entrega en nivel 1 y una fallback de 2153 m en nivel 2', async () => {
+  test('Una calzada cosida de 1717 m entrega en nivel 1 y una fallback de 2153 m en nivel 2', async () => {
     // Los dos casos medidos sobre `barrio-tres-calles` con tramo de 2 km, y no se
     // pueden colapsar: es la mitad que se pierde si alguien convierte el enumerado de
-    // tres valores de SPEC-007 en un booleano.
+    // tres valores de SPEC-007 en un booleano. Las dos calzadas se buscan **por lo que
+    // son** —la única cosida de su celda, la fallback más larga de la suya— y no por el
+    // nombre de los pueblos que unen: cómo se llaman es dato del reparto del repertorio
+    // (SPEC-041) y lo que este caso mide son los metros y la marca del tramo.
     const cosida = await mundoReal(CELDA_COSIDA);
-    assert.equal(Math.round(cosida.arbol.metrosDe('Casal dos Vagalumes', 'Outeiláns do Vento')), 1553);
-    assert.equal(cosida.arbol.cruzaElMonteDe('Casal dos Vagalumes', 'Outeiláns do Vento'), false, 'lo cosido no cruza el monte');
+    const laCosida = laUnicaArista(aristasDe(cosida.mundo, cosida.arbol), (e) => e.cosida, 'con algún tramo cosido');
+    assert.equal(laCosida.metros, 1717, 'la calzada cosida de esta celda medía 1717 m');
+    assert.equal(laCosida.cruzaElMonte, false, 'lo cosido no cruza el monte');
+    assert.ok(laCosida.metros <= 2000, 'la calzada cosida tiene que caber en un solo paso para que el salto sea uno');
     const a = propagacionSobre(null, { arbol: cosida.arbol, tramo: 2000 });
-    a.prop.nace(desenlaceEn('Casal dos Vagalumes'), 0);
+    a.prop.nace(desenlaceEn(laCosida.a), 0);
     avanza(a.prop, 1);
-    assert.equal(nivelEn(a.nucleos, MAPA, 'Outeiláns do Vento'), 1, 'un salto por calzada cosida es nivel 1');
+    assert.equal(nivelEn(a.nucleos, MAPA, laCosida.b), 1, 'un salto por calzada cosida es nivel 1');
 
     const fallback = await mundoReal(CELDA_SIN_CALZADA_REAL);
-    assert.equal(Math.round(fallback.arbol.metrosDe('Outeidoiro do Vento', 'Miraño do Corvo')), 2153);
-    assert.equal(fallback.arbol.cruzaElMonteDe('Outeidoiro do Vento', 'Miraño do Corvo'), true);
+    const aristas = aristasDe(fallback.mundo, fallback.arbol);
+    assert.ok(aristas.every((e) => e.fallback), 'la celda de fuera del extracto tiene que traer todas sus calzadas fallback');
+    const laFallback = aristas.reduce((mayor, e) => (e.metros > mayor.metros ? e : mayor));
+    assert.equal(laFallback.metros, 2153, 'la fallback más larga de esa celda medía 2153 m');
+    assert.equal(laFallback.cruzaElMonte, true);
     const b = propagacionSobre(null, { arbol: fallback.arbol, tramo: 2000 });
-    b.prop.nace(desenlaceEn('Outeidoiro do Vento'), 0);
+    b.prop.nace(desenlaceEn(laFallback.a), 0);
     avanza(b.prop, 2);
-    assert.equal(nivelEn(b.nucleos, MAPA, 'Miraño do Corvo'), 2, 'un salto que cruza un trozo sin calzada real es nivel 2');
+    assert.equal(nivelEn(b.nucleos, MAPA, laFallback.b), 2, 'un salto que cruza un trozo sin calzada real es nivel 2');
   });
 
   test('Cruzar un tramo sin calzada real cuesta un nivel más', () => {
@@ -409,16 +424,27 @@ describe('El nivel sobre dato real: cosida no penaliza y fallback sí', () => {
   });
 
   test('Dos caminos de un salto, uno cosido y otro sin ninguna suposición, llegan en el mismo nivel', async () => {
-    // Sobre dato real: desde «Casal dos Vagalumes» hay un vecino por calzada limpia y
-    // otro por calzada cosida, y los dos lo reciben igual de fiel.
-    const { arbol } = await mundoReal(CELDA_COSIDA);
-    assert.equal(arbol.cruzaElMonteDe('Casal dos Vagalumes', 'Casal da Fonte Vella'), false);
-    assert.equal(arbol.cruzaElMonteDe('Casal dos Vagalumes', 'Outeiláns do Vento'), false);
+    // Sobre dato real: hay un núcleo con un vecino por calzada limpia y otro por calzada
+    // cosida, y los dos lo reciben igual de fiel. Se busca por esa forma —un extremo de
+    // la cosida que además tenga una limpia— y no por el nombre de los tres pueblos.
+    const { mundo, arbol } = await mundoReal(CELDA_COSIDA);
+    const aristas = aristasDe(mundo, arbol);
+    const laCosida = laUnicaArista(aristas, (e) => e.cosida, 'con algún tramo cosido');
+    const tocaA = (e, n) => e.a === n || e.b === n;
+    const elOtro = (e, n) => (e.a === n ? e.b : e.a);
+    const desde = [laCosida.a, laCosida.b].find((n) => aristas.some((e) => e.limpia && tocaA(e, n)));
+    assert.ok(desde, 'ningún extremo de la calzada cosida tiene además un vecino por calzada limpia: el caso no compararía nada');
+    const laLimpia = aristas.find((e) => e.limpia && tocaA(e, desde));
+    assert.ok(laCosida.metros <= 2000 && laLimpia.metros <= 2000, 'los dos caminos tienen que ser de un solo salto');
+    const porCosida = elOtro(laCosida, desde);
+    const porLimpia = elOtro(laLimpia, desde);
+    assert.equal(arbol.cruzaElMonteDe(desde, porLimpia), false);
+    assert.equal(arbol.cruzaElMonteDe(desde, porCosida), false);
     const { prop, nucleos } = propagacionSobre(null, { arbol, tramo: 2000 });
-    prop.nace(desenlaceEn('Casal dos Vagalumes'), 0);
+    prop.nace(desenlaceEn(desde), 0);
     avanza(prop, 1);
-    assert.equal(nivelEn(nucleos, MAPA, 'Casal da Fonte Vella'), 1);
-    assert.equal(nivelEn(nucleos, MAPA, 'Outeiláns do Vento'), 1, 'lo cosido no puede penalizar');
+    assert.equal(nivelEn(nucleos, MAPA, porLimpia), 1);
+    assert.equal(nivelEn(nucleos, MAPA, porCosida), 1, 'lo cosido no puede penalizar');
   });
 
   test('Un salto con dos tramos fallback suma uno solo, no uno por tramo', () => {
@@ -472,11 +498,17 @@ describe('El nivel sobre dato real: cosida no penaliza y fallback sí', () => {
     for (const a of arbol.nucleos) {
       for (const b of arbol.vecinos(a)) assert.equal(arbol.cruzaElMonteDe(a, b), true);
     }
+    // El origen y los dos destinos salen del árbol —el primero con vecinos, uno a un
+    // salto y otro a dos— y no de tres nombres escritos a mano: lo que el caso afirma es
+    // cuánto cuesta un salto por el monte, no cómo se llame el pueblo del otro lado.
+    const origen = origenReal(arbol);
+    const aUnSalto = aSaltos(arbol, origen, 1);
+    const aDosSaltos = aSaltos(arbol, origen, 2);
     const { prop, nucleos } = propagacionSobre(null, { arbol, tramo: 4000 });
-    prop.nace(desenlaceEn('Outeidoiro do Vento'), 0);
+    prop.nace(desenlaceEn(origen), 0);
     avanza(prop, 6);
-    assert.equal(nivelEn(nucleos, MAPA, 'Casal do Arado'), 2, 'un salto por el monte son dos niveles');
-    assert.equal(nivelEn(nucleos, MAPA, 'Casal do Muíño Roto'), 3, 'dos saltos por el monte topan en tres');
+    assert.equal(nivelEn(nucleos, MAPA, aUnSalto), 2, 'un salto por el monte son dos niveles');
+    assert.equal(nivelEn(nucleos, MAPA, aDosSaltos), 3, 'dos saltos por el monte topan en tres');
   });
 
   test('Una calzada sin longitud o sin tramos declarados falla nombrándola', () => {
@@ -522,7 +554,7 @@ describe('Se agota solo y sedimenta', () => {
     // frente se para al entregar en nivel 3, y el árbol es finito.
     const { arbol } = await mundoReal(CELDA_COSIDA);
     const { prop, nucleos } = propagacionSobre(null, { arbol, tramo: 2000 });
-    prop.nace(desenlaceEn('Covatoño da Brétema'), 0);
+    prop.nace(desenlaceEn(origenReal(arbol)), 0);
     avanza(prop, 50);
 
     assert.deepEqual(prop.activos(), [], 'después de cincuenta pasos el rumor ya no viaja');
@@ -695,7 +727,7 @@ describe('Determinismo y estado de partida', () => {
     const { arbol } = await mundoReal(CELDA_COSIDA);
     const corrida = () => {
       const p = propagacionSobre(null, { arbol, tramo: 2000 });
-      p.prop.nace(desenlaceEn('Covatoño da Brétema'), 0);
+      p.prop.nace(desenlaceEn(origenReal(arbol)), 0);
       avanza(p.prop, 20);
       return JSON.stringify({ rumores: congelaRumores(p.estado), nucleos: p.nucleos });
     };
@@ -800,7 +832,7 @@ describe('Determinismo y estado de partida', () => {
     const { registro, arbol } = await mundoReal(CELDA_COSIDA);
     const antes = textoDeCelda(registro);
     const { prop, nucleos } = propagacionSobre(null, { arbol, tramo: 2000 });
-    prop.nace(desenlaceEn('Covatoño da Brétema'), 0);
+    prop.nace(desenlaceEn(origenReal(arbol)), 0);
     avanza(prop, 50);
     assert.ok(arbol.nucleos.some((n) => nivelEn(nucleos, MAPA, n) !== null), 'alguien tiene que haberse enterado');
     assert.equal(textoDeCelda(registro), antes, 'la propagación ha tocado el documento congelado de la celda');
