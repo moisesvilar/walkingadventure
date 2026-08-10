@@ -153,8 +153,27 @@ appId: com.walkingadventure.app
 - assertVisible: '1/5'
 - assertNotVisible:
     id: 'empezar-de-nuevo'
-- assertNotVisible: 'Sabela'
-- assertNotVisible: 'Marcas de Vaeloria'
+# Aquí había `assertNotVisible: 'Sabela'` y **no medía lo que decía medir**. Corregido el
+# 10-ago-2026 con el fallo delante: la tanda entera salió roja con «Assertion is false:
+# "Sabela" is not visible», y la pantalla en la que falló era A1P1, que es donde el
+# arranque **sortea cuatro sugerencias de nombre**. En la ejecución siguiente salieron
+# Aldara, Xela, Froilán y Airas, y la misma línea pasó.
+#
+# Es decir: la afirmación se cumplía o fallaba según lo que sorteara la entropía del
+# dispositivo, y no según si quedaba huella de la partida anterior. Y por partida doble,
+# porque `arranque.yaml` **tampoco escribe el nombre**: el campo llega relleno con una
+# sugerencia sorteada, así que «Sabela» ni siquiera era el nombre del personaje que se
+# borró. Es la misma forma que el `.*\d+\s*(km|m|...)` de la fila 45: una ausencia que se
+# pone roja por una palabra que no tiene nada que ver.
+#
+# Lo que estas dos líneas querían decir —que no queda huella de la partida anterior— lo
+# dicen las de arriba y las de abajo, que sí nombran cosas estables: el contador en 1/5,
+# la ausencia de la pantalla de empezar de nuevo y la de los tres atajos. Se quitan las
+# dos, no se ablandan.
+#
+# El título del mundo iba en la misma línea (`assertNotVisible: 'Marcas de Vaeloria'`) y se
+# quita por lo mismo: los títulos también se sortean, así que afirmar la ausencia de uno
+# concreto no dice nada de si el mundo anterior sigue ahí.
 # Aquí había `assertNotVisible: 'Seguir'` y era imposible: **«Seguir» es el botón propio de
 # A1P1**, y `arranque.yaml` lo afirma presente tres líneas después de arrancar. Las dos
 # pruebas se contradecían y ninguna se había ejecutado nunca. Lo que este bloque quiere
@@ -164,10 +183,23 @@ appId: com.walkingadventure.app
 - assertNotVisible: 'El mismo mundo otra vez'
 - assertNotVisible: 'Recuperar la partida'
 
-# Y volver a lanzar la app sigue llevando al arranque: no queda partida que abrir.
+# Y volver a lanzar la app sigue llevando al arranque: no queda partida que abrir. Desde
+# SPEC-047 esta es la comprobación que más pesa de las de este bloque, y por eso se
+# refuerza: la app ya **no abre siempre en el arranque**, abre por lo que hay en disco. Que
+# llegue aquí después de borrar significa que el borrado se llevó también el documento de
+# partida, y no solo que la app entre por donde entraba antes.
 - launchApp:
     clearState: false
-- assertVisible:
-    id: 'arranque'
+# Levantar la partida ocurre antes de pintar nada, así que hay un fotograma en el que no se
+# ve ninguna de las dos entradas. Se espera al arranque en vez de afirmarlo a la primera.
+- extendedWaitUntil:
+    visible:
+      id: 'arranque'
+    timeout: 30000
 - assertVisible: '1/5'
-- assertNotVisible: 'Sabela'
+# Sin la avería por medio: si el borrado hubiera dejado media partida, esto es lo que se
+# vería en su lugar, y sería la degradación silenciosa que SPEC-040 y SPEC-047 cierran.
+- assertNotVisible:
+    id: 'partida-averiada'
+- assertNotVisible:
+    id: 'portada'

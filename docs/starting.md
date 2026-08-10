@@ -1457,3 +1457,78 @@ Y la guarda de identificadores de SPEC-026 hubo que ensancharla, porque `mapa.ya
 `maestro test` sobre `wa-pixel`: **`andamiaje.yaml` EXIT=0 (20 comandos)**, **`gancho-capacidad-ausente.yaml` EXIT=0 (22)**, **`mapa.yaml` EXIT=0 (51)** — este último levanta un mundo de verdad y lo pinta. Batería de núcleo: **2609 casos, 2603 pasan, 3 fallan, 3 saltados**, y los tres rojos siguen siendo la guarda de la fila 47.
 
 **La columna de límite declarado baja de 12 a 8.** Los ocho que quedan no están bloqueados por navegación: seis esperan el módulo de ubicación (fila 48), uno la pantalla de elección de los ajustes (fila 38) y uno el documento de partida (fila 47).
+
+# 10-ago-2026 (XXX) · La partida se guarda, y lo que se ve al medirla de verdad
+
+La fila 47, que es la más grave de las que quedaban: **la partida no se guardaba nunca**. `congelaEstado` y `levantaEstado` llevaban desde SPEC-016 escritos y probados de arriba abajo, y no los llamaba nadie desde `app/`; cada arranque construía `estadoInicial({ semilla })` y ese estado se moría en la memoria de React. De los cuatro prefijos de `PREFIJOS_DE_LA_PARTIDA`, la app escribía tres. Confirmado antes de tocar nada: `grep` sobre `app/` no devolvía ni una cita de las dos funciones, ni una línea que escribiera bajo `partida/`.
+
+## Lo que se decidió
+
+**Cuándo se congela: cuatro momentos y ninguno más.** Al nacer la partida —al cerrarse el arranque—, al volver de una pantalla de consulta, al echarse a andar, y cuando la app pasa a segundo plano. Los tres primeros son cortes del juego; el cuarto es la red que cubre lo que ninguno cubre, porque a una app la mata el sistema sin avisar y no hay ningún evento de «me van a matar». No se congela en cada cambio de estado, que es escribir en disco a cada paso.
+
+**Y por eso congelar tiene que ser idempotente.** El texto canónico del estado es el sello: si no ha cambiado desde la última congelación, no se reescribe nada. Es lo que permite colgar la congelación de tantos sitios sin pagarlo, y es el uso real de `congelaEstado` dentro de la app —el que no está escondido dentro de `guardaPartida`—. Medido: congelar dos veces seguidas escribe una, y abrir la partida y congelarla acto seguido no escribe nada.
+
+**Un documento que no se puede leer da la cara y no se degrada.** Aquí no se cae nunca a `estadoInicial`: una partida que se pierde y se parece a una que empieza es la degradación silenciosa más cara que este proyecto puede hacer, y es la misma regla que SPEC-040 aplicó al borrado a medias. Tampoco se reconstruye desde el registro por iniciativa propia, que es lo que `reconstruccion.js` prohíbe por escrito. La avería ofrece **abrir una copia y nada más**: ni «continuar», ni «empezar de nuevo». No entra en `docs/flujo.md` —no es una pantalla del juego sino la app confesando un fallo, que es el registro que `lenguaje.md` reserva para esto— y su texto definitivo sigue siendo el pendiente 3 de `partida-guardada.md`.
+
+**Migrar ocurre al abrir, una vez, y se levanta antes de escribirse.** `levantaEstado` y `levantaRegistro` se llaman sobre el documento migrado **antes** de sustituir al bueno: uno que no se puede levantar se descarta entero. Y la cadena y la versión de destino entran por la firma, que es la mitad del diseño de `migracion.js` (§6o): sin eso, «la migración funciona» se cumpliría siempre por no haber nada que migrar, con la versión de formato todavía en 1.
+
+**El mapa que se levanta al volver es el primero por identificador**, y es una limitación declarada: cuál es el activo lo decide dónde estás (RF-PERS-007) y eso pide el módulo de ubicación, que es la fila 48. Con un solo mapa —toda partida que no ha viajado— las dos reglas coinciden, y es la misma que la exportación ya usa para nombrar el fichero.
+
+## Lo que se implementó
+
+`app/datos/partida-guardada.js`, con el generador inyectado como manda §6u, y `app/mapa/mundo-guardado.js`, que lee el documento del mundo sin red y sin pintar nada —el hermano pobre de `levantamiento.abre`, a propósito: aquel monta traedor, proxy, atestación y Skia porque tiene que poder generar; esto solo lee—. En `App.js`, la entrada deja de ser siempre el arranque: se abre lo que hay en disco antes de pintar nada, con una superficie de espera en medio para que «no hay partida» y «todavía no se sabe» no se vean igual.
+
+Y una invariante que se cierra por contrato en vez de por vigilancia: **todo lo que esta orquestación escribe cuelga de `partida/`**, comprobado en un envoltorio del almacén por el que pasa también `guardaPartida`. Una clave de la partida escrita fuera de ese prefijo no entraría ni en la copia ni en el respaldo, y nadie la echaría de menos: es §6h un nivel más abajo.
+
+## Verificado con
+
+`maestro test test/app/partida-persistida.yaml` sobre `wa-pixel` → **EXIT=0 (1 m 24 s)**: arranque entero, portada, `stopApp` + `launchApp` **sin `clearState`**, y vuelve a la portada y no al arranque; dos veces seguidas. Y el documento está en el dispositivo: `adb run-as` enseña `files/partida/partida/estado.json` y `registro.json`, con 23 áreas, el personaje entero —nombre, oficio, tramo declarado de 1200 m— y los ajustes. Pasa `sinRastroDeUbicacion` y se levanta con `levantaEstado`: 26 campos.
+
+**La copia, con la partida real del emulador y no con una sintética.** Se sacó el directorio con `adb`, se exportó y el manifiesto trae `partida/estado.json`, `partida/registro.json` y el mapa —5 documentos, 1 mapa—; importado en un almacén limpio, la partida vuelve con su personaje (Sabela, taberna), su semilla (`NB6ACDFA58P47C9X`) y su mapa, «Reinos do Solpor». Es lo que la fila 39 prometió y no podía cumplir.
+
+**Una partida que el juego no entiende da la cara, medido en pantalla.** Se le puso `version: 9` al fichero del emulador con `adb` y se relanzó: *«Tu partida guardada no se ha podido abrir»*, el motivo literal —*«el documento partida/estado.json está escrito en la versión de formato 9 y esta versión del juego entiende la 1: no se abre»*—, «Abrir una copia», y ni arranque ni portada ni ninguna acción que borre. Restaurado el fichero bueno, vuelve a la portada.
+
+Batería de núcleo: **2634 casos, 2631 pasan, 0 fallan, 3 saltados**. Los tres rojos de `partida-persistida.test.mjs` se apagan **por el cableado**, sin tocar la prueba. `@app`: **19 flujos, 8 pasan, 2 fallan, 9 solo comprueban su límite**.
+
+## Los números que no salen como el encargo esperaba, dichos con la cifra delante
+
+**La columna de límite declarado no baja: sigue en 9.** Y de paso, la entrada anterior dice que quedó en **8**; contados los ficheros con el marcador, son **9**. Ese número estaba mal.
+
+El único que esta fila podía desbloquear era `repisa.yaml`, y no puede pasar, porque **hoy nada de `app/` altera el estado de la partida después de que el arranque se cierre**. Medido leyendo la fuente: las cuatro pantallas de consulta solo leen; el único interruptor que escribiría —los pasos de fondo, que llaman a `cambiaAjuste`— recibe su callback a `null` porque `App.js` no monta el zurrón (fila 46); y quien emite hechos —llegadas, escenas, telón— espera al módulo de ubicación (fila 48) y a las dos pantallas que nunca se escribieron (fila 49). La repisa de cualquier partida del dispositivo son dos líneas y el oro.
+
+Así que lo que sobrevive hoy y se puede afirmar es **el personaje, la semilla, los ajustes y el mapa levantado**, y no una entrada de diario ni un objeto en la repisa. Medir la persistencia con un diario que nadie escribe sería medir el vacío.
+
+**La siembra queda fichada y no estirada.** El documento sembrado lo produce el núcleo jugando N días en headless —`partidaCompleta` ya lo hace—, pero para que llegue al dispositivo hace falta o una puerta que lo importe o una vía de desarrollo que lo escriba, y las dos son diseño. Y hay un argumento contra la segunda que ya está escrito en §6y: *verificar una pantalla del juego por una puerta que ningún jugador usa es deuda*. La repisa es del juego.
+
+## Lo que la fila rompió, y se arregló diciéndolo
+
+**`mapas.yaml` declaraba como límite algo que esta fila deja de ser cierto.** Decía que la app abre en el arranque; desde que la partida se guarda, abrir con una partida en disco lleva a la portada, y con `clearState: false` su guarda afirmaba `arranque` visible y fallaba. Reproducido tres veces —las dos primeras se las llevó la caída de `adb`, la tercera llegó a la aserción—. Lo que le falta a ese flujo no era nunca la puerta: son dos mapas y el ofrecimiento cableado. Se corrige de qué depende su entrada, con la medida escrita en el propio fichero.
+
+Y de paso, `diario.yaml` y `repisa.yaml` llevaban desde la fila 43 diciendo que «no hay ninguna puerta que lleve hasta ella», que es falso desde que la portada tiene sus tres puertas. Corregido el motivo en los dos, sin tocar la guarda: el identificador que miran no existe ni va a existir, así que lo que decían era verdad; lo que mentía era el porqué.
+
+**Y un tercero, que no es de esta fila y salió porque la tanda se repitió: `assertNotVisible: 'Sabela'` no medía lo que decía medir.** La tanda salió roja con «Assertion is false: "Sabela" is not visible», y la pantalla donde falló era A1P1, que es donde el arranque **sortea cuatro sugerencias de nombre**. En la ejecución siguiente salieron Aldara, Xela, Froilán y Airas y la misma línea pasó. Por partida doble, además: `arranque.yaml` tampoco escribe el nombre —el campo llega relleno con una sugerencia sorteada—, así que «Sabela» ni siquiera era el nombre del personaje que se borraba. Es la misma forma que el `.*\d+\s*(km|m|…)` de la fila 45: una ausencia que se pone roja por una palabra que no tiene nada que ver. Se quitan las dos líneas y la del título del mundo, que se sortea igual.
+
+En su lugar, ese flujo pasa a afirmar algo que **antes de esta fila no significaba nada**: que después de borrar, volver a lanzar la app lleva al arranque y no a la portada ni a la avería. Con la app abriendo siempre en el arranque, esa comprobación era vacía; ahora dice que el borrado se llevó también el documento de partida.
+
+**Los otros dos rojos de `@app` son anteriores y siguen fichados.** `empezar-de-nuevo-copia.yaml` es el de la entrada XXVIII —`Share.dismissedAction` es de iOS y en Android la hoja resuelve siempre como compartida—, y `zurron.yaml` busca `paso-ajustes`, que no existe en `app/` ni en `main`: es de la fila 46.
+
+## Y la caída de `adb`, que esta vez se pudo separar de un fallo de verdad
+
+La bitácora la describía como «un flujo por tanda, siempre distinto, en menos de un segundo y sin mensaje de aserción». Esta noche apareció **cuatro veces seguidas en el mismo sitio** —el último `launchApp` de `gancho-capacidad-ausente.yaml`—, que es justo lo que la haría indistinguible de un defecto determinista. Separarla costó cuatro medidas y merece quedar escrito el método:
+
+1. El log de Maestro dice `device offline` y `DeviceServerDied`, nunca una aserción fallida.
+2. Relanzar la app **a mano** con `adb shell am start` funciona: sale A1P1 con su contador en 1/5 y logcat no trae ningún `FATAL`.
+3. Con el emulador ya recuperado, `partida-persistida.yaml` —que hace **dos** ciclos de `stopApp` + `launchApp`— sale verde, y `andamiaje.yaml` también. No era el emulador en general.
+4. Y el mismo flujo, sin tocar una línea, sale **EXIT=0** al quinto intento.
+
+5. Y la medida que lo cierra: **el mismo flujo falla 3 de 3 en `main`**, con el cambio de esta fila fuera del árbol y el mismo `device offline` en el log. Lo que degradó es el emulador —lleva diecisiete horas levantado—, no el código.
+
+Un rojo que se repite en el mismo punto no basta para llamarlo determinista si el mensaje no es una aserción. Cuatro veces seguidas casi lo convierte en una fila nueva que no existe, y el experimento que lo evita es barato: **sacar el cambio del árbol y volver a medir**.
+
+Corolario para el runner: `device offline` va al `maestro.log` y **no a la salida estándar**, así que el report literal enseña un flujo rojo sin ninguna aserción y sin ningún motivo. Quien lea un report con un rojo mudo tiene que ir al log antes de atribuirlo a nada.
+
+## Un defecto que destapó la prueba
+
+Migrar leía el registro de hechos **antes** que `cargaPartida`, y era más estricto que él: un registro ilegible impedía abrir una partida perfectamente jugable, cuando el núcleo lo tolera por diseño —lo que se pierde es la red de seguridad, no la partida—. Corregido: el registro que no se puede leer se salta al migrar, y `cargaPartida` lo declara.
+
+Y una fragilidad que se vio de paso y no se toca aquí: **el registro de esquemas de `formato.js` se llena por efecto de importar cada módulo**. Validar una copia sin haber importado `onboarding.js` falla con «clase de documento desconocida "arranque-en-curso"». En la app no ocurre porque `arranque-montado.jsx` lo importa, pero es una dependencia por efecto secundario que un día morderá.

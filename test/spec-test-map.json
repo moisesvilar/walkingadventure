@@ -27257,6 +27257,232 @@
       "caso": "La entrada a A1P7 se espera y no se afirma a la primera",
       "hueco_de_bateria": true,
       "nota": "Guarda sobre el propio flujo, no sobre la app: los tres flujos que entran a A1P7 morían en `assertVisible: 'Lo que se cuenta hoy'` porque componer la primera lista tarda 11 s medidos y la espera por defecto de Maestro son 5. El arreglo es `extendedWaitUntil`, y esta prueba impide que alguien lo devuelva a una afirmación inmediata sin darse cuenta. DECISIÓN DE PRODUCTO PENDIENTE: ninguna spec pone presupuesto a la composición de la primera lista —el minuto de RNF-PER-001 es el del levantamiento del mapa—, así que once segundos mirando una pantalla quieta no están ni cumplidos ni incumplidos."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un arranque que se cierra saliendo a andar WHEN la partida nace THEN queda escrito el documento de estado bajo el prefijo `partida/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Lo jugado se escribe donde la copia lo busca",
+      "escenario": "Lo jugado se escribe donde la copia lo busca"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida nacida WHEN se mira lo que se ha escrito THEN está también el registro de hechos, vacío y con su versión de reglas dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "El registro de hechos se escribe desde el primer día, aunque esté vacío",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene escenario para el registro vacío: es una consecuencia de «se guardan el estado y los hechos» que ningún escenario nombra por separado."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida en curso WHEN la app pasa a segundo plano THEN la partida queda congelada antes de que el sistema pueda matar el proceso.",
+      "nivel": "@app",
+      "fichero": "test/app/partida-persistida.yaml",
+      "caso": "Cerrar la app y volver no empieza de cero",
+      "escenario": "Cerrar la app y volver no empieza de cero",
+      "nota": "El paso a segundo plano y la muerte del proceso solo se distinguen en un dispositivo: `stopApp` + `launchApp` sin clearState es exactamente el caso."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una pantalla de consulta que ha cambiado algo del estado WHEN se vuelve a la portada THEN la partida queda congelada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Congelar sin que nada haya cambiado no reescribe",
+      "escenario": "Congelar sin que nada haya cambiado no reescribe",
+      "nota": "Hoy ninguna pantalla de consulta escribe —el interruptor de pasos de fondo recibe su callback a null hasta la fila 46—, así que lo afirmable del punto de congelación es que es idempotente y no escribe de más."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida que no ha cambiado desde la última congelación WHEN se vuelve a congelar THEN no se reescribe ningún documento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Congelar sin que nada haya cambiado no reescribe",
+      "escenario": "Congelar sin que nada haya cambiado no reescribe"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una congelación WHEN se escribe THEN el registro de hechos va primero y el documento de estado después, declarando hasta qué hecho está aplicado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Congelar justo después de abrir tampoco reescribe",
+      "hueco_de_bateria": true,
+      "nota": "El orden lo fija y lo prueba `guardaPartida` en `test/nucleo/reconstruccion.test.mjs`; aquí se afirma que esta orquestación pasa por él y no lo reimplementa."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un almacén que falla al escribir WHEN se congela THEN el error se declara nombrando la clave y los documentos anteriores siguen enteros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Si el almacén falla al escribir, se dice la clave y la siguiente congelación reintenta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un documento de partida escrito WHEN se abre la app THEN se abre en la portada y no en el arranque.",
+      "nivel": "@app",
+      "fichero": "test/app/partida-persistida.yaml",
+      "caso": "Cerrar la app y volver no empieza de cero",
+      "escenario": "Cerrar la app y volver no empieza de cero"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida levantada al abrir WHEN se mira lo que trae THEN están el personaje con su nombre y su oficio, la semilla, los ajustes y el mapa levantado con su título.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Cerrar la app y volver no empieza de cero",
+      "escenario": "Cerrar la app y volver no empieza de cero",
+      "nota": "El mapa con su título va aparte, en «El mundo de la partida vuelve con su mapa y su título»."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida levantada al abrir WHEN se mira lo que trae THEN están el personaje con su nombre y su oficio, la semilla, los ajustes y el mapa levantado con su título.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "El mundo de la partida vuelve con su mapa y su título",
+      "hueco_de_bateria": true,
+      "nota": "Segunda mitad del mismo criterio: el mundo no está en el estado y se lee del almacén."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida sin ningún documento de estado WHEN se abre la app THEN se abre en el arranque, que es lo que ve quien la instala.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Sin ningún documento de estado se abre el arranque y no la avería",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida que se está levantando WHEN todavía no se sabe si la hay THEN no se pinta ni la portada ni el arranque.",
+      "nivel": "@app",
+      "fichero": "test/app/partida-persistida.yaml",
+      "caso": "Cerrar la app y volver no empieza de cero",
+      "escenario": "Cerrar la app y volver no empieza de cero",
+      "nota": "Se afirma por la ausencia de `partida-abriendo` una vez abierta: la superficie de espera existe y no se queda."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida con un borrado a medias marcado WHEN se abre la app THEN el borrado se remata antes de intentar leer nada y se llega al arranque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Sin ningún documento de estado se abre el arranque y no la avería",
+      "hueco_de_bateria": true,
+      "nota": "El remate lo prueba SPEC-040 en `test/nucleo/borrado.test.mjs`; lo que esta fila añade es que ocurre antes de abrir, y eso se lee en el orden del efecto de `App.js`."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una importación a medio escribir WHEN se abre la app THEN la partida no se abre y se dice que hay que volver a importar el fichero entero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una importación a medio escribir no abre una mezcla de dos partidas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un documento de estado que no se puede leer WHEN se abre la app THEN se enseña la avería con el motivo y **no se cae al estado inicial**.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Un estado ilegible no se convierte en una partida nueva",
+      "escenario": "Un estado ilegible no se convierte en una partida nueva"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN la avería a la vista WHEN se mira qué se puede hacer THEN se ofrece abrir una copia, y ninguna acción que borre la partida.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Lo único que se ofrece es abrir una copia",
+      "escenario": "Lo único que se ofrece es abrir una copia",
+      "nota": "Para verla en el dispositivo hay que corromper un fichero del área de documentos de la app, y no hay ninguna puerta que lo haga: forzarla sería una puerta trasera. Queda como revisión a mano."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un documento de estado legible y un registro de hechos ilegible WHEN se abre la app THEN la partida se abre igual y lo que falla es la red de seguridad, no la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Un registro ilegible no impide jugar, y se declara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un documento de estado de una versión de formato mayor que la que este juego entiende WHEN se abre la app THEN se enseña la avería declarando las dos versiones y no se toca nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una copia de una versión que el juego no entiende no se abre a medias",
+      "escenario": "Una copia de una versión que el juego no entiende no se abre a medias"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un documento de partida de una versión anterior y la cadena con su paso WHEN se abre la app THEN se migra, la partida se abre y queda declarado de qué versión venía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una partida de una versión anterior se migra al abrirla",
+      "escenario": "Una partida de una versión anterior se migra al abrirla"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida migrada WHEN se mira el almacén THEN los documentos guardados están ya en la versión actual y la procedencia dice que se migró.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una partida de una versión anterior se migra al abrirla",
+      "escenario": "Una partida de una versión anterior se migra al abrirla"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN un documento de una versión anterior y la cadena sin el paso que hace falta WHEN se abre la app THEN se enseña la avería nombrando el salto que falta y **no se interpreta con las reglas nuevas**.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Un salto sin paso registrado no se interpreta con las reglas nuevas",
+      "escenario": "Un salto sin paso registrado no se interpreta con las reglas nuevas"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una migración cuyo resultado no se puede levantar WHEN se abre la app THEN no se escribe el documento migrado y se enseña la avería.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una migración que no se puede levantar no sustituye a la buena",
+      "escenario": "Una migración que no se puede levantar no sustituye a la buena"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida jugada WHEN se guarda una copia THEN el fichero trae el documento de estado y el registro de hechos entre sus partes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una copia exportada trae lo jugado",
+      "escenario": "Una copia exportada trae lo jugado"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una copia con documento de partida WHEN se importa THEN al volver a abrir la app la partida es la de la copia y no la anterior.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "La copia guardada se puede volver a abrir",
+      "escenario": "La copia guardada se puede volver a abrir",
+      "nota": "La sustitución la prueba `importaPartida` en `copia.test.mjs`; que la app la vuelva a leer después pasa por el selector de ficheros del sistema, que Maestro no conduce. Revisión a mano."
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN una partida recién nacida y sin nada jugado WHEN se guarda una copia THEN el fichero se produce igual, con su documento de estado dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una copia exportada trae lo jugado",
+      "escenario": "Una copia exportada trae lo jugado"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN cualquier congelación WHEN se escribe el documento de estado THEN no lleva ninguna coordenada, ningún histórico de posiciones y ningún identificador de instalación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Lo que se escribe no lleva ningún rastro de ubicación",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-047",
+      "criterio": "GIVEN el mismo estado congelado dos veces WHEN se comparan los dos textos THEN son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "El mismo estado congelado dos veces da el mismo texto byte a byte",
+      "hueco_de_bateria": true
     }
   ]
 }

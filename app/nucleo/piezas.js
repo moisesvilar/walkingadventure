@@ -78,6 +78,16 @@ import {
   validaManifiesto,
 } from '@walkingadventure/nucleo/partida/exportacion.js';
 import { CADENA_DEL_FORMATO, migra } from '@walkingadventure/nucleo/partida/migracion.js';
+import { congelaEstado, estadoInicial, levantaEstado } from '@walkingadventure/nucleo/partida/estado.js';
+import { cuantosHechos, levantaRegistro, registroInicial } from '@walkingadventure/nucleo/partida/hechos.js';
+import { CLAVES_DE_PARTIDA, cargaPartida, guardaPartida } from '@walkingadventure/nucleo/partida/reconstruccion.js';
+import {
+  CLAVE_DE_PROCEDENCIA,
+  PROCEDENCIAS,
+  documentoDeProcedencia,
+  exigeSinImportacionAMedias,
+} from '@walkingadventure/nucleo/partida/exportacion.js';
+import { lee } from '@walkingadventure/nucleo/partida/formato.js';
 import {
   ACCIONES as ACCIONES_DEL_ZURRON,
   MOTIVOS_SIN_ZURRON,
@@ -200,6 +210,49 @@ export const NUCLEO_DE_LA_COPIA = Object.freeze({
   validaManifiesto,
   CADENA_DEL_FORMATO,
   migra,
+});
+
+/**
+ * Lo que `creaPartidaGuardada` enumera en `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-047 entra por la misma puerta y por la misma razón que las cinco filas anteriores
+ * (§6u): que la partida se congele solo cuando ha cambiado, que un documento migrado se
+ * levante antes de escribirse y que uno ilegible dé la cara en vez de caer al estado
+ * inicial tienen que poder leerse desde `node --test` sin resolver nada instalado, que es
+ * el único sitio donde se pueden poner rojos.
+ *
+ * `congelaEstado` y `levantaEstado` viajan aquí por su nombre y no escondidos dentro de
+ * `guardaPartida`/`cargaPartida`, porque la orquestación los llama de verdad: el primero
+ * produce el sello con el que se decide si hace falta escribir, el segundo prueba que un
+ * documento migrado se puede levantar **antes** de sustituir al bueno con él.
+ */
+export const NUCLEO_DE_LA_PARTIDA_GUARDADA = Object.freeze({
+  CLAVES_DE_PARTIDA,
+  CLAVE_DE_PROCEDENCIA,
+  PROCEDENCIAS,
+  CADENA_DEL_FORMATO,
+  VERSION_FORMATO,
+  congelaEstado,
+  levantaEstado,
+  levantaRegistro,
+  registroInicial,
+  estadoInicial,
+  guardaPartida,
+  cargaPartida,
+  cuantosHechos,
+  migra,
+  documentoDeProcedencia,
+  exigeSinImportacionAMedias,
+  lee,
+  textoCanonico,
+});
+
+/** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */
+export const NUCLEO_DEL_MUNDO_GUARDADO = Object.freeze({
+  listaMapas,
+  cargaMapa,
+  cargaCelda,
+  celdasAbiertas,
 });
 
 /**

@@ -1160,6 +1160,82 @@ Característica: El mundo se congela entero
 # language: es
 
 @app @persistencia
+Característica: La partida sobrevive a cerrar la app
+  Fuente: partida-guardada.md §2 · RF-PERS-001, RF-PERS-002 · SPEC-047
+
+  Escenario: Lo jugado se escribe donde la copia lo busca
+    Dado un jugador que acaba de cerrar el arranque
+    Cuando la partida nace
+    Entonces quedan escritos el estado y el registro de hechos bajo el prefijo de la partida
+
+  Escenario: Cerrar la app y volver no empieza de cero
+    Dado una partida con personaje y mapa levantado
+    Cuando el sistema mata la app y se vuelve a abrir
+    Entonces se abre en la portada con el mismo personaje y el mismo mapa
+
+  Escenario: Congelar sin que nada haya cambiado no reescribe
+    Dado una partida recién congelada
+    Cuando se vuelve a congelar sin haber cambiado nada
+    Entonces no se reescribe ningún documento
+
+  Escenario: Una copia exportada trae lo jugado
+    Dado una partida guardada
+    Cuando el jugador guarda una copia
+    Entonces el fichero trae dentro el estado de la partida y el registro de hechos
+```
+
+```gherkin
+# language: es
+
+@app @persistencia
+Característica: Una partida que no se puede abrir da la cara
+  Fuente: partida-guardada.md §2 · decisiones-orquestador.md §6h · SPEC-047
+
+  Escenario: Un estado ilegible no se convierte en una partida nueva
+    Dado un documento de estado que no se puede leer
+    Cuando se abre la app
+    Entonces se enseña la avería con el motivo y no se empieza una partida nueva
+
+  Escenario: Lo único que se ofrece es abrir una copia
+    Dado la avería a la vista
+    Cuando el jugador mira qué puede hacer
+    Entonces se le ofrece abrir una copia y ninguna acción que borre
+
+  Escenario: Una copia de una versión que el juego no entiende no se abre a medias
+    Dado un estado escrito en una versión de formato mayor que la del juego
+    Cuando se abre la app
+    Entonces se enseña la avería declarando las dos versiones
+```
+
+```gherkin
+# language: es
+
+@nucleo @persistencia
+Característica: Versionado y migración del estado
+  Fuente: partida-guardada.md «lo que esto obliga» · RF-PERS-008 · SPEC-047
+
+  Escenario: Una partida de una versión anterior se migra al abrirla
+    Dado un estado escrito en una versión anterior y la cadena con su paso
+    Cuando se abre la partida
+    Entonces el documento guardado queda en la versión actual
+    Y queda declarado de qué versión venía
+
+  Escenario: Un salto sin paso registrado no se interpreta con las reglas nuevas
+    Dado un estado de una versión anterior y la cadena sin el paso que hace falta
+    Cuando se abre la partida
+    Entonces falla nombrando el salto que falta
+    Y el documento guardado no se toca
+
+  Escenario: Una migración que no se puede levantar no sustituye a la buena
+    Dado un paso de migración cuyo resultado no pasa el esquema
+    Cuando se abre la partida
+    Entonces no se escribe el documento migrado
+```
+
+```gherkin
+# language: es
+
+@app @persistencia
 Característica: Empezar de nuevo borra y no reinicia
   Fuente: partida-guardada.md §4
 

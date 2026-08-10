@@ -421,6 +421,17 @@
       "report": "test/reports/SPEC-042-run-20260810T035120Z.md",
       "casos": "2583 casos: 2580 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado"
+    },
+    {
+      "spec": "SPEC-047",
+      "slug": "partida-persistida",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SUITE-run-20260810T232749Z.md",
+      "casos": "2634 casos: 2631 pasan, 0 fallan, 3 saltados",
+      "app": "partida-persistida.yaml EXIT=0 sobre wa-pixel. @app en la ultima tanda: 19 flujos, 7 pasan, 8 solo comprueban su limite, 4 rojos. Dos son anteriores y fichados: empezar-de-nuevo-copia (Share.dismissedAction es de iOS, entrada XXVIII) y zurron (paso-ajustes no existe, fila 46). Los otros dos, ajustes-filas-de-valor y gancho-capacidad-ausente, son la caida de adb: el maestro.log dice 'device offline' y nunca una asercion, ajustes-filas-de-valor vuelve verde al reintentarlo, y gancho-capacidad-ausente falla 3 de 3 TAMBIEN EN MAIN con el cambio fuera del arbol.",
+      "nota": "Apaga los tres rojos de la guarda partida-persistida.test.mjs por el cableado, sin tocar la prueba. Verificado ademas fuera de la bateria: el documento existe en el emulador (adb run-as), la copia de la partida real del emulador trae partida/estado.json y registro.json y al importarla la partida vuelve, y una partida con version 9 plantada con adb ensena la averia con las dos versiones en pantalla. Destapo un defecto propio: migrar leia el registro antes que cargaPartida y era mas estricto que el. Rompio mapas.yaml, cuyo limite declaraba que la app abre en el arranque; corregido en el flujo con la medida escrita.",
+      "no_desbloqueado": "La columna de limite declarado sigue en 9 y no baja. repisa.yaml era el unico que dependia de esta fila y necesita una partida sembrada con contenido, que pide una via de producto que no existe. Fichado en decisiones 6z. El 8 de la entrada XXIX estaba mal contado."
     }
   ],
   "bloqueos": [],
@@ -462,10 +473,10 @@
     }
   ],
   "suite_final": {
-    "casos": "2597: 2594 pasan, 0 fallan, 3 saltados",
-    "app": "13 flujos escritos, 0 ejecutados: sin simulador"
+    "casos": "2634: 2631 pasan, 0 fallan, 3 saltados",
+    "app": "19 flujos: 7 pasan, 8 solo comprueban su limite, 4 rojos (2 fichados de otras filas, 2 de la caida de adb verificada contra main)"
   },
-  "bloque": "B6",
+  "bloque": "B7",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",
   "verificacion_final": "partida entera en Node sin red: arranque, salida de puerta a puerta, llegadas, telon, segundo mapa, cerrar y abrir, exportar e importar, empezar de nuevo y determinismo. Destapo que ninguna aventura se podia terminar (0/102) mas cuatro cableados. Corregido: 102/102."
 }

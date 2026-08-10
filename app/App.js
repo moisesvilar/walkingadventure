@@ -16,14 +16,14 @@
 // herramientas y no pantallas del juego, y la distinción está escrita en §6y. En
 // producción no existe.
 
-import React, { useEffect, useState } from 'react';
-import { BackHandler, Linking, Pressable, StyleSheet, Text } from 'react-native';
-
-import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AppState, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
 import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
+import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
+import { mundoDeLaPartida } from './mapa/mundo-guardado.js';
 // El área segura de la app. No es el `SafeAreaView` de `react-native`, que en Android es un
 // `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
 // respeta los insets en las dos plataformas.
@@ -31,13 +31,19 @@ import { AreaSegura } from './plataforma/area-segura.jsx';
 import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
 import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
-import { NUCLEO_DE_EMPEZAR_DE_NUEVO, NUCLEO_DE_LA_COPIA } from './nucleo/piezas.js';
+import {
+  NUCLEO_DEL_MUNDO_GUARDADO,
+  NUCLEO_DE_EMPEZAR_DE_NUEVO,
+  NUCLEO_DE_LA_COPIA,
+  NUCLEO_DE_LA_PARTIDA_GUARDADA,
+} from './nucleo/piezas.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
 import { esPuertaDeDesarrollo } from './plataforma/puerta-de-desarrollo.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
 import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
+import { AbrirCopia } from './pantallas/copia.jsx';
 import { ConsultaMontada } from './pantallas/consulta-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
@@ -77,15 +83,22 @@ export function App() {
   // es del ciclo de vida de la app y no de ninguna pantalla, es **rematar el borrado que un
   // cierre dejó a medias**.
   const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
+  // La partida en disco, de la fila 47: congelarla en los cortes del juego y levantarla al
+  // abrir. Antes de esta fila el estado se componía en memoria y se moría al cerrar.
+  const [partidaGuardada] = useState(() => creaPartidaGuardada({ almacen, nucleo: NUCLEO_DE_LA_PARTIDA_GUARDADA }));
   const [enRevision, setEnRevision] = useState(false);
   const [enMapa, setEnMapa] = useState(false);
-  // La app abre en el arranque, que es lo que ve quien la instala. Se sale de él por
-  // el botón «Salir a andar» de A1P7, que es la frontera de registro y el único
-  // camino: no hay manera de volver a entrar salvo por «empezar de nuevo».
-  const [enArranque, setEnArranque] = useState(true);
-  // Lo que el arranque dejó: el personaje, el mapa levantado y el estado de la partida. Es lo
-  // que la portada necesita, y es de esta fila que exista una portada a la que ir. Mientras no
-  // haya partida guardada —que es de otra fila—, vive aquí y solo dura la sesión.
+  // La app abre en el arranque **solo el primer día**. Desde la fila 47, quien decide por
+  // dónde se entra es lo que haya escrito en disco, y hasta saberlo no se pinta ninguna de
+  // las dos: enseñar el arranque y sustituirlo medio segundo después haría indistinguibles
+  // «no hay partida» y «todavía no se sabe», que es la degradación que SPEC-040 ya cerró
+  // para el borrado a medias.
+  const [enArranque, setEnArranque] = useState(false);
+  // En cuál de las cuatro respuestas de abrir la partida estamos, con el motivo literal
+  // cuando no se pudo. Es lo que decide entre la espera, el arranque, la portada y la avería.
+  const [apertura, setApertura] = useState({ estado: APERTURAS.ABRIENDO, motivo: null });
+  // Lo que hay abierto: el estado de la partida, su registro de hechos, el personaje y el
+  // mapa levantado. Desde la fila 47 ya no muere con la sesión.
   const [partida, setPartida] = useState(null);
   // La salida que se echó a andar, tal y como la declaró quien salió: con aventura preparada,
   // sin más, o retomando la que estaba a medias. Mientras vale `null` no se anda. No se vuelve
@@ -126,25 +139,125 @@ export function App() {
     return () => suscripcion.remove();
   }, [consulta, enPuertaDeDesarrollo]);
 
-  // Lo primero de todo, antes de leer nada de la partida: si hay un borrado marcado, se
-  // termina. Una interrupción a mitad tiene un único final posible —el borrado acaba y
-  // se llega al arranque—, y no una partida con parte de sus documentos que se abre,
-  // parece jugable y falla más tarde por una celda que el índice declara y el almacén no
-  // tiene (SPEC-040, `decisiones-orquestador.md` §6h).
+  /**
+   * Abrir la partida, que es lo primero que pasa y lo que decide qué se pinta.
+   *
+   * El orden importa y no es negociable. Primero se remata un borrado marcado: una
+   * interrupción a mitad tiene un único final posible —el borrado acaba y se llega al
+   * arranque— y no una partida con parte de sus documentos que se abre, parece jugable y
+   * falla más tarde (SPEC-040, `decisiones-orquestador.md` §6h). Después se abre lo que
+   * haya escrito, migrándolo si viene de una versión anterior. Y si algo no se puede leer
+   * **se da la cara**: aquí no se cae nunca a `estadoInicial`, porque una partida que se
+   * pierde y se parece a una que empieza es la peor cosa que este proyecto puede hacer.
+   */
+  const abreLaPartida = useCallback(async () => {
+    setApertura({ estado: APERTURAS.ABRIENDO, motivo: null });
+    let remate;
+    try {
+      remate = await empezarDeNuevo.terminaPendiente();
+    } catch (e) {
+      // La marca sigue puesta y el siguiente arranque vuelve a intentarlo. Lo que no se
+      // hace es seguir y abrir una partida a medio borrar.
+      return { estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) };
+    }
+    if (remate.habia) return { estado: APERTURAS.SIN_PARTIDA, motivo: null };
+
+    const abierta = await partidaGuardada.abre();
+    if (abierta.estado !== APERTURAS.ABIERTA) return abierta;
+
+    // El mundo no está en el estado: se lee del almacén, sin red y sin pintar nada. Que no
+    // haya mapa levantado todavía es un estado normal y no una avería.
+    let mundo = null;
+    try {
+      mundo = await mundoDeLaPartida({
+        almacen,
+        nucleo: NUCLEO_DEL_MUNDO_GUARDADO,
+        semilla: abierta.partida.estado.semilla,
+      });
+    } catch (e) {
+      return { estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) };
+    }
+    return { ...abierta, mundo };
+  }, [almacen, empezarDeNuevo, partidaGuardada]);
+
+  /** Lo que la portada necesita del personaje, con la palabra que se lee bajo el nombre. */
+  const componePersonaje = useCallback((delEstado) => ({
+    ...delEstado,
+    // El oficio viaja dos veces y no es redundancia: la clave es con la que se filtra el
+    // catálogo, y la palabra —con género, que por eso vive en la app— es la que se lee.
+    oficioDicho: nombreCortoDeOficio(delEstado?.oficio, delEstado?.genero),
+  }), []);
+
+  /** Lo que se hace con cada una de las tres respuestas de abrir. Un solo sitio, no tres. */
+  const aplicaApertura = useCallback((resultado) => {
+    if (resultado.estado === APERTURAS.ABIERTA) {
+      setPartida({
+        estado: resultado.partida.estado,
+        registro: resultado.partida.registro,
+        personaje: componePersonaje(resultado.partida.estado.personaje),
+        mundo: resultado.mundo ?? { mapaId: null, documento: null, titulo: null },
+        arrancadaEn: Date.now(),
+      });
+      setSalida(null);
+      setEnArranque(false);
+    } else if (resultado.estado === APERTURAS.SIN_PARTIDA) {
+      setPartida(null);
+      setSalida(null);
+      setEnArranque(true);
+    }
+    setApertura({ estado: resultado.estado, motivo: resultado.motivo ?? null });
+  }, [componePersonaje]);
+
   useEffect(() => {
     let vivo = true;
-    empezarDeNuevo.terminaPendiente()
-      .then((remate) => {
-        if (!vivo || !remate.habia) return;
-        setPartida(null);
-        setSalida(null);
-        setEnArranque(true);
-      })
-      // Si el remate falla, la marca sigue puesta y el siguiente arranque vuelve a
-      // intentarlo. No se reintenta en bucle y no se abre la partida a medio borrar.
-      .catch(() => {});
+    abreLaPartida()
+      .then((resultado) => { if (vivo) aplicaApertura(resultado); })
+      .catch((e) => { if (vivo) setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) }); });
     return () => { vivo = false; };
-  }, [empezarDeNuevo]);
+  }, [abreLaPartida, aplicaApertura]);
+
+  /**
+   * Volver a abrir la partida después de que una copia haya sustituido lo que había.
+   *
+   * El sello se olvida a propósito: lo que hay en disco ya no es lo que esta sesión
+   * congeló, y comparar con el sello viejo haría que la primera congelación de la partida
+   * importada se saltara por «no ha cambiado nada».
+   */
+  const reabreTrasLaCopia = useCallback(() => {
+    partidaGuardada.olvidaElSello();
+    return abreLaPartida()
+      .then(aplicaApertura)
+      .catch((e) => setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) }));
+  }, [abreLaPartida, aplicaApertura, partidaGuardada]);
+
+  /**
+   * Congelar lo que hay abierto. Se llama en los cortes del juego y no en cada cambio.
+   *
+   * Es idempotente: si el texto canónico del estado no ha cambiado desde la última
+   * congelación no se reescribe nada, y por eso puede colgar de tantos sitios. Un fallo al
+   * escribir no se traga —el sello no se mueve y el siguiente corte vuelve a intentarlo—
+   * pero tampoco tiene todavía dónde enseñarse: decírselo a quien juega pide una superficie
+   * que el diseño no tiene (pendiente 3 de `game-design/partida-guardada.md`).
+   */
+  const congelaLaPartida = useCallback((abierta) => {
+    const viva = abierta ?? partida;
+    if (!viva?.estado || !viva?.registro) return Promise.resolve({ escrito: false });
+    return partidaGuardada.congela({ estado: viva.estado, registro: viva.registro })
+      .catch((e) => ({ escrito: false, fallo: mensajeDeError(e) }));
+  }, [partida, partidaGuardada]);
+
+  /**
+   * La red que cubre lo que ningún corte del juego cubre: **a una app la mata el sistema
+   * sin avisar**, y no hay ningún evento de «me van a matar». `inactive` entra igual que
+   * `background` porque en iOS es el que llega primero y a veces el único.
+   */
+  useEffect(() => {
+    if (!partida) return undefined;
+    const suscripcion = AppState.addEventListener('change', (siguiente) => {
+      if (siguiente === 'background' || siguiente === 'inactive') congelaLaPartida();
+    });
+    return () => suscripcion.remove();
+  }, [partida, congelaLaPartida]);
 
   useEffect(() => {
     let vivo = true;
@@ -235,35 +348,66 @@ export function App() {
     );
   }
 
+  // Mientras no se sabe si hay partida no se pinta ninguna de las dos entradas: el papel
+  // quieto y nada más. Sin texto y sin indicador a propósito —leer dos documentos tarda lo
+  // que tarda un fichero, y un rótulo que aparece y desaparece en un fotograma es peor.
+  if (apertura.estado === APERTURAS.ABRIENDO) {
+    return <AreaSegura style={estilos.raiz}><View style={estilos.espera} testID="partida-abriendo" /></AreaSegura>;
+  }
+
+  // La avería: la partida guardada está y no se ha podido abrir. **No se cae al estado
+  // inicial y no se ofrece continuar**, que sería lo mismo con otro nombre. Lo único que se
+  // ofrece es abrir una copia, que es la salida real que la fila 39 dejó puesta.
+  //
+  // No es una pantalla del juego y no sale en `docs/flujo.md`: es la app confesando un
+  // fallo, que es el único registro donde `lenguaje.md` deja hablar como aplicación. Su
+  // texto definitivo sigue siendo el pendiente 3 de `game-design/partida-guardada.md`.
+  if (apertura.estado === APERTURAS.NO_SE_PUDO) {
+    return (
+      <AreaSegura style={estilos.raiz}>
+        <ScrollView contentContainerStyle={estilos.averia} testID="partida-averiada">
+          <Text style={estilos.averiaTitular}>Tu partida guardada no se ha podido abrir.</Text>
+          <Text style={estilos.averiaMotivo} testID="partida-averiada-motivo">{apertura.motivo ?? ''}</Text>
+          <Text style={estilos.averiaCuerpo}>Nada se ha borrado. Si tienes una copia, ábrela.</Text>
+          <AbrirCopia copia={copia} alAbrir={reabreTrasLaCopia} />
+        </ScrollView>
+      </AreaSegura>
+    );
+  }
+
   if (enArranque) {
     return (
       <AreaSegura style={estilos.raiz}>
         <ArranqueMontado
           almacen={almacen}
           copia={copia}
+          // Importar una copia desde A1P1 sustituye la partida del almacén, y hasta esta
+          // fila nadie volvía a leerla: se importaba y se seguía en el arranque como si
+          // nada. Ahora se vuelve a abrir, que es lo que la fila 39 prometió.
+          alAbrirCopia={reabreTrasLaCopia}
           alSalirAAndar={(cerrado, lista, levantado) => {
-            if (cerrado && levantado) {
-              const estado = estadoInicial({ semilla: cerrado.semilla });
-              // El personaje que cerró el arranque **es** el del área de la partida, y no
-              // una copia suya al lado. El área en blanco no se notaba mientras nadie la
-              // leía; en cuanto A6P7 la lee, la partida no tiene nombre —y lo que se
-              // congela y se exporta es el área, así que una partida guardada habría
-              // salido sin nombre sin que nada protestara.
-              estado.personaje = { ...estado.personaje, ...cerrado.personaje };
-              setPartida({
-                estado,
-                // El oficio viaja dos veces y no es redundancia: la clave es con la que se
-                // filtra el catálogo, y la palabra —con género, que por eso vive en la app— es
-                // la que se lee bajo el nombre.
-                personaje: {
-                  ...cerrado.personaje,
-                  oficioDicho: nombreCortoDeOficio(cerrado.personaje.oficio, cerrado.personaje.genero),
-                },
-                mundo: { mapaId: levantado.mapaId, documento: levantado.documento, titulo: levantado.documento?.title ?? null },
-                arrancadaEn: Date.now(),
-              });
+            if (!cerrado || !levantado) {
+              setEnArranque(false);
+              return;
             }
-            setEnArranque(false);
+            // La partida **nace en disco**, no en memoria: se escribe su estado inicial con
+            // el personaje que cerró el arranque dentro del área —el área es lo que se
+            // congela y lo que se exporta— y su registro de hechos vacío. Antes de esta fila
+            // esto se componía aquí mismo y se moría al cerrar la app.
+            partidaGuardada.nace({ semilla: cerrado.semilla, personaje: cerrado.personaje })
+              .then((nacida) => {
+                setPartida({
+                  estado: nacida.estado,
+                  registro: nacida.registro,
+                  personaje: componePersonaje({ ...nacida.estado.personaje, ...cerrado.personaje }),
+                  mundo: { mapaId: levantado.mapaId, documento: levantado.documento, titulo: levantado.documento?.title ?? null },
+                  arrancadaEn: Date.now(),
+                });
+                setEnArranque(false);
+              })
+              // Si la partida no se puede escribir, se dice y no se juega: seguir sería
+              // jugar una partida que se va a perder entera sin que nada proteste.
+              .catch((e) => setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) }));
           }}
         />
       </AreaSegura>
@@ -296,15 +440,26 @@ export function App() {
           mundo={partida.mundo}
           almacen={almacen}
           empezarDeNuevo={empezarDeNuevo}
-          alVolver={() => setConsulta(consulta === 'empezar-de-nuevo' ? 'ajustes' : null)}
+          // Al volver se congela: es el sitio donde el estado puede cambiar sin que haya una
+          // salida de por medio —los interruptores de ajustes cuando la fila 46 los conecte,
+          // el estilo y el tamaño de letra cuando la 38 les dé pantalla de elección—. Ponerlo
+          // después, cuando alguno empiece a escribir, es cómo se pierde un ajuste sin que
+          // nada proteste; y como congelar es idempotente, hoy no escribe nada.
+          alVolver={() => {
+            congelaLaPartida();
+            setConsulta(consulta === 'empezar-de-nuevo' ? 'ajustes' : null);
+          }}
           alAbrirPuerta={(id) => setConsulta(id)}
           // Borrar lleva al arranque y a ningún otro sitio: es lo que distingue borrar de
-          // reiniciar, y el destino lo declara el núcleo en `DESTINO_TRAS_BORRAR`.
+          // reiniciar, y el destino lo declara el núcleo en `DESTINO_TRAS_BORRAR`. El sello
+          // se olvida porque en disco ya no queda nada con lo que compararse.
           alBorrada={() => {
+            partidaGuardada.olvidaElSello();
             setConsulta(null);
             setPartida(null);
             setSalida(null);
             setEnArranque(true);
+            setApertura({ estado: APERTURAS.SIN_PARTIDA, motivo: null });
           }}
         />
       </AreaSegura>
@@ -326,7 +481,13 @@ export function App() {
           // sitio: «salir a andar» de la preparación, «salir a andar sin más» de la portada y de
           // la lista, y «seguir con ella» de la tarjeta de a medias. Que la de a medias no vuelva
           // a preparar nada es el criterio de SPEC-028 que esto cierra.
-          alAndar={(echada) => setSalida(echada ?? { conAventura: false })}
+          // Echarse a andar es un corte del juego y se congela: es el punto de enganche que
+          // la fila 44 encontrará puesto cuando cablee la máquina de una salida, junto con el
+          // del telón. Hoy la salida todavía no cambia nada del estado, así que no escribe.
+          alAndar={(echada) => {
+            congelaLaPartida();
+            setSalida(echada ?? { conAventura: false });
+          }}
           // Las tres puertas del pie de la portada. La composición del núcleo las declara
           // en `PUERTAS` y la pantalla las pinta; lo que faltaba era esto, que llevaran a
           // algún sitio.
@@ -351,4 +512,11 @@ const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: '#efe3c0' },
   paso: { paddingHorizontal: 24, paddingVertical: 8 },
   pasoTexto: { fontSize: 13, color: '#1e2b18', opacity: 0.7 },
+  // La espera ocupa la pantalla entera: una marca de 0×0 no existe para la automatización,
+  // y esta tiene que poder afirmarse.
+  espera: { flex: 1 },
+  averia: { padding: 24, gap: 16 },
+  averiaTitular: { fontSize: 20, color: '#1e2b18' },
+  averiaMotivo: { fontSize: 13, lineHeight: 19, color: '#1e2b18', opacity: 0.75 },
+  averiaCuerpo: { fontSize: 15, lineHeight: 22, color: '#1e2b18' },
 });

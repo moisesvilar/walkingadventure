@@ -1,0 +1,92 @@
+# @app — La partida sobrevive a cerrar la app (SPEC-047).
+#
+# Aquí vive **solo lo que no se puede ver sin dispositivo**, que en esta fila es una cosa y
+# una sola: que **matar el proceso y volver a abrir no empieza de cero**. Todo lo demás de
+# la fila —que se escriba bajo el prefijo que la copia recorre, que congelar sin cambios no
+# reescriba, que un documento ilegible dé la cara, que una partida vieja se migre o nombre
+# el salto que falta— son funciones sobre un almacén y se afirman en
+# `test/nucleo/partida-guardada.test.mjs`, que corre sin simulador. Duplicarlo aquí solo
+# añadiría un flujo lento que se cae por el entorno.
+#
+# Y es una cosa que ninguna prueba de Node puede desmentir: en Node, «cerrar y volver a
+# abrir» es montar otro almacén sobre el mismo directorio, y eso no toca ni el ciclo de
+# vida de la app ni el directorio de documentos que da el sistema. Aquí sí.
+#
+# **Lo que este flujo NO puede comprobar todavía, y por qué se dice con el número delante:**
+#
+# Lo que sobrevive y se puede afirmar en pantalla hoy es **el personaje, la semilla, los
+# ajustes de origen y el mapa levantado**. No una entrada de diario ni un objeto en la
+# repisa, porque **nada de `app/` altera el estado de la partida después de que el arranque
+# se cierre**: las cuatro pantallas de consulta solo leen, el único interruptor que
+# escribiría recibe su callback a `null` porque el zurrón no está montado (fila 46), y quien
+# emite hechos —llegadas, escenas, telón— espera al módulo de ubicación (fila 48) y a las
+# dos pantallas que nunca se escribieron (fila 49). Medir la persistencia con un diario que
+# nadie escribe sería medir el vacío.
+#
+# Los elementos se localizan por los identificadores que ya declaran SPEC-027, SPEC-028 y
+# SPEC-047 —`arranque`, `portada`, `portada-identidad`, `partida-abriendo`,
+# `partida-averiada`— y nunca por su posición en pantalla.
+#
+# El caso, tal y como lo cita `test/spec-test-map.json`:
+#   «Cerrar la app y volver no empieza de cero»
+#
+appId: com.walkingadventure.app
+---
+# Una partida de verdad: se recorre el arranque entero, que es como nace. El flujo del
+# arranque ya está escrito y se reutiliza entero en vez de copiarlo, igual que hacen
+# `antes-de-salir.yaml` y `zurron.yaml`.
+- runFlow:
+    file: arranque.yaml
+
+# Y se llega a la portada, que es lo que el arranque deja detrás.
+- assertVisible:
+    id: 'portada'
+- assertVisible:
+    id: 'portada-identidad'
+
+# ── Cerrar la app y volver no empieza de cero ──────────────────────────────────
+#
+# `stopApp` es matar el proceso, que es lo que hace el sistema sin avisar. **Sin
+# `clearState`**: el punto entero de esta fila es que lo escrito siga ahí. Un `launchApp`
+# con `clearState: true` aquí mediría lo contrario de lo que dice medir.
+- stopApp
+- launchApp
+
+# Levantar la partida lee dos documentos y un mapa, así que se espera a la portada en vez
+# de afirmarla a la primera. El arranque en frío de esta app tarda unos veinte segundos
+# medidos, y esa espera ya la paga `arranque.yaml`; esta es la de leer, que es corta.
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 30000
+
+# Lo que de verdad se afirma: **se vuelve a la portada y no al arranque**. Antes de esta
+# fila la app abría siempre en A1P1, reanudaba el arranque cerrado y salir a andar componía
+# un estado nuevo en memoria.
+- assertVisible:
+    id: 'portada'
+- assertNotVisible:
+    id: 'arranque'
+
+# Ni la espera ni la avería quedan a la vista: la primera es un fotograma y la segunda no
+# tiene que ocurrir nunca en un recorrido sano.
+- assertNotVisible:
+    id: 'partida-abriendo'
+- assertNotVisible:
+    id: 'partida-averiada'
+
+# Y el personaje es el mismo, que es lo que hace que «sigue ahí» signifique algo. El nombre
+# lo eligió el arranque, así que aquí se afirma la identidad de la portada y no un literal.
+- assertVisible:
+    id: 'portada-identidad'
+
+# Una segunda vuelta, porque una sola no distingue «sobrevive» de «se ha quedado en
+# memoria»: matar y abrir otra vez tiene que dar exactamente lo mismo.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 30000
+- assertNotVisible:
+    id: 'arranque'
