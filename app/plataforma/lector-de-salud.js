@@ -174,6 +174,18 @@ export function creaMarcaDeAgua(almacen) {
       await almacen.escribe(CLAVE_DE_LA_MARCA, JSON.stringify({ leidoHasta: instante }));
       return instante;
     },
+    /**
+     * Deja la marca **sin lectura previa**, que es lo que hace que el tiempo con el modo
+     * apagado no se pueda leer hacia atrás cuando se vuelva a encender.
+     *
+     * Se escribe un documento sin `leidoHasta` en lugar de borrar la clave: el almacén
+     * inyectado solo promete `lee` y `escribe`, y una marca que se lee como «no hay» es
+     * exactamente lo mismo que no tenerla.
+     */
+    async olvida() {
+      await almacen.escribe(CLAVE_DE_LA_MARCA, JSON.stringify({ leidoHasta: null }));
+      return null;
+    },
   };
 }
 
@@ -189,8 +201,8 @@ export function creaMarcaDeAgua(almacen) {
  * que la app de salud no responda y distinto de no tener permiso.
  */
 export function creaLectorDeSalud({ fuente = null, marca, ahora = () => Date.now(), ventanaInicialMs = VENTANA_INICIAL_MS }) {
-  if (!marca || typeof marca.lee !== 'function' || typeof marca.escribe !== 'function') {
-    throw new Error('el lector de salud necesita su marca de agua: sin ella, dos aperturas seguidas contarían dos veces los mismos metros');
+  if (!marca || typeof marca.lee !== 'function' || typeof marca.escribe !== 'function' || typeof marca.olvida !== 'function') {
+    throw new Error('el lector de salud necesita su marca de agua completa (lee, escribe, olvida): sin ella, dos aperturas seguidas contarían dos veces los mismos metros');
   }
 
   // Se pide **crudo** y se valida fuera del `try`: así un fallo de la fuente y unos
@@ -227,6 +239,15 @@ export function creaLectorDeSalud({ fuente = null, marca, ahora = () => Date.now
     permiso: permisoActual,
 
     /**
+     * Cierra la cuenta **sin leer nada**: lo que venga a partir de ahora no se contará
+     * hacia atrás. Lo llama el interruptor al apagarse, que es el momento en que se decide
+     * que ese tiempo no ocurre para el juego.
+     */
+    async dejaDeContar() {
+      return marca.olvida();
+    },
+
+    /**
      * Pide el permiso. **Solo desde aquí**, y solo lo llama el interruptor al encenderse:
      * en contexto, explicando para qué, y nunca al instalar ni al abrir.
      */
@@ -244,7 +265,14 @@ export function creaLectorDeSalud({ fuente = null, marca, ahora = () => Date.now
      */
     async lee({ activo = true, salidas = [] } = {}) {
       const vacia = (motivo) => Object.freeze({ metros: 0, leyo: false, motivo, ventana: null, trozos: [] });
-      if (!activo) return vacia(MOTIVOS_DE_LECTURA.MODO_APAGADO);
+      if (!activo) {
+        // Con el modo apagado no se lee **ni ahora ni después**: la marca se olvida en vez
+        // de quedarse quieta, para que volver a encender abra la ventana inicial y no una
+        // hacia atrás de todo el tiempo apagado. Sin penalización por ausencia, y tampoco
+        // regalo por ella.
+        await marca.olvida();
+        return vacia(MOTIVOS_DE_LECTURA.MODO_APAGADO);
+      }
       if (!fuente) return vacia(MOTIVOS_DE_LECTURA.SIN_FUENTE);
 
       const estado = await permisoActual();

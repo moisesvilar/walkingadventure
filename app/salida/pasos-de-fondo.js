@@ -117,12 +117,18 @@ export function creaPasosDeFondo({ nucleo, lector, ajustes }) {
 
     /**
      * Apaga: dejan de leerse pasos y **la reserva que hubiera queda como estaba**, sin
-     * borrarse y sin ejecutarse. Volver a encender no recupera los kilómetros del tiempo
-     * apagado, porque durante ese tiempo no se leyó nada y la marca de agua siguió su
-     * camino.
+     * borrarse y sin ejecutarse.
+     *
+     * Y **se olvida la marca de agua**, que es lo que hace que volver a encender no
+     * recupere los kilómetros del tiempo apagado: una marca quieta durante meses abriría
+     * al reencender una ventana hacia atrás de todo ese tiempo, y lo único que la acotaría
+     * sería el tope de la reserva. Sin marca, la siguiente lectura mira la ventana inicial
+     * y nada más — el tiempo apagado no ocurrió para el juego. Ni penalización por
+     * ausencia ni regalo por ella.
      */
-    apaga() {
+    async apaga() {
       cambiaAjuste(ajustes, AJUSTE, false);
+      await lector.dejaDeContar();
       return Object.freeze({ encendido: false, motivo: MOTIVOS_DE_APAGADO.NO_PEDIDO, aviso: null, testid: TESTIDS.fila });
     },
 
