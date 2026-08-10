@@ -10,7 +10,7 @@
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
   "spec_actual": null,
-  "fase": "checklist-completo",
+  "fase": "completo-y-verificado",
   "iteracion": 0,
   "historial": [
     {
@@ -462,9 +462,10 @@
     }
   ],
   "suite_final": {
-    "casos": "1645: 1642 pasan, 0 fallan, 3 saltados",
-    "app": "3 flujos escritos, 0 ejecutados"
+    "casos": "2597: 2594 pasan, 0 fallan, 3 saltados",
+    "app": "13 flujos escritos, 0 ejecutados: sin simulador"
   },
   "bloque": "B6",
-  "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos."
+  "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",
+  "verificacion_final": "partida entera en Node sin red: arranque, salida de puerta a puerta, llegadas, telon, segundo mapa, cerrar y abrir, exportar e importar, empezar de nuevo y determinismo. Destapo que ninguna aventura se podia terminar (0/102) mas cuatro cableados. Corregido: 102/102."
 }
