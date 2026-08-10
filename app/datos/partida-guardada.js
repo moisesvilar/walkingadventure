@@ -166,6 +166,11 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
    * Devuelve de qué versión venían, o `null` si no había nada que migrar. Un salto sin
    * paso registrado **no se interpreta con las reglas nuevas**: `migra` falla nombrándolo
    * y el error sube hasta la avería.
+   *
+   * Con una excepción medida: **un registro que ni siquiera se puede leer no impide abrir
+   * la partida.** `cargaPartida` lo tolera por diseño —lo que se pierde es la red de
+   * seguridad, no la partida— y migrar antes que él no puede ser más estricto que él, o
+   * una partida perfectamente jugable dejaría de abrirse por culpa de su auditoría.
    */
   async function migraDocumentos() {
     const migrados = [];
@@ -174,7 +179,14 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
     for (const clave of [CLAVES_DE_PARTIDA.estado, CLAVES_DE_PARTIDA.registro]) {
       const crudo = await almacen.lee(clave);
       if (crudo == null) continue;
-      const resultado = migra(lee(crudo, `el documento ${clave}`), {
+      let doc;
+      try {
+        doc = lee(crudo, `el documento ${clave}`);
+      } catch (e) {
+        if (clave === CLAVES_DE_PARTIDA.registro) continue;
+        throw e;
+      }
+      const resultado = migra(doc, {
         cadena: cadenaVigente,
         donde: `el documento ${clave}`,
         hasta: destino,
