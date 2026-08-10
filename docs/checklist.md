@@ -69,7 +69,7 @@
 | --- | --- | --- | --- | --- |
 | 37 | diario-consulta | RF-DIARIO-002, RF-DIARIO-003, RF-DIARIO-004 | must | done |
 | 38 | repisa-ajustes | RF-PROG-007, RF-PJ-010, RF-LANG-002 | must | done |
-| 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | done |
+| 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | done (mecanismo, no cableado — ver fila 47) |
 | 40 | empezar-de-nuevo | RF-PERS-006 | must | done |
 | 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | done |
 | 42 | pasos-fondo-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | done |
@@ -80,9 +80,21 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 43 | navegacion-de-consulta | RF-DIARIO-002, RF-PROG-007, RF-PJ-010, RF-PERS-006, RF-RUMOR-002 | must | pending |
+| 43 | navegacion-de-consulta | RF-DIARIO-002, RF-PROG-007, RF-PJ-010, RF-PERS-006, RF-RUMOR-002 | must | done |
 | 44 | navegacion-en-la-calle | RF-BUCLE-005, RF-BUCLE-007, RF-BUCLE-011, RF-QUEST-004, RF-PRIV-004 | must | pending |
 | 45 | puerta-de-desarrollo | RF-INFRA-007 | must | pending |
+| 46 | fuente-de-salud-y-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
+| 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | pending |
+
+La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
+
+La **47** tampoco es de este encargo, y es la más grave de las dos. Medido el 10-ago-2026: **`congelaEstado` y `levantaEstado` no se llaman desde ningún sitio de `app/`**. `App.js` construye `estadoInicial({ semilla })` en cada arranque y ese estado vive solo en memoria; de los cuatro prefijos de `PREFIJOS_DE_LA_PARTIDA`, la app escribe `arranque/`, `camara/` y `mapa/`, y **`partida/` no lo escribe nadie**. El diario, la repisa, el oro, los motes, las aventuras, las entregas, los rumores y los NPCs se pierden al cerrar la app.
+
+Y la consecuencia que conviene tener escrita porque no se ve desde ninguna prueba de la fila 39: **una copia exportada hoy sale sin documento de partida**. El respaldo funciona y no respalda nada de lo jugado.
+
+Va con su guarda ya escrita y **en rojo a propósito** hasta que se cierre: `test/nucleo/partida-persistida.test.mjs`, tres casos rojos con nombre y dueño. Es la aplicación de la regla que más cara ha salido en este repo — lo que falta se exige, y su ausencia es error de construcción, nunca un valor por defecto — y por eso no es un comentario.
+
+La fila 39 sigue en `done` y no se reabre: entregó el mecanismo entero y sus pruebas lo demuestran. Lo que no entregó es el cableado, y eso es esta fila.
 
 ## Notas de derivación
 

@@ -1,8 +1,13 @@
-// La raíz de la app: monta la pantalla de andamiaje con los módulos de plataforma
-// inyectados y con lo que diga el gancho de enlace profundo. Sin navegación: un
-// enrutador para pasar entre pantallas de herramienta es una librería para nada. La
-// fila 27 es la que tendrá el onboarding entero que encadenar, y es la que sustituye
-// el andamiaje por la primera pantalla de verdad.
+// La raíz de la app y **la máquina de estados del recorrido**: qué momento está a la
+// vista y qué lleva de uno a otro. Las aristas que encadena no se inventan aquí — son las
+// que declara `docs/flujo.md`, que es la fuente normativa, y una transición que no esté
+// allí no se cablea sin decidirla antes como cambio de diseño.
+//
+// Sigue sin haber enrutador, y desde la fila 43 eso es una decisión medida y no una
+// inercia: los momentos son cuatro, de una pantalla de consulta solo se vuelve a la
+// portada, y una pila de navegación no tendría nada que apilar. Si la fila 44 —la máquina
+// de una salida, que sí tiene profundidad— demostrara lo contrario, es esa fila la que lo
+// replantea con la medida delante.
 //
 // Desde esta fila hay una segunda pantalla que **sí es del juego**: el mapa. Aquí
 // cuelga de un paso porque todavía no existe el flujo que lleva hasta ella —dónde se
@@ -21,7 +26,7 @@
 // recorrer el arranque entero.
 
 import React, { useEffect, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text } from 'react-native';
+import { BackHandler, Linking, Pressable, StyleSheet, Text } from 'react-native';
 
 import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
 
@@ -41,6 +46,7 @@ import { leeGancho } from './plataforma/gancho.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
 import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
+import { ConsultaMontada } from './pantallas/consulta-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { EnMarchaMontado } from './pantallas/en-marcha-montado.jsx';
@@ -74,9 +80,9 @@ export function App() {
     elige: eligeConElSistema,
     nucleo: NUCLEO_DE_LA_COPIA,
   }));
-  // Empezar de nuevo, que es borrar. La puerta a A6P7 es la fila de los ajustes, que es
-  // de la fila 38 y todavía no está montada; lo que sí cuelga de aquí, porque es del
-  // ciclo de vida de la app y no de ninguna pantalla, es **rematar el borrado que un
+  // Empezar de nuevo, que es borrar. Desde la fila 43 su puerta existe —la fila última de
+  // A6P6, que a su vez cuelga de la portada—; lo que además sigue colgando de aquí, porque
+  // es del ciclo de vida de la app y no de ninguna pantalla, es **rematar el borrado que un
   // cierre dejó a medias**.
   const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
   const [enRevision, setEnRevision] = useState(false);
@@ -98,6 +104,25 @@ export function App() {
   // `__wa.demo()` del prototipo— en lugar de sobre uno inventado aquí.
   const [enMarcha, setEnMarcha] = useState(false);
   const [mundoDelPaso, setMundoDelPaso] = useState({ documento: null, fallo: null });
+  // La puerta de consulta abierta, o ninguna. Las tres de la portada más la que cuelga de
+  // los ajustes; `docs/flujo.md` las declara colgando de A6P1, que es la portada redibujada,
+  // y por eso esto es un valor y no una pila: de una pantalla de consulta solo se vuelve a
+  // la portada, nunca a otra.
+  const [consulta, setConsulta] = useState(null);
+
+  // El atrás de Android hace lo mismo que el «‹» de la pantalla, y no otra cosa. Que
+  // discrepen es un defecto de plataforma y no una decisión: quien pulsa el del sistema
+  // espera exactamente lo que promete el de la pantalla que está mirando.
+  useEffect(() => {
+    if (consulta === null) return undefined;
+    const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Desde empezar de nuevo se vuelve a los ajustes, que es «dejarlo como está», y
+      // desde las otras tres a la portada.
+      setConsulta((abierta) => (abierta === 'empezar-de-nuevo' ? 'ajustes' : null));
+      return true;
+    });
+    return () => suscripcion.remove();
+  }, [consulta]);
 
   // Lo primero de todo, antes de leer nada de la partida: si hay un borrado marcado, se
   // termina. Una interrupción a mitad tiene un único final posible —el borrado acaba y
@@ -156,8 +181,15 @@ export function App() {
           copia={copia}
           alSalirAAndar={(cerrado, lista, levantado) => {
             if (cerrado && levantado) {
+              const estado = estadoInicial({ semilla: cerrado.semilla });
+              // El personaje que cerró el arranque **es** el del área de la partida, y no
+              // una copia suya al lado. El área en blanco no se notaba mientras nadie la
+              // leía; en cuanto A6P7 la lee, la partida no tiene nombre —y lo que se
+              // congela y se exporta es el área, así que una partida guardada habría
+              // salido sin nombre sin que nada protestara.
+              estado.personaje = { ...estado.personaje, ...cerrado.personaje };
               setPartida({
-                estado: estadoInicial({ semilla: cerrado.semilla }),
+                estado,
                 // El oficio viaja dos veces y no es redundancia: la clave es con la que se
                 // filtra el catálogo, y la palabra —con género, que por eso vive en la app— es
                 // la que se lee bajo el nombre.
@@ -188,6 +220,35 @@ export function App() {
     );
   }
 
+  // Las pantallas de consulta van por delante de la portada, y **la portada no se
+  // recompone al volver**: sigue montada detrás con su estado intacto. Abrir el diario y
+  // volver no puede cambiar la miniatura ni la tarjeta de a medias, porque entre una cosa
+  // y la otra no ha pasado nada en el juego.
+  if (partida && consulta !== null) {
+    return (
+      <AreaSegura style={estilos.raiz}>
+        <ConsultaMontada
+          puerta={consulta}
+          partida={partida.estado}
+          personaje={partida.personaje}
+          mundo={partida.mundo}
+          almacen={almacen}
+          empezarDeNuevo={empezarDeNuevo}
+          alVolver={() => setConsulta(consulta === 'empezar-de-nuevo' ? 'ajustes' : null)}
+          alAbrirPuerta={(id) => setConsulta(id)}
+          // Borrar lleva al arranque y a ningún otro sitio: es lo que distingue borrar de
+          // reiniciar, y el destino lo declara el núcleo en `DESTINO_TRAS_BORRAR`.
+          alBorrada={() => {
+            setConsulta(null);
+            setPartida(null);
+            setSalida(null);
+            setEnArranque(true);
+          }}
+        />
+      </AreaSegura>
+    );
+  }
+
   // La portada: lo que se ve al abrir la app cualquier día que no sea el primero. Sin partida
   // —una compilación abierta directamente en el andamiaje— se queda el andamiaje, que es lo
   // que había antes de esta fila.
@@ -204,6 +265,10 @@ export function App() {
           // la lista, y «seguir con ella» de la tarjeta de a medias. Que la de a medias no vuelva
           // a preparar nada es el criterio de SPEC-028 que esto cierra.
           alAndar={(echada) => setSalida(echada ?? { conAventura: false })}
+          // Las tres puertas del pie de la portada. La composición del núcleo las declara
+          // en `PUERTAS` y la pantalla las pinta; lo que faltaba era esto, que llevaran a
+          // algún sitio.
+          alAbrirPuerta={(id) => setConsulta(id)}
         />
       </AreaSegura>
     );

@@ -37,19 +37,20 @@ import { fuente } from './mundo-de-prueba.mjs';
  * descubriera leyendo el directorio, marcar un flujo nuevo no costaría nada y el
  * marcador dejaría de ser un acto deliberado, que es lo único que aporta.
  *
- * Los tres que NO están, y por qué:
+ * Los cinco que NO están, y por qué:
  *
- * - `arranque.yaml` recorre la app entera, de A1P1 a A1P7. Es el único flujo que hoy
- *   verifica pantallas de verdad.
+ * - `arranque.yaml` recorre la app entera, de A1P1 a A1P7.
  * - `antes-de-salir.yaml` y `zurron.yaml` no tienen guarda ninguna: empiezan con
  *   `runFlow: file: arranque.yaml` y siguen recorriendo. Su rojo es rojo de verdad.
+ * - `ajustes.yaml` y `empezar-de-nuevo.yaml` **salieron de esta lista con la fila 43**,
+ *   que montó el momento de consulta: se entra por `puerta-ajustes`, que es la del pie de
+ *   la portada, y desde ahí a A6P7. Recorrido medido en `wa-pixel` el 10-ago-2026.
  */
 const FLUJOS_DE_LIMITE_DECLARADO = [
-  'ajustes.yaml',
+  'ajustes-filas-de-valor.yaml',
   'andamiaje.yaml',
   'descarte.yaml',
   'diario.yaml',
-  'empezar-de-nuevo.yaml',
   'en-marcha.yaml',
   'escena.yaml',
   'gancho-capacidad-ausente.yaml',

@@ -1,17 +1,13 @@
 # @app — Empezar de nuevo dentro del móvil (SPEC-040).
 #
-# @limite-declarado
+# **Recorre su pantalla desde el 10-ago-2026.** Hasta la fila 43 este flujo llevaba
+# `@limite-declarado`: no había ninguna puerta hasta A6P6 y lo único que ejecutaba era
+# una guarda que comprobaba que la pantalla seguía sin existir. Ahora `App.js` monta el
+# momento de consulta y la puerta es la del pie de la portada, así que **este flujo entra
+# por donde entra una persona** y su verde vale lo que dice.
 #
-# Este flujo **no recorre su pantalla**: falta `paso-ajustes` en `app/App.js`, así que
-# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
-# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
-# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
-# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
-# DECLARADO», unas líneas más abajo.
-#
-# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
-# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
-# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+# Se llega recorriendo el arranque entero, que es el único camino a la portada, y por eso
+# empieza reutilizando `arranque.yaml` en vez de copiarlo.
 #
 # Aquí vive **solo lo que necesita dispositivo**. Lo que se pierde enumerado en cosas, que
 # una partida del primer día no enumere ceros, que un mapa sin título falle nombrándolo,
@@ -37,19 +33,20 @@
 # se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
 # medido contra la app.
 #
-# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
+# **Lo que este flujo necesitaba y ya tiene**, de la fila 43: la puerta hasta A6P6 y de
+# ahí a A6P7, con el «dejarlo como está» y el atrás del sistema llevando los dos a los
+# ajustes.
 #
-# - **Una puerta hasta la pantalla.** `app/pantallas/empezar-de-nuevo.jsx` existe y está
-#   entera, pero **`App.js` no la monta** —tampoco monta los ajustes de los que cuelga—.
-#   El primer paso va contra `paso-ajustes`, que sigue la convención de los otros pasos
-#   provisionales y **todavía no existe**. Es un hueco de cableado y no de este flujo, el
-#   mismo que ya declara `test/app/ajustes.yaml`.
-# - **Una partida montada en el simulador**, con su personaje, sus dos mapas y su diario:
-#   la enumeración se compone en tiempo de ejecución y sin partida no hay nada que
-#   enumerar. El andamiaje tiene que dejarla puesta antes de `launchApp`.
-# - **La hoja de compartir del sistema**, para el camino de guardar una copia primero. En
-#   simulador se cancela, que además es el caso que interesa mirar: las tres acciones
-#   vuelven y la partida sigue.
+# **Lo que todavía le falta, y de quién es:**
+#
+# - **Una partida con dos mapas y con diario**, porque la enumeración de lo que se pierde
+#   se compone en tiempo de ejecución. Con la partida del día uno la frase nombra el
+#   personaje y el mapa levantado, y no hay ni diario ni segundo mapa que enumerar — que
+#   es correcto y es lo que se afirma aquí. Los caminos con dos mapas y con días apuntados
+#   son de la **fila 47**, que carga un documento de partida al arrancar.
+# El camino de guardar una copia antes de borrar **ya no está aquí**: vive en
+# `empezar-de-nuevo-copia.yaml` desde que se midió en `wa-pixel` y destapó un defecto
+# destructivo. Este flujo cubre el resto de A6P7, que sí se recorre entero.
 #
 # **Lo que este flujo NO puede comprobar, y por qué:**
 #
@@ -71,157 +68,106 @@
 #
 appId: com.walkingadventure.app
 ---
+# A la portada se llega saliendo del arranque, que hoy es el único camino. El flujo del
+# arranque ya está escrito y se reutiliza entero en vez de copiarlo.
+- runFlow:
+    file: arranque.yaml
+
+- tapOn:
+    id: 'puerta-ajustes'
+- tapOn: 'Empezar de nuevo'
+
+# ── Se explica que el mundo no se puede rehacer ────────────────────────────────
+# La pantalla es la de consulta de los ajustes, y sus tres bloques están.
+
+- assertVisible:
+    id: 'empezar-de-nuevo'
+- assertVisible:
+    id: 'momento'
+- assertVisible: 'de-consulta'
+- assertVisible:
+    id: 'empezar-de-nuevo-estado'
+- assertVisible: 'preguntando'
+- assertVisible: 'Empezar de nuevo'
+- assertVisible: '‹ Ajustes'
+
+- assertVisible:
+    id: 'empezar-de-nuevo-perdida'
+- assertVisible: '.*Se pierde todo esto.*'
+- assertVisible: '.*No se puede deshacer.*'
+- assertVisible:
+    id: 'empezar-de-nuevo-congelado'
+- assertVisible: '.*esos datos ya han cambiado.*'
+- assertVisible: '.*otro sitio, con otros nombres.*'
+- assertVisible: '.*se puede volver a abrir cuando quieras.*'
+
+# ── No hay segundo aviso, ni casilla, ni texto que teclear, ni cuenta atrás ────
+# Ausencias, que es lo que solo se puede afirmar mirando la pantalla entera.
+
+- assertNotVisible: 'Confirmar'
+- assertNotVisible: 'Escribe'
+- assertNotVisible: 'Estoy seguro'
+- assertNotVisible: '¿Seguro?'
+- assertNotVisible: 'Sí, borrar'
+- assertNotVisible: 'Cancelar'
+
+# ── Las tres acciones, y cuál es la principal ─────────────────────────────────
+# El orden y el peso van en el dato; lo que se mira aquí es que las tres están y que la
+# destructiva no es la que se toca sin querer.
+
+- assertVisible:
+    id: 'empezar-de-nuevo-guardar'
+- assertVisible: 'Guardar una copia primero'
+- assertVisible:
+    id: 'empezar-de-nuevo-borrar'
+- assertVisible: 'Borrar sin guardar nada'
+- assertVisible:
+    id: 'empezar-de-nuevo-dejarlo'
+- assertVisible: 'Dejarlo como está'
+
+# ── La copia se ofrece pero no se hace sola ───────────────────────────────────
+# Este tramo vive ahora en `empezar-de-nuevo-copia.yaml`, y no por comodidad: al
+# ejecutarlo en `wa-pixel` destapó un **defecto destructivo** en el camino de guardar una
+# copia antes de borrar. Está descrito entero allí. Sacarlo deja que lo demás de esta
+# pantalla —que sí se recorre y sí pasa— cuente como verificado, y deja el rojo señalando
+# lo que de verdad está roto en vez de tapado detrás de él.
+
+# ── Borrar lleva al arranque ──────────────────────────────────────────────────
+# Sin salir de A6P7 —donde ya estamos, porque el tramo de la copia se fue a su fichero— se
+# borra sin guardar nada. No hay un segundo aviso encima del aviso.
+
+- assertVisible:
+    id: 'empezar-de-nuevo-perdida'
+- tapOn:
+    id: 'empezar-de-nuevo-borrar'
+- assertNotVisible: '¿Seguro?'
+- assertNotVisible: 'Sí, borrar'
+
+# Se llega a la primera pantalla del arranque, y es la de una instalación nueva: A1P1,
+# la primera de las cinco, con el contador en 1/5 y sin ninguna huella de la anterior.
+- assertVisible:
+    id: 'arranque'
+- assertVisible:
+    id: 'arranque-paso'
+- assertVisible: 'quien-eres'
+- assertVisible: '1/5'
+- assertNotVisible:
+    id: 'empezar-de-nuevo'
+- assertNotVisible: 'Sabela'
+- assertNotVisible: 'Marcas de Vaeloria'
+# Aquí había `assertNotVisible: 'Seguir'` y era imposible: **«Seguir» es el botón propio de
+# A1P1**, y `arranque.yaml` lo afirma presente tres líneas después de arrancar. Las dos
+# pruebas se contradecían y ninguna se había ejecutado nunca. Lo que este bloque quiere
+# decir —que no hay ningún atajo a la partida anterior— lo dicen las tres líneas de abajo,
+# que sí nombran atajos y no el botón de avanzar.
+- assertNotVisible: 'Continuar donde lo dejaste'
+- assertNotVisible: 'El mismo mundo otra vez'
+- assertNotVisible: 'Recuperar la partida'
+
+# Y volver a lanzar la app sigue llevando al arranque: no queda partida que abrir.
 - launchApp:
     clearState: false
-
-# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
-#
-# `paso-ajustes` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
-# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
-# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
-# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
-# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
-#
-# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
-# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
-# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
-# `paso-ajustes`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
-# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
-- runFlow:
-    when:
-      notVisible:
-        id: 'paso-ajustes'
-    commands:
-      - assertVisible:
-          id: 'arranque'
-      - assertNotVisible:
-          id: 'paso-ajustes'
-
-# El flujo de verdad, a la espera de su puerta.
-- runFlow:
-    when:
-      visible:
-        id: 'paso-ajustes'
-    commands:
-      - tapOn:
-          id: 'paso-ajustes'
-      - tapOn: 'Empezar de nuevo'
-
-      # ── Se explica que el mundo no se puede rehacer ────────────────────────────────
-      # La pantalla es la de consulta de los ajustes, y sus tres bloques están.
-
-      - assertVisible:
-          id: 'empezar-de-nuevo'
-      - assertVisible:
-          id: 'momento'
-      - assertVisible: 'de-consulta'
-      - assertVisible:
-          id: 'empezar-de-nuevo-estado'
-      - assertVisible: 'preguntando'
-      - assertVisible: 'Empezar de nuevo'
-      - assertVisible: '‹ Ajustes'
-
-      - assertVisible:
-          id: 'empezar-de-nuevo-perdida'
-      - assertVisible: 'Se pierde todo esto'
-      - assertVisible: 'No se puede deshacer'
-      - assertVisible:
-          id: 'empezar-de-nuevo-congelado'
-      - assertVisible: 'esos datos ya han cambiado'
-      - assertVisible: 'otro sitio, con otros nombres'
-      - assertVisible: 'se puede volver a abrir cuando quieras'
-
-      # ── No hay segundo aviso, ni casilla, ni texto que teclear, ni cuenta atrás ────
-      # Ausencias, que es lo que solo se puede afirmar mirando la pantalla entera.
-
-      - assertNotVisible: 'Confirmar'
-      - assertNotVisible: 'Escribe'
-      - assertNotVisible: 'Estoy seguro'
-      - assertNotVisible: '¿Seguro?'
-      - assertNotVisible: 'Sí, borrar'
-      - assertNotVisible: 'Cancelar'
-
-      # ── Las tres acciones, y cuál es la principal ─────────────────────────────────
-      # El orden y el peso van en el dato; lo que se mira aquí es que las tres están y que la
-      # destructiva no es la que se toca sin querer.
-
-      - assertVisible:
-          id: 'empezar-de-nuevo-guardar'
-      - assertVisible: 'Guardar una copia primero'
-      - assertVisible:
-          id: 'empezar-de-nuevo-borrar'
-      - assertVisible: 'Borrar sin guardar nada'
-      - assertVisible:
-          id: 'empezar-de-nuevo-dejarlo'
-      - assertVisible: 'Dejarlo como está'
-
-      # ── La copia se ofrece pero no se hace sola ───────────────────────────────────
-      # Se toca guardar una copia: la espera se cuenta con una línea y sin cifra, y «dejarlo
-      # como está» sigue estando mientras las otras dos no están.
-
-      - tapOn:
-          id: 'empezar-de-nuevo-guardar'
-      - assertVisible: 'Preparando la copia…'
-      - assertVisible:
-          id: 'empezar-de-nuevo-dejarlo'
-      - assertNotVisible: '%'
-      - assertNotVisible: 'por ciento'
-
-      # La hoja del sistema se cancela: no se ha guardado nada, **no se borra nada** y las tres
-      # acciones vuelven tal cual.
-      - back
-      - assertVisible: 'No se ha guardado nada'
-      - assertVisible: 'Tu partida sigue como estaba'
-      - assertVisible:
-          id: 'empezar-de-nuevo-estado'
-      - assertVisible: 'preguntando'
-      - assertVisible:
-          id: 'empezar-de-nuevo-guardar'
-      - assertVisible:
-          id: 'empezar-de-nuevo-borrar'
-      - assertVisible:
-          id: 'empezar-de-nuevo-dejarlo'
-
-      # Y dejarlo como está vuelve a los ajustes sin haber tocado nada: la fila sigue ahí.
-      - tapOn:
-          id: 'empezar-de-nuevo-dejarlo'
-      - assertVisible:
-          id: 'ajustes-lista'
-      - assertVisible: 'Empezar de nuevo'
-
-      # ── Borrar lleva al arranque ──────────────────────────────────────────────────
-      # Se entra otra vez —la partida sigue entera, así que la pantalla se compone igual— y esta
-      # vez se borra sin guardar nada. No hay un segundo aviso encima del aviso.
-
-      - tapOn: 'Empezar de nuevo'
-      - assertVisible:
-          id: 'empezar-de-nuevo-perdida'
-      - tapOn:
-          id: 'empezar-de-nuevo-borrar'
-      - assertNotVisible: '¿Seguro?'
-      - assertNotVisible: 'Sí, borrar'
-
-      # Se llega a la primera pantalla del arranque, y es la de una instalación nueva: A1P1,
-      # la primera de las cinco, con el contador en 1/5 y sin ninguna huella de la anterior.
-      - assertVisible:
-          id: 'arranque'
-      - assertVisible:
-          id: 'arranque-paso'
-      - assertVisible: 'quien-eres'
-      - assertVisible: '1/5'
-      - assertNotVisible:
-          id: 'empezar-de-nuevo'
-      - assertNotVisible: 'Sabela'
-      - assertNotVisible: 'Marcas de Vaeloria'
-      - assertNotVisible: 'Seguir'
-      - assertNotVisible: 'Continuar donde lo dejaste'
-      - assertNotVisible: 'El mismo mundo otra vez'
-      - assertNotVisible: 'Recuperar la partida'
-
-      # Y volver a lanzar la app sigue llevando al arranque: no queda partida que abrir.
-      - launchApp:
-          clearState: false
-      - assertVisible:
-          id: 'arranque'
-      - assertVisible: '1/5'
-      - assertNotVisible: 'Sabela'
+- assertVisible:
+    id: 'arranque'
+- assertVisible: '1/5'
+- assertNotVisible: 'Sabela'

@@ -1,0 +1,84 @@
+# @app — Las filas de valor de los ajustes: abrir, elegir y volver (SPEC-038).
+#
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: la elección de un ajuste de valor no tiene
+# pantalla en `app/pantallas/`, así que tocar una fila de valor no abre nada. Lo único que
+# llega a ejecutarse es la guarda de más abajo, y su verde significa «el límite sigue en
+# pie», nunca «la pantalla funciona».
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo.
+#
+# **Por qué existe este fichero.** Estaba dentro de `ajustes.yaml`, y se ha sacado al
+# medirlo en `wa-pixel` el 10-ago-2026: todo lo demás de aquel flujo —el catálogo cerrado,
+# los cinco grupos, las once filas, las diecisiete ausencias, el interruptor y la frontera
+# de registro al salir— **recorre A6P6 de verdad y pasa**. Dejar este tramo dentro habría
+# tirado el flujo entero por lo único que le falta, y entonces setenta afirmaciones ciertas
+# sobre los ajustes se leerían como no verificadas. Partirlo es lo contrario de ablandar la
+# prueba: es que cada mitad diga con precisión lo que sabe.
+#
+# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
+#
+# - **Las pantallas de elección.** `partida/ajustes.js` declara cinco filas de valor —el
+#   tramo, los caminos que evitar, el nombre, el género, cómo se pinta y el tamaño de la
+#   letra— y **ninguna tiene pantalla escrita en `app/pantallas/`**. El núcleo sí trae con
+#   qué componerlas (`edicionDelNombre`, `eleccionDelGenero`, `cambiaElNombre`,
+#   `cambiaAjuste`): lo que falta es la pantalla, no la lógica. Es de la **fila 38**, que
+#   entregó A6P6 y su catálogo y no los destinos de sus filas.
+# - **La pantalla de los sitios marcados.** `app/pantallas/sitios-marcados.jsx` sí existe y
+#   está entera, y **nadie la importa**: es una de las ocho pantallas huérfanas medidas el
+#   10-ago. Su fila es la 35.
+#
+# **Lo que este flujo NO puede comprobar, y por qué:** que el estilo elegido repinte el
+# mapa sin resembrarlo. Eso es dato y se afirma en `test/nucleo/pintado.test.mjs`; desde
+# aquí solo se ve que la fila cambió de valor.
+#
+# Los elementos se localizan por los identificadores que declara la spec —`ajustes-lista`,
+# `ajustes-como-se-pinta`, `ajustes-nombre`, `ajustes-genero`— y nunca por su posición.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «Un ajuste de valor abre, se elige y vuelve»
+#
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# La pantalla de elección de un ajuste de valor no existe: tocar `ajustes-como-se-pinta`
+# no abre nada. Mientras ese sea el caso, este flujo no recorre nada y lo dice —comprueba
+# que la app abre donde abre y que la pantalla de elección sigue sin estar—. El día que
+# exista, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'ajustes-eleccion'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'ajustes-eleccion'
+
+# El flujo de verdad, a la espera de su pantalla.
+- runFlow:
+    when:
+      visible:
+        id: 'ajustes-eleccion'
+    commands:
+      # ── Un ajuste de valor abre, se elige y vuelve ─────────────────────────────
+      # Sin confirmación, sin aviso de éxito y sin salir de los ajustes.
+      - runFlow:
+          file: arranque.yaml
+      - tapOn:
+          id: 'puerta-ajustes'
+      - tapOn:
+          id: 'ajustes-como-se-pinta'
+      - assertVisible: 'Pergamino'
+      - tapOn: 'Pergamino'
+      - assertVisible:
+          id: 'ajustes-lista'
+      - assertVisible: 'Pergamino'
+      - assertNotVisible: 'Guardado'
+      - assertNotVisible: 'Cambios guardados'
