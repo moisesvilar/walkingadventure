@@ -105,9 +105,22 @@ describe('La disposición del repositorio tras estrenar la app', () => {
     // `app/render/lamina.jsx` lo monta. Sigue sin ser obligatoria porque el render
     // recibe Skia inyectado (`app/render/enlace-skia.js`) y por eso se compone y se
     // ejercita en Node sin ella; el día que se declare, esta lista ya no lo impide.
+    //
+    // `expo-file-system` entra por **SPEC-039**, que es la fila que lo usa:
+    // `app/plataforma/ficheros.js` escribe la partida en el directorio de documentos y
+    // `app/plataforma/copia-del-sistema.js` deja el fichero de trabajo en la caché para
+    // la hoja de compartir. Con una salvedad que se dice y no se disimula: **la spec no
+    // lo nombra en su reparto**, y por eso hoy está declarado por veredicto de quien
+    // orquesta y no por la regla de arriba. Iterar SPEC-039 para nombrarlo es lo que
+    // deja este renglón como los demás; mientras tanto, lo que se gana es que lo que la
+    // app importa esté dicho, que es el agujero que abrió esta fila: la lista solo
+    // miraba lo declarado, nunca lo importado, y por ahí entraba media plataforma del
+    // SDK sin que nada protestase. Quien mira desde el otro lado es
+    // `duradero.test.mjs`, «Todo paquete que app/ importa está declarado».
     const permitidas = new Set([
       'expo', 'react', 'react-native', 'expo-haptics', 'expo-notifications', 'expo-linking', '@walkingadventure/nucleo',
       '@shopify/react-native-skia', // SPEC-021: el pintado del mapa
+      'expo-file-system', // SPEC-039: la partida en disco y el fichero de la copia
     ]);
     const declaradas = Object.keys(APP_PAQUETE.dependencies ?? {});
     for (const d of declaradas) {

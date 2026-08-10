@@ -24737,6 +24737,671 @@
       "caso": "Los ajustes no leen el reloj del sistema ni el azar",
       "hueco_de_bateria": true,
       "nota": "Bloqueante (@determinismo, RNF-DET-003)."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la app con el almacén duradero cableado, cuando se congela una celda y se cierra la app, entonces al volver a abrirla el documento está y se lee idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Las claves duraderas sobreviven a cerrar y volver a abrir la app, byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 3 de la spec: la persistencia entre aperturas de la app no tiene escenario en ningún sitio. Se afirma sobre el disco de verdad, montando otro almacén sobre el mismo directorio, que es lo que hace cerrar y abrir."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la app con el almacén duradero cableado, cuando se congela una celda y se cierra la app, entonces al volver a abrirla el documento está y se lee idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "El mundo no depende de OSM después de generarse",
+      "escenario": "El mundo no depende de OSM después de generarse",
+      "nota": "El escenario ya estaba vivo en almacen.test.mjs sobre el almacén en memoria; aquí se afirma la mitad que faltaba, que lo congelado DURA."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el almacén duradero, cuando se enumeran sus operaciones, entonces son las cuatro de SPEC-009 —leer por clave, escribir por clave, listar por prefijo y borrar— y ninguna más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "El almacén duradero expone las cuatro operaciones de SPEC-009 y ninguna más",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una escritura, cuando se observa cómo ocurre, entonces se escribe aparte y se sustituye, y nunca se sobrescribe en sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Escribir es escribir aparte y sustituir, y nunca sobrescribir en sitio",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 4 de la spec: la escritura atómica no tiene escenario. Se observa con el doble del sistema de ficheros, que registra el orden de las seis operaciones."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una escritura interrumpida a mitad, cuando se lee después la clave, entonces o está el documento anterior entero o no está ninguno, y nunca un documento truncado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Una escritura interrumpida a mitad deja el documento anterior entero o ninguno, nunca uno truncado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el almacén, cuando se lista por prefijo, entonces el orden es estable y declarado, y no depende del sistema de ficheros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "El orden de listar por prefijo es el de la clave y no el del sistema de ficheros",
+      "hueco_de_bateria": true,
+      "nota": "El doble puede contestar en orden invertido: sin eso, «orden estable» se cumpliría por casualidad."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una clave que no existe, cuando se lee, entonces se obtiene ausencia y no un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Leer una clave que no existe da ausencia y no un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el disco lleno, cuando se escribe, entonces el error se propaga nombrando la clave y el documento anterior sigue intacto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Con el disco lleno el error nombra la clave y el documento anterior sigue intacto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la orquestación de la app construida sin almacén duradero cableado, cuando se construye, entonces falla nombrando la pieza que falta, en lugar de seguir en memoria y perder la partida al cerrar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "La app construida sin almacén duradero cableado falla nombrando la pieza que falta",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre exigeAlmacenDuradero, que es donde vive el corte. Que la orquestación de la app LO LLAME no se puede afirmar desde aquí: app/nucleo/piezas.js y el montaje citan el paquete por su nombre."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el paquete del núcleo, cuando se ejecuta sin almacén inyectado, entonces sigue funcionando entero en memoria, como fija SPEC-009.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "El paquete del núcleo sin almacén inyectado sigue funcionando entero en memoria",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el almacén duradero, cuando se inspecciona dónde escribe, entonces todo cuelga del directorio de la partida y nada se escribe fuera de él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Una clave mal formada se rechaza nombrándola y nada se escribe fuera del directorio de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida con un mapa levantado, cuando se apaga y se enciende el dispositivo, entonces la partida se abre con el mismo estado, el mismo registro y los mismos documentos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Las claves duraderas sobreviven a cerrar y volver a abrir la app, byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Se cubre con dos casos: este afirma los documentos byte a byte y «El estado manda sobre el registro» afirma que lo que se abre es el estado guardado."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el registro de hechos y el estado, cuando se escriben, entonces el registro se anexa primero y el estado después, con su marca de aplicación, como fija SPEC-016.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "El estado manda sobre el registro",
+      "escenario": "El estado manda sobre el registro",
+      "nota": "El escenario ya estaba vivo en registro.test.mjs y en escena.test.mjs sobre el almacén en memoria; aquí se sostiene el orden de escritura sobre un almacén de verdad."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un apagón entre las dos escrituras, cuando se vuelve a abrir la partida, entonces los hechos posteriores a la marca se aplican hacia delante y no se reconstruye nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Un apagón entre el registro y el estado se termina hacia delante y no reconstruye nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado las reglas de respaldo declaradas por la app, cuando se leen, entonces el directorio de la partida está incluido en la copia del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Las reglas de respaldo salen de la lista única del núcleo y no de una copia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 1 de la spec: RF-PERS-004 no tiene escenario. EJECUTADO desde que las reglas reciben PREFIJOS_DE_LA_PARTIDA por la puerta: se comprueban lo incluido, lo excluido y que lo excluido gana sobre lo incluido —un temporal cuelga de un prefijo incluido y aun así no se respalda—. De la fuente solo se sigue leyendo que no cita el paquete por su nombre, que es lo único que la ejecución no ve."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado esas mismas reglas, cuando se leen, entonces los recursos binarios residentes de un mundo congelado están incluidos, porque son parte del mundo y no una caché.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Toda clave que el almacén escribe cae dentro de lo que entra en la copia del sistema",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado esas mismas reglas, cuando se leen, entonces la caché del proxy y cualquier fichero temporal están excluidos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Las reglas de respaldo salen de la lista única del núcleo y no de una copia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado esas mismas reglas, cuando se comparan con lo que el almacén escribe, entonces toda clave que el almacén usa cae dentro de lo incluido, y ninguna queda fuera sin declararlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Toda clave que el almacén escribe cae dentro de lo que entra en la copia del sistema",
+      "hueco_de_bateria": true,
+      "nota": "Las claves se recogen de clavesEscritas() del almacén duradero tras montar una partida entera, más las seis constantes que el juego escribe fuera de ella: doce claves de siete familias. Se pasan por exigeCobertura del módulo real; antes la comprobación llevaba dentro una copia del predicado y afirmaba sobre esa copia, no sobre las reglas."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una clave nueva que el almacén escribe y que las reglas de respaldo no cubren, cuando se comprueban, entonces falla nombrando la clave, en lugar de dejarla silenciosamente fuera de la copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Una clave nueva que las reglas de respaldo no cubren se pone roja nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Se ejecuta exigeCobertura y se lee el error que produce: nombra la clave que se quedaría fuera, no acusa a las que sí están cubiertas y dice cuántas son."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el código de esta entrega, cuando se inspeccionan sus imports y su tráfico saliente, entonces no habla con ningún servidor nuestro: la copia la hace el sistema y nosotros no la vemos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "El código de esta entrega no habla con ningún servidor nuestro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la declaración de qué sale del móvil, cuando se lee, entonces dice que lo que sale es una partida dentro del respaldo cifrado de la propia cuenta del jugador, y que el rastro de ubicación no sale porque no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Qué sale del móvil está dicho en voz alta y el rastro de ubicación no sale porque no existe",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida con dos mapas, cuando se exporta, entonces el fichero contiene el índice y los documentos de todas las celdas de los dos mapas, el estado, el registro de hechos y los recursos binarios residentes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero exportado trae los dos mapas, el estado, el registro y los recursos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero exportado, cuando se lee su manifiesto, entonces declara la versión de formato de la constante única de SPEC-009, la versión de las reglas con que se escribió y la lista completa de sus partes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El manifiesto declara la versión de formato de la constante única y la lista completa de partes",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero exportado, cuando se comparan sus partes con el manifiesto, entonces están todas las declaradas y ninguna más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero trae exactamente las partes que su manifiesto declara, ni una más ni una menos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la misma partida, cuando se exporta dos veces, entonces los dos ficheros son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Exportar dos veces la misma partida da el mismo fichero byte a byte",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre las tres cosas: la lista de partes, el manifiesto y EL FICHERO empaquetado, que es lo que sale del móvil. Y sobre dos partidas montadas de cero por separado, que es lo que de verdad afirma que dos móviles con la misma partida producen el mismo fichero."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero exportado, cuando se buscan marcas de tiempo del reloj real, entonces no hay ninguna, ni en el manifiesto ni en las entradas del contenedor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero exportado no lleva ninguna marca del reloj real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado los textos del narrador cacheados de la partida, cuando se exporta, entonces van dentro, y el manifiesto declara que van.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Los textos del narrador cacheados van dentro y el manifiesto declara que van",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida recién creada sin ningún mapa, cuando se exporta, entonces el fichero se produce igual, con su manifiesto y sin celdas, y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Una partida recién creada sin ningún mapa se exporta igual y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida sin ningún recurso binario, cuando se exporta, entonces el fichero se produce igual y el manifiesto declara cero recursos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Una partida sin ningún recurso binario se exporta igual y el manifiesto declara cero recursos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una exportación terminada, cuando se compara la partida antes y después, entonces el estado, el registro y todos los documentos son idénticos byte a byte: exportar no toca nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Exportar no toca la partida: ni el estado, ni el registro, ni ningún documento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el fichero exportado, cuando se mide una partida de mil días con dos mapas, entonces su tamaño queda declarado y comparado con el presupuesto de SPEC-009 y SPEC-016, fase a fase por tipo de parte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El tamaño del fichero queda declarado fase a fase por tipo de parte",
+      "hueco_de_bateria": true,
+      "nota": "Se afirman el instrumento —medidaPorClaseDeParte reparte los bytes entre manifiesto, documento y recurso— y el tamaño del fichero empaquetado, declarado en 24 057 B para la partida de dos mapas y una salida. La partida de mil días se monta en el caso siguiente."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el fichero exportado, cuando se recorre entero, entonces no contiene ningún histórico de posiciones, ningún camino recorrido y ninguna coordenada de la jugadora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero exportado no contiene ningún histórico de posiciones ni coordenada de la jugadora",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el fichero exportado, cuando se buscan los datos del mundo, entonces está el anclaje redondeado de cada mapa, que es su identificador desde SPEC-003, y ninguna coordenada más precisa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Del mundo sale el anclaje redondeado de cada mapa y ninguna coordenada más precisa",
+      "hueco_de_bateria": true,
+      "nota": "Las dos coordenadas exactas desde las que se levantaron los mapas se buscan literalmente dentro del fichero y no aparecen; los dos anclajes redondeados sí."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un jugador que guardó una copia y borró la partida, cuando importa el fichero, entonces recupera el mundo, el personaje, el diario y los rangos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "La copia guardada se puede volver a abrir",
+      "escenario": "La copia guardada se puede volver a abrir",
+      "nota": "El escenario que esta fila existe para hacer verdad, entero y por primera vez vivo: mundo, personaje, diario, rangos y el binario residente."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero importado, cuando se compara con el original, entonces los documentos, el estado y el registro son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Los documentos, el estado y el registro importados son idénticos byte a byte a los originales",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero importado, cuando se lee la partida, entonces declara que vino de una importación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "La partida importada declara que vino de una importación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero cuyo manifiesto declara una parte que el contenedor no trae, cuando se importa, entonces falla nombrando la parte, y no se abre una partida a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Un manifiesto que declara una parte que el fichero no trae falla nombrando la parte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero que no es una partida, cuando se importa, entonces falla diciendo que no lo es, sin intentar interpretarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Un fichero que no es una partida falla diciendo que no lo es, sin intentar interpretarlo",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre validaManifiesto, que es la validación de datos que decide si un fichero es una partida. La causa en vocabulario cerrado que consume la pantalla (`no-es-partida`) se ejercita en test/nucleo/copia.test.mjs, ya alcanzable."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero con una versión de formato mayor que la que el juego entiende, cuando se importa, entonces no se abre y el error declara la versión que trae y la que se esperaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Un fichero de una versión de formato mayor que la del juego declara las dos versiones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una importación que falla a mitad, cuando se vuelve a abrir la app, entonces la partida anterior sigue entera y no hay ninguna partida a medias escrita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Una importación que falla a mitad deja la marca puesta y la partida no se abre",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una importación confirmada, cuando termina, entonces la partida importada es la única que hay: no hay dos partidas ni ninguna manera de elegir entre ellas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Importar sustituye la partida actual y no deja dos ni ninguna manera de elegir",
+      "hueco_de_bateria": true,
+      "nota": "Tres claves de mapa en la partida de destino, dos en la copia: después de importar quedan exactamente las dos de la copia."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero exportado por otra persona, cuando se importa, entonces se abre su partida entera —su mundo, su personaje, su diario y sus rangos—, que es lo que significa compartir mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero de otra persona abre su partida entera, que es lo que significa compartir mundo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 6 de la spec: compartir mundo importando el fichero de otra persona no tiene escenario, y es la mitad de RF-PERS-005 que nadie había probado."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero importado, cuando se comprueban sus documentos contra el esquema cerrado, entonces se validan todos antes de sustituir nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "Los documentos de un fichero se validan contra el esquema cerrado antes de sustituir nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una exportación en curso, cuando falla a mitad, entonces no queda ningún fichero a medias donde el jugador pueda encontrarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Una exportación que falla a mitad no deja ningún fichero a medias",
+      "hueco_de_bateria": true,
+      "nota": "Criterio que hasta ahora no tenía ninguna entrada: guardar una copia vive en app/datos/copia.js y no se podía ejecutar. Se prueban las dos maneras de fallar a mitad —el almacén se cae al componer, la hoja de compartir se cae al recibir— y en las dos la hoja no llega a recibir nada compuesto a medias y la partida queda idéntica byte a byte."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un jugador que guardó una copia y borró la partida, cuando importa el fichero, entonces recupera el mundo, el personaje, el diario y los rangos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "En un móvil limpio abrir una copia la abre sin preguntar, y sobre una partida se queda en el aviso",
+      "escenario": "La copia guardada se puede volver a abrir",
+      "nota": "Segundo caso del mismo escenario, por la puerta por la que entra de verdad: el selector del sistema, creaCopia.abre() y el móvil limpio, que es el caso normal después de borrar la partida."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero truncado, cuando se importa, entonces falla diciendo que el fichero está incompleto y la partida actual sigue intacta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Un fichero truncado se rechaza con la causa cerrada y la partida sigue intacta",
+      "hueco_de_bateria": true,
+      "nota": "Criterio que hasta ahora no tenía ninguna entrada. La causa viaja en el resultado (`incompleto`) y no se deduce leyendo el texto en español, que es como se rompe una pantalla al corregir una tilde; y la partida de quien abre el fichero queda idéntica byte a byte."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero truncado, cuando se importa, entonces falla diciendo que el fichero está incompleto y la partida actual sigue intacta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Un fichero truncado falla diciendo que está incompleto y nombra la parte que se corta",
+      "hueco_de_bateria": true,
+      "nota": "La otra mitad, en el contenedor: cuatro maneras de que un fichero no esté entero —cortado por el cuerpo, cortado por la cabecera, con bytes de más y con una cuenta de partes que miente— y las cuatro dan la causa `incompleto` sin intentar interpretar nada."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una importación que va a sustituir una partida existente, cuando se pide, entonces se avisa de que la actual se pierde y se ofrece guardar una copia antes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Sobre una partida existente se avisa de que se va a sustituir, y sobre un móvil limpio no",
+      "hueco_de_bateria": true,
+      "nota": "Criterio que hasta ahora no tenía ninguna entrada. Aquí se afirma lo que decide si el aviso aparece —hay partida o no la hay— y que validar no escribe nada mientras nadie confirma. Los tres botones y su orden son de la pantalla y quedan para @app; guardar una copia antes es la acción `guarda`, que se ejercita en «Guardar una copia entrega el fichero entero a la hoja de compartir y no toca la partida»."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una importación confirmada, cuando termina, entonces la partida importada es la única que hay: no hay dos partidas ni ninguna manera de elegir entre ellas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Confirmar el aviso sustituye la partida y no deja rastro de la anterior",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso: el otro se afirma sobre importaPartida y este sobre la acción que confirma el aviso, que es por donde pasa de verdad."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero que no es una partida, cuando se importa, entonces falla diciendo que no lo es, sin intentar interpretarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Un fichero que no es una partida se rechaza por su primera línea y no se interpreta",
+      "hueco_de_bateria": true,
+      "nota": "La causa en vocabulario cerrado que consume la pantalla, ya ejecutada: se mira la primera línea y no se intenta leer nada más, ni siquiera de un fichero con una cabecera casi igual."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero que no es una partida, cuando se importa, entonces falla diciendo que no lo es, sin intentar interpretarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Las cuatro causas por las que un fichero no se abre se distinguen entre ellas",
+      "hueco_de_bateria": true,
+      "nota": "Las cuatro con su causa y su línea: no-es-partida, incompleto, version-mayor y falta-migracion. La última se puede provocar hoy, con la versión de formato todavía en 1, porque nada por debajo de la mínima soportada tiene cadena que lo alcance."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero exportado, cuando se comparan sus partes con el manifiesto, entonces están todas las declaradas y ninguna más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Un fichero desempaquetado devuelve exactamente las partes que se empaquetaron",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso, sobre el fichero y no sobre la lista: lo que entra en el contenedor sale byte a byte, en el mismo orden canónico, con el manifiesto de primera parte y el binario todavía en base64."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la orquestación de la app construida sin almacén duradero cableado, cuando se construye, entonces falla nombrando la pieza que falta, en lugar de degradar en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Sin las piezas del sistema o sin núcleo no se construye, y el error nombra la que falta",
+      "hueco_de_bateria": true,
+      "nota": "La mitad que faltaba del criterio: guardar y abrir una copia se construyen enteras o no se construyen, y las trece piezas del núcleo se comprueban una a una AL CONSTRUIR y no al abrir el fichero de otra persona, que es cuando ya no hay a quién decírselo."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la orquestación de la app construida sin almacén duradero cableado, cuando se construye, entonces falla nombrando la pieza que falta, en lugar de degradar en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "El contenedor sin el nombre del manifiesto inyectado no se construye",
+      "hueco_de_bateria": true,
+      "nota": "Un contenedor que empaquetara sin saber cuál es la primera parte escribiría ficheros que nadie puede volver a abrir, y no protestaría al hacerlo."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida recién creada sin ningún mapa, cuando se exporta, entonces el fichero se produce igual, con su manifiesto y sin celdas, y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/copia.test.mjs",
+      "caso": "Una partida sin ningún mapa se guarda igual y el fichero se llama partida",
+      "hueco_de_bateria": true,
+      "nota": "Segundo caso, sobre el fichero: se comparte igual, trae solo su manifiesto y se llama «partida» porque no hay mundo que le dé nombre."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el fichero exportado, cuando se mide una partida de mil días con dos mapas, entonces su tamaño queda declarado y comparado con el presupuesto de SPEC-009 y SPEC-016, fase a fase por tipo de parte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero de una partida de mil días queda medido entero y cabe en el presupuesto de SPEC-016",
+      "hueco_de_bateria": true,
+      "nota": "La partida de MIL DÍAS, montada de verdad: dos mapas y tres hechos por salida, mil salidas. El fichero empaquetado queda declarado en 718 638 B y el registro y el estado se comparan contra las constantes de SPEC-016, no contra un número escrito a mano."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el juego, cuando se lee la versión de formato que escribe, entonces sale de la constante única de SPEC-009 y no de ninguna copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "La versión de formato que el juego escribe sale de la constante única y no de una copia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de la spec: RF-PERS-008 no tiene escenario. Todo este fichero es hueco de batería."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la cadena de migraciones, cuando se recorre, entonces cubre sin huecos desde la versión mínima soportada hasta la actual, y cada paso declara de qué versión a cuál va.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "La cadena cubre sin huecos desde la versión mínima hasta la actual y cada paso declara su salto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una cadena con un hueco entre dos versiones, cuando se comprueba, entonces falla nombrando el salto que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Una cadena con un hueco entre dos versiones falla nombrando el salto que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un documento de una versión menor que la actual y con todos los pasos registrados, cuando se migra, entonces se aplican los pasos en orden y el resultado valida contra el esquema cerrado actual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Un documento de una versión menor con todos los pasos registrados se migra en orden",
+      "hueco_de_bateria": true,
+      "nota": "La validación contra el esquema cerrado se cubre además con «Migrar hasta la versión real valida el resultado contra el esquema cerrado actual»."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un documento de una versión menor sin paso registrado para ese salto, cuando se importa, entonces falla nombrando el salto que falta, en lugar de interpretarlo con las reglas nuevas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Un documento de una versión menor sin paso registrado para ese salto falla nombrando el salto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una migración que introduce un campo que antes no existía, cuando se aplica, entonces el valor que pone está declarado en el propio paso, y no se deduce en el momento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Una migración que introduce un campo nuevo declara el valor y no lo deduce",
+      "hueco_de_bateria": true,
+      "nota": "Por `introduce` no puede pasar nada ejecutable: es donde se sostiene que migrar el mismo fichero en dos versiones del juego dé lo mismo."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el mismo documento, cuando se migra dos veces desde el mismo origen, entonces los dos resultados son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Migrar el mismo documento dos veces desde el mismo origen da resultados idénticos byte a byte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un documento ya en la versión actual, cuando se pide migrarlo, entonces sale idéntico y ningún paso se aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Un documento ya en la versión actual sale idéntico y ningún paso se aplica",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida migrada, cuando se lee, entonces declara desde qué versión se migró y con qué versión de reglas se hizo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Una partida migrada declara desde qué versión se migró y con qué versión de reglas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida migrada, cuando se compara con la original, entonces la original sigue en el fichero de origen sin tocar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "La original sigue sin tocar después de migrarla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado la cadena de migraciones y un paso de prueba registrado, cuando se ejecuta la comprobación, entonces se puede poner roja: el mecanismo se ejercita aunque hoy solo exista la versión 1.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "La comprobación de la cadena se puede poner roja con un paso de prueba mal declarado",
+      "hueco_de_bateria": true,
+      "nota": "El criterio de §6o: tres maneras de ponerla roja hoy, con la versión de formato todavía en 1."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida cuyo registro pasa del presupuesto de SPEC-016, cuando se compacta, entonces se sella un estado y el registro empieza desde el sello.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/compactacion.test.mjs",
+      "caso": "Sellar un estado deja el registro empezando desde el sello",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 5 de la spec: la compactación no tiene escenario. El presupuesto se afirma aparte, en «El presupuesto de SPEC-016 se mide y es el que decide cuándo hay que compactar»; una partida de 6 MB de registro no se monta y la medida se comprueba contra las constantes."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida compactada, cuando se reconstruye desde su registro, entonces se reconstruye desde el sello y el resultado es el mismo que el estado sellado más los hechos posteriores.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/compactacion.test.mjs",
+      "caso": "Una partida compactada se reconstruye desde el sello y da lo mismo que sin compactar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una compactación, cuando se busca si se han podado hechos sueltos, entonces no se ha podado ninguno: o están todos desde el sello o está el sello.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/compactacion.test.mjs",
+      "caso": "Compactar no poda ningún hecho suelto: o están todos desde el sello o está el sello",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una compactación interrumpida, cuando se vuelve a abrir la partida, entonces sigue el registro anterior entero y no hay ningún sello a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/compactacion.test.mjs",
+      "caso": "Una compactación interrumpida deja el registro anterior entero y ningún sello a medias",
+      "hueco_de_bateria": true,
+      "nota": "Se cubre con tres casos, porque hay tres puntos en los que se puede morir: este, «Una compactación que llegó a cambiar el estado se remata y no se reproduce dos veces» y «Abrir la partida deshace o remata una compactación a medias antes de leer nada»."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado una partida de cien salidas, cuando se exporta y se recorre el fichero entero, entonces no contiene ningún histórico de posiciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero exportado no contiene ningún histórico de posiciones ni coordenada de la jugadora",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "Bloqueante (@privacidad, RF-PRIV-002). La partida es de una salida y no de cien: lo que hace la afirmación no es el número de salidas sino que el estado y el registro pasen por la guarda del formato al escribirse y al importarse."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado ese mismo fichero, cuando se busca por dónde fue la jugadora de un sitio a otro, entonces no aparece.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero exportado no contiene ningún histórico de posiciones ni coordenada de la jugadora",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado ese mismo fichero, cuando se buscan lecturas de sensores, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero exportado no contiene ningún histórico de posiciones ni coordenada de la jugadora",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el directorio que entra en la copia del sistema, cuando se recorre entero, entonces contiene lo mismo que el fichero exportado y nada más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Toda clave que el almacén escribe cae dentro de lo que entra en la copia del sistema",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "Bloqueante (@privacidad). Se comprueba además en «Las claves duraderas sobreviven a cerrar y volver a abrir la app, byte a byte», donde los ficheros que hay en el directorio del disco se comparan uno a uno con las claves de la partida."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado un fichero de partida al que se le añade a mano un campo con una posición de la jugadora, cuando se importa, entonces el esquema cerrado lo rechaza nombrando el campo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "Bloqueante (@privacidad, RF-PRIV-002)."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el reparto de rutas, cuando se comprueba, entonces casi todo es afirmable en @nucleo con node --test y un almacén de memoria.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Ningún módulo alcanzable desde test/nucleo/ cita un especificador que haya que instalar",
+      "hueco_de_bateria": true,
+      "nota": "AGUJERO CERRADO: el guardián de SPEC-001 solo mira los imports directos de test/nucleo/ y test/dobles/, nunca el cierre transitivo por app/. Esta comprobación sigue el grafo entero. Es la que sostiene que copia.js, empaquetador.js y reglas-de-respaldo.js —que ya reciben el núcleo por la puerta— no vuelvan a citar el paquete por su nombre."
+    },
+    {
+      "spec": "SPEC-039",
+      "criterio": "Dado el reparto de rutas, cuando se comprueba, entonces esta fila no añade ninguna dependencia nueva a la app.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/duradero.test.mjs",
+      "caso": "Todo paquete que app/ importa está declarado, o es del SDK de Expo y se dice quién lo trae",
+      "hueco_de_bateria": true,
+      "nota": "AGUJERO CERRADO: la lista cerrada de SPEC-020 mira lo que app/package.json DECLARA, nunca lo que app/ IMPORTA. `expo-file-system` entró por ahí; ya está declarado y admitido en la lista cerrada por veredicto de quien orquesta —LA SPEC NO LO NOMBRA, y hace falta iterar SPEC-039 para dejarlo escrito—. La comprobación mira desde el lado de los imports: recoge todos los ficheros que piden cada paquete, entiende también require(), poda los artefactos de compilación y se pone roja si el barrido deja de ver los paquetes que hoy se importan de verdad."
     }
   ]
 }
