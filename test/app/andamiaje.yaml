@@ -1,5 +1,18 @@
 # @app — El primer flujo que toca un dispositivo (SPEC-020).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: la app abre en el arranque —`enArranque =
+# true`— y al andamiaje solo se llega saliendo de él sin partida levantada. Lo único
+# que llega a ejecutarse es la guarda de más abajo, así que su verde significa «el
+# límite sigue en pie» y nunca «la pantalla funciona», y por eso no se cuenta en la
+# misma casilla que un verde de verdad. El porqué entero y lo que haría falta para
+# levantarlo están en «LÍMITE DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Comprueba lo único que esta fila entrega: que la app arranca, que la pantalla de
 # andamiaje está entera, que el título de mundo lo pinta el núcleo y que las cuatro
 # capacidades se enumeran. Los elementos se localizan por los identificadores que
@@ -14,44 +27,70 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-- assertVisible:
-    id: 'pantalla-andamiaje'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# Este flujo daba por hecho que la app abre en el andamiaje, y **no abre ahí**.
+# `app/App.js` arranca con `enArranque = true`, así que lo primero y lo único que se ve
+# al instalar es el arranque de A1P1. El andamiaje sigue existiendo y `PantallaAndamiaje` se monta, pero solo cuando se sale del arranque **sin partida levantada**: hay que recorrer las siete pantallas de A1 para llegar, y este flujo no las recorre.
+#
+# Mientras la app abra donde abre, este flujo **no recorre nada y lo dice**: comprueba
+# que sigue sin haber camino y que la app abre en el arranque. Su verde significa «el
+# límite declarado sigue en pie», nunca «la pantalla está verificada». El día que haya
+# camino, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'pantalla-andamiaje'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'pantalla-andamiaje'
 
-# La pantalla se declara herramienta: si esto desaparece sin que la fila 27 la
-# haya sustituido, es que alguien la ha empezado a tratar como pantalla de juego.
-- assertVisible: 'Andamiaje. Esto no es el juego.*'
+# El flujo de verdad, a la espera de su camino.
+- runFlow:
+    when:
+      visible:
+        id: 'pantalla-andamiaje'
+    commands:
+      - assertVisible:
+          id: 'pantalla-andamiaje'
 
-- assertVisible:
-    id: 'titulo-de-mundo'
+      # La pantalla se declara herramienta: si esto desaparece sin que la fila 27 la
+      # haya sustituido, es que alguien la ha empezado a tratar como pantalla de juego.
+      - assertVisible: 'Andamiaje. Esto no es el juego.*'
 
-# Idéntico al de Node: namesFor(localeFor(42.40, -8.81)).worldTitle(makeRng('42.40,-8.81#1:title')).
-- assertVisible: '«Reinos de Vaeloria»'
+      - assertVisible:
+          id: 'titulo-de-mundo'
 
-- assertVisible: 'semilla 42.40,-8.81#1 · idioma gl'
+      # Idéntico al de Node: namesFor(localeFor(42.40, -8.81)).worldTitle(makeRng('42.40,-8.81#1:title')).
+      - assertVisible: '«Reinos de Vaeloria»'
 
-- assertVisible:
-    id: 'capacidades'
+      - assertVisible: 'semilla 42.40,-8.81#1 · idioma gl'
 
-- assertVisible:
-    id: 'capacidad-salud'
-- assertVisible:
-    id: 'capacidad-haptico'
-- assertVisible:
-    id: 'capacidad-notificaciones'
-- assertVisible:
-    id: 'capacidad-respaldo'
+      - assertVisible:
+          id: 'capacidades'
 
-# La salud queda declarada no montada, nombrando a su dueña.
-- assertVisible: 'Salud — no montada'
-- assertVisible: '.*la monta la fila 42.*'
+      - assertVisible:
+          id: 'capacidad-salud'
+      - assertVisible:
+          id: 'capacidad-haptico'
+      - assertVisible:
+          id: 'capacidad-notificaciones'
+      - assertVisible:
+          id: 'capacidad-respaldo'
 
-# Ni el núcleo caído ni la lista vacía: los dos estados existen y aquí no tocan.
-- assertNotVisible:
-    id: 'nucleo-error'
-- assertNotVisible:
-    id: 'capacidades-vacio'
-- assertNotVisible:
-    id: 'gancho-no-reconocido'
+      # La salud queda declarada no montada, nombrando a su dueña.
+      - assertVisible: 'Salud — no montada'
+      - assertVisible: '.*la monta la fila 42.*'
 
-# Sin cifras de distancia, tiempo, ritmo, pasos ni progreso en toda la pantalla.
-- assertNotVisible: '.*\d+\s*(km|m|min|pasos|%).*'
+      # Ni el núcleo caído ni la lista vacía: los dos estados existen y aquí no tocan.
+      - assertNotVisible:
+          id: 'nucleo-error'
+      - assertNotVisible:
+          id: 'capacidades-vacio'
+      - assertNotVisible:
+          id: 'gancho-no-reconocido'
+
+      # Sin cifras de distancia, tiempo, ritmo, pasos ni progreso en toda la pantalla.
+      - assertNotVisible: '.*\d+\s*(km|m|min|pasos|%).*'

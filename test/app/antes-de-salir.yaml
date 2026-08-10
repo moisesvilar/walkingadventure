@@ -10,10 +10,11 @@
 # sin simulador. Duplicar aquí lo que ya se puede poner rojo en Node solo añadiría un flujo
 # lento que se cae por el entorno.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para pasar**: una instalación limpia —a la portada se llega
 # saliendo del arranque, que es hoy el único camino— y el proxy alcanzable desde el
@@ -147,12 +148,23 @@ appId: com.walkingadventure.app
       # hace y lo que no hace ya está afirmado en `test/nucleo/lo-que-hay-hoy.test.mjs`.
       # Que la pantalla llegue aquí con un mundo recién levantado sería la noticia.
 
-# La línea que dice que se puede salir sin coger ninguna, en los dos casos.
+# Ni una distancia en toda la pantalla. La hora orientativa sí, que es lo que el diseño
+# pide al lado de la palabra del mundo. Se comprueba arriba y, más abajo, otra vez después
+# de bajar: «toda la pantalla» es todo lo que se recorre, no lo que cabe de una vez.
+- assertNotVisible: '.*\d+\s*(m|km|metros|pasos|kcal|%).*'
+
+# La línea que dice que se puede salir sin coger ninguna, en los dos casos. **Se alcanza
+# bajando**, por lo mismo que en A1P7: `PantallaLoQueHayHoy` es un `ScrollView` y la lista
+# de hoy no tiene longitud fija —trae de una a tres entradas, según lo que el reparto
+# resuelva—, así que la línea, que va debajo, puede quedar bajo el pliegue en unas
+# ejecuciones y a la vista en otras. Con lista corta `scrollUntilVisible` no desplaza nada.
+- scrollUntilVisible:
+    element:
+      id: 'andar-sin-nada'
+    direction: DOWN
 - assertVisible:
     id: 'andar-sin-nada'
 - assertVisible: 'Y puedes salir a andar sin coger ninguna. El mundo se mueve igual.'
-# Ni una distancia en toda la pantalla. La hora orientativa sí, que es lo que el diseño
-# pide al lado de la palabra del mundo.
 - assertNotVisible: '.*\d+\s*(m|km|metros|pasos|kcal|%).*'
 
 # ── A2P4 · La ficha ────────────────────────────────────────────────────────────

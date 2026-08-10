@@ -1,5 +1,18 @@
 # @app — Los ajustes dentro del móvil (SPEC-038).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: falta `paso-ajustes` en `app/App.js`, así que
+# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**. El catálogo cerrado, los cinco grupos y
 # su orden, los tres tipos de fila, el valor derivado de cada una, que no exista una fila
 # del oficio y que una fila sin dueño cableado impida componer la pantalla son
@@ -14,10 +27,11 @@
 #    el real; que el conmutador no se adelante solo se ve tocándolo.
 # 3. **Que «Empezar de nuevo» no lleve color destructivo en la lista** y sí en su pantalla.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -54,106 +68,135 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-- tapOn:
-    id: 'paso-ajustes'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-ajustes` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
+# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
+# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
+# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
+# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+#
+# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
+# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
+# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
+# `paso-ajustes`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
+# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-ajustes'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-ajustes'
 
-# ── Los ajustes son la única excepción ─────────────────────────────────────────
-# La pantalla declara su registro, y es el único sitio del juego donde vale `aplicacion`.
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-ajustes'
+    commands:
+      - tapOn:
+          id: 'paso-ajustes'
 
-- assertVisible:
-    id: 'momento'
-- assertVisible: 'de-consulta'
-- assertVisible:
-    id: 'ajustes-registro'
-- assertVisible: 'aplicacion'
-- assertVisible: 'Ajustes'
+      # ── Los ajustes son la única excepción ─────────────────────────────────────────
+      # La pantalla declara su registro, y es el único sitio del juego donde vale `aplicacion`.
 
-# Los cinco grupos, en su orden, y las once filas colgando de ellos.
-- assertVisible:
-    id: 'ajustes-lista'
-- assertVisible: 'como-andas,tu-personaje,el-mapa,el-mundo,tus-cosas'
-- assertVisible:
-    id: 'ajustes-grupo'
-- assertVisible:
-    id: 'ajustes-fila'
-- assertVisible: 'Cómo se pinta'
-- assertVisible: 'Tamaño de la letra'
-- assertVisible: 'Solo de día'
-- assertVisible: 'Guardar una copia'
-- assertVisible: 'Empezar de nuevo'
+      - assertVisible:
+          id: 'momento'
+      - assertVisible: 'de-consulta'
+      - assertVisible:
+          id: 'ajustes-registro'
+      - assertVisible: 'aplicacion'
+      - assertVisible: 'Ajustes'
 
-# ── El oficio no aparece en ajustes ────────────────────────────────────────────
-# Se puede cambiar el nombre y el género gramatical, y no el oficio.
+      # Los cinco grupos, en su orden, y las once filas colgando de ellos.
+      - assertVisible:
+          id: 'ajustes-lista'
+      - assertVisible: 'como-andas,tu-personaje,el-mapa,el-mundo,tus-cosas'
+      - assertVisible:
+          id: 'ajustes-grupo'
+      - assertVisible:
+          id: 'ajustes-fila'
+      - assertVisible: 'Cómo se pinta'
+      - assertVisible: 'Tamaño de la letra'
+      - assertVisible: 'Solo de día'
+      - assertVisible: 'Guardar una copia'
+      - assertVisible: 'Empezar de nuevo'
 
-- assertVisible:
-    id: 'ajustes-nombre'
-- assertVisible: 'Cómo te llamas'
-- assertVisible:
-    id: 'ajustes-genero'
-- assertVisible: 'Cómo se dirigen a ti'
+      # ── El oficio no aparece en ajustes ────────────────────────────────────────────
+      # Se puede cambiar el nombre y el género gramatical, y no el oficio.
 
-- assertNotVisible: 'Oficio'
-- assertNotVisible: 'A qué te dedicas'
-- assertNotVisible: 'Cambiar de oficio'
-- assertNotVisible:
-    id: 'ajustes-oficio'
+      - assertVisible:
+          id: 'ajustes-nombre'
+      - assertVisible: 'Cómo te llamas'
+      - assertVisible:
+          id: 'ajustes-genero'
+      - assertVisible: 'Cómo se dirigen a ti'
 
-# Ni ninguna fila que cambie el mapa activo, ni nada de red, cuenta, suscripción o
-# analítica: el catálogo es cerrado y estas no están.
-- assertNotVisible: 'Mapa activo'
-- assertNotVisible: 'Cambiar de mapa'
-- assertNotVisible: 'Cuenta'
-- assertNotVisible: 'Suscripción'
-- assertNotVisible: 'Iniciar sesión'
-- assertNotVisible: 'Datos de uso'
+      - assertNotVisible: 'Oficio'
+      - assertNotVisible: 'A qué te dedicas'
+      - assertNotVisible: 'Cambiar de oficio'
+      - assertNotVisible:
+          id: 'ajustes-oficio'
 
-# Ni la palabra que «caminos que evitar» no dice nunca.
-- assertVisible: 'Caminos que evitar'
-- assertNotVisible: 'Accesibilidad'
-- assertNotVisible: 'Modo'
-- assertNotVisible: 'Adaptado'
+      # Ni ninguna fila que cambie el mapa activo, ni nada de red, cuenta, suscripción o
+      # analítica: el catálogo es cerrado y estas no están.
+      - assertNotVisible: 'Mapa activo'
+      - assertNotVisible: 'Cambiar de mapa'
+      - assertNotVisible: 'Cuenta'
+      - assertNotVisible: 'Suscripción'
+      - assertNotVisible: 'Iniciar sesión'
+      - assertNotVisible: 'Datos de uso'
 
-# ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
-# Instalación nueva: apagado. Y tocarlo **no lo enciende**: lo pide. Hasta que el permiso
-# no vuelve concedido, lo que se pinta sigue siendo el valor real.
+      # Ni la palabra que «caminos que evitar» no dice nunca.
+      - assertVisible: 'Caminos que evitar'
+      - assertNotVisible: 'Accesibilidad'
+      - assertNotVisible: 'Modo'
+      - assertNotVisible: 'Adaptado'
 
-- assertVisible:
-    id: 'ajustes-pasos-de-fondo'
-- assertVisible: 'Contar los pasos del día a día'
-- tapOn:
-    id: 'ajustes-pasos-de-fondo'
-- assertVisible:
-    id: 'ajustes-pasos-de-fondo'
-- assertVisible: 'no'
+      # ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
+      # Instalación nueva: apagado. Y tocarlo **no lo enciende**: lo pide. Hasta que el permiso
+      # no vuelve concedido, lo que se pinta sigue siendo el valor real.
 
-# ── Un ajuste de valor abre, se elige y vuelve ─────────────────────────────────
-# Sin confirmación, sin aviso de éxito y sin salir de los ajustes.
+      - assertVisible:
+          id: 'ajustes-pasos-de-fondo'
+      - assertVisible: 'Contar los pasos del día a día'
+      - tapOn:
+          id: 'ajustes-pasos-de-fondo'
+      - assertVisible:
+          id: 'ajustes-pasos-de-fondo'
+      - assertVisible: 'no'
 
-- tapOn:
-    id: 'ajustes-como-se-pinta'
-- assertVisible: 'Pergamino'
-- tapOn: 'Pergamino'
-- assertVisible:
-    id: 'ajustes-lista'
-- assertVisible: 'Pergamino'
-- assertNotVisible: 'Guardado'
-- assertNotVisible: 'Cambios guardados'
+      # ── Un ajuste de valor abre, se elige y vuelve ─────────────────────────────────
+      # Sin confirmación, sin aviso de éxito y sin salir de los ajustes.
 
-# ── Lo destructivo no se marca en la lista ─────────────────────────────────────
-# «Empezar de nuevo» es la última y aquí es una puerta más; el aviso vive en su pantalla.
+      - tapOn:
+          id: 'ajustes-como-se-pinta'
+      - assertVisible: 'Pergamino'
+      - tapOn: 'Pergamino'
+      - assertVisible:
+          id: 'ajustes-lista'
+      - assertVisible: 'Pergamino'
+      - assertNotVisible: 'Guardado'
+      - assertNotVisible: 'Cambios guardados'
 
-- assertNotVisible: 'Se borrará'
-- assertNotVisible: 'Esta acción no se puede deshacer'
-- tapOn: 'Empezar de nuevo'
-- assertVisible: 'Se borrará'
+      # ── Lo destructivo no se marca en la lista ─────────────────────────────────────
+      # «Empezar de nuevo» es la última y aquí es una puerta más; el aviso vive en su pantalla.
 
-# ── La frontera se cruza al salir ──────────────────────────────────────────────
-# Fuera de los ajustes ya no se habla como aplicación: la repisa declara `mundo`.
+      - assertNotVisible: 'Se borrará'
+      - assertNotVisible: 'Esta acción no se puede deshacer'
+      - tapOn: 'Empezar de nuevo'
+      - assertVisible: 'Se borrará'
 
-- back
-- tapOn: '‹ Volver'
-- tapOn:
-    id: 'paso-repisa'
-- assertVisible: 'La repisa'
-- assertNotVisible:
-    id: 'ajustes-registro'
+      # ── La frontera se cruza al salir ──────────────────────────────────────────────
+      # Fuera de los ajustes ya no se habla como aplicación: la repisa declara `mundo`.
+
+      - back
+      - tapOn: '‹ Volver'
+      - tapOn:
+          id: 'paso-repisa'
+      - assertVisible: 'La repisa'
+      - assertNotVisible:
+          id: 'ajustes-registro'

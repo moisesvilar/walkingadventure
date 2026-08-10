@@ -117,9 +117,21 @@ describe('La disposición del repositorio tras estrenar la app', () => {
     // miraba lo declarado, nunca lo importado, y por ahí entraba media plataforma del
     // SDK sin que nada protestase. Quien mira desde el otro lado es
     // `duradero.test.mjs`, «Todo paquete que app/ importa está declarado».
+    //
+    // `react-native-reanimated` y `react-native-worklets` entran también por
+    // **SPEC-021**, y por arrastre de Skia y no por gusto: Skia declara Reanimated
+    // como par *opcional* pero lo exige al importarse, y sin él la app compila,
+    // instala y revienta al arrancar con `[runtime not ready]: Error:
+    // react-native-reanimated is not installed!`. En Reanimated 4 la transformación
+    // de worklets ya no vive en Reanimated sino en `react-native-worklets`, cuyo
+    // plugin de Babel declara `app/babel.config.js` — así que las dos son una sola
+    // decisión: la que hace que la fila que porta el pintado a Skia arranque. No son
+    // «por si acaso»: quitar cualquiera de las dos deja la app sin abrir.
     const permitidas = new Set([
       'expo', 'react', 'react-native', 'expo-haptics', 'expo-notifications', 'expo-linking', '@walkingadventure/nucleo',
       '@shopify/react-native-skia', // SPEC-021: el pintado del mapa
+      'react-native-reanimated', // SPEC-021: Skia lo exige al importarse
+      'react-native-worklets', // SPEC-021: el plugin de Babel de Reanimated 4
       'expo-file-system', // SPEC-039: la partida en disco y el fichero de la copia
     ]);
     const declaradas = Object.keys(APP_PAQUETE.dependencies ?? {});
@@ -476,6 +488,15 @@ describe('La pantalla de andamiaje', () => {
     const declarados = new Set([
       'pantalla-andamiaje', 'titulo-de-mundo', 'nucleo-error', 'capacidades', 'capacidades-vacio',
       'gancho-no-reconocido', 'capacidad-salud', 'capacidad-haptico', 'capacidad-notificaciones', 'capacidad-respaldo',
+      // `arranque` no es un selector de esta pantalla y no se usa para localizar nada de
+      // ella: es la guarda que declara que **hoy no hay camino hasta el andamiaje**.
+      // `App.js` abre con `enArranque = true`, así que al andamiaje solo se llega saliendo
+      // del arranque sin partida levantada, y los dos flujos de esta fila se quedaban en
+      // A1P1 sin poder decir por qué. Ahora lo dicen: mientras `pantalla-andamiaje` no
+      // esté a la vista afirman que la app abrió en el arranque, y el cuerpo de verdad
+      // espera. Es un identificador declarado —de SPEC-027, no inventado aquí—, y sale de
+      // esta lista el día que el andamiaje vuelva a ser alcanzable.
+      'arranque',
     ]);
     assert.equal(FLUJOS_DE_ESTA_FILA.length, 2, 'faltan los flujos de @app de esta fila');
     for (const flujo of FLUJOS_DE_ESTA_FILA) {

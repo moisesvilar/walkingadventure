@@ -1,5 +1,18 @@
 # @app — Una partida, muchos mapas, y ningún selector, dentro del móvil (SPEC-041).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: a la portada solo se llega con una partida ya
+# levantada, y la app abre en el arranque. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**. Casi toda esta fila es dato y se pone
 # roja sin simulador: la resolución del mapa activo, el alcance en tramos, el desempate,
 # la ausencia de una operación que fije el mapa a mano, la unicidad de nombres entre
@@ -21,10 +34,11 @@
 #    no hay nada que tocar no tiene excepciones, y comprobarlo exige el momento en marcha
 #    de verdad, con el GPS cruzando un borde.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -67,130 +81,156 @@ appId: com.walkingadventure.app
 # ── El mapa activo lo decide dónde estás ──────────────────────────────────────
 # Se abre la app estando en casa: sale la portada del mapa de casa, sin preguntar nada.
 
-- setLocation:
-    latitude: 42.402
-    longitude: -8.809
-- assertVisible:
-    id: 'portada'
-- assertVisible:
-    id: 'momento'
-- assertVisible: 'antes-de-salir'
-- assertVisible:
-    id: 'mapa-activo'
-- assertVisible: '42.40,-8.81'
-- assertNotVisible:
-    id: 'ofrecer-levantar-mapa'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# Este flujo daba por hecho que la app abre en la portada, y **no abre ahí**.
+# `app/App.js` arranca con `enArranque = true`, así que lo primero y lo único que se ve
+# al instalar es el arranque de A1P1. A la portada se llega solo con una partida ya levantada, que es lo que deja el arranque al terminar; sin ella `App.js` cae al andamiaje.
+#
+# Mientras la app abra donde abre, este flujo **no recorre nada y lo dice**: comprueba
+# que sigue sin haber camino y que la app abre en el arranque. Su verde significa «el
+# límite declarado sigue en pie», nunca «la pantalla está verificada». El día que haya
+# camino, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'portada'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'portada'
 
-# Nada ha preguntado: ni un diálogo, ni una lista, ni una bienvenida.
-- assertNotVisible: 'Elegir mapa'
-- assertNotVisible: 'Tus mapas'
-- assertNotVisible: 'Bienvenida'
-- assertNotVisible: 'Volver a casa'
+# El flujo de verdad, a la espera de su camino.
+- runFlow:
+    when:
+      visible:
+        id: 'portada'
+    commands:
+      - setLocation:
+          latitude: 42.402
+          longitude: -8.809
+      - assertVisible:
+          id: 'portada'
+      - assertVisible:
+          id: 'momento'
+      - assertVisible: 'antes-de-salir'
+      - assertVisible:
+          id: 'mapa-activo'
+      - assertVisible: '42.40,-8.81'
+      - assertNotVisible:
+          id: 'ofrecer-levantar-mapa'
 
-# ── No existe ningún selector de mapas ────────────────────────────────────────
-# Se recorren las pantallas del juego y en ninguna hay manera de cambiarlo a mano.
+      # Nada ha preguntado: ni un diálogo, ni una lista, ni una bienvenida.
+      - assertNotVisible: 'Elegir mapa'
+      - assertNotVisible: 'Tus mapas'
+      - assertNotVisible: 'Bienvenida'
+      - assertNotVisible: 'Volver a casa'
 
-- assertNotVisible:
-    id: 'selector-de-mapas'
-- assertNotVisible:
-    id: 'lista-de-mapas'
-- assertNotVisible:
-    id: 'cambiar-mapa'
+      # ── No existe ningún selector de mapas ────────────────────────────────────────
+      # Se recorren las pantallas del juego y en ninguna hay manera de cambiarlo a mano.
 
-- tapOn:
-    id: 'puerta-ajustes'
-- assertNotVisible: 'Mapas'
-- assertNotVisible: 'Cambiar de mapa'
-- assertNotVisible:
-    id: 'selector-de-mapas'
-- tapOn: '‹'
+      - assertNotVisible:
+          id: 'selector-de-mapas'
+      - assertNotVisible:
+          id: 'lista-de-mapas'
+      - assertNotVisible:
+          id: 'cambiar-mapa'
 
-# ── Llegar a un sitio nuevo ofrece levantar un mapa ───────────────────────────
-# El GPS salta a cuatrocientos kilómetros: no hay mapa activo, y el ofrecimiento
-# **sustituye** a la portada en lugar de superponerse. No hay mapa detrás.
+      - tapOn:
+          id: 'puerta-ajustes'
+      - assertNotVisible: 'Mapas'
+      - assertNotVisible: 'Cambiar de mapa'
+      - assertNotVisible:
+          id: 'selector-de-mapas'
+      - tapOn: '‹'
 
-- setLocation:
-    latitude: 40.4168
-    longitude: -3.7038
-- assertVisible:
-    id: 'ofrecer-levantar-mapa'
-- assertNotVisible:
-    id: 'portada'
-- assertVisible:
-    id: 'mapa-activo'
-- assertVisible: 'ninguno'
+      # ── Llegar a un sitio nuevo ofrece levantar un mapa ───────────────────────────
+      # El GPS salta a cuatrocientos kilómetros: no hay mapa activo, y el ofrecimiento
+      # **sustituye** a la portada en lugar de superponerse. No hay mapa detrás.
 
-- assertVisible: 'Hasta aquí no llega ninguno de tus mapas'
-- assertVisible: 'Si esto va a ser sitio tuyo, se puede levantar uno.'
-- assertVisible:
-    id: 'levantar-mapa-aqui'
-- assertVisible:
-    id: 'dejarlo-estar'
+      - setLocation:
+          latitude: 40.4168
+          longitude: -3.7038
+      - assertVisible:
+          id: 'ofrecer-levantar-mapa'
+      - assertNotVisible:
+          id: 'portada'
+      - assertVisible:
+          id: 'mapa-activo'
+      - assertVisible: 'ninguno'
 
-# Las tres puertas siguen —el diario es donde se leen los mapas donde ya no estás— y
-# salir a andar no: no se juega donde no estás.
-- assertVisible:
-    id: 'puerta-diario'
-- assertVisible:
-    id: 'puerta-repisa'
-- assertVisible:
-    id: 'puerta-ajustes'
-- assertNotVisible:
-    id: 'salir-sin-mas'
-- assertNotVisible:
-    id: 'ver-que-se-cuenta'
+      - assertVisible: 'Hasta aquí no llega ninguno de tus mapas'
+      - assertVisible: 'Si esto va a ser sitio tuyo, se puede levantar uno.'
+      - assertVisible:
+          id: 'levantar-mapa-aqui'
+      - assertVisible:
+          id: 'dejarlo-estar'
 
-# Y ninguna distancia, ninguna lista de mapas y ningún «volver a casa».
-- assertNotVisible: 'km'
-- assertNotVisible: 'Volver a casa'
-- assertNotVisible: 'Tus mapas'
+      # Las tres puertas siguen —el diario es donde se leen los mapas donde ya no estás— y
+      # salir a andar no: no se juega donde no estás.
+      - assertVisible:
+          id: 'puerta-diario'
+      - assertVisible:
+          id: 'puerta-repisa'
+      - assertVisible:
+          id: 'puerta-ajustes'
+      - assertNotVisible:
+          id: 'salir-sin-mas'
+      - assertNotVisible:
+          id: 'ver-que-se-cuenta'
 
-# Rechazar no se recuerda: se deja estar, y el mismo sitio vuelve a ofrecerlo igual.
-- tapOn:
-    id: 'dejarlo-estar'
-- assertVisible:
-    id: 'ofrecer-levantar-mapa'
-- assertNotVisible:
-    id: 'salir-sin-mas'
-- launchApp:
-    clearState: false
-- setLocation:
-    latitude: 40.4168
-    longitude: -3.7038
-- assertVisible:
-    id: 'ofrecer-levantar-mapa'
-- assertVisible: 'Hasta aquí no llega ninguno de tus mapas'
+      # Y ninguna distancia, ninguna lista de mapas y ningún «volver a casa».
+      - assertNotVisible: 'km'
+      - assertNotVisible: 'Volver a casa'
+      - assertNotVisible: 'Tus mapas'
 
-# ── Volver a casa no se anuncia ───────────────────────────────────────────────
-# Se vuelve al sitio de siempre: la portada de casa, sin transición ni mensaje.
+      # Rechazar no se recuerda: se deja estar, y el mismo sitio vuelve a ofrecerlo igual.
+      - tapOn:
+          id: 'dejarlo-estar'
+      - assertVisible:
+          id: 'ofrecer-levantar-mapa'
+      - assertNotVisible:
+          id: 'salir-sin-mas'
+      - launchApp:
+          clearState: false
+      - setLocation:
+          latitude: 40.4168
+          longitude: -3.7038
+      - assertVisible:
+          id: 'ofrecer-levantar-mapa'
+      - assertVisible: 'Hasta aquí no llega ninguno de tus mapas'
 
-- setLocation:
-    latitude: 42.402
-    longitude: -8.809
-- assertVisible:
-    id: 'portada'
-- assertVisible: '42.40,-8.81'
-- assertNotVisible: 'Bienvenida'
-- assertNotVisible: 'De vuelta'
-- assertNotVisible:
-    id: 'ofrecer-levantar-mapa'
+      # ── Volver a casa no se anuncia ───────────────────────────────────────────────
+      # Se vuelve al sitio de siempre: la portada de casa, sin transición ni mensaje.
 
-# ── Abrir una celda vecina en marcha no enseña nada ───────────────────────────
-# Se sale a andar y el GPS cruza el borde de la celda. El mundo tiene que existir donde
-# estás, y eso es trabajo del juego: en marcha no hay nada que tocar y ninguna excepción.
+      - setLocation:
+          latitude: 42.402
+          longitude: -8.809
+      - assertVisible:
+          id: 'portada'
+      - assertVisible: '42.40,-8.81'
+      - assertNotVisible: 'Bienvenida'
+      - assertNotVisible: 'De vuelta'
+      - assertNotVisible:
+          id: 'ofrecer-levantar-mapa'
 
-- tapOn:
-    id: 'salir-sin-mas'
-- assertVisible:
-    id: 'momento-en-marcha'
-- setLocation:
-    latitude: 42.402
-    longitude: -8.760
-- assertVisible:
-    id: 'momento-en-marcha'
-- assertNotVisible:
-    id: 'celda-apertura'
-- assertNotVisible: 'Levantando'
-- assertNotVisible: 'Dibujando el mundo'
-- assertNotVisible:
-    id: 'control-tocable'
+      # ── Abrir una celda vecina en marcha no enseña nada ───────────────────────────
+      # Se sale a andar y el GPS cruza el borde de la celda. El mundo tiene que existir donde
+      # estás, y eso es trabajo del juego: en marcha no hay nada que tocar y ninguna excepción.
+
+      - tapOn:
+          id: 'salir-sin-mas'
+      - assertVisible:
+          id: 'momento-en-marcha'
+      - setLocation:
+          latitude: 42.402
+          longitude: -8.760
+      - assertVisible:
+          id: 'momento-en-marcha'
+      - assertNotVisible:
+          id: 'celda-apertura'
+      - assertNotVisible: 'Levantando'
+      - assertNotVisible: 'Dibujando el mundo'
+      - assertNotVisible:
+          id: 'control-tocable'

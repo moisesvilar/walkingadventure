@@ -1,5 +1,18 @@
 # @app — El sitio que no pega dentro del móvil (SPEC-035).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: falta `paso-llegada` en `app/App.js`, así que
+# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dedo**: que el gesto sean **dos toques y ninguno más**
 # —que detrás de «Marcarlo» no aparezca ningún diálogo de confirmación—, que elegir un
 # motivo y cerrar la capa sin marcar **no marque nada**, y que deshacer desde los ajustes
@@ -9,10 +22,11 @@
 # corre sin simulador. **La decisión vive en el paquete justamente para que no haga falta
 # un simulador para ponerla roja**, y duplicarla aquí solo añadiría un flujo lento.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -50,61 +64,91 @@ appId: com.walkingadventure.app
     clearState: true
 
 # El paso a la llegada, provisional como el del mapa y el de en marcha. Hoy no existe.
-- tapOn:
-    id: 'paso-llegada'
 
-# ── La ficha, y desde ella la acción discreta de la fila 33 ────────────────────
-- assertVisible:
-    id: 'ficha-texto'
-- tapOn: 'Este sitio no pega'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-llegada` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
+# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
+# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
+# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
+# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+#
+# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
+# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
+# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
+# `paso-llegada`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
+# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-llegada'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-llegada'
 
-# ── A4P8: la capa, con los cinco motivos y ninguno marcado ─────────────────────
-- assertVisible:
-    id: 'descarte-anclaje'
-- assertVisible: '¿Qué le pasa a este sitio?'
-# La línea que quita la obligación está, y está **antes** de los motivos: es lo que
-# convierte la lista en una ayuda en lugar de en un formulario.
-- assertVisible: 'No hace falta que digas por qué. Con marcarlo, el juego deja de mandarte aquí.'
-- assertVisible: 'Se puede deshacer cuando quieras.'
-- assertVisible: 'Es una casa particular'
-- assertVisible: 'Otra cosa'
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-llegada'
+    commands:
+      - tapOn:
+          id: 'paso-llegada'
 
-# ── Cerrar sin marcar habiendo elegido un motivo no marca nada ─────────────────
-- tapOn:
-    id: 'descarte-motivo'
-    text: 'casa-particular'
-- back
-- assertVisible:
-    id: 'ficha-texto'
-- assertNotVisible:
-    id: 'descarte-anclaje'
+      # ── La ficha, y desde ella la acción discreta de la fila 33 ────────────────────
+      - assertVisible:
+          id: 'ficha-texto'
+      - tapOn: 'Este sitio no pega'
 
-# ── El gesto entero: dos toques y ninguno más ─────────────────────────────────
-# Primer toque: la acción de la ficha. Segundo y último: «Marcarlo». No se elige motivo
-# a propósito —«No hace falta dar motivo»— y detrás no puede aparecer ningún diálogo.
-- tapOn: 'Este sitio no pega'
-- tapOn:
-    id: 'descarte-confirmar'
-- assertNotVisible:
-    id: 'descarte-anclaje'
-# La capa se cierra y se vuelve a la ficha. Ni línea de gracias, ni confirmación: que la
-# acción ya no esté disponible es toda la confirmación que hace falta.
-- assertVisible:
-    id: 'ficha-texto'
-- assertNotVisible: 'Este sitio no pega'
+      # ── A4P8: la capa, con los cinco motivos y ninguno marcado ─────────────────────
+      - assertVisible:
+          id: 'descarte-anclaje'
+      - assertVisible: '¿Qué le pasa a este sitio?'
+      # La línea que quita la obligación está, y está **antes** de los motivos: es lo que
+      # convierte la lista en una ayuda en lugar de en un formulario.
+      - assertVisible: 'No hace falta que digas por qué. Con marcarlo, el juego deja de mandarte aquí.'
+      - assertVisible: 'Se puede deshacer cuando quieras.'
+      - assertVisible: 'Es una casa particular'
+      - assertVisible: 'Otra cosa'
 
-# ── Deshacer vive en ajustes y no en el sitio ─────────────────────────────────
-- tapOn:
-    id: 'paso-ajustes'
-- assertVisible:
-    id: 'sitios-marcados'
-    text: '1'
-- tapOn:
-    id: 'sitios-marcados'
-- assertVisible: 'Que vuelva a contar'
-- tapOn:
-    id: 'sitio-marcado-deshacer'
-- assertVisible: 'Todavía no has marcado ninguno.'
-- assertVisible:
-    id: 'sitios-marcados'
-    text: '0'
+      # ── Cerrar sin marcar habiendo elegido un motivo no marca nada ─────────────────
+      - tapOn:
+          id: 'descarte-motivo'
+          text: 'casa-particular'
+      - back
+      - assertVisible:
+          id: 'ficha-texto'
+      - assertNotVisible:
+          id: 'descarte-anclaje'
+
+      # ── El gesto entero: dos toques y ninguno más ─────────────────────────────────
+      # Primer toque: la acción de la ficha. Segundo y último: «Marcarlo». No se elige motivo
+      # a propósito —«No hace falta dar motivo»— y detrás no puede aparecer ningún diálogo.
+      - tapOn: 'Este sitio no pega'
+      - tapOn:
+          id: 'descarte-confirmar'
+      - assertNotVisible:
+          id: 'descarte-anclaje'
+      # La capa se cierra y se vuelve a la ficha. Ni línea de gracias, ni confirmación: que la
+      # acción ya no esté disponible es toda la confirmación que hace falta.
+      - assertVisible:
+          id: 'ficha-texto'
+      - assertNotVisible: 'Este sitio no pega'
+
+      # ── Deshacer vive en ajustes y no en el sitio ─────────────────────────────────
+      - tapOn:
+          id: 'paso-ajustes'
+      - assertVisible:
+          id: 'sitios-marcados'
+          text: '1'
+      - tapOn:
+          id: 'sitios-marcados'
+      - assertVisible: 'Que vuelva a contar'
+      - tapOn:
+          id: 'sitio-marcado-deshacer'
+      - assertVisible: 'Todavía no has marcado ninguno.'
+      - assertVisible:
+          id: 'sitios-marcados'
+          text: '0'

@@ -365,6 +365,14 @@ describe('La lámina en el móvil', () => {
       'mapa-pantalla', 'mapa-motivo', 'mapa-jugable', 'mapa-minuto', 'mapa-no-se-pudo', 'mapa-sin-cablear',
       ...FASES.map((f) => `fase-${f.id}`),
       'paso-mapa',
+      // `arranque` no localiza nada del mapa: es la guarda que declara que **hoy no se
+      // llega a `paso-mapa`**. El paso existe en `App.js`, pero vive en el andamiaje, y
+      // al andamiaje solo se llega saliendo del arranque sin partida levantada —la app
+      // abre con `enArranque = true`—. El flujo hacía `launchApp` y tocaba `paso-mapa`
+      // acto seguido, que es una pantalla que la app dejó de tener al abrir. Mientras el
+      // paso no esté a la vista, el flujo afirma que se abrió en el arranque y el cuerpo
+      // espera; sale de esta lista el día que haya camino.
+      'arranque',
     ]);
     const flujo = fuente(FLUJO_DE_APP);
     const usados = [...flujo.matchAll(/^\s*id:\s*'([^']+)'/gm)].map((m) => m[1]);

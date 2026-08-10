@@ -1,5 +1,18 @@
 # @app — El momento «en marcha» dentro del móvil (SPEC-029).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: `paso-marcha` existe, pero no se alcanza:
+# vive en el andamiaje, y al andamiaje no se llega. Lo único que llega a ejecutarse es
+# la guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca
+# «la pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**: que la lámina ocupe la pantalla de verdad
 # de borde a borde, que el háptico y la notificación salgan por sus canales del sistema, que
 # tocar una notificación abra el mapa con la marca puesta, y que llegar una noticia no
@@ -12,10 +25,11 @@
 # cae por el entorno, y en esta fila pesa más que en ninguna: **casi todo lo que hay que
 # afirmar son ausencias, y una ausencia es justo lo que peor se comprueba mirando.**
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de Android,
-# así que ningún flujo `@app` se puede correr aquí (`pipeline/decisiones-orquestador.md` §4).
-# El flujo se escribe igual y el runner lo registra como infraestructura ausente, nunca como
-# verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad se
+# leyera como infraestructura ausente. Lo que hoy se ejecuta de este fichero es solo la
+# guarda de arriba: ver el marcador de cabecera.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -61,141 +75,173 @@ appId: com.walkingadventure.app
     clearState: true
 
 # El paso al momento en marcha, provisional como el del mapa. Hoy no existe: ver arriba.
-- tapOn:
-    id: 'paso-marcha'
 
-# ── A3P2 · Si miras ────────────────────────────────────────────────────────────
-- assertVisible:
-    id: 'en-marcha'
-- assertVisible:
-    id: 'momento-en-marcha'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-marcha` **sí existe en `app/App.js`, pero no se puede alcanzar**, que no es lo mismo y
+# conviene no confundirlo. La tira de pasos provisionales —`paso-mapa`, `paso-marcha`,
+# `paso-revision-render`— vive en el andamiaje, y al andamiaje solo se llega **saliendo
+# del arranque sin partida levantada**: `App.js` arranca con `enArranque = true` y no
+# hay atajo, así que lo primero y lo único que se ve al instalar es A1P1. Este flujo
+# hacía `launchApp` y tocaba `paso-marcha` acto seguido, dando por hecho una pantalla de
+# arranque que la app dejó de tener.
+#
+# Mientras no haya camino, este flujo **no recorre nada y lo dice**: comprueba que el
+# paso sigue sin estar a la vista y que la app abre en el arranque. Su verde significa
+# «el límite declarado sigue en pie», nunca «la pantalla está verificada». En cuanto el
+# paso sea alcanzable, la condición cambia sola y el cuerpo de abajo —que está entero,
+# tal y como se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-marcha'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-marcha'
 
-# La lámina a sangre: se dibuja de verdad en Skia y ocupa la pantalla entera. Es lo único
-# de esta fila que no se puede afirmar sin dispositivo, porque «de borde a borde» es una
-# propiedad del hueco real y no de la composición.
-- assertVisible:
-    id: 'mapa-lamina'
-- assertVisible:
-    id: 'mapa-camara'
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-marcha'
+    commands:
+      - tapOn:
+          id: 'paso-marcha'
 
-# La marca de posición, roja y del propio mapa. Su etiqueta lleva de cuál de las dos es.
-- assertVisible:
-    id: 'marca-posicion'
-- assertVisible: 'del-mapa'
+      # ── A3P2 · Si miras ────────────────────────────────────────────────────────────
+      - assertVisible:
+          id: 'en-marcha'
+      - assertVisible:
+          id: 'momento-en-marcha'
 
-# El norte arriba: la cámara no tiene ángulo y la orientación viaja en el estado.
-- assertVisible:
-    id: 'en-marcha-orientacion'
-- assertVisible: 'norte-arriba'
+      # La lámina a sangre: se dibuja de verdad en Skia y ocupa la pantalla entera. Es lo único
+      # de esta fila que no se puede afirmar sin dispositivo, porque «de borde a borde» es una
+      # propiedad del hueco real y no de la composición.
+      - assertVisible:
+          id: 'mapa-lamina'
+      - assertVisible:
+          id: 'mapa-camara'
 
-# ── Ni un control tocable ──────────────────────────────────────────────────────
-# La lista de tocables se pinta como etiqueta vacía. Aquí se comprueba además que ninguno
-# de los controles que el momento prohíbe llegó a montarse: son los identificadores que
-# tendría que declarar quien los añadiese, y su ausencia es la entrega.
-- assertVisible:
-    id: 'en-marcha-tocables'
-- assertNotVisible:
-    id: 'control-tocable'
-- assertNotVisible:
-    id: 'barra-de-pestanas'
-- assertNotVisible:
-    id: 'cabecera'
-- assertNotVisible:
-    id: 'control-de-zoom'
-- assertNotVisible:
-    id: 'boton-de-centrar'
-- assertNotVisible:
-    id: 'leyenda'
-- assertNotVisible:
-    id: 'boton-de-aceptar'
-- assertNotVisible:
-    id: 'boton-de-descartar'
+      # La marca de posición, roja y del propio mapa. Su etiqueta lleva de cuál de las dos es.
+      - assertVisible:
+          id: 'marca-posicion'
+      - assertVisible: 'del-mapa'
 
-# ── Ninguna cifra de esfuerzo ──────────────────────────────────────────────────
-# A3P7 es la pantalla que está dibujada para no hacerse: ninguno de sus elementos existe.
-- assertNotVisible:
-    id: 'kilometros'
-- assertNotVisible:
-    id: 'ritmo'
-- assertNotVisible:
-    id: 'pasos'
-- assertNotVisible:
-    id: 'porcentaje-de-aventura'
-- assertNotVisible:
-    id: 'racha'
+      # El norte arriba: la cámara no tiene ángulo y la orientación viaja en el estado.
+      - assertVisible:
+          id: 'en-marcha-orientacion'
+      - assertVisible: 'norte-arriba'
 
-# ── El zócalo de guía ──────────────────────────────────────────────────────────
-# Dos líneas al pie, con un solo contenido. La grande nombra la calzada y el sitio.
-- assertVisible:
-    id: 'zocalo'
-- assertVisible: 'guia'
-- assertVisible:
-    id: 'zocalo-antetitulo'
-- assertVisible: 'Vas por'
-- assertVisible:
-    id: 'zocalo-texto'
+      # ── Ni un control tocable ──────────────────────────────────────────────────────
+      # La lista de tocables se pinta como etiqueta vacía. Aquí se comprueba además que ninguno
+      # de los controles que el momento prohíbe llegó a montarse: son los identificadores que
+      # tendría que declarar quien los añadiese, y su ausencia es la entrega.
+      - assertVisible:
+          id: 'en-marcha-tocables'
+      - assertNotVisible:
+          id: 'control-tocable'
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
+      - assertNotVisible:
+          id: 'cabecera'
+      - assertNotVisible:
+          id: 'control-de-zoom'
+      - assertNotVisible:
+          id: 'boton-de-centrar'
+      - assertNotVisible:
+          id: 'leyenda'
+      - assertNotVisible:
+          id: 'boton-de-aceptar'
+      - assertNotVisible:
+          id: 'boton-de-descartar'
 
-# Los sitios a los que la aventura manda van rotulados aunque no se hayan pisado.
-- assertVisible:
-    id: 'sitio-rotulado'
+      # ── Ninguna cifra de esfuerzo ──────────────────────────────────────────────────
+      # A3P7 es la pantalla que está dibujada para no hacerse: ninguno de sus elementos existe.
+      - assertNotVisible:
+          id: 'kilometros'
+      - assertNotVisible:
+          id: 'ritmo'
+      - assertNotVisible:
+          id: 'pasos'
+      - assertNotVisible:
+          id: 'porcentaje-de-aventura'
+      - assertNotVisible:
+          id: 'racha'
 
-# ── Acercar y arrastrar siguen siendo gestos ───────────────────────────────────
-# Un gesto no es un control: arrastrar mueve el encuadre y no acepta nada. Después del
-# gesto la pantalla sigue siendo la misma y no ha aparecido ningún control.
-- swipe:
-    start: '50%, 60%'
-    end: '30%, 40%'
-- assertVisible:
-    id: 'en-marcha'
-- assertVisible:
-    id: 'mapa-camara'
-- assertNotVisible:
-    id: 'boton-de-centrar'
+      # ── El zócalo de guía ──────────────────────────────────────────────────────────
+      # Dos líneas al pie, con un solo contenido. La grande nombra la calzada y el sitio.
+      - assertVisible:
+          id: 'zocalo'
+      - assertVisible: 'guia'
+      - assertVisible:
+          id: 'zocalo-antetitulo'
+      - assertVisible: 'Vas por'
+      - assertVisible:
+          id: 'zocalo-texto'
 
-# ── A3P3 · Llega una noticia ───────────────────────────────────────────────────
-# La noticia viaja por háptico y marca. Lo que se puede ver es la marca sobre el sitio y
-# el zócalo cambiado; que vibre es @manual, y que NO salte notificación se comprueba por
-# las capas que el aviso dejó anotadas.
-- assertVisible:
-    id: 'marca-aviso'
-- assertVisible:
-    id: 'aviso-emitido'
-- assertVisible: 'noticia:si'
-- assertVisible:
-    id: 'aviso-capas'
-- assertVisible: 'salieron=haptico|marca;faltaron='
-- assertVisible:
-    id: 'zocalo'
-- assertVisible: 'noticia'
-- assertVisible: 'Lo sabrás al llegar'
+      # Los sitios a los que la aventura manda van rotulados aunque no se hayan pisado.
+      - assertVisible:
+          id: 'sitio-rotulado'
 
-# La noticia no enciende la pantalla y no usa el canal de notificación ni siquiera
-# silenciosa: no hay ninguna notificación que ver.
-- assertNotVisible: 'notificacion'
+      # ── Acercar y arrastrar siguen siendo gestos ───────────────────────────────────
+      # Un gesto no es un control: arrastrar mueve el encuadre y no acepta nada. Después del
+      # gesto la pantalla sigue siendo la misma y no ha aparecido ningún control.
+      - swipe:
+          start: '50%, 60%'
+          end: '30%, 40%'
+      - assertVisible:
+          id: 'en-marcha'
+      - assertVisible:
+          id: 'mapa-camara'
+      - assertNotVisible:
+          id: 'boton-de-centrar'
 
-# ── A3P4 · Llega una oportunidad ───────────────────────────────────────────────
-# La oportunidad es el único aviso que enciende la pantalla, y la única que usa el canal
-# de notificación. Tocar la notificación del sistema no se puede automatizar; lo que sí
-# se comprueba es que entrar por el aviso deja el mapa con la marca del encuentro puesta
-# y **no acepta ninguna aventura ni abre ninguna escena**.
-- assertVisible:
-    id: 'aviso-capas'
-- assertVisible: 'salieron=notificacion|haptico'
-- assertVisible:
-    id: 'en-marcha'
-- assertVisible:
-    id: 'marca-aviso'
-- assertNotVisible:
-    id: 'escena'
-- assertNotVisible:
-    id: 'visor'
-- assertNotVisible:
-    id: 'boton-de-aceptar'
+      # ── A3P3 · Llega una noticia ───────────────────────────────────────────────────
+      # La noticia viaja por háptico y marca. Lo que se puede ver es la marca sobre el sitio y
+      # el zócalo cambiado; que vibre es @manual, y que NO salte notificación se comprueba por
+      # las capas que el aviso dejó anotadas.
+      - assertVisible:
+          id: 'marca-aviso'
+      - assertVisible:
+          id: 'aviso-emitido'
+      - assertVisible: 'noticia:si'
+      - assertVisible:
+          id: 'aviso-capas'
+      - assertVisible: 'salieron=haptico|marca;faltaron='
+      - assertVisible:
+          id: 'zocalo'
+      - assertVisible: 'noticia'
+      - assertVisible: 'Lo sabrás al llegar'
 
-# ── El zócalo sigue teniendo un solo contenido ─────────────────────────────────
-# Con la noticia y la oportunidad puestas sigue habiendo un zócalo y no dos: dos zócalos
-# son dos cosas que leer andando, y el momento se diseñó para que leer sea un vistazo.
-- assertVisible:
-    id: 'zocalo'
-- assertVisible:
-    id: 'en-marcha-tocables'
+      # La noticia no enciende la pantalla y no usa el canal de notificación ni siquiera
+      # silenciosa: no hay ninguna notificación que ver.
+      - assertNotVisible: 'notificacion'
+
+      # ── A3P4 · Llega una oportunidad ───────────────────────────────────────────────
+      # La oportunidad es el único aviso que enciende la pantalla, y la única que usa el canal
+      # de notificación. Tocar la notificación del sistema no se puede automatizar; lo que sí
+      # se comprueba es que entrar por el aviso deja el mapa con la marca del encuentro puesta
+      # y **no acepta ninguna aventura ni abre ninguna escena**.
+      - assertVisible:
+          id: 'aviso-capas'
+      - assertVisible: 'salieron=notificacion|haptico'
+      - assertVisible:
+          id: 'en-marcha'
+      - assertVisible:
+          id: 'marca-aviso'
+      - assertNotVisible:
+          id: 'escena'
+      - assertNotVisible:
+          id: 'visor'
+      - assertNotVisible:
+          id: 'boton-de-aceptar'
+
+      # ── El zócalo sigue teniendo un solo contenido ─────────────────────────────────
+      # Con la noticia y la oportunidad puestas sigue habiendo un zócalo y no dos: dos zócalos
+      # son dos cosas que leer andando, y el momento se diseñó para que leer sea un vistazo.
+      - assertVisible:
+          id: 'zocalo'
+      - assertVisible:
+          id: 'en-marcha-tocables'

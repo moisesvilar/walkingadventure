@@ -1,5 +1,18 @@
 # @app — La llegada dentro del móvil (SPEC-032).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: falta `paso-llegada` en `app/App.js`, así que
+# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**, que en esta fila es muy poco y está muy
 # bien delimitado: que validar una llegada **no encienda la pantalla ni ponga la app en
 # primer plano**, y que la escena siga esperando cuando alguien se digna a mirar. Todo lo
@@ -10,10 +23,11 @@
 # entorno: **la secuencia es un dato del núcleo justamente para que no haga falta un
 # simulador para ponerla roja.**
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -53,79 +67,109 @@ appId: com.walkingadventure.app
     clearState: true
 
 # El paso a la llegada, provisional como el del mapa y el de en marcha. Hoy no existe.
-- tapOn:
-    id: 'paso-llegada'
 
-# ── Se llega andando y se para dentro del geofence ─────────────────────────────
-# El sitio es el núcleo del mundo de andamiaje. Se entra andando y se para dentro: la
-# permanencia se cumple con dos fijos separados en el tiempo, no con una espera del flujo.
-- setLocation:
-    latitude: 42.4012
-    longitude: -8.8114
-- setLocation:
-    latitude: 42.4010
-    longitude: -8.8110
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-llegada` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
+# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
+# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
+# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
+# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+#
+# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
+# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
+# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
+# `paso-llegada`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
+# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-llegada'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-llegada'
 
-# ── La escena queda disponible y espera ────────────────────────────────────────
-# Nadie mira el móvil: la app no se ha puesto en primer plano sola y no ha aparecido
-# ninguna notificación. El momento sigue siendo el de andar.
-- assertNotVisible:
-    id: 'notificacion'
-- assertNotVisible:
-    id: 'lo-que-se-cuenta'
-- assertVisible:
-    id: 'momento-estado'
-- assertVisible: 'en-marcha'
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-llegada'
+    commands:
+      - tapOn:
+          id: 'paso-llegada'
 
-# Si el jugador mira, la escena está ahí. Esto es «abrir la app», no un control del juego.
-- launchApp
-- assertVisible:
-    id: 'llegada'
-- assertVisible:
-    id: 'momento-estado'
-- assertVisible: 'al-parar'
+      # ── Se llega andando y se para dentro del geofence ─────────────────────────────
+      # El sitio es el núcleo del mundo de andamiaje. Se entra andando y se para dentro: la
+      # permanencia se cumple con dos fijos separados en el tiempo, no con una espera del flujo.
+      - setLocation:
+          latitude: 42.4012
+          longitude: -8.8114
+      - setLocation:
+          latitude: 42.4010
+          longitude: -8.8110
 
-# La secuencia ofrecida, expuesta como la lista ordenada de tipos y modos: se afirma el
-# orden entero sin recorrer cuatro pantallas.
-- assertVisible:
-    id: 'llegada-secuencia'
-- assertVisible: 'lo-que-se-cuenta:encadenado'
-- assertVisible:
-    id: 'llegada-paso'
+      # ── La escena queda disponible y espera ────────────────────────────────────────
+      # Nadie mira el móvil: la app no se ha puesto en primer plano sola y no ha aparecido
+      # ninguna notificación. El momento sigue siendo el de andar.
+      - assertNotVisible:
+          id: 'notificacion'
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta'
+      - assertVisible:
+          id: 'momento-estado'
+      - assertVisible: 'en-marcha'
 
-# ── Ninguna de estas pantallas se navega ───────────────────────────────────────
-# No hay barra, no hay flecha de atrás entre pasos y no hay manera de saltar al siguiente.
-- assertNotVisible:
-    id: 'barra-de-pestanas'
-- assertNotVisible:
-    id: 'cabecera'
-- assertNotVisible:
-    id: 'boton-atras'
-- assertNotVisible:
-    id: 'saltar'
+      # Si el jugador mira, la escena está ahí. Esto es «abrir la app», no un control del juego.
+      - launchApp
+      - assertVisible:
+          id: 'llegada'
+      - assertVisible:
+          id: 'momento-estado'
+      - assertVisible: 'al-parar'
 
-# ── A4P5 · Lo que aquí se cuenta ───────────────────────────────────────────────
-# El último paso encadenado de una llegada a un núcleo. Sin nada que se cuente de la
-# jugadora, la sección «Y de ti» no existe —no se enseña vacía—.
-- assertVisible:
-    id: 'lo-que-se-cuenta'
-- assertNotVisible:
-    id: 'lo-que-se-cuenta-de-ti'
-- assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
+      # La secuencia ofrecida, expuesta como la lista ordenada de tipos y modos: se afirma el
+      # orden entero sin recorrer cuatro pantallas.
+      - assertVisible:
+          id: 'llegada-secuencia'
+      - assertVisible: 'lo-que-se-cuenta:encadenado'
+      - assertVisible:
+          id: 'llegada-paso'
 
-# «Seguir» es la única acción, y cierra la llegada: el móvil vuelve al bolsillo.
-- tapOn:
-    id: 'llegada-seguir'
-- assertNotVisible:
-    id: 'lo-que-se-cuenta'
+      # ── Ninguna de estas pantallas se navega ───────────────────────────────────────
+      # No hay barra, no hay flecha de atrás entre pasos y no hay manera de saltar al siguiente.
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
+      - assertNotVisible:
+          id: 'cabecera'
+      - assertNotVisible:
+          id: 'boton-atras'
+      - assertNotVisible:
+          id: 'saltar'
 
-# ── Pararse en un semáforo dentro de un geofence no tiene consecuencias ────────
-# Se vuelve a pasar por el mismo sitio dentro de la misma salida: la llegada ya está
-# cerrada y no se vuelve a ofrecer, y nada se enciende por volver a pisarlo.
-- setLocation:
-    latitude: 42.4010
-    longitude: -8.8110
-- assertNotVisible:
-    id: 'lo-que-se-cuenta'
-- assertNotVisible:
-    id: 'notificacion'
+      # ── A4P5 · Lo que aquí se cuenta ───────────────────────────────────────────────
+      # El último paso encadenado de una llegada a un núcleo. Sin nada que se cuente de la
+      # jugadora, la sección «Y de ti» no existe —no se enseña vacía—.
+      - assertVisible:
+          id: 'lo-que-se-cuenta'
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta-de-ti'
+      - assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
+
+      # «Seguir» es la única acción, y cierra la llegada: el móvil vuelve al bolsillo.
+      - tapOn:
+          id: 'llegada-seguir'
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta'
+
+      # ── Pararse en un semáforo dentro de un geofence no tiene consecuencias ────────
+      # Se vuelve a pasar por el mismo sitio dentro de la misma salida: la llegada ya está
+      # cerrada y no se vuelve a ofrecer, y nada se enciende por volver a pisarlo.
+      - setLocation:
+          latitude: 42.4010
+          longitude: -8.8110
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta'
+      - assertNotVisible:
+          id: 'notificacion'

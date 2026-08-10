@@ -11,10 +11,11 @@
 # simulador. Duplicar aquí lo que ya se puede poner rojo en Node solo añadiría un flujo
 # lento que se cae por el entorno.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para pasar**: la app montada por `ArranqueMontado`, el
 # proxy alcanzable desde el simulador (`EXPO_PUBLIC_PROXY`) con el Overpass del
@@ -52,14 +53,35 @@ appId: com.walkingadventure.app
 - assertNotVisible:
     id: 'arranque-sin-cablear'
 
-# El momento del sistema de diseño: antes de salir. La pantalla está permitida y se
-# puede leer, elegir y esperar.
-- assertVisible:
-    id: 'momento-antes-de-salir'
+# El momento del sistema de diseño —«antes de salir»— y el paso en curso NO se afirman
+# aquí, y no por dejadez: `arranque.jsx` los declara como dos `View` con
+# `estilos.marca = { position: 'absolute', width: 0, height: 0 }`, y un nodo de cero por
+# cero **no existe para ninguna automatización de interfaz**. Medido: el árbol de
+# accesibilidad los trae con `boundsInScreen: Rect(0, 0 - 0, 0)` y `visible: false`, y
+# Maestro los descarta con «Skipping invisible child» antes de que ningún selector los
+# vea. `assertVisible` sobre ellos no puede pasar nunca, en ninguna máquina, hoy ni
+# arreglando el entorno: no es un rojo que se pueda perseguir.
+#
+# Lo que sí se comprueba, y donde de verdad se puede poner rojo, es el vocabulario de
+# momentos, que vive en el paquete y lo afirma `test/nucleo/narrador.test.mjs`
+# («MOMENTOS_DE_SALIDA»). Que además se pinte una marca en pantalla solo sería
+# comprobable el día que la marca tenga tamaño; queda anotado como defecto de la app.
 
 # ── A1P1 · Quién eres ──────────────────────────────────────────────────────────
-- assertVisible:
-    id: 'arranque-paso'
+#
+# La cabecera lleva flecha y contador en las cinco primeras pantallas, y el contador
+# dice el paso sobre cinco (SPEC-027: «en cualquiera de los cinco primeros pasos …
+# lleva flecha de atrás y contador»). **A1P1 la lleva**: que la flecha exista aquí es
+# lo que hace que arrepentirse del nombre no sea una puerta cerrada.
+#
+# Este bloque decía que estas tres líneas estaban rojas a propósito porque la cabecera
+# se pintaba **debajo de la barra de estado** —flecha en `Rect(53, 32 - 116, 124)`, con
+# la barra midiendo ~100 px—, por el `SafeAreaView` de `react-native`, que solo hace
+# algo en iOS. **Ese defecto ya no está y el texto se corrige en lugar de arrastrarlo**:
+# medido ahora en el mismo dispositivo, la flecha ocupa `[53,160][116,252]` y el «1/5»
+# `[115,182][169,229]`, los dos por debajo de los 128 px de la barra, y las tres líneas
+# pasan. Dejar puesto que son «rojas a propósito» haría que un rojo de verdad en la
+# cabecera se leyera como el defecto viejo ya conocido.
 - assertVisible:
     id: 'arranque-contador'
 - assertVisible: '1/5'
@@ -256,19 +278,59 @@ appId: com.walkingadventure.app
     id: 'arranque-seguir'
 
 # ── A1P7 · La primera aventura ─────────────────────────────────────────────────
-- assertVisible: 'Lo que se cuenta hoy'
+#
+# **Once segundos medidos, y ninguna spec que se los presupueste.** Componer la primera
+# lista —castear el reparto contra el mundo recién levantado y escribir lo que se cuenta—
+# tarda 11 s en este dispositivo, y la espera por defecto de Maestro son 5. Por eso los
+# tres flujos que entran a A1P7 morían exactamente aquí, todos con el mismo mensaje
+# («Assertion is false: "Lo que se cuenta hoy" is visible»), y por eso se espera como se
+# espera dos bloques más arriba para `mapa-lamina`: es espera, no lógica.
+#
+# Lo que el `extendedWaitUntil` arregla es el flujo. Lo que **no** arregla es lo que el
+# flujo destapó: **ninguna spec le pone presupuesto a esta pantalla**. El minuto de
+# RNF-PER-001 es el del levantamiento del mapa, no el de la lista, así que once segundos
+# mirando una pantalla quieta después de pulsar «Seguir» no están ni cumplidos ni
+# incumplidos: no están decididos. Es una decisión de producto pendiente y queda escrita
+# aquí, no ablandada en silencio — el día que alguien le ponga número, este es el sitio
+# donde el número tiene que caber.
+- extendedWaitUntil:
+    visible: 'Lo que se cuenta hoy'
+    timeout: 60000
 - assertVisible: 'Por aquí hay quien necesita algo'
 - assertVisible:
     id: 'primera-lista'
 - assertVisible:
     id: 'aventura-medida'
+
+# **De aquí abajo se llega bajando, y no es cosmética.** A1P7 es un `ScrollView`
+# (`LaPrimeraAventura`, `app/pantallas/arranque.jsx`) y **la lista del día uno no tiene
+# longitud fija**: la componen las aventuras que el casting logre resolver contra el mundo
+# recién levantado, y eso cambia de una ejecución a otra. Medido en este dispositivo: con
+# cuatro tarjetas la lista llega a y=2242 de los 2277 útiles, y la regla del reloj, «andar
+# sin nada» y «Salir a andar» —la acción principal de la pantalla, y la frontera de
+# registro— quedan **por debajo del borde**; en otra tanda salió una sola aventura y cabía
+# todo. Una prueba que solo pasa cuando la lista sale corta no afirma nada, y afirmar sin
+# desplazarse convertía la longitud del reparto en el resultado de la prueba.
+#
+# Quien juega llega a estos textos bajando, y aquí se llega igual. `scrollUntilVisible` no
+# ablanda nada —se sigue afirmando exactamente lo que se afirmaba, solo que después de
+# alcanzarlo— y con lista corta no desplaza: para en cuanto el elemento ya se ve.
+- scrollUntilVisible:
+    element:
+      id: 'andar-sin-nada'
+    direction: DOWN
 - assertVisible:
     id: 'andar-sin-nada'
 - assertVisible: 'Y puedes salir a andar sin coger ninguna. El mundo se mueve igual.'
 - assertNotVisible:
     id: 'arranque-atras'
 
-# La frontera de registro: «Salir a andar» es el último texto que dice «nosotros».
+# La frontera de registro: «Salir a andar» es el último texto que dice «nosotros». Va detrás
+# de «andar sin nada» en la pantalla, así que con lista larga tampoco se ve al llegar.
+- scrollUntilVisible:
+    element:
+      id: 'arranque-seguir'
+    direction: DOWN
 - assertVisible: 'Salir a andar'
 - tapOn:
     id: 'arranque-seguir'

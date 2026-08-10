@@ -27212,6 +27212,51 @@
       "caso": "El rango sube donde llega la noticia y en ningún otro sitio",
       "hueco_de_bateria": true,
       "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. La otra cara del cableado del motor, medida sobre el escalón: sin propagador cableado el vecino se quedaba en el escalón de partida."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado, cuando se ejecuta el runner, entonces el report registra la ausencia en la sección de infraestructura, separada de los resultados de las pruebas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
+      "hueco_de_bateria": true,
+      "nota": "ATRIBUCIÓN IMPRECISA, y se dice: este caso no cubre un criterio literal de ninguna spec. Implementa la decisión §6w de pipeline/decisiones-orquestador.md —«un verde de límite declarado no se cuenta con los demás»—, que es el mismo principio que este criterio de SPEC-001 aplica a la infraestructura ausente: lo que no es un resultado no se suma con los resultados. Se cuelga aquí porque SPEC-001 es la spec que entrega el andamiaje de pruebas y su contabilidad; quien orquesta puede reatribuirlo. El cuarto estado del runner vive en scripts/qa-tester-run.sh y no lo escribe wa-qa-dev. Fija la lista literal de los trece flujos de test/app/ cuyo verde significa «el límite sigue en pie»: un marcador nuevo sin tocar la lista es rojo, y un nombre de la lista cuyo fichero ya no está marcado, también."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado, cuando se ejecuta el runner, entonces el report registra la ausencia en la sección de infraestructura, separada de los resultados de las pruebas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "Todo flujo marcado lleva su guarda de límite",
+      "hueco_de_bateria": true,
+      "nota": "ATRIBUCIÓN IMPRECISA, y se dice: este caso no cubre un criterio literal de ninguna spec. Implementa la decisión §6w de pipeline/decisiones-orquestador.md —«un verde de límite declarado no se cuenta con los demás»—, que es el mismo principio que este criterio de SPEC-001 aplica a la infraestructura ausente: lo que no es un resultado no se suma con los resultados. Se cuelga aquí porque SPEC-001 es la spec que entrega el andamiaje de pruebas y su contabilidad; quien orquesta puede reatribuirlo. El cuarto estado del runner vive en scripts/qa-tester-run.sh y no lo escribe wa-qa-dev. Comprueba que el marcador no es una etiqueta suelta: cada flujo marcado tiene una guarda `runFlow / when / notVisible` que afirma que la app abre en el arranque y que su pantalla sigue sin estar, y conserva el cuerpo real colgando de la condición contraria para que vuelva solo el día que haya camino."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado, cuando se ejecuta el runner, entonces el report registra la ausencia en la sección de infraestructura, separada de los resultados de las pruebas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "Ningún flujo marcado afirma nada fuera de una condición",
+      "hueco_de_bateria": true,
+      "nota": "ATRIBUCIÓN IMPRECISA, y se dice: este caso no cubre un criterio literal de ninguna spec. Implementa la decisión §6w de pipeline/decisiones-orquestador.md —«un verde de límite declarado no se cuenta con los demás»—, que es el mismo principio que este criterio de SPEC-001 aplica a la infraestructura ausente: lo que no es un resultado no se suma con los resultados. Se cuelga aquí porque SPEC-001 es la spec que entrega el andamiaje de pruebas y su contabilidad; quien orquesta puede reatribuirlo. El cuarto estado del runner vive en scripts/qa-tester-run.sh y no lo escribe wa-qa-dev. La mitad que evita el abuso: un flujo de límite declarado no puede verificar nada por la puerta de atrás. En el primer nivel solo se admiten un `launchApp` y `runFlow` condicionados; cualquier afirmación o toque suelto sería un verde que sí recorre y que se estaría contando en la casilla equivocada."
+    },
+    {
+      "spec": "SPEC-001",
+      "criterio": "Dado que Maestro no está instalado, cuando se ejecuta el runner, entonces el report registra la ausencia en la sección de infraestructura, separada de los resultados de las pruebas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "Los flujos que recorren la app de verdad no llevan marcador",
+      "hueco_de_bateria": true,
+      "nota": "ATRIBUCIÓN IMPRECISA, y se dice: este caso no cubre un criterio literal de ninguna spec. Implementa la decisión §6w de pipeline/decisiones-orquestador.md —«un verde de límite declarado no se cuenta con los demás»—, que es el mismo principio que este criterio de SPEC-001 aplica a la infraestructura ausente: lo que no es un resultado no se suma con los resultados. Se cuelga aquí porque SPEC-001 es la spec que entrega el andamiaje de pruebas y su contabilidad; quien orquesta puede reatribuirlo. El cuarto estado del runner vive en scripts/qa-tester-run.sh y no lo escribe wa-qa-dev. La otra dirección del contrato: arranque.yaml, antes-de-salir.yaml y zurron.yaml recorren pantallas, así que marcarlos convertiría un rojo real en un verde de límite. Rojo si alguien lo intenta."
+    },
+    {
+      "spec": "SPEC-027",
+      "criterio": "Dado una instalación nueva, cuando se abre la app, entonces el arranque empieza en A1P1 y los siete pasos se recorren en el orden del flujo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "La entrada a A1P7 se espera y no se afirma a la primera",
+      "hueco_de_bateria": true,
+      "nota": "Guarda sobre el propio flujo, no sobre la app: los tres flujos que entran a A1P7 morían en `assertVisible: 'Lo que se cuenta hoy'` porque componer la primera lista tarda 11 s medidos y la espera por defecto de Maestro son 5. El arreglo es `extendedWaitUntil`, y esta prueba impide que alguien lo devuelva a una afirmación inmediata sin darse cuenta. DECISIÓN DE PRODUCTO PENDIENTE: ninguna spec pone presupuesto a la composición de la primera lista —el minuto de RNF-PER-001 es el del levantamiento del mapa—, así que once segundos mirando una pantalla quieta no están ni cumplidos ni incumplidos."
     }
   ]
 }

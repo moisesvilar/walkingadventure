@@ -1,5 +1,18 @@
 # @app — El visor del anclaje dentro del móvil (SPEC-033).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: falta `paso-llegada` en `app/App.js`, así que
+# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dedo**: el arrastre del tirador de un lado al otro, que
 # soltarlo antes del cruce vuelva a la ficción, que cerrar deje debajo lo que ya estaba, y
 # que tocar fuera cierre igual que la flecha. Todo lo demás —qué presentación se elige, qué
@@ -8,10 +21,11 @@
 # que corre sin simulador. **La decisión vive en el paquete justamente para que no haga
 # falta un simulador para ponerla roja**, y duplicarla aquí solo añadiría un flujo lento.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -48,141 +62,173 @@ appId: com.walkingadventure.app
     clearState: true
 
 # El paso a la llegada, provisional como el del mapa y el de en marcha. Hoy no existe.
-- tapOn:
-    id: 'paso-llegada'
 
-# ── Se llega andando y se para dentro del geofence ─────────────────────────────
-- setLocation:
-    latitude: 42.4012
-    longitude: -8.8114
-- setLocation:
-    latitude: 42.4010
-    longitude: -8.8110
-- launchApp
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-llegada` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
+# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
+# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
+# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
+# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+#
+# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
+# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
+# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
+# `paso-llegada`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
+# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-llegada'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-llegada'
 
-# ── A4P1 · El visor abre por la ficción, y es una capa ─────────────────────────
-# El estado del momento sale del vocabulario cerrado del paquete. Sin foto de Places
-# —que es lo que hay hoy: ningún extracto trae un `place_id`— el estado es `visor-sin-foto`
-# y el visor **abre igual**.
-- assertVisible:
-    id: 'llegada-estado'
-- assertVisible: 'visor-sin-foto'
-- assertVisible:
-    id: 'visor-anclaje'
-- assertVisible:
-    id: 'visor-cartela'
-- assertVisible: 'ficcion'
-- assertVisible: 'Arrastra para ver qué hay de verdad.'
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-llegada'
+    commands:
+      - tapOn:
+          id: 'paso-llegada'
 
-# La capa no añade ningún control de más: ni aceptar, ni confirmar, ni pasar de lámina.
-- assertNotVisible:
-    id: 'boton-aceptar'
-- assertNotVisible:
-    id: 'indicador-de-pagina'
-- assertNotVisible:
-    id: 'barra-de-pestanas'
+      # ── Se llega andando y se para dentro del geofence ─────────────────────────────
+      - setLocation:
+          latitude: 42.4012
+          longitude: -8.8114
+      - setLocation:
+          latitude: 42.4010
+          longitude: -8.8110
+      - launchApp
 
-# ── Un arrastre soltado antes del cruce vuelve a la ficción ────────────────────
-# Un cuarto del ancho: por debajo del punto de cruce, que está a la mitad. La cartela no
-# ha cambiado y el tirador ha vuelto al borde.
-- swipe:
-    from:
-      id: 'visor-tirador'
-    to:
-      point: '25%,50%'
-- assertVisible:
-    id: 'visor-cartela'
-- assertVisible: 'ficcion'
-- assertVisible: 'Arrastra para ver qué hay de verdad.'
+      # ── A4P1 · El visor abre por la ficción, y es una capa ─────────────────────────
+      # El estado del momento sale del vocabulario cerrado del paquete. Sin foto de Places
+      # —que es lo que hay hoy: ningún extracto trae un `place_id`— el estado es `visor-sin-foto`
+      # y el visor **abre igual**.
+      - assertVisible:
+          id: 'llegada-estado'
+      - assertVisible: 'visor-sin-foto'
+      - assertVisible:
+          id: 'visor-anclaje'
+      - assertVisible:
+          id: 'visor-cartela'
+      - assertVisible: 'ficcion'
+      - assertVisible: 'Arrastra para ver qué hay de verdad.'
 
-# ── A4P2 · Arrastrar descubre el sitio real ────────────────────────────────────
-# Hasta el final: aparece el lado real y la cartela pasa a decir el nombre real. La línea
-# de invitación desaparece, porque ya se arrastró.
-- swipe:
-    from:
-      id: 'visor-tirador'
-    to:
-      point: '95%,50%'
-- assertVisible:
-    id: 'visor-lado-real'
-- assertVisible: 'real'
-- assertVisible: 'Y en realidad'
-- assertNotVisible: 'Arrastra para ver qué hay de verdad.'
-# Sin foto de Places el lado real está igual y no se dibuja ningún hueco de imagen, ningún
-# icono de imagen rota y ninguna leyenda.
-- assertNotVisible:
-    id: 'imagen-ausente'
-- assertNotVisible: 'no disponible'
-- assertNotVisible: 'sin conexión'
+      # La capa no añade ningún control de más: ni aceptar, ni confirmar, ni pasar de lámina.
+      - assertNotVisible:
+          id: 'boton-aceptar'
+      - assertNotVisible:
+          id: 'indicador-de-pagina'
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
 
-# ── El visor es una capa y debajo está el beat ─────────────────────────────────
-# Cerrar con la flecha no lleva a ningún sitio: deja a la vista lo que ya estaba montado.
-- tapOn:
-    id: 'visor-cerrar'
-- assertNotVisible:
-    id: 'visor-anclaje'
-- assertVisible:
-    id: 'llegada-paso'
-- assertVisible: 'beat'
+      # ── Un arrastre soltado antes del cruce vuelve a la ficción ────────────────────
+      # Un cuarto del ancho: por debajo del punto de cruce, que está a la mitad. La cartela no
+      # ha cambiado y el tirador ha vuelto al borde.
+      #
+      # El arrastre va por coordenadas y no anclado al tirador porque **Maestro no sabe ir de
+      # un elemento a un punto**: `from:` admite `direction:`, nunca `to:`. Escrito como estaba
+      # no compilaba —«Parsing Failed at visor.yaml:93:1»— y tumbaba el fichero entero. El
+      # tirador nace en el borde de la ficción, que es el izquierdo, así que salir del 5% y
+      # soltar en el 25% es el mismo gesto que se quería describir.
+      - swipe:
+          start: '5%, 50%'
+          end: '25%, 50%'
+      - assertVisible:
+          id: 'visor-cartela'
+      - assertVisible: 'ficcion'
+      - assertVisible: 'Arrastra para ver qué hay de verdad.'
 
-# ── La segunda vez queda a un toque, y vuelve a abrir por el borde ─────────────
-# Se cierra la llegada, se sale del geofence y se vuelve: el sitio ya está pisado, así que
-# el visor no abre solo y queda en una acción de texto con el nombre del sitio.
-- tapOn:
-    id: 'llegada-seguir'
-- setLocation:
-    latitude: 42.4100
-    longitude: -8.8110
-- setLocation:
-    latitude: 42.4010
-    longitude: -8.8110
-- launchApp
-- assertNotVisible:
-    id: 'visor-anclaje'
-- assertVisible:
-    id: 'llegada-estado'
-- assertVisible: 'visor-a-un-toque'
-- assertVisible:
-    id: 'visor-abrir'
+      # ── A4P2 · Arrastrar descubre el sitio real ────────────────────────────────────
+      # Hasta el final: aparece el lado real y la cartela pasa a decir el nombre real. La línea
+      # de invitación desaparece, porque ya se arrastró.
+      - swipe:
+          start: '5%, 50%'
+          end: '95%, 50%'
+      - assertVisible:
+          id: 'visor-lado-real'
+      - assertVisible: 'real'
+      - assertVisible: 'Y en realidad'
+      - assertNotVisible: 'Arrastra para ver qué hay de verdad.'
+      # Sin foto de Places el lado real está igual y no se dibuja ningún hueco de imagen, ningún
+      # icono de imagen rota y ninguna leyenda.
+      - assertNotVisible:
+          id: 'imagen-ausente'
+      - assertNotVisible: 'no disponible'
+      - assertNotVisible: 'sin conexión'
 
-# Tocarla abre exactamente la capa de A4P1, con el tirador de vuelta en el borde de la
-# ficción: quien vuelve a mirar quiere volver a ver el cruce.
-- tapOn:
-    id: 'visor-a-un-toque'
-- assertVisible:
-    id: 'visor-anclaje'
-- assertVisible:
-    id: 'visor-cartela'
-- assertVisible: 'ficcion'
+      # ── El visor es una capa y debajo está el beat ─────────────────────────────────
+      # Cerrar con la flecha no lleva a ningún sitio: deja a la vista lo que ya estaba montado.
+      - tapOn:
+          id: 'visor-cerrar'
+      - assertNotVisible:
+          id: 'visor-anclaje'
+      - assertVisible:
+          id: 'llegada-paso'
+      - assertVisible: 'beat'
 
-# ── Tocar fuera cierra igual que la flecha, y deja debajo lo mismo ─────────────
-- tapOn:
-    id: 'visor-fuera'
-- assertNotVisible:
-    id: 'visor-anclaje'
-- assertVisible:
-    id: 'llegada-paso'
+      # ── La segunda vez queda a un toque, y vuelve a abrir por el borde ─────────────
+      # Se cierra la llegada, se sale del geofence y se vuelve: el sitio ya está pisado, así que
+      # el visor no abre solo y queda en una acción de texto con el nombre del sitio.
+      - tapOn:
+          id: 'llegada-seguir'
+      - setLocation:
+          latitude: 42.4100
+          longitude: -8.8110
+      - setLocation:
+          latitude: 42.4010
+          longitude: -8.8110
+      - launchApp
+      - assertNotVisible:
+          id: 'visor-anclaje'
+      - assertVisible:
+          id: 'llegada-estado'
+      - assertVisible: 'visor-a-un-toque'
+      - assertVisible:
+          id: 'visor-abrir'
 
-# ── A4P7 · La ficha de texto, en un sitio sin ilustración ──────────────────────
-# El otro sitio del mundo de andamiaje no tiene ilustración: su llegada es la ficha, que es
-# pantalla y no capa, y no dice en ningún sitio que falte nada.
-- setLocation:
-    latitude: 42.4030
-    longitude: -8.8140
-- setLocation:
-    latitude: 42.4031
-    longitude: -8.8141
-- launchApp
-- assertVisible:
-    id: 'llegada-estado'
-- assertVisible: 'ficha'
-- assertVisible:
-    id: 'ficha-texto'
-- assertVisible: 'En realidad:'
-- assertNotVisible:
-    id: 'visor-anclaje'
-- assertNotVisible:
-    id: 'visor-abrir'
-- assertNotVisible: 'Reintentar'
-- assertNotVisible: 'Descargar'
-- assertVisible: 'Seguir andando'
+      # Tocarla abre exactamente la capa de A4P1, con el tirador de vuelta en el borde de la
+      # ficción: quien vuelve a mirar quiere volver a ver el cruce.
+      - tapOn:
+          id: 'visor-a-un-toque'
+      - assertVisible:
+          id: 'visor-anclaje'
+      - assertVisible:
+          id: 'visor-cartela'
+      - assertVisible: 'ficcion'
+
+      # ── Tocar fuera cierra igual que la flecha, y deja debajo lo mismo ─────────────
+      - tapOn:
+          id: 'visor-fuera'
+      - assertNotVisible:
+          id: 'visor-anclaje'
+      - assertVisible:
+          id: 'llegada-paso'
+
+      # ── A4P7 · La ficha de texto, en un sitio sin ilustración ──────────────────────
+      # El otro sitio del mundo de andamiaje no tiene ilustración: su llegada es la ficha, que es
+      # pantalla y no capa, y no dice en ningún sitio que falte nada.
+      - setLocation:
+          latitude: 42.4030
+          longitude: -8.8140
+      - setLocation:
+          latitude: 42.4031
+          longitude: -8.8141
+      - launchApp
+      - assertVisible:
+          id: 'llegada-estado'
+      - assertVisible: 'ficha'
+      - assertVisible:
+          id: 'ficha-texto'
+      - assertVisible: 'En realidad:'
+      - assertNotVisible:
+          id: 'visor-anclaje'
+      - assertNotVisible:
+          id: 'visor-abrir'
+      - assertNotVisible: 'Reintentar'
+      - assertNotVisible: 'Descargar'
+      - assertVisible: 'Seguir andando'

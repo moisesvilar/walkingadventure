@@ -19,10 +19,11 @@
 # 4. **Que no se llegue al zurrón desde ningún otro sitio** —ni ajustes, ni diario, ni
 #    repisa—, que es una ausencia y solo se comprueba recorriendo.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -72,6 +73,19 @@ appId: com.walkingadventure.app
     id: 'portada'
 - assertNotVisible:
     id: 'zurron'
+
+# ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
+# Y el juego es completo sin activarlo: en la portada no hay ninguna invitación a
+# encenderlo. La única mención vive en su fila de los ajustes.
+#
+# Estas tres ausencias se afirman **aquí**, en la portada y antes de salir hacia lo que hay
+# hoy, porque es el único momento del recorrido en que se pasa por ella. Antes colgaban de
+# un `back` desde «Lo que hay hoy» que se ha quitado, y el motivo está explicado abajo, en
+# el bloque de la salida.
+- assertNotVisible: 'Contar los pasos del día a día'
+- assertNotVisible: 'salud'
+- assertNotVisible: 'podómetro'
+
 - tapOn:
     id: 'ver-que-se-cuenta'
 - assertVisible:
@@ -80,17 +94,23 @@ appId: com.walkingadventure.app
     id: 'zurron'
 - assertNotVisible: 'Mientras no estabas'
 
-# ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
-# Y el juego es completo sin activarlo: hasta aquí no ha aparecido ninguna invitación a
-# encenderlo. La única mención vive en su fila de los ajustes.
+# Aquí había un `back` con un `assertVisible: portada` detrás, y afirmaba un camino que el
+# diseño no promete. `docs/flujo.md` es la fuente normativa del recorrido y de A2P3 a A2P1
+# no declara ninguna arista: tiene `A2P1 --> A2P3` («Ver qué se cuenta hoy · sin reserva que
+# vaciar») y tiene la vuelta desde la ficha (`A2P4 -.-> A2P3`, «‹ volver a la lista»), pero
+# de «Lo que hay hoy» a la portada no hay camino, ni con flecha en pantalla ni con el botón
+# del sistema. Lo medido en el emulador `wa-pixel` al pulsarlo: la app se va —el volcado del
+# árbol deja `android:id/content` vacío— y el `assertVisible: portada` siguiente salía en
+# rojo. No es un defecto de la app: es la prueba dando por hecha una transición que nadie
+# ha decidido. El día que el diseño decida qué hace el botón del sistema en A2P3 —volver a
+# la portada, salir de la app, o pedir confirmación—, se declara la arista en
+# `docs/flujo.md` y **este es el sitio donde se afirma**.
 
-- back
-- assertVisible:
-    id: 'portada'
-- assertNotVisible: 'Contar los pasos del día a día'
-- assertNotVisible: 'salud'
-- assertNotVisible: 'podómetro'
-
+# Al quitar el `back`, el recorrido llega a los ajustes desde «Lo que hay hoy» y ya no
+# desde la portada. Da igual de dónde se parta mientras la puerta sea la barra de pestañas,
+# y hoy no se puede afinar más: `paso-ajustes` no existe todavía en ninguna pantalla —es el
+# hueco que declara la cabecera—, así que este paso está rojo por ausencia de la puerta, no
+# por el sitio desde el que se toca.
 - tapOn:
     id: 'paso-ajustes'
 - assertVisible:
@@ -186,6 +206,15 @@ appId: com.walkingadventure.app
     id: 'zurron-envoltorio'
 - assertVisible:
     id: 'zurron-entrada'
+# El cierre **se alcanza bajando**, por lo mismo que en A1P7 y en lo que hay hoy: la
+# pantalla es un `ScrollView` y el número de entradas no es fijo —hasta cinco, y las que
+# haya dependen de lo que quedara sin narrar—, así que la línea que va detrás de todas
+# ellas cabe en pantalla unas veces y otras no. La acción sí está siempre a la vista, y no
+# por suerte: `zurron.jsx` la deja fuera del `ScrollView`, anclada al pie.
+- scrollUntilVisible:
+    element:
+      text: 'Todo eso sigue por ahí, esperando a que pases.'
+    direction: DOWN
 - assertVisible: 'Todo eso sigue por ahí, esperando a que pases.'
 
 # Una sola acción, y ninguna manera de saltarlo ni de tocar una entrada.

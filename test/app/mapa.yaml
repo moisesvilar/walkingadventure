@@ -1,5 +1,18 @@
 # @app — El mapa dentro del móvil (SPEC-026).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: `paso-mapa` existe, pero no se alcanza: vive
+# en el andamiaje, y al andamiaje no se llega. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**: que la lámina se dibuje de verdad en
 # Skia, que los gestos lleguen y muevan la cámara, y que el minuto se cumpla contra el
 # reloj de verdad y el Overpass del proyecto. Todo lo demás de esta fila —el anclaje
@@ -37,124 +50,160 @@ appId: com.walkingadventure.app
     clearState: true
 
 # El paso al mapa es provisional y de esta fila: la fila 27 lo sustituye por A1P4.
-- tapOn:
-    id: 'paso-mapa'
 
-- assertVisible:
-    id: 'mapa-pantalla'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-mapa` **sí existe en `app/App.js`, pero no se puede alcanzar**, que no es lo mismo y
+# conviene no confundirlo. La tira de pasos provisionales —`paso-mapa`, `paso-marcha`,
+# `paso-revision-render`— vive en el andamiaje, y al andamiaje solo se llega **saliendo
+# del arranque sin partida levantada**: `App.js` arranca con `enArranque = true` y no
+# hay atajo, así que lo primero y lo único que se ve al instalar es A1P1. Este flujo
+# hacía `launchApp` y tocaba `paso-mapa` acto seguido, dando por hecho una pantalla de
+# arranque que la app dejó de tener.
+#
+# Mientras no haya camino, este flujo **no recorre nada y lo dice**: comprueba que el
+# paso sigue sin estar a la vista y que la app abre en el arranque. Su verde significa
+# «el límite declarado sigue en pie», nunca «la pantalla está verificada». En cuanto el
+# paso sea alcanzable, la condición cambia sola y el cuerpo de abajo —que está entero,
+# tal y como se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-mapa'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-mapa'
 
-# Que la pantalla haya montado sus piezas antes de pedirle nada.
-- assertNotVisible:
-    id: 'mapa-sin-cablear'
-
-# ── El estado de antes de levantar ─────────────────────────────────────────────
-- assertVisible:
-    id: 'mapa-estado'
-- assertVisible: 'Aquí todavía no hay nada dibujado.'
-- assertVisible:
-    id: 'levantar-mapa'
-- assertVisible: 'Levantar el mapa aquí'
-- assertNotVisible:
-    id: 'mapa-lamina'
-
-- tapOn:
-    id: 'levantar-mapa'
-
-# ── El estado de mientras se levanta ───────────────────────────────────────────
-# Las seis fases, una por línea y con los literales de la pantalla ya dibujada. Ni
-# barra, ni porcentaje, ni contador, ni estimación de segundos. Va dentro de `runFlow`
-# porque una celda que se levanta deprisa puede no dejar ver este momento, y eso no es
-# un fallo: lo que sí sería un fallo es que la lista existiera y estuviera mal.
+# El flujo de verdad, a la espera de su puerta.
 - runFlow:
     when:
       visible:
-        id: 'generacion-fases'
+        id: 'paso-mapa'
     commands:
-      - assertVisible: 'El mundo se está poniendo en su sitio.'
+      - tapOn:
+          id: 'paso-mapa'
+
       - assertVisible:
-          id: 'fase-datos'
+          id: 'mapa-pantalla'
+
+      # Que la pantalla haya montado sus piezas antes de pedirle nada.
+      - assertNotVisible:
+          id: 'mapa-sin-cablear'
+
+      # ── El estado de antes de levantar ─────────────────────────────────────────────
       - assertVisible:
-          id: 'fase-tierra-y-agua'
+          id: 'mapa-estado'
+      - assertVisible: 'Aquí todavía no hay nada dibujado.'
       - assertVisible:
-          id: 'fase-gente'
+          id: 'levantar-mapa'
+      - assertVisible: 'Levantar el mapa aquí'
+      - assertNotVisible:
+          id: 'mapa-lamina'
+
+      - tapOn:
+          id: 'levantar-mapa'
+
+      # ── El estado de mientras se levanta ───────────────────────────────────────────
+      # Las seis fases, una por línea y con los literales de la pantalla ya dibujada. Ni
+      # barra, ni porcentaje, ni contador, ni estimación de segundos. Va dentro de `runFlow`
+      # porque una celda que se levanta deprisa puede no dejar ver este momento, y eso no es
+      # un fallo: lo que sí sería un fallo es que la lista existiera y estuviera mal.
+      - runFlow:
+          when:
+            visible:
+              id: 'generacion-fases'
+          commands:
+            - assertVisible: 'El mundo se está poniendo en su sitio.'
+            - assertVisible:
+                id: 'fase-datos'
+            - assertVisible:
+                id: 'fase-tierra-y-agua'
+            - assertVisible:
+                id: 'fase-gente'
+            - assertVisible:
+                id: 'fase-calzadas'
+            - assertVisible:
+                id: 'fase-sitios'
+            - assertVisible:
+                id: 'fase-nombres'
+            - assertVisible: 'Mirando qué hay por ahí'
+            - assertVisible: 'Poniéndole nombre a todo'
+            - assertNotVisible: '.*\d+\s*%.*'
+
+      # El minuto de RNF-PER-001. Este es el único sitio donde el presupuesto se mide contra
+      # el reloj de verdad, contra el Overpass del proyecto y sobre el dispositivo de
+      # referencia; en `node --test` se afirma el instrumento y no el número. Si el mapa no
+      # está pintado al cumplirse el minuto, este flujo se cae y el criterio está rojo.
+      - extendedWaitUntil:
+          visible:
+            id: 'mapa-lamina'
+          timeout: 60000
+
+      # ── La lámina, y nada encima de ella ───────────────────────────────────────────
       - assertVisible:
-          id: 'fase-calzadas'
+          id: 'mapa-camara'
       - assertVisible:
-          id: 'fase-sitios'
+          id: 'mapa-jugable'
+      - assertNotVisible:
+          id: 'mapa-no-se-pudo'
+      - assertNotVisible:
+          id: 'generacion-fases'
+      - assertNotVisible:
+          id: 'levantar-mapa'
+
+      # El momento «de consulta»: ni barra de pestañas, ni cabecera, ni control de zoom, ni
+      # botón de centrar, ni leyenda. Acercar y arrastrar son gestos y el resto vive fuera.
+      - assertNotVisible: '.*[Zz]oom.*'
+      - assertNotVisible: '.*[Cc]entrar.*'
+      - assertNotVisible: '.*[Ll]eyenda.*'
+      - assertNotVisible: '.*\d+\s*(km|min|pasos|%).*'
+
+      # La cámara con la que se está pintando, antes de tocar nada: centro, radio y tamaño.
+      # Es la marca que existe para poder afirmar que un gesto movió la cámara y no el mundo.
+      - copyTextFrom:
+          id: 'mapa-camara'
+      - evalScript: ${output.camaraInicial = maestro.copiedText}
+
+      # ── Arrastrar mueve la cámara y no el mundo ────────────────────────────────────
+      - swipe:
+          from:
+            id: 'mapa-lamina'
+          direction: LEFT
+      - copyTextFrom:
+          id: 'mapa-camara'
+      - assertTrue: ${maestro.copiedText != output.camaraInicial}
+      - evalScript: ${output.camaraTrasArrastre = maestro.copiedText}
+
+      # El mundo no se ha movido con el dedo: la lámina sigue pintada, no se ha vuelto a
+      # levantar nada y el momento no ha pasado otra vez por la lista de fases.
       - assertVisible:
-          id: 'fase-nombres'
-      - assertVisible: 'Mirando qué hay por ahí'
-      - assertVisible: 'Poniéndole nombre a todo'
-      - assertNotVisible: '.*\d+\s*%.*'
+          id: 'mapa-lamina'
+      - assertNotVisible:
+          id: 'generacion-fases'
+      - assertNotVisible:
+          id: 'levantar-mapa'
 
-# El minuto de RNF-PER-001. Este es el único sitio donde el presupuesto se mide contra
-# el reloj de verdad, contra el Overpass del proyecto y sobre el dispositivo de
-# referencia; en `node --test` se afirma el instrumento y no el número. Si el mapa no
-# está pintado al cumplirse el minuto, este flujo se cae y el criterio está rojo.
-- extendedWaitUntil:
-    visible:
-      id: 'mapa-lamina'
-    timeout: 60000
+      # ── Girar el móvil no resiembra nada ───────────────────────────────────────────
+      # Reencuadra la lámina y no vuelve a generar: lo que se pinta es el mundo congelado.
+      # `LANDSCAPE` a secas no existe: el vocabulario de Maestro es PORTRAIT,
+      # LANDSCAPE_LEFT, LANDSCAPE_RIGHT y UPSIDE_DOWN, y con el valor inventado el fichero
+      # entero no compilaba —«Parsing Failed at mapa.yaml:145:28»— y se llevaba por delante
+      # los ciento sesenta renglones de al lado, no solo estos seis.
+      - setOrientation: LANDSCAPE_LEFT
+      - assertVisible:
+          id: 'mapa-lamina'
+      - assertNotVisible:
+          id: 'generacion-fases'
+      - setOrientation: PORTRAIT
+      - assertVisible:
+          id: 'mapa-lamina'
+      - assertNotVisible:
+          id: 'generacion-fases'
 
-# ── La lámina, y nada encima de ella ───────────────────────────────────────────
-- assertVisible:
-    id: 'mapa-camara'
-- assertVisible:
-    id: 'mapa-jugable'
-- assertNotVisible:
-    id: 'mapa-no-se-pudo'
-- assertNotVisible:
-    id: 'generacion-fases'
-- assertNotVisible:
-    id: 'levantar-mapa'
-
-# El momento «de consulta»: ni barra de pestañas, ni cabecera, ni control de zoom, ni
-# botón de centrar, ni leyenda. Acercar y arrastrar son gestos y el resto vive fuera.
-- assertNotVisible: '.*[Zz]oom.*'
-- assertNotVisible: '.*[Cc]entrar.*'
-- assertNotVisible: '.*[Ll]eyenda.*'
-- assertNotVisible: '.*\d+\s*(km|min|pasos|%).*'
-
-# La cámara con la que se está pintando, antes de tocar nada: centro, radio y tamaño.
-# Es la marca que existe para poder afirmar que un gesto movió la cámara y no el mundo.
-- copyTextFrom:
-    id: 'mapa-camara'
-- evalScript: ${output.camaraInicial = maestro.copiedText}
-
-# ── Arrastrar mueve la cámara y no el mundo ────────────────────────────────────
-- swipe:
-    from:
-      id: 'mapa-lamina'
-    direction: LEFT
-- copyTextFrom:
-    id: 'mapa-camara'
-- assertTrue: ${maestro.copiedText != output.camaraInicial}
-- evalScript: ${output.camaraTrasArrastre = maestro.copiedText}
-
-# El mundo no se ha movido con el dedo: la lámina sigue pintada, no se ha vuelto a
-# levantar nada y el momento no ha pasado otra vez por la lista de fases.
-- assertVisible:
-    id: 'mapa-lamina'
-- assertNotVisible:
-    id: 'generacion-fases'
-- assertNotVisible:
-    id: 'levantar-mapa'
-
-# ── Girar el móvil no resiembra nada ───────────────────────────────────────────
-# Reencuadra la lámina y no vuelve a generar: lo que se pinta es el mundo congelado.
-- setOrientation: LANDSCAPE
-- assertVisible:
-    id: 'mapa-lamina'
-- assertNotVisible:
-    id: 'generacion-fases'
-- setOrientation: PORTRAIT
-- assertVisible:
-    id: 'mapa-lamina'
-- assertNotVisible:
-    id: 'generacion-fases'
-
-# Y el encuadre que se dejó sigue siendo el que se dejó, no el inicial: la cámara es
-# estado de pantalla y girar el móvil no la devuelve al principio.
-- copyTextFrom:
-    id: 'mapa-camara'
-- assertTrue: ${maestro.copiedText != output.camaraInicial}
+      # Y el encuadre que se dejó sigue siendo el que se dejó, no el inicial: la cámara es
+      # estado de pantalla y girar el móvil no la devuelve al principio.
+      - copyTextFrom:
+          id: 'mapa-camara'
+      - assertTrue: ${maestro.copiedText != output.camaraInicial}

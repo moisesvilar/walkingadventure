@@ -1,5 +1,18 @@
 # @app — La repisa dentro del móvil (SPEC-038).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: falta `paso-repisa` en `app/App.js`, así que
+# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**, que en esta fila es una cosa y no
 # quince, porque el reparto de la spec está elegido para eso: el orden de los objetos, la
 # procedencia de cada uno, los motes del mapa activo, la línea del oro, los estados
@@ -14,10 +27,11 @@
 # 2. **Que la serif sea la serif.** Maestro no compara tipografías, pero sí puede afirmar
 #    que la pantalla declara registro de mundo, que es de donde sale.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -51,92 +65,122 @@ appId: com.walkingadventure.app
     clearState: true
 
 # El paso a la repisa, provisional como el del mapa y el de la marcha. Hoy no existe.
-- tapOn:
-    id: 'paso-repisa'
 
-# ── La repisa no es un inventario ──────────────────────────────────────────────
-# Se abre en momento de consulta, con los objetos y, debajo, los motes.
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-repisa` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
+# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
+# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
+# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
+# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+#
+# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
+# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
+# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
+# `paso-repisa`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
+# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-repisa'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-repisa'
 
-- assertVisible:
-    id: 'momento'
-- assertVisible: 'de-consulta'
-- assertVisible: 'La repisa'
-- assertVisible:
-    id: 'repisa-objetos'
-- assertVisible:
-    id: 'repisa-objeto'
-- assertVisible: 'Y cómo te llaman'
-- assertVisible:
-    id: 'repisa-motes'
-- assertVisible:
-    id: 'repisa-oro'
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-repisa'
+    commands:
+      - tapOn:
+          id: 'paso-repisa'
 
-# Ni peso, ni huecos, ni contadores, ni casillas, ni iconos: nada de lo que un inventario
-# enseña. Se afirma por texto porque ninguna de estas cosas tiene localizador, y no lo
-# tiene porque no existe.
-- assertNotVisible: 'Peso'
-- assertNotVisible: 'peso:'
-- assertNotVisible: 'Capacidad'
-- assertNotVisible: 'Huecos'
-- assertNotVisible: 'Equipar'
-- assertNotVisible: 'Ordenar'
-- assertNotVisible: 'Combinar'
-- assertNotVisible: 'Descartar'
-- assertNotVisible: 'Tirar'
-- assertNotVisible:
-    id: 'repisa-peso'
-- assertNotVisible:
-    id: 'repisa-ordenar'
-- assertNotVisible:
-    id: 'repisa-tirar'
+      # ── La repisa no es un inventario ──────────────────────────────────────────────
+      # Se abre en momento de consulta, con los objetos y, debajo, los motes.
 
-# Y una llave no se anuncia como llave: nada distingue al que abre puertas.
-- assertNotVisible: 'Llave'
-- assertNotVisible: 'Abre'
+      - assertVisible:
+          id: 'momento'
+      - assertVisible: 'de-consulta'
+      - assertVisible: 'La repisa'
+      - assertVisible:
+          id: 'repisa-objetos'
+      - assertVisible:
+          id: 'repisa-objeto'
+      - assertVisible: 'Y cómo te llaman'
+      - assertVisible:
+          id: 'repisa-motes'
+      - assertVisible:
+          id: 'repisa-oro'
 
-# ── Los tres gestos de inventario no están conectados a nada ───────────────────
-# Es lo único de esta fila que no se puede afirmar sin dispositivo: la lista no responde,
-# y después de los tres gestos la repisa sigue igual, con el mismo objeto en el mismo
-# sitio.
+      # Ni peso, ni huecos, ni contadores, ni casillas, ni iconos: nada de lo que un inventario
+      # enseña. Se afirma por texto porque ninguna de estas cosas tiene localizador, y no lo
+      # tiene porque no existe.
+      - assertNotVisible: 'Peso'
+      - assertNotVisible: 'peso:'
+      - assertNotVisible: 'Capacidad'
+      - assertNotVisible: 'Huecos'
+      - assertNotVisible: 'Equipar'
+      - assertNotVisible: 'Ordenar'
+      - assertNotVisible: 'Combinar'
+      - assertNotVisible: 'Descartar'
+      - assertNotVisible: 'Tirar'
+      - assertNotVisible:
+          id: 'repisa-peso'
+      - assertNotVisible:
+          id: 'repisa-ordenar'
+      - assertNotVisible:
+          id: 'repisa-tirar'
 
-- longPressOn:
-    id: 'repisa-objeto'
-- assertVisible:
-    id: 'repisa-objeto'
-- assertNotVisible: 'Tirar'
-- assertNotVisible: 'Eliminar'
-- assertNotVisible: 'Quitar de la repisa'
+      # Y una llave no se anuncia como llave: nada distingue al que abre puertas.
+      - assertNotVisible: 'Llave'
+      - assertNotVisible: 'Abre'
 
-- swipe:
-    from:
-      id: 'repisa-objeto'
-    direction: LEFT
-- assertVisible:
-    id: 'repisa-objeto'
-- assertNotVisible: 'Borrar'
-- assertNotVisible: 'Eliminar'
+      # ── Los tres gestos de inventario no están conectados a nada ───────────────────
+      # Es lo único de esta fila que no se puede afirmar sin dispositivo: la lista no responde,
+      # y después de los tres gestos la repisa sigue igual, con el mismo objeto en el mismo
+      # sitio.
 
-- swipe:
-    from:
-      id: 'repisa-objeto'
-    direction: DOWN
-- assertVisible:
-    id: 'repisa-objeto'
-- assertVisible:
-    id: 'repisa-motes'
+      - longPressOn:
+          id: 'repisa-objeto'
+      - assertVisible:
+          id: 'repisa-objeto'
+      - assertNotVisible: 'Tirar'
+      - assertNotVisible: 'Eliminar'
+      - assertNotVisible: 'Quitar de la repisa'
 
-# ── Se lee de arriba abajo y no se navega ──────────────────────────────────────
-# Una sola columna: ni pestañas, ni secciones plegables, ni buscador, ni filtro.
-- assertNotVisible:
-    id: 'repisa-pestanas'
-- assertNotVisible:
-    id: 'repisa-buscador'
-- assertNotVisible:
-    id: 'repisa-filtro'
-- assertNotVisible:
-    id: 'barra-de-pestanas'
+      - swipe:
+          from:
+            id: 'repisa-objeto'
+          direction: LEFT
+      - assertVisible:
+          id: 'repisa-objeto'
+      - assertNotVisible: 'Borrar'
+      - assertNotVisible: 'Eliminar'
 
-# Y la única salida es volver, que es lo que hace una pantalla de consulta.
-- assertVisible: '‹ Volver'
-- tapOn: '‹ Volver'
-- assertNotVisible: 'La repisa'
+      - swipe:
+          from:
+            id: 'repisa-objeto'
+          direction: DOWN
+      - assertVisible:
+          id: 'repisa-objeto'
+      - assertVisible:
+          id: 'repisa-motes'
+
+      # ── Se lee de arriba abajo y no se navega ──────────────────────────────────────
+      # Una sola columna: ni pestañas, ni secciones plegables, ni buscador, ni filtro.
+      - assertNotVisible:
+          id: 'repisa-pestanas'
+      - assertNotVisible:
+          id: 'repisa-buscador'
+      - assertNotVisible:
+          id: 'repisa-filtro'
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
+
+      # Y la única salida es volver, que es lo que hace una pantalla de consulta.
+      - assertVisible: '‹ Volver'
+      - tapOn: '‹ Volver'
+      - assertNotVisible: 'La repisa'

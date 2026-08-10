@@ -1,5 +1,18 @@
 # @app @accesibilidad — El gancho para poner una capacidad en rojo (SPEC-020).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: la app abre en el arranque, y el enlace
+# profundo tampoco saca de él —`leeGancho` anota qué capacidades faltan y no navega—.
+# Lo único que llega a ejecutarse es la guarda de más abajo, así que su verde
+# significa «el límite sigue en pie» y nunca «la pantalla funciona», y por eso no se
+# cuenta en la misma casilla que un verde de verdad. El porqué entero y lo que haría
+# falta para levantarlo están en «LÍMITE DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Es lo que hace que «la app funciona aunque falten» se pueda poner ROJO en lugar
 # de afirmarse: se fuerzan capacidades a ausentes por enlace profundo y se
 # comprueba que la app sigue en pie y lo declara. El gancho no escribe nada, así
@@ -13,30 +26,57 @@ appId: com.walkingadventure.app
     clearState: true
 
 # Los tres degradables a la vez, que es el caso que de verdad importa.
-- openLink: 'walkingadventure://andamiaje?ausentes=haptico,notificaciones,respaldo'
 
-- assertVisible:
-    id: 'pantalla-andamiaje'
-- assertVisible:
-    id: 'capacidades'
-- assertVisible: 'Háptico — no montada'
-- assertVisible: 'Notificaciones — no montada'
-- assertVisible: 'Respaldo — no montada'
-- assertVisible: '.*ausente por el gancho de andamiaje.*'
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# Este flujo daba por hecho que la app abre en el andamiaje, y **no abre ahí**.
+# `app/App.js` arranca con `enArranque = true`, así que lo primero y lo único que se ve
+# al instalar es el arranque de A1P1. Y el enlace profundo no lo arregla: `leeGancho` solo guarda qué capacidades faltan, no saca del arranque, así que `walkingadventure://andamiaje?ausentes=...` no lleva al andamiaje que nombra.
+#
+# Mientras la app abra donde abre, este flujo **no recorre nada y lo dice**: comprueba
+# que sigue sin haber camino y que la app abre en el arranque. Su verde significa «el
+# límite declarado sigue en pie», nunca «la pantalla está verificada». El día que haya
+# camino, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'pantalla-andamiaje'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'pantalla-andamiaje'
 
-# Ninguna parte de la pantalla queda vacía por ello: el título sigue ahí.
-- assertVisible:
-    id: 'titulo-de-mundo'
+# El flujo de verdad, a la espera de su camino.
+- runFlow:
+    when:
+      visible:
+        id: 'pantalla-andamiaje'
+    commands:
+      - openLink: 'walkingadventure://andamiaje?ausentes=haptico,notificaciones,respaldo'
 
-# Un nombre que no es ninguna de las cuatro no cambia nada y se dice cuál fue.
-- openLink: 'walkingadventure://andamiaje?ausentes=telepatia'
-- assertVisible:
-    id: 'gancho-no-reconocido'
-- assertVisible: '.*No reconozco la capacidad «telepatia».*'
+      - assertVisible:
+          id: 'pantalla-andamiaje'
+      - assertVisible:
+          id: 'capacidades'
+      - assertVisible: 'Háptico — no montada'
+      - assertVisible: 'Notificaciones — no montada'
+      - assertVisible: 'Respaldo — no montada'
+      - assertVisible: '.*ausente por el gancho de andamiaje.*'
 
-# Al relanzar sin enlace, el estado real vuelve: el gancho no persiste nada.
-- launchApp:
-    clearState: false
-- assertVisible:
-    id: 'capacidad-haptico'
-- assertNotVisible: '.*ausente por el gancho de andamiaje.*'
+      # Ninguna parte de la pantalla queda vacía por ello: el título sigue ahí.
+      - assertVisible:
+          id: 'titulo-de-mundo'
+
+      # Un nombre que no es ninguna de las cuatro no cambia nada y se dice cuál fue.
+      - openLink: 'walkingadventure://andamiaje?ausentes=telepatia'
+      - assertVisible:
+          id: 'gancho-no-reconocido'
+      - assertVisible: '.*No reconozco la capacidad «telepatia».*'
+
+      # Al relanzar sin enlace, el estado real vuelve: el gancho no persiste nada.
+      - launchApp:
+          clearState: false
+      - assertVisible:
+          id: 'capacidad-haptico'
+      - assertNotVisible: '.*ausente por el gancho de andamiaje.*'

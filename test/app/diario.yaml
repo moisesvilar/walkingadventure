@@ -1,5 +1,18 @@
 # @app — El diario dentro del móvil (SPEC-037).
 #
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: falta `paso-diario` en `app/App.js`, así que
+# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
+# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
+# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
+# DECLARADO», unas líneas más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
+# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
+# lo que convierte marcar y desmarcar en un acto deliberado y visible.
+#
 # Aquí vive **solo lo que necesita dispositivo**, que en esta fila son dos afirmaciones y
 # no treinta, porque el reparto de la spec está elegido para eso: los capítulos, sus días,
 # sus historias, los cuatro órdenes, la ausencia de nivel, los tres estados del marcador,
@@ -16,10 +29,11 @@
 #    sistema, ni con un gesto de descarte, ni tocando fuera. El dato declara
 #    `sePuedeSaltar: false`, pero quien tiene que respetarlo es el `Modal`.
 #
-# **NO SE EJECUTA EN LA MÁQUINA DE ESTE PIPELINE.** No hay Xcode completo ni SDK de
-# Android, así que ningún flujo `@app` se puede correr aquí
-# (`pipeline/decisiones-orquestador.md` §4). El flujo se escribe igual y el runner lo
-# registra como infraestructura ausente, nunca como verde.
+# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
+# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
+# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
+# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
+# medido contra la app.
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
@@ -59,142 +73,172 @@ appId: com.walkingadventure.app
 
 # El paso al diario, provisional como el del mapa, el de la llegada y el de la escena.
 # Hoy no existe.
-- tapOn:
-    id: 'paso-diario'
 
-# ── Al principio el diario solo se lee por días ────────────────────────────────
-# El diario se abre por días, en el capítulo del mapa activo y sin que nadie lo elija.
+# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
+#
+# `paso-diario` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
+# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
+# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
+# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
+# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+#
+# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
+# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
+# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
+# `paso-diario`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
+# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+- runFlow:
+    when:
+      notVisible:
+        id: 'paso-diario'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'paso-diario'
 
-- assertVisible:
-    id: 'momento'
-- assertVisible: 'de-consulta'
-- assertVisible:
-    id: 'diario-vista'
-- assertVisible: 'dias'
-- assertVisible: 'Tu diario'
-- assertVisible:
-    id: 'diario-capitulos'
-- assertVisible:
-    id: 'diario-capitulo-activo'
-- assertVisible:
-    id: 'diario-dias'
+# El flujo de verdad, a la espera de su puerta.
+- runFlow:
+    when:
+      visible:
+        id: 'paso-diario'
+    commands:
+      - tapOn:
+          id: 'paso-diario'
 
-# La segunda manera de leerlo **no está**: no desactivada, no presente. Ni la acción, ni
-# la lista de historias, ni ningún candado ni promesa de que llegará.
-- assertNotVisible:
-    id: 'diario-ver-por-historias'
-- assertNotVisible:
-    id: 'diario-historias'
-- assertNotVisible: 'Ver por historias'
-- assertNotVisible: 'Lo que se cuenta'
+      # ── Al principio el diario solo se lee por días ────────────────────────────────
+      # El diario se abre por días, en el capítulo del mapa activo y sin que nadie lo elija.
 
-# Y el diario no se navega como una aplicación: ni barra, ni pestañas, ni buscador, ni
-# filtro, ni calendario.
-- assertNotVisible:
-    id: 'barra-de-pestanas'
-- assertNotVisible:
-    id: 'diario-buscador'
-- assertNotVisible:
-    id: 'diario-filtro'
-- assertNotVisible:
-    id: 'diario-calendario'
+      - assertVisible:
+          id: 'momento'
+      - assertVisible: 'de-consulta'
+      - assertVisible:
+          id: 'diario-vista'
+      - assertVisible: 'dias'
+      - assertVisible: 'Tu diario'
+      - assertVisible:
+          id: 'diario-capitulos'
+      - assertVisible:
+          id: 'diario-capitulo-activo'
+      - assertVisible:
+          id: 'diario-dias'
 
-# ── La primera coincidencia se pone en escena ──────────────────────────────────
-# Se sale a andar y se llega al segundo núcleo, donde se cuenta otra versión de lo que ya
-# estaba apuntado. La escena aparece encima de la llegada, no colgando del diario.
+      # La segunda manera de leerlo **no está**: no desactivada, no presente. Ni la acción, ni
+      # la lista de historias, ni ningún candado ni promesa de que llegará.
+      - assertNotVisible:
+          id: 'diario-ver-por-historias'
+      - assertNotVisible:
+          id: 'diario-historias'
+      - assertNotVisible: 'Ver por historias'
+      - assertNotVisible: 'Lo que se cuenta'
 
-- tapOn:
-    id: 'paso-llegada'
-- setLocation:
-    latitude: 42.4012
-    longitude: -8.8114
-- setLocation:
-    latitude: 42.4010
-    longitude: -8.8110
+      # Y el diario no se navega como una aplicación: ni barra, ni pestañas, ni buscador, ni
+      # filtro, ni calendario.
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
+      - assertNotVisible:
+          id: 'diario-buscador'
+      - assertNotVisible:
+          id: 'diario-filtro'
+      - assertNotVisible:
+          id: 'diario-calendario'
 
-- assertVisible:
-    id: 'triangulacion-escena'
-- assertVisible:
-    id: 'momento'
-- assertVisible: 'al-parar'
+      # ── La primera coincidencia se pone en escena ──────────────────────────────────
+      # Se sale a andar y se llega al segundo núcleo, donde se cuenta otra versión de lo que ya
+      # estaba apuntado. La escena aparece encima de la llegada, no colgando del diario.
 
-# Las dos versiones juntas, y la línea que va entre ellas.
-- assertVisible:
-    id: 'diario-version'
-- assertVisible: 'Aquí, hoy'
-- assertVisible: '— esto ya lo habías oído —'
-- assertVisible: 'No así.'
+      - tapOn:
+          id: 'paso-llegada'
+      - setLocation:
+          latitude: 42.4012
+          longitude: -8.8114
+      - setLocation:
+          latitude: 42.4010
+          longitude: -8.8110
 
-# Ni un texto que explique que las noticias se deforman, ni una marca de cuál es la buena.
-- assertNotVisible: 'se deforma'
-- assertNotVisible: 'fiable'
-- assertNotVisible: 'versión correcta'
+      - assertVisible:
+          id: 'triangulacion-escena'
+      - assertVisible:
+          id: 'momento'
+      - assertVisible: 'al-parar'
 
-# ── Modal y sin manera de saltarla ─────────────────────────────────────────────
-# Una sola acción, la que la cierra. Ni gesto de descarte, ni botón de atrás del sistema,
-# ni salida tocando fuera: el valor entero de la escena está en que se lea, y ocurre una
-# sola vez en toda la partida.
-- assertNotVisible:
-    id: 'triangulacion-saltar'
-- assertNotVisible:
-    id: 'boton-atras'
-- assertNotVisible:
-    id: 'cabecera-atras'
+      # Las dos versiones juntas, y la línea que va entre ellas.
+      - assertVisible:
+          id: 'diario-version'
+      - assertVisible: 'Aquí, hoy'
+      - assertVisible: '— esto ya lo habías oído —'
+      - assertVisible: 'No así.'
 
-- back
-- assertVisible:
-    id: 'triangulacion-escena'
+      # Ni un texto que explique que las noticias se deforman, ni una marca de cuál es la buena.
+      - assertNotVisible: 'se deforma'
+      - assertNotVisible: 'fiable'
+      - assertNotVisible: 'versión correcta'
 
-- swipe:
-    direction: DOWN
-- assertVisible:
-    id: 'triangulacion-escena'
+      # ── Modal y sin manera de saltarla ─────────────────────────────────────────────
+      # Una sola acción, la que la cierra. Ni gesto de descarte, ni botón de atrás del sistema,
+      # ni salida tocando fuera: el valor entero de la escena está en que se lea, y ocurre una
+      # sola vez en toda la partida.
+      - assertNotVisible:
+          id: 'triangulacion-saltar'
+      - assertNotVisible:
+          id: 'boton-atras'
+      - assertNotVisible:
+          id: 'cabecera-atras'
 
-# Y su única acción la cierra y devuelve a la llegada.
-- assertVisible:
-    id: 'triangulacion-apuntarlo'
-- tapOn:
-    id: 'triangulacion-apuntarlo'
-- assertNotVisible:
-    id: 'triangulacion-escena'
-- assertVisible:
-    id: 'lo-que-se-cuenta'
+      - back
+      - assertVisible:
+          id: 'triangulacion-escena'
 
-# ── A partir de ahí se abre la vista por historias ─────────────────────────────
-# Ya en casa, el diario se puede leer de las dos maneras, y ninguna sustituye a la otra.
+      - swipe:
+          direction: DOWN
+      - assertVisible:
+          id: 'triangulacion-escena'
 
-- tapOn:
-    id: 'paso-diario'
-- assertVisible:
-    id: 'diario-ver-por-historias'
-- tapOn:
-    id: 'diario-ver-por-historias'
+      # Y su única acción la cierra y devuelve a la llegada.
+      - assertVisible:
+          id: 'triangulacion-apuntarlo'
+      - tapOn:
+          id: 'triangulacion-apuntarlo'
+      - assertNotVisible:
+          id: 'triangulacion-escena'
+      - assertVisible:
+          id: 'lo-que-se-cuenta'
 
-- assertVisible:
-    id: 'diario-vista'
-- assertVisible: 'historias'
-- assertVisible: 'Lo que se cuenta'
-- assertVisible:
-    id: 'diario-historias'
-- assertVisible:
-    id: 'diario-historia'
+      # ── A partir de ahí se abre la vista por historias ─────────────────────────────
+      # Ya en casa, el diario se puede leer de las dos maneras, y ninguna sustituye a la otra.
 
-# Ninguna versión lleva icono, color ni marca distinta de las demás, y no hay ningún
-# control de orden: solo existe un orden.
-- assertNotVisible:
-    id: 'diario-orden'
-- assertNotVisible: 'Ordenar por'
-- assertNotVisible: 'Más fiel'
+      - tapOn:
+          id: 'paso-diario'
+      - assertVisible:
+          id: 'diario-ver-por-historias'
+      - tapOn:
+          id: 'diario-ver-por-historias'
 
-# Y se vuelve por días: las dos conviven.
-- assertVisible:
-    id: 'diario-ver-por-dias'
-- tapOn:
-    id: 'diario-ver-por-dias'
-- assertVisible:
-    id: 'diario-vista'
-- assertVisible: 'dias'
-- assertVisible:
-    id: 'diario-dias'
-- assertVisible:
-    id: 'diario-ver-por-historias'
+      - assertVisible:
+          id: 'diario-vista'
+      - assertVisible: 'historias'
+      - assertVisible: 'Lo que se cuenta'
+      - assertVisible:
+          id: 'diario-historias'
+      - assertVisible:
+          id: 'diario-historia'
+
+      # Ninguna versión lleva icono, color ni marca distinta de las demás, y no hay ningún
+      # control de orden: solo existe un orden.
+      - assertNotVisible:
+          id: 'diario-orden'
+      - assertNotVisible: 'Ordenar por'
+      - assertNotVisible: 'Más fiel'
+
+      # Y se vuelve por días: las dos conviven.
+      - assertVisible:
+          id: 'diario-ver-por-dias'
+      - tapOn:
+          id: 'diario-ver-por-dias'
+      - assertVisible:
+          id: 'diario-vista'
+      - assertVisible: 'dias'
+      - assertVisible:
+          id: 'diario-dias'
+      - assertVisible:
+          id: 'diario-ver-por-historias'
