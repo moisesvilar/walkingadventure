@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-042",
-  "fase": "dev",
+  "spec_actual": null,
+  "fase": "checklist-completo",
   "iteracion": 0,
   "historial": [
     {
@@ -412,6 +412,15 @@
       "casos": "2519 casos: 2516 pasan, 0 fallan, 3 saltados",
       "app": "flujo escrito, no ejecutado",
       "nota": "cierra el hueco de unicidad entre celdas que SPEC-026 dejo anotado. Aviso: los nombres construidos se encadenan mucho y pueden ser problema de lamina."
+    },
+    {
+      "spec": "SPEC-042",
+      "slug": "pasos-fondo-zurron",
+      "resultado": "verde",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-042-run-20260810T035120Z.md",
+      "casos": "2583 casos: 2580 pasan, 0 fallan, 3 saltados",
+      "app": "flujo escrito, no ejecutado"
     }
   ],
   "bloqueos": [],
