@@ -233,3 +233,18 @@ Y había un choque real de criterios: SPEC-020 exige arrancar sin instalar nada,
 **Decisión: manda el criterio duro**, y `CLAUDE.md` lo dice con todas las letras — *el día que la red de seguridad del determinismo dependa de un `node_modules`, deja de ser una red*. Los dos criterios dejan de chocar aplicando el patrón que este proyecto usa en todas partes: **inyección**. Los dos módulos de `app/` reciben el núcleo como pieza, `app/nucleo/piezas.js` es el único sitio que lo coge por su nombre, y las pruebas arman el mismo bundle por ruta relativa.
 
 Restaurado: **1939 pruebas y 0 fallos con y sin `node_modules`**, idénticos.
+
+## 6v · El checklist entero en verde, y la partida no se podía terminar
+
+Con las 42 filas en `done` y **2583 casos en verde**, monté la partida completa de punta a punta — arranque, salida, llegadas, telón, segundo mapa, cerrar y abrir, exportar e importar, empezar de nuevo, determinismo. Igual que al cerrar B2 (§6r), y con el mismo resultado: **lo que las pruebas unitarias no ven vive en las costuras**.
+
+**El defecto grande: ninguna aventura se podía terminar.** El último beat de un lazo cae **siempre** en un sitio ya visitado —el lazo es cerrado por diseño, esa es la mitad del juego— y `partida/llegadas.js` lo descartaba **en silencio**: `if (yaValidada(nombre)) continue;`. Medido: **27 de 27, 12 de 12 y 28 de 28** aventuras casteadas de `costero`, `barrio-tres-calles` y `urbano-denso` tienen su último beat en un sitio anterior. **El 100 %.** Consecuencia: toda aventura acababa `a-medias`, con telón de cierre en corto, **0 oro, 0 objetos, sin rumor y sin mote**.
+
+Y cuatro más, todas de cableado:
+
+- **Nadie compone el desenlace.** `echaElTelon` lo exige y no hay función que lo derive de la plantilla y la aventura casteada.
+- **La lista de hoy no tiene memoria**: los mismos tres títulos el día 1 y el día 6. `aventurasCerradas()` está exportada y **no la consume nadie**.
+- **El propagador de rumores no está cableado en la partida**: solo se registra dentro del prólogo. Medido: con él, rango `{forastería 7, pertenencia 3}` y 17 entradas de diario; sin él, `{9, 1}` y 13. La noticia de la jugadora no salía del pueblo.
+- **B5 no tiene orquestación en `app/`**: existen todas las piezas y no hay máquina de estados que las encadene.
+
+**La lección, y es la misma que §6r a mayor escala:** una suite verde no demuestra que el producto funcione. Cada fila probaba su lado con diligencia; nadie recorría el camino entero hasta que alguien lo recorrió.
