@@ -107,6 +107,12 @@ export function declaraTiposDeHecho(area, tipos) {
 
 declaraTiposDeHecho('pasos', {
   'paso-ejecutado': campos({ n: 'entero', restoM: 'numero', restoFondoM: 'numero' }),
+  // El vaciado de la reserva de pasos de fondo (SPEC-042). Es lo que hace que el zurrón
+  // se vacíe **al leerse y no al componerse**: se anexa al confirmar «Seguir», entero o
+  // nada, así que cerrar la app a mitad devuelve el mismo zurrón. Lleva cuántas entradas
+  // se narraron —cero cuando ninguno de sus pasos produjo nada— y entre qué pasos iba la
+  // reserva, que es lo que permite reproducir el vaciado sin guardar los pasos otra vez.
+  'reserva-vaciada': campos({ narrados: 'entero', primerPaso: 'entero', ultimoPaso: 'entero' }),
 });
 
 declaraTiposDeHecho('sitios', {

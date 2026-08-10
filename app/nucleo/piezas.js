@@ -78,6 +78,16 @@ import {
   validaManifiesto,
 } from '@walkingadventure/nucleo/partida/exportacion.js';
 import { CADENA_DEL_FORMATO, migra } from '@walkingadventure/nucleo/partida/migracion.js';
+import {
+  ACCIONES as ACCIONES_DEL_ZURRON,
+  MOTIVOS_SIN_ZURRON,
+  TESTIDS as TESTIDS_DEL_ZURRON,
+  TOPE_DE_ENTRADAS,
+  abreElZurron,
+  vaciaElZurron,
+} from '@walkingadventure/nucleo/partida/zurron.js';
+import { AJUSTES_DE_ORIGEN, cambiaAjuste } from '@walkingadventure/nucleo/partida/ajustes.js';
+import { kilometrosDeFondo, tamanoDeLaReserva } from '@walkingadventure/nucleo/partida/kilometros.js';
 import { REGISTROS, coloca, textoConRegistro } from '@walkingadventure/nucleo/lenguaje/registro.js';
 import {
   ACCIONES,
@@ -145,6 +155,31 @@ export const NUCLEO_DE_LA_PREPARACION = Object.freeze({
   componePreparacion,
   resumenDeLaPreparacion,
   redactaAventura,
+});
+
+/**
+ * Lo que `creaZurron` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-042 entra por la misma puerta y por lo mismo (§6u): si hay zurrón, cuántas entradas
+ * trae, que sean como mucho cinco, que caigan a plantilla cuando el narrador falla y que la
+ * reserva se vacíe con su hecho y entera tienen que poder leerse desde `node --test` sin
+ * resolver nada instalado, que es el único sitio donde se pueden poner rojos.
+ */
+export const NUCLEO_DEL_ZURRON = Object.freeze({
+  abreElZurron,
+  vaciaElZurron,
+  TESTIDS: TESTIDS_DEL_ZURRON,
+  ACCIONES: ACCIONES_DEL_ZURRON,
+  TOPE_DE_ENTRADAS,
+  MOTIVOS_SIN_ZURRON,
+});
+
+/** Lo que `creaPasosDeFondo` enumera en su `DEL_NUCLEO`, ni una función más. */
+export const NUCLEO_DE_LOS_PASOS_DE_FONDO = Object.freeze({
+  kilometrosDeFondo,
+  tamanoDeLaReserva,
+  AJUSTES_DE_ORIGEN,
+  cambiaAjuste,
 });
 
 /** Lo único que el contenedor necesita del núcleo: cómo se llama el manifiesto. */

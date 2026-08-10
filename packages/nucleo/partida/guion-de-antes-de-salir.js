@@ -16,8 +16,15 @@ import { congelaHondo } from '../core/congelar.js';
 import { reglaDeFormula } from '../names/lenguaje.js';
 import { REGISTROS, cifrasDeTexto } from './guion-de-arranque.js';
 
-/** Las pantallas del momento, en el orden de `docs/flujo.md`. A2P2 es de la fila 42 y no tiene guion aquí. */
-export const PANTALLAS = congelaHondo(['a2p1', 'a2p3', 'a2p4', 'a2p5']);
+/**
+ * Las pantallas del momento, en el orden de `docs/flujo.md`.
+ *
+ * A2P2 entra con SPEC-042, que es su dueña: hasta entonces el zurrón no existía y su guion
+ * habría sido texto sin pantalla. Entra aquí y no en su propio módulo porque lo que la
+ * revisión de este fichero compra —ni una cifra, voz del mundo, ninguna disculpa— es
+ * literalmente lo que sus criterios afirman.
+ */
+export const PANTALLAS = congelaHondo(['a2p1', 'a2p2', 'a2p3', 'a2p4', 'a2p5']);
 
 /**
  * La medida de cada tamaño **en palabra del mundo y con su equivalencia orientativa**.
@@ -105,6 +112,21 @@ export const GUION = congelaHondo([
   { pantalla: 'a2p1', id: 'puerta-diario', registro: REGISTROS.MUNDO, texto: 'El diario' },
   { pantalla: 'a2p1', id: 'puerta-repisa', registro: REGISTROS.MUNDO, texto: 'La repisa' },
   { pantalla: 'a2p1', id: 'puerta-ajustes', registro: REGISTROS.MUNDO, texto: 'Ajustes' },
+
+  // --- A2P2 · El zurrón ---------------------------------------------------------
+  //
+  // Un contenedor con marco propio y entradas prestadas (`quests.md` decisión 3): lo único
+  // que se escribe nuevo es el envoltorio, y cada entrada trae el texto de la plantilla que
+  // la generó. De ahí que aquí solo haya rótulo, sitio, cierre y acción: lo demás llega.
+  { pantalla: 'a2p2', id: 'rotulo', registro: REGISTROS.MUNDO, texto: 'Mientras no estabas' },
+  { pantalla: 'a2p2', id: 'envoltorio', registro: REGISTROS.MUNDO, texto: null, de: 'el narrador, en la única llamada agrupada al abrir la salida, con su texto de plantilla de repuesto' },
+  { pantalla: 'a2p2', id: 'entradas', registro: REGISTROS.MUNDO, texto: null, de: 'la reserva de pasos de fondo: una entrada por paso que produjo algo, con su sitio y su texto' },
+  { pantalla: 'a2p2', id: 'sitio', registro: REGISTROS.MUNDO, texto: `En ${HUECO_DEL_SITIO}`, huecos: ['sitio'] },
+  // La línea de cierre **no cuenta cuántas cosas han pasado ni invita a no perderse la
+  // próxima**: dice que lo contado sigue donde está, que es lo que hace que el zurrón no
+  // consuma lo que cuenta.
+  { pantalla: 'a2p2', id: 'cierre', registro: REGISTROS.MUNDO, texto: 'Todo eso sigue por ahí, esperando a que pases.' },
+  { pantalla: 'a2p2', id: 'seguir', registro: REGISTROS.MUNDO, texto: 'Seguir' },
 
   // --- A2P3 · Lo que hay hoy ----------------------------------------------------
   { pantalla: 'a2p3', id: 'titulo', registro: REGISTROS.MUNDO, texto: 'Lo que se cuenta hoy' },
