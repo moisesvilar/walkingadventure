@@ -9,7 +9,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { MARGEN_BORDE_M, generaCelda } from '../../packages/nucleo/world/celda.js';
-import { creaRejilla, limitesDeCelda } from '../../packages/nucleo/world/rejilla.js';
+import { creaRejilla, limitesDeCelda, repartoDeCelda } from '../../packages/nucleo/world/rejilla.js';
 import { cuposDeCelda } from '../../packages/nucleo/world/cupos.js';
 import { semillaDeCelda } from '../../packages/nucleo/core/semilla.js';
 import { abreCelda, celdasAbiertas, creaMapa } from '../../packages/nucleo/partida/mapa.js';
@@ -18,7 +18,7 @@ import { construyeGrafo } from '../../packages/nucleo/world/grafo.js';
 import { generateSettlements } from '../../packages/nucleo/world/settlements.js';
 import { generateParajes } from '../../packages/nucleo/world/parajes.js';
 import { buildRoutes, pegarAViario } from '../../packages/nucleo/world/routes.js';
-import { localeFor, namesFor } from '../../packages/nucleo/names/index.js';
+import { crearIndiceDeNombres, localeFor, namesFor } from '../../packages/nucleo/names/index.js';
 import { mundoCongelado } from '../dobles/mundo-congelado.mjs';
 import { creaInspectorDeRed } from '../dobles/inspector-red.mjs';
 import {
@@ -123,11 +123,22 @@ describe('La generación de una celda', () => {
     const congelado = mundoCongelado(nombre);
     const { lat, lon } = registro.centro;
     const radio = rejilla.radioInscritoM;
-    const names = namesFor(localeFor(lat, lon));
+    const locale = localeFor(lat, lon);
+    const names = namesFor(locale);
     const geo = parseGeo(congelado.geo, lat, lon);
     const anchors = parsePois(congelado.pois, lat, lon);
 
-    const { settlements, freeAnchors } = generateSettlements(anchors, geo, radio, semillaCelda, null, names);
+    // El mismo índice de nombres que arma la tubería, **con el reparto de esta celda**
+    // (SPEC-041). Sin él, la reconstrucción nombraría con el repertorio entero mientras
+    // la celda registrada nombra con su porción, y el caso compararía dos repartos en
+    // vez del azar de las fases: el reparto filtra los sorteos y eso desplaza el flujo
+    // de azar de cada fase, así que hasta los núcleos saldrían distintos.
+    const indice = crearIndiceDeNombres({
+      reparto: repartoDeCelda({ semilla: SEMILLA_A, mapaId: rejilla.id, celda }),
+      idioma: locale,
+    });
+
+    const { settlements, freeAnchors } = generateSettlements(anchors, geo, radio, semillaCelda, null, names, indice);
     // Las mismas vías que arma la tubería: las carreteras del terreno **más el
     // callejero**, sin repetir por clave de OSM. Reproducir la fase con solo las
     // carreteras compararía dos grafos distintos y el escenario mediría el dato en
@@ -141,12 +152,12 @@ describe('La generación de una celda', () => {
     });
     const grafo = construyeGrafo(vias);
     pegarAViario(settlements, grafo);
-    const routes = buildRoutes(settlements, grafo, semillaCelda, names);
+    const routes = buildRoutes(settlements, grafo, semillaCelda, names, indice);
     // El cupo de parajes se rehace como lo hace la celda —del catálogo y del tamaño
     // en tramos de la rejilla—, así que lo único que cambia respecto al registro es
     // el flujo de azar de la fase, que es lo que este caso quiere aislar.
     const cupos = cuposDeCelda({ radioEnTramos: rejilla.radioInscritoM / rejilla.tramoM });
-    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semillaCelda}:otra-implementacion`, null, names, undefined, null, null, {
+    const parajes = generateParajes(freeAnchors, settlements, routes, geo, radio, `${semillaCelda}:otra-implementacion`, null, names, indice, null, null, {
       cupo: cupos.parajes,
       // El mismo grafo que se pegó y se trazó, como hace la tubería: desde SPEC-007
       // los cruces son bifurcaciones de la red viaria, así que una reconstrucción sin

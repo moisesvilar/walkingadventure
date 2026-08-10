@@ -25834,6 +25834,663 @@
       "fichero": "test/nucleo/borrado.test.mjs",
       "caso": "Los ficheros que se exportaron no se tocan al borrar",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador con dos mapas, uno de casa y otro de vacaciones, cuando abre la app estando en casa, entonces se abre el mapa de casa sin preguntar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El mapa activo lo decide dónde estás",
+      "escenario": "El mapa activo lo decide dónde estás"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador con dos mapas, uno de casa y otro de vacaciones, cuando abre la app estando en casa, entonces se abre el mapa de casa sin preguntar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "El mapa activo lo decide dónde estás",
+      "escenario": "El mapa activo lo decide dónde estás",
+      "nota": "Lo mismo desde la orquestación del móvil, que es quien lee los índices del almacén."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador con dos mapas, uno de casa y otro de vacaciones, cuando abre la app estando en casa, entonces se abre el mapa de casa sin preguntar nada.",
+      "nivel": "@app",
+      "fichero": "test/app/mapas.yaml",
+      "caso": "El mapa activo lo decide dónde estás",
+      "escenario": "El mapa activo lo decide dónde estás"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando abre la app estando en el sitio de vacaciones, entonces se abre el de vacaciones sin preguntar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El mapa activo lo decide dónde estás",
+      "escenario": "El mapa activo lo decide dónde estás"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando abre la app estando en el sitio de vacaciones, entonces se abre el de vacaciones sin preguntar nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "El mapa activo lo decide dónde estás",
+      "escenario": "El mapa activo lo decide dónde estás"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando abre la app estando en el sitio de vacaciones, entonces se abre el de vacaciones sin preguntar nada.",
+      "nivel": "@app",
+      "fichero": "test/app/mapas.yaml",
+      "caso": "El mapa activo lo decide dónde estás",
+      "escenario": "El mapa activo lo decide dónde estás"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una posición dentro de una celda abierta de un mapa, cuando se resuelve el mapa activo, entonces es ese mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una posición de una celda abierta resuelve ese mapa y no deja nada pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una posición dentro de la rejilla de un mapa pero en una celda que aún no se ha abierto, cuando se resuelve el mapa activo, entonces es ese mapa, y la celda queda declarada como pendiente de abrir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una posición de la rejilla en una celda cerrada resuelve el mapa y declara la celda pendiente",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una posición fuera de la rejilla de un mapa pero a menos del alcance declarado de su borde, cuando se resuelve el mapa activo, entonces sigue siendo ese mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "A un paso del borde la posición sigue siendo del mismo mapa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 4 de la spec: «a 300 km» y «estando en casa» son los dos extremos y el caso interesante no estaba escrito."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la misma posición preguntada dos veces, cuando se resuelve el mapa activo, entonces se obtiene siempre el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "La misma posición preguntada dos veces resuelve el mismo mapa y no escribe nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una posición equidistante de dos mapas de la partida, cuando se resuelve el mapa activo, entonces se resuelve por un criterio declarado y estable, y no por el orden en que se levantaron.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Dos mapas que se solapan se desempatan por el anclaje que ordena primero",
+      "hueco_de_bateria": true,
+      "nota": "Se prueba el solape, que es la equidistancia exacta y no una aproximación de coma flotante."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el alcance declarado con el que una posición sigue siendo de un mapa, cuando se busca de dónde sale, entonces está expresado en tramos del jugador y no en metros absolutos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El alcance del borde va en tramos del jugador y no en metros absolutos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una posición mal formada, cuando se resuelve el mapa activo, entonces falla nombrando lo que llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una posición mal formada falla nombrando lo que llegó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una partida sin ningún mapa, cuando se resuelve el mapa activo, entonces no hay ninguno y no es un error.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una partida sin ningún mapa no tiene mapa activo y no es un error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la superficie pública de esta entrega, cuando se busca una operación que fije el mapa activo a mano, entonces no existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "No existe ningún selector de mapas",
+      "escenario": "No existe ningún selector de mapas"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el jugador que recorre todas las pantallas, cuando las revisa, entonces no hay ninguna manera de cambiar el mapa activo a mano.",
+      "nivel": "@app",
+      "fichero": "test/app/mapas.yaml",
+      "caso": "No existe ningún selector de mapas",
+      "escenario": "No existe ningún selector de mapas",
+      "nota": "La ausencia en las pantallas solo se afirma recorriéndolas en el dispositivo."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el catálogo de ajustes, cuando se recorre, entonces no contiene ninguna fila de mapas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "No existe ningún selector de mapas",
+      "escenario": "No existe ningún selector de mapas",
+      "nota": "La fila de ajustes que no existe, sobre el catálogo de SPEC-038."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador a 300 km de todos sus mapas, cuando abre la app, entonces se le ofrece levantar un mapa nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Llegar a un sitio nuevo ofrece levantar un mapa",
+      "escenario": "Llegar a un sitio nuevo ofrece levantar un mapa"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador a 300 km de todos sus mapas, cuando abre la app, entonces se le ofrece levantar un mapa nuevo.",
+      "nivel": "@app",
+      "fichero": "test/app/mapas.yaml",
+      "caso": "Llegar a un sitio nuevo ofrece levantar un mapa",
+      "escenario": "Llegar a un sitio nuevo ofrece levantar un mapa"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese ofrecimiento, cuando se lee, entonces está en voz de mundo y no menciona la red, los mapas guardados ni ninguna distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El ofrecimiento habla en voz de mundo y no nombra la red, los mapas guardados ni ninguna distancia",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese ofrecimiento, cuando se enumeran sus acciones, entonces son levantar un mapa aquí y dejarlo estar, y ninguna más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Las acciones del ofrecimiento son dos y las tres puertas siguen, pero salir a andar no",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese ofrecimiento, cuando se mira lo que sigue disponible, entonces el diario, la repisa y los ajustes lo están, y salir a andar no.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Las acciones del ofrecimiento son dos y las tres puertas siguen, pero salir a andar no",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese ofrecimiento, cuando se mira lo que sigue disponible, entonces el diario, la repisa y los ajustes lo están, y salir a andar no.",
+      "nivel": "@app",
+      "fichero": "test/app/mapas.yaml",
+      "caso": "Llegar a un sitio nuevo ofrece levantar un mapa",
+      "escenario": "Llegar a un sitio nuevo ofrece levantar un mapa"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que acepta, cuando el mapa se levanta, entonces se ancla a la coordenada redondeada de allí y entra en la lista de mapas de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Un mapa levantado lejos se ancla a la coordenada redondeada y pasa a ser el activo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un mapa nuevo levantado, cuando se resuelve el mapa activo, entonces es el nuevo, sin que nadie lo elija.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Un mapa levantado lejos se ancla a la coordenada redondeada y pasa a ser el activo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que rechaza el ofrecimiento, cuando vuelve a abrir la app en el mismo sitio, entonces se le vuelve a ofrecer, y no queda ninguna marca de haberlo rechazado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Las acciones del ofrecimiento son dos y las tres puertas siguen, pero salir a andar no",
+      "hueco_de_bateria": true,
+      "nota": "El ofrecimiento no guarda ninguna marca del rechazo y el segundo es idéntico al primero."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que rechaza el ofrecimiento, cuando vuelve a abrir la app en el mismo sitio, entonces se le vuelve a ofrecer, y no queda ninguna marca de haberlo rechazado.",
+      "nivel": "@app",
+      "fichero": "test/app/mapas.yaml",
+      "caso": "Llegar a un sitio nuevo ofrece levantar un mapa",
+      "escenario": "Llegar a un sitio nuevo ofrece levantar un mapa"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador lejos de todos y sin conexión, cuando se ofrece levantar un mapa, entonces no se levanta y el momento lo dice en voz de mundo, sin nombrar la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El ofrecimiento habla en voz de mundo y no nombra la red, los mapas guardados ni ninguna distancia",
+      "hueco_de_bateria": true,
+      "nota": "El aviso de sin cobertura, que se dice sin nombrar la red."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una posición donde la celda no da para un mundo jugable, cuando se intenta levantar, entonces se declara, como fija SPEC-026, en lugar de entregar un mapa vacío.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/levantamiento.test.mjs",
+      "caso": "Una celda que no da para un mundo jugable se declara en vez de entregarse vacía",
+      "hueco_de_bateria": true,
+      "nota": "Frontera que esta spec consume y no implementa: lo fija SPEC-026 y aquí se reutiliza tal cual."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una partida con dos mapas, cuando se listan, entonces cada uno declara su anclaje, su título, sus celdas abiertas, su contador de pasos y sus rangos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Cada mapa de la partida declara su anclaje, su título, sus celdas, su contador y sus rangos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una partida con dos mapas, cuando se listan, entonces cada uno declara su anclaje, su título, sus celdas abiertas, su contador de pasos y sus rangos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "Los mapas de la partida se listan con lo que cada uno declara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que pisa una celda vecina no abierta de su mapa, cuando el mundo tiene que existir donde está, entonces la celda se abre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que pisa una celda vecina no abierta de su mapa, cuando el mundo tiene que existir donde está, entonces la celda se abre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia",
+      "nota": "La misma afirmación sobre el móvil, que es lo que esta fila estrena."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda vecina abierta por pisarla, cuando se compara el documento de la celda propia antes y después, entonces es idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda vecina abierta por pisarla, cuando se compara el documento de la celda propia antes y después, entonces es idéntico byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la señal de celda completada, cuando se abre una vecina como acontecimiento, entonces la vecina que se abre sale de la semilla y es la misma en dos ejecuciones iguales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una celda es idéntica byte a byte se abra por pisarla o como acontecimiento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la señal de celda completada, cuando se abre una vecina como acontecimiento, entonces la vecina que se abre sale de la semilla y es la misma en dos ejecuciones iguales.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "La vecina que se abre como acontecimiento sale de la semilla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la misma celda abierta por pisarla en una partida y por acontecimiento en otra, con la misma semilla y los mismos datos, cuando se comparan, entonces su contenido es idéntico y solo difiere el motivo registrado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una celda es idéntica byte a byte se abra por pisarla o como acontecimiento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado dos celdas contiguas abiertas, cuando se generan sus calzadas, entonces están cosidas en el borde que comparten.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia",
+      "nota": "La costura del borde compartido, que es la segunda línea del escenario."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado dos celdas contiguas abiertas en un orden y, en otra ejecución, en el orden inverso, cuando se comparan sus costuras, entonces son idénticas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Dos celdas contiguas abiertas en cualquier orden dan la misma costura",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda ya abierta, cuando el jugador la vuelve a pisar, entonces se lee del almacén y no se consulta OSM.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una celda ya abierta se lee del almacén y no se consulta OSM",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda ya abierta, cuando el jugador la vuelve a pisar, entonces se lee del almacén y no se consulta OSM.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "Abrir una celda vecina no toca la celda propia",
+      "escenario": "Abrir una celda vecina no toca la celda propia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la apertura de una celda sin conexión, cuando se intenta, entonces no se abre a medias: o hay documento completo o no hay documento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "La apertura de una celda sin conexión no deja media celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la apertura de una celda sin conexión, cuando se intenta, entonces no se abre a medias: o hay documento completo o no hay documento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andar.test.mjs",
+      "caso": "La apertura de una celda sin conexión no deja media celda",
+      "hueco_de_bateria": true,
+      "nota": "Con el vocabulario cerrado de celda-apertura, que es lo que ve la pantalla."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda abierta, cuando se cierra y se vuelve a abrir la app, entonces sigue abierta y su documento se lee del almacén.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Una celda abierta sigue abierta al volver a abrir la app",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que vive pegado al borde de su celda, cuando anda cien metros y cambia de celda, entonces la nueva se abre y el juego sigue sin interrupción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Quien vive pegado al borde anda cien metros, cambia de celda y el juego sigue",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un índice de celda fuera de la rejilla del mapa, cuando se pide abrirla, entonces falla nombrando el índice.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Un índice de celda mal formado falla nombrando el índice",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado dos celdas contiguas del mismo mapa, cuando se recogen los nombres de sus núcleos, servicios, parajes, calzadas y ramales, entonces no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Dos celdas contiguas no repiten ningún nombre aunque se generen sin conocerse",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 1 de la spec: la unicidad entre celdas vecinas no tenía escenario, y es lo que ya se rompió una vez en costero#2."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado todas las celdas abiertas de un mapa, cuando se recogen todos sus nombres, entonces no hay ninguno repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "No hay dos nombres iguales en un mundo",
+      "escenario": "No hay dos nombres iguales en un mundo",
+      "nota": "El escenario de siempre, afirmado ahora sobre un mapa con tres celdas y no sobre un mundo generado de una vez."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado dos celdas contiguas, cuando cada una se genera sin conocer a la otra, entonces sus nombres siguen sin repetirse: la unicidad no depende de consultar al vecino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Dos celdas contiguas no repiten ningún nombre aunque se generen sin conocerse",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda, cuando se genera con vecinas abiertas y cuando se genera sin ninguna, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Una celda es idéntica byte a byte con vecinas abiertas y sin ninguna",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 2 de la spec: es la propiedad que impide que el determinismo dependa del itinerario."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado dos mapas distintos de la misma partida, cuando se comparan sus nombres, entonces pueden repetirse: la unicidad es por mapa, como el índice.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Dos mapas distintos de la misma partida sí pueden repetir nombres",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una celda cuyo reparto del repertorio se agota, cuando se nombra un elemento más, entonces cae a la forma construida declarada, que incorpora la celda, y no a un nombre repetido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Cuando el reparto se agota se cae a la forma construida y no a un nombre repetido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la forma construida, cuando también colisiona, entonces falla nombrando el paquete de idioma y el elemento, en lugar de repetir un nombre en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Cuando la forma construida también colisiona se falla nombrando el paquete y el elemento",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el índice de nombres de un mapa, cuando se serializa y se vuelve a cargar, entonces vuelve entero y abrir una celda más sigue sin repetir ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "El índice de un mapa vuelve entero de su documento y abrir una celda más sigue sin repetir",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un mapa en una coordenada de Galicia y otro en una del interior, cuando se comparan sus nombres, entonces los primeros salen del paquete gallego y los segundos del castellano, celda a celda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/repertorio.test.mjs",
+      "caso": "Un mapa de Galicia y otro del interior nombran cada uno con su paquete, celda a celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que levanta un mapa nuevo lejos, cuando llega allí, entonces conserva personaje, oficio, repisa, diario y objetos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El jugador viaja entero",
+      "escenario": "El jugador viaja entero",
+      "nota": "Lo que viaja no está indexado por mapa y lo que no viaja sí: es la forma del estado y no una promesa."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando llega a los núcleos del mapa nuevo, entonces es forastera en todos ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El rango no viaja entre mapas",
+      "escenario": "El rango no viaja entre mapas"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando se consulta su bolsa de oro desde el mapa nuevo, entonces es la misma: el oro es lo que se lleva encima.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El jugador viaja entero",
+      "escenario": "El jugador viaja entero"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando se consultan los motes en el mapa nuevo, entonces no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El rango no viaja entre mapas",
+      "escenario": "El rango no viaja entre mapas"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el código de esta entrega, cuando se buscan rutas que copien rangos, motes o lo que se cuenta de un mapa a otro, entonces no existe ninguna: el rango no viaja porque es por núcleo y no porque nadie lo impida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El código de esta entrega no copia rangos, motes ni lo que se cuenta de un mapa a otro",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que vuelve a casa después de estar fuera, cuando llega a sus núcleos de siempre, entonces le siguen conociendo con el rango que dejó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El rango no viaja entre mapas",
+      "escenario": "El rango no viaja entre mapas",
+      "nota": "Volver a casa devuelve el rango que se dejó, sin que nadie lo haya guardado aparte."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un objeto obtenido en el mapa de vacaciones, cuando se abre la repisa en casa, entonces está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El jugador viaja entero",
+      "escenario": "El jugador viaja entero",
+      "nota": "La repisa es de la fila 38; aquí se afirma que sus objetos no están indexados por mapa."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una entrada de diario de un mapa, cuando se lee el diario del otro, entonces no aparece: cada capítulo es de su mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Cada capítulo declara su mapa, el título de su mundo y cuántos días contiene",
+      "escenario": "Los mapas antiguos se leen desde el diario",
+      "nota": "Frontera con la fila 37, que es la dueña del capítulo."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador que pasa tres semanas fuera andando en otro mapa, cuando vuelve a casa, entonces el mundo de casa ha avanzado solo con los kilómetros que anduvo allí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El mundo de casa no avanza en tu ausencia",
+      "escenario": "El mundo de casa no avanza en tu ausencia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese mismo jugador, cuando se compara el contador de pasos del mapa de casa antes de irse y al volver, entonces es el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El mundo de casa no avanza en tu ausencia",
+      "escenario": "El mundo de casa no avanza en tu ausencia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado kilómetros andados en el mapa activo, cuando se convierten en pasos, entonces avanza el contador de ese mapa y ninguno más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El mundo de casa no avanza en tu ausencia",
+      "escenario": "El mundo de casa no avanza en tu ausencia"
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado una partida con dos mapas, cuando se leen sus reservas de pasos de fondo, entonces cada mapa tiene la suya y no se mezclan.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Cada mapa lleva su reserva de pasos de fondo y no se mezclan",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 3 de la spec: que cada mapa lleve su contador y su reserva no estaba afirmado en ningún sitio."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado kilómetros de fondo que llegan con la app cerrada, cuando se acreditan al abrir, entonces van al mapa activo en ese momento, que es el del sitio donde está el jugador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Los kilómetros de fondo se acreditan al mapa activo en el momento de abrir",
+      "hueco_de_bateria": true,
+      "nota": "Hueco 5 de la spec: es la única aproximación declarada de esta fila."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un mapa que lleva meses sin visitarse, cuando se vuelve a él, entonces su estado es exactamente el que se dejó y nada ha caducado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Un mapa que lleva meses sin visitarse vuelve exactamente como se dejó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un mapa que lleva meses sin visitarse, cuando se busca una penalización, un decaimiento o una pérdida de rango por ausencia, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Un mapa que lleva meses sin visitarse vuelve exactamente como se dejó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado un jugador con un mapa de vacaciones del año pasado, cuando abre el diario, entonces ve un capítulo por mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Los mapas antiguos se leen desde el diario",
+      "escenario": "Los mapas antiguos se leen desde el diario",
+      "nota": "La lista de mapas, que es la mitad que entrega esta fila; la del capítulo es de la 37."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese capítulo antiguo, cuando se abre, entonces dentro están sus días y su mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un capítulo que no es el del mapa activo trae sus días, sus caras y su lámina, y nada más",
+      "escenario": "Los mapas antiguos se leen desde el diario",
+      "nota": "Frontera con la fila 37."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado ese capítulo antiguo, cuando se busca una manera de jugar en él desde casa, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capitulos.test.mjs",
+      "caso": "Un capítulo que no es el del mapa activo no ofrece ninguna acción de juego",
+      "escenario": "Los mapas antiguos se leen desde el diario",
+      "nota": "Frontera con la fila 37."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la lista de mapas de la partida, cuando se busca dónde se enseña fuera del diario, entonces no se enseña en ningún sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "No existe ningún selector de mapas",
+      "escenario": "No existe ningún selector de mapas",
+      "nota": "La lista de mapas no se enseña fuera del diario."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado la misma semilla y los mismos datos de OSM, cuando se abre la misma celda dos veces, entonces los dos documentos son idénticos byte a byte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/celda.test.mjs",
+      "caso": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "Frontera que esta spec consume: la generación de una celda es de SPEC-003."
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado dos mapas de la misma partida, cuando se comparan las semillas de la misma celda y la misma fase, entonces son distintas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Dos mapas de la misma partida siembran distinto la misma celda",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el mismo estado y la misma posición, cuando se resuelve el mapa activo dos veces, entonces el resultado es el mismo y nada se escribe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "Resolver el mapa activo dos veces con el mismo estado da lo mismo y no escribe nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-041",
+      "criterio": "Dado el código que esta fila añade, cuando se busca en él, entonces no aparece `Math.random`, `Date.now` ni ninguna lectura del reloj del sistema dentro de nada que participe en la generación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/mapas.test.mjs",
+      "caso": "El módulo del mapa activo no usa azar del sistema, ni el reloj, ni orden de inserción",
+      "hueco_de_bateria": true
     }
   ]
 }

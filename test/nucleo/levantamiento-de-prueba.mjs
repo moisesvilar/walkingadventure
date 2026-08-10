@@ -26,11 +26,21 @@ import {
   cargaMapa,
   celdaAbierta,
   celdasAbiertas,
+  completaCelda,
   creaMapa,
+  guardaCelda,
+  guardaIndice,
   guardaMapa,
   listaMapas,
   pisa,
+  resuelvePosicion,
 } from '../../packages/nucleo/partida/mapa.js';
+import {
+  ESTADOS_DE_APERTURA,
+  SIN_MAPA_ACTIVO,
+  listaDeMapas,
+  resuelveMapaActivo,
+} from '../../packages/nucleo/partida/mapas.js';
 import { claveDeCelda, creaRejilla } from '../../packages/nucleo/world/rejilla.js';
 import { creaReloj } from '../dobles/reloj.mjs';
 import { SEMILLA_A, SEMILLA_B, consultaDeFixture, coordenadaDe } from './celda-de-prueba.mjs';
@@ -58,6 +68,27 @@ export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
   pisa,
   claveDeCelda,
   creaRejilla,
+});
+
+/**
+ * El generador **con lo que hace falta además para andar** (SPEC-041): el mapa activo,
+ * la apertura de celdas vecinas y su guardado.
+ *
+ * Va aparte y no dentro del anterior por lo mismo que `DEL_NUCLEO_PARA_ANDAR` va aparte
+ * de `DEL_NUCLEO`: pintar una lámina ya levantada no necesita nada de esto, y tener los
+ * dos bundles es lo que permite poner roja la otra mitad de §6h —que la pieza ausente se
+ * dice nombrándola en vez de degradar en silencio—.
+ */
+export const NUCLEO_PARA_ANDAR = Object.freeze({
+  ...NUCLEO_DEL_LEVANTAMIENTO,
+  completaCelda,
+  guardaCelda,
+  guardaIndice,
+  resuelvePosicion,
+  resuelveMapaActivo,
+  listaDeMapas,
+  ESTADOS_DE_APERTURA,
+  SIN_MAPA_ACTIVO,
 });
 
 /**
