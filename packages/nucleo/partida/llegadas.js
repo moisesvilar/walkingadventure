@@ -495,12 +495,26 @@ export function creaLlegadas({
   const registra = (nombre) => {
     const geofence = geofenceDeSitio(nombre);
     const primeraVisita = visitados.yaVisitado(nombre) !== true;
-    const delLazo = beatPendienteDe(nombre);
+    // Un beat cuyo turno todavía no ha llegado **espera**, y esa es toda la pieza: se
+    // valida la llegada al sitio —el visor, la ficha y lo que allí se cuenta son suyos y
+    // no del beat— y el beat se queda en la cola para la llegada que sí le toque. Sin
+    // esto, dos beats de la misma cadena a menos de un geofence el uno del otro —en
+    // `costero`, los beats 1 y 3 de «la receta perdida» están a treinta y siete metros—
+    // se validaban de una sola parada, la escena del beat de después se ofrecía antes
+    // que la del de antes y quien atendiera las escenas en el orden en que se le
+    // ofrecen reventaba a mitad de la calle con «llegó el beat 3 y el que toca es el 2».
+    // Adelantarlo no es una opción: la cadena es lineal y resolver fuera de orden se
+    // saltaría el que falta. Descartar la llegada entera, tampoco: perdería la primera
+    // visita de un sitio del mundo por culpa de un beat que ocurre allí más tarde.
+    const pendiente = beatPendienteDe(nombre);
+    const delLazo = leTocaAhora(pendiente) ? pendiente : null;
     if (delLazo) consumidos.add(ordenDelBeat.get(delLazo));
     // Un micro-encuentro mandado por la cola produce beat igual que uno del lazo. Solo
     // se pregunta por él la primera vez que se llega al sitio en esta salida: volver
-    // a por el beat que faltaba no puede traerse de paso un segundo encuentro.
-    const mandado = delLazo || yaValidada(nombre) ? null : cola.microEncuentroEn(nombre);
+    // a por el beat que faltaba no puede traerse de paso un segundo encuentro. Y no se
+    // pregunta en un sitio con beat del lazo pendiente aunque no le toque: el encuentro
+    // ocuparía el sitio de la escena que ese sitio ya se debe.
+    const mandado = pendiente || yaValidada(nombre) ? null : cola.microEncuentroEn(nombre);
     const secuencia = secuenciaDeLlegada({
       tipoDeSitio: geofence.tipo,
       primeraVisita,
