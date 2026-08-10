@@ -21,9 +21,14 @@
 # señales de fallo. Si no se entiende lo que llegó, el resultado es 2.
 #
 # Sin credenciales, sin .env, sin red y sin dev server. Los flujos de @app tienen
-# tres estados y no dos: Maestro ausente y Maestro presente pero sin dispositivo
-# son los dos infraestructura ausente —se registran en la sección 3 y nunca
-# producen un verde—, y solo un flujo que llegó a ejecutarse y falló es rojo.
+# tres estados y no dos: Maestro ausente, Maestro sin runtime de Java y Maestro
+# presente pero sin dispositivo son los tres infraestructura ausente —se registran
+# en la sección 3 y nunca producen un verde—, y solo un flujo que llegó a ejecutarse
+# y falló es rojo.
+#
+# Lo que Maestro necesita para arrancar (JVM y SDK de Android) lo cablea el propio
+# runner más abajo, buscándolo y declarando en el report qué encontró. Se puede
+# forzar con WA_JAVA_HOME y WA_ANDROID_HOME.
 
 set -uo pipefail
 
@@ -46,6 +51,107 @@ for VARIABLE in $(env | grep -E '^(NODE_TEST_[A-Za-z0-9_]*|NODE_OPTIONS)=' | cut
   unset "$VARIABLE"
 done
 SANEADAS="${SANEADAS# }"
+
+# --- lo que Maestro necesita: runtime de Java y SDK de Android --------------
+#
+# Sanear el entorno no es lo mismo que no dar lo necesario, y confundir las dos
+# cosas tuvo un precio: Maestro corre sobre la JVM y habla con el dispositivo por
+# `adb`, así que sin `JAVA_HOME` el binario ni arranca —«Unable to locate a Java
+# Runtime»— y los flujos de `@app` se registraban como infraestructura ausente
+# incluso con el emulador delante. Faltaba el cableado, no la máquina.
+#
+# Se resuelve aquí, de forma declarada y reproducible: una lista fija de candidatos,
+# en orden, cada uno **validado antes de aceptarse** (que `bin/java -version`
+# funcione de verdad; en macOS `/usr/bin/java` existe siempre y no sirve para nada).
+# Ninguna ruta de una máquina concreta se da por supuesta ni se hereda a ciegas, y
+# la elegida —con su origen— se escribe en el report. Si ninguna sirve, sigue siendo
+# infraestructura ausente con el motivo dicho: nunca un rojo, nunca un verde.
+
+TAB="$(printf '\t')"
+
+java_sirve() {
+  [ -n "${1:-}" ] && [ -x "$1/bin/java" ] && "$1/bin/java" -version >/dev/null 2>&1
+}
+
+# Cada línea es «origen<TAB>ruta». Los comodines se ordenan con LC_ALL=C para que dos
+# máquinas con los mismos JDK instalados elijan el mismo, y no el que devuelva antes
+# el sistema de ficheros.
+candidatos_java() {
+  [ -n "${WA_JAVA_HOME:-}" ] && printf 'WA_JAVA_HOME%s%s\n' "$TAB" "$WA_JAVA_HOME"
+  [ -n "${JAVA_HOME:-}" ] && printf 'JAVA_HOME del entorno%s%s\n' "$TAB" "$JAVA_HOME"
+  if [ -x /usr/libexec/java_home ]; then
+    RUTA="$(/usr/libexec/java_home 2>/dev/null)"
+    [ -n "$RUTA" ] && printf '/usr/libexec/java_home%s%s\n' "$TAB" "$RUTA"
+  fi
+  for PATRON in '/opt/homebrew/opt/openjdk' '/opt/homebrew/opt/openjdk@*' \
+                '/usr/local/opt/openjdk' '/usr/local/opt/openjdk@*' \
+                '/Library/Java/JavaVirtualMachines/*/Contents/Home' \
+                '/usr/lib/jvm/*'; do
+    while IFS= read -r RUTA; do
+      [ -d "$RUTA" ] && printf 'ruta conocida%s%s\n' "$TAB" "$RUTA"
+    done < <(eval "ls -d $PATRON" 2>/dev/null | LC_ALL=C sort)
+  done
+  [ -d "$HOME/.sdkman/candidates/java/current" ] && printf 'sdkman%s%s\n' "$TAB" "$HOME/.sdkman/candidates/java/current"
+  if command -v java >/dev/null 2>&1; then
+    BIN="$(command -v java)"
+    DIR="$(cd "$(dirname "$BIN")" && pwd -P)"
+    printf 'java del PATH%s%s\n' "$TAB" "$(dirname "$DIR")"
+  fi
+  return 0
+}
+
+JAVA_ELEGIDO=""; JAVA_ORIGEN=""; JAVA_VERSION=""; JAVA_PROBADAS=""
+while IFS="$TAB" read -r ORIGEN RUTA; do
+  [ -n "${RUTA:-}" ] || continue
+  JAVA_PROBADAS="$JAVA_PROBADAS$RUTA ($ORIGEN)
+"
+  if [ -z "$JAVA_ELEGIDO" ] && java_sirve "$RUTA"; then
+    JAVA_ELEGIDO="$RUTA"; JAVA_ORIGEN="$ORIGEN"
+  fi
+done <<FIN
+$(candidatos_java)
+FIN
+
+if [ -n "$JAVA_ELEGIDO" ]; then
+  export JAVA_HOME="$JAVA_ELEGIDO"
+  export PATH="$JAVA_HOME/bin:$PATH"
+  JAVA_VERSION="$("$JAVA_HOME/bin/java" -version 2>&1 | head -1)"
+fi
+
+# El SDK de Android es otra cosa: en una máquina que solo pruebe en iOS no hace
+# falta, así que no encontrarlo no bloquea nada. Se declara lo que se encontró y, si
+# no hay, Maestro dirá con sus palabras que le falta `adb` y eso ya cae en el patrón
+# de infraestructura ausente de más abajo.
+ANDROID_ELEGIDO=""; ANDROID_ORIGEN=""
+candidatos_android() {
+  [ -n "${WA_ANDROID_HOME:-}" ] && printf 'WA_ANDROID_HOME%s%s\n' "$TAB" "$WA_ANDROID_HOME"
+  [ -n "${ANDROID_HOME:-}" ] && printf 'ANDROID_HOME del entorno%s%s\n' "$TAB" "$ANDROID_HOME"
+  [ -n "${ANDROID_SDK_ROOT:-}" ] && printf 'ANDROID_SDK_ROOT del entorno%s%s\n' "$TAB" "$ANDROID_SDK_ROOT"
+  printf 'ruta conocida%s%s\n' "$TAB" "$HOME/Library/Android/sdk"
+  printf 'ruta conocida%s%s\n' "$TAB" "$HOME/Android/Sdk"
+  printf 'ruta conocida%s%s\n' "$TAB" "/usr/local/share/android-sdk"
+  if command -v adb >/dev/null 2>&1; then
+    BIN="$(command -v adb)"
+    DIR="$(cd "$(dirname "$BIN")" && pwd -P)"
+    printf 'adb del PATH%s%s\n' "$TAB" "$(dirname "$DIR")"
+  fi
+  return 0
+}
+
+while IFS="$TAB" read -r ORIGEN RUTA; do
+  [ -n "${RUTA:-}" ] || continue
+  if [ -z "$ANDROID_ELEGIDO" ] && [ -x "$RUTA/platform-tools/adb" ]; then
+    ANDROID_ELEGIDO="$RUTA"; ANDROID_ORIGEN="$ORIGEN"
+  fi
+done <<FIN
+$(candidatos_android)
+FIN
+
+if [ -n "$ANDROID_ELEGIDO" ]; then
+  export ANDROID_HOME="$ANDROID_ELEGIDO"
+  export ANDROID_SDK_ROOT="$ANDROID_ELEGIDO"
+  export PATH="$ANDROID_HOME/platform-tools:$PATH"
+fi
 
 uso() {
   cat >&2 <<'FIN'
@@ -233,54 +339,95 @@ if [ "$ALCANCE" != "nucleo" ]; then
     APP_ESTADO="no ejecutado: Maestro no está instalado (infraestructura ausente, no un fallo de pruebas)"
   elif [ "${#FLUJOS[@]}" -eq 0 ]; then
     APP_ESTADO="no había flujos que ejecutar: test/app/ no contiene ningún .yaml"
+  elif [ -z "$JAVA_ELEGIDO" ]; then
+    # Se sabe antes de lanzarlo, así que se dice antes: arrancar Maestro para que
+    # escupa «Unable to locate a Java Runtime» y luego reconocerle la frase sería el
+    # mismo veredicto por el camino largo.
+    APP_INFRA="no hay ningún runtime de Java que pueda usar"
+    APP_INFRA_LINEA="Ninguna de las rutas candidatas trae un bin/java que arranque:
+${JAVA_PROBADAS}Se puede indicar uno con WA_JAVA_HOME."
+    APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas)"
   else
-    INFORME="$TMP/app-junit.xml"
-    # `--no-ansi` para que los colores no rompan los patrones, y `</dev/null` para
-    # que el menú interactivo de «elige un dispositivo» no deje el runner colgado
-    # esperando una tecla que en desatendido no llega nunca.
-    maestro test --format JUNIT --output "$INFORME" --no-ansi test/app/ >"$TMP/app-run.txt" 2>&1 </dev/null
-    RC=$?
+    # Un flujo, una invocación. Pasarle el directorio entero salía más barato en
+    # arranques de JVM, pero Maestro parsea los dieciséis antes de ejecutar el
+    # primero: un solo YAML que no compila dejaba la tanda entera sin informe y sin
+    # cifras, que es indistinguible de no tener dispositivo. Flujo a flujo, lo que no
+    # compila se nombra y los demás siguen contando.
+    N=0
+    APP_INFRA_N=0        # flujos que no se ejecutaron por falta de máquina
+    APP_ILEGIBLES=""     # flujos de los que no se entendió nada: terminal, nunca verde
+    : >"$TMP/app-run.txt"
+    : >"$TMP/app-tabla.txt"
 
-    # Se afirma que hubo ejecución solo si el informe trae un `<testsuite` por cada
-    # recuento y viceversa: un informe a medias no se interpreta a ojo.
-    SUITES="$(LC_ALL=C grep -c '<testsuite ' "$INFORME" 2>/dev/null)"; [ -n "$SUITES" ] || SUITES=0
-    ATRIB_TESTS="$(LC_ALL=C grep -o 'tests="[0-9][0-9]*"' "$INFORME" 2>/dev/null | wc -l | tr -d ' ')"
-    ATRIB_FALLOS="$(LC_ALL=C grep -o 'failures="[0-9][0-9]*"' "$INFORME" 2>/dev/null | wc -l | tr -d ' ')"
+    for FLUJO in "${FLUJOS[@]}"; do
+      N=$((N + 1))
+      INFORME="$TMP/app-junit-$N.xml"
+      SALIDA="$TMP/app-run-$N.txt"
+      # `--no-ansi` para que los colores no rompan los patrones, y `</dev/null` para
+      # que el menú interactivo de «elige un dispositivo» no deje el runner colgado
+      # esperando una tecla que en desatendido no llega nunca.
+      maestro test --format JUNIT --output "$INFORME" --no-ansi "$FLUJO" >"$SALIDA" 2>&1 </dev/null
+      RC=$?
+      { echo "── $FLUJO (código $RC)"; cat "$SALIDA"; echo; } >>"$TMP/app-run.txt"
 
-    if [ "$SUITES" -ge 1 ] && [ "$ATRIB_TESTS" -eq "$SUITES" ] && [ "$ATRIB_FALLOS" -eq "$SUITES" ]; then
-      APP_TOTAL="$(LC_ALL=C grep -o 'tests="[0-9][0-9]*"' "$INFORME" | LC_ALL=C sed 's/[^0-9]//g' | awk '{s+=$1} END{print s+0}')"
-      APP_FALLA="$(LC_ALL=C grep -o 'failures="[0-9][0-9]*"' "$INFORME" | LC_ALL=C sed 's/[^0-9]//g' | awk '{s+=$1} END{print s+0}')"
-      APP_RECONOCIDO=1
-      if [ "$APP_TOTAL" -eq 0 ]; then
-        # Mismo trato que en @nucleo: había flujos y no se ejecutó ninguno.
-        NO_EJECUTABLE=1
-        APP_ESTADO="no se pudo ejecutar: había ${#FLUJOS[@]} flujo(s) y el informe JUnit declara 0 casos ejecutados (código de Maestro: $RC)"
-      else
-        EJECUTADO=1
-        if [ "$RC" -ne 0 ] && [ "$APP_FALLA" -eq 0 ]; then
-          APP_DISCREPANCIA="Maestro salió con código $RC pero su informe declara 0 fallos. Se toma el peor de los dos."
-        elif [ "$RC" -eq 0 ] && [ "$APP_FALLA" -ne 0 ]; then
-          APP_DISCREPANCIA="Maestro salió con código 0 pero su informe declara $APP_FALLA fallo(s). Se toma el peor de los dos."
-        fi
-        if [ "$RC" -ne 0 ] || [ "$APP_FALLA" -ne 0 ]; then
-          FALLO=1
-          APP_ESTADO="FALLO (código $RC, $APP_FALLA flujo(s) en rojo de $APP_TOTAL)"
+      # Se afirma que hubo ejecución solo si el informe trae un `<testsuite` por cada
+      # recuento y viceversa: un informe a medias no se interpreta a ojo.
+      SUITES="$(LC_ALL=C grep -c '<testsuite ' "$INFORME" 2>/dev/null)"; [ -n "$SUITES" ] || SUITES=0
+      ATRIB_TESTS="$(LC_ALL=C grep -o 'tests="[0-9][0-9]*"' "$INFORME" 2>/dev/null | wc -l | tr -d ' ')"
+      ATRIB_FALLOS="$(LC_ALL=C grep -o 'failures="[0-9][0-9]*"' "$INFORME" 2>/dev/null | wc -l | tr -d ' ')"
+
+      if [ "$SUITES" -ge 1 ] && [ "$ATRIB_TESTS" -eq "$SUITES" ] && [ "$ATRIB_FALLOS" -eq "$SUITES" ]; then
+        T="$(LC_ALL=C grep -o 'tests="[0-9][0-9]*"' "$INFORME" | LC_ALL=C sed 's/[^0-9]//g' | awk '{s+=$1} END{print s+0}')"
+        F="$(LC_ALL=C grep -o 'failures="[0-9][0-9]*"' "$INFORME" | LC_ALL=C sed 's/[^0-9]//g' | awk '{s+=$1} END{print s+0}')"
+        if [ "$T" -eq 0 ]; then
+          APP_ILEGIBLES="$APP_ILEGIBLES $FLUJO"
+          echo "- \`$FLUJO\`: **no se ejecutó** — informe con 0 casos (código $RC)" >>"$TMP/app-tabla.txt"
         else
-          APP_ESTADO="OK ($APP_TOTAL flujo(s), 0 en rojo)"
+          APP_RECONOCIDO=1
+          APP_TOTAL=$((APP_TOTAL + T))
+          APP_FALLA=$((APP_FALLA + F))
+          if [ "$RC" -ne 0 ] && [ "$F" -eq 0 ]; then
+            APP_DISCREPANCIA="$APP_DISCREPANCIA \`$FLUJO\` salió con código $RC y su informe declara 0 fallos; se toma el peor de los dos."
+            APP_FALLA=$((APP_FALLA + 1))
+            echo "- \`$FLUJO\`: **FALLO** (código $RC, informe sin fallos — se toma el peor)" >>"$TMP/app-tabla.txt"
+          elif [ "$F" -ne 0 ]; then
+            echo "- \`$FLUJO\`: **FALLO** ($F de $T en rojo)" >>"$TMP/app-tabla.txt"
+          else
+            echo "- \`$FLUJO\`: OK ($T caso(s))" >>"$TMP/app-tabla.txt"
+          fi
         fi
+      elif LC_ALL=C grep -Eq "$MAESTRO_SIN_DISPOSITIVO" "$SALIDA"; then
+        APP_INFRA_N=$((APP_INFRA_N + 1))
+        APP_INFRA="no hay ningún dispositivo conectado"
+        [ -n "$APP_INFRA_LINEA" ] || APP_INFRA_LINEA="$(LC_ALL=C grep -Eh -m1 "$MAESTRO_SIN_DISPOSITIVO" "$SALIDA")"
+        echo "- \`$FLUJO\`: no ejecutado — $APP_INFRA" >>"$TMP/app-tabla.txt"
+      elif LC_ALL=C grep -Eq "$MAESTRO_SIN_ENTORNO" "$SALIDA"; then
+        APP_INFRA_N=$((APP_INFRA_N + 1))
+        APP_INFRA="a Maestro le falta algo del entorno para arrancar"
+        [ -n "$APP_INFRA_LINEA" ] || APP_INFRA_LINEA="$(LC_ALL=C grep -Eh -m1 "$MAESTRO_SIN_ENTORNO" "$SALIDA")"
+        echo "- \`$FLUJO\`: no ejecutado — $APP_INFRA" >>"$TMP/app-tabla.txt"
+      else
+        APP_ILEGIBLES="$APP_ILEGIBLES $FLUJO"
+        echo "- \`$FLUJO\`: **no se pudo ejecutar** — código $RC, sin informe JUnit con recuento ni causa de infraestructura conocida" >>"$TMP/app-tabla.txt"
       fi
-    elif LC_ALL=C grep -Eq "$MAESTRO_SIN_DISPOSITIVO" "$TMP/app-run.txt"; then
-      APP_INFRA="no hay ningún dispositivo conectado"
-      APP_INFRA_LINEA="$(LC_ALL=C grep -Eh -m1 "$MAESTRO_SIN_DISPOSITIVO" "$TMP/app-run.txt")"
-      APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas)"
-    elif LC_ALL=C grep -Eq "$MAESTRO_SIN_ENTORNO" "$TMP/app-run.txt"; then
-      APP_INFRA="a Maestro le falta algo del entorno para arrancar"
-      APP_INFRA_LINEA="$(LC_ALL=C grep -Eh -m1 "$MAESTRO_SIN_ENTORNO" "$TMP/app-run.txt")"
-      APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas)"
-    else
+    done
+
+    # El orden importa: lo ilegible manda sobre lo rojo —«arregla la máquina o el
+    # flujo, no el juego»— y lo rojo manda sobre lo verde. La infraestructura ausente
+    # solo se declara cuando ningún flujo llegó a ejecutarse por eso.
+    if [ "$APP_TOTAL" -gt 0 ]; then EJECUTADO=1; fi
+    if [ -n "$APP_ILEGIBLES" ]; then
       NO_EJECUTABLE=1
-      APP_ESTADO="no se pudo ejecutar: Maestro terminó con código $RC y su salida no se reconoce — ni informe JUnit con recuento (\`<testsuite ... tests=\"n\" failures=\"n\">\`) ni ninguna causa de infraestructura conocida"
+      APP_ESTADO="no se pudo ejecutar entero: $APP_TOTAL flujo(s) contados ($APP_FALLA en rojo) y estos no dejaron nada que se pueda afirmar:${APP_ILEGIBLES}"
+    elif [ "$APP_FALLA" -ne 0 ]; then
+      FALLO=1
+      APP_ESTADO="FALLO ($APP_FALLA flujo(s) en rojo de $APP_TOTAL)"
+    elif [ "$APP_TOTAL" -eq 0 ]; then
+      APP_ESTADO="no ejecutado: Maestro está instalado pero $APP_INFRA (infraestructura ausente, no un fallo de pruebas) — $APP_INFRA_N de ${#FLUJOS[@]} flujo(s)"
+    else
+      APP_ESTADO="OK ($APP_TOTAL flujo(s), 0 en rojo)"
     fi
+    APP_DISCREPANCIA="${APP_DISCREPANCIA# }"
   fi
 fi
 
@@ -359,7 +506,7 @@ fi
   if [ "$HAY_MAESTRO" -eq 0 ]; then
     echo "- **Maestro no está instalado.** Los flujos de \`@app\` no se han ejecutado."
   elif [ -n "$APP_INFRA" ]; then
-    echo "- **Maestro está instalado, pero $APP_INFRA.** Los flujos de \`@app\` no se han ejecutado: falta esta máquina, no falla el código. Maestro lo dijo así:"
+    echo "- **Maestro está instalado, pero $APP_INFRA.** Los flujos de \`@app\` no se han ejecutado: falta esta máquina, no falla el código. Dicho literalmente:"
     echo
     echo '```'
     printf '%s\n' "$APP_INFRA_LINEA"
@@ -371,6 +518,20 @@ fi
     echo "- \`test/app/\` no contiene ningún flujo."
   else
     echo "- \`test/app/\`: ${#FLUJOS[@]} flujo(s)."
+  fi
+  if [ -n "$JAVA_ELEGIDO" ]; then
+    echo "- Runtime de Java para Maestro: \`$JAVA_ELEGIDO\` (origen: $JAVA_ORIGEN) — \`$JAVA_VERSION\`. Se resuelve y se exporta aquí a propósito: Maestro no arranca sin él, y heredarlo del entorno de quien lanza el runner haría que el veredicto dependiera de la terminal."
+  else
+    echo "- **No se encontró ningún runtime de Java.** Maestro no puede arrancar sin JVM, así que los flujos de \`@app\` no se han ejecutado. Rutas probadas:"
+    echo
+    echo '```'
+    printf '%s' "$JAVA_PROBADAS"
+    echo '```'
+  fi
+  if [ -n "$ANDROID_ELEGIDO" ]; then
+    echo "- SDK de Android: \`$ANDROID_ELEGIDO\` (origen: $ANDROID_ORIGEN). Se exporta como \`ANDROID_HOME\`/\`ANDROID_SDK_ROOT\` y su \`platform-tools\` va al PATH, que es de donde Maestro saca \`adb\`."
+  else
+    echo "- SDK de Android: no encontrado. No bloquea por sí solo —una máquina que solo pruebe en iOS no lo necesita—; si hacía falta, Maestro lo dirá abajo con sus palabras. Se puede indicar con \`WA_ANDROID_HOME\`."
   fi
   if [ -n "$SANEADAS" ]; then
     echo "- **Variables heredadas retiradas del entorno de los subprocesos:** $SANEADAS. Cambian la forma de la salida de \`node --test\` y con ellas el veredicto dependería de quién lanza el runner."
@@ -415,12 +576,18 @@ fi
   echo "- Flujos: ${#FLUJOS[@]}"
   if [ -f "$TMP/app-run.txt" ]; then
     if [ "$APP_RECONOCIDO" -eq 1 ]; then
-      echo "- Casos: $APP_TOTAL · fallan: $APP_FALLA"
+      echo "- Ejecutados: $APP_TOTAL · pasan: $((APP_TOTAL - APP_FALLA)) · fallan: $APP_FALLA"
     else
-      echo "- Casos: no contados. Maestro no llegó a dejar un informe JUnit con recuento, así que de esta ejecución no se afirma ninguna cifra."
+      echo "- Ejecutados: ninguno. Maestro no llegó a dejar un informe JUnit con recuento, así que de esta ejecución no se afirma ninguna cifra."
     fi
     if [ -n "$APP_DISCREPANCIA" ]; then
       echo "- **Discrepancia:** $APP_DISCREPANCIA"
+    fi
+    if [ -s "$TMP/app-tabla.txt" ]; then
+      echo
+      echo "Flujo a flujo:"
+      echo
+      cat "$TMP/app-tabla.txt"
     fi
     echo
     echo "Salida literal:"
