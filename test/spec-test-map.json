@@ -27086,6 +27086,132 @@
       "caso": "En el código que esta fila añade no aparece Math.random ni Date.now",
       "hueco_de_bateria": true,
       "nota": "El lector de salud queda fuera a propósito y se afirma aparte: es el único sitio con reloj real, vive en app/ y lo que cruza la frontera son metros ya acotados."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dado un mundo sembrado, cuando se castean todas las plantillas que casteen, entonces el lazo de cada una vuelve al sitio del que salió: su último beat cae siempre en un sitio por el que ya se pasó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Todo lazo casteado se cierra",
+      "escenario": "Todo lazo casteado se cierra",
+      "nota": "La mitad que faltaba del escenario, medida sobre las 102 aventuras casteadas de los cuatro mundos de referencia: es el 100 %, y es lo que convertía en fatal la guarda del sitio ya visitado de SPEC-032 (§6v)."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el último beat de un lazo, que ocurre en un sitio ya visitado en la misma salida, cuando se vuelve a él andando y se para dentro de su geofence, entonces la llegada valida y trae ese beat, y la aventura se puede terminar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Se puede terminar toda aventura casteada de los cuatro mundos de referencia",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. Es el caso que habría cazado el defecto grande: con la guarda anterior terminaban 0 de 102 —barrio 0/24, costero 0/29, suelo-250m 0/19, urbano-denso 0/30— y ahora terminan las 102. Se anda el lazo de verdad, con posiciones clasificadas y paradas de la permanencia entera: llamando a resuelveBeat directamente, como hacían las pruebas de SPEC-034, el geofence no participa y el defecto sigue invisible."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado el último beat de un lazo, cuando se vuelve a su sitio, entonces la segunda llegada a ese sitio trae el paso de beat en su secuencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "El último beat de un lazo se resuelve al volver al sitio donde empezó",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. La misma afirmación en corto y sobre el mecanismo, para que el defecto se pueda poner rojo sin contar 102 aventuras: con la guarda anterior solo había una llegada al sitio del último beat."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio en el que ya se estuvo en esta salida, cuando se vuelve a él a por el beat que faltaba, entonces el visor no se abre solo: sigue disponible con un toque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "La segunda vez el visor no se abre solo",
+      "escenario": "La segunda vez el visor no se abre solo",
+      "nota": "Lo que la guarda del sitio ya visitado protegía, afirmado sobre las segundas llegadas que el arreglo de §6v hace posibles: antes no existía ni una y el escenario se cumplía sobre una lista vacía. Se mide sobre más de cien segundas llegadas de los cuatro mundos de referencia y ninguna repite el visor encadenado."
+    },
+    {
+      "spec": "SPEC-032",
+      "criterio": "Dado un sitio ya visitado en esta salida, cuando se vuelve a él, entonces no se pregunta otra vez a la cola de entregas: volver a por el beat que faltaba no se trae de paso un segundo micro-encuentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Volver a por el beat que faltaba no trae de paso un segundo micro-encuentro",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. La otra mitad de lo que la guarda protegía y que el arreglo tenía que conservar. Se cuenta lo que se le preguntó a la cola, que es lo único que lo distingue de no haber vuelto."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dada una aventura andada entera, cuando se echa el telón con el desenlace compuesto desde su plantilla, entonces se cierra como terminada, ingresa el oro declarado y nace el rumor donde acabó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Una aventura andada entera se cierra terminada, con su desenlace, su oro y su rumor",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. Antes no componía el desenlace nadie: echaElTelon lo exigía, la plantilla declaraba la mitad y el casting la otra, y entre las dos no había ninguna función que las juntara. El telón salía sin desenlace, sin oro, sin objeto y sin rumor."
+    },
+    {
+      "spec": "SPEC-010",
+      "criterio": "Dada una aventura casteada terminada, cuando se compone su desenlace, entonces trae el oro, los objetos y el lugar que la plantilla y la cadena declaran, y su identidad distingue dos vueltas de la misma plantilla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "El desenlace de una aventura terminada entrega lo que su plantilla declara",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. Las cifras medidas sobre las 102 aventuras terminadas: oro en las 102 y objeto en 28. La identidad lleva la salida dentro, que es lo que separa dos vueltas de la misma plantilla —comparten aventura.id— y lo que reventaba al nacer el rumor la segunda vez."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dado un jugador que se vuelve a mitad de una aventura, cuando se echa el telón, entonces en lugar del desenlace ve el cierre en corto, y después la entrada del diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "El cierre en corto ocupa el sitio del desenlace",
+      "escenario": "El cierre en corto ocupa el sitio del desenlace",
+      "nota": "La mitad que llega andando: la aventura queda a medias porque se anduvo medio lazo de verdad, no porque se le diga desde fuera. La otra mitad, con la aventura recorrida llamando al motor, está en test/nucleo/telon.test.mjs."
+    },
+    {
+      "spec": "SPEC-036",
+      "criterio": "Dada una aventura cerrada en corto, cuando se echa el telón, entonces no nace ningún rumor y el telón no enseña lo que se pone en camino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Un cierre en corto no genera rumor",
+      "escenario": "Un cierre en corto no genera rumor",
+      "nota": "Sobre una aventura de plantilla notable andada a medias, para que la ausencia de rumor no se explique por una plantilla que no lo declaraba."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dada una aventura que ya se cerró en este mapa, cuando se compone la lista de hoy otro día, entonces no se vuelve a ofrecer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Una aventura ya vivida no se vuelve a ofrecer",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. aventurasCerradas() estaba exportada y no la consumía nadie: los mismos tres títulos el día 1 y el día 6. El caso afirma además el contraste sin registro —los mismos tres— para que la memoria sea lo que está cambiando la lista y no el día."
+    },
+    {
+      "spec": "SPEC-028",
+      "criterio": "Dada una aventura cerrada en un mapa, cuando se compone la lista de hoy en otro mapa, entonces se sigue ofreciendo: lo cerrado en un mapa no dice nada de otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Lo cerrado en un mapa no se descuenta de otro",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. El reverso de la memoria de la lista, que sin él se cumpliría también con una memoria que descontara de todos los mapas a la vez."
+    },
+    {
+      "spec": "SPEC-012",
+      "criterio": "Dado un desenlace notable en un núcleo, cuando se cierra la salida, entonces existe un rumor allí en nivel 0 y no existe en ningún otro núcleo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Nace fiel y en el sitio",
+      "escenario": "Nace fiel y en el sitio",
+      "nota": "Aquí sobre el motor de la partida ya armado, que es el que cuelga la propagación entre paso y paso. La mitad sobre la propagación suelta está en test/nucleo/rumores.test.mjs."
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un desenlace notable y un núcleo vecino al que llega el rumor, cuando el mundo avanza con el motor de la partida cableado, entonces en ese vecino, donde no se ha estado nunca, ya saben quién es y de dónde salió la noticia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "Se puede ser alguien en un pueblo donde no has estado",
+      "escenario": "Se puede ser alguien en un pueblo donde no has estado",
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. El defecto era de cableado: el motor de pasos de la partida no colgaba ningún productor, así que el mundo avanzaba y la noticia de la jugadora no salía del pueblo donde ocurrió. El caso lleva dentro las dos mitades —con productores y sin ellos— porque sin la de abajo no distinguiría propagar de no propagar."
+    },
+    {
+      "spec": "SPEC-015",
+      "criterio": "Dado un rumor que ha viajado por el árbol de calzadas, cuando se pregunta el rango de los núcleos, entonces sube donde ocurrió y donde llegó la noticia, y no se mueve donde no llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/bucle-completo.test.mjs",
+      "caso": "El rango sube donde llega la noticia y en ningún otro sitio",
+      "hueco_de_bateria": true,
+      "nota": "Costura entre filas, cerrada por dictamen del orquestador (pipeline/decisiones-orquestador.md §6v). No sale de un criterio de la spec sino de la partida completa jugada a mano al cerrar el checklist, así que va declarada como hueco de la batería: docs/testing.md no tiene características de costura, por la misma razón por la que nadie recorría el camino entero. La otra cara del cableado del motor, medida sobre el escalón: sin propagador cableado el vecino se quedaba en el escalón de partida."
     }
   ]
 }
