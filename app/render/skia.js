@@ -98,22 +98,38 @@ function formaComoOps(forma) {
   throw new Error(`pintaEscena: forma de recorte desconocida "${forma.tipo}"`);
 }
 
+/**
+ * Un camino, levantado con `PathBuilder` y no con el camino mutable de siempre.
+ *
+ * `Skia.Path.Make()` y sus métodos siguen funcionando, pero **cada llamada imprime un
+ * aviso de obsolescencia**, y un aviso en una compilación de desarrollo levanta el
+ * rótulo de LogBox: una franja negra al pie de la pantalla que no aparece en el árbol
+ * de accesibilidad, que tapa la acción principal y que se come el primer toque que
+ * reciba. Medido en el emulador: al pintar la lámina de A1P6 salían seis avisos
+ * —`addRect`, `moveTo`, `lineTo`, `addCircle`, `addRRect`, `close`—, el rótulo caía
+ * justo encima de «Seguir» (`[63,2183][210,2246]` contra una franja de 2154 a 2274) y
+ * el arranque no pasaba de ahí ni con Maestro ni a mano. Es el mismo mecanismo que ya
+ * está anotado en `plataforma/area-segura.jsx`, y por eso se cierra donde nace: **la
+ * app no emite ni un aviso**.
+ *
+ * `detach()` devuelve el camino inmutable ya terminado; el trazado se tira.
+ */
 function caminoDe(Skia, ops) {
-  const camino = Skia.Path.Make();
+  const trazado = Skia.PathBuilder.Make();
   for (const op of ops) {
     switch (op[0]) {
-      case 'M': camino.moveTo(op[1], op[2]); break;
-      case 'L': camino.lineTo(op[1], op[2]); break;
-      case 'Q': camino.quadTo(op[1], op[2], op[3], op[4]); break;
-      case 'Z': camino.close(); break;
-      case 'R': camino.addRect(Skia.XYWHRect(op[1], op[2], op[3], op[4])); break;
-      case 'RR': camino.addRRect(Skia.RRectXY(Skia.XYWHRect(op[1], op[2], op[3], op[4]), op[5], op[5])); break;
-      case 'C': camino.addCircle(op[1], op[2], op[3]); break;
-      case 'E': camino.addOval(Skia.XYWHRect(op[1] - op[3], op[2] - op[4], op[3] * 2, op[4] * 2)); break;
+      case 'M': trazado.moveTo(op[1], op[2]); break;
+      case 'L': trazado.lineTo(op[1], op[2]); break;
+      case 'Q': trazado.quadTo(op[1], op[2], op[3], op[4]); break;
+      case 'Z': trazado.close(); break;
+      case 'R': trazado.addRect(Skia.XYWHRect(op[1], op[2], op[3], op[4])); break;
+      case 'RR': trazado.addRRect(Skia.RRectXY(Skia.XYWHRect(op[1], op[2], op[3], op[4]), op[5], op[5])); break;
+      case 'C': trazado.addCircle(op[1], op[2], op[3]); break;
+      case 'E': trazado.addOval(Skia.XYWHRect(op[1] - op[3], op[2] - op[4], op[3] * 2, op[4] * 2)); break;
       default: throw new Error(`pintaEscena: operación de camino desconocida "${op[0]}"`);
     }
   }
-  return camino;
+  return trazado.detach();
 }
 
 /**
