@@ -2,12 +2,26 @@
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: a la portada solo se llega con una partida ya
-# levantada, y la app abre en el arranque. Lo único que llega a ejecutarse es la
-# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
-# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
-# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
-# DECLARADO», unas líneas más abajo.
+# Este flujo **no recorre su pantalla**, y desde SPEC-047 el motivo es otro. Lo único que
+# llega a ejecutarse es la guarda de más abajo, así que su verde significa «el límite sigue
+# en pie» y nunca «la pantalla funciona», y por eso no se cuenta en la misma casilla que un
+# verde de verdad. El porqué entero está en «LÍMITE DECLARADO», unas líneas más abajo.
+#
+# **Corrección de este fichero, 10-ago-2026, con la medida delante.** Decía que a la portada
+# solo se llega con una partida levantada y que la app abre en el arranque. La segunda mitad
+# **es falsa desde SPEC-047**: la partida se guarda, y al abrir la app con una partida en
+# disco se abre en la portada. Medido: con `clearState: false` y la partida que dejó
+# `partida-persistida.yaml`, este flujo salía por la rama de la guarda y afirmaba `arranque`
+# visible, que ya no lo está — `EXIT=1`, «Assert that id: arranque is visible... FAILED».
+# No es la caída de `adb`: se reprodujo tres veces seguidas y la tercera llegó a la
+# aserción.
+#
+# El arreglo es de este fichero y no del código, porque **lo que le falta a este flujo no
+# era nunca la puerta**: son dos mapas montados y el ofrecimiento cableado, y eso sigue sin
+# estar. Lo que se corrige es de qué depende su entrada: pasa a `clearState: true`, que la
+# hace determinista y no dependiente de lo que dejara el flujo anterior. El día que exista
+# la manera de sembrar una partida de dos mapas en el dispositivo, quien la monte devuelve
+# el `clearState: false` con el paso de siembra delante.
 #
 # La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
 # poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
@@ -75,22 +89,27 @@
 #
 appId: com.walkingadventure.app
 ---
+# Instalación limpia, y es deliberado: sin ella la entrada de este flujo depende de la
+# partida que dejara el flujo anterior, y eso no es una guarda sino una lotería.
 - launchApp:
-    clearState: false
+    clearState: true
 
 # ── El mapa activo lo decide dónde estás ──────────────────────────────────────
 # Se abre la app estando en casa: sale la portada del mapa de casa, sin preguntar nada.
 
 # ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
 #
-# Este flujo daba por hecho que la app abre en la portada, y **no abre ahí**.
-# `app/App.js` arranca con `enArranque = true`, así que lo primero y lo único que se ve
-# al instalar es el arranque de A1P1. A la portada se llega solo con una partida ya levantada, que es lo que deja el arranque al terminar; sin ella `App.js` cae al andamiaje.
+# Lo que falta **no es la puerta**: son los dos mapas. El mapa activo lo decide dónde
+# estás, así que con uno solo no hay nada que decidir y el ofrecimiento no puede aparecer;
+# y quien resuelve el mapa activo al abrir —y decide entre portada y ofrecimiento— es
+# `App.js`, que no lo monta. Sin ubicación (fila 48) tampoco hay posición con la que
+# resolverlo, y sembrar una partida de dos mapas en el dispositivo no tiene hoy ninguna vía
+# que no sea una puerta trasera.
 #
-# Mientras la app abra donde abre, este flujo **no recorre nada y lo dice**: comprueba
-# que sigue sin haber camino y que la app abre en el arranque. Su verde significa «el
-# límite declarado sigue en pie», nunca «la pantalla está verificada». El día que haya
-# camino, la condición cambia sola y el cuerpo de abajo se ejecuta entero.
+# Desde una instalación limpia no hay partida, así que la app abre en el arranque y este
+# flujo **no recorre nada y lo dice**. Su verde significa «el límite declarado sigue en
+# pie», nunca «la pantalla está verificada». El día que haya dos mapas montados, la
+# condición cambia sola y el cuerpo de abajo se ejecuta entero.
 - runFlow:
     when:
       notVisible:
