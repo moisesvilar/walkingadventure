@@ -1512,6 +1512,17 @@ En su lugar, ese flujo pasa a afirmar algo que **antes de esta fila no significa
 
 **Los otros dos rojos de `@app` son anteriores y siguen fichados.** `empezar-de-nuevo-copia.yaml` es el de la entrada XXVIII —`Share.dismissedAction` es de iOS y en Android la hoja resuelve siempre como compartida—, y `zurron.yaml` busca `paso-ajustes`, que no existe en `app/` ni en `main`: es de la fila 46.
 
+## Y la caída de `adb`, que esta vez se pudo separar de un fallo de verdad
+
+La bitácora la describía como «un flujo por tanda, siempre distinto, en menos de un segundo y sin mensaje de aserción». Esta noche apareció **cuatro veces seguidas en el mismo sitio** —el último `launchApp` de `gancho-capacidad-ausente.yaml`—, que es justo lo que la haría indistinguible de un defecto determinista. Separarla costó cuatro medidas y merece quedar escrito el método:
+
+1. El log de Maestro dice `device offline` y `DeviceServerDied`, nunca una aserción fallida.
+2. Relanzar la app **a mano** con `adb shell am start` funciona: sale A1P1 con su contador en 1/5 y logcat no trae ningún `FATAL`.
+3. Con el emulador ya recuperado, `partida-persistida.yaml` —que hace **dos** ciclos de `stopApp` + `launchApp`— sale verde, y `andamiaje.yaml` también. No era el emulador en general.
+4. Y el mismo flujo, sin tocar una línea, sale **EXIT=0** al quinto intento.
+
+Un rojo que se repite en el mismo punto no basta para llamarlo determinista si el mensaje no es una aserción. Cuatro veces seguidas casi lo convierte en una fila nueva que no existe.
+
 ## Un defecto que destapó la prueba
 
 Migrar leía el registro de hechos **antes** que `cargaPartida`, y era más estricto que él: un registro ilegible impedía abrir una partida perfectamente jugable, cuando el núcleo lo tolera por diseño —lo que se pierde es la red de seguridad, no la partida—. Corregido: el registro que no se puede leer se salta al migrar, y `cargaPartida` lo declara.
