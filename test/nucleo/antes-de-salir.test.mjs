@@ -330,10 +330,18 @@ describe('Lo que ninguna de las cinco pantallas lleva', () => {
 
   test('El guion se revisa a sí mismo al cargarse, y sus consultas fallan nombrando lo que falta', () => {
     assert.deepEqual(revisaGuionDeAntesDeSalir(), [], 'el guion no pasa su propia revisión');
-    assert.deepEqual([...PANTALLAS], ['a2p1', 'a2p3', 'a2p4', 'a2p5'], 'A2P2 es de la fila 42 y no tiene guion aquí');
+    // REEXPRESADO EN SPEC-042, y la reexpresión es el contenido del cambio. Hasta esta
+    // fila A2P2 no existía y su guion habría sido texto sin pantalla; ahora su dueña la
+    // entrega, así que el zurrón entra en la lista y **pasa por la misma revisión que las
+    // otras cuatro**: ni una cifra, voz del mundo y ninguna disculpa, que es literalmente
+    // lo que sus criterios afirman. La lista sigue siendo cerrada y sigue enumerándose
+    // entera: lo que se afirma es que son estas cinco y ninguna más.
+    assert.deepEqual([...PANTALLAS], ['a2p1', 'a2p2', 'a2p3', 'a2p4', 'a2p5'], 'A2P2 es de SPEC-042 y su guion vive aquí, con las otras cuatro');
     for (const pantalla of PANTALLAS) assert.ok(guionDePantalla(pantalla).length > 0);
 
-    assert.throws(() => guionDePantalla('a2p2'), (e) => {
+    // Y una pantalla del artefacto que este guion no declara sigue fallando enumerando
+    // las que sí: A2P6 no existe, y pedir su guion no puede devolver una lista vacía.
+    assert.throws(() => guionDePantalla('a2p6'), (e) => {
       for (const pantalla of PANTALLAS) assert.ok(e.message.includes(pantalla), `el error no enumera "${pantalla}"`);
       return true;
     });
