@@ -59,9 +59,9 @@
 | 31 | deteccion-vehiculo | RF-INFRA-005, RF-BUCLE-015 | must | done |
 | 32 | llegadas-geofence | RF-BUCLE-005, RF-BUCLE-006, RF-RUMOR-005 | must | done |
 | 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | done |
-| 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done |
+| 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done (paquete, no pantalla — ver fila 49) |
 | 35 | descarte-anclaje | RF-PRIV-004 | must | done |
-| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | done |
+| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | done (paquete, no pantalla — ver fila 49) |
 
 ## B6 · Lo que queda en casa
 
@@ -85,6 +85,8 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 45 | puerta-de-desarrollo | RF-INFRA-007 | must | pending |
 | 46 | fuente-de-salud-y-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
 | 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | pending |
+| 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | pending |
+| 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | pending |
 
 La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 
@@ -95,6 +97,12 @@ Y la consecuencia que conviene tener escrita porque no se ve desde ninguna prueb
 Va con su guarda ya escrita y **en rojo a propósito** hasta que se cierre: `test/nucleo/partida-persistida.test.mjs`, tres casos rojos con nombre y dueño. Es la aplicación de la regla que más cara ha salido en este repo — lo que falta se exige, y su ausencia es error de construcción, nunca un valor por defecto — y por eso no es un comentario.
 
 La fila 39 sigue en `done` y no se reabre: entregó el mecanismo entero y sus pruebas lo demuestran. Lo que no entregó es el cableado, y eso es esta fila.
+
+La **48** es el bloqueo más grande de todos, y sale de medir por qué la fila 44 no se podía hacer: **la app no tiene módulo de ubicación**. `app/package.json` no declara `expo-location` ni equivalente; `creaProveedorDeUbicacion` y `creaSeguidorDePosicion` son contratos que esperan el nativo inyectado, y hoy reciben el «sin montar» que protesta. Por eso A1P4 funciona —cae a la vía de elegir el punto a mano— y por eso **no hay geofences, ni llegadas, ni posición en marcha**: B5 entera. Trae dependencia nueva y su spec tiene que nombrarla.
+
+La **49** son las dos pantallas que sus filas nunca escribieron: **A4P3, la escena de un beat**, y **A5P1-A5P4, el telón**. Medido por cierre de imports el 10-ago-2026: SPEC-034 y SPEC-036 son las dos únicas filas de B5 y B6 que **no tocaron ni un fichero de `app/`**. Las dos siguen en `done` y no se reabren —entregaron el paquete entero, con sus pruebas—, pero el checklist ya no dice que entregaran pantalla.
+
+Las dos van con la misma guarda, `test/nucleo/pantallas-huerfanas.test.mjs`, que fija en **8 de 32** las pantallas escritas a las que no llega ningún import desde `App.js` y falla si el número sube. Eran **12** antes de la fila 43. Ese número es el que mide de verdad el patrón: no que las filas no entreguen pantalla —doce de dieciséis la entregaron— sino que **una fila podía entregar una pantalla y darse por hecha sin que nadie pudiera abrirla**.
 
 ## Notas de derivación
 
