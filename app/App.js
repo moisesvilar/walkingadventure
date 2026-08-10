@@ -9,21 +9,12 @@
 // de una salida, que sí tiene profundidad— demostrara lo contrario, es esa fila la que lo
 // replantea con la medida delante.
 //
-// Desde esta fila hay una segunda pantalla que **sí es del juego**: el mapa. Aquí
-// cuelga de un paso porque todavía no existe el flujo que lleva hasta ella —dónde se
-// levanta, con qué permiso, con qué tramo— y sin ese paso no habría manera de
-// recorrer el levantamiento de punta a punta ni de medir el minuto.
-//
-// Y una tercera, la revisión del render, detrás de un paso que solo existe con
-// `__DEV__`. Esa no es navegación: es el equivalente del hook `__wa.style()` que el
-// prototipo tiene en consola, y es donde se hace la revisión de paridad.
-//
-// Desde la fila 29 hay además un **cuarto momento encadenado de verdad**: en marcha. No
-// cuelga de ningún paso provisional cuando hay partida —se llega andando, que es como se
-// llega en el juego: por «salir a andar» de la preparación, por «salir a andar sin más» de
-// la portada y de la lista, y por «seguir con ella» de la tarjeta de a medias—. El paso
-// provisional existe solo al lado de los otros dos, para poder abrir el momento sin
-// recorrer el arranque entero.
+// Y aparte del recorrido del juego hay **una puerta de desarrollo**, de la fila 45: el
+// enlace `walkingadventure://desarrollo` lleva al andamiaje y a la tira de pasos que cuelga
+// de él —el mapa suelto, el momento en marcha sobre el mundo de revisión, la revisión del
+// render—. No es navegación y no sale en `docs/flujo.md`: lo que hay detrás son
+// herramientas y no pantallas del juego, y la distinción está escrita en §6y. En
+// producción no existe.
 
 import React, { useEffect, useState } from 'react';
 import { BackHandler, Linking, Pressable, StyleSheet, Text } from 'react-native';
@@ -43,6 +34,7 @@ import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import { NUCLEO_DE_EMPEZAR_DE_NUEVO, NUCLEO_DE_LA_COPIA } from './nucleo/piezas.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
+import { esPuertaDeDesarrollo } from './plataforma/puerta-de-desarrollo.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
 import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
@@ -109,20 +101,30 @@ export function App() {
   // y por eso esto es un valor y no una pila: de una pantalla de consulta solo se vuelve a
   // la portada, nunca a otra.
   const [consulta, setConsulta] = useState(null);
+  // La puerta de desarrollo, abierta o no. No se persiste y no se puede abrir en
+  // producción: `esPuertaDeDesarrollo` devuelve false sin mirar el enlace siquiera.
+  const [enPuertaDeDesarrollo, setEnPuertaDeDesarrollo] = useState(false);
 
   // El atrás de Android hace lo mismo que el «‹» de la pantalla, y no otra cosa. Que
   // discrepen es un defecto de plataforma y no una decisión: quien pulsa el del sistema
   // espera exactamente lo que promete el de la pantalla que está mirando.
   useEffect(() => {
-    if (consulta === null) return undefined;
+    if (consulta === null && !enPuertaDeDesarrollo) return undefined;
     const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => {
+      // La puerta de desarrollo se cierra primero, porque está por encima de todo lo demás:
+      // salir de ella devuelve exactamente donde se estaba, que es lo que la hace usable
+      // para mirar una avería sin perder el sitio.
+      if (enPuertaDeDesarrollo) {
+        setEnPuertaDeDesarrollo(false);
+        return true;
+      }
       // Desde empezar de nuevo se vuelve a los ajustes, que es «dejarlo como está», y
       // desde las otras tres a la portada.
       setConsulta((abierta) => (abierta === 'empezar-de-nuevo' ? 'ajustes' : null));
       return true;
     });
     return () => suscripcion.remove();
-  }, [consulta]);
+  }, [consulta, enPuertaDeDesarrollo]);
 
   // Lo primero de todo, antes de leer nada de la partida: si hay un borrado marcado, se
   // termina. Una interrupción a mitad tiene un único final posible —el borrado acaba y
@@ -147,6 +149,10 @@ export function App() {
   useEffect(() => {
     let vivo = true;
     const aplica = (url) => {
+      // La puerta de desarrollo primero, y es independiente del gancho de capacidades: son
+      // dos enlaces con anfitriones distintos y se pueden usar por separado o encadenados
+      // —abrir la puerta y después poner una capacidad en rojo—, que es como se usa.
+      if (esPuertaDeDesarrollo(url, EN_DESARROLLO) && vivo) setEnPuertaDeDesarrollo(true);
       const leido = leeGancho(url, EN_DESARROLLO);
       if (!vivo) return;
       if (leido.ausentes.length === 0 && leido.noReconocidos.length === 0) return;
@@ -172,6 +178,62 @@ export function App() {
       .catch((e) => { if (vivo) setMundoDelPaso({ documento: null, fallo: mensajeDeError(e) }); });
     return () => { vivo = false; };
   }, [enMarcha, mundoDelPaso]);
+
+  // El andamiaje y su tira de pasos, en dos piezas para que la puerta de desarrollo y el
+  // caso de «no hay partida» monten exactamente lo mismo. Se dibujaba solo en el segundo, y
+  // duplicarlo habría sido dos andamiajes que se desincronizan en cuanto alguien toque uno.
+  const laTiraDePasos = (
+    <>
+      {/* El paso al mapa. Existe en todas las compilaciones porque el mapa es del
+          juego; lo provisional es el paso, no la pantalla. */}
+      {!enRevision && !enMarcha ? (
+        <Pressable onPress={() => setEnMapa((estaba) => !estaba)} style={estilos.paso} testID="paso-mapa">
+          <Text style={estilos.pasoTexto}>{enMapa ? 'Volver al andamiaje' : 'El mapa'}</Text>
+        </Pressable>
+      ) : null}
+
+      {/* El paso al momento en marcha, hermano del anterior y por la misma razón: el
+          momento es del juego y a él se llega andando desde la portada, pero sin partida
+          levantada no hay ninguna manera de abrirlo. */}
+      {!enRevision && !enMapa ? (
+        <Pressable onPress={() => setEnMarcha((estaba) => !estaba)} style={estilos.paso} testID="paso-marcha">
+          <Text style={estilos.pasoTexto}>{enMarcha ? 'Volver al andamiaje' : 'En marcha'}</Text>
+        </Pressable>
+      ) : null}
+
+      {/* El paso a la revisión del render. Solo en desarrollo, igual que la puerta por la
+          que se llega hasta aquí. */}
+      {EN_DESARROLLO && !enMapa && !enMarcha ? (
+        <Pressable onPress={() => setEnRevision((estaba) => !estaba)} style={estilos.paso} testID="paso-revision-render">
+          <Text style={estilos.pasoTexto}>{enRevision ? 'Volver al andamiaje' : 'El render en Skia'}</Text>
+        </Pressable>
+      ) : null}
+    </>
+  );
+
+  const elMomentoDeDesarrollo = enMapa ? <MapaMontado almacen={almacen} /> : enMarcha ? (
+    <EnMarchaMontado mundo={mundoDelPaso.documento} falloDeCableado={mundoDelPaso.fallo} />
+  ) : enRevision ? (
+    <RevisionMontada />
+  ) : (
+    <PantallaAndamiaje
+      modulos={MODULOS_DE_PLATAFORMA}
+      ausentes={gancho.ausentes}
+      noReconocidos={gancho.noReconocidos}
+    />
+  );
+
+  // La puerta de desarrollo gana a todo lo demás, y a propósito: se abre para mirar por qué
+  // algo va mal, y lo que va mal casi siempre va mal en medio de otra cosa. No toca la
+  // partida ni la borra —queda montada detrás—, y se sale con el atrás del sistema.
+  if (enPuertaDeDesarrollo) {
+    return (
+      <AreaSegura style={estilos.raiz}>
+        {laTiraDePasos}
+        {elMomentoDeDesarrollo}
+      </AreaSegura>
+    );
+  }
 
   if (enArranque) {
     return (
@@ -274,45 +336,13 @@ export function App() {
     );
   }
 
+  // Sin partida —una compilación que sale del arranque sin levantar nada— se queda el
+  // andamiaje, que es lo que había antes de la fila 45. La puerta de desarrollo monta
+  // exactamente esto mismo, y por eso las dos piezas están arriba y no aquí dentro.
   return (
     <AreaSegura style={estilos.raiz}>
-      {/* El paso al mapa. Existe en todas las compilaciones porque el mapa es del
-          juego; lo provisional es el paso, no la pantalla. */}
-      {!enRevision && !enMarcha ? (
-        <Pressable onPress={() => setEnMapa((estaba) => !estaba)} style={estilos.paso} testID="paso-mapa">
-          <Text style={estilos.pasoTexto}>{enMapa ? 'Volver al andamiaje' : 'El mapa'}</Text>
-        </Pressable>
-      ) : null}
-
-      {/* El paso al momento en marcha, hermano del anterior y por la misma razón: el
-          momento es del juego y a él se llega andando desde la portada, pero sin partida
-          levantada no hay ninguna manera de abrirlo. Lo sustituye A3P1 con su rótulo del
-          sistema, que es de la fila 30; hasta entonces la lámina convive con esta tira. */}
-      {!enRevision && !enMapa ? (
-        <Pressable onPress={() => setEnMarcha((estaba) => !estaba)} style={estilos.paso} testID="paso-marcha">
-          <Text style={estilos.pasoTexto}>{enMarcha ? 'Volver al andamiaje' : 'En marcha'}</Text>
-        </Pressable>
-      ) : null}
-
-      {/* El paso a la revisión del render. Solo en desarrollo: el flujo de Maestro
-          abre la app en el andamiaje y ahí se queda. */}
-      {EN_DESARROLLO && !enMapa && !enMarcha ? (
-        <Pressable onPress={() => setEnRevision((estaba) => !estaba)} style={estilos.paso} testID="paso-revision-render">
-          <Text style={estilos.pasoTexto}>{enRevision ? 'Volver al andamiaje' : 'El render en Skia'}</Text>
-        </Pressable>
-      ) : null}
-
-      {enMapa ? <MapaMontado almacen={almacen} /> : enMarcha ? (
-        <EnMarchaMontado mundo={mundoDelPaso.documento} falloDeCableado={mundoDelPaso.fallo} />
-      ) : enRevision ? (
-        <RevisionMontada />
-      ) : (
-        <PantallaAndamiaje
-          modulos={MODULOS_DE_PLATAFORMA}
-          ausentes={gancho.ausentes}
-          noReconocidos={gancho.noReconocidos}
-        />
-      )}
+      {laTiraDePasos}
+      {elMomentoDeDesarrollo}
     </AreaSegura>
   );
 }
