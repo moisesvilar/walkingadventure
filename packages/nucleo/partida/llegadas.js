@@ -388,8 +388,14 @@ export function creaLlegadas({
   // Los beats se resuelven **contra los sitios del mundo congelado**: un beat cuyo
   // lugar no existe es un cableado a medias, y tratarlo como un sitio sin beat es
   // exactamente la degradación silenciosa que este proyecto ya ha pagado siete veces.
+  //
+  // Y se guardan **en cola por sitio**, no de uno en uno: el lazo es cerrado por
+  // diseño, así que el último beat de toda aventura cae en un sitio por el que ya se
+  // pasó. Con un beat por sitio, ese último no existía para esta capa y ninguna
+  // aventura se podía terminar (`pipeline/decisiones-orquestador.md` §6v).
   const beatsPorSitio = new Map();
-  for (const beat of reparto.beats) {
+  const ordenDelBeat = new Map();
+  reparto.beats.forEach((beat, i) => {
     const donde = exigeNombre(beat?.lugar?.nombre ?? beat?.lugar, `el lugar del beat ${beat?.n ?? '?'} de la aventura`);
     if (!sitios.has(donde)) {
       throw new Error(
@@ -397,8 +403,10 @@ export function creaLlegadas({
         'un lugar que el mundo congelado no tiene no se puede tratar como un sitio sin beat',
       );
     }
-    if (!beatsPorSitio.has(donde)) beatsPorSitio.set(donde, beat);
-  }
+    if (!beatsPorSitio.has(donde)) beatsPorSitio.set(donde, []);
+    beatsPorSitio.get(donde).push(beat);
+    ordenDelBeat.set(beat, i);
+  });
 
   // Una salida nueva empieza sin llegadas: las de la anterior se fueron con su telón, y
   // arrastrarlas reabriría una escena de otro día.
@@ -417,6 +425,30 @@ export function creaLlegadas({
   };
 
   const yaValidada = (nombre) => registro.llegadas.some((l) => l.sitio === nombre);
+
+  // Qué beats del lazo ya se llevó una llegada de esta salida, por su sitio en la
+  // cadena. La cadena es lineal (SPEC-034), así que el beat que un sitio tiene
+  // pendiente es el primero suyo que nadie se ha llevado, y **le toca** solo cuando
+  // todos los anteriores de la cadena ya están resueltos: sin esa condición, plantarse
+  // en el punto de partida validaría a la vez el primer beat y el último, que ocurre
+  // en el mismo sitio, y la aventura se terminaría sin andar.
+  const consumidos = new Set();
+  const beatPendienteDe = (nombre) => (beatsPorSitio.get(nombre) ?? []).find((b) => !consumidos.has(ordenDelBeat.get(b))) ?? null;
+  const leTocaAhora = (beat) => beat !== null && reparto.beats.every((otro, i) => i >= ordenDelBeat.get(beat) || consumidos.has(i));
+
+  // Una llegada levantada de su documento no trae el beat dentro —el área guarda la
+  // secuencia, que es lo que no se puede recalcular— así que se vuelve a repartir la
+  // cola sobre las llegadas que ya tenían paso de beat, en su mismo orden.
+  for (const llegada of registro.llegadas) {
+    if (!llegada.secuencia.some((p) => p.tipo === TIPOS_DE_PASO.BEAT)) continue;
+    // Se reparte contra **este** reparto y no se conserva el beat que la llegada
+    // trajera: dos objetos de beat distintos para la misma parada de la cadena harían
+    // que la cuenta de lo consumido dejara de cuadrar sin que nada se pusiera rojo.
+    const suyo = beatPendienteDe(llegada.sitio);
+    if (!suyo) continue;
+    llegada.beat = suyo;
+    consumidos.add(ordenDelBeat.get(suyo));
+  }
 
   // El reloj de la parada, por sitio: desde cuándo lleva parada dentro de este geofence.
   // Vive mientras dura la vigilancia y no se guarda: son veinte segundos de sensor, no un
@@ -463,9 +495,26 @@ export function creaLlegadas({
   const registra = (nombre) => {
     const geofence = geofenceDeSitio(nombre);
     const primeraVisita = visitados.yaVisitado(nombre) !== true;
-    const delLazo = beatsPorSitio.get(nombre) ?? null;
-    // Un micro-encuentro mandado por la cola produce beat igual que uno del lazo.
-    const mandado = delLazo ? null : cola.microEncuentroEn(nombre);
+    // Un beat cuyo turno todavía no ha llegado **espera**, y esa es toda la pieza: se
+    // valida la llegada al sitio —el visor, la ficha y lo que allí se cuenta son suyos y
+    // no del beat— y el beat se queda en la cola para la llegada que sí le toque. Sin
+    // esto, dos beats de la misma cadena a menos de un geofence el uno del otro —en
+    // `costero`, los beats 1 y 3 de «la receta perdida» están a treinta y siete metros—
+    // se validaban de una sola parada, la escena del beat de después se ofrecía antes
+    // que la del de antes y quien atendiera las escenas en el orden en que se le
+    // ofrecen reventaba a mitad de la calle con «llegó el beat 3 y el que toca es el 2».
+    // Adelantarlo no es una opción: la cadena es lineal y resolver fuera de orden se
+    // saltaría el que falta. Descartar la llegada entera, tampoco: perdería la primera
+    // visita de un sitio del mundo por culpa de un beat que ocurre allí más tarde.
+    const pendiente = beatPendienteDe(nombre);
+    const delLazo = leTocaAhora(pendiente) ? pendiente : null;
+    if (delLazo) consumidos.add(ordenDelBeat.get(delLazo));
+    // Un micro-encuentro mandado por la cola produce beat igual que uno del lazo. Solo
+    // se pregunta por él la primera vez que se llega al sitio en esta salida: volver
+    // a por el beat que faltaba no puede traerse de paso un segundo encuentro. Y no se
+    // pregunta en un sitio con beat del lazo pendiente aunque no le toque: el encuentro
+    // ocuparía el sitio de la escena que ese sitio ya se debe.
+    const mandado = pendiente || yaValidada(nombre) ? null : cola.microEncuentroEn(nombre);
     const secuencia = secuenciaDeLlegada({
       tipoDeSitio: geofence.tipo,
       primeraVisita,
@@ -478,8 +527,12 @@ export function creaLlegadas({
     return llegada;
   };
 
+  // Con el lazo cerrado un sitio puede tener dos llegadas en la misma salida. La que
+  // se consulta es **la que sigue esperando**, y la última si ya se leyeron todas: lo
+  // que se pregunta por un sitio es lo que hay ahora, no lo que hubo la primera vez.
   const laLlegadaDe = (nombre, quien) => {
-    const llegada = registro.llegadas.find((l) => l.sitio === nombre);
+    const suyas = registro.llegadas.filter((l) => l.sitio === nombre);
+    const llegada = suyas.find((l) => !l.cerrada) ?? suyas[suyas.length - 1];
     if (!llegada) {
       throw new Error(
         `${quien}: no hay ninguna llegada validada a "${nombre}" en la salida "${salida}". ` +
@@ -559,7 +612,15 @@ export function creaLlegadas({
           const desde = paradaDesde.get(nombre) ?? previa.tMs;
           paradaDesde.set(nombre, desde);
           if (posicion.tMs - desde < PERMANENCIA_MS) continue;
-          if (yaValidada(nombre)) continue;
+          // Volver a un sitio ya visitado **valida el beat que toca**, y no valida
+          // ninguna otra cosa. Lo que esta guarda protege es que el visor y la ficha de
+          // un sitio ya visto no se repitan, no que un beat pendiente allí se quede sin
+          // resolver: el lazo es cerrado por diseño y su último beat cae siempre en un
+          // sitio anterior, así que descartarlo dejaba toda aventura en «a-medias»
+          // (`pipeline/decisiones-orquestador.md` §6v). Y lo que no se repite se sigue
+          // sin repetir: la segunda llegada trae el visor **a un toque**, porque ya no
+          // es la primera visita.
+          if (yaValidada(nombre) && !leTocaAhora(beatPendienteDe(nombre))) continue;
           validadasAqui.push({ nombre, distanciaM });
         }
 
@@ -593,10 +654,10 @@ export function creaLlegadas({
     /** El beat de una llegada, si lo hay. Lo compone la fila 34; aquí solo se entrega. */
     beatDe(nombre) {
       const llegada = laLlegadaDe(nombre, 'pedir el beat de una llegada');
-      // Al levantar la partida el beat se vuelve a resolver contra el reparto: el área
-      // guarda la secuencia, que es lo que no se puede recalcular, y no una copia del
-      // beat, que sí.
-      return llegada.beat ?? beatsPorSitio.get(nombre) ?? null;
+      // Al levantar la partida el beat se vuelve a repartir contra el reparto —lo hace
+      // el montaje de la capa—: el área guarda la secuencia, que es lo que no se puede
+      // recalcular, y no una copia del beat, que sí.
+      return llegada.beat ?? null;
     },
 
     /**
