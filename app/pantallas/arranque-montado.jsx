@@ -66,6 +66,7 @@ export function ArranqueMontado({
   alSalirAAndar = null,
   almacen = null,
   copia = null,
+  alAbrirCopia = null,
 }) {
   const { width, height } = useWindowDimensions();
 
@@ -158,7 +159,9 @@ export function ArranqueMontado({
       {/* A1P1 aporta una acción secundaria y nada más: por debajo de la principal y con
           menos peso. Sin las dos piezas del sistema cableadas no se ofrece, porque una
           acción que no puede llegar a ninguna parte es peor que no tenerla. */}
-      {copia ? <AbrirCopia copia={copia} /> : null}
+      {/* Y quien monta decide qué pasa cuando la copia entra: hasta SPEC-047 no pasaba
+          nada, se sustituía la partida del almacén y el arranque seguía como si nada. */}
+      {copia ? <AbrirCopia copia={copia} alAbrir={alAbrirCopia} /> : null}
     </View>
   );
 }
