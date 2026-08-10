@@ -66,18 +66,30 @@ export function creaFuente(gestor = Skia.FontMgr.System()) {
       weight: tipografia.peso === 'bold' ? FontWeight.Bold : FontWeight.Normal,
       slant: tipografia.italica ? FontSlant.Italic : FontSlant.Upright,
     };
+    // «La primera familia que el sistema tenga» significa **una con la que se pueda
+    // medir**, y hay que comprobarlo en vez de creerse la respuesta del gestor. Dos
+    // cosas, medidas las dos en el emulador de Android:
+    //
+    // - `Skia.Font` sin tipografía —lo que salía de traducir el nombre genérico a «sin
+    //   familia»— devuelve una fuente sin letra detrás. No lanza: se dibuja vacía y mide
+    //   cero. Los genéricos se le piden al gestor como cualquier otro nombre, que en
+    //   Android son familias de verdad.
+    // - El gestor **también responde a familias que no tiene** con una tipografía que no
+    //   rasteriza nada. `Georgia` y `Cinzel` entran por ahí, y son la cabeza de la pila
+    //   de la cartela.
+    //
+    // Las dos acaban igual: medida cero, y el error saliendo al final del todo en el
+    // colocador de rótulos, que es donde no está el problema. Una pasada de medida sobre
+    // una letra lo corta aquí, que es donde se elige.
     let font = null;
     for (const familia of familiasDe(tipografia.familia)) {
-      if (GENERICAS.includes(familia.toLowerCase())) {
-        // Sin nombre de familia, el gestor entrega la que el sistema tenga por defecto.
-        font = Skia.Font(undefined, tipografia.tamano);
-        break;
-      }
-      const letra = gestor.matchFamilyStyle(familia, forma);
-      if (letra) {
-        font = Skia.Font(letra, tipografia.tamano);
-        break;
-      }
+      const letra = gestor.matchFamilyStyle(familia, forma)
+        ?? (GENERICAS.includes(familia.toLowerCase()) ? gestor.matchFamilyStyle('', forma) : null);
+      if (!letra) continue;
+      const candidata = Skia.Font(letra, tipografia.tamano);
+      if (!(candidata.getTextWidth('M') > 0)) continue;
+      font = candidata;
+      break;
     }
     cache.set(clave, font);
     return font;

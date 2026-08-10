@@ -16,8 +16,25 @@
 //
 // El servidor guarda **una sola cosa**: el resumen de las fichas ya gastadas, para que
 // no valgan dos veces. No guarda a quién se emitieron, porque no lo sabe.
+//
+// La primitiva —cegar, resumir con dominio completo, desciegar— **no está aquí**: vive
+// en `ficha-ciega.mjs`, que no importa nada y por eso la puede compartir el móvil. Este
+// módulo abre con `node:crypto` y el empaquetador de la app no lo resuelve, así que
+// dejarla aquí obligaba a copiarla, y una copia del cegado que diverge no cuesta una
+// caché fría: cuesta que ninguna ficha del mundo verifique.
 
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
+
+import {
+  aBigInt,
+  aHex,
+  aHexBytes,
+  deBase64url,
+  desciegaTanda as desciega,
+  modPow,
+  preparaTanda as prepara,
+  resumenDeDominio,
+} from './ficha-ciega.mjs';
 
 /**
  * Lo que este módulo escribe, entrada por entrada **y campo por campo**. Se compara con
@@ -31,52 +48,6 @@ export const ESCRITURAS = Object.freeze([
 /** Los motivos por los que una ficha se rechaza. Cerrado: no hay un «otros». */
 export const MOTIVOS_DE_RECHAZO = Object.freeze(['ausente', 'malformada', 'caducada', 'falsificada', 'gastada']);
 
-// --- aritmética modular -----------------------------------------------------
-
-function modPow(base, exp, mod) {
-  let r = 1n;
-  let b = base % mod;
-  let e = exp;
-  while (e > 0n) {
-    if (e & 1n) r = (r * b) % mod;
-    b = (b * b) % mod;
-    e >>= 1n;
-  }
-  return r;
-}
-
-function inversoModular(a, m) {
-  let [viejoR, r] = [((a % m) + m) % m, m];
-  let [viejoS, s] = [1n, 0n];
-  while (r !== 0n) {
-    const q = viejoR / r;
-    [viejoR, r] = [r, viejoR - q * r];
-    [viejoS, s] = [s, viejoS - q * s];
-  }
-  if (viejoR !== 1n) return null; // no invertible: hay que sortear otro cegador
-  return ((viejoS % m) + m) % m;
-}
-
-const aBigInt = (hex) => BigInt('0x' + hex);
-const aHex = (n) => { const h = n.toString(16); return h.length % 2 ? '0' + h : h; };
-const b64uABuf = (s) => Buffer.from(s, 'base64url');
-
-/**
- * Resumen de dominio completo: expande SHA-256 con MGF1 hasta un byte menos que el
- * módulo y lo reduce. Sin esto, firmar «el hash a secas» deja el esquema abierto a
- * falsificaciones multiplicativas, que es el fallo clásico de RSA sin relleno.
- */
-function resumenDeDominio(semilla, n) {
-  const bytes = Math.ceil(n.toString(16).length / 2) - 1;
-  const trozos = [];
-  for (let i = 0; trozos.reduce((s, t) => s + t.length, 0) < bytes; i++) {
-    const contador = Buffer.alloc(4);
-    contador.writeUInt32BE(i, 0);
-    trozos.push(createHash('sha256').update(Buffer.concat([Buffer.from('walking-adventure/fdh'), semilla, contador])).digest());
-  }
-  return aBigInt(Buffer.concat(trozos).subarray(0, bytes).toString('hex')) % n;
-}
-
 // --- la clave de época ------------------------------------------------------
 
 /** Genera una clave RSA nueva y la deja en la forma que este módulo usa. */
@@ -84,57 +55,32 @@ export function generaClaveRSA(bits = 2048) {
   const { privateKey } = generateKeyPairSync('rsa', { modulusLength: bits });
   const jwk = privateKey.export({ format: 'jwk' });
   return {
-    n: aBigInt(b64uABuf(jwk.n).toString('hex')),
-    e: aBigInt(b64uABuf(jwk.e).toString('hex')),
-    d: aBigInt(b64uABuf(jwk.d).toString('hex')),
+    n: aBigInt(aHexBytes(deBase64url(jwk.n))),
+    e: aBigInt(aHexBytes(deBase64url(jwk.e))),
+    d: aBigInt(aHexBytes(deBase64url(jwk.d))),
   };
 }
 
 // --- la mitad del cliente ---------------------------------------------------
 //
-// Vive aquí y no en `app/` porque las dos mitades tienen que compartir la primitiva:
-// si el cegado y el descegado se escriben dos veces, el día que uno cambie el otro
-// deja de verificar y no hay nada que lo ponga en rojo. La app la importa; el proxy
-// no la llama nunca.
+// Se reexporta desde `ficha-ciega.mjs` en lugar de reimplementarse: la app importa
+// aquella —que no importa nada y por eso el empaquetador del móvil la resuelve— y el
+// andamiaje importa esta. Las dos son la misma función, que es justo lo que hay que
+// poder afirmar.
 
 /**
  * Prepara una tanda: sortea los valores de las fichas y los ciega.
  *
- * @returns {{cegadas: string[], secretos: object[]}} lo cegado se manda al proxy; los
- *   secretos no salen del móvil.
+ * El azar por defecto es el de Node, que es donde corren el andamiaje y las pruebas. La
+ * app no lo tiene y pasa el suyo, declarado.
  */
 export function preparaTanda(clavePublica, cuantas, aleatorio = randomBytes) {
-  const n = aBigInt(clavePublica.n);
-  const e = aBigInt(clavePublica.e);
-  const cegadas = [];
-  const secretos = [];
-  for (let i = 0; i < cuantas; i++) {
-    const nonce = Buffer.from(aleatorio(32));
-    const m = resumenDeDominio(nonce, n);
-    let r;
-    let inverso = null;
-    while (inverso === null) {
-      r = aBigInt(Buffer.from(aleatorio(Math.ceil(n.toString(16).length / 2))).toString('hex')) % n;
-      if (r < 2n) continue;
-      inverso = inversoModular(r, n);
-    }
-    cegadas.push(aHex((m * modPow(r, e, n)) % n));
-    secretos.push({ nonce: nonce.toString('base64url'), inverso: aHex(inverso), kid: clavePublica.kid });
-  }
-  return { cegadas, secretos };
+  return prepara(clavePublica, cuantas, aleatorio);
 }
 
 /** Desciega las firmas que devolvió el proxy y produce las fichas usables. */
 export function desciegaTanda(clavePublica, secretos, firmas) {
-  const n = aBigInt(clavePublica.n);
-  if (secretos.length !== firmas.length) {
-    throw new Error(`llegaron ${firmas.length} firmas para ${secretos.length} valores cegados`);
-  }
-  return secretos.map((s, i) => ({
-    kid: s.kid,
-    nonce: s.nonce,
-    firma: aHex((aBigInt(firmas[i]) * aBigInt(s.inverso)) % n),
-  }));
+  return desciega(clavePublica, secretos, firmas);
 }
 
 // --- el emisor --------------------------------------------------------------
@@ -218,8 +164,13 @@ export function creaEmisorDeFichas({ config, reloj, gastadas, generaClave = () =
       const c = claves.get(ficha.kid);
       if (!c) return { valida: false, motivo: 'caducada' };
       let s;
-      try { s = aBigInt(ficha.firma); } catch { return { valida: false, motivo: 'malformada' }; }
-      const m = resumenDeDominio(b64uABuf(ficha.nonce), c.n);
+      let m;
+      // El `nonce` y la firma llegan de fuera: leerlos es parte de la comprobación, y
+      // un valor que no es lo que dice ser es una ficha malformada, no una excepción.
+      try {
+        s = aBigInt(ficha.firma);
+        m = resumenDeDominio(deBase64url(ficha.nonce), c.n);
+      } catch { return { valida: false, motivo: 'malformada' }; }
       if (modPow(s % c.n, c.e, c.n) !== m) return { valida: false, motivo: 'falsificada' };
       return { valida: true, motivo: null };
     },

@@ -16,9 +16,11 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { PRESUPUESTO_FOTOS_MAPA_MS, PRESUPUESTO_PREPARACION_MS } from '@walkingadventure/nucleo/partida/recursos.js';
 
+import { atestacionDeLaApp } from '../datos/atestacion.js';
 import { creaCalendario } from '../datos/calendario.js';
 import { creaClienteDeLotes } from '../datos/cliente-de-lotes.js';
 import { puertaDeRed } from '../datos/red.js';
+import { evidenciaDelSistema, mecanismoDeAtestacion } from '../plataforma/atestacion.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { creaAlmacenDeBinarios } from '../recursos/almacen-de-binarios.js';
 import { creaConseguidorDeRecursos } from '../recursos/conseguidor.js';
@@ -50,9 +52,18 @@ export function AntesDeSalirMontado({
   const montaje = useMemo(() => {
     try {
       const pide = puertaDeRed();
+      // La misma tanda que gastan el arranque y el mapa: las ilustraciones y las fotos
+      // son llamadas de pago, y sin ficha el proxy solo devuelve lo que ya está pagado.
+      const atestacion = atestacionDeLaApp({
+        pide,
+        base,
+        plataforma: mecanismoDeAtestacion(),
+        evidencia: evidenciaDelSistema(),
+      });
+      const ficha = () => atestacion.ficha();
       const conseguidor = creaConseguidorDeRecursos({
-        clienteDeImagenes: creaClienteDeLotes({ pide, base, ruta: 'imagen' }),
-        clienteDeFotos: creaClienteDeLotes({ pide, base, ruta: 'places' }),
+        clienteDeImagenes: creaClienteDeLotes({ pide, base, ruta: 'imagen', ficha }),
+        clienteDeFotos: creaClienteDeLotes({ pide, base, ruta: 'places', ficha }),
         almacen: almacen ?? creaAlmacenDeBinarios(),
         presupuestoIlustracionesMs: PRESUPUESTO_PREPARACION_MS,
         presupuestoFotosMs: PRESUPUESTO_FOTOS_MAPA_MS,

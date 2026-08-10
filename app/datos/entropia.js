@@ -35,3 +35,28 @@ export function entropiaDelDispositivo(fuente = globalThis.crypto) {
   for (let i = 0; i < VALORES; i++) valores.push(Math.floor(Math.random() * 256));
   return { origen: 'math', valores };
 }
+
+/**
+ * Los bytes que pide el cegado de una tanda de fichas, con su procedencia declarada.
+ *
+ * Es la misma regla que la semilla y el mismo motivo para declararla, pero **lo que hay
+ * en juego no es lo mismo y conviene decirlo aquí**: el factor de cegado es lo único que
+ * impide al proxy reconocer después la ficha que firmó. Con `origen: 'crypto'` la no
+ * enlazabilidad es la que promete SPEC-023; con `origen: 'math'` se apoya en el
+ * generador del motor, y un servidor que lo persiguiera podría reconstruirlo. Quien
+ * consume esto —`datos/atestacion.js`— arrastra el origen hasta su estado para que la
+ * diferencia se pueda mirar, y no se disimula con un respaldo callado.
+ *
+ * @returns `{ origen, bytes }` con `bytes` un `Uint8Array` de longitud `cuantos`.
+ */
+export function bytesDelDispositivo(cuantos, fuente = globalThis.crypto) {
+  const bytes = new Uint8Array(cuantos);
+  if (fuente && typeof fuente.getRandomValues === 'function') {
+    // `getRandomValues` tiene un tope por llamada de 65536 bytes en la especificación:
+    // se pide a trozos para que una tanda grande no lo cruce sin avisar.
+    for (let i = 0; i < cuantos; i += 65536) fuente.getRandomValues(bytes.subarray(i, Math.min(cuantos, i + 65536)));
+    return { origen: 'crypto', bytes };
+  }
+  for (let i = 0; i < cuantos; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return { origen: 'math', bytes };
+}

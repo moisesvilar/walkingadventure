@@ -28,6 +28,16 @@ export function creaMedidorSkia(fuente) {
     }
     const ascenso = Math.abs(metricas.ascent);
     const descenso = Math.abs(metricas.descent);
+    // Una fuente sin tipografía detrás no lanza: mide cero y sigue. Sin esta guarda el
+    // fallo aparece al final, en el colocador de rótulos, que es donde no está el
+    // problema — y buscar ahí cuesta la tarde. Aquí se nombra la familia, que es lo que
+    // hay que arreglar.
+    if (texto && !(ancho > 0 && ascenso + descenso > 0)) {
+      throw new Error(
+        `la tipografía "${tipografia.familia}" mide cero: el gestor devolvió una fuente sin letra detrás, ` +
+        'así que no hay caja que colocar',
+      );
+    }
     return { ancho, alto: ascenso + descenso, ascenso, descenso };
   };
 }

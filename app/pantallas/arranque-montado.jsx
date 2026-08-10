@@ -17,6 +17,7 @@ import { localeFor } from '@walkingadventure/nucleo/names/index.js';
 import { colocadorDeRotulos } from '@walkingadventure/nucleo/render/colocador.js';
 
 import { exigeAlmacenDuradero } from '../datos/almacen-duradero.js';
+import { atestacionDeLaApp } from '../datos/atestacion.js';
 import { creaClienteDeProxy } from '../datos/cliente-proxy.js';
 import { entropiaDelDispositivo } from '../datos/entropia.js';
 import { puertaDeRed } from '../datos/red.js';
@@ -25,6 +26,7 @@ import { creaCronometro } from '../mapa/cronometro.js';
 import { NUCLEO_DEL_LEVANTAMIENTO } from '../nucleo/piezas.js';
 import { creaLevantamiento } from '../mapa/levantamiento.js';
 import { componePrimeraLista } from '../mapa/primera-lista.js';
+import { evidenciaDelSistema, mecanismoDeAtestacion } from '../plataforma/atestacion.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { proveedorSinMontar } from '../plataforma/ubicacion.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
@@ -74,7 +76,16 @@ export function ArranqueMontado({
       exigeAlmacenDuradero(almacen, 'el arranque');
       const enlace = creaEnlaceReal();
       const cronometro = creaCronometro({ ahora: () => Date.now() });
-      const cliente = creaClienteDeProxy({ pide: puertaDeRed(), base });
+      // El mapa de A1P5 se levanta con datos que **no están en la caché de nadie**, así
+      // que sin ficha el proxy responde «no hay» y el arranque se queda clavado en A1P4.
+      const pide = puertaDeRed();
+      const atestacion = atestacionDeLaApp({
+        pide,
+        base,
+        plataforma: mecanismoDeAtestacion(),
+        evidencia: evidenciaDelSistema(),
+      });
+      const cliente = creaClienteDeProxy({ pide, base, ficha: () => atestacion.ficha() });
       const levantamiento = creaLevantamiento({
         consultaOsm: creaTraedorDeOsm({ cliente }),
         almacen,

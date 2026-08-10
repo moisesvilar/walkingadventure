@@ -17,12 +17,14 @@ import { RESPUESTAS_DE_TRAMO, tramoDeRespuesta } from '@walkingadventure/nucleo/
 import { colocadorDeRotulos } from '@walkingadventure/nucleo/render/colocador.js';
 
 import { exigeAlmacenDuradero } from '../datos/almacen-duradero.js';
+import { atestacionDeLaApp } from '../datos/atestacion.js';
 import { creaClienteDeProxy } from '../datos/cliente-proxy.js';
 import { creaTraedorDeOsm } from '../datos/traedor.js';
 import { puertaDeRed } from '../datos/red.js';
 import { creaCronometro } from '../mapa/cronometro.js';
 import { NUCLEO_DEL_LEVANTAMIENTO } from '../nucleo/piezas.js';
 import { creaLevantamiento } from '../mapa/levantamiento.js';
+import { evidenciaDelSistema, mecanismoDeAtestacion } from '../plataforma/atestacion.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
 import { creaMedidorSkia } from '../render/medidor-skia.js';
@@ -82,7 +84,16 @@ export function MapaMontado({
       exigeAlmacenDuradero(almacen, 'la pantalla del mapa');
       const enlace = creaEnlaceReal();
       const cronometro = creaCronometro({ ahora: () => Date.now() });
-      const cliente = creaClienteDeProxy({ pide: puertaDeRed(), base });
+      // La ficha no es un adorno: sin ella el proxy toma la vía sin atestación, que solo
+      // sirve caché, y una celda recién levantada nunca lo está.
+      const pide = puertaDeRed();
+      const atestacion = atestacionDeLaApp({
+        pide,
+        base,
+        plataforma: mecanismoDeAtestacion(),
+        evidencia: evidenciaDelSistema(),
+      });
+      const cliente = creaClienteDeProxy({ pide, base, ficha: () => atestacion.ficha() });
       const levantamiento = creaLevantamiento({
         consultaOsm: creaTraedorDeOsm({ cliente }),
         almacen,

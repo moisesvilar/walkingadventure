@@ -54,9 +54,15 @@ export function creaClienteDeLotes({ pide, base, ruta, ficha = null, lote = null
      */
     async pideLote(peticiones) {
       const lista = Array.isArray(peticiones) ? peticiones : [];
-      const emitida = ficha ? await ficha() : null;
       const sobres = [];
       for (const peticion of lista) {
+        // Una ficha **por petición**, no una por lote: el proxy gasta la ficha en cada
+        // llamada de pago, así que reutilizarla dejaría todo el lote menos la primera
+        // imagen rechazado con «hay que volver a atestar» — y como aquí un rechazo se
+        // convierte en «no hay», el lote entero saldría con textos de plantilla sin que
+        // nada lo dijera. Lo que sí es de todo el lote es el identificador, que es lo que
+        // le permite al proxy cortar un bucle.
+        const emitida = ficha ? await ficha() : null;
         const cuerpo = { peticion };
         if (emitida) cuerpo.ficha = emitida;
         if (lote) cuerpo.lote = lote;
