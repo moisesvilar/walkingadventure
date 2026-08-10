@@ -17,6 +17,7 @@ import { ESTILOS, ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/est
 import { exigeEnlace } from './enlace-skia.js';
 import { creaMedidorSkia } from './medidor-skia.js';
 import { pintaEscena } from './skia.js';
+import { MARCA_SUPERPUESTA } from '../pantallas/marca.js';
 
 /**
  * @param {object} props
@@ -84,7 +85,7 @@ function volcadoDeColocacion(escena) {
 
 const estilos = StyleSheet.create({
   lamina: { overflow: 'hidden' },
-  // Marcas de estado para la batería: ocupan cero y no se ven. La lámina sigue sin
-  // llevar nada encima.
-  marca: { position: 'absolute', width: 0, height: 0 },
+  // Marcas de estado para la batería: un punto que no se ve pero que sí se puede leer.
+  // La lámina sigue sin llevar nada encima.
+  marca: MARCA_SUPERPUESTA,
 });

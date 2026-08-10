@@ -32,6 +32,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TESTIDS } from '@walkingadventure/nucleo/partida/repisa.js';
 
 import { familiaDe } from './tipografia.js';
+import { MARCA } from './marca.js';
 
 const PAPEL = '#f6f2e6';
 const TINTA = '#1e2b18';
@@ -99,7 +100,7 @@ export function PantallaRepisa({ repisa, alVolver = null }) {
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PAPEL },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 20, gap: 4 },
   volver: { fontSize: 14, color: LAPIZ, marginBottom: 6 },
   titulo: { fontSize: 24, color: TINTA, marginBottom: 10 },

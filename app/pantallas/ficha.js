@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -57,7 +58,7 @@ export function PantallaFicha({ ficha, alSeguir = null, alDescartar = null }) {
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PLACA },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 28, gap: 16 },
   tipo: { fontFamily: 'serif', fontSize: 13, letterSpacing: 2, textTransform: 'uppercase', color: LAPIZ },
   nombre: { fontFamily: 'serif', fontSize: 30, color: TINTA },

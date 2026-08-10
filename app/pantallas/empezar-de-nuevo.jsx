@@ -30,6 +30,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BLOQUES, TEXTOS_DE_EMPEZAR_DE_NUEVO } from '../datos/empezar-de-nuevo.js';
 
 import { familiaDe } from './tipografia.js';
+import { MARCA } from './marca.js';
 
 const PAPEL = '#f6f2e6';
 const TINTA = '#1e2b18';
@@ -130,7 +131,7 @@ export function PantallaEmpezarDeNuevo({ pantalla, empezarDeNuevo, alVolver = nu
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PAPEL },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 20 },
   volver: { fontSize: 14, color: LAPIZ, marginBottom: 6 },
   titulo: { fontSize: 16, fontWeight: '600', color: TINTA, marginBottom: 16 },

@@ -26,6 +26,7 @@ import { OFICIOS } from '@walkingadventure/nucleo/quests/oficios.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { MapaRealSinMontar } from './mapa-real.jsx';
 import { PantallaMapa } from './mapa.jsx';
+import { MARCA_SUPERPUESTA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -624,5 +625,5 @@ const estilos = StyleSheet.create({
   accionTexto: { fontFamily: 'serif', fontSize: 18, color: TINTA, textDecorationLine: 'underline' },
   accionMenor: { marginTop: 14, alignSelf: 'flex-start' },
   accionMenorTexto: { fontSize: 15, color: TINTA, opacity: 0.8 },
-  marca: { position: 'absolute', width: 0, height: 0 },
+  marca: MARCA_SUPERPUESTA,
 });

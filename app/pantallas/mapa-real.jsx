@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { MARCA_SUPERPUESTA } from './marca.js';
 
 /** Lo que se dice cuando el mapa real no está montado. Es diagnóstico, no copy de juego. */
 export const SIN_MAPA_REAL = 'sin-mapa-real: falta la capa de teselas, que ninguna spec ha nombrado todavía';
@@ -40,5 +41,5 @@ export function MapaRealSinMontar({ centro, tamano }) {
 const estilos = StyleSheet.create({
   superficie: { flex: 1, backgroundColor: '#d9d2c0' },
   aviso: { fontSize: 1, opacity: 0 },
-  marca: { position: 'absolute', width: 0, height: 0 },
+  marca: MARCA_SUPERPUESTA,
 });

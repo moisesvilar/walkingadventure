@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CAUSAS_DE_ERROR, ESTADOS_DE_ABRIR, ESTADOS_DE_GUARDAR } from '../datos/copia.js';
+import { MARCA } from './marca.js';
 
 const TINTA = '#1e2b18';
 const LAPIZ = '#9a9483';
@@ -145,7 +146,7 @@ export function AbrirCopia({ copia, alAbrir = null }) {
 }
 
 const estilos = StyleSheet.create({
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   secundaria: { paddingHorizontal: 24, paddingVertical: 8 },
   accion: { fontSize: 13, color: LAPIZ, paddingVertical: 6 },
   espera: { fontSize: 13, color: LAPIZ, paddingVertical: 6 },

@@ -21,13 +21,17 @@
 // recorrer el arranque entero.
 
 import React, { useEffect, useState } from 'react';
-import { Linking, Pressable, SafeAreaView, StyleSheet, Text } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text } from 'react-native';
 
 import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
 import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
+// El área segura de la app. No es el `SafeAreaView` de `react-native`, que en Android es un
+// `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
+// respeta los insets en las dos plataformas.
+import { AreaSegura } from './plataforma/area-segura.jsx';
 import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
 import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
@@ -146,7 +150,7 @@ export function App() {
 
   if (enArranque) {
     return (
-      <SafeAreaView style={estilos.raiz}>
+      <AreaSegura style={estilos.raiz}>
         <ArranqueMontado
           almacen={almacen}
           copia={copia}
@@ -168,7 +172,7 @@ export function App() {
             setEnArranque(false);
           }}
         />
-      </SafeAreaView>
+      </AreaSegura>
     );
   }
 
@@ -189,7 +193,7 @@ export function App() {
   // que había antes de esta fila.
   if (partida) {
     return (
-      <SafeAreaView style={estilos.raiz}>
+      <AreaSegura style={estilos.raiz}>
         <AntesDeSalirMontado
           partida={partida.estado}
           personaje={partida.personaje}
@@ -201,12 +205,12 @@ export function App() {
           // a preparar nada es el criterio de SPEC-028 que esto cierra.
           alAndar={(echada) => setSalida(echada ?? { conAventura: false })}
         />
-      </SafeAreaView>
+      </AreaSegura>
     );
   }
 
   return (
-    <SafeAreaView style={estilos.raiz}>
+    <AreaSegura style={estilos.raiz}>
       {/* El paso al mapa. Existe en todas las compilaciones porque el mapa es del
           juego; lo provisional es el paso, no la pantalla. */}
       {!enRevision && !enMarcha ? (
@@ -244,7 +248,7 @@ export function App() {
           noReconocidos={gancho.noReconocidos}
         />
       )}
-    </SafeAreaView>
+    </AreaSegura>
   );
 }
 

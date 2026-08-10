@@ -41,6 +41,7 @@ import { CapaDescarte } from './descarte.jsx';
 import { PantallaFicha } from './ficha.js';
 import { PantallaLoQueSeCuenta } from './lo-que-se-cuenta.js';
 import { PantallaVisor } from './visor.js';
+import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -160,7 +161,7 @@ export function PantallaLlegada({
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PLACA },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   hueco: { flex: 1, padding: 28, justifyContent: 'center', gap: 24 },
   mundo: { fontFamily: 'serif', fontSize: 20, lineHeight: 30, color: TINTA },
   aUnToque: { paddingHorizontal: 28, paddingTop: 24 },

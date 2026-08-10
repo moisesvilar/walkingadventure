@@ -20,6 +20,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { TEXTOS, VISTAS } from '@walkingadventure/nucleo/partida/capitulos.js';
+import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -188,7 +189,7 @@ export function PantallaDiarioPorHistorias({ capitulo, textos = {}, alVerPorDias
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PLACA },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 28, gap: 14 },
   volver: { fontFamily: 'System', fontSize: 14, color: LAPIZ },
   titular: { fontFamily: 'serif', fontSize: 28, color: TINTA },

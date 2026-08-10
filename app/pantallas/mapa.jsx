@@ -21,6 +21,7 @@ import { mensajeDeError } from '../plataforma/capacidades.js';
 import { acerca, arrastra, normaliza, vistaDe } from '../mapa/camara.js';
 import { FASES } from '../mapa/fases.js';
 import { Lamina } from '../render/lamina.jsx';
+import { MARCA_SUPERPUESTA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -287,6 +288,6 @@ const estilos = StyleSheet.create({
   accionTexto: { fontFamily: 'serif', fontSize: 18, color: TINTA, textDecorationLine: 'underline' },
   fase: { fontFamily: 'serif', fontSize: 17, color: TINTA, opacity: 0.5, marginTop: 10 },
   faseHecha: { opacity: 1 },
-  // Marcas de estado para la batería: ocupan cero y no se ven.
-  marca: { position: 'absolute', width: 0, height: 0 },
+  // Marcas de estado para la batería: un punto que no se ve pero que sí se puede leer.
+  marca: MARCA_SUPERPUESTA,
 });

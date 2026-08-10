@@ -23,6 +23,7 @@ import { PanResponder, StyleSheet, Text, View } from 'react-native';
 import { ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
 
 import { acerca, arrastra, normaliza, vistaDe } from '../mapa/camara.js';
+import { MARCA_SUPERPUESTA } from './marca.js';
 
 /** El tamaño de la marca de posición, en px. La marca de aviso es algo menor. */
 const MARCA_POSICION_PX = 14;
@@ -190,8 +191,8 @@ const LAPIZ = '#6b6250';
 const estilos = StyleSheet.create({
   // A sangre: la lámina ocupa la pantalla entera y no hay cabecera ni pie que la recorte.
   raiz: { flex: 1, backgroundColor: TINTA },
-  // Marcas de estado para la batería: ocupan cero y no se ven.
-  marca: { position: 'absolute', width: 0, height: 0 },
+  // Marcas de estado para la batería: un punto que no se ve pero que sí se puede leer.
+  marca: MARCA_SUPERPUESTA,
   marcaPosicion: {
     position: 'absolute',
     left: '50%',

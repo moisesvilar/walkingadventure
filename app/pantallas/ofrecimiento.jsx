@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -72,7 +73,7 @@ export function PantallaOfrecimiento({ ofrecimiento, alLevantar = null, alDejarl
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PLACA, justifyContent: 'space-between' },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 24, gap: 12, marginTop: 48 },
   sitio: { fontSize: 13, color: LAPIZ, letterSpacing: 2 },
   titular: { fontSize: 26, color: TINTA, lineHeight: 32 },

@@ -13,6 +13,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { familiaDe } from './tipografia.js';
+import { MARCA } from './marca.js';
 
 const PAPEL = '#f6f2e6';
 const TINTA = '#1e2b18';
@@ -63,7 +64,7 @@ export function PantallaZurron({ zurron, alSeguir = null }) {
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PAPEL },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 24, paddingBottom: 12 },
   // Versalitas del color del filete, como el resto de rótulos del momento.
   rotulo: { fontSize: 11, letterSpacing: 1.2, textTransform: 'uppercase', color: FILETE, marginBottom: 12 },

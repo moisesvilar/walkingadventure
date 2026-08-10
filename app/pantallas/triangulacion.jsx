@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -73,7 +74,7 @@ export function PantallaTriangulacion({ escena, textos = {}, alApuntarlo = null 
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PLACA },
-  marca: { width: 0, height: 0 },
+  marca: MARCA,
   contenido: { padding: 28, gap: 14 },
   antetitulo: { fontFamily: 'System', fontSize: 13, color: LAPIZ, letterSpacing: 1 },
   titular: { fontFamily: 'serif', fontSize: 26, color: TINTA },
