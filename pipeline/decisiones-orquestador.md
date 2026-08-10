@@ -248,3 +248,46 @@ Y cuatro más, todas de cableado:
 - **B5 no tiene orquestación en `app/`**: existen todas las piezas y no hay máquina de estados que las encadene.
 
 **La lección, y es la misma que §6r a mayor escala:** una suite verde no demuestra que el producto funcione. Cada fila probaba su lado con diligencia; nadie recorría el camino entero hasta que alguien lo recorrió.
+
+## 6w · Trece flujos verdes que no recorren nada, y el cronómetro que los delata
+
+Con el emulador montado —`wa-pixel`, API 35, la app instalada, Metro con `EXPO_PUBLIC_PROXY=http://10.0.2.2:8138` y el proxy ciego detrás— los dieciséis flujos de `@app` se ejecutan por primera vez en la vida del proyecto. El runner canta **16 ejecutados, 13 pasan, 3 fallan**, y ese número es falso como afirmación sobre la app.
+
+Lo delata el reloj: **los trece que pasan tardan 9-10 s y los tres que fallan tardan 70 s.** Un flujo que recorre pantallas de verdad tarda más de un minuto; diez segundos son `launchApp` y dos afirmaciones. Los trece verdes son la rama de guarda que se les añadió —`runFlow: when: notVisible: <su pantalla>`—, que comprueba que la app abrió en el arranque y que su pantalla **no está a la vista**. Es honesto lo que dicen, y está escrito con todas las letras en cada fichero; lo que no es honesto es **sumarlo en la misma casilla que un verde de verdad**.
+
+Es §6h otra vez, y en el sitio más caro: la pieza que al no estar no protesta es ahora *la pantalla entera*. La causa de fondo es real y ya estaba declarada en el informe final —**B5 no tiene orquestación en `app/`**, y desde SPEC-027 la app abre en el arranque, así que al andamiaje y a su tira de pasos provisionales ya no se llega—; el defecto no es que las pantallas falten, es que **su ausencia sale verde**.
+
+**Decisión:**
+
+1. **Un verde de límite declarado no se cuenta con los demás.** El runner gana un cuarto estado para `@app` —`ejecutados · pasan · fallan · solo comprueban su límite`— y los flujos de límite se declaran a sí mismos con un marcador en cabecera. Contrato, no vigilancia: una prueba de `@nucleo` fija **la lista exacta** de flujos marcados, así que marcar uno nuevo es un acto deliberado y visible, y desmarcarlo el día que haya camino también.
+2. **Los tres rojos son de espera, no de lógica, y se arreglan como tal.** Los tres mueren en la misma línea —`assertVisible: 'Lo que se cuenta hoy'`, A1P7— justo después de pulsar `arranque-seguir` en A1P6. Componer la primera lista tarda **11 s medidos** y la espera por defecto de Maestro son 5: es `extendedWaitUntil`, el mismo que el flujo ya usa dos líneas antes para `mapa-lamina`. **Que tarde once segundos queda declarado**: ninguna spec le pone presupuesto —el minuto de RNF-PER-001 es el del levantamiento— y once segundos mirando una pantalla quieta no es un detalle de test, es una decisión de producto pendiente.
+3. **El número que se publica es el medido, no el del runner viejo.** El informe final decía «ni un flujo `@app` se ha ejecutado»; era cierto al escribirlo y hoy no lo es. Se corrige con lo que hay: dieciséis se ejecutan, tres recorren la app, trece comprueban que su pantalla sigue sin existir.
+
+## 6x · No era espera: la app no repinta, y por eso no se puede pasar de A1P6
+
+El punto 2 de §6w está mal y lo corrijo aquí en vez de dejarlo puesto. Escribí que los tres rojos eran «de espera, no de lógica» y que se arreglaban con `extendedWaitUntil`; lo escribí **repitiendo los once segundos que me contó quien implementó la fila, sin medirlos yo**. Con la espera subida a sesenta segundos siguen rojos, y tardan **1m 52s**. No era espera.
+
+Lo que pasa, reproducido cuatro veces sobre el emulador y sin ninguna interpretación de por medio:
+
+1. El flujo llega a A1P6 —«TU MAPA»— y **la lámina se pinta entera y bien**: Reinos da Lúa Rota, la costa, las calzadas, once rótulos sobre placa. El pintado en Skia funciona en el dispositivo, y eso es lo primero que hay que decir porque es la fila entera de B4 dando la cara.
+2. Se pulsa `arranque-seguir`. Maestro lo da por hecho, y `adb shell input tap` sobre el centro exacto del nodo también.
+3. **La pantalla no cambia.** Ni con Maestro ni a mano, ni a los 5 s ni a los 60. El árbol de accesibilidad sigue trayendo A1P6 entero. No hay excepción en logcat, no hay LogBox, no hay segunda ventana, el proceso está **al 0 % de CPU**: no es un hilo bloqueado ni un error tragado.
+4. Basta **forzar un paso de layout sin tocar la pantalla** —`adb shell wm size 1080x2401`, un píxel— para que aparezca A1P7 entera y correcta: «Lo que se cuenta hoy», la lista compuesta, «Salir a andar».
+
+Es decir: **la pulsación sí llega y el estado sí avanza; lo que no ocurre es el repintado.** El árbol nativo se queda con la pantalla anterior hasta que algo externo obliga a un layout. Sin ese empujón, la app **no pasa de A1P6 en ningún caso**, que es lo mismo que decir que hoy el juego no se puede jugar en el dispositivo.
+
+**Consecuencias, y esta es la parte que importa del veredicto:**
+
+- El número honesto de `@app` no es «13 pasan» ni «3 pasan»: es **0 pantallas verificadas de 16 flujos ejecutados**. Trece comprueban que su pantalla no existe todavía y tres mueren en la primera pantalla de verdad que intentan pasar.
+- Va a **wa-dev como defecto de código**, no a wa-qa-dev como prueba floja. Cambiar la prueba aquí sería exactamente lo que el encargo prohíbe.
+- Y queda dicho lo que esto le hace al informe final: la app **arranca, levanta el mundo, congela el documento y lo pinta**, y ahí se para. Todo lo que hay detrás del mapa —la portada, la salida, las llegadas, el telón, el diario— está probado en Node y **no se ha visto funcionar en un teléfono ni una vez**.
+
+### 6x-bis · La causa era LogBox, no un fallo de repintado — y detrás había una segunda pantalla que no cabe
+
+Corrijo el mecanismo que di en §6x. Yo describí bien lo observado —la pulsación no hacía nada y un `wm size` de un píxel destapaba A1P7— pero **la explicación que puse encima («la app no repinta») era mía y era falsa**. Lo medido por quien implementó: al pintar la lámina, Skia imprimía **seis avisos de obsolescencia** (`addRect`, `moveTo`, `lineTo`, `addCircle`, `addRRect`, `close`) desde `app/render/skia.js`, y un `console.warn` en compilación de desarrollo levanta el rótulo de **LogBox**, una franja al pie que **no sale en el árbol de accesibilidad** —por eso yo no la veía en el volcado ni en `dumpsys window`— y que caía justo encima de «Seguir»: franja de 2154 a 2274 contra un botón en `[63,2183][210,2246]`. Se comía el toque. El `wm size` no forzaba un repintado: descolocaba la franja.
+
+Es el mismo mecanismo que ya estaba anotado en `app/plataforma/area-segura.jsx` de la vez anterior, y se cierra donde nace: `caminoDe` pasa a `Skia.PathBuilder` y **la app no emite ni un aviso**. Verificado por mí: el arranque ya pasa de A1P6 y A1P7 se pinta entera, con sus cuatro aventuras.
+
+**Y ahí aparece la siguiente, que solo se ve en pantalla:** con cuatro aventuras en la lista, A1P7 **no cabe** —las tarjetas llegan a 2242 de los 2277 útiles— y «Y puedes salir a andar sin coger ninguna» y **«Salir a andar», que es la frontera de registro**, quedan por debajo del borde. La pantalla es un `ScrollView`, así que la persona llega bajando; **quien no llega es la prueba**, que afirma sin desplazarse. Esto sí es defecto de prueba y no de código: va a wa-qa-dev.
+
+La lección se repite con una vuelta más: **cada defecto que el dispositivo destapa esconde al siguiente**. Tres capas hasta ahora —Reanimated que no dejaba arrancar, el área segura, LogBox— y cada una había que quitarla para ver la de debajo. Ninguna era visible desde Node.

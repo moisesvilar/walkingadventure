@@ -1368,3 +1368,28 @@ Y con eso, todo lo que solo se ve en pantalla sigue sin revisar: la paridad visu
 ## Verificado con
 
 `bash scripts/qa-tester-run.sh SUITE` → **PASS, 2597 casos, 2594 pasan, 0 fallan, 3 saltados**. `node test/headless.mjs` en verde. `verifica-gherkin` (36 características, 191 casos) y `verifica-flujo` (40 pantallas, 83 aristas) en verde. Y la partida completa jugada de punta a punta en Node, que es la que encontró lo que las otras no veían.
+
+---
+
+## 10-ago-2026 · El emulador, y las cuatro capas que había debajo
+
+La app llevaba dos filas enteras de pantallas escritas y **ni un flujo `@app` ejecutado**: no había simulador en la máquina. Se montó uno —`wa-pixel`, Android 15 (API 35), la app compilada e instalada, Metro sirviendo el bundle, el proxy ciego detrás— y se ejecutaron los dieciséis. Lo que salió es la mejor demostración que tiene este proyecto de por qué una suite verde no basta.
+
+**Lo primero, y no es un detalle: el mapa se pinta en el teléfono, y se pinta bien.** *Reinos da Lúa Rota* sobre Skia, con la costa, las calzadas cosidas, once rótulos sobre placa, el marco y la brújula. La tubería entera corre dentro del móvil.
+
+**Y debajo, cuatro defectos en fila, cada uno tapando al siguiente**, ninguno visible desde Node:
+
+1. **Reanimated sin declarar.** Skia lo declara como par *opcional* y lo exige al importarse. La app compilaba, instalaba y moría al abrir con `[runtime not ready]`. En Reanimated 4 la transformación de worklets se mudó a `react-native-worklets`, así que son dos dependencias y un plugin de Babel, y son una sola decisión.
+2. **El área segura que en Android no existe.** El `SafeAreaView` de `react-native` allí es un `View` corriente, y la cabecera del arranque se pintaba **bajo la barra de estado**: el contador «1/5» en `Rect(115,54-169,101)`, invisible para cualquier automatización. Con `AreaSegura`, `[115,182][169,229]`.
+3. **LogBox comiéndose el toque, que es el caro.** Cada lámina pintada disparaba seis avisos de obsolescencia de Skia (`addRect`, `moveTo`, `lineTo`, `addCircle`, `addRRect`, `close`), y un `console.warn` en compilación de desarrollo levanta el rótulo de LogBox: una franja al pie —de 2154 a 2274— que **no aparece en el árbol de accesibilidad** y que caía justo encima de «Seguir» en A1P6 (`[63,2183][210,2246]`). La pulsación se perdía. **No se podía pasar del mapa**, ni con Maestro ni a mano; el proceso al 0 % de CPU, sin excepción en logcat, sin segunda ventana. Lo delató que un `wm size` de un píxel destapara A1P7 entera: no era un repintado que faltara, era una franja que se movía. Cerrado donde nace —`caminoDe` pasa a `Skia.PathBuilder` y la app no emite ni un aviso—, que es la misma lección que la vez anterior: un aviso de desarrollo no es cosmética, es una franja que tapa una acción.
+4. **La frontera de registro bajo el pliegue.** Con cuatro aventuras en la lista del día uno, «Salir a andar» queda fuera de pantalla; con una, cabe. La pantalla es un `ScrollView` y la persona baja: quien no bajaba era la prueba. Una prueba que solo pasa cuando el reparto es corto convierte la longitud del casting en su resultado.
+
+Con los cuatro cerrados, **el arranque se recorre entero y sale a la portada**: A1P1 → nombre → tramo → permiso → dónde se levanta → generación → mapa → primera aventura → salir a andar → portada → lo que hay hoy.
+
+**Y el hallazgo de contabilidad, que vale tanto como los defectos.** El runner cantaba «16 ejecutados, 13 pasan, 3 fallan». Lo delató el reloj: los trece verdes tardaban **9-10 s** y los rojos **más de un minuto**. Los trece solo ejecutaban una guarda que comprueba que su pantalla **sigue sin existir** —B5 y B6 no tienen navegación en `app/`, y desde SPEC-027 al andamiaje ya no se llega—. Es honesto lo que dicen; lo deshonesto era sumarlo en la misma casilla que un verde de verdad: §6h otra vez, ahora con una pantalla entera como pieza que al faltar no protesta. Ahora los flujos se declaran con `# @limite-declarado`, una prueba de núcleo fija **la lista exacta** para que marcar sea un acto deliberado, y el runner tiene **un cuarto estado**: *ejecutados · pasan · fallan · solo comprueban su límite*. El número de hoy: **16 ejecutados, 2 recorren la app y pasan, 2 rojos —uno real, `zurron`, porque no hay puerta a los ajustes, y uno por caída de `adb`—, 12 de límite declarado.**
+
+Dos cosas más, pequeñas y ciertas. **`node --test test/nucleo/` no funciona en Node 24** —trata el directorio como fichero y falla con `MODULE_NOT_FOUND`—: `CLAUDE.md` y el `README.md` llevaban tiempo publicando un comando que no arranca, y ahora nombran la forma que sí (enumerar los ficheros, que es lo que hace el runner). Y **el botón atrás del sistema no está decidido**: `docs/flujo.md` no declara vuelta de «Lo que hay hoy» a la portada, y pulsarlo allí se lleva la app entera y deja la raíz vacía. Queda anotado en `docs/pendientes.md`, porque en Android el botón existe siempre y no decidir es decidir que salga del juego desde cualquier pantalla.
+
+## Verificado con
+
+`bash scripts/qa-tester-run.sh SUITE` → **@nucleo 97 ficheros, 2603 casos, 2600 pasan, 0 fallan, 3 saltados**; **@app 16 ejecutados · 2 pasan · 2 fallan · 12 de límite declarado**. `maestro test test/app/arranque.yaml` en verde de punta a punta, dos ejecuciones seguidas, sobre `wa-pixel`. Y el mapa de A1P6 mirado con los ojos, que para el pintado no hay sustituto.

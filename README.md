@@ -24,7 +24,7 @@ El servidor sirve los estáticos de `prototipo/` y hace de proxy de Overpass con
 
 El Overpass local y la caché se comparten entre todas las sesiones y worktrees de la máquina: la base de datos vive en el volumen Docker `walkingadventure-overpass-db` y el extracto y la caché en `~/.walkingadventure/`. La primera vez en cada máquina, `scripts/overpass-setup.sh` (descarga el extracto e inicia la importación, que tarda horas); después el contenedor arranca solo con Docker y no hay que volver a ejecutarlo. El script es idempotente: si ya sirve datos, sale.
 
-Tests sin navegador ni red: `node test/headless.mjs` y `node --test test/nucleo/`. **Los dos arrancan en un clon limpio sin instalar nada**, y eso es un criterio duro: el día que la red de seguridad del determinismo dependa de un `node_modules`, deja de ser una red.
+Tests sin navegador ni red: `node test/headless.mjs` y `node --test $(find test/nucleo -type f -name '*.test.mjs' | sort)` (la forma de directorio, `node --test test/nucleo/`, dejó de funcionar en Node 24). **Los dos arrancan en un clon limpio sin instalar nada**, y eso es un criterio duro: el día que la red de seguridad del determinismo dependa de un `node_modules`, deja de ser una red.
 
 ## Flujo
 

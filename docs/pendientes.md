@@ -25,6 +25,8 @@ Tres sí conviene mirarlos antes de tocar lo que dependa de ellos: **el tamaño 
 
 **El paso 3 está cerrado** (7-ago-2026): `docs/prd.md` y `docs/checklist.md`. **Lo siguiente es el paso 4, ejecutar el checklist con el pipeline**, y a partir de ahí la columna `Estado` del checklist es de quien orquesta el bucle: nadie la toca a mano. El PRD dejó marcados quince huecos de cobertura en `docs/testing.md` (RF con ⚠ sin escenario) que conviene rellenar antes o durante sus specs.
 
+**Y uno nuevo, que solo apareció al ejecutar los flujos en un dispositivo** (10-ago-2026): **qué hace el botón atrás del sistema en Android**. `docs/flujo.md` declara las vueltas del arranque y la de la ficha a la lista, y nada más; en «Lo que hay hoy» no hay camino declarado de vuelta a la portada. Medido en el emulador: pulsarlo allí **se lleva la app entera** y deja la raíz vacía. En Android el botón existe siempre, así que no decidir es decidir que salga del juego desde cualquier pantalla. No bloquea nada hoy —la prueba dejó de afirmar una transición que el diseño no promete—, pero es de las cosas que se notan el primer día de uso real.
+
 ## Ideas sin cerrar
 
 Vienen de `docs/ideas.md` y no son compromisos: falta decidir si entran.

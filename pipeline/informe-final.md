@@ -87,11 +87,33 @@ En `pipeline/decisiones-orquestador.md`, veintidós entradas, más las `## Decis
 - **Manda el criterio duro** de arrancar sin `node_modules`: *el día que la red de seguridad del determinismo dependa de un `node_modules`, deja de ser una red* (§6u).
 - Un AC de SPEC-014 chocaba con RF-NPC-002 y **manda el requisito** (§6p).
 
-## 8 · Lo que NO se ha verificado
+## 8 · El dispositivo, que llegó después — y lo que destapó
 
-**Ni un flujo `@app` se ha ejecutado. Ninguno.** Hay **13 escritos** en `test/app/` y **cero corridos**: Maestro 2.8.0 está instalado —lo instalé la primera mañana— pero **no hay simulador**: `xcode-select -p` da solo Command Line Tools, `xcrun simctl` no existe, y no hay SDK de Android. El runner lo registra como infraestructura ausente y **nunca como verde**, que era el punto; pero conviene decirlo sin rodeos: **de los 2597 casos, ninguno ha tocado un dispositivo.**
+Esta sección decía «ni un flujo `@app` se ha ejecutado, ninguno», y era verdad al escribirla. **El 10 de agosto se montó el emulador** —`wa-pixel`, Android 15 (API 35), la app compilada e instalada, Metro sirviendo el bundle y el proxy ciego detrás— y los **16 flujos se ejecutaron por primera vez en la vida del proyecto**. Lo que se vio merece contarse en orden, porque cada defecto tapaba al siguiente.
 
-Con eso queda sin revisar todo lo que solo se ve en pantalla: **la paridad visual de los cinco estilos**, la fluidez del render en gama media, el háptico desde el bolsillo, los gestos, el diálogo nativo de permisos, y **el minuto medido en el dispositivo de referencia** — que la spec exige declarar y **el repo no declara en ningún sitio**. El minuto que sí está medido (3222 ms) es en Node contra el Overpass del proyecto.
+**Lo primero, lo bueno: el mapa se pinta, y se pinta bien.** En el teléfono, sobre Skia: *Reinos da Lúa Rota*, la costa, las calzadas cosidas, once rótulos sobre placa, el marco y la brújula. La tubería entera —Overpass, generación, congelación, colocación, pintado— corre dentro del móvil. Eso es B1, B2 y B4 dando la cara a la vez.
+
+**Y lo segundo: hasta ese día, la app no arrancaba, y después no pasaba de la sexta pantalla.** Cuatro defectos, todos invisibles desde Node, cada uno oculto tras el anterior:
+
+1. **Reanimated sin declarar.** Skia lo declara como par *opcional* y lo exige al importarse: la app compilaba, instalaba y moría con `[runtime not ready]`.
+2. **El área segura que en Android no existe.** El `SafeAreaView` de `react-native` no hace nada allí, y la cabecera del arranque se pintaba **debajo de la barra de estado**.
+3. **LogBox comiéndose el toque.** Seis avisos de obsolescencia de Skia por lámina pintada levantaban el rótulo de desarrollo —una franja al pie que **no aparece en el árbol de accesibilidad**— justo encima de «Seguir» en A1P6. La pulsación se perdía, y con ella **el juego entero**: no había forma de pasar del mapa. Cerrado donde nace, con `PathBuilder`: la app no emite ni un aviso.
+4. **La frontera de registro bajo el pliegue.** Con cuatro aventuras en la lista del día uno, «Salir a andar» queda fuera de pantalla. La persona baja; la prueba afirmaba sin bajar.
+
+Con los cuatro cerrados, **el arranque se recorre entero**: A1P1 → nombre → tramo → permiso → dónde se levanta → generación → **mapa** → primera aventura → salir a andar → **portada** → lo que hay hoy. Eso es lo que hoy se puede jugar en un teléfono, verificado a mano y por Maestro.
+
+**El recuento honesto de `@app`, que no es el que cantaba el runner.** Trece flujos «pasaban» en 9-10 s mientras los que recorren la app tardan más de un minuto: solo ejecutaban una guarda que comprueba que su pantalla **sigue sin existir**. Sumar eso con un verde de verdad es el patrón §6h en su versión más cara. Ahora el runner tiene un cuarto estado y el número es este:
+
+| | |
+| --- | --- |
+| Ejecutados | **16** |
+| Recorren la app y pasan | **2** (`arranque`, `antes-de-salir`) |
+| Rojos | **2** — uno real (`zurron`: no hay puerta a los ajustes) y uno por caída de `adb` |
+| Solo comprueban su límite declarado | **12** |
+
+Los doce lo son por una causa ya escrita más abajo: **B5 y B6 no tienen orquestación en `app/`**, y desde SPEC-027 la app abre en el arranque, así que al andamiaje y a su tira de pasos provisionales ya no se llega. Que estén marcados y contados aparte es lo que impide que su ausencia se lea como verificación.
+
+**Lo que sigue sin verificarse**, y ahora se puede decir con más precisión: todo lo que hay **detrás de «Lo que hay hoy»** —la ficha, la salida, las llegadas, el visor del anclaje, la escena, el telón, el diario, la repisa, los mapas múltiples— está probado en Node y **no se ha visto funcionar en un teléfono ni una vez**. Y sigue sin revisarse la **paridad visual de los cinco estilos**, la fluidez en gama media, el háptico desde el bolsillo, los gestos de dos dedos, el diálogo nativo de permisos, y **el minuto medido en el dispositivo de referencia** — que la spec exige declarar y **el repo no declara en ningún sitio**. El minuto que sí está medido (3222 ms) es en Node contra el Overpass del proyecto.
 
 **Otras cosas declaradas y no resueltas:**
 
@@ -103,7 +125,7 @@ Con eso queda sin revisar todo lo que solo se ve en pantalla: **la paridad visua
 
 ## 9 · Lo primero que haría mañana
 
-1. **Montar un simulador** —Xcode completo o SDK de Android— y correr los 13 flujos. Es el único agujero grande que queda, y crece con cada fila de pantalla.
+1. ~~**Montar un simulador** y correr los flujos.~~ → **hecho el 10-ago-2026**, y era el agujero grande: destapó cuatro defectos que ninguna prueba de Node podía ver y dejó el recuento de `@app` diciendo la verdad. Lo que queda de aquí es consecuencia suya, no sustituto: **cablear la navegación de B5 y B6 en `app/`** para que los doce flujos de límite declarado dejen de serlo. Mientras no exista, doce pantallas escritas y probadas en Node no se pueden abrir en un teléfono.
 2. **Cablear la orquestación de B5 en `app/`**: la máquina de estados de una salida. Las piezas están todas.
 3. **Declarar el dispositivo de referencia** y medir el minuto en él.
 4. **Recapturar los fixtures** con la consulta nueva, para que los bordillos se verifiquen sobre dato real.
