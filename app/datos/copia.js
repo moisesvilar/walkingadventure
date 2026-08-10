@@ -123,9 +123,15 @@ export function creaCopia({ almacen, binarios = null, comparte, elige, nucleo, c
     const { manifiesto, partes } = await componeExportacion({ almacen, binarios });
     const contenido = empaqueta(partes);
     const nombre = nombreDeFichero(titulo ?? (await tituloDelMundoPrincipal()));
-    await comparte({ nombre, contenido });
+    const hoja = await comparte({ nombre, contenido });
     return {
       estado: ESTADOS_DE_GUARDAR.GUARDADA,
+      // Si la hoja del sistema se descartó sin guardar. Viaja hasta aquí porque
+      // **empezar de nuevo encadena el borrado a esta copia** (SPEC-040): quien cancela
+      // la hoja no ha guardado nada, y borrar detrás sería la pérdida de datos más cara
+      // del proyecto ocurriendo en silencio. Una hoja que no contesta se toma por
+      // guardada, que es lo que era antes de que existiera este campo.
+      compartida: hoja?.compartida !== false,
       nombre,
       bytes: contenido.length,
       manifiesto,

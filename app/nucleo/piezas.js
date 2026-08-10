@@ -63,6 +63,21 @@ import {
   validaManifiesto,
 } from '@walkingadventure/nucleo/partida/exportacion.js';
 import { CADENA_DEL_FORMATO, migra } from '@walkingadventure/nucleo/partida/migracion.js';
+import { REGISTROS, coloca, textoConRegistro } from '@walkingadventure/nucleo/lenguaje/registro.js';
+import {
+  ACCIONES,
+  DESTINO_TRAS_BORRAR,
+  ESTADOS_DE_EMPEZAR,
+  SITIO,
+  TESTIDS,
+  borraPartida,
+  componeEmpezarDeNuevo,
+  exigeSinBorradoAMedias,
+  hayBorradoAMedias,
+  loQueSePierde,
+  mapasDeLaPartida,
+  terminaBorradoPendiente,
+} from '@walkingadventure/nucleo/partida/borrado.js';
 
 /** Lo que `creaLevantamiento` enumera en `DEL_NUCLEO`, ni una función más. */
 export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
@@ -122,3 +137,29 @@ export const NUCLEO_DE_LA_COPIA = Object.freeze({
  * derivar de esa lista y no copiarla; lo que no puede es arrastrar el paquete consigo.
  */
 export const NUCLEO_DEL_RESPALDO = Object.freeze({ PREFIJOS_DE_LA_PARTIDA });
+
+/**
+ * Lo que `creaEmpezarDeNuevo` enumera en `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-040 vuelve a pasar por la misma puerta y por la misma razón (§6u): la frase que
+ * enumera lo que se pierde y el encadenado del borrado con la copia tienen que poder
+ * leerse desde `node --test` sin resolver nada instalado, que es el único sitio donde
+ * «no enumera ceros» y «si la copia falla no se borra» se pueden poner rojos.
+ */
+export const NUCLEO_DE_EMPEZAR_DE_NUEVO = Object.freeze({
+  REGISTROS,
+  coloca,
+  textoConRegistro,
+  ESTADOS_DE_EMPEZAR,
+  TESTIDS,
+  ACCIONES,
+  DESTINO_TRAS_BORRAR,
+  SITIO,
+  componeEmpezarDeNuevo,
+  loQueSePierde,
+  mapasDeLaPartida,
+  borraPartida,
+  terminaBorradoPendiente,
+  exigeSinBorradoAMedias,
+  hayBorradoAMedias,
+});

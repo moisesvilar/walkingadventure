@@ -27,10 +27,11 @@ import { estadoInicial } from '@walkingadventure/nucleo/partida/estado.js';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
 import { creaCopia } from './datos/copia.js';
+import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
 import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
-import { NUCLEO_DE_LA_COPIA } from './nucleo/piezas.js';
+import { NUCLEO_DE_EMPEZAR_DE_NUEVO, NUCLEO_DE_LA_COPIA } from './nucleo/piezas.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
@@ -69,6 +70,11 @@ export function App() {
     elige: eligeConElSistema,
     nucleo: NUCLEO_DE_LA_COPIA,
   }));
+  // Empezar de nuevo, que es borrar. La puerta a A6P7 es la fila de los ajustes, que es
+  // de la fila 38 y todavía no está montada; lo que sí cuelga de aquí, porque es del
+  // ciclo de vida de la app y no de ninguna pantalla, es **rematar el borrado que un
+  // cierre dejó a medias**.
+  const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
   const [enRevision, setEnRevision] = useState(false);
   const [enMapa, setEnMapa] = useState(false);
   // La app abre en el arranque, que es lo que ve quien la instala. Se sale de él por
@@ -88,6 +94,26 @@ export function App() {
   // `__wa.demo()` del prototipo— en lugar de sobre uno inventado aquí.
   const [enMarcha, setEnMarcha] = useState(false);
   const [mundoDelPaso, setMundoDelPaso] = useState({ documento: null, fallo: null });
+
+  // Lo primero de todo, antes de leer nada de la partida: si hay un borrado marcado, se
+  // termina. Una interrupción a mitad tiene un único final posible —el borrado acaba y
+  // se llega al arranque—, y no una partida con parte de sus documentos que se abre,
+  // parece jugable y falla más tarde por una celda que el índice declara y el almacén no
+  // tiene (SPEC-040, `decisiones-orquestador.md` §6h).
+  useEffect(() => {
+    let vivo = true;
+    empezarDeNuevo.terminaPendiente()
+      .then((remate) => {
+        if (!vivo || !remate.habia) return;
+        setPartida(null);
+        setSalida(null);
+        setEnArranque(true);
+      })
+      // Si el remate falla, la marca sigue puesta y el siguiente arranque vuelve a
+      // intentarlo. No se reintenta en bucle y no se abre la partida a medio borrar.
+      .catch(() => {});
+    return () => { vivo = false; };
+  }, [empezarDeNuevo]);
 
   useEffect(() => {
     let vivo = true;

@@ -52,5 +52,19 @@ export function creaAlmacenDeBinarios() {
     guardados() {
       return [...datos.keys()].sort();
     },
+
+    /**
+     * Olvida todos los binarios. **Solo la usa empezar de nuevo** (SPEC-040): los
+     * binarios son parte del mundo congelado, y borrar la partida sin ellos dejaría en
+     * memoria las ilustraciones de un mundo que ya no existe.
+     *
+     * Sigue sin borrar nada por su cuenta, que es lo que dice la cabecera: aquí se
+     * borra porque alguien ha pedido explícitamente destruir la partida entera.
+     */
+    olvidaTodo() {
+      const cuantos = datos.size;
+      datos.clear();
+      return cuantos;
+    },
   };
 }
