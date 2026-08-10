@@ -181,8 +181,15 @@ export function App() {
           copia={copia}
           alSalirAAndar={(cerrado, lista, levantado) => {
             if (cerrado && levantado) {
+              const estado = estadoInicial({ semilla: cerrado.semilla });
+              // El personaje que cerró el arranque **es** el del área de la partida, y no
+              // una copia suya al lado. El área en blanco no se notaba mientras nadie la
+              // leía; en cuanto A6P7 la lee, la partida no tiene nombre —y lo que se
+              // congela y se exporta es el área, así que una partida guardada habría
+              // salido sin nombre sin que nada protestara.
+              estado.personaje = { ...estado.personaje, ...cerrado.personaje };
               setPartida({
-                estado: estadoInicial({ semilla: cerrado.semilla }),
+                estado,
                 // El oficio viaja dos veces y no es redundancia: la clave es con la que se
                 // filtra el catálogo, y la palabra —con género, que por eso vive en la app— es
                 // la que se lee bajo el nombre.

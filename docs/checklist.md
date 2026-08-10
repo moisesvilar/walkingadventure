@@ -83,6 +83,9 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 43 | navegacion-de-consulta | RF-DIARIO-002, RF-PROG-007, RF-PJ-010, RF-PERS-006, RF-RUMOR-002 | must | pending |
 | 44 | navegacion-en-la-calle | RF-BUCLE-005, RF-BUCLE-007, RF-BUCLE-011, RF-QUEST-004, RF-PRIV-004 | must | pending |
 | 45 | puerta-de-desarrollo | RF-INFRA-007 | must | pending |
+| 46 | fuente-de-salud-y-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
+
+La 46 sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 
 ## Notas de derivación
 
