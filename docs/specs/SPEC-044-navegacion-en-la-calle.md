@@ -81,7 +81,8 @@ Las dos son obligatorias y **la segunda es la que se pierde sola en un arreglo d
 - **Dado** quien se para dentro de un geofence el tiempo de permanencia, con la cadencia por tiempo activa y un fijo de error hasta diez metros, **cuando** se comprueba, **entonces** la llegada se valida.
 - **Dado** quien atraviesa un geofence andando a cuatro kilómetros por hora sin pararse, **cuando** se comprueba, **entonces** la llegada **no** se valida.
 - **Dado** quien atraviesa un geofence andando a cinco kilómetros por hora sin pararse, **cuando** se comprueba, **entonces** la llegada **no** se valida.
-- **Dado** un vehículo detenido dentro de un geofence —un atasco—, **cuando** se comprueba, **entonces** la llegada **no** se valida, por mucho que la deriva sea cero.
+- **Dado** un vehículo detenido dentro de un geofence —un atasco—, **cuando** se comprueba **mientras la traza siga diciendo vehículo**, **entonces** la llegada **no** se valida, por mucho que la deriva sea cero.
+- **Dado** ese mismo vehículo detenido, **cuando** pasan los `SALIDA_DE_VEHICULO_S = 120` quieto, **entonces** la traza deja de decir vehículo —SPEC-031 decide que quien juega se bajó— y la llegada **sí** valida, que es lo correcto: lo que hay dentro del geofence ya no es un coche parado.
 - **Dado** una traza clasificada como vehículo, **cuando** se mide la parada, **entonces** la respuesta es que no es parada, sea cual sea la deriva de la ventana.
 - **Dado** un error de fijo por encima del límite declarado, **cuando** se comprueba una llegada, **entonces** el límite está escrito con su número y no se disimula: por encima de σ ≈ 15 m la validación se degrada y por encima de σ ≈ 20 m deja de sostenerse.
 - **Dado** una posición de precisión mala, **cuando** se comprueba, **entonces** **no** se descarta: sigue contando, porque las posiciones malas quitarían metros que sí se anduvieron, y lo que hacen es degradar a ambiguo, que valida.
@@ -166,7 +167,7 @@ Las dos son obligatorias y **la segunda es la que se pierde sola en un arreglo d
                                                                 │
    CIERRA ─── hay beat, o cayó un micro-encuentro ──▶ A4P3 · A4P4   ·· fila 49: HUECO DECLARADO
           └── no has venido a nada, y es paraje ───▶ A4P7 la ficha
-          └── no has venido a nada, y es núcleo ───▶ A4P5 lo que aquí se cuenta   ⚠ arista que falta en docs/flujo.md
+          └── no has venido a nada, y es núcleo ───▶ A4P5 lo que aquí se cuenta   ⚠ arista que faltaba en docs/flujo.md
                                                                 │
    A4P4 ─── Seguir ──▶ NUCLEO ── sí ──▶ A4P5 ── Seguir ──▶ A3P1
                               └─ no ──▶ A3P1
@@ -176,7 +177,7 @@ Las dos son obligatorias y **la segunda es la que se pierde sola en un arreglo d
                                         └─ dejarlo como está ──▶ A4P7
 ```
 
-La arista marcada con ⚠ **no está en `docs/flujo.md` y hace falta**: está razonada, con la corrección propuesta, en «El hueco de `docs/flujo.md`».
+La arista marcada con ⚠ **no estaba en `docs/flujo.md` y hacía falta**: el dueño aprobó añadirla y ya está en el diagrama, junto con otras tres que destapó la guarda. Está contado en «El hueco de `docs/flujo.md`».
 
 **El hueco del beat (A4P3, A4P4).** Cuando el paso vigente es un beat, se monta el hueco que `app/pantallas/llegada.js` ya sabe pintar, con **una sola acción**:
 
@@ -223,7 +224,7 @@ Elemento nuevo, y no es visible: la cadencia de la suscripción como respuesta d
 en lugar de constante. Se declara aquí porque es lo que hace que una llegada pueda validar.
 ```
 
-`node scripts/verifica-flujo.mjs` tiene que seguir en verde: no se añade ni se quita ninguna pantalla de `docs/pantallas/`. Lo que sí cambia es el **conjunto de aristas** de `docs/flujo.md`, y eso es un cambio de diseño que se propone y no se hace por cuenta propia.
+`node scripts/verifica-flujo.mjs` tiene que seguir en verde: no se añade ni se quita ninguna pantalla de `docs/pantallas/`. Lo que sí cambia es el **conjunto de aristas** de `docs/flujo.md`, y eso es un cambio de diseño que se escaló y que el dueño aprobó antes de tocarlo; qué se añadió está en «El hueco de `docs/flujo.md`».
 
 ### data-testid
 
@@ -297,7 +298,9 @@ El umbral que elige entre las dos sale de la misma tabla: **hasta cinco metros d
 
 **Límite declarado, con número y no con esperanza:** por encima de σ ≈ 15 m la validación se degrada y por encima de σ ≈ 20 m deja de sostenerse. Cubre la calle normal y no cubre el cañón urbano profundo.
 
-Y la mitad que se pierde sola en cualquier arreglo de ruido: **el vehículo sigue apartando la llegada**, y el atasco dentro de un geofence sale **0 % en todas las tandas medidas**. Eso no lo da la deriva —un coche parado no deriva—: lo da que `esUnaParada` nunca es cierto con la clasificación `vehiculo`, y esa guarda no se toca.
+Y la mitad que se pierde sola en cualquier arreglo de ruido: **el vehículo sigue apartando la llegada**, y el atasco dentro de un geofence sale **0 % en todas las tandas medidas**. Eso no lo da la deriva —un coche parado no deriva—: lo da que la parada nunca es cierta con la clasificación `vehiculo`, y esa guarda no se toca.
+
+**Y el veto dura lo que dura la clasificación, que es lo que el criterio de arriba decía en absoluto y no lo es.** Pasados los `SALIDA_DE_VEHICULO_S = 120` quieto, el detector de SPEC-031 decide que quien juega se bajó del coche: la traza deja de decir vehículo y la llegada valida. No es una excepción a «el atasco no valida» —es que lo que hay dentro del geofence ya no es un coche parado—, y es exactamente lo que SPEC-031 quiso al poner dos minutos y no treinta segundos: *un autobús parado en un semáforo no es bajarse del autobús*. Está afirmado en `test/nucleo/marcha.test.mjs` con dos casos hermanos, uno de `SALIDA_DE_VEHICULO_S − 30` que no valida y otro de `SALIDA_DE_VEHICULO_S + 60` que sí, para que quien toque esa constante vea enfrente qué se lleva por delante. **La prueba afirma la verdad; el que estaba mal escrito era el criterio**, y queda acotado arriba con su número.
 
 **La premisa que resultó falsa, y queda escrita para que nadie la reintroduzca:** el encargo pedía medir `RADIO_DE_GEOFENCE_M = 40` contra `ERROR_MAXIMO_FIABLE_M = 30` porque «una fracción de las posiciones se descarta por poco fiable justo donde más falta hace». Lo dice al revés la propia fuente: `transporte.js` declara que *«las posiciones malas no se descartan —eso quitaría metros que sí se anduvieron—: solo dejan de poder afirmar un motor»*, un fijo malo degrada `vehiculo` a `ambiguo`, y `ambiguo` **valida**. La precisión mala empuja hacia validar de más, no de menos.
 
@@ -335,24 +338,27 @@ Eso contradice tres fuentes que sí lo declaran, y las tres mandan sobre el diag
 - `docs/testing.md`, escenario **«Sin beat, lo que se cuenta es la llegada entera»**: *«Cuando llega y se para, entonces lo primero que ve es lo que allí se cuenta»*.
 - `packages/nucleo/partida/secuencia.js`, que produce el paso de lo que aquí se cuenta para **todo** núcleo, con beat o sin él, y que además excluye la ficha en un núcleo.
 
-Así que el que está mal es el diagrama, y `scripts/verifica-flujo.mjs` no lo puede cazar porque compara **nodos** y no aristas: A4P5 tiene aristas, solo que ninguna sirve para llegar sin beat. Es la misma asimetría por la que §6y descubrió a mano que `ofrecimiento.jsx` no tenía nodo.
+Así que el que estaba mal era el diagrama, y `scripts/verifica-flujo.mjs` no lo podía cazar porque comparaba **nodos** y no aristas: A4P5 tenía aristas, solo que ninguna servía para llegar sin beat. Es la misma asimetría por la que §6y descubrió a mano que `ofrecimiento.jsx` no tenía nodo.
 
-**Propuesta, no hecha por cuenta propia** (mismo criterio que §6y: añadir o cambiar una arista del diagrama es un cambio de diseño):
+**Decidido y hecho.** Se escaló como cambio de diseño —mismo criterio que §6y: añadir o cambiar una arista del diagrama no se hace por cuenta propia— y el dueño aprobó añadir las aristas y escribir la guarda que las vigila. Lo que hay en `docs/flujo.md` son **cuatro** aristas nuevas y no las tres que se proponían, porque la guarda destapó una más al escribirla:
 
 ```
-  CIERRA  -->|"no has venido a nada y el sitio es un núcleo"|      A4P5
-  LLEGA   -->|"núcleo sin ilustración: la llegada entera es lo que se cuenta"| A4P5
-  A4P6    -->|"es un núcleo: aflora lo que allí se cuenta"|        A4P5
+  LLEGA   -->|"primera vez en un núcleo sin ilustración y sin beat: la llegada entera es lo que allí se cuenta"| A4P5
+  LLEGA   -->|"primera vez, sin ilustración pero con beat: sin visor que abrir, la escena es lo primero"|        A4P3
+  CIERRA  -->|"no has venido a nada, pero es un núcleo: allí no hay ficha, hay lo que se cuenta"|                A4P5
+  A4P6    -->|"es un núcleo y hoy no hay beat: aflora lo que allí se cuenta"|                                    A4P5
 ```
 
-Y mientras la decisión no esté tomada, **esta fila cablea el comportamiento que mandan el diseño y la batería** —el núcleo sin beat enseña A4P5— y deja la discrepancia declarada aquí y en el informe de la fila. Lo contrario sería entregar un juego que contradice `quests.md` para no contradecir un diagrama que se quedó corto.
+La cuarta —`LLEGA → A4P3`— es la que nadie había visto: un sitio **sin ilustración pero con beat** no tiene visor que abrir, así que la escena es su primer paso encadenado, y el diagrama solo llegaba a A4P3 pasando por el visor. Y las dos aristas de `→ A4P7` cambian de rótulo, porque decían «el caso normal» de una llegada sin beat y ese caso normal es el de un paraje o un servicio: en un núcleo no hay ficha.
+
+**Y la guarda, que es lo que evita que esto vuelva a pasar:** `scripts/verifica-flujo.mjs` compara ahora **aristas** además de nodos. Enumera las **veinticuatro** secuencias que `secuenciaDeLlegada` puede producir —tipo de sitio × primera visita × ilustración × beat— y exige que cada una tenga camino en el diagrama **usando solo las pantallas de sus propios pasos**. Esa restricción es la pieza: con alcanzabilidad a secas, la llegada a un núcleo sin beat quedaba «cubierta» por el camino que pasa por el beat, que es justo el que esa secuencia no tiene. Se enumeran las veinticuatro en vez de elegir casos porque el espacio es pequeño y completo, y así no hay manera de que se quede fuera el que falla.
 
 ### Los dos recuentos que esta fila mueve
 
 Los dos son guardas de contrato con lista escrita a mano, y bajarlos es un acto con registro:
 
-- **`test/nucleo/pantallas-huerfanas.test.mjs`**, hoy ocho. Salen `descarte.jsx`, `ficha.js`, `llegada.js`, `lo-que-se-cuenta.js`, `visor.js` y `triangulacion.jsx`. Quedan **dos**: `sitios-marcados.jsx`, que cuelga de una fila de valor de A6P6 (fila 38) —ojo, esta fila la hace alcanzable por el camino de deshacer, así que si el cierre transitivo la alcanza, sale también y quedaría **una**—, y `zurron.jsx` (fila 46). **El número que se publique es el medido**, no el previsto.
-- **`test/nucleo/limite-declarado.test.mjs`**, hoy ocho. Salen `llegada.yaml`, `visor.yaml` y `descarte.yaml`, que pasan a recorrer sus pantallas. Quedan cinco: `escena.yaml` (fila 49), `diario.yaml` y `repisa.yaml` (piden la siembra fichada en §6z), `mapas.yaml` (pide dos mapas y el ofrecimiento) y `ajustes-filas-de-valor.yaml` (fila 38). Un flujo sale de la columna **solo** cuando recorre su pantalla de verdad, y su entrada se quita en el mismo commit; **un flujo que tarda diez segundos no ha recorrido nada**.
+- **`test/nucleo/pantallas-huerfanas.test.mjs`**, ocho al empezar y **una medido al cerrar**. Salieron siete: las seis del momento «al parar» —`descarte.jsx`, `ficha.js`, `llegada.js`, `lo-que-se-cuenta.js`, `visor.js` y `triangulacion.jsx`—, y **también `sitios-marcados.jsx`**, que se preveía que se quedara. Sale porque el cierre transitivo la alcanza: el camino de deshacer un descarte pasa por ella, así que la fila 38 se queda sin su huérfana sin que nadie la haya cableado a propósito. Queda **`zurron.jsx`** (fila 46), que necesita la fuente de salud, el motor de pasos y el registro de hechos. Baja de ocho a una y no a dos como se preveía, y **el número que se publica es el medido**.
+- **`test/nucleo/limite-declarado.test.mjs`**, ocho al empezar y **pendiente de medida** al escribir esto: la columna la mueve Maestro sobre el simulador, y hasta que la tanda no termine no hay número que publicar. Lo previsto sigue siendo que salgan `llegada.yaml`, `visor.yaml` y `descarte.yaml`, que pasan a recorrer sus pantallas, y que queden cinco: `escena.yaml` (fila 49), `diario.yaml` y `repisa.yaml` (piden la siembra fichada en §6z), `mapas.yaml` (pide dos mapas y el ofrecimiento) y `ajustes-filas-de-valor.yaml` (fila 38). **Previsto no es medido**, y el número que se publique será el segundo. Un flujo sale de la columna **solo** cuando recorre su pantalla de verdad, y su entrada se quita en el mismo commit; **un flujo que tarda diez segundos no ha recorrido nada**.
 
 ### Lo que consume de otras specs y no respecifica
 
@@ -390,8 +396,8 @@ Se anotan aquí porque son de la batería y no de esta spec:
 
 Tres, y ninguna se resuelve por cuenta propia:
 
-1. **La arista que falta en `docs/flujo.md`** para llegar a A4P5 sin beat. Propuesta escrita arriba; el diagrama lo cambia quien decide diseño.
-2. **La actualización de `game-design/bucle-jugable.md`** con cómo se mide «parada dentro» y su límite medido, más las dos iteraciones de SPEC-031 y SPEC-032. Es obligación de la fila y su ejecución cae fuera de `wa-dev`.
+1. **La arista que falta en `docs/flujo.md`** para llegar a A4P5 sin beat. Propuesta escrita arriba; el diagrama lo cambia quien decide diseño. **Resuelta**: el dueño aprobó las aristas y la guarda, y acabaron siendo cuatro y no tres.
+2. **La actualización de `game-design/bucle-jugable.md`** con cómo se mide «parada dentro» y su límite medido, más las dos iteraciones de SPEC-031 y SPEC-032. Es obligación de la fila y su ejecución cae fuera de `wa-dev`. **Resuelta**: las iteraciones son `SPEC-031-iter-1` y `SPEC-032-iter-1`, escritas por `wa-spec` como manda `.claude/rules/naming.md`, y el momento 3 de `bucle-jugable.md` lleva ya la regla con su límite.
 3. **El coste de batería de la cadencia por tiempo**, que aquí se acota a estar dentro de un geofence y **no está medido en un dispositivo**. Si al medirlo resulta que en un mundo urbano denso se está dentro de algún geofence buena parte de la salida, es una decisión de diseño —estrechar el radio, alargar la cadencia, o aceptarlo— y se escala con el número delante, no se ajusta una constante por cuenta propia.
 
 ## Decisiones asumidas
