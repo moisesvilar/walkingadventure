@@ -47,11 +47,7 @@ import {
   siguienteTamanoDeTexto,
 } from '@walkingadventure/nucleo/quests/escena.js';
 import { aventuraEnCurso, resuelveBeat } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
-import {
-  apuntaHaberEstado,
-  entintadoDelMundo,
-  libroDePendientes,
-} from '@walkingadventure/nucleo/partida/conocimiento.js';
+import { apuntaHaberEstado, libroDePendientes } from '@walkingadventure/nucleo/partida/conocimiento.js';
 import { identidadDeCara } from '@walkingadventure/nucleo/partida/npcs.js';
 import { vistaDeTenencia } from '@walkingadventure/nucleo/partida/objetos.js';
 import { namesFor } from '@walkingadventure/nucleo/names/index.js';
@@ -59,7 +55,8 @@ import { echaElTelon, piezasDeSerie } from '@walkingadventure/nucleo/partida/cie
 import { componeElTelon } from '@walkingadventure/nucleo/partida/telon.js';
 import { componeElDesenlace, repuestoDe } from '@walkingadventure/nucleo/quests/desenlace.js';
 import { CATALOGO } from '@walkingadventure/nucleo/quests/catalogo.js';
-import { salidaAbierta } from '@walkingadventure/nucleo/partida/salida-abierta.js';
+import { VIAS_DE_CIERRE, salidaAbierta } from '@walkingadventure/nucleo/partida/salida-abierta.js';
+import { MOTIVOS_DE_CIERRE, telonPendiente } from '@walkingadventure/nucleo/partida/salidas.js';
 import { entradasDe, proyeccion } from '@walkingadventure/nucleo/partida/diario.js';
 import {
   CLAVES,
@@ -410,12 +407,17 @@ export const NUCLEO_DEL_CIERRE_DE_SALIDA = Object.freeze({
   repuestoDe,
   salidaAbierta,
   aventuraEnCurso,
+  telonPendiente,
+  libroDePendientes,
+  apuntaHaberEstado,
+  sitiosConPosicion,
   entradasDe,
   proyeccion,
-  entintadoDelMundo,
-  namesFor,
   estadoDeMapa,
+  namesFor,
   CATALOGO,
+  VIAS_DE_CIERRE,
+  MOTIVOS_DE_CIERRE,
 });
 
 /**
