@@ -414,3 +414,54 @@ Antes de cerrar la sesión de la 48 se le hizo una única pregunta: **¿queda al
 **e · Un callejón sin salida, probado, para que nadie lo repita:** retirar `RECEIVE_BOOT_COMPLETED` con `tools:node="remove"` **no vale**. La app revienta con `IllegalArgumentException: Requested job cannot be persisted` en cuanto llega la primera posición, porque `expo-task-manager` clava `setPersisted(true)`.
 
 **f · Y la distinción de quién afirma qué, que es de método y la puso ella:** lo último que la sesión de la 48 midió fue **la rama en `9be4246` con el árbol limpio**. El merge a `main`, la tanda de verificación y el `push` los hice yo, y son míos. Que nadie lea mañana esta conversación y atribuya a la 48 un merge que no verificó.
+
+## §9 · La fila 44, y la duodécima aparición de §6h: la capa de llegadas no podía dispararse
+
+### 9a · La deuda (d) del encargo apuntaba al revés, y detrás había algo mayor
+
+El encargo de la fila (`docs/prompt-navegacion-en-la-calle.md` §d) pedía medir `RADIO_DE_GEOFENCE_M = 40` contra `ERROR_MAXIMO_FIABLE_M = 30` porque «una fracción de las posiciones se descarta por poco fiable justo donde más falta hace». **Es falso, y lo dice la propia fuente**: el comentario de `transporte.js:66` declara que *«las posiciones malas no se descartan —eso quitaría metros que sí se anduvieron—: solo dejan de poder afirmar un motor»*. Un fijo malo degrada `vehiculo` a `ambiguo`, y `ambiguo` **valida** (`validaLlegadaPorGeofence` solo aparta el vehículo). O sea que la precisión mala empuja hacia validar de más, no de menos.
+
+Pero el sitio al que apuntaba sí escondía algo, y es lo peor que ha aparecido en todo el checklist. Montada la tubería real —el filtro de cadencia de `plataforma/posiciones.js`, el detector de `transporte.js` y `creaLlegadas().comprueba()` alimentado posición a posición—, con alguien **parado 300 s dentro de un geofence**, 400 semillas por celda:
+
+| error del fijo | 0 m | 5 m | 10 m | 20 m | 30 m | 50 m |
+| --- | --- | --- | --- | --- | --- | --- |
+| valida, con la cadencia por distancia de hoy | 0 % | 21 % | 0 % | 0 % | 0 % | 0 % |
+| valida, muestreando por tiempo cada 10 s | 100 % | 76 % | 13 % | 1 % | 0,3 % | 0 % |
+
+**Hoy ninguna llegada puede validar en un dispositivo**, ni en la calle ni en el emulador. Dos causas independientes, las dos confirmadas en la fuente y no solo modeladas:
+
+1. **Parado no llega ninguna posición.** `distanceInterval: 10` es `setMinUpdateDistanceMeters` del `LocationRequest` de Android (`node_modules/expo-location/android/src/main/java/expo/modules/location/LocationHelpers.kt:52`), un filtro duro. Con GPS perfecto —el del emulador— se entrega **un fijo en 300 s**, y la permanencia se cuenta sobre posiciones que llegan.
+2. **El ruido del GPS se lee como andar.** `esUnaParada` mide `metros / duracionS < 0,5 m/s` sobre el salto crudo entre dos fijos. Un ruido de σ metros con fijos a T segundos aparenta ~1,4·σ/T m/s, así que hace falta **T > 2,8·σ** para que un parado parezca parado: con σ = 10 m, más de veintiocho segundos entre fijos.
+
+**Es la duodécima aparición de §6h y la más cara**, porque la pieza que al no estar no protesta es la capa entera: SPEC-032 escribió, probó y cerró las llegadas **sobre secuencias de posiciones fabricadas**, y su propia sección de frontera dice «Ninguna entrada nueva de sensor: las dos que hacen falta ya existen». Nadie la conectó nunca al sensor real. Mil casos en verde sobre una capa que en un teléfono no se dispara jamás.
+
+### 9b · Qué decidió el dueño, y por qué se le preguntó
+
+La medida se le llevó **antes de escribir la spec**, porque el encargo dice que si el número sale feo *se escala y no se ajusta una constante por cuenta propia*. Se le ofrecieron tres alcances: solo el muestreo y escalar la calle; el muestreo **más** arreglar la detección de parada; o partir la fila en dos.
+
+**Decidió arreglar también la calle**, con el tamaño de la fila advertido y el número delante.
+
+Y queda anotado un asunto de método, porque va a volver a pasar: mientras la pregunta estaba abierta llegó **el mensaje de otra sesión afirmando la decisión del dueño**, con las condiciones ya redactadas. No se actuó sobre él. Un relato fiel de una decisión no es la decisión: quien la confirma es quien la toma, en su sitio. Se paró, se le preguntó a él y él contestó. Lo que sí se recogió de aquel mensaje es lo que no dependía de ninguna autorización —fijar los números midiendo, exigir las dos mitades del criterio y cortar en commits verificables—, porque era bueno con independencia de quién lo dijera.
+
+### 9c · La regla nueva se fijó midiendo, y conserva los veinte segundos donde el fijo los sostiene
+
+Anclar y comparar cada fijo contra el ancla **no vale**, y está medido: «parada dentro» y «de paso a 4 km/h» suben juntas con el radio de quietud (radio 15 m: 98 % de paradas validadas y **36 %** de paseos), porque con dos o tres fijos en la ventana el ruido y la deriva son indistinguibles.
+
+Lo que sí los separa es que **el ruido del GPS es de media cero y la deriva de quien anda no**. La regla que se adopta mide la **deriva de la ventana**: el centroide de su primera mitad contra el de la segunda. Promediar hunde el ruido como 1/√n y deja la deriva intacta. Medido con muestreo cada 5 s, 800 semillas por celda:
+
+| | ventana 20 s · deriva ≤ 5 m | | ventana 40 s · deriva ≤ 8 m | |
+| --- | --- | --- | --- | --- |
+| **error del fijo** | parada dentro | de paso 4 km/h | parada dentro | de paso 4 km/h |
+| 0 m | 100 % | **0 %** | 100 % | **0 %** |
+| 3 m | 100 % | **0 %** | 100 % | **0 %** |
+| 5 m | 100 % | 4,3 % | 100 % | **0 %** |
+| 10 m | 100 % | 27,6 % | 100 % | 0,8 % |
+| 15 m | 82 % | 19,8 % | 91 % | 5,9 % |
+
+De ahí sale la decisión, y es adaptativa **porque la medida lo pide, no por elegancia**: con el fijo bueno la ventana corta ya separa, así que **la permanencia de veinte segundos de `llegadas.js` se conserva donde el fijo la sostiene** y solo se estira a cuarenta cuando el error declarado del fijo la deja de sostener. Alargarla para todo el mundo habría contradicho sin necesidad la razón por la que SPEC-032 la puso corta —*validar es barato, y un beat que se atiende de paso valida igual*—.
+
+**Las dos mitades del criterio se exigen a la vez**, y la segunda es la que se pierde sola en un arreglo de ruido: el vehículo sigue apartando la llegada, y el atasco dentro de un geofence sale **0 % en todas las tandas medidas**. Un arreglo que hiciera validar al parado a cambio de validar al autobús parado no sería un arreglo.
+
+**Límite declarado**: por encima de σ ≈ 15 m la validación se degrada y por encima de σ ≈ 20 m deja de sostenerse. Cubre la calle normal y no cubre el cañón urbano profundo. Es un límite medido y con número, no una esperanza.
+
+Tocar la regla de parada va contra decisiones cerradas de SPEC-031 y SPEC-032, así que **el diseño se actualiza y no solo el código**, que es lo que manda `CLAUDE.md`: las dos specs y el documento de `game-design/` correspondiente llevan el porqué con esta tabla como evidencia, y la iteración se anota en `docs/starting.md`.
