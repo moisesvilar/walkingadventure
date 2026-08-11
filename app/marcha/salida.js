@@ -28,7 +28,7 @@
 //   que es lo que `AREA_SALIDAS` declara y ni un campo más.
 
 import { CADENCIA_M, cadenciaPorDistancia, creaFuenteDePosiciones, creaTrazaDeSalida } from '../plataforma/posiciones.js';
-import { creaSeguidorDeLaSalida } from './seguidor.js';
+import { SIN_SEGMENTO_TODAVIA, creaSeguidorDeLaSalida } from './seguidor.js';
 
 /** Lo que esto le pide al generador, enumerado. Ni una función más. */
 export const DEL_NUCLEO = Object.freeze([
@@ -131,6 +131,7 @@ export function creaLaSalida({
   tramo = null,
   alCambiar = null,
   pidePermisoDeAviso = null,
+  montaLlegadas = null,
 }) {
   if (!nucleo) throw new Error('la vida de una salida necesita el núcleo inyectado: es quien decide las transiciones, el plazo y el regreso');
   const faltan = DEL_NUCLEO.filter((n) => nucleo[n] == null);
@@ -169,14 +170,40 @@ export function creaLaSalida({
   let traza = null;
   let seguidor = null;
   let averia = null;
+  // El detector de esta salida y la capa de llegadas que cuelga de él. Van juntos y mueren
+  // juntos: una capa de llegadas que sobreviviera a un cierre ofrecería la escena de otro
+  // día, y `creaLlegadas` ya la vacía al cambiar de salida.
+  let detector = null;
+  let llegadas = null;
   // La cadencia puesta, que es lo que la histéresis necesita saber para no cambiarla en cada
   // muestra del borde. Arranca por distancia porque es lo que declara SPEC-048.
   let cadencia = cadenciaPorDistancia(CADENCIA_M);
 
   const montaLaTraza = () => {
     const fuente = creaFuenteDePosiciones({ lee: () => suscripcion.lee() });
-    traza = creaTrazaDeSalida({ fuente, detector: nucleo.creaDetectorDeTransporte() });
+    detector = nucleo.creaDetectorDeTransporte();
+    traza = creaTrazaDeSalida({ fuente, detector });
     seguidor = origen ? creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo, sitios }) : null;
+    llegadas = null;
+  };
+
+  /**
+   * Monta la capa de llegadas sobre **el detector de esta salida**, que es el mismo que
+   * clasifica la traza: montarla con uno propio daría dos clasificaciones distintas para la
+   * misma posición, y el vehículo se apartaría en un sitio y en el otro no.
+   */
+  const montaLasLlegadas = () => {
+    if (!montaLlegadas || !detector) return;
+    const enCurso = nucleo.salidaEnCurso(salidas);
+    if (!enCurso) return;
+    try {
+      llegadas = montaLlegadas({ detector, salida: enCurso.salida, mapaId: enCurso.mapa });
+    } catch (e) {
+      // Una capa que no se puede montar es avería y se dice: sin ella no habría llegadas y
+      // nadie las echaría de menos, que es la forma de fallo que esta fila existe para cerrar.
+      llegadas = null;
+      averia = mensaje(e);
+    }
   };
 
   /** El punto de una posición cruda en metros del mundo, o `null` sin mapa levantado. */
@@ -199,6 +226,8 @@ export function creaLaSalida({
   const desmontaLaTraza = () => {
     traza = null;
     seguidor = null;
+    detector = null;
+    llegadas = null;
   };
 
   const avisa = () => {
@@ -234,9 +263,23 @@ export function creaLaSalida({
       // pararse dentro de un geofence siga entregando fijos, y sin fijos no hay permanencia
       // que contar. Fuera de un geofence esto no cambia nada y no vuelve a pedir la
       // suscripción, porque la respuesta es la misma que ya estaba puesta.
-      await ajustaLaCadencia(enMetros(cruda));
+      const punto = enMetros(cruda);
+      await ajustaLaCadencia(punto);
       const segmentos = traza.traza().segmentos;
       const ultimo = segmentos.length ? segmentos[segmentos.length - 1] : null;
+      // La capa de llegadas se alimenta **posición a posición y con la precisión declarada
+      // dentro**: la precisión elige la ventana de parada y se tira ahí mismo, sin guardarse
+      // en ninguna parte, igual que el rumbo y la altitud. Va antes del regreso porque una
+      // llegada validada en la última posición de la salida sigue siendo una llegada.
+      if (llegadas && punto) {
+        llegadas.comprueba([{
+          x: punto.x,
+          y: punto.y,
+          tMs: cruda.tMs,
+          precisionM: cruda.precisionM ?? null,
+          clasificacion: ultimo ? ultimo.clasificacion : SIN_SEGMENTO_TODAVIA,
+        }]);
+      }
       paso = nucleo.recibePosicion(salidas, {
         // La clasificación la produce el detector del núcleo y **no** esta capa. Sin
         // segmento todavía viaja `null`, que para el plazo es «no cuenta como metro
@@ -273,6 +316,12 @@ export function creaLaSalida({
 
     /** El seguidor del momento en marcha, o `null` si no hay salida abierta con sensor. */
     seguidor: () => seguidor,
+
+    /**
+     * La capa de llegadas de esta salida, o `null`. De ella cuelga toda la máquina del
+     * momento «al parar»: la escena que espera, su paso vigente y el descarte del anclaje.
+     */
+    llegadas: () => llegadas,
 
     /** El último fallo recogido, o `null`. Es lo que la pantalla enseña como motivo literal. */
     averia: () => averia,
@@ -393,6 +442,9 @@ export function creaLaSalida({
         await paraElSensor();
         return noSeAbre('rotulo-no-disponible', abierta.motivo);
       }
+      // Y solo aquí, con la salida ya abierta: la capa de llegadas pertenece a una salida y
+      // sin ella no habría dónde registrar ninguna ni cuándo dejar de ofrecerla.
+      montaLasLlegadas();
       avisa();
       return { abierta: true, motivo: null, marca: null, salida: abierta.salida };
     },
@@ -432,6 +484,7 @@ export function creaLaSalida({
       // que fue una comida.
       montaLaTraza();
       const vuelta = nucleo.retomaLaSalida(salidas, { tMs: punto.tMs, rotulo });
+      if (vuelta.retomada) montaLasLlegadas();
       if (!vuelta.retomada) await paraElSensor();
       avisa();
       return { retomada: vuelta.retomada, motivo: vuelta.motivo };
@@ -503,6 +556,10 @@ export function creaLaSalida({
       // coserlo contaría como quietud medida lo que fue una app cerrada.
       if (suscripcion && !traza && nucleo.situacionDeSalida(salidas) === 'abierta-con-rotulo') {
         montaLaTraza();
+        // Y con ella la capa de llegadas, que es lo que hace que al reabrir la app con una
+        // salida ya abierta la escena que espera se pueda ofrecer: **la llegada vive en el
+        // estado guardado**, así que lo que faltaba era la capa que la lee.
+        montaLasLlegadas();
         avisa();
       }
       return resultado;

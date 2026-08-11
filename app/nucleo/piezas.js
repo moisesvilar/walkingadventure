@@ -111,7 +111,15 @@ import {
   situacionDeSalida,
   terminaDesdeElRotulo,
 } from '@walkingadventure/nucleo/partida/salidas.js';
-import { CADENCIAS, cadenciaDeMuestreo, sitiosConPosicion } from '@walkingadventure/nucleo/partida/llegadas.js';
+import { CADENCIAS, cadenciaDeMuestreo, creaLlegadas, sitiosConPosicion } from '@walkingadventure/nucleo/partida/llegadas.js';
+import { PRESENTACIONES, creaVisor } from '@walkingadventure/nucleo/partida/visor.js';
+import { creaCapaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
+import { creaMicroEncuentros } from '@walkingadventure/nucleo/partida/microencuentros.js';
+import { loQueSeCuentaEn } from '@walkingadventure/nucleo/partida/nucleos.js';
+import { estadoDeMapa } from '@walkingadventure/nucleo/partida/pasos.js';
+import { pisaSitio } from '@walkingadventure/nucleo/partida/estado.js';
+import { cierraLaEscena } from '@walkingadventure/nucleo/partida/triangulacion.js';
+import { MODOS, TIPOS_DE_PASO } from '@walkingadventure/nucleo/partida/secuencia.js';
 import { componeRotulo } from '@walkingadventure/nucleo/partida/rotulo.js';
 import { creaDetectorDeTransporte } from '@walkingadventure/nucleo/partida/transporte.js';
 import { makeProjector } from '@walkingadventure/nucleo/core/geo.js';
@@ -302,6 +310,29 @@ export const NUCLEO_DE_LA_SALIDA = Object.freeze({
   sitiosConPosicion,
   cadenciaDeMuestreo,
   CADENCIAS,
+});
+
+/**
+ * Lo que `creaLasLlegadas` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-044 entra por la misma puerta que las nueve filas anteriores (§6u): que una parada
+ * dentro del geofence valide, que atravesarlo andando no, que la secuencia se recorra entera
+ * y en orden, que un paso sin pantalla se enseñe en vez de saltarse y que marcar un anclaje
+ * no resiembre el mapa tienen que poder leerse desde `node --test` sin resolver nada
+ * instalado, que es el único sitio donde se pueden poner rojos.
+ */
+export const NUCLEO_DE_LAS_LLEGADAS = Object.freeze({
+  creaLlegadas,
+  creaVisor,
+  creaCapaDeDescartes,
+  creaMicroEncuentros,
+  loQueSeCuentaEn,
+  estadoDeMapa,
+  pisaSitio,
+  cierraLaEscena,
+  PRESENTACIONES,
+  TIPOS_DE_PASO,
+  MODOS,
 });
 
 /** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */

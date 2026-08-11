@@ -54,6 +54,15 @@ export const TEXTOS = Object.freeze({
   nada: 'Aquí no queda nada esperando.',
 });
 
+/**
+ * Cómo se nombra un paso en el hueco. **El paso va nombrado y no en blanco**: un hueco que
+ * no dice qué falta es un hueco que se puede dar por hecho, y la fila 49 tiene que poder
+ * borrar exactamente estas líneas.
+ */
+export function nombraElPaso(paso, sitio) {
+  return `${paso.tipo}: la escena de ${sitio}`;
+}
+
 /** La lista de tipos y modos de la secuencia, para poder afirmar el orden de un vistazo. */
 export function etiquetaDeSecuencia(secuencia) {
   return secuencia.map((paso) => `${paso.tipo}:${paso.modo}`).join(',');
@@ -140,7 +149,12 @@ export function PantallaLlegada({
       ) : debajo && Pantalla ? (
         <Pantalla paso={debajo} sitio={llegada.sitio} alSeguir={alSeguir} />
       ) : debajo ? (
-        <View style={estilos.hueco}>
+        // El hueco declarado de la fila 49, con **el paso nombrado y una sola acción**. Es el
+        // mismo patrón, palabra por palabra, con el que la fila 48 dejó alcanzable el telón:
+        // feo, honesto, y desaparece cuando llegue la 49. Lo que no se hace es saltar el
+        // paso: una secuencia que parece completa sin serlo es exactamente §6h.
+        <View style={estilos.hueco} testID="llegada-hueco" accessibilityLabel={debajo.tipo}>
+          <Text style={estilos.mundo}>{nombraElPaso(debajo, llegada.sitio)}</Text>
           <Text style={estilos.mundo}>{TEXTOS.sinPantalla}</Text>
           <Pressable testID="llegada-seguir" onPress={alSeguir} style={estilos.accion}>
             <Text style={estilos.accionTexto}>{TEXTOS.seguir}</Text>

@@ -217,7 +217,10 @@ export function PantallaAntesDeSalir({
       lista={preparado !== null}
       // La aventura ya quedó anotada al aceptarla en la ficha, así que aquí solo se
       // pregunta si la salida se abre: `retomada` evita anotarla dos veces.
-      alSalirAAndar={() => { void echaAAndar({ conAventura: true, preparado, retomada: true }); }}
+      // El reparto casteado viaja con la salida y no se vuelve a buscar: es lo que la capa
+      // de llegadas necesita para saber qué beats hay hoy, y sin él una secuencia sin beat
+      // sería indistinguible de una llegada a la que no se ha venido a nada.
+      alSalirAAndar={() => { void echaAAndar({ conAventura: true, preparado, reparto: { beats: elegida?.beats ?? [] }, retomada: true }); }}
     />
   );
 }

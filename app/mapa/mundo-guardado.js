@@ -38,5 +38,13 @@ export async function mundoDeLaPartida({ almacen, nucleo, semilla } = {}) {
   // La primera por su clave: es la misma que fija el título y el idioma del mapa, así que
   // lo que se lee al volver no depende del orden en que se abrieron las celdas.
   const registro = await cargaCelda(mapa, abiertas[0].celda, { almacen });
-  return { mapaId: mapa.id, documento: registro.mundo, titulo: mapa.titulo ?? registro.mundo?.title ?? null };
+  return {
+    mapaId: mapa.id,
+    documento: registro.mundo,
+    titulo: mapa.titulo ?? registro.mundo?.title ?? null,
+    // Los cupos que la celda congeló al generarse. Viajan porque el descarte de un anclaje
+    // lee de ellos el suelo de parajes, y **se leen de la celda y no se recalculan**: un
+    // mapa viejo tiene que seguir comparándose contra el suelo con el que se generó.
+    cupos: registro.cupos ?? null,
+  };
 }

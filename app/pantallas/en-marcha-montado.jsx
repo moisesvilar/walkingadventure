@@ -92,6 +92,10 @@ export function EnMarchaMontado({
   seguidor = null,
   vibrador = null,
   motivoSinUbicacion = null,
+  // La cadencia con la que se está pidiendo posición, del vocabulario cerrado del paquete.
+  // **No se pinta y no se lee**: es una marca, y su único cometido es que se pueda afirmar
+  // desde el aparato que el muestreo cambia al entrar en un geofence.
+  cadencia = null,
   // Cuántas posiciones han llegado. **No se usa para nada más que recomponer**: el seguidor
   // es un objeto estable, así que sin un valor que cambie el momento se compondría una vez
   // y la marca se quedaría donde entró — indistinguible de andar en círculos.
@@ -108,7 +112,13 @@ export function EnMarchaMontado({
 
   const montaje = useMemo(() => {
     try {
+      // El sitio bajo la marca sale del propio seguidor, que es quien lo resuelve contra el
+      // índice de geofences. Se lee aquí y no del momento compuesto porque `marcaPosicion` es
+      // el contrato de SPEC-030 y esta fila no lo amplía: lo que hacía falta era llevarlo a
+      // una marca observable, no meterlo en lo que se pinta — en marcha no se pinta.
+      const leida = seguidor ? seguidor.posicion() : null;
       return {
+        sitio: leida?.sitio ?? null,
         momento: componeEnMarcha({
           seguidor: seguidor ?? seguidorSinMontar(),
           vibrador: vibrador ?? creaVibradorDeExpo(Haptics),
@@ -125,7 +135,7 @@ export function EnMarchaMontado({
         fallo: null,
       };
     } catch (e) {
-      return { momento: null, enlace: null, fallo: mensajeDeError(e) };
+      return { sitio: null, momento: null, enlace: null, fallo: mensajeDeError(e) };
     }
   }, [seguidor, vibrador, salidas, mundo, trazado, guia, marcasDeAviso, noticia, desvio, caminoEvitado, paso]);
 
@@ -151,6 +161,13 @@ export function EnMarchaMontado({
           que envuelve, así que no puede coordinar su número de orden con los de dentro, y
           dos marcas en el mismo punto son dos marcas que la automatización no puede leer. */}
       <View testID="ubicacion-estado" accessibilityLabel={seguidor ? 'montado' : 'sin-montar'} style={marcaSuperpuesta(0, { fila: 1 })} />
+      {/* El sitio bajo la marca de posición, o `sin-sitio` cuando no hay ninguno. Es lo que
+          permite poner rojo el día que `sitio` vuelva a ser nulo por construcción (§8b): sin
+          esta marca, la 44 podía aterrizar y olvidarse de rellenarlo sin que nada protestara. */}
+      <View testID="salida-sitio" accessibilityLabel={montaje.sitio ?? 'sin-sitio'} style={marcaSuperpuesta(1, { fila: 1 })} />
+      {/* Y la cadencia vigente. Sin ella el cambio de muestreo solo se podría afirmar sobre
+          la función pura del paquete, nunca sobre el aparato. */}
+      <View testID="salida-cadencia" accessibilityLabel={cadencia ?? 'sin-suscripcion'} style={marcaSuperpuesta(2, { fila: 1 })} />
       <PantallaEnMarcha
         momento={montaje.momento}
         documento={mundo}
