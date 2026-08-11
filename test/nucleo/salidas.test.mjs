@@ -75,9 +75,9 @@ import {
   terminaLaAventura,
 } from '../../packages/nucleo/partida/salidas.js';
 import {
+  DENTRO_DEL_REGRESO_MS,
+  DENTRO_DEL_REGRESO_S,
   LO_QUE_EL_REGRESO_NO_MIRA,
-  PERMANENCIA_MS,
-  PERMANENCIA_S,
   RADIO_DE_REGRESO_M,
   TRAMOS_DE_ALEJAMIENTO,
   avanzaElRegreso,
@@ -330,7 +330,7 @@ describe('El telón se echa solo al cerrarse la salida', () => {
     const fin = recorre(estado, rotulo, [
       posicion(1500, 20, 'andando'),
       posicion(20, 60, 'andando'),
-      posicion(15, 60 + PERMANENCIA_S / 60, 'andando'),
+      posicion(15, 60 + DENTRO_DEL_REGRESO_S / 60, 'andando'),
     ]);
     assert.equal(fin.haVuelto, true);
     assert.equal(situacionDeSalida(estado), 'cerrada-sin-leer');
@@ -423,8 +423,8 @@ describe('El telón se echa solo al cerrarse la salida', () => {
     // El radio de regreso, en cambio, va en metros y no se escala: es tolerancia de
     // sensor y no unidad de juego.
     assert.equal(RADIO_DE_REGRESO_M, 50);
-    assert.equal(PERMANENCIA_S, 60);
-    assert.equal(PERMANENCIA_MS, 60_000);
+    assert.equal(DENTRO_DEL_REGRESO_S, 60);
+    assert.equal(DENTRO_DEL_REGRESO_MS, 60_000);
     assert.doesNotMatch(codigoSinComentarios('packages/nucleo/partida/regreso.js'), /RADIO_DE_REGRESO_M\s*\*/, 'el radio de regreso se escala con algo');
   });
 
