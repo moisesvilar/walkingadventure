@@ -39,7 +39,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { creaLaSalida, DEL_NUCLEO, MOTIVOS_DE_NO_ABRIR } from '../../app/marcha/salida.js';
-import { CLASIFICACIONES, SIN_SEGMENTO_TODAVIA, creaSeguidorDePosicion } from '../../app/marcha/seguidor.js';
+import { CLASIFICACIONES, SIN_SEGMENTO_TODAVIA, creaSeguidorDeLaSalida, creaSeguidorDePosicion } from '../../app/marcha/seguidor.js';
 import {
   CADENCIA_M,
   NOMBRE_DE_LA_APP,
@@ -49,11 +49,27 @@ import {
 } from '../../app/plataforma/posiciones.js';
 import { TAREAS_QUE_LA_APP_DEFINE, exigeTareaDeclarada } from '../../app/plataforma/permisos.js';
 import { makeProjector } from '../../packages/nucleo/core/geo.js';
+import {
+  CADENCIAS,
+  CADENCIA_CERCA_S,
+  PARADA_DENTRO_S,
+  MARGEN_DE_CERCANIA_M,
+  RADIO_DE_GEOFENCE_M,
+  cadenciaDeMuestreo,
+  sitiosConPosicion,
+} from '../../packages/nucleo/partida/llegadas.js';
 import { congelaHondo } from '../../packages/nucleo/core/congelar.js';
 import { componeRotulo, PLAZO_DE_RETIRADA_MS } from '../../packages/nucleo/partida/rotulo.js';
-import { creaDetectorDeTransporte, HUECO_MAXIMO_S } from '../../packages/nucleo/partida/transporte.js';
+import { creaDetectorDeTransporte, HUECO_MAXIMO_S, SALIDA_DE_VEHICULO_S } from '../../packages/nucleo/partida/transporte.js';
 import { congelaSalidas, estadoDeSalidas, levantaSalidas } from '../../packages/nucleo/partida/salidas.js';
 import * as salidas from '../../packages/nucleo/partida/salidas.js';
+import { REPARTO_SIN_AVENTURA, creaLasLlegadas } from '../../app/marcha/llegadas.js';
+import { makeRng } from '../../packages/nucleo/core/rng.js';
+import { estadoInicial } from '../../packages/nucleo/partida/estado.js';
+import { registroInicial } from '../../packages/nucleo/partida/hechos.js';
+import { NUCLEO_DE_LAS_LLEGADAS } from './llegadas-de-prueba.mjs';
+import { celdaDeFixture } from './partida-de-prueba.mjs';
+import { SEMILLA_A } from './celda-de-prueba.mjs';
 import { rotuloNoDisponible, rotuloQueFunciona, rotuloQueSeRetiraSolo, rotuloSinMontar } from '../dobles/rotulo-del-sistema.mjs';
 import { fuente } from './mundo-de-prueba.mjs';
 
@@ -90,7 +106,30 @@ const NUCLEO = Object.freeze({
   disponibilidadDelRotulo: salidas.disponibilidadDelRotulo,
   creaDetectorDeTransporte,
   makeProjector,
+  // SPEC-044: la cercanía a un geofence y la cadencia que sale de ella las decide el paquete.
+  sitiosConPosicion,
+  cadenciaDeMuestreo,
+  CADENCIAS,
 });
+
+/**
+ * El documento del mundo levantado del mapa activo, del que salen los geofences.
+ *
+ * Sus puntos están escritos **en metros del mundo y a mano**, elegidos contra el proyector de
+ * `ORIGEN`: el núcleo cae exactamente donde aterriza `posicion(42.4010, -8.8100)`, el servicio
+ * a veinte metros de él —dos geofences solapados, que es el caso del «más cercano»— y el
+ * paraje a dos kilómetros, fuera de todo. Es lo que permite afirmar el sitio bajo la marca y
+ * el cambio de cadencia sin ningún fixture de OSM.
+ */
+const MUNDO = Object.freeze({
+  settlements: [
+    { name: 'Monfrida', x: 0, y: 111, services: [{ name: 'A Taberna Pechada', x: 20, y: 111 }] },
+  ],
+  parajes: [{ name: 'O Torreón Esquecido', x: 2000, y: 0 }],
+});
+
+/** Un punto del mundo en grados, para dejar la marca del sensor donde se quiera. */
+const EN_MONFRIDA = Object.freeze({ lat: 42.4010, lon: -8.8100 });
 
 /**
  * Una suscripción de mentira, con el mismo contrato que la de `expo-location`.
@@ -104,9 +143,19 @@ function suscripcionDoblada({ puntual = { lat: 42.40, lon: -8.81, tMs: T0, preci
   let corriendo = false;
   const arranques = [];
   const paradas = [];
+  // Las cadencias que la orquestación le ha pedido aplicar, en orden. Es lo que permite
+  // afirmar que el muestreo cambia al entrar en un geofence **sobre el aparato** y no solo
+  // sobre la función pura del paquete.
+  const cadencias = [];
   return {
     arranques,
     paradas,
+    cadencias,
+    async aplicaCadencia(nueva) {
+      const previa = cadencias.length ? cadencias[cadencias.length - 1].modo : 'por-distancia';
+      cadencias.push(nueva);
+      return nueva.modo !== previa;
+    },
     async arranca(compuesto) { arranques.push(compuesto); corriendo = true; },
     async actualiza(compuesto) { arranques.push(compuesto); corriendo = true; },
     async para() { paradas.push(true); corriendo = false; },
@@ -127,6 +176,15 @@ function posicion(lat, lon, tMs, precisionM = 8) {
   return { lat, lon, tMs, precisionM };
 }
 
+/**
+ * Los grados que corresponden a un punto del mundo. Es la vuelta de `toXY`, y se pide al
+ * mismo proyector: una trigonometría paralela escrita aquí daría puntos que no cuadran con
+ * el mundo congelado, que es justo lo que la cabecera del seguidor prohíbe.
+ */
+function gradosDe(proyector, punto) {
+  return proyector.toLatLon(punto);
+}
+
 /** Abre una salida con todo cableado y devuelve las piezas para seguir tocándolas. */
 async function abierta({ rotulo = rotuloQueFunciona(), suscripcion = suscripcionDoblada(), estado = estadoDeSalidas() } = {}) {
   const cambios = [];
@@ -136,6 +194,7 @@ async function abierta({ rotulo = rotuloQueFunciona(), suscripcion = suscripcion
     rotulo,
     suscripcion,
     origen: ORIGEN,
+    mundo: MUNDO,
     tramo: TRAMO_M,
     alCambiar: () => cambios.push(true),
   });
@@ -177,8 +236,9 @@ describe('La cadena del sensor: una suscripción, fuente, detector, seguidor', (
     // que el núcleo ya toma, y es justo lo que la cabecera del seguidor prohíbe.
     const codigo = fuente('app/marcha/salida.js');
     assert.match(codigo, /creaFuenteDePosiciones\(\{ lee: \(\) => suscripcion\.lee\(\) \}\)/);
-    assert.match(codigo, /creaTrazaDeSalida\(\{ fuente, detector: nucleo\.creaDetectorDeTransporte\(\) \}\)/);
-    assert.match(codigo, /creaSeguidorDeLaSalida\(\{ fuente, traza, origen, nucleo \}\)/);
+    assert.match(codigo, /detector = nucleo\.creaDetectorDeTransporte\(\)/);
+    assert.match(codigo, /creaTrazaDeSalida\(\{ fuente, detector \}\)/);
+    assert.match(codigo, /creaSeguidorDeLaSalida\(\{ fuente, traza, origen, nucleo, sitios \}\)/);
   });
 
   test('El servicio en primer plano se pide por distancia y con la precisión que el detector necesita', () => {
@@ -293,9 +353,65 @@ describe('La cadena del sensor: una suscripción, fuente, detector, seguidor', (
     const esperado = makeProjector(ORIGEN.lat, ORIGEN.lon).toXY(42.4010, -8.8100);
     assert.equal(leida.x, esperado.x);
     assert.equal(leida.y, esperado.y);
-    // El sitio lo resuelve el geofence de la llegada, que es de la fila 44. `null` es la
-    // respuesta honesta y el momento sabe pintarla; inventarlo sería adelantar la 44.
-    assert.equal(leida.sitio, null);
+    // Y el sitio se **resuelve**, que es lo que esta fila trae: hasta SPEC-044 el cuarto
+    // campo iba a `null` por construcción y nada se ponía rojo el día que la fila que tenía
+    // que rellenarlo se olvidara (§8b). La marca cae encima de «Monfrida», así que su
+    // nombre es la respuesta.
+    assert.equal(leida.sitio, 'Monfrida');
+  });
+
+  test('El sitio del seguidor no es nulo por construcción', async () => {
+    // La red de §8b, en la forma que §6p le dio al `anclaje: null`: no basta con que hoy
+    // salga bien en un punto elegido, hace falta algo que se ponga **rojo** el día que el
+    // campo vuelva a ser estructuralmente nulo. Se recorre el índice entero del mapa activo
+    // y se exige que el centro de cada geofence nombre a su sitio: si alguien devuelve
+    // `null` por construcción, esto cae en el primero.
+    const sitios = sitiosConPosicion(MUNDO);
+    assert.ok(sitios.size >= 2, 'el mundo de esta prueba no tiene geofences suficientes para que la afirmación mida nada');
+    const proyector = makeProjector(ORIGEN.lat, ORIGEN.lon);
+    const suscripcion = suscripcionDoblada();
+    const { laSalida } = await abierta({ suscripcion });
+    assert.equal(laSalida.geofences()?.size, sitios.size, 'la salida no monta el índice de geofences del mapa activo');
+
+    for (const [nombre, geofence] of sitios) {
+      // Se busca en grados el punto que proyecta al centro del geofence, que es lo único
+      // que el sensor sabe entregar: la proyección cuantiza y una vuelta cruda no cuadraría.
+      const grados = gradosDe(proyector, geofence);
+      suscripcion.entrega(posicion(grados.lat, grados.lon, T0 + 20_000));
+      await laSalida.recibeLaPosicion();
+      const leida = laSalida.seguidor().posicion();
+      assert.equal(leida.sitio, nombre, `parada en el centro de "${nombre}" y el seguidor dice ${JSON.stringify(leida.sitio)}`);
+    }
+
+    // Fuera de todos los geofences sí es `null`, y ahí es la respuesta honesta: no es que
+    // no se haya consultado, es que no hay ninguno debajo.
+    suscripcion.entrega(posicion(42.4300, -8.8500, T0 + 60_000));
+    await laSalida.recibeLaPosicion();
+    assert.equal(laSalida.seguidor().posicion().sitio, null);
+
+    // Y por contrato: montarlo sin el índice **falla nombrando lo que falta**, en vez de
+    // entregar `sitio: null` como antes. Es lo que cierra la puerta en lugar de vigilarla.
+    assert.throws(
+      () => creaLaSalida({ nucleo: NUCLEO, salidas: estadoDeSalidas(), rotulo: rotuloQueFunciona(), origen: ORIGEN, suscripcion: suscripcionDoblada() }),
+      /índice de geofences/,
+    );
+    assert.throws(
+      () => creaSeguidorDeLaSalida({ fuente: { posicion: () => null }, traza: { muestrea: () => null, traza: () => ({ segmentos: [] }) }, origen: ORIGEN, nucleo: NUCLEO }),
+      /sitiosConPosicion/,
+    );
+
+    // Y no queda en el módulo ningún camino que devuelva el sitio nulo sin haber mirado un
+    // geofence: el único `sitio:` que se escribe sale de `sitioEn(...)`.
+    const codigo = fuente('app/marcha/seguidor.js')
+      .split('\n')
+      .filter((linea) => !linea.trim().startsWith('//') && !linea.trim().startsWith('*'))
+      .join('\n');
+    const asignaciones = codigo.match(/sitio:\s*[^,\n]+/g) ?? [];
+    assert.deepEqual(
+      asignaciones.filter((a) => /null\s*$/.test(a) && !/\?\?/.test(a)),
+      [],
+      `el seguidor vuelve a tener un camino que entrega el sitio nulo por construcción: ${JSON.stringify(asignaciones)}`,
+    );
   });
 
   test('El seguidor rechaza una posición sin clasificar en lugar de pintarla', () => {
@@ -533,7 +649,7 @@ describe('Echarse a andar puede no poder, y entonces se dice por qué', () => {
     // app—, así que la sesión nueva se monta sobre el mismo y lo encuentra puesto.
     const rotulo = rotuloQueFunciona();
     const { estado } = await abierta({ suscripcion, rotulo });
-    const otraSesion = creaLaSalida({ nucleo: NUCLEO, salidas: estado, rotulo, suscripcion, origen: ORIGEN, tramo: TRAMO_M });
+    const otraSesion = creaLaSalida({ nucleo: NUCLEO, salidas: estado, rotulo, suscripcion, origen: ORIGEN, mundo: MUNDO, tramo: TRAMO_M });
     assert.equal(otraSesion.seguidor(), null, 'la sesión nueva nace con seguidor sin haber reconciliado');
     await otraSesion.reconcilia();
     assert.ok(otraSesion.seguidor(), 'reabrir con una salida abierta deja el momento en marcha sin seguidor');
@@ -737,6 +853,26 @@ describe('Con la partida abierta desde disco', () => {
     );
     assert.equal(laSalida.situacion(), 'abierta-con-rotulo');
   });
+
+  test('Por el camino normal el área que se muta es la misma que llegó', async () => {
+    // **La deuda (a) de §8**, que hasta aquí no la afirmaba nadie: la palabra `descongelada`
+    // aparecía solo dentro de `app/marcha/salida.js` y ni una vez en `test/`. Es una red que
+    // al dispararse no protesta —§6h con el signo cambiado—, y su propio comentario dice qué
+    // pasa cuando salta: **lo que se abra no está en la partida que se congela**, así que la
+    // salida se ve en pantalla y se pierde al guardar, sin un solo rojo.
+    const estado = estadoDeSalidas();
+    const { laSalida } = await abierta({ estado });
+    const propia = laSalida.areaPropia();
+    assert.equal(propia.descongelada, false, 'la orquestación ha tenido que copiar el área: lo que se abra no llegará a la partida que se congela');
+    assert.equal(propia.area, estado, 'el área que se muta no es la misma que llegó');
+    assert.equal(salidas.salidaEnCurso(estado)?.salida, 's1', 'la salida abierta no ha aparecido en el área de la partida');
+
+    // Y la otra mitad, que es la que da sentido a la primera: con un área congelada sí sale
+    // `true`, y eso se puede afirmar. Sin las dos, la afirmación de arriba sería compatible
+    // con un `descongelada` clavado a `false`.
+    const { laSalida: desdeDisco } = await abierta({ estado: congelaHondo(estadoDeSalidas()) });
+    assert.equal(desdeDisco.areaPropia().descongelada, true);
+  });
 });
 
 // ── iOS: lo que no se entrega, declarado ────────────────────────────────────────
@@ -818,5 +954,264 @@ describe('El momento en marcha con el sensor montado', () => {
     assert.match(pantalla, /Math\.round\(momento\.marcaPosicion\.punto\.x\)/);
     // Y la conversión de metros del mundo a píxeles vive en la cámara, con su inversa.
     assert.match(fuente('app/mapa/camara.js'), /export function pixelDeMundo/);
+  });
+});
+
+// ── La tubería real, del sensor a la escena ─────────────────────────────────────
+//
+// **Esta es la guarda de la duodécima aparición de §6h, y es la que hoy no existía.**
+// SPEC-032 escribió, probó y cerró la capa de llegadas entera sobre secuencias de posiciones
+// fabricadas: mil casos en verde sobre una capa que en un teléfono no se disparaba jamás.
+// Medido en `pipeline/decisiones-orquestador.md` §9a: parada 300 s dentro de un geofence,
+// 400 semillas por celda, **0 % de llegadas validadas** con el fijo perfecto.
+//
+// Lo que se monta aquí es la cadena entera y sin trozos fabricados en medio: la suscripción
+// de `plataforma/posiciones.js` con **su filtro de cadencia aplicado de verdad**, la fuente,
+// el detector de `partida/transporte.js`, la ventana de parada de `partida/ritmo.js` y
+// `creaLlegadas().comprueba()`, alimentada posición a posición por `recibeLaPosicion`.
+//
+// El sensor doblado es el único trozo que no es de producción, y **es un modelo del filtro
+// y no un generador de posiciones**: entrega un fijo solo cuando las opciones que la app le
+// pidió lo dejan pasar —`distanceInterval` metros recorridos, o `timeInterval` milisegundos
+// transcurridos—, que es lo que hace `setMinUpdateDistanceMeters` del `LocationRequest` de
+// Android. Con la cadencia por distancia y quien juega parada, no entrega ninguno: por eso
+// esta prueba se pone roja el día que alguien devuelva el muestreo a `distanceInterval` fijo.
+
+describe('Una parada dentro de un geofence valida la llegada con la tubería real', () => {
+  /**
+   * Un sensor que respeta el filtro que la app le pide.
+   *
+   * `trayectoria(tMs)` es la verdad del terreno en metros del mundo; `tic` avanza el reloj
+   * y entrega el fijo **solo si el filtro lo deja pasar**. El ruido del fijo viene de la
+   * semilla y nunca de `Math.random`, que es lo que hace la prueba repetible.
+   */
+  function sensorConFiltro({ proyector, trayectoria, precisionM = 3, ruidoM = 0, semilla = 'tuberia' }) {
+    let opciones = null;
+    let entrega = null;
+    const emitidos = [];
+    const rng = makeRng(semilla);
+    const Location = {
+      Accuracy: { High: 4, Balanced: 3 },
+      startLocationUpdatesAsync: async (_tarea, o) => { opciones = o; },
+      stopLocationUpdatesAsync: async () => { opciones = null; },
+      hasStartedLocationUpdatesAsync: async () => opciones !== null,
+      getCurrentPositionAsync: async () => {
+        const grados = proyector.toLatLon(trayectoria(0));
+        return { coords: { latitude: grados.lat, longitude: grados.lon, accuracy: precisionM }, timestamp: T0 };
+      },
+    };
+    const suscripcion = creaSuscripcionDeUbicacion({
+      Location,
+      TaskManager: { defineTask: (_, fn) => { entrega = fn; } },
+      declaraTarea: exigeTareaDeclarada,
+    });
+    let ultimo = null;
+    return {
+      ...suscripcion,
+      emitidos,
+      opciones: () => opciones,
+      /** Un segundo de reloj del sensor. Devuelve si el filtro dejó pasar el fijo. */
+      tic(tMs) {
+        if (!opciones || !entrega) return false;
+        const verdad = trayectoria(tMs);
+        // El ruido del fijo, de media cero: es lo que la regla de deriva de ventana hunde
+        // promediando y lo que la de fijo a fijo confundía con andar.
+        const punto = { x: verdad.x + (rng() - 0.5) * 2 * ruidoM, y: verdad.y + (rng() - 0.5) * 2 * ruidoM };
+        if (ultimo) {
+          const porTiempo = Number.isFinite(opciones.timeInterval) && opciones.timeInterval > 0;
+          if (porTiempo) {
+            if (tMs - ultimo.tMs < opciones.timeInterval) return false;
+          } else if (Math.hypot(punto.x - ultimo.x, punto.y - ultimo.y) < (opciones.distanceInterval ?? 0)) {
+            return false;
+          }
+        }
+        ultimo = { ...punto, tMs };
+        emitidos.push({ tMs, ...punto });
+        const grados = proyector.toLatLon(punto);
+        entrega({ data: { locations: [{ coords: { latitude: grados.lat, longitude: grados.lon, accuracy: precisionM }, timestamp: tMs }] } });
+        return true;
+      },
+    };
+  }
+
+  /**
+   * Monta la vida de una salida sobre un mundo de fixture y la capa de llegadas de verdad
+   * —`app/marcha/llegadas.js`, la que la app monta—, y recorre la trayectoria segundo a
+   * segundo hasta `hastaMs`.
+   *
+   * El bundle del núcleo se arma **por ruta relativa** y no se importa de
+   * `app/nucleo/piezas.js`: aquel fichero cita el paquete por su nombre y no resuelve sin
+   * instalación, y esta batería tiene que arrancar en un clon limpio (§6u).
+   */
+  async function andaLaTuberia({ trayectoria, hastaMs, precisionM = 3, ruidoM = 0, semilla = 'tuberia', reparto = REPARTO_SIN_AVENTURA }) {
+    const celda = await celdaDeFixture('costero');
+    const mundo = celda.mundo;
+    const origen = mundo.origin;
+    const proyector = makeProjector(origen.lat, origen.lon);
+    const estado = estadoInicial({ semilla: celda.semilla ?? SEMILLA_A });
+    const suscripcion = sensorConFiltro({ proyector, trayectoria, precisionM, ruidoM, semilla });
+
+    const laSalida = creaLaSalida({
+      nucleo: NUCLEO,
+      salidas: estado.salidas,
+      rotulo: rotuloQueFunciona(),
+      suscripcion,
+      origen,
+      mundo,
+      tramo: TRAMO_M,
+      montaLlegadas: ({ detector, salida, mapaId }) => creaLasLlegadas({
+        nucleo: NUCLEO_DE_LAS_LLEGADAS,
+        mundo,
+        cupos: celda.cupos,
+        mapaId,
+        salida,
+        estado,
+        registro: registroInicial(),
+        detector,
+        reparto,
+        dia: 1,
+      }),
+    });
+
+    const abierta = await laSalida.abre({ salida: 's1', mapa: celda.mapaId, mundo: 'Reinos da Brétema' });
+    assert.equal(abierta.abierta, true, `la salida no se abrió: ${abierta.motivo ?? ''}`);
+    assert.ok(laSalida.llegadas(), `la capa de llegadas no se montó: ${laSalida.averia() ?? ''}`);
+
+    for (let tMs = T0; tMs <= T0 + hastaMs; tMs += 1000) {
+      if (suscripcion.tic(tMs)) await laSalida.recibeLaPosicion();
+    }
+    return { laSalida, suscripcion, mundo, proyector, celda, estado };
+  }
+
+  /** El sitio del mundo de fixture sobre el que se para, y su geofence. */
+  async function unSitioDelMundo() {
+    const celda = await celdaDeFixture('costero');
+    const sitios = sitiosConPosicion(celda.mundo);
+    // El primero por orden declarado, que es el mismo orden con el que el índice se
+    // construye: elegirlo por gusto haría que la prueba dependiera de un nombre.
+    const [nombre, geofence] = [...sitios][0];
+    return { nombre, geofence, celda };
+  }
+
+  /** Quien se acerca andando y se para en el sitio: llega a los `paradaEnMs` y ya no se mueve. */
+  function llegaYSePara(geofence, { desdeM = 300, velocidadMs = 1.39 } = {}) {
+    const duracionS = desdeM / velocidadMs;
+    return (tMs) => {
+      const t = Math.max(0, (tMs - T0) / 1000);
+      const recorrido = Math.min(1, t / duracionS);
+      return { x: geofence.x - desdeM * (1 - recorrido), y: geofence.y };
+    };
+  }
+
+  test('Parada dentro de un geofence, con la tubería entera montada, la llegada se valida', async () => {
+    const { nombre, geofence } = await unSitioDelMundo();
+    const { laSalida, suscripcion } = await andaLaTuberia({
+      trayectoria: llegaYSePara(geofence),
+      // Llegar cuesta 216 s andando; después se está parada dos minutos, que es de sobra
+      // para los veinte segundos de la ventana corta y para los cuarenta de la larga.
+      hastaMs: 340_000,
+      ruidoM: 3,
+    });
+
+    // La mitad que §9a medía al 0 %: con la cadencia por distancia y quien juega parada, el
+    // sensor no entrega ni un fijo y no hay permanencia que contar.
+    assert.equal(suscripcion.cadencia(), 'por-tiempo', 'la suscripción no cambió a cadencia por tiempo con el sitio debajo');
+    assert.equal(laSalida.cadencia(), 'por-tiempo', 'la salida no publica la cadencia vigente que de verdad está puesta');
+    assert.equal(suscripcion.opciones().timeInterval, CADENCIA_CERCA_S * 1000);
+    assert.equal(suscripcion.opciones().distanceInterval, 0, 'el filtro de distancia sigue puesto y los dos se aplican a la vez');
+
+    const espera = laSalida.llegadas().espera();
+    assert.ok(espera, 'nadie validó ninguna llegada con la tubería real: es exactamente lo que §9a midió al 0 %');
+    assert.equal(espera.sitio, nombre);
+
+    // Y de los fijos parada, unos cuantos: sin la cadencia por tiempo serían cero.
+    const parada = suscripcion.emitidos.filter((p) => p.tMs > T0 + 220_000);
+    assert.ok(parada.length >= 10, `parada solo llegaron ${parada.length} fijos, y la permanencia se cuenta sobre posiciones que llegan`);
+  });
+
+  test('Quien atraviesa el geofence andando no valida ninguna llegada, ni a cuatro ni a cinco kilómetros por hora', async () => {
+    // La mitad del criterio que se pierde sola en cualquier arreglo de ruido. Se pasa de
+    // largo, sin pararse ni una muestra, a las dos velocidades que §9c midió.
+    for (const [nombre, velocidadMs] of [['cuatro', 1.11], ['cinco', 1.39]]) {
+      const { geofence } = await unSitioDelMundo();
+      const { laSalida } = await andaLaTuberia({
+        trayectoria: (tMs) => ({ x: geofence.x - 300 + velocidadMs * ((tMs - T0) / 1000), y: geofence.y }),
+        hastaMs: 500_000,
+        ruidoM: 3,
+        semilla: `de-paso-${nombre}`,
+      });
+      assert.equal(
+        laSalida.llegadas().espera(),
+        null,
+        `pasar de largo a ${nombre} kilómetros por hora ha validado una llegada, y «El visor no aparece nunca andando» deja de sostenerse`,
+      );
+    }
+  });
+
+  test('Un vehículo parado dentro del geofence no valida, por mucho que la deriva sea cero', async () => {
+    // El atasco: el coche entra en el geofence y se queda quieto. La deriva de la ventana es
+    // cero y aun así no valida, porque `creaVentanaDeParada` responde que no antes de medir
+    // nada cuando la clasificación es vehículo. Es la guarda que un arreglo de ruido pierde
+    // sola, y por eso se afirma aparte y no como un caso más de la parada.
+    //
+    // **El atasco dura menos que `SALIDA_DE_VEHICULO_S`, y es a propósito**: pasado ese
+    // tiempo el detector de SPEC-031 decide que quien juega se bajó del coche, que es otra
+    // situación y no esta. Dónde queda el borde está medido y escrito abajo.
+    const { geofence } = await unSitioDelMundo();
+    const paradoS = SALIDA_DE_VEHICULO_S - 30;
+    const { laSalida, suscripcion } = await andaLaTuberia({
+      // Se llega a velocidad de coche —lo bastante lejos y rápido para que el detector funde
+      // el motor, que le cuesta `CONFIRMACION_VEHICULO_S`— y se para dentro.
+      trayectoria: (tMs) => {
+        const t = Math.max(0, (tMs - T0) / 1000);
+        const recorrido = Math.min(1, t / 90);
+        return { x: geofence.x - 1800 * (1 - recorrido), y: geofence.y };
+      },
+      hastaMs: (90 + paradoS) * 1000,
+      ruidoM: 3,
+      semilla: 'atasco',
+    });
+    assert.ok(suscripcion.emitidos.length > 20, 'el atasco no llegó a entregar fijos y el caso no mediría nada');
+
+    // Que de verdad se estaba clasificando como vehículo: sin esto el caso pasaría por no
+    // haber llegado a fundar ningún motor, que es lo contrario de lo que quiere afirmar.
+    const segmentos = laSalida.traza().traza().segmentos;
+    assert.equal(segmentos[segmentos.length - 1].clasificacion, 'vehiculo', 'el detector no clasificó el atasco como vehículo');
+    assert.ok(paradoS >= PARADA_DENTRO_S, 'el atasco dura menos que la permanencia y el caso no mediría nada');
+
+    assert.equal(
+      laSalida.llegadas().espera(),
+      null,
+      'un vehículo parado dentro de un geofence ha validado la llegada: un arreglo que valide al autobús parado no es un arreglo',
+    );
+  });
+
+  test('Un vehículo quieto más que el tiempo de salida deja de ser vehículo, y eso está medido', async () => {
+    // **El borde del caso de arriba, escrito con su número y no con esperanza.** No es una
+    // excepción a «el atasco no valida»: es que a partir de `SALIDA_DE_VEHICULO_S` la traza
+    // deja de decir vehículo —SPEC-031 decide que quien juega se bajó—, así que lo que hay
+    // dentro del geofence ya no es un coche parado. Se afirma para que el día que alguien
+    // toque ese número vea aquí qué se lleva por delante.
+    const { geofence } = await unSitioDelMundo();
+    const { laSalida } = await andaLaTuberia({
+      trayectoria: (tMs) => {
+        const t = Math.max(0, (tMs - T0) / 1000);
+        const recorrido = Math.min(1, t / 90);
+        return { x: geofence.x - 1800 * (1 - recorrido), y: geofence.y };
+      },
+      hastaMs: (90 + SALIDA_DE_VEHICULO_S + 60) * 1000,
+      ruidoM: 3,
+      semilla: 'atasco-largo',
+    });
+    const segmentos = laSalida.traza().traza().segmentos;
+    assert.equal(
+      segmentos[segmentos.length - 1].clasificacion,
+      'parada',
+      `pasados ${SALIDA_DE_VEHICULO_S} s quietos la traza tendría que haber dejado de decir vehículo`,
+    );
+    assert.ok(
+      laSalida.llegadas().espera(),
+      'quieta dos minutos dentro del geofence, con la traza diciendo parada, la llegada sigue sin validar',
+    );
   });
 });
