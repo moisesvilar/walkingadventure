@@ -41,7 +41,7 @@ import { CapaDescarte } from './descarte.jsx';
 import { PantallaFicha } from './ficha.js';
 import { PantallaLoQueSeCuenta } from './lo-que-se-cuenta.js';
 import { PantallaVisor } from './visor.js';
-import { MARCA } from './marca.js';
+import { CAPA_DE_MARCAS, MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -131,10 +131,16 @@ export function PantallaLlegada({
 
   return (
     <View style={estilos.raiz} testID="llegada">
-      <View testID="momento-estado" accessibilityLabel="al-parar" style={estilos.marca} />
-      <View testID="llegada-estado" accessibilityLabel={estado ?? 'sin-resolver'} style={estilos.marca} />
-      <View testID="llegada-secuencia" accessibilityLabel={etiquetaDeSecuencia(llegada.secuencia)} style={estilos.marca} />
-      <View testID="llegada-paso" accessibilityLabel={debajo ? debajo.tipo : 'cerrada'} style={estilos.marca} />
+      {/* Las cuatro marcas del paso, **en su capa y no en el flujo**: esta pantalla va a
+          sangre, así que en el flujo caían en la esquina de arriba, debajo de la ventana de
+          la barra de estado del sistema, y quien lee el árbol descarta lo que otra ventana
+          tapa — estaban en el árbol del sistema y no se podían afirmar. Ver `CAPA_DE_MARCAS`. */}
+      <View pointerEvents="none" style={CAPA_DE_MARCAS}>
+        <View testID="momento-estado" accessibilityLabel="al-parar" style={MARCA} />
+        <View testID="llegada-estado" accessibilityLabel={estado ?? 'sin-resolver'} style={MARCA} />
+        <View testID="llegada-secuencia" accessibilityLabel={etiquetaDeSecuencia(llegada.secuencia)} style={MARCA} />
+        <View testID="llegada-paso" accessibilityLabel={debajo ? debajo.tipo : 'cerrada'} style={MARCA} />
+      </View>
 
       {aUnToque ? (
         <Pressable testID="visor-a-un-toque" onPress={alVisor} style={estilos.aUnToque}>
@@ -175,7 +181,6 @@ export function PantallaLlegada({
 
 const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: PLACA },
-  marca: MARCA,
   hueco: { flex: 1, padding: 28, justifyContent: 'center', gap: 24 },
   mundo: { fontFamily: 'serif', fontSize: 20, lineHeight: 30, color: TINTA },
   aUnToque: { paddingHorizontal: 28, paddingTop: 24 },

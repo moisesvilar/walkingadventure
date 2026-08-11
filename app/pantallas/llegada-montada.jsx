@@ -24,7 +24,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { PantallaLlegada } from './llegada.js';
-import { marcaSuperpuesta } from './marca.js';
+import { MARCA, capaDeMarcas } from './marca.js';
 import { PantallaTriangulacion } from './triangulacion.jsx';
 
 /** La avería del momento, con la pieza nombrada. Un identificador propio, como los otros dos. */
@@ -83,9 +83,10 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
       {/* Cuántas veces se ha movido la secuencia. Sin ella el montaje sería un objeto nuevo
           en cada repintado y no habría manera de saber que se avanzó. */}
       {/* En su propia fila de marcas: vive en otro contenedor que el de la pantalla que
-          envuelve, y dos marcas en el mismo punto son dos marcas ilegibles para la
-          automatización (§7f, y el arreglo de `marca.js`). */}
-      <View testID="llegada-movimientos" accessibilityLabel={String(paso)} style={marcaSuperpuesta(0, { fila: 2 })} />
+          envuelve, así que no puede coordinar su sitio con las de dentro. */}
+      <View pointerEvents="none" style={capaDeMarcas(2)}>
+        <View testID="llegada-movimientos" accessibilityLabel={String(paso)} style={MARCA} />
+      </View>
 
       <PantallaLlegada
         llegada={montaje.llegada}

@@ -36,7 +36,7 @@ import { creaVibradorDeExpo } from '../plataforma/vibrador.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
 import { Lamina } from '../render/lamina.jsx';
 import { PantallaEnMarcha } from './en-marcha.jsx';
-import { CAPA_DE_MARCAS, MARCA, marcaSuperpuesta } from './marca.js';
+import { CAPA_DE_MARCAS, MARCA } from './marca.js';
 
 /**
  * El encuadre con el que se abre el momento: la celda entera, recentrada sobre la marca de
@@ -145,9 +145,12 @@ export function EnMarchaMontado({
     return (
       <View style={estilos.aviso} testID="en-marcha-sin-cablear">
         {/* La avería del momento con su motivo del vocabulario cerrado, y de qué está el
-            sensor. Van como marca porque lo que se lee sigue sin nombrar ningún código. */}
-        <View testID="marcha-sin-ubicacion" accessibilityLabel={sinUbicacion ?? ''} style={marcaSuperpuesta(0, { fila: 1 })} />
-        <View testID="ubicacion-estado" accessibilityLabel="sin-montar" style={marcaSuperpuesta(1, { fila: 1 })} />
+            sensor. Van como marca porque lo que se lee sigue sin nombrar ningún código, y en
+            la capa por lo mismo que las de la otra rama: esta pantalla también va a sangre. */}
+        <View pointerEvents="none" style={CAPA_DE_MARCAS}>
+          <View testID="marcha-sin-ubicacion" accessibilityLabel={sinUbicacion ?? ''} style={MARCA} />
+          <View testID="ubicacion-estado" accessibilityLabel="sin-montar" style={MARCA} />
+        </View>
         <Text style={estilos.texto}>{fallo ?? TEXTOS_SIN_UBICACION[sinUbicacion]}</Text>
       </View>
     );
