@@ -28212,6 +28212,737 @@
       "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
       "hueco_de_bateria": true,
       "nota": "Sale exactamente uno y la columna queda en ocho. Medido en `wa-pixel` el 11-ago-2026: `en-marcha.yaml` recorre la pantalla de verdad en 103 s desde la portada, con el arranque entero dentro."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida abierta y ninguna escena esperando, **cuando** se abre la app, **entonces** lo que se ve es el momento en marcha, y no ninguna pantalla del momento «al parar».",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "El momento en marcha se alcanza andando desde la portada",
+      "escenario": "El momento en marcha se alcanza andando desde la portada"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida abierta y una escena esperando, **cuando** se abre la app, **entonces** lo que se ve es la llegada por su paso vigente, y no el mapa.",
+      "nivel": "@app",
+      "fichero": "test/app/llegada.yaml",
+      "caso": "La escena queda disponible y espera",
+      "escenario": "La escena queda disponible y espera",
+      "nota": "El flujo está de límite declarado: la capa de llegadas no se monta en el dispositivo. La mitad que no necesita dispositivo se afirma en test/nucleo/llegadas.test.mjs."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada validada, **cuando** se valida, **entonces** la app no se pone en primer plano, la pantalla no se enciende y no se emite ninguna notificación, ningún háptico ni ningún sonido. *(`@app` para lo visible; el resto es afirmable sobre `LO_QUE_UNA_LLEGADA_EMITE`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una llegada validada no emite ninguna notificación, ningún háptico ni ninguna petición de primer plano",
+      "escenario": "La escena queda disponible y espera",
+      "nota": "Se afirma sobre LO_QUE_UNA_LLEGADA_EMITE y sobre la ausencia de canal en el código. La mitad visible —que la pantalla no se encienda— es @manual."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una primera visita a un sitio con ilustración, **cuando** la llegada se ofrece, **entonces** el visor aparece encadenado y con el tirador en el borde de la ficción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El visor abre por la ficción la primera vez",
+      "escenario": "El visor abre por la ficción la primera vez"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el visor abierto, **cuando** se cierra con la flecha o tocando fuera, **entonces** debajo queda el paso siguiente de la secuencia, ya montado, y no se vuelve a ninguna pantalla anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El visor es una capa y debajo está el beat",
+      "escenario": "El visor es una capa y debajo está el beat"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una segunda visita a un sitio con ilustración, **cuando** la llegada se ofrece, **entonces** el visor **no se abre solo** y queda disponible con un toque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La segunda vez el visor no se abre solo",
+      "escenario": "La segunda vez el visor no se abre solo"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada a un paraje sin beat, **cuando** se recorre, **entonces** lo que se enseña es la ficha del sitio, y su acción de seguir devuelve al momento en marcha.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Llegar sin haber venido a nada da la ficha del sitio",
+      "escenario": "Llegar sin haber venido a nada da la ficha del sitio"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada a un núcleo, **cuando** se recorre hasta el final, **entonces** el último paso encadenado es lo que allí se cuenta, y su «Seguir» devuelve al momento en marcha.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aquí se cuenta cierra la llegada a un núcleo",
+      "escenario": "Lo que aquí se cuenta cierra la llegada a un núcleo"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** dos llegadas validadas a la vez, **cuando** se cierra la primera, **entonces** se ofrece la segunda sin pasar por el momento en marcha.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dos geofences solapados validan los dos y se ofrece primero el más cercano",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería no describe qué pasa con dos llegadas a la vez."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada a medio recorrer, **cuando** se cierra la app y se vuelve a abrir, **entonces** la secuencia continúa por el paso donde iba y no vuelve a empezar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una secuencia abandonada a mitad continúa por el paso donde iba",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada cerrada, **cuando** se cierra, **entonces** la partida se congela, y lo que se levanta al abrir de nuevo trae la llegada cerrada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La escena sigue disponible después de cerrar la app y volver dos días después",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería no describe el viaje de ida y vuelta del área de llegadas."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la superficie de la máquina, **cuando** se busca una operación que lleve a un paso concreto de la secuencia, **entonces** no existe: la única manera de moverse es avanzar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "No existe ninguna operación que salte a un paso concreto de la secuencia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: es una ausencia estructural y la batería describe lo que el juego hace."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada a un núcleo donde aflora por primera vez una segunda versión de algo ya apuntado, **cuando** se cierra ese paso, **entonces** se enseña la escena de la primera coincidencia encima, y su única acción devuelve al momento en marcha.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/triangulacion.test.mjs",
+      "caso": "La primera coincidencia se pone en escena",
+      "escenario": "La primera coincidencia se pone en escena"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** cualquier momento de la máquina, **cuando** se buscan controles tocables en el momento en marcha, **entonces** no hay ninguno: lo tocable empieza al parar.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control",
+      "nota": "Se sigue cumpliendo con un geofence cerca: en marcha no se añade ni un control, ni una cifra, ni un aviso."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida abierta cuya última posición conocida no está dentro de ningún geofence, **cuando** se pide la cadencia de la suscripción, **entonces** es la de SPEC-048: por distancia, cada diez metros, y ninguna cadencia por tiempo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Fuera de todo geofence la cadencia es la de SPEC-048, por distancia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: nada de docs/testing.md afirma la cadencia del sensor. Está anotado en la propia spec."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida abierta cuya última posición conocida está dentro de algún geofence, **cuando** se pide la cadencia, **entonces** es por tiempo, cada cinco segundos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Con un geofence debajo la cadencia pasa a ser por tiempo, cada cinco segundos",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería, el mismo."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida que se abre con quien juega ya parada dentro de un geofence, **cuando** se abre, **entonces** la cadencia por tiempo se decide con el punto de partida y no espera a un fijo que no va a llegar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una salida que se abre con quien juega ya parada dentro arranca por tiempo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** quien está dentro de un geofence y se aleja, **cuando** la última posición queda a más del radio más el margen de cercanía declarado, **entonces** la cadencia vuelve a ser por distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La histéresis impide cambiar de cadencia en cada muestra del borde",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Cubre la mitad de alejarse y la de volver."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una posición justo en el borde del geofence que entra y sale por el ruido del fijo, **cuando** se decide la cadencia, **entonces** no se cambia de cadencia en cada muestra: la histéresis del margen lo impide.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La histéresis impide cambiar de cadencia en cada muestra del borde",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el mismo caso cubre los dos criterios, que son las dos mitades de la histéresis."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la decisión de cadencia, **cuando** se inspecciona dónde vive, **entonces** es una función del paquete sobre la última posición y los geofences del mapa activo, y la app solo la aplica.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Con un geofence debajo la cadencia pasa a ser por tiempo, cada cinco segundos",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Que la decisión viva en el paquete se afirma además en «La cadena del sensor» de test/nucleo/marcha.test.mjs, que exige la pieza enumerada en DEL_NUCLEO."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la cadencia por tiempo activa, **cuando** se inspecciona lo que se guarda, **entonces** no se guarda ninguna posición más que antes: lo que sobrevive sigue siendo la última, sobrescrita. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "@privacidad, bloqueante. Ahora con muchas más posiciones pasando por el sensor que antes."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la cadencia por tiempo activa, **cuando** se lee la línea del rótulo del sistema, **entonces** dice exactamente lo mismo que fuera del geofence: acercarse a un sitio no cambia lo que se lee en la pantalla de bloqueo. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El servicio en primer plano se pide por distancia y con la precisión que el detector necesita",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La línea del rótulo no la toca aplicaCadencia: se vuelve a pedir la suscripción con el mismo rótulo compuesto."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una ventana de posiciones, **cuando** se decide si es una parada, **entonces** se compara el centroide de su primera mitad con el de la segunda, y no dos fijos consecutivos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La deriva se mide entre el centroide de la primera mitad y el de la segunda",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: nada afirmaba que una parada real validase en presencia de ruido de GPS. Anotado en la propia spec."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un fijo cuya precisión declarada sostiene la ventana corta, **cuando** se mide la parada, **entonces** la ventana es de veinte segundos y la deriva admitida son cinco metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Con el fijo bueno la ventana es la corta y con el malo la larga",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un fijo cuya precisión declarada no sostiene la ventana corta, **cuando** se mide la parada, **entonces** la ventana es de cuarenta segundos y la deriva admitida son ocho metros.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Con el fijo bueno la ventana es la corta y con el malo la larga",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el mismo caso cubre las dos ventanas, que se eligen con el mismo umbral."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una posición que llega sin precisión declarada, **cuando** se mide la parada, **entonces** se usa la ventana larga: en la duda sobre el error del fijo se exige más, no menos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una posición sin precisión declarada usa la ventana larga",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una ventana que todavía no cubre su duración, **cuando** se pregunta si es una parada, **entonces** la respuesta es que no, y no se extrapola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una ventana que todavía no cubre su duración responde que no, y no se extrapola",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la app que vuelve del segundo plano y vuelve a anclar la traza, **cuando** se pregunta por la parada, **entonces** la ventana empieza de cero y la permanencia se cuenta desde ahí, sin coser el hueco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una marca de tiempo hacia atrás vuelve a anclar la ventana en lugar de medir una duración negativa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es el mismo mecanismo con el que la app vuelve a anclar la traza al volver del segundo plano."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la regla de parada, **cuando** se busca dónde vive, **entonces** está en un solo módulo del paquete, el mismo del que la lee el motor de pasos, y no está reimplementada en la app.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La regla de parada vive en un solo módulo y no está reimplementada en la app",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la regla de parada por enlace de fijo a fijo, **cuando** se busca quién decide con ella la validación de un geofence, **entonces** no queda nadie.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La regla de parada vive en un solo módulo y no está reimplementada en la app",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el mismo caso afirma que esUnaParada ya no aparece en la capa de llegadas."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la misma secuencia de posiciones dos veces, **cuando** se mide la parada, **entonces** el resultado es idéntico: no se lee el reloj del sistema ni ninguna fuente de azar. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "La misma secuencia de posiciones dos veces da la misma parada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. @determinismo, bloqueante."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** quien se para dentro de un geofence el tiempo de permanencia, con la cadencia por tiempo activa y un fijo de error hasta diez metros, **cuando** se comprueba, **entonces** la llegada se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Parada dentro de un geofence, con la tubería entera montada, la llegada se valida",
+      "escenario": "El geofence se valida desde la calle",
+      "nota": "La tubería real de punta a punta, con el filtro de cadencia del sensor aplicado: es la guarda de la duodécima aparición de §6h. La mitad de núcleo puro está en «Una parada dentro del geofence con el fijo bueno valida»."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** quien atraviesa un geofence andando a cuatro kilómetros por hora sin pararse, **cuando** se comprueba, **entonces** la llegada **no** se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Quien atraviesa el geofence a cuatro kilómetros por hora no valida",
+      "escenario": "El visor no aparece nunca andando",
+      "nota": "La velocidad de cuatro no la tenía la batería: solo la de cinco. Con la tubería real, en «Quien atraviesa el geofence andando no valida ninguna llegada, ni a cuatro ni a cinco kilómetros por hora» de test/nucleo/marcha.test.mjs."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** quien atraviesa un geofence andando a cinco kilómetros por hora sin pararse, **cuando** se comprueba, **entonces** la llegada **no** se valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El visor no aparece nunca andando",
+      "escenario": "El visor no aparece nunca andando"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un vehículo detenido dentro de un geofence —un atasco—, **cuando** se comprueba, **entonces** la llegada **no** se valida, por mucho que la deriva sea cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Un vehículo parado dentro del geofence no valida, por mucho que la deriva sea cero",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: «Pasar en coche por delante de un beat no lo valida» habla de pasar, no de estar parado. Y queda medido su borde en «Un vehículo quieto más que el tiempo de salida deja de ser vehículo, y eso está medido»."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una traza clasificada como vehículo, **cuando** se mide la parada, **entonces** la respuesta es que no es parada, sea cual sea la deriva de la ventana.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "El vehículo no es una parada aunque la deriva sea cero",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un error de fijo por encima del límite declarado, **cuando** se comprueba una llegada, **entonces** el límite está escrito con su número y no se disimula: por encima de σ ≈ 15 m la validación se degrada y por encima de σ ≈ 20 m deja de sostenerse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "El límite de esta regla está escrito con su número y no se disimula",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una posición de precisión mala, **cuando** se comprueba, **entonces** **no** se descarta: sigue contando, porque las posiciones malas quitarían metros que sí se anduvieron, y lo que hacen es degradar a ambiguo, que valida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una parada dentro del geofence sin precisión declarada paga la ventana larga",
+      "escenario": "En la duda, cuenta",
+      "nota": "La precisión mala no descarta la posición: degrada a ambiguo, y ambiguo valida. Lo que hace es pagar la ventana larga."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la ficha de un sitio, **cuando** se toca «Este sitio no pega», **entonces** se abre la capa de A4P8 encima, con la ficha montada debajo.",
+      "nivel": "@app",
+      "fichero": "test/app/descarte.yaml",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar",
+      "nota": "El flujo está de límite declarado: sin llegada no hay ficha desde la que abrir la capa."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la capa de descarte abierta, **cuando** se toca «Marcarlo», **entonces** el anclaje queda marcado y se vuelve a andar, sin diálogo de confirmación y sin línea de agradecimiento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la capa de descarte abierta sin elegir motivo, **cuando** se toca «Marcarlo», **entonces** se marca igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "No hace falta dar motivo",
+      "escenario": "No hace falta dar motivo"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la capa de descarte con un motivo elegido, **cuando** se cierra sin tocar «Marcarlo», **entonces** no se marca nada y la elección se descarta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "El motivo no cambia nada de lo que ocurre",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: que cerrar la capa sin marcar no marque nada es de la capa de A4P8 y solo se recorre con dedo. La mitad de núcleo es que el motivo no cambia nada."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un anclaje marcado, **cuando** se compara el documento congelado del mapa antes y después, **entonces** es idéntico byte a byte: anotar no es resembrar. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Marcarlo lo saca del casting sin resembrar",
+      "escenario": "Marcarlo lo saca del casting sin resembrar",
+      "nota": "@determinismo, bloqueante: se compara el documento congelado de la celda byte a byte."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un anclaje marcado, **cuando** se vuelve a castear, **entonces** ninguna aventura lo vuelve a usar, y el sitio conserva su nombre y su posición en el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Un núcleo descartado no se borra: el descarte saca del casting, no borra el pueblo",
+      "escenario": "Marcarlo lo saca del casting sin resembrar"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un anclaje marcado, **cuando** se abre la lista de sitios marcados desde los ajustes, **entonces** aparece con su nombre de fantasía y qué es en realidad, y con su acción de deshacer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "La lista de ajustes trae cada sitio con su nombre de fantasía y con qué es en realidad",
+      "escenario": "Es reversible"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un anclaje marcado, **cuando** se deshace desde los ajustes, **entonces** vuelve a estar disponible para el casting, y no hace falta volver a andar hasta allí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Es reversible",
+      "escenario": "Es reversible"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** ningún anclaje marcado, **cuando** se abre la lista, **entonces** dice que no hay ninguno y no finge una lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Deshacer lo que no estaba marcado no cambia nada y no emite ningún hecho",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la lista vacía no tiene escenario."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el descarte hecho y el deshecho, **cuando** se inspecciona el tráfico saliente, **entonces** no sale ninguna petición relacionada, ni al marcar ni al deshacer. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "No se reporta a ningún sitio",
+      "escenario": "No se reporta a ningún sitio",
+      "nota": "@privacidad, bloqueante: se afirma sobre el registro del inspector de tráfico saliente."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la capa de descarte, **cuando** se busca un campo de texto libre, **entonces** no existe ninguno, tampoco en «Otra cosa».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Los motivos son los cinco del artefacto y ninguno lleva texto libre",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** los descartes de una partida, **cuando** se descartan tantos anclajes que el mapa baja del suelo de parajes, **entonces** se ofrece el estirón con el mecanismo que ya entrega SPEC-035, y no se amplía nada solo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "Si el filtro deja el mundo sin reparto, se ofrece el estirón",
+      "escenario": "Si el filtro deja el mundo sin reparto, se ofrece el estirón"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una partida abierta por el camino normal, **cuando** se monta la vida de la salida, **entonces** el área de salidas que la orquestación muta es la misma que llegó: `descongelada` vale `false`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Por el camino normal el área que se muta es la misma que llegó",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: es la deuda (a) de §8, y la batería describe qué hace el juego y no cómo se pasa el estado."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un área de salidas congelada que llegara a la orquestación, **cuando** se monta, **entonces** `descongelada` vale `true` y eso se puede afirmar, porque lo que se abra no estaría en la partida que se congela.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Por el camino normal el área que se muta es la misma que llegó",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el mismo caso afirma las dos mitades, y sin la segunda la primera sería compatible con un descongelada clavado a false."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el seguidor de una salida y una posición dentro del geofence de un sitio, **cuando** se lee, **entonces** su campo `sitio` es el nombre de ese sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El sitio del seguidor no es nulo por construcción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: es la deuda (b) de §8."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una posición dentro de dos geofences solapados, **cuando** se lee el seguidor, **entonces** `sitio` es el del más cercano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El sitio del seguidor no es nulo por construcción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el índice del mundo de prueba trae dos geofences solapados a propósito."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una posición fuera de todos los geofences, **cuando** se lee el seguidor, **entonces** `sitio` es `null`, que es la respuesta honesta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El sitio del seguidor no es nulo por construcción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el seguidor de una salida montado sin el índice de geofences del mapa activo, **cuando** se monta, **entonces** **falla nombrando lo que falta**, en lugar de entregar `sitio: null` por construcción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El sitio del seguidor no es nulo por construcción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el fallo por contrato, que es lo que cierra la puerta en lugar de vigilarla."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el código de la app, **cuando** se busca un camino que devuelva `sitio: null` sin haber consultado ningún geofence, **entonces** no queda ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El sitio del seguidor no es nulo por construcción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: se lee el código de app/marcha/seguidor.js y se exige que no quede ninguna asignación de sitio nula sin haber consultado un geofence. Es el patrón de §6p."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** `packages/nucleo/partida/`, **cuando** se enumeran sus constantes de permanencia, **entonces** ninguna se llama `PERMANENCIA_S`: cada reloj se nombra por lo que mide, para que la de la parada y la del regreso no se puedan confundir con un grep.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Lo que la vida de una salida le pide al núcleo está enumerado y es lo mismo que se le inyecta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El renombrado se afirma por su efecto: los cinco ficheros de prueba que citaban PERMANENCIA_* ahora citan PARADA_DENTRO_* y DENTRO_DEL_REGRESO_*, y ninguno resuelve si alguien devuelve el nombre viejo."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el reloj de permanencia del regreso, **cuando** se compara con el de la parada, **entonces** siguen siendo dos relojes distintos con dos asimetrías distintas, y esta fila no cambia el del regreso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El regreso se cierra con un minuto dentro del radio de casa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Esta fila no toca el reloj del regreso: sus casos siguen siendo los mismos y afirman los sesenta segundos con su constante propia."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el cierre de esta fila, **cuando** se enumeran los RF que entrega, **entonces** son **RF-BUCLE-005**, **RF-BUCLE-007** y **RF-PRIV-004**, y ningún otro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pantallas-huerfanas.test.mjs",
+      "caso": "La lista de pantallas huérfanas es exactamente la declarada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no qué RF entrega cada fila. Lo que sí se puede afirmar es qué pantallas quedan sin camino."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el recuento de pantallas huérfanas de `test/nucleo/pantallas-huerfanas.test.mjs`, hoy en ocho, **cuando** se mide al terminar esta fila, **entonces** baja a **dos** —`sitios-marcados.jsx`, que es de la fila 38, y `zurron.jsx`, que es de la 46—; y **si sale más, se dice con el número delante y con el dueño de cada una escrito**.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pantallas-huerfanas.test.mjs",
+      "caso": "El recuento es el medido y no ha subido",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El número medido es 1 de 33 y no 2: el cierre transitivo alcanza sitios-marcados por el camino de deshacer."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la columna de flujos de límite declarado de `test/nucleo/limite-declarado.test.mjs`, hoy en ocho, **cuando** se mide al terminar esta fila, **entonces** baja a **cinco**, porque `llegada.yaml`, `visor.yaml` y `descarte.yaml` pasan a recorrer sus pantallas de verdad; y **si sale más, se dice con el número delante**.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El número medido es 8 y no 5: los tres flujos de la llegada no pueden recorrer su pantalla y el motivo está escrito en la cabecera de cada uno."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un flujo que sale de la columna de límite declarado, **cuando** se mide su duración, **entonces** recorre pantallas de verdad: un flujo que tarda diez segundos no ha recorrido nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "Los flujos que recorren la app de verdad no llevan marcador",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** `packages/nucleo/`, **cuando** se enumeran sus imports, **entonces** no aparece ni React Native ni ningún módulo de Expo. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "El paquete compartido no importa React Native ni Expo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. @determinismo, bloqueante."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el código de `packages/nucleo/`, **cuando** se busca `Math.random`, `Date.now` o `new Date`, **entonces** no hay ninguno: el tiempo del sensor viaja dentro de cada posición. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El módulo de las llegadas no lee el reloj, no sortea y no clasifica velocidades",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. @determinismo, bloqueante. Para ritmo.js, en «La misma traza medida dos veces da la misma medida y no lee el reloj del sistema»."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un clon limpio sin `node_modules`, **cuando** se ejecuta la batería de `@nucleo` enumerando sus ficheros, **entonces** arranca entera y pasa. *(Criterio duro, §6u.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/andamiaje-estructura.test.mjs",
+      "caso": "node --test test/nucleo/ arranca sin instalar ninguna dependencia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Criterio duro de §6u: el bundle del núcleo que consume app/marcha/llegadas.js se arma por ruta relativa en test/nucleo/llegadas-de-prueba.mjs."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** la misma secuencia de posiciones inyectada dos veces sobre el mismo mundo, **cuando** se recorre una salida entera, **entonces** las llegadas validadas, sus secuencias y su orden salen idénticos. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La misma secuencia de posiciones inyectada dos veces valida lo mismo y en el mismo orden",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. @determinismo, bloqueante: se compara por serialización completa."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida entera recorrida, **cuando** se inspecciona lo que la partida escribe, **entonces** no hay ninguna traza de ubicación: siguen siendo el punto de partida y las marcas que `AREA_SALIDAS` ya declara, y ni un campo más. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El punto de partida y las marcas mueren con la salida",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "@privacidad, bloqueante."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada validada, **cuando** se congela, **entonces** lo que se guarda es el mapa, el sitio por su nombre, la secuencia y el paso: sin coordenadas y sin marcas de tiempo. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La escena sigue disponible después de cerrar la app y volver dos días después",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. @privacidad, bloqueante: el documento de llegadas se serializa y se busca en él tMs, x, y y precision."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida entera con llegadas y descartes, **cuando** se inspecciona el tráfico saliente, **entonces** el anclaje real no entra en ninguna llamada de red y no hay ningún identificador persistente por instalación. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/descartes.test.mjs",
+      "caso": "No se reporta a ningún sitio",
+      "escenario": "No se reporta a ningún sitio",
+      "nota": "@privacidad, bloqueante."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el paquete, **cuando** se busca quién resuelve el índice de geofences y la cadencia, **entonces** están en el paquete y llegan inyectados a la app, no al revés.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Lo que la vida de una salida le pide al núcleo está enumerado y es lo mismo que se le inyecta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: sitiosConPosicion, cadenciaDeMuestreo y CADENCIAS entran por DEL_NUCLEO y se comprueban contra la lista de app/nucleo/piezas.js."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** ninguna escena esperando, **cuando** se pide la llegada, **entonces** se responde que no hay nada esperando, sin fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una salida nueva empieza sin ninguna llegada de la anterior",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: escenaQueEspera devuelve null y eso es una respuesta."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un núcleo que no ha oído nada, **cuando** se llega, **entonces** A4P5 se enseña igual, con su línea de que hoy no se cuenta nada por aquí, y ningún texto la llama error ni falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un núcleo que no ha oído nada enseña la pantalla igual y no lo llama error",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el detector de transporte ausente, **cuando** se comprueba una llegada, **entonces** falla nombrándolo, en lugar de validar suponiendo que se andaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El detector de transporte ausente falla en lugar de validar suponiendo que se andaba",
+      "escenario": "Pasar en coche por delante de un beat no lo valida"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una salida sin aventura aceptada, **cuando** se monta la capa de llegadas, **entonces** el reparto se declara vacío explícitamente y no se deja sin cablear.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El reparto no cableado falla nombrando lo que falta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: REPARTO_SIN_AVENTURA lo declara con nombre en app/marcha/llegadas.js."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el reparto, la cola, la capa de lo que se cuenta, las ilustraciones o el registro de sitios pisados sin cablear, **cuando** se monta la capa de llegadas, **entonces** falla nombrando la pieza que falta, en lugar de degradar en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La cola de entregas no cableada falla nombrando la cola",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Las otras piezas, en «La capa de lo que se cuenta no cableada falla nombrándola» y «Un núcleo que calla y un núcleo sin cablear son distinguibles»."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** un sitio que no pertenece al mapa activo, **cuando** se pide su geofence, **entonces** falla nombrando el mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio que no pertenece al mapa activo falla nombrando el mapa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una posición con la marca de tiempo hacia atrás, **cuando** llega a la ventana de parada, **entonces** la ventana se vuelve a anclar en lugar de medir una duración negativa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/ritmo.test.mjs",
+      "caso": "Una marca de tiempo hacia atrás vuelve a anclar la ventana en lugar de medir una duración negativa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el sensor que deja de entregar posiciones a mitad de una salida, **cuando** se mira el momento en marcha, **entonces** se enseña la avería con su motivo del vocabulario cerrado, y no un mapa con la marca quieta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "La avería del momento en marcha tiene un vocabulario cerrado de cuatro",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada validada a un sitio ya marcado como que no vale, **cuando** se recorre, **entonces** el sitio conserva su nombre y su posición y no produce beat, con el mecanismo de SPEC-035 y sin reimplementarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Un sitio sin beat conserva su nombre y su posición y no produce beat",
+      "escenario": "Marcarlo lo saca del casting sin resembrar"
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** una llegada cuyo paso vigente es un beat, **cuando** se monta, **entonces** se enseña el hueco declarado con su única acción de seguir, **con el paso nombrado**, y no se salta el paso en silencio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería, y el que la propia spec nombra: nada afirmaba que un paso sin pantalla se enseñe en lugar de saltarse."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el cierre de esta fila, **cuando** se busca la pantalla de la escena de un beat (A4P3, A4P4), **entonces** lo que hay es el hueco declarado, y **RF-QUEST-004** sigue pendiente en la fila 49.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el hueco declarado de A4P3/A4P4 sigue puesto, así que RF-QUEST-004 sigue pendiente en la fila 49."
+    },
+    {
+      "spec": "SPEC-044",
+      "criterio": "**Dado** el cierre de esta fila, **cuando** se busca la secuencia del telón (A5P1-A5P4), **entonces** lo que hay es el hueco que dejó la fila 48, y **RF-BUCLE-011** sigue pendiente en la fila 49.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: el hueco del telón que dejó la fila 48 sigue puesto, así que RF-BUCLE-011 sigue pendiente en la fila 49."
     }
   ]
 }

@@ -1336,3 +1336,34 @@ describe('Las dos mitades del criterio de una llegada', () => {
     for (let k = 0; k < 3; k += 1) assert.equal(vuelta(), primera, 'dos recorridos idénticos han validado cosas distintas');
   });
 });
+
+// ── El hueco declarado del paso que no tiene pantalla ──────────────────────────
+//
+// SPEC-044. Es la única defensa contra que la fila 49 se dé por hecha sin llegar, y la
+// batería no lo afirmaba: un paso que se salta en silencio deja una secuencia que parece
+// completa y no lo es, que es la forma de fallo que este repo ya ha pagado doce veces (§6h).
+// El precedente literal es el telón de la fila 48 (`telon-sin-pantalla` en `App.js`).
+
+describe('Un paso sin pantalla se enseña, no se salta', () => {
+  test('El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción', () => {
+    const pantalla = codigoDe('app/pantallas/llegada.js');
+    // La marca del hueco existe y **lleva el tipo del paso dentro**: sin el nombre, el hueco
+    // sería indistinguible de una pantalla vacía y su desaparición no sería un acto con
+    // registro el día que llegue la fila 49.
+    assert.match(pantalla, /testID="llegada-hueco"/, 'la pantalla de la llegada no monta el hueco declarado');
+    assert.match(pantalla, /testID="llegada-hueco"[^>]*accessibilityLabel=\{[^}]*tipo\}/, 'el hueco no nombra el paso que no tiene pantalla');
+    assert.match(pantalla, /sinPantalla: 'Esto todavía no está dibujado\.'/, 'el hueco no dice que la pantalla no está dibujada');
+
+    // Y el paso no se salta: la secuencia lo trae y `avanza` es la única manera de moverse,
+    // así que llegar al siguiente cuesta pasar por él.
+    const conBeat = secuenciaDeLlegada({ tipoDeSitio: 'paraje', primeraVisita: true, hayIlustracion: false, hayBeat: true });
+    assert.ok(conBeat.some((p) => p.tipo === TIPOS_DE_PASO.BEAT), 'una llegada con beat no trae el paso de beat en su secuencia');
+    assert.ok(TIPOS_DE_SITIO.includes('paraje'));
+    const encadenados = pasosEncadenados(conBeat);
+    assert.equal(encadenados[encadenados.length - 1].tipo, TIPOS_DE_PASO.BEAT, 'el beat no es el paso al que se llega recorriendo');
+
+    // El telón sigue con su propio hueco, el que dejó la fila 48: esta fila no lo cierra y
+    // tampoco lo tapa.
+    assert.match(codigoDe('app/App.js'), /telon-sin-pantalla/, 'el hueco del telón ha desaparecido sin que llegue la fila 49');
+  });
+});

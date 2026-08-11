@@ -2,8 +2,8 @@
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: falta `paso-llegada` en `app/App.js`, así que
-# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# Este flujo **no recorre su pantalla**: la capa de llegadas no llega a montarse en el
+# dispositivo, así que no hay escena que ofrecer. Lo único que llega a ejecutarse es la
 # guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
 # pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
 # verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
@@ -31,18 +31,12 @@
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
-# - **Una puerta hasta la pantalla.** `app/pantallas/llegada.js` y
-#   `app/pantallas/lo-que-se-cuenta.js` existen y están enteras, pero **`App.js` no las
-#   monta**: no hay ningún camino que lleve a la llegada en un dispositivo. El primer paso
-#   de abajo va contra `paso-llegada`, que es el nombre que le corresponde por la
-#   convención de los otros pasos provisionales (`paso-mapa`, `paso-marcha`,
-#   `paso-revision-render`) y que **todavía no existe**. Es un hueco de cableado y no de
-#   este flujo.
-# - **Las pantallas de las filas 33 y 34.** El visor, la escena y la ficha no están en
-#   disco: mientras no existan, `PantallaLlegada` monta el hueco con el paso nombrado, y
-#   por eso lo que aquí se afirma es `llegada-paso` y no el contenido de cada pantalla.
-# - **Un seguidor de posición cableado**, el mismo que le falta al momento en marcha: sin
-#   él las posiciones de `setLocation` no llegan a la capa de llegadas.
+# - **Que la capa de llegadas se monte en el dispositivo.** `App.js` ya monta la escena que
+#   espera —no hay paso provisional y no lo va a haber—, pero la capa muere al montarse y
+#   nadie enseña el motivo. Medido y con su mensaje en «LÍMITE DECLARADO».
+# - **La pantalla de la escena de un beat (A4P3, A4P4)**, que es de la fila 49: mientras no
+#   exista, la secuencia monta el hueco declarado con el paso nombrado, y por eso lo que
+#   aquí se afirma es `llegada-paso` y no el contenido de cada pantalla.
 #
 # **Lo que este flujo NO puede comprobar, y por qué:**
 #
@@ -66,43 +60,58 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-# El paso a la llegada, provisional como el del mapa y el de en marcha. Hoy no existe.
-
 # ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
 #
-# `paso-llegada` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
-# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
-# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
-# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
-# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+# **Lo que impide recorrerla, medido en `wa-pixel` el 11-ago-2026 y no supuesto.** El párrafo
+# que había aquí decía que faltaba `paso-llegada` en `app/App.js`; eso ya no es cierto y se
+# corrige en lugar de arrastrarlo: SPEC-044 cableó la máquina y **no hay ningún paso
+# provisional**, porque quien decide qué se ve es el estado —si hay una llegada validada sin
+# cerrar, se monta su paso vigente— y no una puerta que se pueda tocar. Lo que falta ahora es
+# otra cosa y está medida:
 #
-# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
-# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
-# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
-# `paso-llegada`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
-# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+# - Se recorre el arranque entero, se echa a andar, se lleva la marca al centro exacto del
+#   geofence de un sitio del mundo levantado y se está parada allí noventa segundos. La
+#   cadencia **sí** cambia —la petición del sistema pasa a `@+5s0ms` y `FusedLocation`
+#   registra `blocked - too fast` en vez de `too close`—, la traza **sí** dice `parada` en el
+#   punto del sitio (`marca-posicion` = `del-mapa:-682,-340:parada`), y aun así **no valida
+#   ninguna llegada**: el área congelada de la partida sigue con `llegadas.salida = null`,
+#   que es lo que escribe montar la capa. Reproducido cuatro veces.
+# - La misma celda, el mismo estado y la misma secuencia de posiciones, pasados por el mismo
+#   código en Node, **validan a los treinta segundos**. Así que el paquete y
+#   `app/marcha/llegadas.js` están bien: lo que falla es el cableado de `app/App.js`.
+# - Una causa está localizada con su mensaje: por el camino de la partida recién nacida
+#   —`App.js`, `partidaGuardada.nace(...).then(...)`— el mundo se guarda como
+#   `{ mapaId, documento, titulo }` **sin `cupos`**, así que `creaLasLlegadas` recibe
+#   `cupos: null` y muere con «la capa de descartes necesita el cupo que la celda congeló al
+#   generarse (cupos.parajes.suelo) y llegó undefined». Es justo el camino que toma todo
+#   flujo con `clearState: true`, y el de cualquier instalación nueva.
+# - Y el fallo es **silencioso**: `montaLasLlegadas` lo recoge en `averia` y nadie enseña
+#   `laSalida.averia()`, aunque su propio comentario diga «una capa que no se puede montar es
+#   avería y se dice». Es §6h otra vez.
+#
+# **Va a `wa-dev` como defecto de código.** Mientras tanto este flujo se queda marcado: su
+# verde significa «el límite sigue en pie», nunca «la pantalla funciona». El día que la capa
+# se monte, este fichero hay que reescribirlo para que entre por donde entra una persona
+# —arranque, portada, «Salir a andar», la marca dentro del geofence— y salga de la columna.
 - runFlow:
     when:
       notVisible:
-        id: 'paso-llegada'
+        id: 'llegada'
     commands:
       - assertVisible:
           id: 'arranque'
       - assertNotVisible:
-          id: 'paso-llegada'
+          id: 'llegada'
 
 # El flujo de verdad, a la espera de su puerta.
 - runFlow:
     when:
       visible:
-        id: 'paso-llegada'
+        id: 'llegada'
     commands:
-      - tapOn:
-          id: 'paso-llegada'
-
       # ── Se llega andando y se para dentro del geofence ─────────────────────────────
-      # El sitio es el núcleo del mundo de andamiaje. Se entra andando y se para dentro: la
-      # permanencia se cumple con dos fijos separados en el tiempo, no con una espera del flujo.
+      # La escena no se navega: se llega. Cuando la capa se monte, este cuerpo entra por
+      # donde entra una persona y la condición de arriba se cumple sola.
       - setLocation:
           latitude: 42.4012
           longitude: -8.8114
