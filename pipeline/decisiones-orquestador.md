@@ -467,3 +467,29 @@ De ahí sale la decisión, y es adaptativa **porque la medida lo pide, no por el
 Tocar la regla de parada va contra decisiones cerradas de SPEC-031 y SPEC-032, así que **el diseño se actualiza y no solo el código**, que es lo que manda `CLAUDE.md`: las dos specs y el documento de `game-design/` correspondiente llevan el porqué con esta tabla como evidencia, y la iteración se anota en `docs/starting.md`.
 
 **Y una atribución mía que estaba mal, corregida por `wa-spec` al ir a escribir la iteración:** el umbral de medio metro por segundo **no es una decisión de SPEC-031** sino de **SPEC-004** (`docs/specs/SPEC-004-tramo-personal.md:181`). Lo de SPEC-031 es que la parada se **detecte** en la traza y la asimetría por efecto. El umbral **no cambia** —sigue valiendo entero para el ritmo y para el motor de pasos—, así que SPEC-004 no necesita iteración; lo que se deroga es su uso como criterio de validación de un geofence, y eso sí es de SPEC-031. Queda escrito porque una derogación apuntada a la spec equivocada es una derogación que el dueño del número no se entera de que le han hecho.
+
+## §10 · Lo que la fila 44 dijo al cerrarse, y que no estaba en ninguna parte
+
+La misma pregunta que a la 48, y otra cosecha que justifica el hábito. **Lo verificable lo he verificado yo contra la fuente** antes de escribirlo; lo que es sospecha queda marcado como tal.
+
+**a · La sospecha grande, sin medir: kilómetros fantasma, y puede haberla abierto la propia 44.** El detector clasifica con `UMBRAL_PARADA_MS` sobre el salto **crudo** entre dos fijos (`transporte.js:168`, verificado) — la misma raíz que rompía las llegadas, con otro consumidor: el motor de pasos. Ruido de σ=10 m con fijos a 5 s aparenta 2,8 m/s → se clasifica `andando` y esos metros se cuentan. Antes de la 44 esto no podía pasar estando parada, porque parada no llegaba ningún fijo; **el muestreo por tiempo cerca de un geofence abre la puerta a acumular metros sin andar, justo donde más se para**. Si alguien ve kilómetros que no cuadran, se mira `transporte.js:168` antes que el motor de pasos. El banco para medirlo es el de §9c: quieto, σ variable, contar metros clasificados `andando`.
+
+**b · `esUnaParada` se ha quedado sin llamador de producción** (verificado: solo definición y pruebas). El umbral **no** está huérfano —`ritmo.js:341` y `transporte.js:168` lo consumen, la frase de SPEC-031-iter-1 es cierta—, pero la función exportada ya no la llama nadie: decidir si se retira o se declara. La sesión sospechó que la frase de la iteración era falsa, lo comprobó, y **no lo era** — se anota también eso.
+
+**c · El banco de barrido de parámetros murió con la sesión.** La guarda de tubería quedó en `marcha.test.mjs`; el barrido periodo × ventana × umbral × σ (cinco scripts) vivía en el scratchpad. Quien quiera reafinar la ventana o el umbral tendrá que reconstruirlo, y reconstruirlo mal es cómo se cambia un número sin la tabla delante. Si se rehace, va a `scripts/` con guardián de ejecución directa.
+
+**d · Callejón probado, para que nadie lo repita: anclar contra un ancla no separa parado de andar.** Radio de quietud 10/15/20/25/30 m a σ=10: parada dentro 77/98/100/100/100 % y de paso a 4 km/h **9,8/36/69/87/94 %**. Suben juntas, siempre.
+
+**e · Contención del emulador: un solo dispositivo, un solo dueño a la vez.** Los flujos usan `clearState: true`; un agente corriendo Maestro mientras otro conduce `adb` le borró la partida a mitad de recorrido y casi se lee como defecto. Vale también para quien orquesta: **no lanzar la suite mientras una sesión de fila tiene el emulador.**
+
+**f · Técnica que sirvió y no estaba escrita:** `adb shell run-as com.walkingadventure.app cat files/partida/partida/estado.json` lee el estado real del aparato — separa «la pantalla no lo enseña» de «no ha pasado» sin depender de la UI ni del informe de nadie.
+
+**g · La costura con la 49, donde está mal cosida:** el hueco de `llegada.js` tolera el paso `beat` porque solo lo nombra; una pantalla de verdad no. El reparto casteado no sobrevive a cerrar la app, así que al reabrir **el beat de dentro llega nulo**: A4P3 se rompe ahí el segundo día, no el primero.
+
+**h · La otra mitad: el telón se marca leído con una sola acción** (regla de SPEC-030: un toque de quien lo lee, nunca el paso de nada), y `abreSalida` lanza con telón sin leer. Si A5 se cuela un camino que no marque, **la app queda encallada sin poder abrir ninguna salida** — fallo silencioso con forma de app muerta.
+
+**i · `componeDesenlace` sigue sin existir** (verificado hoy otra vez; §6v lo fichó). `echaElTelon` lo exige como parámetro y no hay función que lo derive de la plantilla y la aventura. La 49 se lo encuentra el primer día.
+
+**j · Dos geofences solapados validan en la misma parada y encadenan sin pasar por el mapa** — la escena de la 49 puede aparecer inmediatamente después de cerrarse otra llegada. Tumbó 2 de 3 tandas hasta que la prueba lo asumió.
+
+**k · El límite de la verificación de la 44, declarado por ella:** nunca condujo un recorrido limpio de punta a punta hasta A4P5 en una sola pasada — lo que firma se apoya en la tanda de wa-dev, el estado leído con `run-as`, `llegada.yaml` verde seis veces y su recorrido parcial. Evidencia convergente, no experiencia directa, y la diferencia quedó escrita.
