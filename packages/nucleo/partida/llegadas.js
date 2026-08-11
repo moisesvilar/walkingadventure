@@ -191,6 +191,104 @@ export function distanciaAlGeofence(geofence, { x, y }) {
   return Math.hypot(x - geofence.x, y - geofence.y);
 }
 
+// --- la cadencia con la que se pide posición -------------------------------------
+
+/**
+ * Las dos cadencias con las que se le pide posición al sensor. **Vocabulario cerrado**, y
+ * es lo que hace que el cambio se pueda afirmar desde fuera en lugar de deducirse del
+ * gasto de batería.
+ */
+export const CADENCIAS = Object.freeze({ POR_DISTANCIA: 'por-distancia', POR_TIEMPO: 'por-tiempo' });
+
+/** Las dos, en orden declarado. */
+export const IDS_DE_CADENCIA = congelaHondo([CADENCIAS.POR_DISTANCIA, CADENCIAS.POR_TIEMPO]);
+
+/**
+ * Cada cuántos segundos se pide posición **mientras hay un geofence debajo**.
+ *
+ * Cinco, y no es un número elegido por gusto: `pipeline/decisiones-orquestador.md` §9c fijó
+ * los dos pares ventana/deriva midiendo con esta cadencia, y cambiarla invalidaría la tabla
+ * entera. Existe porque `distanceInterval` es un filtro duro del sensor —parada no llega
+ * ninguna posición, medido: **un fijo en trescientos segundos** con GPS perfecto— y una
+ * permanencia se cuenta sobre posiciones que llegan.
+ */
+export const CADENCIA_CERCA_S = 5;
+
+/**
+ * Cuántos metros de más allá del radio hay que poner para volver a la cadencia por
+ * distancia. **Histéresis y no un umbral seco**: un fijo ruidoso en el borde entraría y
+ * saldría del geofence en cada muestra, y volver a pedir la suscripción no es gratis.
+ * Veinte metros son el orden del ruido que la propia tabla de §9c considera normal.
+ */
+export const MARGEN_DE_CERCANIA_M = 20;
+
+/**
+ * Con qué cadencia se pide la posición siguiente: por distancia mientras no hay ningún
+ * geofence debajo, por tiempo mientras lo hay.
+ *
+ * Vive aquí y no en la app **porque es una decisión de juego y no de sensor**: lo que la
+ * gobierna es dónde están los sitios a los que se llega, y la app solo aplica lo que sale.
+ * Y se acota a estar dentro de un geofence en vez de a un halo alrededor: entrar andando ya
+ * entrega un fijo por la cadencia de distancia, así que el halo no compraría nada y en un
+ * mundo urbano denso dejaría el sensor a cinco segundos casi toda la salida.
+ *
+ * @param {object} opciones
+ *   `posicion` la última conocida, en metros del mundo —al abrir una salida es el punto de
+ *   partida, que es lo que evita esperar a un fijo que no va a llegar—; `sitios` el índice
+ *   de geofences del mapa activo, el que devuelve `sitiosConPosicion`; `vigente` la cadencia
+ *   que está puesta ahora mismo, de la que sale la histéresis; `metrosPorDistancia` la
+ *   cadencia por distancia de SPEC-048, que es decisión de batería de aquella fila y esta no
+ *   la toca: entra por la firma en lugar de copiarse aquí.
+ * @returns `{ modo, segundos, metros, sitio, distanciaM }`. Por distancia `segundos` es
+ *   `null` y por tiempo lo es `metros`: una cadencia con las dos puestas no existe.
+ */
+export function cadenciaDeMuestreo({ posicion, sitios, vigente = null, metrosPorDistancia }) {
+  if (!posicion || !Number.isFinite(posicion.x) || !Number.isFinite(posicion.y)) {
+    throw new Error(
+      `la cadencia del muestreo se decide sobre la última posición conocida y llegó ${JSON.stringify(posicion) ?? String(posicion)}: ` +
+      'sin punto no se sabe si hay un sitio debajo, y suponer que no lo hay dejaría la llegada sin poder validar nunca',
+    );
+  }
+  if (!(sitios instanceof Map)) {
+    throw new Error(
+      `la cadencia del muestreo se decide contra el índice de geofences del mapa activo (sitiosConPosicion(mundo)) y llegó ${JSON.stringify(sitios) ?? String(sitios)}: ` +
+      'un índice ausente y un mundo sin sitios tienen que ser distinguibles',
+    );
+  }
+  if (!Number.isFinite(metrosPorDistancia) || metrosPorDistancia <= 0) {
+    throw new Error(
+      `la cadencia por distancia llega como ${JSON.stringify(metrosPorDistancia) ?? String(metrosPorDistancia)} m: es la de SPEC-048 y entra por la firma, ` +
+      'porque copiarla aquí serían dos números que se desincronizan',
+    );
+  }
+  if (vigente !== null && !IDS_DE_CADENCIA.includes(vigente)) {
+    throw new Error(`la cadencia vigente llega como ${JSON.stringify(vigente) ?? String(vigente)} y las declaradas son ${IDS_DE_CADENCIA.join(', ')}`);
+  }
+
+  // El más cercano, que es el mismo criterio con el que se ordenan dos llegadas validadas a
+  // la vez: dos criterios distintos para lo mismo es cómo se desincronizan.
+  let cerca = null;
+  for (const [nombre, geofence] of sitios) {
+    const distanciaM = distanciaAlGeofence(geofence, posicion);
+    if (cerca === null || distanciaM < cerca.distanciaM || (distanciaM === cerca.distanciaM && nombre < cerca.nombre)) {
+      cerca = { nombre, distanciaM, radioM: geofence.radioM };
+    }
+  }
+
+  // Entrar cuesta el radio; salir, el radio más el margen. Esa asimetría es toda la
+  // histéresis, y sin ella la suscripción se volvería a pedir en cada muestra del borde.
+  const limite = vigente === CADENCIAS.POR_TIEMPO ? MARGEN_DE_CERCANIA_M : 0;
+  const dentro = cerca !== null && cerca.distanciaM <= cerca.radioM + limite;
+
+  return congelaHondo({
+    modo: dentro ? CADENCIAS.POR_TIEMPO : CADENCIAS.POR_DISTANCIA,
+    segundos: dentro ? CADENCIA_CERCA_S : null,
+    metros: dentro ? null : metrosPorDistancia,
+    sitio: dentro ? cerca.nombre : null,
+    distanciaM: cerca === null ? null : cerca.distanciaM,
+  });
+}
+
 /**
  * Los sitios de un mundo congelado con su posición y su tipo, indexados por nombre.
  *

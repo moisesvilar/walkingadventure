@@ -288,6 +288,9 @@ export function App() {
     montaLaSalida({
       salidas: partida.estado.salidas,
       origen: partida.mundo.documento?.origin ?? null,
+      // El documento del mundo, del que salen los geofences: de ellos cuelgan la cadencia
+      // del muestreo y el sitio bajo la marca de posición.
+      mundo: partida.mundo.documento ?? null,
       tramo: partida.estado.personaje?.tramo ?? null,
       alCambiar: () => repintaLaSalida((n) => n + 1),
     })

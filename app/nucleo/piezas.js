@@ -111,6 +111,7 @@ import {
   situacionDeSalida,
   terminaDesdeElRotulo,
 } from '@walkingadventure/nucleo/partida/salidas.js';
+import { CADENCIAS, cadenciaDeMuestreo, sitiosConPosicion } from '@walkingadventure/nucleo/partida/llegadas.js';
 import { componeRotulo } from '@walkingadventure/nucleo/partida/rotulo.js';
 import { creaDetectorDeTransporte } from '@walkingadventure/nucleo/partida/transporte.js';
 import { makeProjector } from '@walkingadventure/nucleo/core/geo.js';
@@ -294,6 +295,13 @@ export const NUCLEO_DE_LA_SALIDA = Object.freeze({
   disponibilidadDelRotulo,
   creaDetectorDeTransporte,
   makeProjector,
+  // SPEC-044, y por la misma puerta que las ocho filas anteriores (§6u): que fuera de un
+  // geofence la cadencia siga siendo la de SPEC-048, que dentro pase a ser por tiempo y que
+  // la histéresis impida cambiarla en cada muestra del borde tienen que poder leerse desde
+  // `node --test` sin resolver nada instalado.
+  sitiosConPosicion,
+  cadenciaDeMuestreo,
+  CADENCIAS,
 });
 
 /** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */

@@ -27,7 +27,7 @@
 //   en llegar al detector; lo que la partida escribe es el punto de partida y dos marcas,
 //   que es lo que `AREA_SALIDAS` declara y ni un campo más.
 
-import { creaFuenteDePosiciones, creaTrazaDeSalida } from '../plataforma/posiciones.js';
+import { CADENCIA_M, cadenciaPorDistancia, creaFuenteDePosiciones, creaTrazaDeSalida } from '../plataforma/posiciones.js';
 import { creaSeguidorDeLaSalida } from './seguidor.js';
 
 /** Lo que esto le pide al generador, enumerado. Ni una función más. */
@@ -47,6 +47,12 @@ export const DEL_NUCLEO = Object.freeze([
   'disponibilidadDelRotulo',
   'creaDetectorDeTransporte',
   'makeProjector',
+  // SPEC-044. La cercanía a un geofence y la cadencia que sale de ella las decide el
+  // paquete, y esta capa solo las aplica: son reglas de juego —dónde están los sitios a los
+  // que se llega— y no detalle de sensor.
+  'sitiosConPosicion',
+  'cadenciaDeMuestreo',
+  'CADENCIAS',
 ]);
 
 /**
@@ -115,7 +121,17 @@ function noSeAbre(marca, motivo) {
  *   quien juega, del que sale la distancia de alejamiento del regreso; `alCambiar` a quién
  *   se avisa cuando algo se movió, que es cómo la pantalla se entera sin sondear.
  */
-export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcion = null, origen = null, tramo = null, alCambiar = null, pidePermisoDeAviso = null }) {
+export function creaLaSalida({
+  nucleo,
+  salidas: areaRecibida,
+  rotulo,
+  suscripcion = null,
+  origen = null,
+  mundo = null,
+  tramo = null,
+  alCambiar = null,
+  pidePermisoDeAviso = null,
+}) {
   if (!nucleo) throw new Error('la vida de una salida necesita el núcleo inyectado: es quien decide las transiciones, el plazo y el regreso');
   const faltan = DEL_NUCLEO.filter((n) => nucleo[n] == null);
   if (faltan.length) {
@@ -134,17 +150,50 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
     );
   }
 
+  // El índice de geofences del mapa activo, del que cuelgan la cadencia del muestreo y el
+  // sitio que el seguidor nombra. **Con origen tiene que haber mundo**: el origen sale del
+  // documento del mundo levantado, así que uno sin el otro es un cableado a medias y no un
+  // estado del juego. Sin mapa levantado no hay geofences y tampoco hay seguidor.
+  if (origen && !mundo) {
+    throw new Error(
+      'la vida de una salida recibe el origen del mundo congelado y no su documento: sin él no hay índice de geofences, ' +
+      'y sin índice ni el sitio del seguidor ni la cadencia del muestreo se pueden resolver',
+    );
+  }
+  const sitios = mundo ? nucleo.sitiosConPosicion(mundo) : null;
+  const proyector = origen ? nucleo.makeProjector(origen.lat, origen.lon) : null;
+
   // La traza y el seguidor viven **lo que dura la salida** y se montan al abrirla: un
   // detector que sobreviviera a un cierre arrastraría la racha de la salida anterior a la
   // siguiente, que es la manera de que un autobús de ayer clasifique lo de hoy.
   let traza = null;
   let seguidor = null;
   let averia = null;
+  // La cadencia puesta, que es lo que la histéresis necesita saber para no cambiarla en cada
+  // muestra del borde. Arranca por distancia porque es lo que declara SPEC-048.
+  let cadencia = cadenciaPorDistancia(CADENCIA_M);
 
   const montaLaTraza = () => {
     const fuente = creaFuenteDePosiciones({ lee: () => suscripcion.lee() });
     traza = creaTrazaDeSalida({ fuente, detector: nucleo.creaDetectorDeTransporte() });
-    seguidor = origen ? creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo }) : null;
+    seguidor = origen ? creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo, sitios }) : null;
+  };
+
+  /** El punto de una posición cruda en metros del mundo, o `null` sin mapa levantado. */
+  const enMetros = (cruda) => (proyector && cruda ? proyector.toXY(cruda.lat, cruda.lon) : null);
+
+  /**
+   * Decide la cadencia con la última posición conocida y la aplica **sin parar el
+   * servicio**. Devuelve si cambió, que es lo único que hace falta saber fuera.
+   *
+   * Sin mapa levantado no hay geofences, así que no hay nada que decidir: la de distancia se
+   * queda puesta, que es la de SPEC-048.
+   */
+  const ajustaLaCadencia = async (punto) => {
+    if (!sitios || !punto) return false;
+    cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto, sitios, vigente: cadencia.modo, metrosPorDistancia: CADENCIA_M });
+    if (!suscripcion || typeof suscripcion.aplicaCadencia !== 'function') return false;
+    return suscripcion.aplicaCadencia(cadencia);
   };
 
   const desmontaLaTraza = () => {
@@ -181,6 +230,11 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
     try {
       const cruda = traza.muestrea();
       if (cruda == null) return null;
+      // La cadencia se ajusta **con cada posición y antes de nada**: es lo que hace que
+      // pararse dentro de un geofence siga entregando fijos, y sin fijos no hay permanencia
+      // que contar. Fuera de un geofence esto no cambia nada y no vuelve a pedir la
+      // suscripción, porque la respuesta es la misma que ya estaba puesta.
+      await ajustaLaCadencia(enMetros(cruda));
       const segmentos = traza.traza().segmentos;
       const ultimo = segmentos.length ? segmentos[segmentos.length - 1] : null;
       paso = nucleo.recibePosicion(salidas, {
@@ -223,6 +277,18 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
     /** El último fallo recogido, o `null`. Es lo que la pantalla enseña como motivo literal. */
     averia: () => averia,
 
+    /**
+     * La cadencia con la que se está pidiendo posición, del vocabulario cerrado del paquete.
+     *
+     * Se publica porque es lo único que hace afirmable **desde el aparato** que el muestreo
+     * cambia al entrar en un geofence: sobre la función pura se puede afirmar la decisión,
+     * nunca que la suscripción la haya aplicado.
+     */
+    cadencia: () => cadencia.modo,
+
+    /** El índice de geofences del mapa activo, o `null` sin mapa levantado. */
+    geofences: () => sitios,
+
     /** La situación de la salida: una de las cuatro, o la nada. */
     situacion: () => nucleo.situacionDeSalida(salidas),
 
@@ -245,7 +311,10 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
      * la transición**. Los tres primeros pueden decir que no, y decir que no es una
      * respuesta que la portada enseña con su motivo; nada de esto se abre en silencio.
      */
-    async abre({ salida, mapa, destino = null, mundo = null, aventura = null }) {
+    // `nombreDelMundo` es el título que se lee en el rótulo, no el documento del mundo: el
+    // documento entra al montar la salida y el título viaja por aquí. Se llamaban los dos
+    // `mundo` y uno tapaba al otro, que es la clase de confusión que §8c describe.
+    async abre({ salida, mapa, destino = null, mundo: nombreDelMundo = null, aventura = null }) {
       averia = null;
       const disponible = nucleo.disponibilidadDelRotulo(rotulo);
       if (!disponible.hay) {
@@ -281,12 +350,20 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
         return noSeAbre('sensor-sin-responder', 'el sensor todavía no ha entregado ninguna posición, y una salida sin punto de partida no podría cerrarse nunca por regreso');
       }
 
+      // La cadencia se decide **con el punto de partida y antes de arrancar**: quien abre
+      // la salida ya parada dentro de un geofence no puede esperar al fijo que la cambiaría,
+      // porque ese fijo es justo el que la cadencia por distancia no va a entregar.
+      const punto0 = enMetros(punto);
+      if (sitios && punto0) {
+        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M });
+      }
+
       // El servicio se arranca **esperándolo**: `rotulo.pone()` es síncrono por contrato y
       // un fallo aquí se perdería dentro de una promesa. Volver a pedirlo desde `pone()` no
       // abre una segunda suscripción: es la misma tarea con las mismas opciones.
-      const compuesto = nucleo.componeRotulo({ destino, mundo });
+      const compuesto = nucleo.componeRotulo({ destino, mundo: nombreDelMundo });
       try {
-        await suscripcion.arranca(compuesto);
+        await suscripcion.arranca(compuesto, cadencia);
       } catch (e) {
         return noSeAbre('rotulo-no-disponible', `el servicio en primer plano no arrancó, y sin él la salida perdería la ubicación a los pocos minutos — ${mensaje(e)}`);
       }
@@ -299,7 +376,7 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
           mapa,
           aventura,
           destino,
-          mundo,
+          mundo: nombreDelMundo,
           partida: { lat: punto.lat, lon: punto.lon },
           tMs: punto.tMs,
           rotulo,
@@ -338,8 +415,15 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
 
       const enCurso = nucleo.salidaEnCurso(salidas);
       const compuesto = nucleo.componeRotulo({ destino: enCurso?.destino ?? null, mundo: enCurso?.mundo ?? null });
+      // Retomar decide la cadencia otra vez y desde cero: entre el plazo agotado y el
+      // «seguir» se pudo andar media tarde, así que la de antes no dice nada de dónde se
+      // está ahora.
+      const punto0 = enMetros(punto);
+      if (sitios && punto0) {
+        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M });
+      }
       try {
-        await suscripcion.arranca(compuesto);
+        await suscripcion.arranca(compuesto, cadencia);
       } catch (e) {
         return { retomada: false, motivo: mensaje(e) };
       }

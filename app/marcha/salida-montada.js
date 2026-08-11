@@ -41,13 +41,13 @@ function rotuloSinPoderUsarse(motivo) {
  *
  * @param {object} piezas
  *   `salidas` el área de la partida; `origen` el `{lat, lon}` del mundo congelado, que es el
- *   cero de sus metros; `tramo` el de quien juega; `alCambiar` a quién se avisa cuando algo
- *   se movió.
+ *   cero de sus metros; `mundo` su documento, del que sale el índice de geofences del mapa
+ *   activo; `tramo` el de quien juega; `alCambiar` a quién se avisa cuando algo se movió.
  * @returns la orquestación de `creaLaSalida`, siempre: sin rótulo o sin sensor **también se
  *   monta**, y lo que cambia es que abrir responde que no con su motivo. Devolver `null`
  *   dejaría a quien la usa sin nadie a quien preguntar por qué.
  */
-export async function montaLaSalida({ salidas, origen = null, tramo = null, alCambiar = null }) {
+export async function montaLaSalida({ salidas, origen = null, mundo = null, tramo = null, alCambiar = null }) {
   // La orquestación se referencia antes de existir porque la suscripción necesita a quién
   // empujar cada posición: es un empujón y no un sondeo por reloj, que es lo que evita un
   // temporizador corriendo mientras alguien anda.
@@ -95,6 +95,7 @@ export async function montaLaSalida({ salidas, origen = null, tramo = null, alCa
     rotulo,
     suscripcion,
     origen,
+    mundo,
     tramo,
     alCambiar,
     // El permiso de las notificaciones, pedido al abrir la primera salida y no antes: es
