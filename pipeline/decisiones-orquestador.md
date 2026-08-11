@@ -493,3 +493,11 @@ La misma pregunta que a la 48, y otra cosecha que justifica el hábito. **Lo ver
 **j · Dos geofences solapados validan en la misma parada y encadenan sin pasar por el mapa** — la escena de la 49 puede aparecer inmediatamente después de cerrarse otra llegada. Tumbó 2 de 3 tandas hasta que la prueba lo asumió.
 
 **k · El límite de la verificación de la 44, declarado por ella:** nunca condujo un recorrido limpio de punta a punta hasta A4P5 en una sola pasada — lo que firma se apoya en la tanda de wa-dev, el estado leído con `run-as`, `llegada.yaml` verde seis veces y su recorrido parcial. Evidencia convergente, no experiencia directa, y la diferencia quedó escrita.
+
+### §10-bis · El punto (i) era falso, y cómo llegó a estar escrito dos veces
+
+La fila 49 lo verificó antes de usarlo, que es lo que su encargo manda, y encontró que **`componeElDesenlace` existe**: `packages/nucleo/quests/desenlace.js`, con `lugarDelDesenlace` y `repuestoDe`, entró en `aec5efa` — el mismo arreglo que cerró §6v. O sea que la deuda se fichó y se saldó en el mismo commit, y la nota sobrevivió al arreglo.
+
+Lo que sí es cierto, y es lo que queda en pie de (i): **no la llama nadie desde `app/`**. Es §6h en su forma de cableado —función escrita, probada en `bucle-completo.test.mjs`, sin llamador— y no una pieza que falte. La diferencia le ahorra a la 49 construir un duplicado que se habría desincronizado del original.
+
+Y el error de método, que es lo que vale la pena escribir porque lo cometimos **dos veces seguidas**: la 44 dijo «lo he vuelto a comprobar hoy: no hay ninguna» y quien orquesta dijo «verificado hoy otra vez», y los dos grepamos `componeDesenlace` — un nombre adivinado — en vez de buscar el concepto. **Un negativo no se verifica buscando un identificador que quizá nunca existió: se busca lo que el código haría si existiera** (`desenlace` en todo el repo, los exports de `quests/`, el commit que cerró la deuda). Un relato fiel de una verificación no es la verificación, y una verificación mal hecha tampoco.
