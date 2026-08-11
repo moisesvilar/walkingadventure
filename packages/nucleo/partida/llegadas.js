@@ -86,11 +86,17 @@ export const RADIO_DE_GEOFENCE_M = 40;
  * aparece nunca andando» dejaría de sostenerse. Con un minuto, en cambio, un beat que
  * se atiende de paso dejaría de validar, y `bucle-jugable.md` §9 dice que pasar cerca
  * por casualidad «valida igual» y «es un regalo, no una anomalía».
+ *
+ * **Se llama por lo que mide y no «permanencia»**, y es de esta fila: `regreso.js` tenía otra
+ * constante con el mismo nombre y otro valor —sesenta segundos—, y lo que §8c describe es
+ * exactamente el error que eso invita a cometer, leer un número y arreglar el otro reloj. Son
+ * dos relojes distintos con dos asimetrías contrarias: aquí, en la duda se valida; allí, en la
+ * duda no se cierra. Se cierra por contrato y no por vigilancia: un comentario no impide nada.
  */
-export const PERMANENCIA_S = 20;
+export const PARADA_DENTRO_S = 20;
 
-/** La permanencia en milisegundos, que es la unidad en la que llegan las marcas. */
-export const PERMANENCIA_MS = PERMANENCIA_S * 1000;
+/** Lo mismo en milisegundos, que es la unidad en la que llegan las marcas. */
+export const PARADA_DENTRO_MS = PARADA_DENTRO_S * 1000;
 
 /**
  * Lo que validar **no** exige, declarado para poder afirmar que no existe.
@@ -647,7 +653,7 @@ export function creaLlegadas({
     mapaId: id,
     salida,
     radioM: RADIO_DE_GEOFENCE_M,
-    permanenciaMs: PERMANENCIA_MS,
+    permanenciaMs: PARADA_DENTRO_MS,
 
     /** El geofence de un sitio del mapa activo. */
     geofence: geofenceDeSitio,
@@ -716,7 +722,7 @@ export function creaLlegadas({
           // sumado ventana más permanencia y roto lo que §9c mide.
           const desde = paradaDesde.get(nombre) ?? medida.desdeMs;
           paradaDesde.set(nombre, desde);
-          if (posicion.tMs - desde < PERMANENCIA_MS) continue;
+          if (posicion.tMs - desde < PARADA_DENTRO_MS) continue;
           // Volver a un sitio ya visitado **valida el beat que toca**, y no valida
           // ninguna otra cosa. Lo que esta guarda protege es que el visor y la ficha de
           // un sitio ya visto no se repitan, no que un beat pendiente allí se quede sin

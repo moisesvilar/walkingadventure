@@ -38,11 +38,18 @@ export const RADIO_DE_REGRESO_M = 50;
  * Cuánto hay que quedarse dentro del radio. El minuto es lo que distingue «he
  * llegado» de «he pasado por delante» a mitad de un lazo, y es más exigente que los
  * veinte segundos de una llegada porque aquí equivocarse cuesta una aventura viva.
+ *
+ * **Se llama por lo que mide y no «permanencia»** (SPEC-044): `llegadas.js` tenía otra
+ * constante con el mismo nombre y otro valor, y §8c describe el error que eso invita a
+ * cometer —leer un número y arreglar el otro reloj—. Son dos relojes distintos y con las
+ * asimetrías cambiadas: allí, en la duda se valida; aquí, en la duda no se cierra. Este no
+ * lo toca esta fila, y es deliberado: es de SPEC-030, su exposición no está medida y
+ * cambiarlo cambiaría cuándo se cierra una salida.
  */
-export const PERMANENCIA_S = 60;
+export const DENTRO_DEL_REGRESO_S = 60;
 
-/** La permanencia en milisegundos, que es la unidad en la que llegan las marcas. */
-export const PERMANENCIA_MS = PERMANENCIA_S * 1000;
+/** Lo mismo en milisegundos, que es la unidad en la que llegan las marcas. */
+export const DENTRO_DEL_REGRESO_MS = DENTRO_DEL_REGRESO_S * 1000;
 
 /**
  * Lo que esta comprobación **no** mira, declarado para poder afirmarlo. Es la lista
@@ -134,7 +141,7 @@ export function avanzaElRegreso(vigilancia, { partida, alejamientoM, lat, lon, t
     permanenciaMs,
     // Las dos condiciones, y las dos hacen falta. Con `>=` se cierra al cumplirse el
     // minuto justo, que es lo que dice «quedarse el tiempo de permanencia».
-    haVuelto: seAlejo && dentro && permanenciaMs >= PERMANENCIA_MS,
+    haVuelto: seAlejo && dentro && permanenciaMs >= DENTRO_DEL_REGRESO_MS,
   });
 }
 
