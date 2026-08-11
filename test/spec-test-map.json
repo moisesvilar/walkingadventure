@@ -28943,6 +28943,839 @@
       "caso": "El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción",
       "hueco_de_bateria": true,
       "nota": "Hueco de batería: el hueco del telón que dejó la fila 48 sigue puesto, así que RF-BUCLE-011 sigue pendiente en la fila 49."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una llegada cuyo paso vigente es un beat, **cuando** se monta, **entonces** lo que se ve es la escena y no el hueco declarado que dejó la fila 44.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "En el sitio del hueco declarado hay pantalla, y el paso sigue sin poder saltarse",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** esa escena, **cuando** se enumeran sus elementos, **entonces** están el nombre de fantasía del sitio, el titular del tipo de escena, la línea de situación, el cuerpo del texto y el cierre por resultado, exactamente como los compone `componeEscena`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La escena pinta lo que compone el paquete y no redacta ni una palabra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** esa escena, **cuando** se cuentan sus acciones tocables, **entonces** hay exactamente una, y su rótulo es el verbo que declara el marco de la escena y nunca «Continuar». *(Escenario «El visor es una capa y debajo está el beat», en su mitad de escena; `@app` para lo tocable.)*",
+      "nivel": "@app",
+      "fichero": "test/app/escena.yaml",
+      "caso": "Un solo botón y ninguna manera de volver atrás",
+      "hueco_de_bateria": true,
+      "nota": "Flujo de límite declarado: la escena existe y se monta, pero un flujo no puede garantizar llegar a ella. La mitad afirmable sin dispositivo es «La escena tiene una sola acción, con el verbo del marco, y ninguna manera de volver» de test/nucleo/escena-cableada.test.mjs."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un beat con una cara del reparto, **cuando** se compone la escena, **entonces** se ven el nombre y el puesto de quien habla y su parlamento entrecomillado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La escena se compone con la cara del reparto, con su nombre y su puesto",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El beat con cara se fabrica: medido, 0 de 506 beats casteados de los cuatro mundos de referencia cae sobre un rol humano, y el número está fijado en «Ningún beat del catálogo cae hoy sobre un rol humano, y por eso ninguna escena tiene cara»."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un beat cuya escena no tiene a nadie, **cuando** se compone, **entonces** el bloque de la cara no existe, el cuerpo se pinta como párrafo y ningún otro elemento cambia de sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La escena sin cara pierde el bloque de la cara y no mueve nada más",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es del paquete y ya estaba probado desde SPEC-034; aquí se consume tal cual."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** cualquier escena, **cuando** se busca un retrato de la cara, **entonces** no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La escena tiene una sola acción, con el verbo del marco, y ninguna manera de volver",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** cualquier escena, **cuando** se busca una flecha de volver, una barra, una segunda acción o un salto al paso siguiente, **entonces** no hay ninguno: lo que `LO_QUE_LA_ESCENA_NO_LLEVA` enumera se puede poner rojo elemento a elemento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La escena tiene una sola acción, con el verbo del marco, y ninguna manera de volver",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El mismo caso recorre LO_QUE_LA_ESCENA_NO_LLEVA elemento a elemento."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un beat con disparador de franja resuelto fuera de ella, **cuando** se pinta la escena, **entonces** no hay ni aviso de franja ni reloj en pantalla, y lo único distinto es qué variante se lee.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "La variante de fuera de franja no reprocha nada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La franja no se anuncia: lo único que cambia es qué variante se lee, y eso es del paquete."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un beat con disparador `con_objeto`, **cuando** se pinta la escena por cualquiera de sus dos vías, **entonces** no hay candado, ni «necesitas», ni lista de requisitos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin el objeto hay otro camino al mismo beat",
+      "escenario": "Sin el objeto hay otro camino al mismo beat",
+      "nota": "Las dos vías resuelven el mismo beat y ninguna se anuncia: la pantalla no recibe candado, ni requisitos, ni lista."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la escena en pantalla, **cuando** se enumeran sus elementos y el registro de cada uno, **entonces** el único de registro de aplicación es el ajuste de tamaño de letra y todo lo demás es voz del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El único registro de aplicación de la escena es el ajuste de tamaño de letra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la escena, **cuando** se toca el ajuste de tamaño de letra, **entonces** el texto cambia de tamaño en el sitio, sin abrir panel, sin recargar nada y sin salir de la escena. *(`@app`.)*",
+      "nivel": "@app",
+      "fichero": "test/app/escena.yaml",
+      "caso": "El tamaño del texto se cambia sin salir de la escena",
+      "hueco_de_bateria": true,
+      "nota": "Flujo de límite declarado. Maestro no mide tipografías: lo que el flujo comprobaría es que tocar no saca de la escena."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el ajuste tocado tantas veces como escalones tiene la escala más una, **cuando** se lee el escalón vigente, **entonces** es el de origen: el recorrido es cíclico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El escalón de tamaño de letra vive fuera de la escena y recorre la escala en ciclo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un escalón elegido, **cuando** se sale de la escena y se entra en otra, **entonces** sigue puesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El escalón de tamaño de letra vive fuera de la escena y recorre la escala en ciclo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El escalón vive en quien monta el paso, no en la escena: por eso sobrevive a entrar en la siguiente. La mitad tocable está en test/app/escena.yaml, en «El tamaño elegido sigue puesto en la escena siguiente»."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un tamaño de letra fuera de la escala declarada, **cuando** se aplica, **entonces** falla nombrando el valor y la escala entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Un tamaño de letra fuera de la escala falla nombrando el valor y la escala",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es del paquete desde SPEC-034."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la etiqueta y la ayuda del ajuste, **cuando** se leen, **entonces** no aparece ninguna mención de accesibilidad, de dificultad de lectura ni de modo alguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El único registro de aplicación de la escena es el ajuste de tamaño de letra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Se recorren las palabras prohibidas sobre la etiqueta y la ayuda que declara el paquete."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** cualquier texto que la escena pinta, **cuando** se busca en él una cifra, **entonces** no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Ningún texto de la escena ni de lo que te llevas lleva una cifra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la escena resuelta, **cuando** se toca su única acción, **entonces** lo siguiente que se ve es lo que te llevas, y no el mapa ni ninguna pantalla anterior. *(Arista `A4P3 → A4P4` de `docs/flujo.md`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "En qué mitad del paso de beat se va es del paso y no de la escena",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Cubre además el defecto que la propia fila midió: con el estado dentro de la escena, tocar el tamaño de letra devolvía de A4P4 a A4P3."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** esa pantalla, **cuando** se enumeran sus elementos, **entonces** están el rótulo «Llevas encima», lo que se lleva, el párrafo que empuja al siguiente y —salvo en el último beat— el nombre del sitio siguiente con su línea de calzadas y su marca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Lo que te llevas se pinta con lo suyo, y el último beat no nombra ningún sitio siguiente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el último beat de la cadena, **cuando** se compone lo que te llevas, **entonces** no hay bloque de sitio siguiente y la acción es la misma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Lo que te llevas se pinta con lo suyo, y el último beat no nombra ningún sitio siguiente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Se afirma sobre lo compuesto al andar el lazo entero, no sobre un ejemplo."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** esa pantalla, **cuando** se busca cualquier cifra —cuánto falta, cuántos beats quedan, cuánto oro se lleva—, **entonces** no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Ningún texto de la escena ni de lo que te llevas lleva una cifra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** lo que te llevas en un sitio que es un núcleo, **cuando** se toca «Seguir andando», **entonces** el paso siguiente es lo que allí se cuenta. *(Aristas `A4P4 → NUCLEO → A4P5`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Lo que aquí se cuenta cierra la llegada a un núcleo",
+      "escenario": "Lo que aquí se cuenta cierra la llegada a un núcleo",
+      "nota": "El orden de los pasos lo decide la secuencia y la pantalla no lo reordena."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** lo que te llevas en un sitio que no es un núcleo, **cuando** se toca «Seguir andando», **entonces** se vuelve al momento en marcha. *(Arista `NUCLEO → A3P1`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Una secuencia recorrida hasta el final cierra la llegada y no vuelve a ofrecerse",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Cerrada la última escena que espera, el montaje avisa de que ya no queda ninguna y se vuelve al momento en marcha."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un tramo del guiado sin nombre propio, **cuando** se pinta la línea de calzadas, **entonces** simplemente no se nombra, y ningún texto lo llama falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Lo que te llevas se pinta con lo suyo, y el último beat no nombra ningún sitio siguiente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La línea de calzadas descarta los tramos sin nombre propio y ningún texto lo llama falta."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una entrada de la lista de hoy que se acepta, **cuando** se acepta, **entonces** queda una aventura en curso en el estado, con su cadena de beats casteada, su beat en curso puesto en el primero y su hecho `aventura-aceptada` anexado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Aceptar una entrada deja la aventura en curso en su primer beat, con su hecho anexado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una aventura en curso y una llegada cuyo paso vigente es su beat, **cuando** se cierra ese paso, **entonces** el beat queda resuelto y el beat en curso pasa a ser el siguiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Cerrar el paso de un beat resuelve el que toca y la cadena entera se anda por la capa de la app",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una llegada que ofrece un beat que **no** es el que toca, **cuando** se recorre, **entonces** el beat se queda esperando a la llegada que sí le toque y la app no falla, con el mecanismo que `partida/llegadas.js` ya trae y sin reimplementarlo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El beat que no toca se queda esperando a la llegada que sí le toque y la app no falla",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la misma escena compuesta dos veces por cerrarse y abrirse la app, **cuando** se resuelve el beat la segunda vez, **entonces** no cambia nada y no se duplica ningún hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Resolver dos veces el mismo beat no cambia nada ni duplica ningún hecho",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el último beat de la cadena resuelto, **cuando** se pregunta por la aventura en curso, **entonces** está lista para cerrarse como terminada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Cerrar el paso de un beat resuelve el que toca y la cadena entera se anda por la capa de la app",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida con aventura aceptada, **cuando** se cierra y se vuelve a abrir la app antes de terminarla, **entonces** la aventura sigue en curso por el mismo beat y **el beat que la llegada ofrece no llega nulo**. *(Deuda `pipeline/decisiones-orquestador.md` §10g.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El reparto se recupera del mundo congelado y es idéntico beat a beat",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es la deuda §10g: el beat que la llegada ofrece ya no llega nulo al reabrir la app."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el reparto casteado tras reabrir la app, **cuando** se compara con el de antes de cerrarla, **entonces** es idéntico beat a beat: se recupera del mundo congelado y de la plantilla que el estado ya guarda, y no se persiste ninguna cadena de textos. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El reparto se recupera del mundo congelado y es idéntico beat a beat",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante. Se compara por serialización completa y se afirma además que la cadena no se persiste."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida sin ninguna aventura aceptada, **cuando** se monta la capa de llegadas, **entonces** el reparto sigue declarándose vacío explícitamente, como hasta ahora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Sin ninguna aventura aceptada el reparto sigue declarándose vacío explícitamente",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el estado de una aventura en curso guardado, **cuando** se inspecciona, **entonces** no contiene ninguna coordenada ni ninguna marca de tiempo. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El estado de una aventura en curso no guarda ninguna coordenada ni ninguna marca de tiempo",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad, bloqueante. Se mira lo escrito y no el código."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un telón sin leer, **cuando** se abre la app, **entonces** lo primero que se ve es el telón de aquella salida, y no la portada. *(Escenario «El telón espera a que lo leas».)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El telón espera a que lo leas",
+      "escenario": "El telón espera a que lo leas",
+      "nota": "La mitad de la app —que el telón manda sobre la portada— la cablea App.js y se afirma en «Leer el telón deja abrir otra salida»."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** cualquier telón, **cuando** se mira su primera pantalla, **entonces** es el mapa; y **cuando** se mira la última, **entonces** es la entrada del diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "La primera pantalla es siempre el mapa y la última siempre la entrada del diario",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es del paquete desde SPEC-036 y la pantalla no reordena nada."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida con aventura terminada y desenlace notable, **cuando** se recorre el telón, **entonces** las pantallas son, en este orden, el mapa, el desenlace, lo que se pone en camino y la entrada del diario. *(Aristas `A5P1 → A5P2 → A5P3 → A5P4`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Una aventura terminada compone su desenlace desde la plantilla del catálogo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida con aventura terminada y desenlace **no** notable, **cuando** se recorre, **entonces** son el mapa, el desenlace y la entrada del diario. *(Escenario «El rumor solo aparece si el desenlace era notable»; arista `A5P2 → A5P4`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El rumor solo aparece si el desenlace era notable",
+      "escenario": "El rumor solo aparece si el desenlace era notable",
+      "nota": "Es del paquete desde SPEC-036; el cableado de la app se afirma en test/nucleo/telon-cableado.test.mjs."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida que se cerró a mitad de la aventura, **cuando** se recorre, **entonces** en el sitio del desenlace va el cierre en corto, y después la entrada del diario y nunca lo que se pone en camino. *(Escenarios «El cierre en corto ocupa el sitio del desenlace» y «Un cierre en corto no genera rumor»; arista `A5P2B → A5P4`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El cierre en corto ocupa el sitio del desenlace",
+      "escenario": "El cierre en corto ocupa el sitio del desenlace",
+      "nota": "Ahora por la puerta de la app: la aventura se anda a medias y el motor declara cómo acabó."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un paseo sin ninguna aventura, **cuando** se recorre, **entonces** son el mapa y la entrada del diario, sin nada en medio. *(Escenario «Un paseo sin aventura tiene telón completo menos desenlace»; arista `A5P1 → A5P4`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Un paseo sin aventura tiene telón completo menos desenlace",
+      "escenario": "Un paseo sin aventura tiene telón completo menos desenlace"
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un día sin ningún ascenso, **cuando** se pinta la primera pantalla, **entonces** es la misma pantalla con el título del día sin tinta, la lista de ascensos vacía, los nombres de los sitios por los que se pasó y la línea que constata el día. *(Escenario «Un día sin descubrir nada enseña el mapa igual»; arista `A5P1 ⇢ A5P1B → A5P4`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Un día sin descubrir nada enseña el mapa igual",
+      "escenario": "Un día sin descubrir nada enseña el mapa igual"
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el paseo sin aventura y la salida con aventura, **cuando** se comparan los títulos de sus primeras pantallas, **entonces** son el mismo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "El paseo sin aventura no es una pantalla distinta con título propio",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es del paquete desde SPEC-036."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** cualquier pantalla del telón salvo la última, **cuando** se cuentan sus acciones, **entonces** hay exactamente una, «Seguir», y no hay flecha de volver.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Toda pantalla del telón salvo la última tiene una sola acción y ninguna flecha de volver",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la entrada del día, **cuando** se cuentan sus acciones, **entonces** hay exactamente dos: «Ver el diario entero» y «Cerrar». *(Aristas `A5P4 → A6P2` y `A5P4 → A6P1`.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida",
+      "nota": "Escenario nuevo de docs/testing.md, escrito por esta fila: §10h no tenía ninguno."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el desenlace, **cuando** se cuentan las cifras de toda la pantalla, **entonces** la única es la del oro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "La única cifra de la pantalla del desenlace es la del oro",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería no tiene ningún escenario que cuente las cifras del desenlace. El caso homónimo del paquete está en test/nucleo/telon.test.mjs desde SPEC-036; aquí se afirma sobre lo que la pantalla monta."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el desenlace de un rango que no se movió, **cuando** se pinta, **entonces** no hay frase de rango y no se sustituye por ninguna que diga que no subió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "La única cifra de la pantalla del desenlace es la del oro",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La frase del rango es condicional en la pantalla y ausente cuando el rango no se movió."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la pantalla de lo que se pone en camino, **cuando** se inspecciona lo que se le entregó para pintar, **entonces** lleva el núcleo de origen y nada más: ni destinos, ni saltos, ni nivel, ni el árbol de calzadas. *(Escenario «El telón no enseña la propagación».)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El telón no enseña la propagación",
+      "escenario": "El telón no enseña la propagación",
+      "nota": "Ahora sobre lo que la pantalla le entrega a la lámina: el núcleo de origen y nada más."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el mapa del telón, **cuando** se busca una leyenda de tintas o cualquier explicación de qué significa cada una, **entonces** no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El mapa del telón no lleva ninguna leyenda de tintas, y la lámina recibe el entintado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el mapa del telón, **cuando** se compara con el mismo mundo pintado en marcha, **entonces** el mundo es idéntico y solo cambia el pintado. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Entintar no resiembra ni mueve nada",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante. Es del paquete desde SPEC-036; lo que esta fila añade es que la lámina reciba el entintado, afirmado en «El mapa del telón no lleva ninguna leyenda de tintas, y la lámina recibe el entintado»."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un telón con hito, **cuando** se recorre, **entonces** la cartela aparece **una sola vez** entre el desenlace y la entrada del diario, sin acción propia más que cerrarse y sin quedar en ningún sitio consultable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "La cartela del hito aparece una sola vez entre el desenlace y la entrada del diario",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un hito que coincide con un cierre en corto, **cuando** se recorre el telón, **entonces** la cartela aparece igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Un hito que coincide con una salida cerrada en corto aparece igual",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es del paquete desde SPEC-036."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida que se cierra por volver al punto de partida, **cuando** se cierra, **entonces** la vida de la salida queda con el telón sin leer y el registro de la salida abierta **sigue abierto**, esperando a que el telón se eche.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Volver a casa cierra la salida",
+      "escenario": "Volver a casa cierra la salida",
+      "nota": "La mitad que esta fila entrega: el registro de la salida abierta sigue abierto, esperando a que el telón se eche."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** «dejarlo aquí» desde la portada, **cuando** se toca, **entonces** ocurre exactamente lo mismo que al volver a casa, y el registro de la salida abierta **no** se cierra por su cuenta antes de que el telón se eche.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "«Dejarlo aquí» entra por la misma puerta y no cierra el registro de la salida abierta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** cualquiera de las tres vías de cierre, **cuando** se monta la pantalla del telón, **entonces** el telón se echa **una sola vez**, con las seis piezas de serie cableadas, y lo que se pinta es lo que `echaElTelon` devolvió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Las tres vías de cierre echan el telón por la misma puerta, y la vía sale del motivo anotado",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón ya echado, **cuando** se vuelve a pedir echarlo, **entonces** no se entinta dos veces ni se ingresa el oro dos veces.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El telón se echa una sola vez: volver a pedirlo no entinta dos veces ni ingresa el oro dos veces",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una aventura terminada, **cuando** se echa el telón, **entonces** su desenlace se compone desde la plantilla del catálogo y la aventura casteada, y el telón enseña el desenlace y no el cierre en corto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Una aventura terminada compone su desenlace desde la plantilla del catálogo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una aventura cerrada a mitad, **cuando** se echa el telón, **entonces** el texto que se pinta es el de repuesto que la plantilla declara, elegido por si se consiguió algo, y nunca uno redactado en `app/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El cierre en corto ocupa el sitio del desenlace",
+      "escenario": "El cierre en corto ocupa el sitio del desenlace",
+      "nota": "Se afirma además que el texto es uno de los dos repuestos que declara la plantilla y no uno redactado en app/."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón echado, **cuando** se mira la partida, **entonces** se ha congelado en ese mismo corte.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "La app cerrada entre echar el telón y marcarlo como leído enseña la entrada del día recompuesta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Que el corte se congele lo cablea App.js con alEchado, y la consecuencia observable —que no se vuelva a echar— es lo que este caso afirma."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón echado, **cuando** se mira la app, **entonces** no ha saltado ninguna notificación y la app no se ha puesto en primer plano. *(Escenario «Volver a casa cierra la salida».)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Volver a casa cierra la salida",
+      "escenario": "Volver a casa cierra la salida",
+      "nota": "La capa declara notifica y ponePrimerPlano en falso, que es lo que se afirma."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la entrada del día, **cuando** se toca «Cerrar», **entonces** el telón queda marcado como leído y se llega a la portada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida"
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la entrada del día, **cuando** se toca «Ver el diario entero», **entonces** el telón queda marcado como leído igual y se llega al diario.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida",
+      "nota": "Las dos salidas marcan, y «Ver el diario entero» además abre el diario."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** **todas** las salidas de la última pantalla del telón, **cuando** se recorren una a una, **entonces** cada una deja el telón marcado como leído y una salida nueva se puede abrir. *(Es el criterio que impide la app muerta de §10h.)*",
+      "nivel": "@app",
+      "fichero": "test/app/telon.yaml",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida",
+      "nota": "Flujo de límite declarado nuevo: es §10h y necesita dedo, pero las tres vías de cierre de una salida están fuera del alcance de un flujo en esta máquina. La mitad afirmable sin dispositivo está en test/nucleo/telon-cableado.test.mjs con el mismo nombre."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón a medio leer, **cuando** se avanza de pantalla, **entonces** el telón **no** queda marcado como leído: lo marca un toque de quien lo lee y nunca el paso de nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida",
+      "nota": "La mitad negativa: avanzar de pantalla no marca nada."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un telón sin leer, **cuando** se intenta echar a andar, **entonces** no se abre ninguna salida y el motivo que se enseña es el que ya declara el vocabulario cerrado, `telon-pendiente`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida",
+      "nota": "El motivo telon-pendiente es del vocabulario cerrado de app/marcha/salida.js y ya estaba afirmado en test/nucleo/marcha.test.mjs."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón marcado como leído, **cuando** se echa a andar, **entonces** la salida se abre.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Leer el telón deja abrir otra salida",
+      "escenario": "Leer el telón deja abrir otra salida"
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el árbol de la app, **cuando** se busca el hueco `telon-sin-pantalla` con su acción `telon-cerrar`, **entonces** no queda ninguno: la fila 48 lo dejó puesto y esta lo sustituye.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El paso de beat se monta con su pantalla, y un paso sin ella se enseña con su nombre y su acción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Sustituye a la guarda que SPEC-044 dejó puesta y que esta fila retira por criterio de aceptación; el porqué está escrito en el propio fichero."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el árbol de la app, **cuando** se busca el hueco `llegada-hueco` para el paso de beat, **entonces** no queda ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El paso de beat se monta con su pantalla, y un paso sin ella se enseña con su nombre y su acción",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El mismo caso afirma la retirada de los dos huecos y lo que la guarda protegía de verdad."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida durante la cual se ha llegado a sitios nuevos, **cuando** se mira el mapa a mitad de camino, **entonces** está como al salir de casa y solo se ha movido la marca. *(Escenario «El mapa no cambia durante la salida».)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El mapa no cambia durante la salida",
+      "escenario": "El mapa no cambia durante la salida",
+      "nota": "Ahora andando el lazo con la capa de la app montada."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** esa misma salida, **cuando** se echa el telón, **entonces** los sitios a los que se llegó aparecen entintados y la lista dice a qué escalón han subido, en palabras del mundo. *(Escenario «El mapa se entinta al echar el telón».)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El mapa se entinta al echar el telón",
+      "escenario": "El mapa se entinta al echar el telón",
+      "nota": "La mitad que esta fila entrega: el libro de pendientes lo llena alguien, que hasta hoy no ocurría."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** esa lista, **cuando** se busca en ella un porcentaje, un kilómetro, un tiempo o una barra, **entonces** no hay ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El mapa se entinta al echar el telón",
+      "escenario": "El mapa se entinta al echar el telón",
+      "nota": "Se recorre la lista de ascensos buscando cifras."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida a mitad de la cual se cerró y se volvió a abrir la app, **cuando** se echa el telón, **entonces** los sitios a los que ya se había llegado siguen entintándose: lo pendiente se reconstruye de las llegadas que el estado ya guarda y no se pierde con el proceso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Lo pendiente se reconstruye de las llegadas que el estado guarda y no se pierde con el proceso",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida sin ninguna llegada validada, **cuando** se echa el telón, **entonces** la lista de ascensos está vacía y no se sustituye por ninguna disculpa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Una salida sin ninguna llegada validada tiene la lista de ascensos vacía y no se disculpa",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la escena sin el reloj de pared cableado, **cuando** se compone la de un beat de franja, **entonces** falla nombrando el reloj y no resuelve la llegada como si fuera dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Sin el reloj de pared, la escena de un beat de franja se enseña como avería y el paso no se salta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la escena sin la vista de tenencia cableada, **cuando** se compone la de un beat `con_objeto`, **entonces** falla nombrando la tenencia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena.test.mjs",
+      "caso": "Sin la vista de tenencia, un beat con objeto falla nombrando la tenencia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es del paquete desde SPEC-034; el motor de la app la exige y la calcula del estado, afirmado en «El motor de la aventura en curso no se monta sin el núcleo, el mundo ni el estado»."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el cierre de la salida sin alguna de sus seis piezas, **cuando** se ejecuta, **entonces** falla nombrando la pieza que falta y no echa un telón al que le falta algo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Sin cada una de las piezas del cierre, echar el telón falla nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el cierre sin el calendario cableado, **cuando** se ejecuta, **entonces** falla nombrando el calendario y no apunta el día cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Sin cada una de las piezas del cierre, echar el telón falla nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El calendario se quita del cierre y el fallo lo nombra."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el cierre sin la plantilla del catálogo de la aventura terminada, **cuando** se ejecuta, **entonces** falla nombrándola y no echa un telón sin desenlace.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Sin la plantilla del catálogo de la aventura, el cierre falla nombrándola",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una escena cuyo beat llega nulo o recortado, **cuando** se monta la pantalla, **entonces** se enseña la avería con su motivo literal y **el paso no se salta en silencio**.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Sin el reloj de pared, la escena de un beat de franja se enseña como avería y el paso no se salta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La avería llega con su motivo literal en motivoDeEscena y el paso se sigue pudiendo cerrar."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón que no se puede echar, **cuando** se monta su pantalla, **entonces** se enseña la avería con su motivo literal y la única acción sigue marcando el telón como leído, de modo que la app nunca queda encallada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "La avería del telón conserva la acción que lo marca como leído",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la app cerrada entre echar el telón y marcarlo como leído, **cuando** se vuelve a abrir, **entonces** el telón **no** se echa otra vez y lo que se enseña es su última pantalla —la entrada del día, recompuesta del diario— con sus dos salidas, que marcan el telón como leído. Está declarado en «Decisiones asumidas» y no es un hueco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "La app cerrada entre echar el telón y marcarlo como leído enseña la entrada del día recompuesta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería: la batería describe qué hace el juego, no cómo está cableado, y el cableado es lo que esta fila entrega."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** dos geofences solapados que validan en la misma parada, **cuando** se cierra la primera llegada, **entonces** la escena de la segunda aparece sin pasar por el mapa y sin fallar. *(§10j.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dos geofences solapados validan los dos y se ofrece primero el más cercano",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. §10j. La segunda escena se ofrece sin pasar por el mapa, y con la capa de la app montada las dos componen su escena: afirmado también en «Cerrar el paso de un beat resuelve el que toca y la cadena entera se anda por la capa de la app»."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la escena de un beat en un sitio sin ilustración, **cuando** se recorre la llegada, **entonces** la escena se alcanza igual: no depende del visor. *(Arista `LLEGA → A4P3` de `docs/flujo.md`; deuda 3 del encargo.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "El visor es una capa y debajo está el beat",
+      "escenario": "El visor es una capa y debajo está el beat",
+      "nota": "La escena no depende del visor: el lazo se anda entero con las ilustraciones declaradas ausentes y todos los pasos de beat componen su escena."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** `packages/nucleo/`, **cuando** se enumeran sus imports, **entonces** no aparece ni React Native ni ningún módulo de Expo. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Ningún módulo del paquete importa de React Native ni de Expo",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante. Hueco de batería: es una frontera de código y la batería describe el juego."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el código de `packages/nucleo/`, **cuando** se busca `Math.random`, `Date.now` o `new Date`, **entonces** no hay ninguno. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/generacion.test.mjs",
+      "caso": "No se usa ninguna fuente de azar ni de tiempo del sistema",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante. Hueco de batería."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** un clon limpio sin `node_modules`, **cuando** se ejecuta la batería de `@nucleo` enumerando sus ficheros, **entonces** arranca entera y pasa. *(Criterio duro, §6u.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Cualquier módulo del paquete arranca en Node sin instalar ninguna dependencia",
+      "hueco_de_bateria": true,
+      "nota": "Criterio duro de §6u. Hueco de batería. Los dos bundles nuevos se arman por ruta relativa en test/nucleo/cableado-de-prueba.mjs justamente por esto."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el mismo estado y las mismas entradas dos veces, **cuando** se compone el telón, **entonces** los dos son idénticos, frase de rango incluida. *(`@determinismo`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "El mismo estado y las mismas entradas componen el mismo telón dos veces",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante. Se compara por serialización completa, frase de rango incluida."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una salida entera recorrida y su telón echado, **cuando** se inspecciona lo que la partida escribe, **entonces** no hay ninguna coordenada, ninguna marca de tiempo y ningún minuto del día. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Lo que la partida escribe al echar el telón no lleva ninguna coordenada ni ninguna marca de tiempo",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad, bloqueante."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** una escena compuesta y un beat resuelto, **cuando** se cuentan las peticiones de red, **entonces** cero. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Ni el cierre ni el telón hacen ninguna petición de red",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad, bloqueante. Se afirma sobre la fuente de las cinco capas de esta fila, que es donde una petición tendría que estar."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el telón entero, **cuando** se inspecciona el tráfico saliente, **entonces** no sale ninguna petición. *(`@privacidad`, bloqueante.)*",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon-cableado.test.mjs",
+      "caso": "Ni el cierre ni el telón hacen ninguna petición de red",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad, bloqueante."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** el paquete, **cuando** se busca quién compone la escena y el telón, **entonces** están en `packages/nucleo/` y llegan inyectados a la app; ningún texto nuevo se redacta en `app/`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La escena pinta lo que compone el paquete y no redacta ni una palabra",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Se cuenta cada nodo de texto de las dos pantallas: todos son expresiones, así que no hay una sola cadena redactada en app/."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** los textos que la app pinta, **cuando** se buscan las palabras del vocabulario de reproche, del de propagación y del de logro, **entonces** no aparece ninguna, con las mismas comprobaciones que el paquete ya exporta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/telon.test.mjs",
+      "caso": "Ningún texto del telón usa el vocabulario de reproche, y uno que lo usara falla nombrándolo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Los tres vocabularios los comprueba el paquete sobre los textos que produce, y la app no añade ninguno: afirmado en «Toda pantalla del telón salvo la última tiene una sola acción y ninguna flecha de volver», que exige que ningún texto se redacte en app/."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** `test/nucleo/pantallas-huerfanas.test.mjs`, hoy en **una** (`zurron.jsx`, de la fila 46), **cuando** se mide al terminar esta fila, **entonces** sigue en una: las pantallas nuevas quedan alcanzables desde `App.js` y **el recuento no sube**. Si subiera, se dice con el número delante y el dueño de cada una escrito.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pantallas-huerfanas.test.mjs",
+      "caso": "El recuento es el medido y no ha subido",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Guarda de recuento con lista escrita a mano."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** `test/nucleo/contratos-sin-llamador.test.mjs`, **cuando** se mide al terminar, **entonces** ni `echaElTelon`, ni `componeElTelon`, ni `componeEscena` de quests, ni `componeLoQueTeLlevas`, ni `componeElDesenlace`, ni las tres transiciones de `aventura-en-curso.js` siguen sin llamador de producción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/piezas-sin-consumidor.test.mjs",
+      "caso": "La lista de bloques sin consumidor es exactamente la que se mide",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Guarda nueva de esta fila: contratos-sin-llamador.test.mjs no ve estas piezas porque descubre por la forma creaX. Que las siete transiciones y composiciones que la spec nombra ya tienen llamador se afirma además en los dos ficheros de cableado, que las ejercitan por la puerta de la app."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** la columna de `test/nucleo/limite-declarado.test.mjs`, hoy en **siete**, **cuando** se mide al terminar, **entonces** `escena.yaml` sale y quedan **seis**; y si no puede salir —porque no se puede garantizar dónde nace el mundo ni qué sitio tiene beat—, **se dice con el número delante y con el motivo medido**, nunca con el previsto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La columna sube de siete a ocho: escena.yaml no puede salir y telon.yaml entra. Los dos motivos, medidos, están en la propia lista y en las cabeceras de los dos flujos."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "**Dado** `node scripts/verifica-flujo.mjs`, **cuando** se ejecuta al terminar, **entonces** sigue en verde: no se añade ni se quita ninguna pantalla de `docs/pantallas/` y no se cambia ninguna arista del diagrama.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "node scripts/verifica-flujo.mjs sigue en verde",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Lo ejecuta el runner: no se añade ni se quita ninguna pantalla de docs/pantallas/ y no se cambia ninguna arista."
     }
   ]
 }
