@@ -13,8 +13,8 @@
 // - **No clasifica velocidades.** Consulta `validaLlegadaPorGeofence` de `ritmo.js`,
 //   que es donde vive la asimetría de `bucle-jugable.md` §9: en la duda se valida,
 //   porque una llegada de más no le quita nada a nadie, y solo el vehículo la invalida.
-//   Y consulta ahí mismo `esUnaParada`, que es lo que separa haberse parado de haber
-//   estado dentro. La regla se lee del mismo módulo del que la lee el motor de pasos.
+//   Y consulta ahí mismo `creaVentanaDeParada`, que es lo que separa haberse parado de
+//   haber estado dentro. La regla se lee del mismo módulo del que la lee el motor de pasos.
 // - **No lee el reloj ni sortea nada.** Las marcas de tiempo viajan dentro de cada
 //   posición, como en el regreso de SPEC-030.
 // - **No decide si hay beat, ni si hay micro-encuentro, ni qué se cuenta.** Todo eso
@@ -37,7 +37,7 @@ import { PROTAGONISTAS } from './deformacion.js';
 import { apuntaLoQueSeCuenta } from './diario.js';
 import { paraLaCapaQuePinta } from './nucleos.js';
 import { exigeMapaId } from './pasos.js';
-import { esUnaParada, validaLlegadaPorGeofence } from './ritmo.js';
+import { creaVentanaDeParada, validaLlegadaPorGeofence } from './ritmo.js';
 import {
   MODOS,
   TIPOS_DE_PASO,
@@ -75,8 +75,11 @@ export const RADIO_DE_GEOFENCE_M = 40;
  * Cuánto hay que estar **parada dentro** para que la llegada valide.
  *
  * Es tiempo de parada, no tiempo dentro: el diseño dice «parada dentro» y la diferencia
- * no es un matiz, porque atravesar andando este radio ya dura más que esto. Quien lo
- * mide es `esUnaParada` de `ritmo.js`, que es donde vive el umbral.
+ * no es un matiz, porque atravesar andando este radio ya dura más que esto. Quien mide la
+ * parada es `creaVentanaDeParada` de `ritmo.js`, que compara el centroide de la primera
+ * mitad de una ventana con el de la segunda; el reloj de aquí cuenta desde el principio de
+ * esa ventana, así que con el fijo bueno estos veinte segundos siguen siendo el coste
+ * entero y con el fijo malo lo son los cuarenta de la ventana larga.
  *
  * Corto, y es deliberado: **validar es barato**. Lo que la permanencia distingue es
  * pararse de pasar de largo — sin ella, atravesar el geofence validaría y «el visor no
@@ -555,10 +558,10 @@ export function creaLlegadas({
   // medio no son haberse parado aquí.
   const paradaDesde = new Map();
 
-  // La última posición vista, que es con la que se forma el enlace cuando las posiciones
-  // llegan de una en una y no en tandas. Una sola posición no distingue estar parada de
-  // ir de paso: hacen falta dos.
-  let anterior = null;
+  // La ventana de deriva de esta salida, **una sola**: estar parada es una propiedad de la
+  // trayectoria y no del sitio (SPEC-044, §9c). Vive lo que dura la vigilancia y no se
+  // guarda, igual que el reloj de arriba.
+  const ventana = creaVentanaDeParada();
 
   const exigeDetector = () => {
     if (!detector || detector.montado !== true) {
@@ -683,16 +686,17 @@ export function creaLlegadas({
         // valida, y solo el vehículo aparta la llegada.
         const puedeValidar = validaLlegadaPorGeofence(clasificacion);
 
-        // El enlace que termina en esta posición, que es lo único que sabe si se estaba
-        // parada. Una marca que no avanza no forma enlace: una traza que retrocede en el
-        // tiempo es otra traza, y se vuelve a anclar en lugar de medir una duración
-        // negativa.
-        const previa = anterior;
-        anterior = posicion;
-        const enlace = previa && posicion.tMs > previa.tMs
-          ? { metros: Math.hypot(posicion.x - previa.x, posicion.y - previa.y), duracionS: (posicion.tMs - previa.tMs) / 1000 }
-          : null;
-        const parada = enlace !== null && esUnaParada({ ...enlace, clasificacion });
+        // La ventana de deriva, que es lo único que sabe si se estaba parada. **La
+        // precisión declarada del fijo llega hasta aquí y se usa en vuelo**: elige la
+        // ventana y se tira, como el rumbo y la altitud — no se guarda en ninguna parte.
+        const medida = ventana.agrega({
+          x: posicion.x,
+          y: posicion.y,
+          tMs: posicion.tMs,
+          precisionM: Number.isFinite(posicion.precisionM) ? posicion.precisionM : null,
+          clasificacion,
+        });
+        const parada = medida.parada;
 
         const validadasAqui = [];
         for (const [nombre, geofence] of sitios) {
@@ -705,9 +709,12 @@ export function creaLlegadas({
             paradaDesde.delete(nombre);
             continue;
           }
-          // El reloj arranca donde arrancó la parada, que es el principio del enlace y no
-          // esta posición: si no, la primera muestra de cada parada no contaría.
-          const desde = paradaDesde.get(nombre) ?? previa.tMs;
+          // El reloj arranca donde arrancó la parada, que es **el principio de la ventana**
+          // y no esta posición. Es lo que conserva los veinte segundos donde el fijo los
+          // sostiene: con la ventana corta, quien lleva parada veinte segundos ya los ha
+          // pagado cuando la ventana lo declara. Contarlos desde la declaración habría
+          // sumado ventana más permanencia y roto lo que §9c mide.
+          const desde = paradaDesde.get(nombre) ?? medida.desdeMs;
           paradaDesde.set(nombre, desde);
           if (posicion.tMs - desde < PERMANENCIA_MS) continue;
           // Volver a un sitio ya visitado **valida el beat que toca**, y no valida
