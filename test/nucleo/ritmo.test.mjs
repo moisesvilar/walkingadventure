@@ -17,14 +17,22 @@ import assert from 'node:assert/strict';
 import {
   ALFA,
   CLASIFICACIONES,
+  ERROR_QUE_SOSTIENE_LA_CORTA_M,
+  LIMITE_DE_ERROR_DECLARADO,
   MINIMO_UTIL_M,
+  MOTIVOS_DE_NO_PARADA,
   REGLA_DE_LA_DUDA,
   UMBRAL_PARADA_MS,
+  VENTANAS_DE_PARADA,
+  creaVentanaDeParada,
   cuentaParaElMotorDePasos,
+  derivaDeVentana,
   entraEnLaMedidaDelTramo,
+  esUnaParada,
   incorporaMedida,
   mideRitmoDeSalida,
   validaLlegadaPorGeofence,
+  ventanaParaPrecision,
 } from '../../packages/nucleo/partida/ritmo.js';
 import { SEGUNDOS_POR_TRAMO, declaraTramo } from '../../packages/nucleo/partida/tramo.js';
 import { simulaRecorrido } from '../dobles/gps-simulado.mjs';
@@ -332,4 +340,216 @@ describe('La corrección con la medida', () => {
     assert.equal(despues.salidasMedidas, 1);
     assert.equal(despues.declaradoM, 2000, 'incorporar una medida ha cambiado lo declarado');
   });
+});
+
+// ── La parada, medida por deriva de ventana ────────────────────────────────────
+//
+// SPEC-044 · §9c. La regla de fijo a fijo dejó de decidir la validación de un geofence:
+// medido, el ruido del GPS con fijos a T segundos aparenta ~1,4·σ/T m/s, así que un parado
+// de verdad con σ = 10 m no parece parado hasta que pasan veintiocho segundos entre fijos, y
+// con la cadencia real **no validaba ninguna llegada**. Lo que los separa es que el ruido es
+// de media cero y la deriva de quien anda no.
+//
+// Todo lo de aquí son posiciones con su marca dentro: esta capa no lee ningún reloj, y por
+// eso «cuarenta segundos» es una resta entre dos números y nunca una espera.
+
+describe('La parada, medida por deriva de ventana', () => {
+  /** Una ventana de posiciones en el mismo punto, con la precisión que se pida. */
+  function quieta({ x = 0, y = 0, desdeMs = 0, duracionMs, cadaMs = 5000, precisionM = 3, clasificacion = 'parada' }) {
+    const posiciones = [];
+    for (let t = 0; t <= duracionMs; t += cadaMs) posiciones.push({ x, y, tMs: desdeMs + t, precisionM, clasificacion });
+    return posiciones;
+  }
+
+  /** Una ventana de quien anda en línea recta a la velocidad que se pida. */
+  function andando({ velocidadMs, duracionMs, cadaMs = 5000, precisionM = 3, desdeMs = 0 }) {
+    const posiciones = [];
+    for (let t = 0; t <= duracionMs; t += cadaMs) {
+      posiciones.push({ x: velocidadMs * (t / 1000), y: 0, tMs: desdeMs + t, precisionM, clasificacion: 'andando' });
+    }
+    return posiciones;
+  }
+
+  const mete = (ventana, posiciones) => posiciones.map((p) => ventana.agrega(p)).pop();
+
+  test('La deriva se mide entre el centroide de la primera mitad y el de la segunda', () => {
+    // La pieza entera, y por qué funciona: promediar hunde el ruido como 1/√n y deja la
+    // deriva intacta. Sobre el mismo punto la deriva es cero por mucho ruido que haya.
+    assert.equal(derivaDeVentana([{ x: 0, y: 0, tMs: 0 }, { x: 0, y: 0, tMs: 20_000 }]), 0);
+
+    // Y quien anda deriva lo que ha andado entre las dos mitades: veinte segundos a 1,39 m/s
+    // son 27,8 m, y la separación entre centroides es del orden de la mitad.
+    const paseo = andando({ velocidadMs: 1.39, duracionMs: 20_000 });
+    const deriva = derivaDeVentana(paseo);
+    assert.ok(deriva > VENTANAS_DE_PARADA.corta.derivaM, `andar veinte segundos deriva ${deriva.toFixed(1)} m, por debajo del límite de la ventana corta`);
+
+    // Se parte **por tiempo y no por número de muestras**: la cadencia real no es regular y
+    // partir por índice mediría medias de duraciones distintas.
+    assert.throws(() => derivaDeVentana([{ x: 0, y: 0, tMs: 0 }]), /dos posiciones o más/);
+  });
+
+  test('Con el fijo bueno la ventana es la corta y con el malo la larga', () => {
+    // Los dos pares salen de la tabla de §9c y no se reinventan: a cinco metros de error la
+    // corta ya deja pasar un 4,3 % de paseos a cuatro kilómetros por hora y a diez un 27,6 %,
+    // que es lo que la hace dejar de servir.
+    assert.deepEqual(VENTANAS_DE_PARADA.corta, { duracionS: 20, derivaM: 5 });
+    assert.deepEqual(VENTANAS_DE_PARADA.larga, { duracionS: 40, derivaM: 8 });
+    assert.equal(ERROR_QUE_SOSTIENE_LA_CORTA_M, 5);
+    assert.equal(ventanaParaPrecision(3), VENTANAS_DE_PARADA.corta);
+    assert.equal(ventanaParaPrecision(ERROR_QUE_SOSTIENE_LA_CORTA_M), VENTANAS_DE_PARADA.corta);
+    assert.equal(ventanaParaPrecision(ERROR_QUE_SOSTIENE_LA_CORTA_M + 0.1), VENTANAS_DE_PARADA.larga);
+
+    // Y sobre la ventana de verdad: veinte segundos quieta con el fijo bueno ya es parada, y
+    // con el fijo malo todavía no, porque la suya son cuarenta.
+    assert.equal(mete(creaVentanaDeParada(), quieta({ duracionMs: 20_000, precisionM: 3 })).parada, true);
+    const conFijoMalo = mete(creaVentanaDeParada(), quieta({ duracionMs: 20_000, precisionM: 12 }));
+    assert.equal(conFijoMalo.parada, false);
+    assert.equal(conFijoMalo.motivo, 'ventana-sin-cubrir');
+    assert.equal(mete(creaVentanaDeParada(), quieta({ duracionMs: 40_000, precisionM: 12 })).parada, true);
+  });
+
+  test('Una posición sin precisión declarada usa la ventana larga', () => {
+    // En la duda sobre el error del fijo se exige más y no menos: la asimetría del proyecto
+    // es fallar hacia el lado que no rompe el diseño, y aquí el lado caro es validar a quien
+    // pasa andando, que tumbaría «El visor no aparece nunca andando».
+    assert.equal(ventanaParaPrecision(null), VENTANAS_DE_PARADA.larga);
+    assert.equal(ventanaParaPrecision(undefined), VENTANAS_DE_PARADA.larga);
+    assert.equal(ventanaParaPrecision(Number.NaN), VENTANAS_DE_PARADA.larga);
+
+    const sinPrecision = mete(creaVentanaDeParada(), quieta({ duracionMs: 20_000, precisionM: null }));
+    assert.equal(sinPrecision.parada, false, 'sin precisión declarada la ventana corta ha bastado, y en la duda se exige la larga');
+    assert.equal(mete(creaVentanaDeParada(), quieta({ duracionMs: 40_000, precisionM: null })).parada, true);
+
+    // Y desconocida **contagia**: un solo fijo sin precisión dentro de la ventana corta
+    // obliga a la larga, igual que en el detector de transporte no funda un motor.
+    const ventana = creaVentanaDeParada();
+    ventana.agrega({ x: 0, y: 0, tMs: 0, precisionM: null, clasificacion: 'parada' });
+    const conUnoMalo = mete(ventana, quieta({ desdeMs: 5000, duracionMs: 15_000, precisionM: 3 }));
+    assert.equal(conUnoMalo.parada, false, 'un fijo sin precisión dentro de la ventana corta no ha contagiado');
+  });
+
+  test('Una ventana que todavía no cubre su duración responde que no, y no se extrapola', () => {
+    // Con dos o tres fijos el ruido y la deriva son indistinguibles, que es lo que §9c mide:
+    // con radio de quietud de quince metros salían 98 % de paradas y **36 %** de paseos.
+    const ventana = creaVentanaDeParada();
+    const primera = ventana.agrega({ x: 0, y: 0, tMs: 0, precisionM: 3, clasificacion: 'parada' });
+    assert.equal(primera.parada, false);
+    assert.equal(primera.motivo, 'ventana-sin-cubrir');
+    assert.equal(primera.derivaM, null, 'una ventana sin cubrir ha devuelto una deriva, que es una medida que no tiene');
+
+    const aMedias = mete(ventana, quieta({ desdeMs: 5000, duracionMs: 10_000 }));
+    assert.equal(aMedias.parada, false);
+    assert.equal(aMedias.motivo, 'ventana-sin-cubrir');
+
+    // Los tres motivos son vocabulario cerrado: un motivo inventado no se puede leer.
+    assert.deepEqual([...MOTIVOS_DE_NO_PARADA], ['vehiculo', 'ventana-sin-cubrir', 'deriva']);
+    for (const respuesta of [primera, aMedias]) {
+      assert.ok(MOTIVOS_DE_NO_PARADA.includes(respuesta.motivo), `"${respuesta.motivo}" no está en el vocabulario`);
+    }
+  });
+
+  test('Una marca de tiempo hacia atrás vuelve a anclar la ventana en lugar de medir una duración negativa', () => {
+    // Una traza que retrocede en el tiempo es otra traza. Es lo mismo que hace la app al
+    // volver del segundo plano, y por eso la permanencia se paga otra vez: veinte segundos
+    // declarados, en vez de coser media tarde de comida como si fuera quietud.
+    const ventana = creaVentanaDeParada();
+    assert.equal(mete(ventana, quieta({ duracionMs: 20_000 })).parada, true);
+    const haciaAtras = ventana.agrega({ x: 0, y: 0, tMs: 1000, precisionM: 3, clasificacion: 'parada' });
+    assert.equal(haciaAtras.parada, false, 'la ventana ha seguido midiendo con la traza retrocedida');
+    assert.equal(haciaAtras.motivo, 'ventana-sin-cubrir');
+
+    // Y desde ahí se vuelve a contar entera, sin coser el hueco.
+    assert.equal(mete(ventana, quieta({ desdeMs: 6000, duracionMs: 15_000 })).parada, true);
+  });
+
+  test('El vehículo no es una parada aunque la deriva sea cero', () => {
+    // La mitad del criterio que se pierde sola en cualquier arreglo de ruido: un coche
+    // parado no deriva, así que lo único que lo aparta es la clasificación, y se responde
+    // **antes de medir nada**.
+    const ventana = creaVentanaDeParada();
+    const enCoche = mete(ventana, quieta({ duracionMs: 120_000, clasificacion: 'vehiculo' }));
+    assert.equal(enCoche.parada, false);
+    assert.equal(enCoche.motivo, 'vehiculo');
+    assert.equal(enCoche.derivaM, null, 'se ha medido la deriva de un vehículo, y eso es medir antes de la guarda');
+
+    // Y la guarda es la misma que la del enlace de fijo a fijo, que sigue viva para el
+    // ritmo y para el motor de pasos.
+    assert.equal(esUnaParada({ metros: 0, duracionS: 60, clasificacion: 'vehiculo' }), false);
+    assert.equal(validaLlegadaPorGeofence('vehiculo'), false);
+  });
+
+  test('Quien anda a cuatro y a cinco kilómetros por hora no está parado con ninguna de las dos ventanas', () => {
+    // Las dos velocidades de la tabla de §9c, y las dos ventanas: **0 % de paseos** hasta
+    // tres metros de error. Es lo que sostiene «El visor no aparece nunca andando».
+    for (const velocidadMs of [1.11, 1.39]) {
+      for (const precisionM of [3, 12]) {
+        const respuesta = mete(creaVentanaDeParada(), andando({ velocidadMs, duracionMs: 60_000, precisionM }));
+        assert.equal(
+          respuesta.parada,
+          false,
+          `andar a ${(velocidadMs * 3.6).toFixed(1)} km/h con el fijo de ${precisionM} m ha salido parada (deriva ${respuesta.derivaM?.toFixed(1)} m)`,
+        );
+        assert.equal(respuesta.motivo, 'deriva');
+      }
+    }
+  });
+
+  test('El límite de esta regla está escrito con su número y no se disimula', () => {
+    // Por encima de σ ≈ 15 m la validación se degrada —91 % de paradas con la ventana
+    // larga— y por encima de σ ≈ 20 m deja de sostenerse. Cubre la calle normal y no cubre
+    // el cañón urbano profundo. Es un límite medido, no una esperanza.
+    assert.deepEqual({ ...LIMITE_DE_ERROR_DECLARADO }, { seDegradaM: 15, dejaDeSostenerseM: 20 });
+    assert.ok(LIMITE_DE_ERROR_DECLARADO.seDegradaM > ERROR_QUE_SOSTIENE_LA_CORTA_M);
+    assert.ok(LIMITE_DE_ERROR_DECLARADO.dejaDeSostenerseM > LIMITE_DE_ERROR_DECLARADO.seDegradaM);
+  });
+
+  test('La regla de parada vive en un solo módulo y no está reimplementada en la app', () => {
+    // La misma exigencia que la spec pone en su criterio: quien decide una parada es
+    // `ritmo.js`, del que la lee también el motor de pasos. Una segunda copia en la app se
+    // desincronizaría sin que nada se pusiera rojo.
+    const ritmo = fuente('packages/nucleo/partida/ritmo.js');
+    assert.match(ritmo, /export function creaVentanaDeParada/);
+    for (const modulo of ['app/marcha/salida.js', 'app/marcha/seguidor.js', 'app/plataforma/posiciones.js', 'app/marcha/llegadas.js']) {
+      const codigo = fuente(modulo)
+        .split('\n')
+        .filter((linea) => !linea.trim().startsWith('//') && !linea.trim().startsWith('*'))
+        .join('\n');
+      assert.equal(/creaVentanaDeParada|derivaDeVentana|centroide/.test(codigo), false, `${modulo} reimplementa la regla de parada`);
+    }
+
+    // Y la regla de enlace de fijo a fijo ya no decide ninguna validación de geofence: lo
+    // que queda de `esUnaParada` es el ritmo y el motor de pasos.
+    const llegadas = fuente('packages/nucleo/partida/llegadas.js')
+      .split('\n')
+      .filter((linea) => !linea.trim().startsWith('//') && !linea.trim().startsWith('*'))
+      .join('\n');
+    assert.equal(/esUnaParada/.test(llegadas), false, 'la capa de llegadas vuelve a decidir con la parada de fijo a fijo');
+  });
+
+  test('La misma secuencia de posiciones dos veces da la misma parada', () => {
+    // `@determinismo`, bloqueante: no se lee el reloj del sistema ni ninguna fuente de azar.
+    const secuencia = [
+      ...andando({ velocidadMs: 1.39, duracionMs: 30_000 }),
+      ...quieta({ x: 41.7, desdeMs: 35_000, duracionMs: 40_000 }),
+    ];
+    const primera = secuencia.map((p) => creaVentanaDeParadaConTodo(secuencia, p));
+    for (let k = 0; k < 3; k += 1) {
+      assert.equal(
+        JSON.stringify(secuencia.map((p) => creaVentanaDeParadaConTodo(secuencia, p))),
+        JSON.stringify(primera),
+        'dos recorridos de la misma secuencia dan paradas distintas',
+      );
+    }
+  });
+
+  /** Vuelve a medir la secuencia entera hasta `hasta`, que es lo que hace la comparación honesta. */
+  function creaVentanaDeParadaConTodo(secuencia, hasta) {
+    const ventana = creaVentanaDeParada();
+    let ultima = null;
+    for (const p of secuencia) {
+      ultima = ventana.agrega(p);
+      if (p === hasta) break;
+    }
+    return ultima;
+  }
 });

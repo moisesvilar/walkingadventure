@@ -107,14 +107,18 @@ flowchart TD
   A3P5 -->|"girar hacia el paraje y llegar"| LLEGA
   LLEGA -->|"primera vez aquí y el sitio tiene ilustración"| A4P1
   LLEGA -->|"ya conocías el sitio"| A4P6
-  LLEGA -->|"primera vez, pero sin ilustración: te pilló de paso"| A4P7
+  LLEGA -->|"primera vez, sin ilustración y sin beat: un paraje o un servicio te pilló de paso"| A4P7
+  LLEGA -->|"primera vez en un núcleo sin ilustración y sin beat: la llegada entera es lo que allí se cuenta"| A4P5
+  LLEGA -->|"primera vez, sin ilustración pero con beat: sin visor que abrir, la escena es lo primero"| A4P3
   A4P1 -->|"arrastrar el tirador"| A4P2
   A4P2 -->|"cerrar el visor (▾) · el visor es capa, no paso"| CIERRA
   CIERRA -->|"este sitio es un beat del lazo, o te cayó un micro-encuentro"| A4P3
-  CIERRA -->|"no has venido a nada: el caso normal"| A4P7
+  CIERRA -->|"no has venido a nada, y es un paraje o un servicio: el caso normal"| A4P7
+  CIERRA -->|"no has venido a nada, pero es un núcleo: allí no hay ficha, hay lo que se cuenta"| A4P5
   A4P3 -->|"Coger la caja"| A4P4
   A4P6 -->|"Volver a mirar la torre · el visor queda a un toque"| A4P1
   A4P6 -->|"hay beat hoy en este sitio"| A4P3
+  A4P6 -->|"es un núcleo y hoy no hay beat: aflora lo que allí se cuenta"| A4P5
   A4P4 -->|"Seguir"| NUCLEO
   NUCLEO -->|"sí: aflora lo que allí se cuenta"| A4P5
   NUCLEO -->|"no, es un paraje: Seguir andando"| A3P1

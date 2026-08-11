@@ -41,14 +41,19 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  CADENCIAS,
+  CADENCIA_CERCA_S,
+  IDS_DE_CADENCIA,
   LO_QUE_UNA_LLEGADA_EMITE,
   LO_QUE_UNA_LLEGADA_NO_EMITE,
   LO_QUE_VALIDAR_NO_EXIGE,
-  PERMANENCIA_MS,
-  PERMANENCIA_S,
+  MARGEN_DE_CERCANIA_M,
+  PARADA_DENTRO_MS,
+  PARADA_DENTRO_S,
   RADIO_DE_GEOFENCE_M,
   TEXTOS,
   antetituloDe,
+  cadenciaDeMuestreo,
   congelaLlegadas,
   creaLlegadas,
   distanciaAlGeofence,
@@ -140,10 +145,27 @@ function beatEn(nombre, { x, y = 0, tipo = 'paraje', n = 1 } = {}) {
   return { n, lugar: { nombre, x, y, tipo }, disparador: { tipo: 'llegada' } };
 }
 
+/**
+ * La precisión declarada por defecto de las posiciones fabricadas aquí: **tres metros**,
+ * que es el fijo bueno de la tabla de §9c —el que sostiene la ventana corta y con el que
+ * los veinte segundos de SPEC-032 siguen siendo el coste entero—.
+ *
+ * Está puesta porque SPEC-044 deroga la parada de fijo a fijo y la sustituye por la deriva
+ * de ventana, y **una posición sin precisión declarada usa la ventana larga por prudencia**
+ * (`ritmo.js`, `ventanaParaPrecision`). Las paradas de este fichero se fabricaron antes de
+ * esa regla y no declaraban ninguna, así que medían cuarenta segundos donde el escenario
+ * dice veinte. **Lo que se actualiza es el fixture y no la exigencia**: los escenarios de
+ * `docs/testing.md` que se afirman aquí —«El geofence se valida desde la calle», «El visor
+ * no aparece nunca andando», «Pararse en un semáforo dentro de un geofence no tiene
+ * consecuencias»— siguen intactos y siguen afirmándose. La ventana larga tiene sus propios
+ * casos, más abajo, en «La parada, medida por deriva de ventana».
+ */
+const FIJO_BUENO_M = 3;
+
 /** Posiciones de una parada: el mismo punto, marcas de tiempo que avanzan. */
-function paradoEn({ x, y = 0, desdeMs = 0, duracionMs, cadaMs = 5000, clasificacion = 'parada' }) {
+function paradoEn({ x, y = 0, desdeMs = 0, duracionMs, cadaMs = 5000, clasificacion = 'parada', precisionM = FIJO_BUENO_M }) {
   const posiciones = [];
-  for (let t = 0; t <= duracionMs; t += cadaMs) posiciones.push({ x, y, tMs: desdeMs + t, clasificacion });
+  for (let t = 0; t <= duracionMs; t += cadaMs) posiciones.push({ x, y, tMs: desdeMs + t, precisionM, clasificacion });
   return posiciones;
 }
 
@@ -151,13 +173,15 @@ function paradoEn({ x, y = 0, desdeMs = 0, duracionMs, cadaMs = 5000, clasificac
  * Posiciones de quien pasa de largo por delante de un sitio, a la velocidad que se pida.
  *
  * La velocidad por defecto es la de andar —cinco kilómetros por hora—, porque es la del
- * escenario: «atraviesa el geofence de un sitio sin pararse».
+ * escenario: «atraviesa el geofence de un sitio sin pararse». Y va con el fijo bueno a
+ * propósito: es el caso **más exigente** para «El visor no aparece nunca andando», porque
+ * es el que mide con la ventana corta.
  */
-function pasaPorDelante({ centroX, y = 0, desdeM = -120, hastaM = 120, velocidadMs = 1.39, desdeMs = 0, cadaMs = 2000, clasificacion = 'andando' }) {
+function pasaPorDelante({ centroX, y = 0, desdeM = -120, hastaM = 120, velocidadMs = 1.39, desdeMs = 0, cadaMs = 2000, clasificacion = 'andando', precisionM = FIJO_BUENO_M }) {
   const posiciones = [];
   const duracionS = (hastaM - desdeM) / velocidadMs;
   for (let t = 0; t <= duracionS * 1000; t += cadaMs) {
-    posiciones.push({ x: centroX + desdeM + velocidadMs * (t / 1000), y, tMs: desdeMs + t, clasificacion });
+    posiciones.push({ x: centroX + desdeM + velocidadMs * (t / 1000), y, tMs: desdeMs + t, precisionM, clasificacion });
   }
   return posiciones;
 }
@@ -244,7 +268,7 @@ function codigoSinTextos(ruta) {
 
 /** Una parada de veinte segundos a la distancia que se pida del centro de un sitio. */
 function paradaA(metros, centroX, opciones = {}) {
-  return paradoEn({ x: centroX + metros, duracionMs: PERMANENCIA_MS, ...opciones });
+  return paradoEn({ x: centroX + metros, duracionMs: PARADA_DENTRO_MS, ...opciones });
 }
 
 // ── La validación de una llegada ───────────────────────────────────────────────
@@ -307,21 +331,21 @@ describe('La validación de una llegada', () => {
       paso.validadas.map((v) => v.sitio),
       [],
       `pasar de largo andando ha validado una llegada: cruzar un geofence de ${RADIO_DE_GEOFENCE_M} m ` +
-      `a cinco kilómetros por hora deja ${Math.round(segundosDentro)} s dentro, más que los ${PERMANENCIA_S} s de permanencia`,
+      `a cinco kilómetros por hora deja ${Math.round(segundosDentro)} s dentro, más que los ${PARADA_DENTRO_S} s de permanencia`,
     );
     assert.equal(llegadas.espera(), null, 'pasar de largo ha dejado una escena esperando');
   });
 
   test('Una parada más corta que la permanencia no valida', () => {
     const { llegadas } = capa();
-    const corta = paradoEn({ x: 10, duracionMs: PERMANENCIA_MS - 1000, cadaMs: 1000 });
+    const corta = paradoEn({ x: 10, duracionMs: PARADA_DENTRO_MS - 1000, cadaMs: 1000 });
     assert.deepEqual(llegadas.comprueba({ posiciones: corta }).validadas, []);
-    assert.equal(PERMANENCIA_MS, PERMANENCIA_S * 1000);
+    assert.equal(PARADA_DENTRO_MS, PARADA_DENTRO_S * 1000);
   });
 
   test('Una parada del tiempo de permanencia valida la llegada', () => {
     const { llegadas } = capa();
-    const validadas = llegadas.comprueba({ posiciones: paradoEn({ x: 10, duracionMs: PERMANENCIA_MS, cadaMs: 1000 }) }).validadas;
+    const validadas = llegadas.comprueba({ posiciones: paradoEn({ x: 10, duracionMs: PARADA_DENTRO_MS, cadaMs: 1000 }) }).validadas;
     assert.deepEqual(validadas.map((v) => v.sitio), [MONFRIDA]);
   });
 
@@ -335,7 +359,7 @@ describe('La validación de una llegada', () => {
 
     // Y aunque el coche se pare dentro del geofence, sigue sin validar.
     const { llegadas: otra } = capa({ reparto: { beats: [beatEn(TORREON, { x: 1500 })] } });
-    assert.deepEqual(otra.comprueba({ posiciones: paradoEn({ x: 1500, duracionMs: PERMANENCIA_MS * 3, clasificacion: 'vehiculo' }) }).validadas, []);
+    assert.deepEqual(otra.comprueba({ posiciones: paradoEn({ x: 1500, duracionMs: PARADA_DENTRO_MS * 3, clasificacion: 'vehiculo' }) }).validadas, []);
 
     // La regla se lee del mismo módulo del que la lee el motor de pasos.
     assert.equal(validaLlegadaPorGeofence('vehiculo'), false);
@@ -347,7 +371,7 @@ describe('La validación de una llegada', () => {
     const { llegadas } = capa();
     const ambigua = [
       ...pasaPorDelante({ centroX: 1500, desdeM: -120, hastaM: -30, velocidadMs: 3, cadaMs: 2000, clasificacion: 'ambiguo' }),
-      ...paradoEn({ x: 1490, desdeMs: 60000, duracionMs: PERMANENCIA_MS, clasificacion: 'ambiguo' }),
+      ...paradoEn({ x: 1490, desdeMs: 60000, duracionMs: PARADA_DENTRO_MS, clasificacion: 'ambiguo' }),
     ];
     const validadas = llegadas.comprueba({ posiciones: ambigua }).validadas;
     assert.deepEqual(validadas.map((v) => v.sitio), [TORREON]);
@@ -448,7 +472,7 @@ describe('La validación de una llegada', () => {
   test('Una llegada ya validada no se valida dos veces en la misma salida', () => {
     const { llegadas, estado } = capa();
     llegadas.comprueba({ posiciones: paradaA(0, 1500) });
-    const otraVez = llegadas.comprueba({ posiciones: paradoEn({ x: 1500, desdeMs: 600000, duracionMs: PERMANENCIA_MS * 2 }) });
+    const otraVez = llegadas.comprueba({ posiciones: paradoEn({ x: 1500, desdeMs: 600000, duracionMs: PARADA_DENTRO_MS * 2 }) });
     assert.deepEqual(otraVez.validadas, [], 'volver a pararse ha validado una segunda llegada');
     assert.deepEqual(llegadasValidadas(estado).map((l) => l.sitio), [TORREON]);
     assert.equal(estado.llegadas.length, 1, 'se ha duplicado la llegada en el registro');
@@ -457,7 +481,7 @@ describe('La validación de una llegada', () => {
   test('Dos geofences solapados validan los dos y se ofrece primero el más cercano', () => {
     // Parada en la intersección: a veinte metros del torreón y a treinta de la fonte.
     const { llegadas } = capa();
-    const validadas = llegadas.comprueba({ posiciones: paradoEn({ x: 1520, duracionMs: PERMANENCIA_MS }) }).validadas;
+    const validadas = llegadas.comprueba({ posiciones: paradoEn({ x: 1520, duracionMs: PARADA_DENTRO_MS }) }).validadas;
     assert.deepEqual(validadas.map((v) => v.sitio), [TORREON, FONTE], 'no se han validado las dos, o no en orden de cercanía');
     assert.ok(validadas[0].distanciaM < validadas[1].distanciaM);
     assert.equal(llegadas.espera().sitio, TORREON, 'la que se ofrece no es la del sitio más cercano');
@@ -494,7 +518,10 @@ describe('La validación de una llegada', () => {
 
   test('Un segmento sin clasificar falla nombrando el segmento', () => {
     const { llegadas } = capa();
-    const posiciones = paradoEn({ x: 0, duracionMs: PERMANENCIA_MS, cadaMs: 10000 }).map(({ x, y, tMs }) => ({ x, y, tMs }));
+    // Se le quita **solo** la clasificación, que es lo que esta prueba mira: la precisión
+    // se conserva porque sin ella la ventana sería la larga y el último caso —el de la
+    // traza bien clasificada, que sí valida— dejaría de medir lo que dice medir.
+    const posiciones = paradoEn({ x: 0, duracionMs: PARADA_DENTRO_MS, cadaMs: 10000 }).map(({ x, y, tMs, precisionM }) => ({ x, y, tMs, precisionM }));
     const traza = { segmentos: [{ clasificacion: 'andando' }, { clasificacion: null }] };
     assert.throws(() => llegadas.comprueba({ posiciones, traza }), /segmento 1/);
     assert.throws(() => exigeTrazaClasificada({ segmentos: [{}] }), /segmento 0/);
@@ -737,7 +764,7 @@ describe('La secuencia de una llegada', () => {
     assert.throws(() => llegadas.avanza(), /esperando/);
 
     // Y volver a pararse en el mismo sitio no la reabre.
-    assert.deepEqual(llegadas.comprueba({ posiciones: paradoEn({ x: 0, desdeMs: 900000, duracionMs: PERMANENCIA_MS }) }).validadas, []);
+    assert.deepEqual(llegadas.comprueba({ posiciones: paradoEn({ x: 0, desdeMs: 900000, duracionMs: PARADA_DENTRO_MS }) }).validadas, []);
     assert.equal(llegadas.espera(), null);
   });
 
@@ -858,7 +885,7 @@ describe('Lo que aquí se cuenta', () => {
       enVilaboa: [version({ rumor: 'las-campanas', nivel: 2, veces: 9 })],
     });
     llegadas.comprueba({ posiciones: paradaA(0, 0) });
-    llegadas.comprueba({ posiciones: paradoEn({ x: 3000, desdeMs: 600000, duracionMs: PERMANENCIA_MS }) });
+    llegadas.comprueba({ posiciones: paradoEn({ x: 3000, desdeMs: 600000, duracionMs: PARADA_DENTRO_MS }) });
 
     const enMonfrida = llegadas.loQueAquiSeCuenta({ sitio: MONFRIDA, dia: 3, paso: 7 });
     const enVilaboa = llegadas.loQueAquiSeCuenta({ sitio: VILABOA, dia: 3, paso: 9 });
@@ -959,7 +986,7 @@ describe('Lo que aquí se cuenta', () => {
     const enVilaboa = [version({ rumor: 'las-campanas', nivel: 2, veces: 9 })];
     const { llegadas } = conNucleos({ enMonfrida, enVilaboa, diario });
     llegadas.comprueba({ posiciones: paradaA(0, 0) });
-    llegadas.comprueba({ posiciones: paradoEn({ x: 3000, desdeMs: 600000, duracionMs: PERMANENCIA_MS }) });
+    llegadas.comprueba({ posiciones: paradoEn({ x: 3000, desdeMs: 600000, duracionMs: PARADA_DENTRO_MS }) });
     llegadas.loQueAquiSeCuenta({ sitio: MONFRIDA, dia: 3, paso: 7 });
     const segunda = llegadas.loQueAquiSeCuenta({ sitio: VILABOA, dia: 3, paso: 9 });
 
@@ -985,7 +1012,7 @@ describe('Lo que aquí se cuenta', () => {
       mundo,
       loQueSeCuenta: { versionesDe: (n) => loQueSeCuentaEn(nucleos, { mapaId: MAPA, nucleo: n }) },
     });
-    llegadas.comprueba({ posiciones: paradoEn({ x: nucleo.x, y: nucleo.y, duracionMs: PERMANENCIA_MS }) });
+    llegadas.comprueba({ posiciones: paradoEn({ x: nucleo.x, y: nucleo.y, duracionMs: PARADA_DENTRO_MS }) });
     const { pantalla } = llegadas.loQueAquiSeCuenta({ sitio: nucleo.name, dia: 1, paso: 1 });
     assert.equal(pantalla.sitio, nucleo.name);
     assert.equal(pantalla.antetitulo, `En ${nucleo.name} se habla de`);
@@ -1071,7 +1098,7 @@ describe('Nada degrada por falta de cableado', () => {
     const { llegadas } = capa({ reparto: { beats: [beatEn(FONTE, { x: 1550 })] } });
     const geofence = llegadas.geofence(TORREON);
     assert.deepEqual(geofence, { nombre: TORREON, tipo: 'paraje', x: 1500, y: 0, radioM: RADIO_DE_GEOFENCE_M });
-    llegadas.comprueba({ posiciones: paradoEn({ x: 1480, duracionMs: PERMANENCIA_MS }) });
+    llegadas.comprueba({ posiciones: paradoEn({ x: 1480, duracionMs: PARADA_DENTRO_MS }) });
     assert.equal(llegadas.beatDe(TORREON), null);
     assert.equal(llegadas.espera().secuencia.some((p) => p.tipo === TIPOS_DE_PASO.BEAT), false);
   });
@@ -1137,5 +1164,206 @@ describe('Ni la capa ni la pantalla guardan de más', () => {
     // La distancia se mide en el plano métrico del mundo y no con coordenadas de verdad.
     assert.equal(distanciaAlGeofence({ x: 0, y: 0 }, { x: 3, y: 4 }), 5);
     assert.throws(() => distanciaAlGeofence({ x: 0, y: 0 }, { x: null, y: 0 }), /sin punto/);
+  });
+});
+
+// ── El muestreo mientras hay un geofence cerca ─────────────────────────────────
+//
+// SPEC-044 · §9a. La otra mitad del defecto que dejaba la capa sin poder dispararse:
+// `distanceInterval: 10` es un filtro duro del `LocationRequest` de Android, así que **parada
+// no llega ninguna posición** —medido, un fijo en trescientos segundos con GPS perfecto— y la
+// permanencia se cuenta sobre posiciones que llegan.
+//
+// La decisión vive en el paquete y no en la app porque lo que la gobierna es dónde están los
+// sitios a los que se llega, que es una regla de juego. Lo que se afirma aquí es la función;
+// que el aparato la aplique de verdad se afirma en `test/nucleo/marcha.test.mjs`.
+
+describe('El muestreo mientras hay un geofence cerca', () => {
+  const CADENCIA_POR_DISTANCIA_M = 10;
+  const cadencia = (posicion, vigente = null, mundo = mundoDePrueba()) => cadenciaDeMuestreo({
+    posicion,
+    sitios: sitiosConPosicion(mundo),
+    vigente,
+    metrosPorDistancia: CADENCIA_POR_DISTANCIA_M,
+  });
+
+  test('Fuera de todo geofence la cadencia es la de SPEC-048, por distancia', () => {
+    const fuera = cadencia({ x: 800, y: 0 });
+    assert.equal(fuera.modo, CADENCIAS.POR_DISTANCIA);
+    assert.equal(fuera.metros, CADENCIA_POR_DISTANCIA_M, 'la cadencia por distancia no es la que entra por la firma');
+    assert.equal(fuera.segundos, null, 'hay una cadencia por tiempo puesta fuera de todo geofence');
+    assert.equal(fuera.sitio, null);
+
+    // Y las dos son un vocabulario cerrado: una cadencia inventada no se puede leer.
+    assert.deepEqual([...IDS_DE_CADENCIA], ['por-distancia', 'por-tiempo']);
+    assert.ok(IDS_DE_CADENCIA.includes(fuera.modo));
+  });
+
+  test('Con un geofence debajo la cadencia pasa a ser por tiempo, cada cinco segundos', () => {
+    // Cinco, y no por gusto: §9c fijó los dos pares ventana/deriva midiendo con esta
+    // cadencia, y cambiarla invalidaría la tabla entera.
+    const dentro = cadencia({ x: 1500, y: 0 });
+    assert.equal(dentro.modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(dentro.segundos, CADENCIA_CERCA_S);
+    assert.equal(CADENCIA_CERCA_S, 5);
+    assert.equal(dentro.metros, null, 'una cadencia con las dos puestas no existe');
+    assert.equal(dentro.sitio, TORREON);
+
+    // Y el borde por sus dos mitades, sobre un sitio sin vecino: dentro del radio sí, fuera
+    // no. Se mide en «Monfrida» y no en el torreón porque allí la fonte está a cincuenta
+    // metros y el borde de uno cae dentro del otro.
+    assert.equal(cadencia({ x: RADIO_DE_GEOFENCE_M, y: 0 }).modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(cadencia({ x: RADIO_DE_GEOFENCE_M + 1, y: 0 }).modo, CADENCIAS.POR_DISTANCIA);
+  });
+
+  test('Una salida que se abre con quien juega ya parada dentro arranca por tiempo', () => {
+    // El punto de partida sirve de última posición conocida, que es lo que evita esperar a
+    // un fijo que no va a llegar: con la cadencia de distancia puesta y sin moverse, no
+    // llega ninguno, y la salida se quedaría por distancia para siempre.
+    assert.equal(cadencia({ x: 1500, y: 0 }, null).modo, CADENCIAS.POR_TIEMPO);
+    // Sin posición no se supone que no hay sitio debajo: se falla nombrándolo.
+    assert.throws(() => cadencia(null), /última posición conocida/);
+    assert.throws(() => cadenciaDeMuestreo({ posicion: { x: 0, y: 0 }, sitios: null, metrosPorDistancia: 10 }), /sitiosConPosicion/);
+    assert.throws(() => cadenciaDeMuestreo({ posicion: { x: 0, y: 0 }, sitios: new Map(), metrosPorDistancia: null }), /cadencia por distancia/);
+  });
+
+  test('La histéresis impide cambiar de cadencia en cada muestra del borde', () => {
+    // Sin ella, un fijo ruidoso en el borde entraría y saldría del geofence en cada muestra,
+    // y volver a pedir la suscripción no es gratis. Veinte metros son el orden del ruido que
+    // la propia tabla de §9c considera normal.
+    assert.equal(MARGEN_DE_CERCANIA_M, 20);
+    const justoFuera = { x: RADIO_DE_GEOFENCE_M + 5, y: 0 };
+    // Entrando —vigente por distancia— ese punto todavía está fuera.
+    assert.equal(cadencia(justoFuera, CADENCIAS.POR_DISTANCIA).modo, CADENCIAS.POR_DISTANCIA);
+    // Saliendo —vigente por tiempo— sigue contando como dentro: entrar cuesta el radio y
+    // salir el radio más el margen, y esa asimetría es toda la histéresis.
+    assert.equal(cadencia(justoFuera, CADENCIAS.POR_TIEMPO).modo, CADENCIAS.POR_TIEMPO);
+
+    // Alejarse de verdad sí devuelve la cadencia por distancia.
+    const lejos = { x: RADIO_DE_GEOFENCE_M + MARGEN_DE_CERCANIA_M + 1, y: 0 };
+    assert.equal(cadencia(lejos, CADENCIAS.POR_TIEMPO).modo, CADENCIAS.POR_DISTANCIA);
+
+    // Y una cadencia vigente inventada falla aquí, no en la suscripción.
+    assert.throws(() => cadencia({ x: 0, y: 0 }, 'cada-rato'), /cadencia vigente/);
+  });
+
+  test('Con geofences solapados la cadencia nombra el sitio más cercano', () => {
+    // El mismo criterio con el que se ordenan dos llegadas validadas a la vez: dos criterios
+    // distintos para lo mismo es cómo se desincronizan.
+    const entreLosDos = cadencia({ x: 1520, y: 0 });
+    assert.equal(entreLosDos.sitio, TORREON);
+    assert.equal(Math.round(entreLosDos.distanciaM), 20);
+    assert.equal(cadencia({ x: 1540, y: 0 }).sitio, FONTE);
+  });
+
+  test('Un mundo sin ningún sitio no cambia de cadencia y no falla', () => {
+    // Un índice ausente y un mundo sin sitios tienen que ser distinguibles: el primero es un
+    // cableado a medias y falla; el segundo es un estado normal y responde.
+    const vacio = cadenciaDeMuestreo({ posicion: { x: 0, y: 0 }, sitios: new Map(), metrosPorDistancia: CADENCIA_POR_DISTANCIA_M });
+    assert.equal(vacio.modo, CADENCIAS.POR_DISTANCIA);
+    assert.equal(vacio.sitio, null);
+    assert.equal(vacio.distanciaM, null);
+  });
+});
+
+// ── Las dos mitades del criterio, que se exigen a la vez ───────────────────────
+//
+// SPEC-044 · §9c. La segunda es la que se pierde sola en un arreglo de ruido: un arreglo que
+// hiciera validar al parado a cambio de validar al autobús parado no sería un arreglo.
+
+describe('Las dos mitades del criterio de una llegada', () => {
+  test('Una parada dentro del geofence con el fijo bueno valida', () => {
+    // Con la ventana corta los veinte segundos de SPEC-032 siguen siendo el coste entero:
+    // quien lleva parada veinte segundos ya los ha pagado cuando la ventana lo declara.
+    const { llegadas } = capa();
+    const validadas = llegadas.comprueba({ posiciones: paradoEn({ x: 1500, duracionMs: PARADA_DENTRO_MS, precisionM: 3 }) }).validadas;
+    assert.deepEqual(validadas.map((v) => v.sitio), [TORREON]);
+  });
+
+  test('Una parada dentro del geofence sin precisión declarada paga la ventana larga', () => {
+    // En la duda sobre el error del fijo se exige más y no menos, así que los veinte
+    // segundos no bastan y los cuarenta sí. El coste está declarado, no disimulado.
+    const { llegadas } = capa();
+    assert.deepEqual(llegadas.comprueba({ posiciones: paradoEn({ x: 1500, duracionMs: PARADA_DENTRO_MS, precisionM: null }) }).validadas, []);
+    const { llegadas: otra } = capa();
+    const larga = otra.comprueba({ posiciones: paradoEn({ x: 1500, duracionMs: 40_000, precisionM: null }) }).validadas;
+    assert.deepEqual(larga.map((v) => v.sitio), [TORREON]);
+  });
+
+  test('Quien atraviesa el geofence a cuatro kilómetros por hora no valida', () => {
+    // La otra velocidad de la tabla de §9c, que hasta aquí no afirmaba nadie: la batería solo
+    // tenía la de cinco. A cuatro se está más tiempo dentro, así que es el caso más exigente
+    // para «El visor no aparece nunca andando».
+    for (const precisionM of [3, 12, null]) {
+      const { llegadas } = capa();
+      const posiciones = pasaPorDelante({ centroX: 1500, velocidadMs: 1.11, precisionM });
+      const dentro = posiciones.filter((p) => Math.abs(p.x - 1500) <= RADIO_DE_GEOFENCE_M);
+      const segundosDentro = (dentro[dentro.length - 1].tMs - dentro[0].tMs) / 1000;
+      assert.ok(segundosDentro > PARADA_DENTRO_S, 'a cuatro kilómetros por hora no se está dentro más que la permanencia y el caso no mediría nada');
+      assert.deepEqual(
+        llegadas.comprueba({ posiciones }).validadas.map((v) => v.sitio),
+        [],
+        `pasar de largo a cuatro kilómetros por hora con el fijo de ${JSON.stringify(precisionM)} m ha validado una llegada`,
+      );
+    }
+  });
+
+  test('Un vehículo parado dentro del geofence no valida, por mucho que la deriva sea cero', () => {
+    // El atasco. No lo aparta la deriva —un coche parado no deriva—: lo aparta que la ventana
+    // responde que no antes de medir nada cuando la clasificación es vehículo, y esa guarda
+    // es la mitad del criterio que se pierde sola.
+    const { llegadas } = capa({ reparto: { beats: [beatEn(TORREON, { x: 1500 })] } });
+    const atasco = paradoEn({ x: 1500, duracionMs: PARADA_DENTRO_MS * 6, clasificacion: 'vehiculo', precisionM: 3 });
+    assert.deepEqual(llegadas.comprueba({ posiciones: atasco }).validadas, []);
+    assert.equal(llegadas.espera(), null, 'el atasco ha dejado una escena esperando');
+  });
+
+  test('La misma secuencia de posiciones inyectada dos veces valida lo mismo y en el mismo orden', () => {
+    // `@determinismo`, bloqueante: ni reloj del sistema ni azar. Se compara por serialización
+    // completa, que es lo único que afirma «idéntico» de verdad.
+    const recorrido = [
+      ...pasaPorDelante({ centroX: 1500, desdeM: -200, hastaM: -50 }),
+      ...paradoEn({ x: 1460, desdeMs: 110_000, duracionMs: 40_000 }),
+      ...pasaPorDelante({ centroX: 1500, desdeM: -40, hastaM: 200, desdeMs: 155_000 }),
+    ];
+    const vuelta = () => {
+      const { llegadas } = capa();
+      const paso = llegadas.comprueba({ posiciones: recorrido });
+      return JSON.stringify({ validadas: paso.validadas, esperando: paso.esperando, espera: llegadas.espera() });
+    };
+    const primera = vuelta();
+    assert.match(primera, new RegExp(TORREON), 'el recorrido de referencia no valida nada y el caso no mediría el determinismo');
+    for (let k = 0; k < 3; k += 1) assert.equal(vuelta(), primera, 'dos recorridos idénticos han validado cosas distintas');
+  });
+});
+
+// ── El hueco declarado del paso que no tiene pantalla ──────────────────────────
+//
+// SPEC-044. Es la única defensa contra que la fila 49 se dé por hecha sin llegar, y la
+// batería no lo afirmaba: un paso que se salta en silencio deja una secuencia que parece
+// completa y no lo es, que es la forma de fallo que este repo ya ha pagado doce veces (§6h).
+// El precedente literal es el telón de la fila 48 (`telon-sin-pantalla` en `App.js`).
+
+describe('Un paso sin pantalla se enseña, no se salta', () => {
+  test('El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción', () => {
+    const pantalla = codigoDe('app/pantallas/llegada.js');
+    // La marca del hueco existe y **lleva el tipo del paso dentro**: sin el nombre, el hueco
+    // sería indistinguible de una pantalla vacía y su desaparición no sería un acto con
+    // registro el día que llegue la fila 49.
+    assert.match(pantalla, /testID="llegada-hueco"/, 'la pantalla de la llegada no monta el hueco declarado');
+    assert.match(pantalla, /testID="llegada-hueco"[^>]*accessibilityLabel=\{[^}]*tipo\}/, 'el hueco no nombra el paso que no tiene pantalla');
+    assert.match(pantalla, /sinPantalla: 'Esto todavía no está dibujado\.'/, 'el hueco no dice que la pantalla no está dibujada');
+
+    // Y el paso no se salta: la secuencia lo trae y `avanza` es la única manera de moverse,
+    // así que llegar al siguiente cuesta pasar por él.
+    const conBeat = secuenciaDeLlegada({ tipoDeSitio: 'paraje', primeraVisita: true, hayIlustracion: false, hayBeat: true });
+    assert.ok(conBeat.some((p) => p.tipo === TIPOS_DE_PASO.BEAT), 'una llegada con beat no trae el paso de beat en su secuencia');
+    assert.ok(TIPOS_DE_SITIO.includes('paraje'));
+    const encadenados = pasosEncadenados(conBeat);
+    assert.equal(encadenados[encadenados.length - 1].tipo, TIPOS_DE_PASO.BEAT, 'el beat no es el paso al que se llega recorriendo');
+
+    // El telón sigue con su propio hueco, el que dejó la fila 48: esta fila no lo cierra y
+    // tampoco lo tapa.
+    assert.match(codigoDe('app/App.js'), /telon-sin-pantalla/, 'el hueco del telón ha desaparecido sin que llegue la fila 49');
   });
 });

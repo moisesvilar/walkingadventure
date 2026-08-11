@@ -61,7 +61,7 @@ import { libroDePendientes } from '../../packages/nucleo/partida/conocimiento.js
 import { estadoInicial } from '../../packages/nucleo/partida/estado.js';
 import { registroInicial } from '../../packages/nucleo/partida/hechos.js';
 import {
-  PERMANENCIA_MS,
+  PARADA_DENTRO_MS,
   creaLlegadas,
   estadoDeLlegadas,
 } from '../../packages/nucleo/partida/llegadas.js';
@@ -103,6 +103,19 @@ const VELOCIDAD_MS = 1.39;
 const LEJOS_M = 300;
 
 /**
+ * La precisión declarada de las posiciones que este fichero fabrica: **tres metros**, el
+ * fijo bueno de la tabla de §9c.
+ *
+ * Va puesta desde SPEC-044: la parada dejó de medirse de fijo a fijo y se mide por deriva
+ * de ventana, y **sin precisión declarada se usa la ventana larga** por prudencia
+ * (`ritmo.js`, `ventanaParaPrecision`). Estas paradas se fabricaron antes de esa regla y
+ * duran lo que dura la permanencia, así que con la ventana larga no llegaban a cubrirla.
+ * Se actualiza el fixture, no la exigencia: lo que estas pruebas afirman —que todo lazo
+ * casteado se cierra andándolo— es exactamente lo mismo.
+ */
+const FIJO_BUENO_M = 3;
+
+/**
  * Posiciones de quien anda de un punto a otro, clasificadas «andando».
  *
  * La última cae **encima** del destino y sigue clasificada andando: llegar no valida, lo
@@ -117,16 +130,16 @@ function andaDesde(desde, hasta, tMs, { cadaMs = 2000 } = {}) {
   const posiciones = [];
   for (let t = cadaMs; t < duracionS * 1000; t += cadaMs) {
     const recorrido = ((t / 1000) * VELOCIDAD_MS) / metros;
-    posiciones.push({ x: desde.x + dx * recorrido, y: desde.y + dy * recorrido, tMs: tMs + t, clasificacion: 'andando' });
+    posiciones.push({ x: desde.x + dx * recorrido, y: desde.y + dy * recorrido, tMs: tMs + t, precisionM: FIJO_BUENO_M, clasificacion: 'andando' });
   }
-  posiciones.push({ x: hasta.x, y: hasta.y, tMs: tMs + Math.round(duracionS * 1000), clasificacion: 'andando' });
+  posiciones.push({ x: hasta.x, y: hasta.y, tMs: tMs + Math.round(duracionS * 1000), precisionM: FIJO_BUENO_M, clasificacion: 'andando' });
   return posiciones;
 }
 
 /** Posiciones de quien se para en un punto el tiempo de permanencia entero. */
-function seParaEn(punto, tMs, { cadaMs = 5000, duracionMs = PERMANENCIA_MS } = {}) {
+function seParaEn(punto, tMs, { cadaMs = 5000, duracionMs = PARADA_DENTRO_MS } = {}) {
   const posiciones = [];
-  for (let t = cadaMs; t <= duracionMs; t += cadaMs) posiciones.push({ x: punto.x, y: punto.y, tMs: tMs + t, clasificacion: 'parada' });
+  for (let t = cadaMs; t <= duracionMs; t += cadaMs) posiciones.push({ x: punto.x, y: punto.y, tMs: tMs + t, precisionM: FIJO_BUENO_M, clasificacion: 'parada' });
   return posiciones;
 }
 
@@ -187,22 +200,40 @@ function andaElLazo({ mundo, casteada, mapaId = MAPA, salida = SALIDA, estado = 
       vistos.add(llegada.sitio);
     }
 
-    // Se atienden las escenas que esperan hasta que no queda ninguna: una escena que se
-    // queda abierta dejaría el camino a medias sin que nada lo dijera.
+    // Se atienden las escenas que esperan **una a una y en su orden**, que es lo que hace
+    // una persona: mirar lo que espera, leerlo entero y resolver el beat que traía.
+    //
+    // Antes se cerraban todas en bloque y después se preguntaba por el beat del sitio, y
+    // eso solo funciona mientras una parada valide exactamente una llegada. Con la parada
+    // por deriva de ventana (SPEC-044) una parada del tiempo de permanencia valida dos
+    // llegadas al mismo sitio cuando dos beats seguidos de la cadena caen allí —«el beat
+    // que toca» se resuelve en cuanto el anterior se consume—, y cerrarlas en bloque
+    // perdía la primera. **Se arregla cómo el fixture atiende las escenas, no lo que
+    // exige**: sigue exigiendo que las 102 aventuras casteadas se terminen andando su lazo.
     let vueltas = 0;
+    let resuelto = false;
+    let ultimoOfrecido = null;
     while (llegadas.espera()) {
       if (++vueltas > beats.length * 8) throw new Error(`las escenas de "${casteada.plantilla}" no se acaban de cerrar: ${vueltas} vueltas`);
+      const donde = llegadas.espera().sitio;
+      const ofrecido = llegadas.beatDe(donde);
       let paso;
       do { paso = llegadas.avanza(); } while (!paso.cerrada);
+      const enCurso = aventuraEnCurso(estado);
+      if (ofrecido) ultimoOfrecido = ofrecido;
+      if (!ofrecido || !enCurso || ofrecido.n !== enCurso.beatEnCurso) continue;
+      resuelveBeat(estado, { beat: ofrecido, reloj, tenencia: SIN_OBJETOS });
+      if (ofrecido.n === beat.n) resuelto = true;
     }
 
-    const ofrecido = llegadas.beatDe(beat.lugar.nombre);
-    const enCurso = aventuraEnCurso(estado);
-    if (!ofrecido || !enCurso || ofrecido.n !== enCurso.beatEnCurso) {
-      sinResolver.push({ beat: beat.n, sitio: beat.lugar.nombre, ofrecido: ofrecido?.n ?? null, tocaba: enCurso?.beatEnCurso ?? null });
-      continue;
+    if (!resuelto) {
+      sinResolver.push({
+        beat: beat.n,
+        sitio: beat.lugar.nombre,
+        ofrecido: ultimoOfrecido?.n ?? null,
+        tocaba: aventuraEnCurso(estado)?.beatEnCurso ?? null,
+      });
     }
-    resuelveBeat(estado, { beat: ofrecido, reloj, tenencia: SIN_OBJETOS });
   }
 
   const enCurso = aventuraEnCurso(estado);

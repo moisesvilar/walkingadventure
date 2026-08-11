@@ -16,14 +16,16 @@
 // herramientas y no pantallas del juego, y la distinción está escrita en §6y. En
 // producción no existe.
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
+import { creaCalendario } from './datos/calendario.js';
 import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
-import { mundoDeLaPartida } from './mapa/mundo-guardado.js';
+import { mundoDeLaCelda, mundoDeLaPartida } from './mapa/mundo-guardado.js';
+import { REPARTO_SIN_AVENTURA, creaLasLlegadas } from './marcha/llegadas.js';
 import { montaLaSalida } from './marcha/salida-montada.js';
 // El área segura de la app. No es el `SafeAreaView` de `react-native`, que en Android es un
 // `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
@@ -36,6 +38,7 @@ import {
   NUCLEO_DEL_MUNDO_GUARDADO,
   NUCLEO_DE_EMPEZAR_DE_NUEVO,
   NUCLEO_DE_LA_COPIA,
+  NUCLEO_DE_LAS_LLEGADAS,
   NUCLEO_DE_LA_PARTIDA_GUARDADA,
 } from './nucleo/piezas.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
@@ -50,12 +53,20 @@ import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
 import { marcaSuperpuesta } from './pantallas/marca.js';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { EnMarchaMontado } from './pantallas/en-marcha-montado.jsx';
+import { LlegadaMontada } from './pantallas/llegada-montada.jsx';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
 
 // Referencia estable: si fuera un literal en el cuerpo, cada repintado sería un
 // re-sondeo de las cinco capacidades.
 const SIN_GANCHO = { ausentes: [], noReconocidos: [] };
+
+/**
+ * Las puertas de consulta que cuelgan de los ajustes y no de la portada: de ellas se vuelve
+ * a A6P6 y no a A6P1. Es un dato y no dos condiciones repartidas, porque el atrás del sistema
+ * y el «‹» de la pantalla tienen que hacer exactamente lo mismo.
+ */
+const VUELVEN_A_AJUSTES = ['empezar-de-nuevo', 'sitios-marcados'];
 
 // `__DEV__` lo define el empaquetador. En una compilación de producción vale
 // false y el gancho queda inerte, que es lo que impide que sea una puerta trasera.
@@ -120,6 +131,11 @@ export function App() {
   // sin más, o retomando la que estaba a medias. Mientras vale `null` no se anda. No se vuelve
   // desde aquí: se sale de una salida llegando a casa o echando el telón, que es de la fila 36.
   const [salida, setSalida] = useState(null);
+  // Lo mismo, en una referencia: la capa de llegadas se monta dentro de `abre()`, que ocurre
+  // en la misma vuelta en la que se declara la salida, así que un estado de React todavía no
+  // habría llegado. Es lo que hace que el reparto casteado alcance la capa el mismo día que
+  // se acepta la aventura, y no el siguiente.
+  const laSalidaEchada = useRef(null);
   // La vida de la salida, de SPEC-030 y cableada en la fila 48: el rótulo del sistema, la
   // única suscripción al sensor y las transiciones. Se monta cuando hay partida abierta y
   // **no antes**: sin mundo levantado no hay origen sobre el que proyectar los metros.
@@ -156,9 +172,9 @@ export function App() {
         setEnPuertaDeDesarrollo(false);
         return true;
       }
-      // Desde empezar de nuevo se vuelve a los ajustes, que es «dejarlo como está», y
-      // desde las otras tres a la portada.
-      setConsulta((abierta) => (abierta === 'empezar-de-nuevo' ? 'ajustes' : null));
+      // Desde empezar de nuevo y desde la lista de sitios marcados se vuelve a los ajustes,
+      // que es de donde cuelgan las dos; desde las otras tres, a la portada.
+      setConsulta((abierta) => (VUELVEN_A_AJUSTES.includes(abierta) ? 'ajustes' : null));
       return true;
     });
     return () => suscripcion.remove();
@@ -288,8 +304,35 @@ export function App() {
     montaLaSalida({
       salidas: partida.estado.salidas,
       origen: partida.mundo.documento?.origin ?? null,
+      // El documento del mundo, del que salen los geofences: de ellos cuelgan la cadencia
+      // del muestreo y el sitio bajo la marca de posición.
+      mundo: partida.mundo.documento ?? null,
       tramo: partida.estado.personaje?.tramo ?? null,
       alCambiar: () => repintaLaSalida((n) => n + 1),
+      // La capa de llegadas de la salida, montada sobre **su** detector. Se monta aquí y no
+      // dentro de la vida de la salida porque necesita la partida entera —el área de sitios
+      // pisados, la cola, el diario, los descartes— y esa la tiene esta raíz.
+      //
+      // Va **siempre y sin condición**: sin mundo levantado la fábrica falla nombrando lo que
+      // falta y la salida no se abre con su motivo, que es la verdad —no se puede andar por un
+      // mapa que no existe—. Condicionarla a que hubiera documento era la puerta por la que se
+      // coló que nadie la pasara.
+      montaLlegadas: ({ detector, salida: laQueSeAbre, mapaId }) => creaLasLlegadas({
+        nucleo: NUCLEO_DE_LAS_LLEGADAS,
+        mundo: partida.mundo.documento,
+        cupos: partida.mundo.cupos ?? null,
+        mapaId: mapaId ?? partida.mundo.mapaId,
+        salida: laQueSeAbre,
+        estado: partida.estado,
+        registro: partida.registro,
+        detector,
+        // El reparto casteado llega con la salida que se echó a andar. Al reabrir la app
+        // no está —el estado guarda la aventura por su identificador y no su cadena—, así
+        // que se declara vacío: la secuencia guardada conserva su paso de beat y lo que se
+        // pierde es el beat de dentro, no el paso. Queda anotado con dueño.
+        reparto: laSalidaEchada.current?.reparto ?? REPARTO_SIN_AVENTURA,
+        dia: creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia(),
+      }),
     })
       .then(async (montada) => {
         if (!vivo) return;
@@ -461,7 +504,10 @@ export function App() {
                   estado: nacida.estado,
                   registro: nacida.registro,
                   personaje: componePersonaje({ ...nacida.estado.personaje, ...cerrado.personaje }),
-                  mundo: { mapaId: levantado.mapaId, documento: levantado.documento, titulo: levantado.documento?.title ?? null },
+                  // Por la misma puerta que la partida abierta de disco, y no por una
+                  // composición propia: este camino se dejaba `cupos` fuera y el descarte
+                  // de un anclaje moría en toda instalación nueva.
+                  mundo: mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro }),
                   arrancadaEn: Date.now(),
                 });
                 setEnArranque(false);
@@ -472,6 +518,28 @@ export function App() {
           }}
         />
       </AreaSegura>
+    );
+  }
+
+  // **La escena que espera manda sobre todo lo demás**, y esa es la máquina entera: quien
+  // decide qué se ve es el estado y no la puerta por la que se entró. Da igual que la app se
+  // acabe de abrir o que se lleve media hora andando — si hay una llegada validada sin
+  // cerrar, lo que se ve es su paso vigente (`bucle-jugable.md` §9). Y no se pone delante
+  // sola: la llegada validó en silencio y esperó, sin encender la pantalla y sin avisar.
+  const laEscenaQueEspera = partida && laSalida ? (laSalida.llegadas()?.espera() ?? null) : null;
+  if (laEscenaQueEspera) {
+    return (
+      <LlegadaMontada
+        llegadas={laSalida.llegadas()}
+        textos={partida.estado.textos?.textos ?? {}}
+        // Cerrar una llegada es un corte del juego y se congela: si la app muriera entre el
+        // paso leído y el siguiente, la secuencia volvería por donde iba.
+        alCambiar={() => {
+          congelaLaPartida();
+          repintaLaSalida((n) => n + 1);
+        }}
+        alTerminar={() => repintaLaSalida((n) => n + 1)}
+      />
     );
   }
 
@@ -488,6 +556,14 @@ export function App() {
         // cerrado, que es lo que distingue «no sé por dónde andas» de «andas en círculos».
         seguidor={laSalida?.seguidor() ?? null}
         motivoSinUbicacion={laSalida?.seguidor() ? null : 'sensor-sin-responder'}
+        // Sin capa de llegadas no se pinta el mapa: se dice por qué. Un mapa con la marca
+        // moviéndose y ninguna escena posible es indistinguible de un mundo donde todavía no
+        // has llegado a nada, y esa confusión es la que costó dos horas de emulador.
+        falloDeCableado={laSalida?.llegadasSinCablear() ?? null}
+        // La cadencia vigente de la suscripción, que no se pinta y solo se puede afirmar.
+        // **Acercarse a un geofence no se dibuja**: si se dibujara sería el medidor de
+        // progreso que `design-system.md` prohíbe, y un motivo para mirar el móvil andando.
+        cadencia={laSalida?.cadencia() ?? null}
         paso={pasoDeSalida}
       />
     );
@@ -535,6 +611,10 @@ export function App() {
           mundo={partida.mundo}
           almacen={almacen}
           empezarDeNuevo={empezarDeNuevo}
+          // El registro y el día, que es lo que deshacer un descarte necesita para dejar su
+          // hecho: el deshacer es una transición más y no un borrado del registro.
+          registro={partida.registro}
+          dia={creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia()}
           // Al volver se congela: es el sitio donde el estado puede cambiar sin que haya una
           // salida de por medio —los interruptores de ajustes cuando la fila 46 los conecte,
           // el estilo y el tamaño de letra cuando la 38 les dé pantalla de elección—. Ponerlo
@@ -542,7 +622,7 @@ export function App() {
           // nada proteste; y como congelar es idempotente, hoy no escribe nada.
           alVolver={() => {
             congelaLaPartida();
-            setConsulta(consulta === 'empezar-de-nuevo' ? 'ajustes' : null);
+            setConsulta(VUELVEN_A_AJUSTES.includes(consulta) ? 'ajustes' : null);
           }}
           alAbrirPuerta={(id) => setConsulta(id)}
           // Borrar lleva al arranque y a ningún otro sitio: es lo que distingue borrar de
@@ -585,6 +665,9 @@ export function App() {
           // enseña debajo de la acción que no pudo. Abrirla igual significaría o perder la
           // ubicación a los pocos minutos o pedir el permiso permanente.
           alAndar={async (echada) => {
+            // Antes de abrir, porque abrir es lo que monta la capa de llegadas y el reparto
+            // tiene que estar puesto cuando lo haga.
+            laSalidaEchada.current = echada ?? { conAventura: false };
             if (!laSalida) {
               return { abierta: false, motivo: 'la vida de la salida no se ha podido montar en esta compilación, y sin ella el rótulo del sistema no sostiene nada' };
             }

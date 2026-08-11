@@ -139,8 +139,39 @@ export const NOMBRE_DE_LA_TAREA = 'salida-abierta';
  * precisión de un GPS urbano —por debajo, la mitad de los fijos serían error— y a paso de
  * andar da una posición cada seis o siete segundos, muy por debajo del hueco máximo de
  * `partida/transporte.js`, que es lo que hace que la traza no se corte andando.
+ *
+ * Desde SPEC-044 esta es **la cadencia de fuera de un geofence** y no la única: con un sitio
+ * debajo se pide por tiempo, porque `distanceInterval` es un filtro duro del sensor y parado
+ * no entrega ninguna posición. Quién decide cuál toca es el paquete —`cadenciaDeMuestreo` de
+ * `partida/llegadas.js`—; esta capa solo la aplica, y este número sigue siendo el de SPEC-048.
  */
 export const CADENCIA_M = 10;
+
+/**
+ * La cadencia de arranque: la de distancia de SPEC-048. **Se declara en lugar de suponerse**
+ * porque una suscripción sin cadencia no existe, y dejar el campo vacío haría indistinguible
+ * «nadie la decidió» de «se decidió que fuera por distancia».
+ */
+export function cadenciaPorDistancia(metros = CADENCIA_M) {
+  return Object.freeze({ modo: 'por-distancia', metros, segundos: null });
+}
+
+/**
+ * Una cadencia bien formada: o metros o segundos, nunca las dos y nunca ninguna. Falla
+ * nombrando lo que llegó, aquí y no dentro de las opciones del módulo nativo, que es donde
+ * un campo de más se traga sin decir nada.
+ */
+export function exigeCadencia(cadencia, quien = 'la cadencia de la suscripción') {
+  const porTiempo = Number.isFinite(cadencia?.segundos) && cadencia.segundos > 0;
+  const porDistancia = Number.isFinite(cadencia?.metros) && cadencia.metros > 0;
+  if (porTiempo === porDistancia) {
+    throw new Error(
+      `${quien} llega como ${JSON.stringify(cadencia) ?? String(cadencia)}: se pide o cada tantos metros o cada tantos segundos, ` +
+      'y una con las dos puestas o con ninguna no describe ningún muestreo',
+    );
+  }
+  return cadencia;
+}
 
 /** El nombre que encabeza la notificación del rótulo en Android. Ver `opciones()`. */
 export const NOMBRE_DE_LA_APP = 'Walking Adventure';
@@ -195,6 +226,12 @@ export function creaSuscripcionDeUbicacion({
   // esperar una promesa, así que la verdad se refresca con `sondeaPresencia()` y aquí solo
   // se guarda la última respuesta: creer sin comprobar es lo que el riesgo 4 castiga.
   let corriendo = false;
+  // La cadencia puesta ahora mismo y el rótulo con el que se pidió. Se guardan porque
+  // **cambiar de cadencia es volver a pedir la misma suscripción con otras opciones**, y
+  // quien la cambia no tiene por qué saber qué se lee en la pantalla de bloqueo — ni al
+  // revés: quien cambia la línea del rótulo no puede llevarse por delante la cadencia.
+  let cadencia = cadenciaPorDistancia(cadenciaM);
+  let ultimoRotulo = null;
 
   TaskManager.defineTask(tarea, ({ data, error }) => {
     if (error || !data) return;
@@ -212,6 +249,14 @@ export function creaSuscripcionDeUbicacion({
     if (alRecibir) alRecibir();
   });
 
+  // Con cadencia por tiempo el filtro de distancia se pone a cero **explícitamente**: si se
+  // dejara puesto, los dos filtros se aplicarían a la vez —el sistema entrega cuando se
+  // cumplen los dos— y parado seguiría sin llegar ninguna posición, que es exactamente el
+  // fallo que esta fila arregla.
+  const porCadencia = () => (Number.isFinite(cadencia.segundos)
+    ? { timeInterval: cadencia.segundos * 1000, distanceInterval: 0 }
+    : { distanceInterval: cadencia.metros });
+
   const opciones = (compuesto) => ({
     // **Precisión alta y no equilibrada**, y no por gusto: `partida/transporte.js` no funda
     // un vehículo con un error mayor de treinta metros, y la equilibrada entrega cien. Con
@@ -219,8 +264,9 @@ export function creaSuscripcionDeUbicacion({
     // detección de transporte quedaría escrita y muerta. Medido en el emulador el
     // 11-ago-2026: con la equilibrada el sistema ni siquiera enciende el GPS.
     accuracy: Location.Accuracy?.High,
-    // Por distancia, nunca por tiempo. Ver `CADENCIA_M`.
-    distanceInterval: cadenciaM,
+    // Por distancia fuera de un geofence y por tiempo dentro. Ver `CADENCIA_M` y
+    // `cadenciaDeMuestreo` de `partida/llegadas.js`, que es quien lo decide.
+    ...porCadencia(),
     // El servicio en primer plano **es** el rótulo: su título y su línea llegan compuestos
     // por el núcleo, que es lo que impide que iOS y Android digan cosas distintas.
     foregroundService: {
@@ -242,9 +288,17 @@ export function creaSuscripcionDeUbicacion({
     tarea,
     cadenciaM,
 
-    /** Arranca el servicio con su notificación. Es lo que pone el rótulo y abre el sensor. */
-    async arranca(compuesto) {
-      await Location.startLocationUpdatesAsync(tarea, opciones(compuesto));
+    /**
+     * Arranca el servicio con su notificación. Es lo que pone el rótulo y abre el sensor.
+     *
+     * La cadencia entra aquí y no se descubre después: una salida que se abre con quien
+     * juega ya parada dentro de un geofence tiene que arrancar ya por tiempo, porque el
+     * fijo que la cambiaría es justo el que no va a llegar.
+     */
+    async arranca(compuesto, nueva = null) {
+      if (nueva) cadencia = exigeCadencia(nueva, 'la cadencia con la que arranca la suscripción');
+      ultimoRotulo = compuesto ?? ultimoRotulo;
+      await Location.startLocationUpdatesAsync(tarea, opciones(ultimoRotulo));
       corriendo = true;
     },
 
@@ -252,11 +306,34 @@ export function creaSuscripcionDeUbicacion({
      * Cambia la línea del rótulo. Se vuelve a pedir la suscripción con las opciones
      * nuevas y **no se para en medio**: parar y arrancar dejaría un hueco en el que el
      * servicio no está, que es exactamente lo que la promesa del permiso no admite.
+     *
+     * Y **no toca la cadencia**: cambiar la línea del rótulo no puede devolver el sensor a
+     * la cadencia de fuera estando dentro de un geofence, que sería perder la llegada por
+     * haber repintado un texto.
      */
     async actualiza(compuesto) {
-      await Location.startLocationUpdatesAsync(tarea, opciones(compuesto));
+      ultimoRotulo = compuesto ?? ultimoRotulo;
+      await Location.startLocationUpdatesAsync(tarea, opciones(ultimoRotulo));
       corriendo = true;
     },
+
+    /**
+     * Aplica una cadencia nueva **sin parar el servicio**, con el mismo rótulo que ya
+     * estaba puesto: acercarse a un sitio no cambia ni una palabra de lo que se lee en la
+     * pantalla de bloqueo. Devuelve si hubo cambio, que es lo que evita volver a pedir la
+     * suscripción en cada muestra.
+     */
+    async aplicaCadencia(nueva) {
+      const pedida = exigeCadencia(nueva, 'la cadencia que se aplica a la suscripción');
+      if (pedida.modo === cadencia.modo) return false;
+      cadencia = pedida;
+      await Location.startLocationUpdatesAsync(tarea, opciones(ultimoRotulo));
+      corriendo = true;
+      return true;
+    },
+
+    /** La cadencia puesta ahora mismo. Es lo que la marca observable del momento enseña. */
+    cadencia: () => cadencia.modo,
 
     /** Para el servicio. Retirado el rótulo se acabó la suscripción: no queda nadie leyendo. */
     async para() {

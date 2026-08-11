@@ -41,13 +41,32 @@ function rotuloSinPoderUsarse(motivo) {
  *
  * @param {object} piezas
  *   `salidas` el área de la partida; `origen` el `{lat, lon}` del mundo congelado, que es el
- *   cero de sus metros; `tramo` el de quien juega; `alCambiar` a quién se avisa cuando algo
- *   se movió.
+ *   cero de sus metros; `mundo` su documento, del que sale el índice de geofences del mapa
+ *   activo; `tramo` el de quien juega; `alCambiar` a quién se avisa cuando algo se movió;
+ *   `montaLlegadas` la fábrica de la capa de llegadas, que necesita la partida entera y por
+ *   eso la arma quien la tiene y entra por aquí.
  * @returns la orquestación de `creaLaSalida`, siempre: sin rótulo o sin sensor **también se
  *   monta**, y lo que cambia es que abrir responde que no con su motivo. Devolver `null`
  *   dejaría a quien la usa sin nadie a quien preguntar por qué.
  */
-export async function montaLaSalida({ salidas, origen = null, tramo = null, alCambiar = null }) {
+export async function montaLaSalida({ salidas, origen = null, mundo = null, tramo = null, alCambiar = null, montaLlegadas }) {
+  // **Exigida aquí y no dentro de `creaLaSalida`**, y el sitio importa: este es el punto de
+  // montaje, o sea el único donde se puede olvidar una pieza; quien arma un montaje doblado
+  // llama a `creaLaSalida` y elige qué le pone.
+  //
+  // La primera versión de esta fila no la pasaba —el parámetro se añadió a `creaLaSalida` y
+  // a `App.js` y este intermediario se quedó sin él—, y no protestó nadie: `montaLasLlegadas`
+  // leía «no hay fábrica» como «no hay nada que montar», la salida se abría, el mapa se
+  // pintaba, la cadencia cambiaba al entrar en el geofence y **ninguna llegada podía validar
+  // jamás**. Medido en `wa-pixel` el 12-ago-2026. Es la decimotercera aparición de §6h y la
+  // cometió la fila que existe para cerrarla, así que se cierra por contrato como las doce
+  // anteriores: sin fábrica no se monta la vida de una salida.
+  if (typeof montaLlegadas !== 'function') {
+    throw new Error(
+      'la vida de una salida se monta con la fábrica de la capa de llegadas y no llegó ninguna: sin ella la salida se abriría ' +
+      'para no poder validar ni una llegada, que es andar por un mapa donde no puede pasar nada',
+    );
+  }
   // La orquestación se referencia antes de existir porque la suscripción necesita a quién
   // empujar cada posición: es un empujón y no un sondeo por reloj, que es lo que evita un
   // temporizador corriendo mientras alguien anda.
@@ -95,8 +114,10 @@ export async function montaLaSalida({ salidas, origen = null, tramo = null, alCa
     rotulo,
     suscripcion,
     origen,
+    mundo,
     tramo,
     alCambiar,
+    montaLlegadas,
     // El permiso de las notificaciones, pedido al abrir la primera salida y no antes: es
     // lo que `permisos.js` declara y lo que hace que el rótulo se vea. Sin él el servicio
     // corre igual y Android lo enseña entre las apps activas, así que denegarlo no impide

@@ -86,12 +86,20 @@ export const SIN_SEGMENTO_TODAVIA = 'ambiguo';
  * proyectar, y una trigonometría paralela escrita en la app daría puntos que no cuadran con
  * los del mundo congelado.
  *
+ * **Y el sitio se resuelve, no se inventa.** Hasta SPEC-044 el cuarto campo del contrato iba
+ * siempre a `null` por construcción, y su comentario lo declaraba: está bien declarado y no
+ * protestaba nadie el día que la fila que tenía que rellenarlo se olvidara (§8b). Ahora se
+ * resuelve contra el índice de geofences del mapa activo, y **montarse sin él falla nombrando
+ * lo que falta**: la ausencia no es un estado legítimo del mundo —siempre hay mundo levantado
+ * cuando hay salida abierta—, así que se cierra por contrato, que es más fuerte que declararla.
+ *
  * @param {object} piezas
  *   `fuente` la de `plataforma/posiciones.js`, que entrega la última posición cruda;
  *   `traza` la de la salida, de la que sale la clasificación; `origen` el `{lat, lon}` del
- *   mundo congelado, que es el cero de sus metros; `nucleo` con `makeProjector`.
+ *   mundo congelado, que es el cero de sus metros; `nucleo` con `makeProjector`; `sitios` el
+ *   índice de geofences del mapa activo, el que devuelve `sitiosConPosicion(mundo)`.
  */
-export function creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo }) {
+export function creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo, sitios }) {
   if (!fuente || typeof fuente.posicion !== 'function') {
     throw new Error(`el seguidor de la salida se monta con la fuente de posiciones y llegó ${JSON.stringify(fuente) ?? String(fuente)}`);
   }
@@ -107,7 +115,30 @@ export function creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo }) {
   if (!origen || !Number.isFinite(origen.lat) || !Number.isFinite(origen.lon)) {
     throw new Error(`el seguidor de la salida se monta sobre el origen del mundo congelado y llegó ${JSON.stringify(origen) ?? String(origen)}`);
   }
+  if (!(sitios instanceof Map)) {
+    throw new Error(
+      `el seguidor de la salida se monta con el índice de geofences del mapa activo (sitiosConPosicion(mundo)) y llegó ${JSON.stringify(sitios) ?? String(sitios)}: ` +
+      'sin él el sitio bajo la marca sería nulo por construcción, que es indistinguible de estar en medio del monte',
+    );
+  }
   const proyector = nucleo.makeProjector(origen.lat, origen.lon);
+
+  /**
+   * El sitio en cuyo geofence se está, o `null`. **El más cercano cuando hay solapados**, que
+   * es el mismo criterio con el que SPEC-032 ordena dos llegadas validadas a la vez: dos
+   * criterios distintos para lo mismo es cómo se desincronizan.
+   */
+  const sitioEn = (punto) => {
+    let cerca = null;
+    for (const [nombre, geofence] of sitios) {
+      const distanciaM = Math.hypot(punto.x - geofence.x, punto.y - geofence.y);
+      if (distanciaM > geofence.radioM) continue;
+      if (cerca === null || distanciaM < cerca.distanciaM || (distanciaM === cerca.distanciaM && nombre < cerca.nombre)) {
+        cerca = { nombre, distanciaM };
+      }
+    }
+    return cerca === null ? null : cerca.nombre;
+  };
 
   return creaSeguidorDePosicion({
     lee() {
@@ -120,9 +151,9 @@ export function creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo }) {
         clasificacion: ultimo ? ultimo.clasificacion : SIN_SEGMENTO_TODAVIA,
         x: punto.x,
         y: punto.y,
-        // El sitio lo resuelve el geofence de la llegada, que es de la fila 44. Sin él no
-        // se inventa uno: `null` es la respuesta honesta y el momento sabe pintarla.
-        sitio: null,
+        // Fuera de todos los geofences sigue siendo `null`, que ahí sí es la respuesta
+        // honesta: no es que no se haya consultado, es que no hay ninguno debajo.
+        sitio: sitioEn(punto),
       };
     },
   });

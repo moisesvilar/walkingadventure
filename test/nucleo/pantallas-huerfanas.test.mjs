@@ -33,24 +33,18 @@ import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
  * alfabético, igual que la lista de flujos de límite declarado y por lo mismo: si se
  * descubriera sola, añadir una huérfana no costaría nada.
  *
- * Las ocho son las del momento «al parar» más el zurrón, y las tres razones son:
+ * Queda **una**, y es `zurron`: necesita la fuente de salud, el motor de pasos y el
+ * registro de hechos, que son de la fila 46.
  *
- * - **No hay módulo de ubicación en la app** (`app/package.json` no declara ninguno y
- *   `creaSeguidorDePosicion` espera el nativo inyectado), así que no hay geofences ni
- *   llegadas: `llegada`, `visor`, `ficha`, `lo-que-se-cuenta`, `descarte`, `triangulacion`.
- * - **`sitios-marcados`** cuelga de una fila de valor de A6P6, y las filas de valor no
- *   tienen pantalla de elección (fila 38).
- * - **`zurron`** necesita la fuente de salud, el motor de pasos y el registro de hechos
- *   (fila 46).
+ * SPEC-044 se llevó las otras siete. Seis eran las del momento «al parar» —`llegada`,
+ * `visor`, `ficha`, `lo-que-se-cuenta`, `descarte`, `triangulacion`—, que estaban escritas y
+ * probadas en Node desde las filas 32, 33, 35 y 37 y a las que no llegaba ni un import
+ * porque nadie había cableado la máquina de una salida. La séptima es `sitios-marcados`, que
+ * es de la fila 38 y **el cierre transitivo la alcanza**: el camino de deshacer un descarte
+ * pasa por ella, así que baja de ocho a una y no a dos como se preveía. **El número que se
+ * publica es el medido**, no el previsto.
  */
 const HUERFANAS = [
-  'app/pantallas/descarte.jsx',
-  'app/pantallas/ficha.js',
-  'app/pantallas/llegada.js',
-  'app/pantallas/lo-que-se-cuenta.js',
-  'app/pantallas/sitios-marcados.jsx',
-  'app/pantallas/triangulacion.jsx',
-  'app/pantallas/visor.js',
   'app/pantallas/zurron.jsx',
 ];
 
@@ -130,8 +124,8 @@ describe('Las pantallas que nadie puede abrir', () => {
   });
 
   test('El recuento es el medido y no ha subido', () => {
-    // El número, en crudo y a la vista. El 10-ago-2026 eran 12 de 32 y la fila 43 lo dejó
-    // en 8; si alguien lo sube, esto lo dice con las dos cifras delante.
+    // El número, en crudo y a la vista. El 10-ago-2026 eran 12 de 32, la fila 43 lo dejó en
+    // 8 y la 44 en **1 de 33**; si alguien lo sube, esto lo dice con las dos cifras delante.
     const vistas = alcanzables();
     const todas = todasLasPantallas();
     const huerfanas = todas.filter((p) => !vistas.has(p));

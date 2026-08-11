@@ -442,6 +442,18 @@
       "casos": "2683 casos: 2679 pasan, 1 falla, 3 saltados",
       "app": "19 flujos: 9 pasan, 2 fallan, 8 solo comprueban su limite. Los dos rojos son anteriores y fichados: empezar-de-nuevo-copia (Share.dismissedAction es de iOS, entrada XXVIII) y zurron (paso-ajustes, fila 46). La columna de limite declarado baja de 9 a 8: sale en-marcha.yaml con 103 s medidos de recorrido real.",
       "nota": "El unico rojo de nucleo esta puesto a proposito: 'Nada de esta app se despierta al arrancar el movil', por el receptor de expo-notifications con BOOT_COMPLETED. Es de SPEC-023, no de esta fila, y la guarda nace roja en vez de tolerarlo. Dos dependencias autorizadas por el dueno: expo-location y expo-task-manager. Alcance recortado por el dueno: el camino de la llegada se queda en la fila 44 y el criterio 4 del encargo se retira. Pantallas huerfanas siguen en 8. Guarda del manifiesto generado mirando las dos plataformas: Android mirado, iOS mirado."
+    },
+    {
+      "spec": "SPEC-044",
+      "slug": "navegacion-en-la-calle",
+      "resultado": "verde con los dos rojos de @app anteriores y fichados",
+      "iteraciones": 2,
+      "report": "test/reports/SPEC-044-run-20260811T152006Z.md",
+      "casos": "2711 casos: 2707 pasan, 1 falla, 3 saltados",
+      "app": "19 flujos: 10 pasan, 2 fallan, 7 solo comprueban su limite. Los dos rojos son anteriores y fichados: empezar-de-nuevo-copia (Share.dismissedAction es de iOS) y zurron (paso-ajustes, fila 46). Esta fila no anade ni un rojo. La columna de limite declarado baja de 8 a 7: sale llegada.yaml, verde cinco tandas seguidas entre 115 y 126 s.",
+      "nota": "La fila descubrio que la capa de llegadas no podia dispararse en un dispositivo: la cadencia por distancia no entrega nada a quien esta parado y esUnaParada medida de fijo a fijo lee el ruido del GPS como andar. Medido 0% de validacion con la cadencia de produccion. Duodecima aparicion de 6h, sobre una capa con mil casos en verde probada solo con posiciones fabricadas. El dueno autorizo arreglar tambien la calle: muestreo por tiempo con geofence cerca y parada por deriva de ventana, con los numeros fijados midiendo (ver 9c). Los 20 s de SPEC-032 se conservan donde el fijo los sostiene. Diseno actualizado: SPEC-031-iter-1, SPEC-032-iter-1 y game-design/bucle-jugable.md. Decimotercera aparicion de 6h cometida por la propia fila: montaLaSalida no pasaba montaLlegadas. Pantallas huerfanas 8 -> 1.",
+      "entrega": "RF-BUCLE-005, RF-BUCLE-007 y RF-PRIV-004. RF-QUEST-004 y RF-BUCLE-011 pasan a la fila 49 (escena del beat y telon), declarado en el checklist.",
+      "no_desbloqueado": "descarte.yaml y visor.yaml siguen en la columna. El motivo de descarte.yaml estaba mal escrito y se ha corregido: la puerta de A4P8 existe, lo que no se puede es garantizar llegar a ella, porque app/plataforma/ubicacion.js:122 lee la coordenada del arranque con accuracy Balanced y ningun flujo puede fijar donde nace el mapa. No se toca aqui: esa lectura decide donde nace el mundo de un jugador real."
     }
   ],
   "bloqueos": [],
@@ -483,8 +495,8 @@
     }
   ],
   "suite_final": {
-    "casos": "2634: 2631 pasan, 0 fallan, 3 saltados",
-    "app": "19 flujos: 7 pasan, 8 solo comprueban su limite, 4 rojos (2 fichados de otras filas, 2 de la caida de adb verificada contra main)"
+    "casos": "2711: 2707 pasan, 1 falla, 3 saltados",
+    "app": "19 flujos: 10 pasan, 2 fallan (los dos fichados de otras filas), 7 solo comprueban su limite"
   },
   "bloque": "B7",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",

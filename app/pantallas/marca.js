@@ -52,3 +52,50 @@ export function marcaSuperpuesta(n = 0, { fila = 0 } = {}) {
   }
   return { position: 'absolute', top: fila, left: n, width: 1, height: 1 };
 }
+
+/**
+ * A qué altura empiezan las marcas de una pantalla **a sangre**, y la tercera vuelta de la
+ * misma forma de fallo.
+ *
+ * Medido el 12-ago-2026 en `wa-pixel` con `maestro hierarchy`, que es el instrumento que
+ * decide: las marcas del momento en marcha y las de la llegada **estaban en el árbol del
+ * sistema y no se podían afirmar**. `uiautomator dump` las enseñaba con su descripción y
+ * `assertVisible` fallaba igual, que es la trampa de verificar con el instrumento
+ * equivocado.
+ *
+ * La causa no era el tamaño ni el apilamiento entre hermanas —las del arranque son del mismo
+ * tamaño y se afirman sin problema—: era **la esquina**. Estas pantallas van a sangre, así
+ * que una marca en `[0,0]` cae debajo de la ventana de la barra de estado del sistema, y
+ * quien lee el árbol descarta lo que otra ventana tapa. Las del arranque empiezan en `y=128`
+ * porque el área segura las baja, y por eso nunca dieron guerra.
+ *
+ * Doscientos puntos independientes de densidad están muy por debajo de cualquier barra de
+ * estado —la de este emulador mide unos cuarenta y tres— y no dependen del orden de
+ * hermanos, que es lo que sí se intentó primero con `zIndex` y `elevation` y no bastó: el
+ * orden del árbol de accesibilidad no es el de pintado.
+ */
+export const LEJOS_DE_LA_BARRA_DE_ESTADO = 200;
+
+/**
+ * Una capa de marcas, fuera del flujo y por debajo de la barra de estado.
+ *
+ * Las marcas van dentro en fila, así que ninguna tapa a otra sin tener que numerarlas. Y
+ * `fila` existe por lo mismo que el `fila` de `marcaSuperpuesta`: dos capas de contenedores
+ * distintos no pueden coordinar en qué punto empieza cada una, y dos marcas en el mismo
+ * punto son dos marcas que la automatización no puede leer.
+ */
+export function capaDeMarcas(fila = 0) {
+  if (!Number.isInteger(fila) || fila < 0) {
+    throw new Error(`una capa de marcas se aparta por su número de fila y llegó ${JSON.stringify(fila) ?? String(fila)}`);
+  }
+  return {
+    position: 'absolute',
+    top: LEJOS_DE_LA_BARRA_DE_ESTADO + fila,
+    left: 0,
+    height: 1,
+    flexDirection: 'row',
+  };
+}
+
+/** La capa de la fila cero, que es la que usa una pantalla que solo tiene una. */
+export const CAPA_DE_MARCAS = capaDeMarcas(0);

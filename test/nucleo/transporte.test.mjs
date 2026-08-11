@@ -58,7 +58,7 @@ import { declaraTramo } from '../../packages/nucleo/partida/tramo.js';
 import { validaLlegada } from '../../packages/nucleo/partida/en-marcha.js';
 import { IDS_DE_AJUSTE } from '../../packages/nucleo/partida/ajustes.js';
 import {
-  PERMANENCIA_S,
+  DENTRO_DEL_REGRESO_S,
   avanzaElRegreso,
   distanciaDeAlejamientoM,
 } from '../../packages/nucleo/partida/regreso.js';
@@ -649,7 +649,7 @@ describe('El vehículo se aparta del reloj del mundo y de la validación', () =>
       tramos: [
         { hastaVertice: 1, velocidadKmH: 4 },
         { hastaVertice: 2, velocidadKmH: 40 },
-        { parada: true, duracionS: PERMANENCIA_S + 30 },
+        { parada: true, duracionS: DENTRO_DEL_REGRESO_S + 30 },
       ],
     });
     const traza = clasificaPosiciones(posiciones);

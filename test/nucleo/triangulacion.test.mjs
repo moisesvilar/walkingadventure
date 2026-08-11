@@ -61,7 +61,7 @@ import {
 } from '../../packages/nucleo/partida/diario.js';
 import { abreElDiario, abreCapitulo } from '../../packages/nucleo/partida/capitulos.js';
 import {
-  PERMANENCIA_MS,
+  PARADA_DENTRO_MS,
   creaLlegadas,
   estadoDeLlegadas,
 } from '../../packages/nucleo/partida/llegadas.js';
@@ -93,10 +93,17 @@ function mundoDeTresNucleos() {
   };
 }
 
-/** Posiciones de una parada: el mismo punto, marcas de tiempo que avanzan. */
-function paradoEn({ x, desdeMs = 0, duracionMs = PERMANENCIA_MS, cadaMs = 5000 }) {
+/**
+ * Posiciones de una parada: el mismo punto, marcas de tiempo que avanzan.
+ *
+ * Con la precisión declarada del fijo bueno —tres metros— desde SPEC-044: la parada se mide
+ * por deriva de ventana y **sin precisión declarada toca la ventana larga**, que no cabe en
+ * los veinte segundos de permanencia que este fichero fabrica. Lo que se actualiza es el
+ * fixture; lo que estas pruebas afirman, la escena de la primera coincidencia, no cambia.
+ */
+function paradoEn({ x, desdeMs = 0, duracionMs = PARADA_DENTRO_MS, cadaMs = 5000, precisionM = 3 }) {
   const posiciones = [];
-  for (let t = 0; t <= duracionMs; t += cadaMs) posiciones.push({ x, y: 0, tMs: desdeMs + t, clasificacion: 'parada' });
+  for (let t = 0; t <= duracionMs; t += cadaMs) posiciones.push({ x, y: 0, tMs: desdeMs + t, precisionM, clasificacion: 'parada' });
   return posiciones;
 }
 

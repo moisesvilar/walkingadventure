@@ -2,8 +2,8 @@
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: falta `paso-llegada` en `app/App.js`, así que
-# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
+# Este flujo **no recorre su pantalla**, y ya no por la capa de llegadas: el motivo está
+# medido y escrito abajo. Lo único que llega a ejecutarse es la
 # guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
 # pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
 # verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
@@ -30,16 +30,14 @@
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
-# - **Una puerta hasta la ficha.** `app/pantallas/llegada.js` monta la capa `descarte-anclaje`
-#   sobre `PantallaFicha`, pero **`App.js` no monta la llegada**: el primer paso va contra
-#   `paso-llegada`, que sigue el nombre de los otros pasos provisionales (`paso-mapa`,
-#   `paso-marcha`, `paso-revision-render`) y **todavía no existe**. Es el mismo hueco de
-#   cableado que declaran `test/app/llegada.yaml` y `test/app/visor.yaml`, y no es de aquí.
+# - **Poder elegir el sitio por el que empieza el mapa**, para que su llegada traiga ficha.
+#   Hoy sale un núcleo o un servicio según le toque, y el flujo no lo decide. Medido abajo.
 # - **La acción «Este sitio no pega» de A4P7**, que es de la fila 33 y es de donde cuelga
 #   el primer toque. Se localiza por su texto porque la spec no le da identificador.
-# - **La pantalla de ajustes A6P6**, que es de la fila 38: de aquí solo sale lo que cuelga
-#   dentro (`sitios-marcados` y `sitio-marcado-deshacer`). El paso `paso-ajustes` tampoco
-#   existe todavía.
+# - **La lista de sitios marcados dentro de A6P6.** La puerta de los ajustes ya existe y es
+#   `puerta-ajustes`, la del pie de la portada (§6y), y desde la fila 44 la fila «Sitios que
+#   marcaste» lleva a la lista y a deshacer. Lo que falta para recorrerlo es haber marcado
+#   algo, y para eso hace falta la llegada.
 #
 # **Lo que este flujo NO puede comprobar, y por qué:**
 #
@@ -63,40 +61,53 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-# El paso a la llegada, provisional como el del mapa y el de en marcha. Hoy no existe.
-
 # ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
 #
-# `paso-llegada` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
-# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
-# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
-# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
-# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
+# **Lo que impide recorrerla, medido en `wa-pixel` el 12-ago-2026, y no es lo que decía aquí
+# la vuelta pasada.** Escribí que la puerta no existía: que la capa de A4P8 cuelga de la
+# ficha, que la única llegada que un flujo alcanza es la del sitio por el que empieza el mapa
+# y que ese sitio es un núcleo, que no lleva ficha. **La primera mitad era cierta y la
+# segunda no.** El sitio de arranque no es siempre un núcleo: cuando cae en un servicio o en
+# un paraje, la llegada trae la ficha y con ella `ficha-descartar` — «Este sitio no pega»—,
+# vista en el aparato. La puerta está.
 #
-# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
-# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
-# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
-# `paso-llegada`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
-# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+# Lo que no está es **poder garantizar que se llega a ella**:
+#
+# - Qué sitio toca no lo decide el flujo. `test/app/llegada.yaml` ramifica sobre la forma que
+#   salga porque no se puede elegir, y en tandas seguidas salen las dos: un núcleo con lo que
+#   allí se cuenta y un servicio con su ficha.
+# - Y el ancla del mapa **no la gobierna la posición que el flujo pone**: con `setLocation` a
+#   `42.4000,-8.7700` antes del arranque, el mapa nace anclado en `42.40,-8.76` —dos tandas,
+#   el mismo resultado—, cuando el redondeo de `anclaje()` sobre esa coordenada da
+#   `42.40,-8.77`. La causa está localizada: `app/plataforma/ubicacion.js` lee la coordenada
+#   del arranque con `getCurrentPositionAsync({ accuracy: Balanced })`, y un fijo simulado no
+#   gobierna esa lectura. Sin eso no hay manera de andar hasta un paraje elegido.
+#
+# Un flujo que solo a veces ejecuta su gesto es un verde que a veces no verifica nada, que es
+# lo que §6w existe para no volver a contar. Así que este se queda marcado hasta que el
+# arranque lea la posición de manera que un flujo la pueda fijar — **y entonces sale, porque
+# la puerta ya está**. Mientras tanto, lo que sí está vivo y sin dispositivo es todo lo demás:
+# lo saca del casting sin resembrar, es reversible, no hace falta motivo y no se reporta a
+# ningún sitio, en `test/nucleo/descartes.test.mjs`.
 - runFlow:
     when:
       notVisible:
-        id: 'paso-llegada'
+        id: 'llegada'
     commands:
       - assertVisible:
           id: 'arranque'
       - assertNotVisible:
-          id: 'paso-llegada'
+          id: 'llegada'
 
 # El flujo de verdad, a la espera de su puerta.
 - runFlow:
     when:
       visible:
-        id: 'paso-llegada'
+        id: 'llegada'
     commands:
-      - tapOn:
-          id: 'paso-llegada'
-
+      # ── Se llega andando y se para dentro del geofence ─────────────────────────────
+      # La escena no se navega: se llega. Cuando la capa se monte, este cuerpo entra por
+      # donde entra una persona y la condición de arriba se cumple sola.
       # ── La ficha, y desde ella la acción discreta de la fila 33 ────────────────────
       - assertVisible:
           id: 'ficha-texto'
@@ -139,7 +150,7 @@ appId: com.walkingadventure.app
 
       # ── Deshacer vive en ajustes y no en el sitio ─────────────────────────────────
       - tapOn:
-          id: 'paso-ajustes'
+          id: 'puerta-ajustes'
       - assertVisible:
           id: 'sitios-marcados'
           text: '1'

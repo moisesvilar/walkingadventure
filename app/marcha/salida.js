@@ -27,8 +27,8 @@
 //   en llegar al detector; lo que la partida escribe es el punto de partida y dos marcas,
 //   que es lo que `AREA_SALIDAS` declara y ni un campo más.
 
-import { creaFuenteDePosiciones, creaTrazaDeSalida } from '../plataforma/posiciones.js';
-import { creaSeguidorDeLaSalida } from './seguidor.js';
+import { CADENCIA_M, cadenciaPorDistancia, creaFuenteDePosiciones, creaTrazaDeSalida } from '../plataforma/posiciones.js';
+import { SIN_SEGMENTO_TODAVIA, creaSeguidorDeLaSalida } from './seguidor.js';
 
 /** Lo que esto le pide al generador, enumerado. Ni una función más. */
 export const DEL_NUCLEO = Object.freeze([
@@ -47,6 +47,12 @@ export const DEL_NUCLEO = Object.freeze([
   'disponibilidadDelRotulo',
   'creaDetectorDeTransporte',
   'makeProjector',
+  // SPEC-044. La cercanía a un geofence y la cadencia que sale de ella las decide el
+  // paquete, y esta capa solo las aplica: son reglas de juego —dónde están los sitios a los
+  // que se llega— y no detalle de sensor.
+  'sitiosConPosicion',
+  'cadenciaDeMuestreo',
+  'CADENCIAS',
 ]);
 
 /**
@@ -62,6 +68,10 @@ export const MOTIVOS_DE_NO_ABRIR = Object.freeze([
   'sensor-sin-responder',
   'ya-hay-salida',
   'telon-pendiente',
+  // La capa de llegadas no se pudo montar. Abrir igual dejaría andando a quien no puede
+  // llegar a ningún sitio: el mapa se pintaría, la marca se movería y ninguna escena
+  // aparecería nunca. Es una respuesta con motivo literal, no una avería que se traga.
+  'llegadas-sin-cablear',
 ]);
 
 function mensaje(e) {
@@ -115,7 +125,18 @@ function noSeAbre(marca, motivo) {
  *   quien juega, del que sale la distancia de alejamiento del regreso; `alCambiar` a quién
  *   se avisa cuando algo se movió, que es cómo la pantalla se entera sin sondear.
  */
-export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcion = null, origen = null, tramo = null, alCambiar = null, pidePermisoDeAviso = null }) {
+export function creaLaSalida({
+  nucleo,
+  salidas: areaRecibida,
+  rotulo,
+  suscripcion = null,
+  origen = null,
+  mundo = null,
+  tramo = null,
+  alCambiar = null,
+  pidePermisoDeAviso = null,
+  montaLlegadas = null,
+}) {
   if (!nucleo) throw new Error('la vida de una salida necesita el núcleo inyectado: es quien decide las transiciones, el plazo y el regreso');
   const faltan = DEL_NUCLEO.filter((n) => nucleo[n] == null);
   if (faltan.length) {
@@ -134,22 +155,97 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
     );
   }
 
+  // El índice de geofences del mapa activo, del que cuelgan la cadencia del muestreo y el
+  // sitio que el seguidor nombra. **Con origen tiene que haber mundo**: el origen sale del
+  // documento del mundo levantado, así que uno sin el otro es un cableado a medias y no un
+  // estado del juego. Sin mapa levantado no hay geofences y tampoco hay seguidor.
+  if (origen && !mundo) {
+    throw new Error(
+      'la vida de una salida recibe el origen del mundo congelado y no su documento: sin él no hay índice de geofences, ' +
+      'y sin índice ni el sitio del seguidor ni la cadencia del muestreo se pueden resolver',
+    );
+  }
+  const sitios = mundo ? nucleo.sitiosConPosicion(mundo) : null;
+  const proyector = origen ? nucleo.makeProjector(origen.lat, origen.lon) : null;
+
   // La traza y el seguidor viven **lo que dura la salida** y se montan al abrirla: un
   // detector que sobreviviera a un cierre arrastraría la racha de la salida anterior a la
   // siguiente, que es la manera de que un autobús de ayer clasifique lo de hoy.
   let traza = null;
   let seguidor = null;
   let averia = null;
+  // El detector de esta salida y la capa de llegadas que cuelga de él. Van juntos y mueren
+  // juntos: una capa de llegadas que sobreviviera a un cierre ofrecería la escena de otro
+  // día, y `creaLlegadas` ya la vacía al cambiar de salida.
+  let detector = null;
+  let llegadas = null;
+  // Por qué la capa de llegadas no está montada, cuando debería estarlo. Va aparte de
+  // `averia` porque tiene consumidor propio: sin capa no hay ninguna llegada posible, así
+  // que se dice en la portada al no poder abrir y en el momento en marcha si aparece después.
+  let sinCablear = null;
+  // La cadencia puesta, que es lo que la histéresis necesita saber para no cambiarla en cada
+  // muestra del borde. Arranca por distancia porque es lo que declara SPEC-048.
+  let cadencia = cadenciaPorDistancia(CADENCIA_M);
 
   const montaLaTraza = () => {
     const fuente = creaFuenteDePosiciones({ lee: () => suscripcion.lee() });
-    traza = creaTrazaDeSalida({ fuente, detector: nucleo.creaDetectorDeTransporte() });
-    seguidor = origen ? creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo }) : null;
+    detector = nucleo.creaDetectorDeTransporte();
+    traza = creaTrazaDeSalida({ fuente, detector });
+    seguidor = origen ? creaSeguidorDeLaSalida({ fuente, traza, origen, nucleo, sitios }) : null;
+    llegadas = null;
+  };
+
+  /**
+   * Monta la capa de llegadas sobre **el detector de esta salida**, que es el mismo que
+   * clasifica la traza: montarla con uno propio daría dos clasificaciones distintas para la
+   * misma posición, y el vehículo se apartaría en un sitio y en el otro no.
+   *
+   * Devuelve el motivo por el que no se pudo, o `null`. **Se devuelve y no solo se anota**:
+   * hasta que `wa-qa-dev` lo midió en el emulador, esto recogía la excepción en `averia` y
+   * ahí se quedaba —nadie consumía `averia()` en toda la app—, así que la salida se abría,
+   * el mapa se pintaba y ninguna llegada podía validar jamás **sin que nada protestara**. Es
+   * la forma de fallo que esta fila vino a cerrar, cometida por la propia fila.
+   */
+  const montaLasLlegadas = ({ salida = null, mapa = null } = {}) => {
+    if (!montaLlegadas || !detector) return null;
+    const enCurso = nucleo.salidaEnCurso(salidas);
+    const cual = salida ?? enCurso?.salida ?? null;
+    const suMapa = mapa ?? enCurso?.mapa ?? null;
+    if (!cual) return null;
+    try {
+      llegadas = montaLlegadas({ detector, salida: cual, mapaId: suMapa });
+      sinCablear = null;
+      return null;
+    } catch (e) {
+      llegadas = null;
+      sinCablear = mensaje(e);
+      averia = sinCablear;
+      return sinCablear;
+    }
+  };
+
+  /** El punto de una posición cruda en metros del mundo, o `null` sin mapa levantado. */
+  const enMetros = (cruda) => (proyector && cruda ? proyector.toXY(cruda.lat, cruda.lon) : null);
+
+  /**
+   * Decide la cadencia con la última posición conocida y la aplica **sin parar el
+   * servicio**. Devuelve si cambió, que es lo único que hace falta saber fuera.
+   *
+   * Sin mapa levantado no hay geofences, así que no hay nada que decidir: la de distancia se
+   * queda puesta, que es la de SPEC-048.
+   */
+  const ajustaLaCadencia = async (punto) => {
+    if (!sitios || !punto) return false;
+    cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto, sitios, vigente: cadencia.modo, metrosPorDistancia: CADENCIA_M });
+    if (!suscripcion || typeof suscripcion.aplicaCadencia !== 'function') return false;
+    return suscripcion.aplicaCadencia(cadencia);
   };
 
   const desmontaLaTraza = () => {
     traza = null;
     seguidor = null;
+    detector = null;
+    llegadas = null;
   };
 
   const avisa = () => {
@@ -181,8 +277,27 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
     try {
       const cruda = traza.muestrea();
       if (cruda == null) return null;
+      // La cadencia se ajusta **con cada posición y antes de nada**: es lo que hace que
+      // pararse dentro de un geofence siga entregando fijos, y sin fijos no hay permanencia
+      // que contar. Fuera de un geofence esto no cambia nada y no vuelve a pedir la
+      // suscripción, porque la respuesta es la misma que ya estaba puesta.
+      const punto = enMetros(cruda);
+      await ajustaLaCadencia(punto);
       const segmentos = traza.traza().segmentos;
       const ultimo = segmentos.length ? segmentos[segmentos.length - 1] : null;
+      // La capa de llegadas se alimenta **posición a posición y con la precisión declarada
+      // dentro**: la precisión elige la ventana de parada y se tira ahí mismo, sin guardarse
+      // en ninguna parte, igual que el rumbo y la altitud. Va antes del regreso porque una
+      // llegada validada en la última posición de la salida sigue siendo una llegada.
+      if (llegadas && punto) {
+        llegadas.comprueba([{
+          x: punto.x,
+          y: punto.y,
+          tMs: cruda.tMs,
+          precisionM: cruda.precisionM ?? null,
+          clasificacion: ultimo ? ultimo.clasificacion : SIN_SEGMENTO_TODAVIA,
+        }]);
+      }
       paso = nucleo.recibePosicion(salidas, {
         // La clasificación la produce el detector del núcleo y **no** esta capa. Sin
         // segmento todavía viaja `null`, que para el plazo es «no cuenta como metro
@@ -220,8 +335,35 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
     /** El seguidor del momento en marcha, o `null` si no hay salida abierta con sensor. */
     seguidor: () => seguidor,
 
+    /**
+     * La capa de llegadas de esta salida, o `null`. De ella cuelga toda la máquina del
+     * momento «al parar»: la escena que espera, su paso vigente y el descarte del anclaje.
+     */
+    llegadas: () => llegadas,
+
     /** El último fallo recogido, o `null`. Es lo que la pantalla enseña como motivo literal. */
     averia: () => averia,
+
+    /**
+     * Por qué no hay capa de llegadas, o `null` cuando la hay.
+     *
+     * Tiene consumidor, y esa es toda su razón de ser: el momento en marcha lo enseña como
+     * avería en vez de pintar un mapa donde nunca va a pasar nada. Una salida abierta sin
+     * esta capa no es una salida degradada, es una salida en la que el juego no ocurre.
+     */
+    llegadasSinCablear: () => (llegadas ? null : sinCablear),
+
+    /**
+     * La cadencia con la que se está pidiendo posición, del vocabulario cerrado del paquete.
+     *
+     * Se publica porque es lo único que hace afirmable **desde el aparato** que el muestreo
+     * cambia al entrar en un geofence: sobre la función pura se puede afirmar la decisión,
+     * nunca que la suscripción la haya aplicado.
+     */
+    cadencia: () => cadencia.modo,
+
+    /** El índice de geofences del mapa activo, o `null` sin mapa levantado. */
+    geofences: () => sitios,
 
     /** La situación de la salida: una de las cuatro, o la nada. */
     situacion: () => nucleo.situacionDeSalida(salidas),
@@ -245,7 +387,10 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
      * la transición**. Los tres primeros pueden decir que no, y decir que no es una
      * respuesta que la portada enseña con su motivo; nada de esto se abre en silencio.
      */
-    async abre({ salida, mapa, destino = null, mundo = null, aventura = null }) {
+    // `nombreDelMundo` es el título que se lee en el rótulo, no el documento del mundo: el
+    // documento entra al montar la salida y el título viaja por aquí. Se llamaban los dos
+    // `mundo` y uno tapaba al otro, que es la clase de confusión que §8c describe.
+    async abre({ salida, mapa, destino = null, mundo: nombreDelMundo = null, aventura = null }) {
       averia = null;
       const disponible = nucleo.disponibilidadDelRotulo(rotulo);
       if (!disponible.hay) {
@@ -281,17 +426,35 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
         return noSeAbre('sensor-sin-responder', 'el sensor todavía no ha entregado ninguna posición, y una salida sin punto de partida no podría cerrarse nunca por regreso');
       }
 
+      // La cadencia se decide **con el punto de partida y antes de arrancar**: quien abre
+      // la salida ya parada dentro de un geofence no puede esperar al fijo que la cambiaría,
+      // porque ese fijo es justo el que la cadencia por distancia no va a entregar.
+      const punto0 = enMetros(punto);
+      if (sitios && punto0) {
+        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M });
+      }
+
       // El servicio se arranca **esperándolo**: `rotulo.pone()` es síncrono por contrato y
       // un fallo aquí se perdería dentro de una promesa. Volver a pedirlo desde `pone()` no
       // abre una segunda suscripción: es la misma tarea con las mismas opciones.
-      const compuesto = nucleo.componeRotulo({ destino, mundo });
+      const compuesto = nucleo.componeRotulo({ destino, mundo: nombreDelMundo });
       try {
-        await suscripcion.arranca(compuesto);
+        await suscripcion.arranca(compuesto, cadencia);
       } catch (e) {
         return noSeAbre('rotulo-no-disponible', `el servicio en primer plano no arrancó, y sin él la salida perdería la ubicación a los pocos minutos — ${mensaje(e)}`);
       }
 
       montaLaTraza();
+      // La capa de llegadas **antes de abrir**, no después: si no se puede montar, lo que
+      // hay que hacer es no abrir, y para eso el estado tiene que seguir intacto. Montarla
+      // después dejaría una salida abierta con el sensor parado, que no es ninguno de los
+      // cuatro estados que `salidas.js` declara.
+      const falta = montaLasLlegadas({ salida, mapa });
+      if (falta) {
+        await paraElSensor();
+        return noSeAbre('llegadas-sin-cablear', falta);
+      }
+
       let abierta;
       try {
         abierta = nucleo.abreSalida(salidas, {
@@ -299,7 +462,7 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
           mapa,
           aventura,
           destino,
-          mundo,
+          mundo: nombreDelMundo,
           partida: { lat: punto.lat, lon: punto.lon },
           tMs: punto.tMs,
           rotulo,
@@ -338,8 +501,15 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
 
       const enCurso = nucleo.salidaEnCurso(salidas);
       const compuesto = nucleo.componeRotulo({ destino: enCurso?.destino ?? null, mundo: enCurso?.mundo ?? null });
+      // Retomar decide la cadencia otra vez y desde cero: entre el plazo agotado y el
+      // «seguir» se pudo andar media tarde, así que la de antes no dice nada de dónde se
+      // está ahora.
+      const punto0 = enMetros(punto);
+      if (sitios && punto0) {
+        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M });
+      }
       try {
-        await suscripcion.arranca(compuesto);
+        await suscripcion.arranca(compuesto, cadencia);
       } catch (e) {
         return { retomada: false, motivo: mensaje(e) };
       }
@@ -348,6 +518,7 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
       // que fue una comida.
       montaLaTraza();
       const vuelta = nucleo.retomaLaSalida(salidas, { tMs: punto.tMs, rotulo });
+      if (vuelta.retomada) montaLasLlegadas();
       if (!vuelta.retomada) await paraElSensor();
       avisa();
       return { retomada: vuelta.retomada, motivo: vuelta.motivo };
@@ -419,6 +590,10 @@ export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcio
       // coserlo contaría como quietud medida lo que fue una app cerrada.
       if (suscripcion && !traza && nucleo.situacionDeSalida(salidas) === 'abierta-con-rotulo') {
         montaLaTraza();
+        // Y con ella la capa de llegadas, que es lo que hace que al reabrir la app con una
+        // salida ya abierta la escena que espera se pueda ofrecer: **la llegada vive en el
+        // estado guardado**, así que lo que faltaba era la capa que la lee.
+        montaLasLlegadas();
         avisa();
       }
       return resultado;
