@@ -449,14 +449,14 @@ Anclar y comparar cada fijo contra el ancla **no vale**, y está medido: «parad
 
 Lo que sí los separa es que **el ruido del GPS es de media cero y la deriva de quien anda no**. La regla que se adopta mide la **deriva de la ventana**: el centroide de su primera mitad contra el de la segunda. Promediar hunde el ruido como 1/√n y deja la deriva intacta. Medido con muestreo cada 5 s, 800 semillas por celda:
 
-| | ventana 20 s · deriva ≤ 5 m | | ventana 40 s · deriva ≤ 8 m | |
-| --- | --- | --- | --- | --- |
-| **error del fijo** | parada dentro | de paso 4 km/h | parada dentro | de paso 4 km/h |
-| 0 m | 100 % | **0 %** | 100 % | **0 %** |
-| 3 m | 100 % | **0 %** | 100 % | **0 %** |
-| 5 m | 100 % | 4,3 % | 100 % | **0 %** |
-| 10 m | 100 % | 27,6 % | 100 % | 0,8 % |
-| 15 m | 82 % | 19,8 % | 91 % | 5,9 % |
+| | ventana 20 s · deriva ≤ 5 m | | | ventana 40 s · deriva ≤ 8 m | | |
+| --- | --- | --- | --- | --- | --- | --- |
+| **error del fijo** | parada dentro | de paso 4 km/h | de paso 5 km/h | parada dentro | de paso 4 km/h | de paso 5 km/h |
+| 0 m | 100 % | **0 %** | **0 %** | 100 % | **0 %** | **0 %** |
+| 3 m | 100 % | **0 %** | **0 %** | 100 % | **0 %** | **0 %** |
+| 5 m | 100 % | 4,3 % | 0,5 % | 100 % | **0 %** | **0 %** |
+| 10 m | 100 % | 27,6 % | 11,6 % | 100 % | 0,8 % | **0 %** |
+| 15 m | 82 % | 19,8 % | 12,0 % | 91 % | 5,9 % | 1,0 % |
 
 De ahí sale la decisión, y es adaptativa **porque la medida lo pide, no por elegancia**: con el fijo bueno la ventana corta ya separa, así que **la permanencia de veinte segundos de `llegadas.js` se conserva donde el fijo la sostiene** y solo se estira a cuarenta cuando el error declarado del fijo la deja de sostener. Alargarla para todo el mundo habría contradicho sin necesidad la razón por la que SPEC-032 la puso corta —*validar es barato, y un beat que se atiende de paso valida igual*—.
 
