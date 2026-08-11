@@ -86,6 +86,28 @@ import { fuente } from './mundo-de-prueba.mjs';
  * Los dos que se quedan cuentan ese motivo en su cabecera, y ninguno de los tres cuenta ya la
  * historia vieja —«falta `paso-llegada` en App.js»—, que era falsa desde que la máquina
  * existe: un límite declarado por un motivo que ya no es el suyo es peor que no declararlo.
+ *
+ * **La fila 49 la deja en ocho, y es la primera vez que la columna sube.** Se dice con el
+ * número delante porque para eso está esta lista. Su encargo preveía siete → seis, sacando
+ * `escena.yaml`; lo medido es siete → ocho:
+ *
+ * - `escena.yaml` **se queda**, y su motivo viejo era falso: decía que faltaba `paso-escena`
+ *   en `App.js`. Hoy la escena se monta —inyectada en `PantallaLlegada` por su tipo de paso—
+ *   y **esa puerta no debe existir**: SPEC-049 declara que la ausencia de rutas es la pieza,
+ *   porque no hay manera de llegar a A4P3 sin haber llegado al sitio. Lo que lo mantiene aquí
+ *   son tres medidas que se suman: el ancla del mapa no la gobierna la posición que el flujo
+ *   pone (fila 44), la semilla nace de entropía real y el arranque no ofrece dónde escribirla,
+ *   y `setLocation` **no mueve nada** en esta máquina (fila 48), así que no se puede andar
+ *   hasta un beat. Juntas: **qué sitio tiene beat no es reproducible entre tandas**. Y la
+ *   cuarta cierra la última puerta: sin llamador de `siembraLaCola` no puede saltar ningún
+ *   micro-encuentro, así que una salida sin aventura tampoco produce un paso de beat.
+ * - `telon.yaml` **entra**, y es nuevo. Lo que necesita dedo del telón —que las dos salidas de
+ *   A5P4 dejen el telón leído y una salida nueva abrible, §10h— pide una salida cerrada sin
+ *   leer, y **las tres vías de cierre están fuera del alcance de un flujo**: volver a casa
+ *   exige moverse y `geo fix` no mueve; «dejarlo aquí» cuelga de la tarjeta de a medias, que
+ *   solo aparece pasados noventa minutos de reloj del sistema; y «dar la salida por terminada»
+ *   vive en la notificación del servicio, fuera de la ventana de la app. Se escribe entero y
+ *   marcado en vez de no escribirse: así vuelve solo el día que `geo fix` mueva la marca.
  */
 const FLUJOS_DE_LIMITE_DECLARADO = [
   'ajustes-filas-de-valor.yaml',
@@ -94,6 +116,7 @@ const FLUJOS_DE_LIMITE_DECLARADO = [
   'escena.yaml',
   'mapas.yaml',
   'repisa.yaml',
+  'telon.yaml',
   'visor.yaml',
 ];
 

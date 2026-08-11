@@ -1,0 +1,185 @@
+# @app — El telón de una salida dentro del móvil (SPEC-036, cableado por SPEC-049).
+#
+# @limite-declarado
+#
+# Este flujo **no recorre su pantalla**: no hay ninguna manera de cerrar una salida con
+# el dedo en esta máquina, así que el telón no llega a montarse nunca. Lo único que se
+# ejecuta es la guarda de más abajo, así que su verde significa «el límite sigue en pie»
+# y nunca «el telón funciona». El porqué medido está en «LÍMITE DECLARADO», unas líneas
+# más abajo.
+#
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`, y
+# **este flujo la sube de siete a ocho**. Se dice con el número delante porque subirla es
+# exactamente lo que esa guarda existe para hacer visible: la fila 49 esperaba bajarla y
+# la sube, y el motivo es que el telón necesita un dedo para lo único que `@nucleo` no
+# puede afirmar —que todas las salidas de A5P4 desembocan en telón leído y salida
+# abrible, §10h— y ese dedo hoy no puede llegar hasta él.
+#
+# Aquí vive **solo lo que necesita dedo o pantalla**: que la secuencia se recorra entera
+# con toques, que cada pantalla intermedia tenga una sola acción, que las **dos** salidas
+# de la entrada del día dejen el telón marcado como leído, y que después de cualquiera de
+# las dos se pueda abrir otra salida. Todo lo demás —qué pantallas trae cada telón, en qué
+# orden, el entintado, el oro, el rumor, el cierre en corto y la cartela del hito— se
+# afirma en `test/nucleo/telon.test.mjs` y, desde SPEC-049, el cableado entero en
+# `test/nucleo/telon-cableado.test.mjs`, que corren sin simulador.
+#
+# ── LÍMITE DECLARADO, con el motivo medido ────────────────────────────────────
+#
+# **Para ver el telón hace falta una salida cerrada sin leer, y las tres vías de cierre
+# están fuera del alcance de un flujo. Medido, no supuesto:**
+#
+# 1. **Volver al punto de partida.** Exige alejarse una distancia en tramos y volver, y
+#    para eso hay que moverse. `setLocation` de Maestro es `adb emu geo fix` y en esta
+#    máquina **devuelve OK y no mueve nada**: medido el 11-ago-2026, tres fijos seguidos
+#    dejaron la etiqueta de `marca-posicion` idéntica, y está escrito en
+#    `test/app/en-marcha.yaml`. Sin movimiento no hay alejamiento y sin alejamiento el
+#    regreso no se comprueba nunca.
+# 2. **«Dejarlo aquí» desde la portada.** La acción `a-medias-dejarlo` cuelga de la
+#    tarjeta de a medias, y esa tarjeta solo existe con la salida **abierta sin rótulo**,
+#    que es lo que ocurre cuando pasa el plazo del servicio en primer plano. Son noventa
+#    minutos de reloj del sistema y no hay manera de adelantarlos desde el flujo.
+# 3. **«Dar la salida por terminada» desde el rótulo del sistema.** Está en la
+#    notificación del servicio en primer plano, fuera de la ventana de la app. Ningún
+#    flujo de este repo abre la bandeja del sistema, y hacerlo aquí convertiría el estado
+#    de la bandeja del emulador en el resultado de la prueba.
+#
+# **Qué levantaría el límite**, para que quede escrito: que `geo fix` mueva la marca en
+# esta máquina —entonces la vía 1 se recorre entera, que es además la que el juego usa—.
+# Ese día la condición cambia sola y el cuerpo de abajo, que está entero tal y como se
+# escribió, pasa a ejecutarse sin tocar una línea de este fichero.
+#
+# **Lo que este flujo NO puede comprobar aunque se levante el límite, y por qué:**
+#
+# - **Que el mapa del telón salga entintado.** Maestro no lee píxeles de un lienzo de
+#   Skia. Lo que sí se comprueba es que la lámina del telón está y que la lista de
+#   ascensos está; que cada elemento lleva una de tres tintas y ninguna otra se afirma en
+#   `test/nucleo/telon.test.mjs`.
+# - **Que el telón no se eche dos veces al morir la app entre echarlo y leerlo.** Habría
+#   que matar el proceso en mitad de un efecto. Se afirma en `@nucleo` sobre el estado, y
+#   la marca `telon-recompuesto` está puesta en la pantalla para el día en que se pueda.
+#
+# Los elementos se localizan por los identificadores que declaró SPEC-036 y nunca por su
+# posición en pantalla.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «Leer el telón deja abrir otra salida»
+#
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+
+# La guarda del límite: con el estado limpio la app abre en el arranque y no hay ninguna
+# salida cerrada sin leer, así que el telón no está. Se condiciona sobre `telon`, que es
+# el identificador de la propia pantalla y no el de ninguna puerta de desarrollo: SPEC-049
+# prohíbe crear una, y el telón se monta donde el juego lo monta —en `App.js`, cuando la
+# vida de la salida dice `telon`— y en ningún otro sitio.
+- runFlow:
+    when:
+      notVisible:
+        id: 'telon'
+    commands:
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'telon'
+
+# El flujo de verdad, a la espera de poder cerrar una salida con el dedo.
+- runFlow:
+    when:
+      visible:
+        id: 'telon'
+    commands:
+      # ── La primera pantalla es siempre el mapa ─────────────────────────────────────
+      #
+      # Con tinta o sin ella: es la misma pantalla y lo que cambia es el título, la lista y
+      # la línea. Saltársela haría desaparecer el objeto central del juego justo el día en
+      # que menos apetece salir.
+      - assertVisible:
+          id: 'telon-estado'
+      - assertVisible:
+          id: 'telon-titulo'
+      - assertVisible:
+          id: 'telon-ascensos'
+
+      # Ninguna leyenda de tintas: las tres se ven y no se explican.
+      - assertNotVisible: 'Leyenda'
+      - assertNotVisible: 'significa'
+
+      # Y ninguna manera de navegar: el telón se lee una vez, no se recorre hacia atrás y
+      # no dice por qué pantalla vas.
+      - assertNotVisible:
+          id: 'volver'
+      - assertNotVisible:
+          id: 'cabecera-atras'
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
+      - assertNotVisible:
+          id: 'saltar'
+      - assertNotVisible:
+          id: 'indicador-de-pantalla'
+
+      # ── Se recorre entero, y solo se avanza ────────────────────────────────────────
+      #
+      # Una acción por pantalla, «Seguir», hasta llegar a la entrada del día. El tope es de
+      # la prueba y no del juego: el telón más largo tiene cuatro pantallas, y un bucle sin
+      # tope escondería una secuencia que no acaba.
+      - repeat:
+          times: 5
+          commands:
+            - tapOn:
+                id: 'telon-seguir'
+                # Opcional porque la secuencia tiene entre dos y cuatro pantallas según
+                # cómo acabara la salida, y cuál toca no lo decide el flujo. Lo que de
+                # verdad se exige —llegar a la entrada del día— se afirma justo debajo.
+                optional: true
+
+      # La cartela del hito, si aparece, es una capa que se cierra tocando y no vuelve.
+      - runFlow:
+          when:
+            visible:
+              id: 'hito-arranque'
+          commands:
+            - tapOn:
+                id: 'hito-arranque'
+            - assertNotVisible:
+                id: 'hito-arranque'
+
+      # ── La entrada del día, y sus dos salidas ──────────────────────────────────────
+      - assertVisible:
+          id: 'telon-estado'
+          text: 'diario'
+      - assertVisible:
+          id: 'diario-del-dia'
+      - assertVisible:
+          id: 'diario-lo-propio'
+      - assertVisible:
+          id: 'telon-diario'
+      - assertVisible:
+          id: 'telon-cerrar'
+      # Ya no hay «Seguir»: la última pantalla ofrece las dos salidas naturales y ninguna
+      # intermedia ofrece salir, para no partir la lectura por la mitad.
+      - assertNotVisible:
+          id: 'telon-seguir'
+
+      # ── «Cerrar» deja el telón leído y una salida nueva se puede abrir ─────────────
+      #
+      # Es §10h: si esto no se cumpliera, la app quedaría sin poder abrir ninguna salida
+      # jamás, que es un fallo silencioso con forma de app muerta.
+      - tapOn:
+          id: 'telon-cerrar'
+      - assertVisible:
+          id: 'portada'
+      - assertNotVisible:
+          id: 'telon'
+      - assertVisible:
+          id: 'salir-sin-mas'
+      - tapOn:
+          id: 'salir-sin-mas'
+      - extendedWaitUntil:
+          visible:
+            id: 'en-marcha'
+          timeout: 30000
+      # Y la salida se abrió de verdad: con el telón sin marcar, la portada habría dicho
+      # `telon-pendiente` debajo de la acción que no pudo.
+      - assertNotVisible: 'telon-pendiente'
