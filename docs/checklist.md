@@ -86,7 +86,7 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 46 | fuente-de-salud-y-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
 | 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | done |
 | 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | done (sensor y rótulo; el camino de la llegada se queda en la 44 — ver §7a) |
-| 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | pending |
+| 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | in-progress |
 
 La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 
