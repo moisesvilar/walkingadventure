@@ -36,7 +36,7 @@ import { creaVibradorDeExpo } from '../plataforma/vibrador.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
 import { Lamina } from '../render/lamina.jsx';
 import { PantallaEnMarcha } from './en-marcha.jsx';
-import { marcaSuperpuesta } from './marca.js';
+import { CAPA_DE_MARCAS, MARCA, marcaSuperpuesta } from './marca.js';
 
 /**
  * El encuadre con el que se abre el momento: la celda entera, recentrada sobre la marca de
@@ -160,14 +160,6 @@ export function EnMarchaMontado({
           Y va en **su propia fila** de marcas: vive en otro contenedor que el de la pantalla
           que envuelve, así que no puede coordinar su número de orden con los de dentro, y
           dos marcas en el mismo punto son dos marcas que la automatización no puede leer. */}
-      <View testID="ubicacion-estado" accessibilityLabel={seguidor ? 'montado' : 'sin-montar'} style={marcaSuperpuesta(0, { fila: 1 })} />
-      {/* El sitio bajo la marca de posición, o `sin-sitio` cuando no hay ninguno. Es lo que
-          permite poner rojo el día que `sitio` vuelva a ser nulo por construcción (§8b): sin
-          esta marca, la 44 podía aterrizar y olvidarse de rellenarlo sin que nada protestara. */}
-      <View testID="salida-sitio" accessibilityLabel={montaje.sitio ?? 'sin-sitio'} style={marcaSuperpuesta(1, { fila: 1 })} />
-      {/* Y la cadencia vigente. Sin ella el cambio de muestreo solo se podría afirmar sobre
-          la función pura del paquete, nunca sobre el aparato. */}
-      <View testID="salida-cadencia" accessibilityLabel={cadencia ?? 'sin-suscripcion'} style={marcaSuperpuesta(2, { fila: 1 })} />
       <PantallaEnMarcha
         momento={montaje.momento}
         documento={mundo}
@@ -179,6 +171,18 @@ export function EnMarchaMontado({
         Lamina={Lamina}
         aviso={aviso}
       />
+      {/* Las tres marcas del montaje, **después de la lámina y en su propia capa**: dicen qué
+          se cableó, no qué se ve, y la lámina va a sangre, así que como hermanas sueltas las
+          tapaba entera y ninguna llegaba al árbol de accesibilidad. Ver `CAPA_DE_MARCAS`. */}
+      <View pointerEvents="none" style={CAPA_DE_MARCAS}>
+        <View testID="ubicacion-estado" accessibilityLabel={seguidor ? 'montado' : 'sin-montar'} style={MARCA} />
+        {/* El sitio bajo la marca de posición, o `sin-sitio` cuando no hay ninguno. Es lo que
+            permite poner rojo el día que `sitio` vuelva a ser nulo por construcción (§8b). */}
+        <View testID="salida-sitio" accessibilityLabel={montaje.sitio ?? 'sin-sitio'} style={MARCA} />
+        {/* Y la cadencia vigente. Sin ella el cambio de muestreo solo se podría afirmar sobre
+            la función pura del paquete, nunca sobre el aparato. */}
+        <View testID="salida-cadencia" accessibilityLabel={cadencia ?? 'sin-suscripcion'} style={MARCA} />
+      </View>
     </View>
   );
 }

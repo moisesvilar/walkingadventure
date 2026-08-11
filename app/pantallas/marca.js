@@ -46,6 +46,33 @@ export const MARCA_SUPERPUESTA = { position: 'absolute', top: 0, left: 0, width:
  * coordinar su numeración con las de la pantalla que envuelven: con `fila: 1` no chocan con
  * las de dentro sea cual sea el número que aquellas usen.
  */
+/**
+ * La capa que lleva las marcas de un momento **a sangre**, y la tercera vuelta de la misma
+ * forma de fallo.
+ *
+ * Medido el 12-ago-2026 en `wa-pixel`: las marcas del momento en marcha eran hermanas de una
+ * lámina que ocupa la pantalla entera, y en el árbol de accesibilidad solo llegaban
+ * `mapa-lamina`, `mapa` y `marca-posicion`. Ni 1×1 ni apartarlas una de otra bastan cuando
+ * detrás va un hermano a pantalla completa: **Android descarta como invisible lo que otro
+ * hermano tapa**, y quién tapa a quién lo decide el orden en que se dibujan.
+ *
+ * Se resuelve de forma que no vuelva a depender de ese orden: `elevation` en Android y
+ * `zIndex` en iOS suben esta capa por encima de sus hermanos **la pongan donde la pongan**,
+ * y `pointerEvents: 'none'` garantiza que subirla no la haga tocable — el momento en marcha
+ * no tiene ni un control y esto no puede ser el primero.
+ *
+ * Las marcas van dentro en fila, así que ninguna tapa a otra sin tener que numerarlas.
+ */
+export const CAPA_DE_MARCAS = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  height: 1,
+  flexDirection: 'row',
+  zIndex: 100,
+  elevation: 100,
+};
+
 export function marcaSuperpuesta(n = 0, { fila = 0 } = {}) {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error(`una marca superpuesta se aparta por su número de orden y llegó ${JSON.stringify(n) ?? String(n)}`);

@@ -24,7 +24,7 @@ import { creaCalendario } from './datos/calendario.js';
 import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
-import { mundoDeLaPartida } from './mapa/mundo-guardado.js';
+import { mundoDeLaCelda, mundoDeLaPartida } from './mapa/mundo-guardado.js';
 import { REPARTO_SIN_AVENTURA, creaLasLlegadas } from './marcha/llegadas.js';
 import { montaLaSalida } from './marcha/salida-montada.js';
 // El área segura de la app. No es el `SafeAreaView` de `react-native`, que en Android es un
@@ -503,7 +503,10 @@ export function App() {
                   estado: nacida.estado,
                   registro: nacida.registro,
                   personaje: componePersonaje({ ...nacida.estado.personaje, ...cerrado.personaje }),
-                  mundo: { mapaId: levantado.mapaId, documento: levantado.documento, titulo: levantado.documento?.title ?? null },
+                  // Por la misma puerta que la partida abierta de disco, y no por una
+                  // composición propia: este camino se dejaba `cupos` fuera y el descarte
+                  // de un anclaje moría en toda instalación nueva.
+                  mundo: mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro }),
                   arrancadaEn: Date.now(),
                 });
                 setEnArranque(false);
@@ -552,6 +555,10 @@ export function App() {
         // cerrado, que es lo que distingue «no sé por dónde andas» de «andas en círculos».
         seguidor={laSalida?.seguidor() ?? null}
         motivoSinUbicacion={laSalida?.seguidor() ? null : 'sensor-sin-responder'}
+        // Sin capa de llegadas no se pinta el mapa: se dice por qué. Un mapa con la marca
+        // moviéndose y ninguna escena posible es indistinguible de un mundo donde todavía no
+        // has llegado a nada, y esa confusión es la que costó dos horas de emulador.
+        falloDeCableado={laSalida?.llegadasSinCablear() ?? null}
         // La cadencia vigente de la suscripción, que no se pinta y solo se puede afirmar.
         // **Acercarse a un geofence no se dibuja**: si se dibujara sería el medidor de
         // progreso que `design-system.md` prohíbe, y un motivo para mirar el móvil andando.

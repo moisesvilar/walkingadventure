@@ -68,6 +68,10 @@ export const MOTIVOS_DE_NO_ABRIR = Object.freeze([
   'sensor-sin-responder',
   'ya-hay-salida',
   'telon-pendiente',
+  // La capa de llegadas no se pudo montar. Abrir igual dejaría andando a quien no puede
+  // llegar a ningún sitio: el mapa se pintaría, la marca se movería y ninguna escena
+  // aparecería nunca. Es una respuesta con motivo literal, no una avería que se traga.
+  'llegadas-sin-cablear',
 ]);
 
 function mensaje(e) {
@@ -175,6 +179,10 @@ export function creaLaSalida({
   // día, y `creaLlegadas` ya la vacía al cambiar de salida.
   let detector = null;
   let llegadas = null;
+  // Por qué la capa de llegadas no está montada, cuando debería estarlo. Va aparte de
+  // `averia` porque tiene consumidor propio: sin capa no hay ninguna llegada posible, así
+  // que se dice en la portada al no poder abrir y en el momento en marcha si aparece después.
+  let sinCablear = null;
   // La cadencia puesta, que es lo que la histéresis necesita saber para no cambiarla en cada
   // muestra del borde. Arranca por distancia porque es lo que declara SPEC-048.
   let cadencia = cadenciaPorDistancia(CADENCIA_M);
@@ -191,18 +199,28 @@ export function creaLaSalida({
    * Monta la capa de llegadas sobre **el detector de esta salida**, que es el mismo que
    * clasifica la traza: montarla con uno propio daría dos clasificaciones distintas para la
    * misma posición, y el vehículo se apartaría en un sitio y en el otro no.
+   *
+   * Devuelve el motivo por el que no se pudo, o `null`. **Se devuelve y no solo se anota**:
+   * hasta que `wa-qa-dev` lo midió en el emulador, esto recogía la excepción en `averia` y
+   * ahí se quedaba —nadie consumía `averia()` en toda la app—, así que la salida se abría,
+   * el mapa se pintaba y ninguna llegada podía validar jamás **sin que nada protestara**. Es
+   * la forma de fallo que esta fila vino a cerrar, cometida por la propia fila.
    */
-  const montaLasLlegadas = () => {
-    if (!montaLlegadas || !detector) return;
+  const montaLasLlegadas = ({ salida = null, mapa = null } = {}) => {
+    if (!montaLlegadas || !detector) return null;
     const enCurso = nucleo.salidaEnCurso(salidas);
-    if (!enCurso) return;
+    const cual = salida ?? enCurso?.salida ?? null;
+    const suMapa = mapa ?? enCurso?.mapa ?? null;
+    if (!cual) return null;
     try {
-      llegadas = montaLlegadas({ detector, salida: enCurso.salida, mapaId: enCurso.mapa });
+      llegadas = montaLlegadas({ detector, salida: cual, mapaId: suMapa });
+      sinCablear = null;
+      return null;
     } catch (e) {
-      // Una capa que no se puede montar es avería y se dice: sin ella no habría llegadas y
-      // nadie las echaría de menos, que es la forma de fallo que esta fila existe para cerrar.
       llegadas = null;
-      averia = mensaje(e);
+      sinCablear = mensaje(e);
+      averia = sinCablear;
+      return sinCablear;
     }
   };
 
@@ -327,6 +345,15 @@ export function creaLaSalida({
     averia: () => averia,
 
     /**
+     * Por qué no hay capa de llegadas, o `null` cuando la hay.
+     *
+     * Tiene consumidor, y esa es toda su razón de ser: el momento en marcha lo enseña como
+     * avería en vez de pintar un mapa donde nunca va a pasar nada. Una salida abierta sin
+     * esta capa no es una salida degradada, es una salida en la que el juego no ocurre.
+     */
+    llegadasSinCablear: () => (llegadas ? null : sinCablear),
+
+    /**
      * La cadencia con la que se está pidiendo posición, del vocabulario cerrado del paquete.
      *
      * Se publica porque es lo único que hace afirmable **desde el aparato** que el muestreo
@@ -418,6 +445,16 @@ export function creaLaSalida({
       }
 
       montaLaTraza();
+      // La capa de llegadas **antes de abrir**, no después: si no se puede montar, lo que
+      // hay que hacer es no abrir, y para eso el estado tiene que seguir intacto. Montarla
+      // después dejaría una salida abierta con el sensor parado, que no es ninguno de los
+      // cuatro estados que `salidas.js` declara.
+      const falta = montaLasLlegadas({ salida, mapa });
+      if (falta) {
+        await paraElSensor();
+        return noSeAbre('llegadas-sin-cablear', falta);
+      }
+
       let abierta;
       try {
         abierta = nucleo.abreSalida(salidas, {
@@ -442,9 +479,6 @@ export function creaLaSalida({
         await paraElSensor();
         return noSeAbre('rotulo-no-disponible', abierta.motivo);
       }
-      // Y solo aquí, con la salida ya abierta: la capa de llegadas pertenece a una salida y
-      // sin ella no habría dónde registrar ninguna ni cuándo dejar de ofrecerla.
-      montaLasLlegadas();
       avisa();
       return { abierta: true, motivo: null, marca: null, salida: abierta.salida };
     },
