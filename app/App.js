@@ -61,6 +61,13 @@ import { RevisionMontada } from './pantallas/revision-montada.jsx';
 // re-sondeo de las cinco capacidades.
 const SIN_GANCHO = { ausentes: [], noReconocidos: [] };
 
+/**
+ * Las puertas de consulta que cuelgan de los ajustes y no de la portada: de ellas se vuelve
+ * a A6P6 y no a A6P1. Es un dato y no dos condiciones repartidas, porque el atrás del sistema
+ * y el «‹» de la pantalla tienen que hacer exactamente lo mismo.
+ */
+const VUELVEN_A_AJUSTES = ['empezar-de-nuevo', 'sitios-marcados'];
+
 // `__DEV__` lo define el empaquetador. En una compilación de producción vale
 // false y el gancho queda inerte, que es lo que impide que sea una puerta trasera.
 const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
@@ -165,9 +172,9 @@ export function App() {
         setEnPuertaDeDesarrollo(false);
         return true;
       }
-      // Desde empezar de nuevo se vuelve a los ajustes, que es «dejarlo como está», y
-      // desde las otras tres a la portada.
-      setConsulta((abierta) => (abierta === 'empezar-de-nuevo' ? 'ajustes' : null));
+      // Desde empezar de nuevo y desde la lista de sitios marcados se vuelve a los ajustes,
+      // que es de donde cuelgan las dos; desde las otras tres, a la portada.
+      setConsulta((abierta) => (VUELVEN_A_AJUSTES.includes(abierta) ? 'ajustes' : null));
       return true;
     });
     return () => suscripcion.remove();
@@ -596,6 +603,10 @@ export function App() {
           mundo={partida.mundo}
           almacen={almacen}
           empezarDeNuevo={empezarDeNuevo}
+          // El registro y el día, que es lo que deshacer un descarte necesita para dejar su
+          // hecho: el deshacer es una transición más y no un borrado del registro.
+          registro={partida.registro}
+          dia={creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia()}
           // Al volver se congela: es el sitio donde el estado puede cambiar sin que haya una
           // salida de por medio —los interruptores de ajustes cuando la fila 46 los conecte,
           // el estilo y el tamaño de letra cuando la 38 les dé pantalla de elección—. Ponerlo
@@ -603,7 +614,7 @@ export function App() {
           // nada proteste; y como congelar es idempotente, hoy no escribe nada.
           alVolver={() => {
             congelaLaPartida();
-            setConsulta(consulta === 'empezar-de-nuevo' ? 'ajustes' : null);
+            setConsulta(VUELVEN_A_AJUSTES.includes(consulta) ? 'ajustes' : null);
           }}
           alAbrirPuerta={(id) => setConsulta(id)}
           // Borrar lleva al arranque y a ningún otro sitio: es lo que distingue borrar de

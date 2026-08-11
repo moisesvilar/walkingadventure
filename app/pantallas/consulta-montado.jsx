@@ -23,7 +23,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { componeAjustes } from '@walkingadventure/nucleo/partida/ajustes.js';
 import { abreCapitulo, abreElDiario } from '@walkingadventure/nucleo/partida/capitulos.js';
-import { descartesDeMapa } from '@walkingadventure/nucleo/partida/descartes.js';
+import { creaCapaDeDescartes, descartesDeMapa } from '@walkingadventure/nucleo/partida/descartes.js';
 import { listaDeMapas } from '@walkingadventure/nucleo/partida/mapas.js';
 import { SIN_CARAS, componeRepisa } from '@walkingadventure/nucleo/partida/repisa.js';
 import { arbolDeCalzadas } from '@walkingadventure/nucleo/partida/rumores.js';
@@ -33,17 +33,26 @@ import { PantallaAjustes } from './ajustes.jsx';
 import { PantallaDiarioPorDias, PantallaDiarioPorHistorias } from './diario.jsx';
 import { PantallaEmpezarDeNuevo } from './empezar-de-nuevo.jsx';
 import { PantallaRepisa } from './repisa.jsx';
+import { ListaSitiosMarcados } from './sitios-marcados.jsx';
 
-/** Las cuatro puertas del momento. Las tres primeras son las de la portada. */
-export const PUERTAS_DE_CONSULTA = Object.freeze(['diario', 'repisa', 'ajustes', 'empezar-de-nuevo']);
+/** Las cinco puertas del momento. Las tres primeras son las de la portada. */
+export const PUERTAS_DE_CONSULTA = Object.freeze(['diario', 'repisa', 'ajustes', 'empezar-de-nuevo', 'sitios-marcados']);
 
 /**
- * La fila de los ajustes que abre otra pantalla del momento.
+ * Las filas de los ajustes que abren otra pantalla del momento.
  *
- * Solo una, y está aquí y no en la pantalla porque es navegación: `ajustes.jsx` devuelve
- * el identificador de la fila tocada y no sabe a dónde lleva ninguna.
+ * Están aquí y no en la pantalla porque es navegación: `ajustes.jsx` devuelve el
+ * identificador de la fila tocada y no sabe a dónde lleva ninguna.
  */
-const PUERTA_DE_LA_FILA = Object.freeze({ 'empezar-de-nuevo': 'empezar-de-nuevo' });
+const PUERTA_DE_LA_FILA = Object.freeze({
+  'empezar-de-nuevo': 'empezar-de-nuevo',
+  // **Deshacer vive en ajustes y no en el sitio** (`seguridad-privacidad.md` §3):
+  // deshacerlo desde el sitio obligaría a volver a andar hasta allí, y ese es el único
+  // coste que este juego no puede cobrar por un cambio de opinión. Hasta esta fila la lista
+  // se contaba en A6P6 y no se podía abrir, así que la mitad reversible de RF-PRIV-004 no
+  // tenía camino.
+  'sitios-marcados': 'sitios-marcados',
+});
 
 /** La avería del momento, con la pieza nombrada. Un identificador propio, como los otros dos. */
 function Averia({ mensaje }) {
@@ -193,6 +202,52 @@ function AjustesMontados({ partida, personaje, mundo, criterios, pasosDeFondo, a
   );
 }
 
+/**
+ * «Sitios que marcaste», con su deshacer.
+ *
+ * **Deshacer no resiembra nada**, igual que marcar: el sitio conserva su nombre y su
+ * posición, el documento del mapa no cambia ni un byte y lo único que se mueve es si el
+ * anclaje vuelve a recibir casting. Y no sale nada del móvil, ni al marcar ni al deshacer:
+ * aquí no hay a quién.
+ */
+function SitiosMarcadosMontado({ partida, mundo, registro, dia }) {
+  const [movimientos, repinta] = useState(0);
+
+  const montaje = useMemo(() => {
+    try {
+      return {
+        capa: creaCapaDeDescartes({
+          mundo: mundo?.documento ?? null,
+          cupos: mundo?.cupos ?? null,
+          estado: partida.anclajes,
+          mapaId: mundo?.mapaId ?? null,
+          registro,
+        }),
+        fallo: null,
+      };
+    } catch (e) {
+      return { capa: null, fallo: mensajeDeError(e) };
+    }
+  }, [partida, mundo, registro]);
+
+  if (montaje.fallo !== null) return <Averia mensaje={montaje.fallo} />;
+  return (
+    <ListaSitiosMarcados
+      sitios={montaje.capa.sitiosMarcados()}
+      alDeshacer={(anclaje) => {
+        // El paso del mundo no se toca desde aquí: deshacer es una anotación del registro y
+        // no un paso, así que se anexa en el paso que hubiera. El día entra inyectado porque
+        // dentro del núcleo leer el reloj está prohibido.
+        montaje.capa.deshaz({ anclaje, dia, paso: partida.pasos?.mapas?.[mundo?.mapaId]?.n ?? 0 });
+        repinta((n) => n + 1);
+      }}
+      // Cuántas veces se ha deshecho algo. El área la muta el núcleo en sitio y React no se
+      // entera solo; sin esto la lista se quedaría con el sitio que ya no está.
+      key={movimientos}
+    />
+  );
+}
+
 /** Empezar de nuevo. La composición es una lectura del almacén, así que llega después. */
 function EmpezarDeNuevoMontado({ partida, empezarDeNuevo, alVolver, alBorrada }) {
   const [pantalla, setPantalla] = useState(null);
@@ -242,6 +297,8 @@ export function ConsultaMontada({
   empezarDeNuevo,
   pasosDeFondo = null,
   criterios = [],
+  registro = null,
+  dia = 0,
   alVolver = null,
   alAbrirPuerta = null,
   alBorrada = null,
@@ -255,6 +312,12 @@ export function ConsultaMontada({
   }
   if (puerta === 'repisa') {
     return <RepisaMontada partida={partida} mundo={mundo} alVolver={alVolver} />;
+  }
+  if (puerta === 'sitios-marcados') {
+    // La lista no dibuja vuelta propia y no se le añade una aquí: su composición es de la
+    // fila 38 y esta fila la monta, no la rediseña. Se sale con el atrás del sistema, que
+    // `App.js` lleva de vuelta a los ajustes igual que desde empezar de nuevo.
+    return <SitiosMarcadosMontado partida={partida} mundo={mundo} registro={registro} dia={dia} />;
   }
   if (puerta === 'ajustes') {
     return (
