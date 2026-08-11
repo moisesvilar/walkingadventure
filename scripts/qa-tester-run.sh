@@ -228,6 +228,13 @@ REPORT_REL="test/reports/${ETIQUETA}-run-${SELLO}.md"
 REPORT="$RAIZ/$REPORT_REL"
 mkdir -p "$RAIZ/test/reports"
 
+# La constancia que deja `test/nucleo/manifiesto-generado.test.mjs`. Se borra **antes** de
+# ejecutar nada: leer la de la tanda anterior diría que se miró el manifiesto en una
+# ejecución que no lo miró, que es la misma clase de mentira que esa guarda viene a
+# impedir. Su ausencia después de la tanda significa que la guarda no llegó a correr.
+MANIFIESTO_CONSTANCIA="$RAIZ/test/reports/manifiesto-generado.estado.json"
+rm -f "$MANIFIESTO_CONSTANCIA"
+
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -537,6 +544,44 @@ ${JAVA_PROBADAS}Se puede indicar uno con WA_JAVA_HOME."
   fi
 fi
 
+# --- la guarda del manifiesto generado: su tercer estado --------------------
+#
+# La promesa de privacidad de este proyecto no vive en `app/app.json`: vive en el
+# `AndroidManifest.xml` fusionado y en el `Info.plist` generado, y los dos son
+# artefactos de compilación que están gitignorados. Una guarda que se saltara las
+# comprobaciones cuando no están pasaría en verde sin haber mirado nada — §6h en el
+# sitio donde más caro sale—, así que la guarda **no registra esos casos** cuando
+# faltan y deja constancia de qué pudo mirar.
+#
+# Aquí se recoge esa constancia y se publica **arriba, en el veredicto**, y no
+# enterrada en la sección de infraestructura: entre discreto y pesado, aquí pesado.
+# Quien lee «PASS» tiene que ver en la misma pantalla que la promesa de privacidad no
+# llegó a comprobarse en una plataforma, o en las dos. Es la misma doctrina que el
+# tercer estado de Maestro, con su casilla propia: «no compilado» y «compilado y
+# limpio» no se cuentan en la misma casilla.
+
+MANIFIESTO_ESTADO="no ejecutada (fuera del alcance pedido)"
+MANIFIESTO_COMPLETO=0
+if [ "$ALCANCE" != "app" ]; then
+  if [ ! -f "$MANIFIESTO_CONSTANCIA" ]; then
+    MANIFIESTO_ESTADO="**no dejó constancia**: la guarda del manifiesto generado no llegó a ejecutarse, así que de esta tanda no consta que se mirara nada"
+  else
+    MANIFIESTO_LEIDO="$(node -e '
+      const fs = require("node:fs");
+      try {
+        const c = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+        const di = (p) => (p && p.mirado ? "mirado" : "NO MIRADO");
+        process.stdout.write(`${c.completo ? 1 : 0}\t Android: ${di(c.android)} · iOS: ${di(c.ios)}`);
+      } catch (e) {
+        process.stdout.write("0\t no se pudo leer la constancia: " + e.message);
+      }
+    ' "$MANIFIESTO_CONSTANCIA" 2>/dev/null)"
+    MANIFIESTO_COMPLETO="${MANIFIESTO_LEIDO%%$TAB*}"
+    MANIFIESTO_ESTADO="${MANIFIESTO_LEIDO#*$TAB}"
+    case "$MANIFIESTO_COMPLETO" in 0|1) ;; *) MANIFIESTO_COMPLETO=0; MANIFIESTO_ESTADO="no se pudo leer la constancia de la guarda del manifiesto generado" ;; esac
+  fi
+fi
+
 # --- 3 · mapa de cobertura --------------------------------------------------
 #
 # Su resultado va en infraestructura, nunca como prueba en rojo: un mapa
@@ -600,6 +645,15 @@ fi
       echo "- **De la app no se ha verificado nada.** Ninguno de los flujos que se ejecutaron recorre una pantalla: los verdes de límite declarado solo dicen que su pantalla sigue sin existir."
     fi
   fi
+  # La guarda del manifiesto generado, con su casilla propia. Va aquí arriba y no en la
+  # sección 3 a propósito: es la promesa que más pesa del proyecto y no se puede leer
+  # «PASS» sin ver, en la misma pantalla, si llegó a comprobarse.
+  if [ "$ALCANCE" != "app" ]; then
+    echo "- Guarda del manifiesto generado:$MANIFIESTO_ESTADO"
+    if [ "$MANIFIESTO_COMPLETO" -ne 1 ]; then
+      echo "- **La promesa de privacidad no se ha podido comprobar entera.** El manifiesto fusionado de Android y el \`Info.plist\` generado de iOS son artefactos de compilación y están gitignorados; lo que no se pudo mirar **no está verde, está sin mirar**. Cómo se generan, en la sección 3."
+    fi
+  fi
   echo
   echo "## 2 · Regresión de núcleo"
   echo
@@ -652,6 +706,16 @@ fi
     echo "- **Variables heredadas retiradas del entorno de los subprocesos:** $SANEADAS. Cambian la forma de la salida de \`node --test\` y con ellas el veredicto dependería de quién lanza el runner."
   else
     echo "- Entorno de partida limpio: no había ninguna variable que retirar (se vigilan \`NODE_TEST_*\` y \`NODE_OPTIONS\`)."
+  fi
+  if [ "$ALCANCE" != "app" ]; then
+    echo "- Guarda del manifiesto generado (\`test/nucleo/manifiesto-generado.test.mjs\`):$MANIFIESTO_ESTADO. Los dos artefactos están gitignorados y solo existen después de compilar:"
+    echo
+    echo '```'
+    echo 'Android · cd app && npx expo run:android'
+    echo '            → app/android/app/build/intermediates/merged_manifest/debug/processDebugMainManifest/AndroidManifest.xml'
+    echo 'iOS     · cd app && npx expo prebuild --platform ios --no-install --skip-dependency-update expo'
+    echo '            → app/ios/<proyecto>/Info.plist   (no hace falta Xcode: los config plugins se evalúan en Node)'
+    echo '```'
   fi
   if [ "$MAPA_VALIDADO" -eq 0 ]; then
     echo "- Mapa de cobertura (\`test/spec-test-map.json\`), código \`$MAPA_RC\`: **no se pudo validar** (sin línea \`VEREDICTO:\` reconocible, o el validador declaró que no llegó a validar). Sigue sin ser rojo, pero tampoco cuenta como validación correcta."

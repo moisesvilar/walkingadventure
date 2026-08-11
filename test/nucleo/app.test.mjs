@@ -24,6 +24,7 @@ import { spawnSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { DEPENDENCIAS_DE_UBICACION } from '../../app/plataforma/permisos.js';
 import { localeFor, namesFor } from '../../packages/nucleo/names/index.js';
 import { makeRng } from '../../packages/nucleo/core/rng.js';
 import { SUFIJOS_DE_FASE } from '../../packages/nucleo/core/semilla.js';
@@ -118,6 +119,21 @@ describe('La disposición del repositorio tras estrenar la app', () => {
     // SDK sin que nada protestase. Quien mira desde el otro lado es
     // `duradero.test.mjs`, «Todo paquete que app/ importa está declarado».
     //
+    // `expo-location` y `expo-task-manager` entran por **SPEC-048**, y esta vez la spec
+    // sí las nombra en su reparto, con la frase que cierra la lista: «Dos dependencias
+    // nuevas y ninguna más… si al implementar aparece una tercera, no se mete». Cada una
+    // dice para qué está en `app/plataforma/permisos.js`, en `DEPENDENCIAS_DE_UBICACION`,
+    // y ese renglón se contrasta más abajo: abrir la lista de aquí sin declarar el motivo
+    // allí volvería a dejar la lista mirando solo lo declarado.
+    //
+    // `expo-task-manager` merece una línea aparte porque **estaba en la lista de fuera**
+    // hasta esta fila, con la nota «servicio en primer plano, fila 30». Entra a hacer
+    // exactamente eso: `TaskManager.defineTask` es la tarea a la que el servicio en primer
+    // plano de Android entrega las posiciones, y ese servicio es lo que
+    // `game-design/seguridad-privacidad.md` §2 nombra como la razón de **no** pedir el
+    // permiso permanente. No entra a leer con la app cerrada; lo que impide que acabe
+    // haciéndolo es `TAREAS_QUE_LA_APP_DEFINE`, que `pasos-de-fondo.test.mjs` enumera.
+    //
     // `react-native-reanimated` y `react-native-worklets` entran también por
     // **SPEC-021**, y por arrastre de Skia y no por gusto: Skia declara Reanimated
     // como par *opcional* pero lo exige al importarse, y sin él la app compila,
@@ -133,6 +149,8 @@ describe('La disposición del repositorio tras estrenar la app', () => {
       'react-native-reanimated', // SPEC-021: Skia lo exige al importarse
       'react-native-worklets', // SPEC-021: el plugin de Babel de Reanimated 4
       'expo-file-system', // SPEC-039: la partida en disco y el fichero de la copia
+      'expo-location', // SPEC-048: el permiso «mientras se usa», la posición y el servicio en primer plano
+      'expo-task-manager', // SPEC-048: la tarea a la que ese servicio entrega las posiciones
     ]);
     const declaradas = Object.keys(APP_PAQUETE.dependencies ?? {});
     for (const d of declaradas) {
@@ -148,11 +166,29 @@ describe('La disposición del repositorio tras estrenar la app', () => {
       'expo-font': 'tipografías propias, fila 27',
       axios: 'cliente HTTP, fila 26',
       '@react-native-async-storage/async-storage': 'almacenamiento de partida, fila 39',
-      'expo-task-manager': 'servicio en primer plano, fila 30',
+      // Los dos módulos de fondo de verdad, que siguen fuera y no tienen ningún uso
+      // legítimo aquí. Se nombran desde la fuente y no a mano: la lista que decide qué es
+      // fondo con otro nombre vive en `permisos.js`, y copiarla aquí sería tener dos.
+      'expo-background-fetch': 'fondo con otro nombre, MODULOS_DE_FONDO_QUE_NO_SE_MONTAN',
+      'expo-background-task': 'fondo con otro nombre, MODULOS_DE_FONDO_QUE_NO_SE_MONTAN',
     };
     for (const [paquete, fila] of Object.entries(fuera)) {
       assert.equal(declaradas.includes(paquete), false, `"${paquete}" no entra en esta fila (${fila})`);
     }
+
+    // Y la otra mitad de abrir la lista, que es lo que impide que abrirla salga gratis:
+    // **cada dependencia nueva dice para qué está y qué fila la trajo**, en la fuente y no
+    // en este comentario. Sin esto, «entra porque la spec la nombra» se convierte en
+    // «entra», que es exactamente cómo se llenó de librerías la app que esta lista vigila.
+    const declarada = (id) => DEPENDENCIAS_DE_UBICACION.find((d) => d.id === id);
+    for (const id of ['expo-location', 'expo-task-manager']) {
+      assert.equal(declaradas.includes(id), true, `falta la dependencia "${id}", que SPEC-048 nombra en su reparto`);
+      const motivo = declarada(id);
+      assert.ok(motivo, `"${id}" está en app/package.json y no dice para qué está en DEPENDENCIAS_DE_UBICACION`);
+      assert.ok(motivo.porque && motivo.porque.length > 20, `"${id}" no explica para qué está`);
+      assert.match(motivo.dueña, /fila 48/, `"${id}" no dice qué fila la trajo`);
+    }
+    assert.deepEqual(DEPENDENCIAS_DE_UBICACION.map((d) => d.id), ['expo-location', 'expo-task-manager'], 'la declaración de dependencias de ubicación no son exactamente las dos que la spec nombra');
   });
 
   test('El package.json de la raíz declara el espacio de trabajo y ninguna dependencia de runtime', () => {

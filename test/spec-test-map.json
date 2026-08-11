@@ -27483,6 +27483,735 @@
       "fichero": "test/nucleo/partida-guardada.test.mjs",
       "caso": "El mismo estado congelado dos veces da el mismo texto byte a byte",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `app/package.json` WHEN se leen sus dependencias THEN aparecen `expo-location` y `expo-task-manager`, y ninguna otra dependencia nueva respecto de la entrega anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "app/package.json declara exactamente las dependencias que la spec nombra",
+      "hueco_de_bateria": true,
+      "nota": "La lista cerrada es de SPEC-020 y se abre citando la fila que mete cada dependencia. La batería describe qué hace el juego, no de qué librerías depende."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `app/plataforma/permisos.js` WHEN se lee el motivo de cada dependencia nueva THEN cada una dice para qué está y qué fila la trajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "app/package.json declara exactamente las dependencias que la spec nombra",
+      "hueco_de_bateria": true,
+      "nota": "`DEPENDENCIAS_DE_UBICACION` se contrasta contra lo declarado en `app/package.json`: abrir la lista sin declarar el motivo volvería a dejarla mirando solo lo declarado."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `app/app.json` WHEN se pasa por `revisaLaDeclaracion` THEN no devuelve ningún problema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la configuración del plugin de `expo-location` en `app/app.json` WHEN se lee THEN la ubicación de fondo de Android está apagada de forma explícita y el servicio en primer plano está encendido de forma explícita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente",
+      "nota": "Se afirma sobre el efecto y no sobre la configuración: lo que importa es que `ACCESS_BACKGROUND_LOCATION` no llegue al manifiesto fusionado, y que el servicio de ubicación sí esté declarado."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el `AndroidManifest.xml` generado por la compilación nativa WHEN se enumeran sus `uses-permission` THEN no aparece `ACCESS_BACKGROUND_LOCATION`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente",
+      "nota": "La guarda registra su ausencia como infraestructura ausente y nunca como verde: sin manifiesto compilado el caso no se registra, y el runner lo publica en el veredicto."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN ese mismo manifiesto generado WHEN se buscan los permisos que `LO_QUE_NUNCA_SE_DECLARA` prohíbe THEN no aparece ninguno, y en particular no aparece `RECEIVE_BOOT_COMPLETED`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Ningún permiso prohibido llega al manifiesto fusionado",
+      "hueco_de_bateria": true,
+      "nota": "PARCIALMENTE INCUMPLIDO Y DECLARADO. `RECEIVE_BOOT_COMPLETED` está en el APK desde SPEC-023 por `expo-notifications` y no se puede retirar sin que la app reviente, así que salió de `LO_QUE_NUNCA_SE_DECLARA` y entró en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE` con su motivo. Lo que sí queda rojo es la propiedad de la que ese permiso es solo la llave: ver «Nada de esta app se despierta al arrancar el móvil»."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN un permiso que una de las dos librerías inyecte al fusionar y que esta app no declara WHEN se compila THEN queda retirado explícitamente en el manifiesto de la app y la retirada va comentada con su motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Todo permiso del manifiesto fusionado está declarado, y todo lo declarado sigue apareciendo",
+      "hueco_de_bateria": true,
+      "nota": "Por lista blanca y no por lista de prohibidos: cualquier permiso del manifiesto fusionado que no esté declarado en `permisos.js` o en el arrastre de librería escrito a mano pone rojo, aunque nadie lo hubiera imaginado."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el `Info.plist` generado WHEN se buscan las claves de ubicación THEN está `NSLocationWhenInUseUsageDescription` y no están `NSLocationAlwaysAndWhenInUseUsageDescription` ni `NSLocationAlwaysUsageDescription`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Las claves de ubicación son la de «mientras se usa» y ninguna más",
+      "escenario": "La app no pide el permiso de ubicación permanente"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el `Info.plist` generado WHEN se leen sus `UIBackgroundModes` THEN son exactamente `['location']`, sin `fetch`, sin `processing` y sin `remote-notification`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Los modos de fondo de iOS son exactamente los declarados",
+      "hueco_de_bateria": true,
+      "nota": "Se comprueba sobre lo generado y no sobre `app.json`: el config plugin de `expo-task-manager` empuja `fetch` incondicionalmente, y por ahí la fila metió una tarea periódica sin que nadie lo viera."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el código de `app/` WHEN se busca una llamada a `requestBackgroundPermissionsAsync` THEN no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Nada de esta fila pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `MODULOS_DE_FONDO_QUE_NO_SE_MONTAN` WHEN se enumera THEN siguen dentro `expo-background-fetch` y `expo-background-task`, y la lista sigue contrastándose contra las dependencias de la app.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true,
+      "nota": "REEXPRESADO. El caso afirmaba que ninguna dependencia estaba en la lista y la lista contenía `expo-task-manager`, que esta fila mete: el sustituto se cambia por la propiedad, con las tareas enumeradas una a una."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN esa misma lista WHEN se busca `expo-task-manager` THEN ya no está, y el fichero explica por escrito por qué sale.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `app/plataforma/permisos.js` WHEN se lee THEN declara las tareas que la app define una a una, cada una con su identificador, su `porque` y su `dueña`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN esa declaración WHEN se enumera THEN tiene exactamente una entrada: la del servicio en primer plano de la salida abierta, que muere con la salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el código de `app/` WHEN se enumeran las tareas registradas con el gestor de tareas THEN todas están en esa declaración, y una registrada sin declarar es error de construcción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true,
+      "nota": "`exigeTareaDeclarada` es por donde pasa el registro, y la suscripción se niega a montarse sin la guarda."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `TAREAS_PERIODICAS` WHEN se lee THEN sigue vacía, y una tarea periódica añadida ahí sigue poniendo la suite roja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el código de `app/` WHEN se busca una tarea que se registre fuera de una salida abierta THEN no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una salida que se cierra deja el sensor sin nadie leyendo",
+      "escenario": "Una salida que se cierra deja el sensor sin nadie leyendo"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una instalación limpia parada en A1P3 WHEN se pulsa «Permitir» THEN sale el diálogo del sistema de ubicación mientras se usa y no sale ningún otro diálogo de permiso.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "El diálogo del sistema no ofrece la ubicación permanente",
+      "escenario": "El diálogo del sistema no ofrece la ubicación permanente",
+      "nota": "El bloque va condicionado al identificador del controlador de permisos y no a su texto: el diálogo lo escribe el sistema en el idioma del móvil. Medido en `wa-pixel`: la app está instalada con los permisos concedidos, así que allí el diálogo no llega a salir y el bloque se salta."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el diálogo a la vista WHEN se concede THEN se pasa a A1P4 con la marca puesta en la posición que entregó el sensor.",
+      "nivel": "@app",
+      "fichero": "test/app/arranque.yaml",
+      "caso": "Conceder el permiso deja la marca donde la puso el sensor",
+      "escenario": "Conceder el permiso deja la marca donde la puso el sensor",
+      "nota": "La coordenada no se afirma: el fijo del emulador depende de lo que tenga puesto `adb emu geo fix` y eso convertiría el estado del emulador en el resultado. Lo que se afirma es la marca `permiso-respuesta` y el paso a A1P4."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el permiso concedido WHEN se lee el arranque a medias guardado THEN el origen del punto es `permiso`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera",
+      "escenario": "Conceder el permiso deja la marca donde la puso el sensor",
+      "nota": "El origen del punto lo distingue el núcleo desde SPEC-027; lo que esta fila añade es la marca de A1P3, que es lo que distingue denegar de no poder preguntar."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el diálogo a la vista WHEN se deniega THEN se pasa a A1P4 igual, con la marca en el punto por defecto, el origen del punto en `a-mano`, sin pantalla intermedia y sin ningún texto que lo llame error.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "Denegar el permiso sigue por la vía manual sin llamarlo problema",
+      "escenario": "Denegar el permiso sigue por la vía manual sin llamarlo problema",
+      "nota": "Denegar en el diálogo nativo no lo provoca ningún automatismo de forma fiable, y la spec ya lo declara @manual. La mitad automatizable —que denegar deja el origen en `a-mano` y no enseña ninguna pantalla intermedia— vive en `onboarding.test.mjs`."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el proveedor montado y el sistema devolviendo un fallo al pedir el permiso WHEN se pulsa «Permitir» THEN se queda en A1P3, se enseña el motivo literal del fallo y no se pasa a A1P4 como si se hubiera denegado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera",
+      "escenario": "No poder preguntar el permiso se queda en la pantalla y lo dice"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una compilación en la que el módulo de ubicación no se monta WHEN se abre A1P3 THEN «Permitir» está apagado con su motivo a la vista y la vía de elegir el punto a mano sigue entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera",
+      "escenario": "Sin módulo de ubicación \"Permitir\" sale apagado y la vía manual queda entera"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN A1P3 WHEN se lee la marca de la respuesta del permiso THEN dice una de cuatro y solo una: `sin-pedir`, `concedido`, `denegado`, `no-se-pudo-preguntar`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/onboarding.test.mjs",
+      "caso": "No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera",
+      "escenario": "No poder preguntar el permiso se queda en la pantalla y lo dice"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el permiso concedido y el mapa levantado WHEN se inspecciona lo escrito en el almacén THEN no hay ninguna posición leída del sensor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta WHEN se cuentan las suscripciones al sensor THEN hay exactamente una, y de ella cuelgan la fuente y el seguidor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una salida abierta tiene una sola suscripción al sensor",
+      "escenario": "Una salida abierta tiene una sola suscripción al sensor"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la fuente montada WHEN se lee una posición THEN trae `lat`, `lon`, `tMs` y `precisionM`, y no trae rumbo, altitud ni velocidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una posición del sensor entra con cuatro campos y ninguno más",
+      "escenario": "De cada posición del sensor sobreviven cuatro campos"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una lectura del sensor sin precisión declarada WHEN se entrega THEN `precisionM` va a `null` y nunca a cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una lectura sin precisión declarada va a null y nunca a cero",
+      "escenario": "De cada posición del sensor sobreviven cuatro campos"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la fuente y el detector montados WHEN se muestrea una posición THEN entra en el detector y la traza de la salida sale clasificada segmento a segmento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "La posición llega al seguidor ya clasificada",
+      "escenario": "La posición llega al seguidor ya clasificada"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una posición que llega al seguidor WHEN se mira lo que trae THEN va ya clasificada en andando · parada · vehículo · ambiguo, y la clasificación la produce el detector del núcleo y no la app.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El seguidor rechaza una posición sin clasificar en lugar de pintarla",
+      "escenario": "La posición llega al seguidor ya clasificada"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN dos lecturas separadas por más que el hueco máximo declarado en `transporte.js` WHEN se forma la traza THEN no se enlazan entre sí.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Tras una interrupción la traza se vuelve a anclar",
+      "escenario": "Tras una interrupción la traza se vuelve a anclar"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la app que vuelve al primer plano tras un rato sin leer WHEN se reanuda la lectura THEN la primera posición nueva no se enlaza con la última de antes de la interrupción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Al reabrir la app con una salida abierta, la traza se vuelve a montar sin coser lo andado",
+      "escenario": "Tras una interrupción la traza se vuelve a anclar"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida que se cierra o una pantalla de marcha que se desmonta WHEN se mira el sensor THEN la suscripción queda retirada y no sigue leyendo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una salida que se cierra deja el sensor sin nadie leyendo",
+      "escenario": "Una salida que se cierra deja el sensor sin nadie leyendo"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el detector de transporte sin montar WHEN se pide la traza de la salida THEN falla nombrándolo, en lugar de devolver una traza con todo por andando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Sin el detector de transporte la salida no se monta, y lo dice nombrándolo",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene escenario para la frontera de inyección: es la regla de SPEC-020, que describe cómo está montado el código y no qué hace el juego."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida echada a andar con el permiso concedido WHEN se abre el momento en marcha THEN el seguidor está montado y la marca de posición se pinta en el punto que entrega el sensor.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "El momento en marcha se alcanza andando desde la portada",
+      "escenario": "El momento en marcha se alcanza andando desde la portada",
+      "nota": "Recorrido medido en `wa-pixel` el 11-ago-2026: 103 s de principio a fin con el arranque entero dentro. Es lo que saca a este flujo de la columna de límite declarado."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el GPS del dispositivo moviéndose con `adb emu geo fix` WHEN llegan posiciones nuevas THEN la marca se mueve y ningún otro elemento del mapa cambia.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El momento en marcha se alcanza andando desde la portada",
+      "escenario": "El momento en marcha se alcanza andando desde la portada",
+      "nota": "NO AUTOMATIZADO Y MEDIDO A MANO. `setLocation` de Maestro es `adb emu geo fix`, y en esta máquina devuelve OK sin mover el fijo: medido el 11-ago-2026, tres fijos seguidos dejaron la etiqueta de `marca-posicion` idéntica. El recorrido concreto con la marca moviéndose está en `docs/starting.md`; en cuanto `geo fix` sea fiable, la afirmación va a `test/app/en-marcha.yaml`."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN un recorrido a paso de andar WHEN se lee la traza clasificada THEN sus segmentos salen `andando`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "Un viaje en tren no hace avanzar el mundo",
+      "escenario": "Un viaje en tren no hace avanzar el mundo",
+      "nota": "La clasificación la produce `partida/transporte.js` y está probada allí desde SPEC-031. Lo que esta fila añade es que la posición del sensor llega al detector, y eso se afirma en `marcha.test.mjs`."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN un recorrido a velocidad ambigua WHEN se lee la traza THEN sus segmentos salen `ambiguo` y no `vehiculo`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/transporte.test.mjs",
+      "caso": "En la duda, cuenta",
+      "escenario": "En la duda, cuenta"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el sensor que todavía no ha entregado ninguna posición WHEN se compone el momento THEN la marca se queda donde estaba y ninguna pantalla lo cuenta como avería del mundo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "La posición llega al seguidor ya clasificada",
+      "escenario": "La posición llega al seguidor ya clasificada",
+      "nota": "Devolver `null` es una respuesta prevista del seguidor y no un error: con un solo fijo y sin segmento todavía, la clasificación sale `ambiguo`, que es como `ritmo.js` cuenta la duda a favor de quien anda."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la avería del momento en marcha WHEN se lee su marca de motivo THEN dice uno de un vocabulario cerrado: `permiso-denegado`, `permiso-no-preguntable`, `sensor-sin-responder`, `rotulo-sin-montar`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "La avería del momento en marcha tiene un vocabulario cerrado de cuatro",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene escenario para la avería del momento: los cuatro motivos son de esta fila y se arreglan en sitios distintos."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el momento en marcha con el seguidor montado WHEN se enumeran sus elementos tocables THEN no hay ninguno.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "La pantalla del mapa no tiene ni un control",
+      "escenario": "La pantalla del mapa no tiene ni un control"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el momento en marcha WHEN se leen sus textos THEN no aparece ninguna cifra de distancia, tiempo, ritmo, pasos ni progreso.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "No se enseña ninguna cifra de esfuerzo",
+      "escenario": "No se enseña ninguna cifra de esfuerzo"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida que se abre WHEN el rótulo está disponible THEN se arranca el servicio en primer plano con su notificación persistente y la salida queda abierta con el rótulo puesto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El servicio en primer plano se pide por distancia y con la precisión que el detector necesita",
+      "escenario": "El momento en marcha se alcanza andando desde la portada"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el rótulo puesto WHEN se lee su línea THEN dice hacia dónde se va y ninguna cifra, y su texto lo compone `partida/rotulo.js` y no la capa de plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El servicio en primer plano se pide por distancia y con la precisión que el detector necesita",
+      "escenario": "La salida sigue viva con el móvil bloqueado",
+      "nota": "Que la línea no lleve cifras ni palabras de esfuerzo está probado en `salidas.test.mjs` desde SPEC-030; lo que esta fila añade es que la plataforma la recibe compuesta y no escribe ni una palabra."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el rótulo puesto WHEN se intenta descartarlo deslizando THEN no se puede.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "El rótulo no se puede descartar deslizando",
+      "escenario": "El rótulo no se puede descartar deslizando",
+      "nota": "Maestro no interactúa con la persiana de notificaciones. Medido a mano con `dumpsys notification`: la notificación lleva NO_CLEAR, y queda declarado en `DECLARACION.medido` de `rotulo.android.js`, que sí se afirma en `marcha.test.mjs`."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el rótulo puesto WHEN se enumeran sus acciones THEN hay exactamente una: dar la salida por terminada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Android declara el límite que sí tiene: el rótulo no puede llevar su acción",
+      "hueco_de_bateria": true,
+      "nota": "NO ENTREGADO Y DECLARADO. La notificación del servicio en primer plano la compone `expo-location` y no admite acciones. Queda escrito en `DECLARACION.loQueNoEntrega` con lo que haría falta y con lo que hay mientras tanto, y el caso afirma esa declaración en vez de una acción que no existe."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el rótulo puesto y el móvil bloqueado WHEN se anda veinte minutos THEN la salida sigue abierta y el rótulo sigue diciendo hacia dónde va.",
+      "nivel": "@manual",
+      "fichero": "docs/testing.md",
+      "caso": "La salida sigue viva con el móvil bloqueado",
+      "escenario": "La salida sigue viva con el móvil bloqueado"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el canal de notificación del rótulo WHEN se lee su importancia THEN es baja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Android declara el límite que sí tiene: el rótulo no puede llevar su acción",
+      "escenario": "El canal del rótulo no avisa de nada",
+      "nota": "Medido sobre el dispositivo con `dumpsys notification` —el canal sale en IMPORTANCE_LOW, lo crea así `expo-location`— y escrito como dato en `DECLARACION.medido`, que es lo que esta prueba afirma."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la capacidad `rotulo` WHEN se sondea en un dispositivo Android con la app instalada THEN responde montada y disponible.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "El momento en marcha se alcanza andando desde la portada",
+      "escenario": "El momento en marcha se alcanza andando desde la portada",
+      "nota": "Si la sonda respondiera que no, la salida no se abriría y el flujo moriría en `en-marcha` con `en-marcha-sin-cablear` a la vista."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la sonda del rótulo WHEN se ejecuta THEN no pide ningún permiso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/contratos-sin-llamador.test.mjs",
+      "caso": "Un contrato de plataforma que sigue en la lista por su sufijo lo sostiene su propia sonda",
+      "hueco_de_bateria": true,
+      "nota": "La sonda se ejecuta en `node --test` sin nada del sistema delante: si pidiera un permiso, no podría responder aquí."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta cuyo servicio mata el sistema WHEN se reconcilia el estado con la presencia real del rótulo THEN queda registrado con el motivo de retirada por el sistema y la salida no se queda creyéndose sostenida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una salida abierta se reconcilia con lo que de verdad hay en la pantalla de bloqueo",
+      "hueco_de_bateria": true,
+      "nota": "Riesgo 4 del PRD. La batería no tiene escenario propio: es una propiedad del ciclo de vida de Android, no del juego."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida que se cierra por cualquiera de sus vías WHEN se mira el rótulo THEN queda retirado en la misma transición y no en una posterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Se puede cerrar la salida desde el rótulo del sistema",
+      "escenario": "Se puede cerrar la salida desde el rótulo del sistema"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `app/plataforma/rotulo.ios.js` y `app/plataforma/rotulo.android.js` WHEN se comparan sus exportaciones THEN son exactamente las mismas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Hay una implementación del rótulo por plataforma y las dos exportan los mismos nombres",
+      "hueco_de_bateria": true,
+      "nota": "Ya lo afirmaba SPEC-030 y esta fila no lo reescribe: se cita para que el criterio no quede sin cobertura declarada."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `rotulo.ios.js` WHEN se sondea su capacidad THEN responde no montada y su motivo nombra la Actividad en Vivo, la dependencia o el módulo nativo que haría falta, y la fila que lo decidirá.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El límite de cada plataforma está escrito como dato y no como comentario",
+      "escenario": "En iOS una salida no se abre y se dice por qué"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una compilación de iOS WHEN se intenta abrir una salida THEN no se abre, y el motivo que se enseña es el del rótulo que falta, no un fallo genérico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Sin rótulo no se abre ninguna salida, y «no montado» se distingue de «no disponible»",
+      "escenario": "En iOS una salida no se abre y se dice por qué",
+      "nota": "En esta máquina no hay Xcode, así que el flujo de iOS no se puede ejecutar. Lo que sí se puede poner rojo es la conducta: con el rótulo sin montar, abrir responde `rotulo-no-montado` con su motivo y no abre nada."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `rotulo.ios.js` WHEN se lee su cabecera THEN el límite está escrito con su motivo, y no se declara disponible ninguna capacidad que no entregue.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El límite de cada plataforma está escrito como dato y no como comentario",
+      "escenario": "En iOS una salida no se abre y se dice por qué"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una partida sin ninguna salida y el rótulo disponible WHEN se echa a andar desde la portada o desde la preparación THEN la salida queda abierta con el rótulo puesto y con el punto de partida anotado.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "El momento en marcha se alcanza andando desde la portada",
+      "escenario": "El momento en marcha se alcanza andando desde la portada"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el rótulo no disponible WHEN se echa a andar THEN la salida no se abre, y la portada enseña el motivo distinguiendo «no montada» de «montada y no disponible».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Sin rótulo no se abre ninguna salida, y «no montado» se distingue de «no disponible»",
+      "escenario": "En iOS una salida no se abre y se dice por qué"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el permiso de ubicación denegado WHEN se echa a andar THEN la salida no se abre y se dice por qué.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Sin permiso de ubicación no se abre ninguna salida",
+      "escenario": "Sin permiso de ubicación no se abre ninguna salida"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida ya abierta WHEN se intenta abrir otra THEN falla nombrando la que sigue abierta, en lugar de sustituirla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Con una salida ya abierta, abrir otra falla nombrando la que sigue abierta",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene escenario para el intento de abrir dos: es una avería y no una vía del juego."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta WHEN se cierra la app y se vuelve a abrir THEN vuelve en la misma situación, con el mismo punto de partida y con la misma marca del último metro propio.",
+      "nivel": "@app",
+      "fichero": "test/app/en-marcha.yaml",
+      "caso": "El momento en marcha se alcanza andando desde la portada",
+      "escenario": "El momento en marcha se alcanza andando desde la portada",
+      "nota": "Medido: al reabrir se ve la portada con `salida-situacion = abierta-con-rotulo`, `rotulo-estado = puesto` y la tarjeta de a medias con sus dos acciones, y «seguir con ella» devuelve al momento en marcha. Andar es una decisión de quien anda y la app no la retoma sola."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta WHEN transcurre el plazo declarado sin un solo metro propio THEN el rótulo se retira y la salida sigue abierta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rótulo se retira pero la salida no se cierra",
+      "escenario": "El rótulo se retira pero la salida no se cierra"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta con el rótulo retirado WHEN se pide «seguir» THEN vuelve a estar abierta con el rótulo puesto y el plazo cuenta de nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rótulo se retira pero la salida no se cierra",
+      "escenario": "El rótulo se retira pero la salida no se cierra"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta WHEN se vuelve al punto de partida en autobús THEN la salida se cierra igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Volver a casa en autobús echa el telón igual",
+      "escenario": "Volver a casa en autobús echa el telón igual"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida abierta WHEN se pulsa «dar la salida por terminada» en el rótulo THEN se cierra exactamente igual que si hubiera vuelto, salvo el motivo anotado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Se puede cerrar la salida desde el rótulo del sistema",
+      "escenario": "Se puede cerrar la salida desde el rótulo del sistema"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida cerrada sin leer WHEN se intenta abrir otra salida THEN falla nombrando el telón pendiente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Con un telón sin leer, abrir otra salida falla nombrando el telón pendiente",
+      "escenario": "El telón espera a que lo leas"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida cerrada sin leer y la pantalla del telón sin dibujar WHEN se abre la app THEN se enseña un hueco que nombra el telón pendiente y no se hace pasar por el telón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Con un telón sin leer, abrir otra salida falla nombrando el telón pendiente",
+      "hueco_de_bateria": true,
+      "nota": "El hueco vive en `App.js` con una sola acción, como `pantallas/llegada.js` resuelve la escena que no existe. Lo que se afirma aquí es la regla que lo sostiene: con el telón sin leer no se puede abrir otra salida, y marcarlo leído es una acción explícita."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el telón marcado como leído WHEN se abre la app THEN se ofrece la portada y se puede abrir otra salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Con un telón sin leer, abrir otra salida falla nombrando el telón pendiente",
+      "escenario": "El telón espera a que lo leas"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN los contratos de plataforma escritos y probados WHEN se enumera cuáles no alcanza ningún llamador desde `app/` THEN la lista está escrita a mano, con dueño por cada entrada, y una entrada nueva no declarada pone la suite roja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/contratos-sin-llamador.test.mjs",
+      "caso": "La lista de contratos sin llamador es exactamente la que se mide",
+      "hueco_de_bateria": true,
+      "nota": "Los contratos se descubren por su forma —exportan `creaX` y `xSinMontar`— y se cruzan contra la lista escrita a mano: una lista que solo se lee no obliga a nadie."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN esa misma guarda WHEN un contrato de la lista pasa a tener llamador THEN la suite también se pone roja hasta que se quite de la lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/contratos-sin-llamador.test.mjs",
+      "caso": "La lista de contratos sin llamador es exactamente la que se mide",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN esta entrega WHEN se mide esa lista THEN `app/plataforma/posiciones.js`, `app/marcha/seguidor.js`, `app/plataforma/ubicacion.js` y `app/plataforma/rotulo.android.js` ya no están en ella.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/contratos-sin-llamador.test.mjs",
+      "caso": "Cada entrada de la lista nombra un contrato que su fichero exporta, con dueño y motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida en la que se han leído cien posiciones WHEN se inspecciona todo lo escrito en el almacén THEN no hay ningún histórico de posiciones ni ninguna lista que crezca con lo andado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN esa misma salida WHEN se lee el documento de partida THEN la única coordenada que contiene es el punto de partida de la salida en curso, y las únicas marcas de tiempo del sensor son las que el esquema declara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "Las marcas son tres y no dos, y la diferencia se dice en lugar de disimularse: `ultimoPropioMs` y `ultimaMarcaMs` miden el plazo, y `regreso.dentroDesdeMs` es el reloj de permanencia de `regreso.js`, también de SPEC-030 y también declarado. La propiedad es que el conjunto sea cerrado y pequeño, y que una cuarta ponga esto rojo."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una salida cerrada y su telón leído WHEN se abre otra THEN el punto de partida y las marcas de la anterior no siguen ahí: mueren con la salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El punto de partida y las marcas mueren con la salida",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la copia exportada tras esa salida WHEN se busca dentro THEN tampoco hay traza ni histórico.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "escenario": "El rastro de ubicación no se guarda nunca",
+      "nota": "La copia es el documento congelado, así que lo que afirma `marcha.test.mjs` sobre lo escrito vale igual para lo exportado; la exportación sin rastro está probada desde SPEC-039."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la salida entera con servicio en primer plano corriendo WHEN se inspecciona el tráfico saliente THEN no sale ninguna posición.",
+      "nivel": "@red",
+      "fichero": "test/nucleo/sin-red.test.mjs",
+      "caso": "Las coordenadas salen una sola vez, al generar el mapa",
+      "escenario": "Las coordenadas salen una sola vez, al generar el mapa",
+      "nota": "El inspector de tráfico saliente es de SPEC-026 y la afirmación no cambia con esta fila: la cadena del sensor no tiene ningún cliente de red, y eso se afirma además leyendo lo que sus módulos importan."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN los módulos de ubicación y de rótulo de esta fila WHEN se inspecciona su código THEN no generan ni leen ningún identificador por instalación, ni anónimo ni de depuración.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Los módulos de ubicación y de rótulo no generan ningún identificador por instalación",
+      "hueco_de_bateria": true,
+      "nota": "La batería tiene el escenario del proxy que no identifica a nadie, pero no uno para el identificador por instalación en el dispositivo."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una posición leída del sensor WHEN pasa por la fuente y por el seguidor THEN los campos que no hacen falta se tiran en el punto de entrada y no más adelante.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una posición del sensor entra con cuatro campos y ninguno más",
+      "escenario": "De cada posición del sensor sobreviven cuatro campos"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el seguidor WHEN se busca en su superficie una operación que devuelva un histórico THEN no existe ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El seguidor no tiene ninguna operación que devuelva un histórico",
+      "escenario": "El rastro de ubicación no se guarda nunca"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la notificación del rótulo WHEN se lee todo lo que muestra THEN no lleva ninguna coordenada, ningún nombre real de sitio ni ninguna cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El servicio en primer plano se pide por distancia y con la precisión que el detector necesita",
+      "escenario": "La salida sigue viva con el móvil bloqueado"
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN `packages/nucleo/` WHEN se enumeran sus imports THEN no aparecen `expo-location`, `expo-task-manager`, ningún otro módulo de Expo ni nada de React Native.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El paquete compartido sigue sin saber que existe Expo",
+      "hueco_de_bateria": true,
+      "nota": "La frontera del núcleo es la red de seguridad del determinismo, y no es una regla del juego: no tiene escenario en la batería y no debería tenerlo."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN un clon limpio sin `node_modules` WHEN se ejecuta la batería de `@nucleo` THEN arranca y pasa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El paquete compartido sigue sin saber que existe Expo",
+      "hueco_de_bateria": true,
+      "nota": "Comprobado moviendo `node_modules` de sitio y volviendo a lanzar la batería entera: mismos 2634 casos y mismos resultados."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la misma secuencia de posiciones inyectada dos veces sobre el mismo mundo THEN la traza clasificada, el plazo del rótulo y el cierre por regreso salen idénticos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Dos recorridos idénticos dan la misma traza, el mismo plazo y el mismo cierre",
+      "escenario": "Dos generaciones con la misma semilla dan el mismo mundo",
+      "nota": "El escenario del determinismo se reutiliza sobre el otro eje de la fila: aquí lo que se repite no es la generación sino el recorrido, y lo que tiene que salir idéntico es la traza, el plazo y el cierre."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN una posición con marca anterior a la última recibida WHEN llega a la capa de salidas THEN falla nombrándola, en lugar de tratarla como reciente.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Una posición con la marca hacia atrás falla nombrándola en vez de contar como reciente",
+      "hueco_de_bateria": true,
+      "nota": "La batería no tiene escenario para una posición con la marca hacia atrás: es una avería del sensor, no una vía del juego."
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN el recuento de pantallas huérfanas WHEN se mide al terminar esta fila THEN sigue en ocho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pantallas-huerfanas.test.mjs",
+      "caso": "El recuento es el medido y no ha subido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048",
+      "criterio": "GIVEN la columna de flujos de límite declarado, hoy en nueve, WHEN se mide al terminar esta fila THEN sale como mucho uno, `en-marcha.yaml`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
+      "hueco_de_bateria": true,
+      "nota": "Sale exactamente uno y la columna queda en ocho. Medido en `wa-pixel` el 11-ago-2026: `en-marcha.yaml` recorre la pantalla de verdad en 103 s desde la portada, con el arranque entero dentro."
     }
   ]
 }

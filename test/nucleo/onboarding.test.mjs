@@ -929,10 +929,34 @@ describe('El arranque es determinista', () => {
 
 describe('Lo que esta entrega no trae, y lo dice en vez de fingirlo', () => {
   test('No hay módulo nativo de ubicación: «Permitir» sale apagado con su motivo y la vía manual queda entera', async () => {
-    const { proveedorSinMontar, creaProveedorDeUbicacion } = await import('../../app/plataforma/ubicacion.js');
+    // REEXPRESADO en SPEC-048, y la reexpresión es el contenido del caso.
+    //
+    // Este caso afirmaba el motivo **literal** del proveedor sin montar —«ninguna spec ha
+    // nombrado la dependencia»— y esa frase dejó de ser cierta en cuanto la fila 48 nombró
+    // `expo-location`: el módulo existe. Con el literal puesto, el caso se pone rojo por
+    // una razón que no es un defecto, que es la otra mitad de §6o —un criterio que no
+    // puede cumplirse no mide nada, igual que uno que no puede fallar.
+    //
+    // Lo que de verdad protegía este caso **no era la frase, era la conducta**, y sigue
+    // entera: una compilación puede no traer el módulo dentro aunque `app.json` declare el
+    // plugin, y entonces «Permitir» sale apagado con su motivo a la vista y la vía manual
+    // llega hasta el final. Eso es lo que se afirma ahora, más el vocabulario cerrado de
+    // A1P3 que la fila 48 añadió, que es lo que hace que **denegar y no poder preguntar se
+    // vean distintos**. El motivo se sigue exigiendo —una frase vacía valdría igual que no
+    // tenerlo— pero por lo que tiene que decir: que el módulo no está en esta compilación.
+    const { proveedorSinMontar, creaProveedorDeUbicacion, creaProveedorDeUbicacionDeExpo } = await import('../../app/plataforma/ubicacion.js');
     const proveedor = proveedorSinMontar();
     assert.equal(proveedor.montado, false, 'el proveedor sin montar dice estar montado');
-    assert.match(proveedor.motivo, /ninguna spec ha nombrado la dependencia/);
+    assert.ok(proveedor.motivo && proveedor.motivo.length > 20, 'el proveedor sin montar no dice por qué no está');
+    assert.match(proveedor.motivo, /no está en esta compilación|no montado/);
+    // Y un binario sin el módulo dentro se distingue de un `app.json` con el plugin
+    // puesto, que es la pregunta que solo se puede hacer aquí: el constructor sobre
+    // `expo-location` devuelve `null` cuando no hay módulo, y **no** un proveedor que
+    // finja. Con `null` quien monta pone el sin montar; con un proveedor que fingiera,
+    // «Permitir» respondería algo y nadie se enteraría de que no hay sensor detrás.
+    assert.equal(creaProveedorDeUbicacionDeExpo(undefined), null);
+    assert.equal(creaProveedorDeUbicacionDeExpo({}), null);
+    assert.equal(creaProveedorDeUbicacionDeExpo({ requestForegroundPermissionsAsync: () => {} }), null, 'un módulo a medias tiene que contar como ausente');
     // Lo que **no** hace es responder «denegado»: eso convertiría una pieza sin
     // cablear en una decisión de quien juega, y la vía manual dejaría de ser una
     // elección para pasar a ser una caída silenciosa.
@@ -955,12 +979,30 @@ describe('Lo que esta entrega no trae, y lo dice en vez de fingirlo', () => {
     assert.match(pantalla, /const sinMontar = proveedor \? proveedor\.montado === false : false;/);
     assert.match(pantalla, /apagada=\{sinMontar\}/);
     assert.match(pantalla, /motivo=\{sinMontar \? proveedor\.motivo : null\}/);
-    // El montaje real monta ese y no uno que deniegue.
-    assert.match(fuente('app/pantallas/arranque-montado.jsx'), /ubicacion \?\? proveedorSinMontar\(\)/);
-    // Y el contrato del módulo nativo existe entero, para el día que la dependencia
-    // se nombre: lo que falta es el módulo, no la frontera.
+    // El montaje real monta ese y no uno que deniegue, y **desde SPEC-048 monta antes el
+    // de verdad**: el de `expo-location` si el módulo está, y el sin montar si no.
+    const montado = fuente('app/pantallas/arranque-montado.jsx');
+    assert.match(montado, /ubicacion \?\? proveedorSinMontar\(\)/);
+    assert.match(montado, /creaProveedorDeUbicacionDeExpo\(Location\)/);
+    // Y el contrato sigue entrando por la firma: el módulo nativo llega inyectado y no
+    // importado, que es lo que mantiene esta prueba ejecutable sin `node_modules`.
     assert.equal(typeof creaProveedorDeUbicacion, 'function');
     assert.throws(() => creaProveedorDeUbicacion({}), /pidePermiso\(\) y leePosicion\(\)/);
+
+    // Y la marca de A1P3, que es lo que hace afirmable que las tres respuestas se ven
+    // distintas. Cuatro y solo cuatro: `denegado` sigue por la vía normal y
+    // `no-se-pudo-preguntar` se queda en la pantalla con el motivo literal. Se lee del
+    // texto y no importando el módulo: `arranque.jsx` trae JSX y Node no lo carga, que es
+    // la misma frontera por la que el resto de este caso lee la pantalla como fuente.
+    assert.match(
+      pantalla,
+      /export const RESPUESTAS_DEL_PERMISO = Object\.freeze\(\['sin-pedir', 'concedido', 'denegado', 'no-se-pudo-preguntar'\]\);/,
+      'A1P3 no declara el vocabulario cerrado de la respuesta del permiso',
+    );
+    assert.match(pantalla, /setRespuestaDelPermiso\('no-se-pudo-preguntar'\)/, 'no poder preguntar no deja marca propia: se confundiría con denegar');
+    assert.match(pantalla, /testID="permiso-respuesta"/);
+    assert.match(pantalla, /testID="ubicacion-estado"/);
+    assert.match(pantalla, /accessibilityLabel=\{sinMontar \? 'sin-montar' : 'montado'\}/);
   });
 
   test('No hay capa de teselas para A1P4: la superficie declara «sin-mapa-real» en vez de fingir un mapa', () => {

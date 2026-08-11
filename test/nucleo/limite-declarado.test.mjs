@@ -37,7 +37,7 @@ import { fuente } from './mundo-de-prueba.mjs';
  * descubriera leyendo el directorio, marcar un flujo nuevo no costaría nada y el
  * marcador dejaría de ser un acto deliberado, que es lo único que aporta.
  *
- * Los cinco que NO están, y por qué:
+ * Los seis que NO están, y por qué:
  *
  * - `arranque.yaml` recorre la app entera, de A1P1 a A1P7.
  * - `antes-de-salir.yaml` y `zurron.yaml` no tienen guarda ninguna: empiezan con
@@ -45,12 +45,20 @@ import { fuente } from './mundo-de-prueba.mjs';
  * - `ajustes.yaml` y `empezar-de-nuevo.yaml` **salieron de esta lista con la fila 43**,
  *   que montó el momento de consulta: se entra por `puerta-ajustes`, que es la del pie de
  *   la portada, y desde ahí a A6P7. Recorrido medido en `wa-pixel` el 10-ago-2026.
+ * - `en-marcha.yaml` **salió de esta lista con la fila 48**, que cableó el módulo de
+ *   ubicación y el rótulo del sistema: «Salir a andar sin más» abre una salida de verdad y
+ *   deja el momento en marcha en pantalla. Recorrido medido en `wa-pixel` el 11-ago-2026,
+ *   **103 s de principio a fin** con el arranque entero dentro — un flujo que tarda diez
+ *   segundos no ha recorrido nada, y este recorre. Lo que el flujo no puede comprobar y por
+ *   qué está escrito en su cabecera, medido y no supuesto.
+ *
+ * La columna pasa de nueve a ocho, y sale **uno solo**: `llegada.yaml`, `visor.yaml` y
+ * `descarte.yaml` dependen del camino de la llegada, que es la fila 44 entera.
  */
 const FLUJOS_DE_LIMITE_DECLARADO = [
   'ajustes-filas-de-valor.yaml',
   'descarte.yaml',
   'diario.yaml',
-  'en-marcha.yaml',
   'escena.yaml',
   'llegada.yaml',
   'mapas.yaml',
@@ -218,9 +226,10 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
 
   test('Los flujos que recorren la app de verdad no llevan marcador', () => {
     // La otra mitad del contrato, y la que evita que esto se convierta en una manera
-    // barata de callar un rojo: los tres flujos que sí recorren pantallas no pueden
-    // marcarse sin que alguien lo vea aquí.
-    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'zurron.yaml']) {
+    // barata de callar un rojo: los flujos que sí recorren pantallas no pueden marcarse
+    // sin que alguien lo vea aquí. `en-marcha.yaml` entra en esta lista con la fila 48, que
+    // es lo que impide que vuelva a la columna sin que nadie se entere.
+    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'zurron.yaml', 'en-marcha.yaml']) {
       const texto = fuente(`test/app/${fichero}`);
       assert.ok(
         !texto.split('\n').some((l) => l.trim() === MARCADOR),

@@ -44,7 +44,10 @@ import {
   MODOS_DE_FONDO,
   MODULOS_DE_FONDO_QUE_NO_SE_MONTAN,
   PERMISOS_QUE_SE_PIDEN,
+  PERMISOS_QUE_UNA_LIBRERIA_EXIGE,
   TAREAS_PERIODICAS,
+  TAREAS_QUE_LA_APP_DEFINE,
+  exigeTareaDeclarada,
   revisaLaDeclaracion,
 } from '../../app/plataforma/permisos.js';
 import {
@@ -337,8 +340,36 @@ describe('Lo que la app declara pedir y lo que nunca declara', () => {
     // Es la puerta por la que se cuela trabajo de fondo **sin pedir ningún permiso
     // nuevo**, así que la lista existe justamente para poder poner roja su ausencia.
     assert.deepEqual([...TAREAS_PERIODICAS], []);
+
+    // REEXPRESADO en SPEC-048 por partida doble, y las dos mitades hay que contarlas
+    // enteras porque las dos contradicen lo que este caso daba por hecho.
+    //
+    // **Uno: el sustituto se cambia por la propiedad.** Hasta esta fila la guarda decía
+    // «ninguna dependencia de la app está en `MODULOS_DE_FONDO_QUE_NO_SE_MONTAN`», y esa
+    // lista contenía `expo-task-manager`. La fila 48 lo mete —es con lo que se define la
+    // tarea del servicio en primer plano que sostiene «mientras se usa» con la pantalla
+    // apagada, que es exactamente lo que `seguridad-privacidad.md` §2 nombra como la razón
+    // de **no** pedir el permiso permanente—, así que el caso se ponía rojo por
+    // aritmética. Igual que el caso del modo de fondo dos más abajo, lo que estaba mal era
+    // el instrumento: la lista de módulos era un **sustituto** de la propiedad que importa
+    // —«no hay trabajo periódico que lea con la app cerrada»— y valía mientras nada
+    // legítimo necesitara el módulo. Se cambia por la propiedad, y queda más fuerte: las
+    // tareas se enumeran **una a una** con su motivo y su dueña, y registrar una sin
+    // declararla es error de construcción y no un descuido silencioso.
+    //
+    // **Dos: `RECEIVE_BOOT_COMPLETED` está en el manifiesto y no lo trajo esta fila.**
+    // Este caso lo buscaba en `app.json` y no lo encontraba nunca, y mientras tanto el
+    // permiso llevaba **desde SPEC-023** dentro del APK: lo inyecta el
+    // `AndroidManifest.xml` de `expo-notifications` al fusionarse. O sea que la guarda
+    // pasaba en verde sobre una promesa rota, porque miraba el fichero de entrada en lugar
+    // de lo que va al binario. Lo que la fila 48 hace es **sacarlo a la luz declarándolo**
+    // con su motivo en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE`, y quien mira donde hay que mirar
+    // es la guarda nueva, `test/nucleo/manifiesto-generado.test.mjs`. Aquí el patrón sale
+    // —seguir buscándolo en `app.json` sería exigir que el permiso siga escondido— y a
+    // cambio se exige que **esté declarado con lo que se hace a cambio**: un permiso que
+    // una librería impone y que nadie justifica vuelve a ser un permiso colado.
     const texto = fuente('app/app.json');
-    for (const patron of [/BGTaskScheduler/, /background-fetch/, /backgroundFetch/, /RECEIVE_BOOT_COMPLETED/, /SCHEDULE_EXACT_ALARM/]) {
+    for (const patron of [/BGTaskScheduler/, /background-fetch/, /backgroundFetch/, /SCHEDULE_EXACT_ALARM/]) {
       assert.equal(patron.test(texto), false, `app.json declara trabajo periódico (${patron})`);
     }
     // Y los módulos que lo traerían no están montados: la dependencia también es una
@@ -347,6 +378,49 @@ describe('Lo que la app declara pedir y lo que nunca declara', () => {
     for (const modulo of MODULOS_DE_FONDO_QUE_NO_SE_MONTAN) {
       assert.equal(dependencias.includes(modulo), false, `la app monta "${modulo}", que es fondo con otro nombre`);
     }
+    // Los dos que quedan prohibidos son los dos que son fondo de verdad. Que la lista no
+    // se pueda vaciar es parte de la guarda: con cero entradas el bucle de arriba pasa
+    // trivialmente, que es la forma barata de callar esto.
+    assert.deepEqual([...MODULOS_DE_FONDO_QUE_NO_SE_MONTAN], ['expo-background-fetch', 'expo-background-task']);
+
+    // Las tareas que la app define, una a una. Exactamente una, y muere con la salida.
+    assert.deepEqual(TAREAS_QUE_LA_APP_DEFINE.map((t) => t.id), ['salida-abierta']);
+    for (const tarea of TAREAS_QUE_LA_APP_DEFINE) {
+      assert.ok(tarea.porque && tarea.porque.length > 20, `la tarea "${tarea.id}" no dice para qué está`);
+      assert.ok(tarea.dueña, `la tarea "${tarea.id}" no dice de quién es`);
+    }
+    // Y registrar una sin declararla es error de construcción, no un descuido: es la
+    // puerta que la lista de módulos cerraba de refilón y esta cierra de frente.
+    assert.throws(
+      () => exigeTareaDeclarada('lo-que-sea'),
+      /no está declarada en TAREAS_QUE_LA_APP_DEFINE/,
+      'una tarea sin declarar se puede registrar: la guarda no está cerrando nada',
+    );
+    assert.equal(exigeTareaDeclarada('salida-abierta').id, 'salida-abierta');
+    // El registro pasa de verdad por ahí, y no es un adorno que nadie llame: la
+    // suscripción exige la guarda y se niega a montarse sin ella.
+    const posiciones = fuente('app/plataforma/posiciones.js');
+    assert.match(posiciones, /declaraTarea\(tarea, /, 'la suscripción registra la tarea sin pasar por la guarda');
+    assert.match(fuente('app/marcha/salida-montada.js'), /declaraTarea: exigeTareaDeclarada/);
+
+    // El permiso que la librería impone: declarado, con quién lo exige, por qué no se
+    // quita y qué se hace a cambio. Sin las cuatro cosas es un permiso colado con nota.
+    for (const permiso of PERMISOS_QUE_UNA_LIBRERIA_EXIGE) {
+      for (const campo of ['quienLoExige', 'porQueNoSeQuita', 'aCambio', 'dueña']) {
+        assert.ok(permiso[campo] && String(permiso[campo]).length > 10, `el permiso impuesto "${permiso.id}" no dice "${campo}"`);
+      }
+    }
+    // Y la lista de lo que nunca se declara **no se puede vaciar ni adelgazar en
+    // silencio**: lo que salga de ella tiene que aparecer en la de permisos impuestos,
+    // con su motivo. Es la misma regla que la de módulos, un nivel más arriba.
+    assert.ok(LO_QUE_NUNCA_SE_DECLARA.length > 0, 'la lista de lo que nunca se declara está vacía: así no puede ponerse roja nunca');
+    const nombrados = new Set([...LO_QUE_NUNCA_SE_DECLARA, ...PERMISOS_QUE_UNA_LIBRERIA_EXIGE.map((p) => p.id)]);
+    for (const peligroso of ['ACCESS_BACKGROUND_LOCATION', 'RECEIVE_BOOT_COMPLETED']) {
+      assert.equal(nombrados.has(peligroso), true, `"${peligroso}" ha desaparecido de las dos listas: es de los dos que esta fila hace peligrosos y no puede dejar de estar nombrado`);
+    }
+    // El permanente sigue en la lista dura y **no** puede mudarse a la de impuestos: ese
+    // es el único que no tiene ninguna librería que lo justifique.
+    assert.equal(LO_QUE_NUNCA_SE_DECLARA.includes('ACCESS_BACKGROUND_LOCATION'), true);
   });
 
   test('El único modo de fondo declarado es el que sostiene «mientras se usa»', () => {

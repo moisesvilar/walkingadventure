@@ -24,13 +24,15 @@
 #
 # **Lo que este flujo NO puede comprobar todavía, y por qué:**
 #
-# - **El diálogo del sistema al pulsar «Permitir».** Esta entrega no trae módulo nativo
-#   de ubicación —ninguna spec ha nombrado la dependencia—, así que «Permitir» sale
-#   apagado con su motivo al lado y el diálogo no existe. Los pasos van escritos bajo
-#   `runFlow` con condición, para que el día que la dependencia entre no haya que
-#   reescribir el flujo. Que la vía manual queda entera sí se recorre aquí.
 # - **Denegar en el diálogo nativo, en las dos plataformas.** Ningún automatismo lo
-#   provoca de forma fiable: es `@manual`, y así lo declara la spec.
+#   provoca de forma fiable: es `@manual`, y así lo declara la spec. Conceder sí se
+#   recorre aquí desde SPEC-048 (ver A1P3).
+# - **Que la marca de A1P4 caiga en la posición que dio el sensor.** El fijo que entrega
+#   el emulador depende de lo que tenga puesto `adb emu geo fix` en ese momento, y una
+#   afirmación sobre la coordenada convertiría el estado del emulador en el resultado de
+#   la prueba. Lo que sí se afirma es lo que distingue las dos vías: `permiso-respuesta`
+#   dice `concedido` y **no** `no-se-pudo-preguntar`, y el origen del punto se afirma en
+#   `test/nucleo/onboarding.test.mjs`, que corre sin dispositivo.
 # - **El mapa real de A1P4.** No hay capa de teselas —misma razón—, así que la
 #   superficie declara `sin-mapa-real`. Lo que sí se ejercita es el gesto: la marca y
 #   el círculo se pintan encima y son de la pantalla, no de ninguna librería.
@@ -179,20 +181,53 @@ appId: com.walkingadventure.app
 - assertVisible:
     id: 'permiso-a-mano'
 
-# El diálogo del sistema, cuando exista el módulo nativo. Mientras no exista, «Permitir»
-# sale apagado con su motivo y este bloque no entra.
+# Antes de pedir nada, la marca dice `sin-pedir`. Es lo que hace afirmable que denegar y
+# no poder preguntar se ven distintos: las tres respuestas viven en el mismo sitio.
+- assertVisible:
+    id: 'permiso-respuesta'
+- assertVisible: 'sin-pedir'
+# Y hay con qué pedirlo: desde SPEC-048 el módulo de ubicación está en la compilación, así
+# que «Permitir» no sale apagado. Si saliera apagado, esta línea lo dice con su nombre en
+# vez de dejar que el flujo se vaya por la vía manual como si fuera una elección.
+- assertVisible:
+    id: 'ubicacion-estado'
+- assertVisible: 'montado'
+- assertNotVisible:
+    id: 'permiso-permitir-motivo'
+
+- tapOn:
+    id: 'permiso-permitir'
+
+# El diálogo del sistema. Va condicionado y **se localiza por el identificador del
+# controlador de permisos de Android, no por su texto**: el diálogo lo escribe el sistema
+# en el idioma del móvil, y una afirmación sobre «Ubicación» convertía el idioma del
+# emulador en el resultado de la prueba (medido el 11-ago-2026: en `wa-pixel` sale en
+# inglés y esta línea moría aquí). La condición existe porque el sistema **recuerda la
+# respuesta**: con el permiso ya concedido de una tanda anterior no vuelve a preguntar, y
+# `clearState` no siempre lo revoca.
 - runFlow:
     when:
-      notVisible:
-        id: 'permiso-permitir-motivo'
+      visible:
+        id: 'com.android.permissioncontroller:id/permission_allow_foreground_only_button'
     commands:
+      # **«Mientras se usa» y ninguna otra puerta.** Que el diálogo no ofrezca «todo el
+      # rato» es la exclusión 12 del PRD vista desde donde de verdad se rompe: si algún día
+      # alguien enciende la ubicación de fondo en el plugin, este botón aparece y esto se
+      # pone rojo. Es la mitad que `test/nucleo/pasos-de-fondo.test.mjs` no puede afirmar.
+      - assertNotVisible:
+          id: 'com.android.permissioncontroller:id/permission_allow_always_button'
       - tapOn:
-          id: 'permiso-permitir'
-      - assertVisible: '.*[Uu]bicación.*'
-      - assertVisible:
-          id: 'arranque'
+          id: 'com.android.permissioncontroller:id/permission_allow_foreground_only_button'
 
-# La vía manual, que es la que esta entrega recorre entera.
+# Conceder lleva a A1P4 y **no se queda en A1P3**: la respuesta se lee en la marca, que es
+# nuestra y no depende del idioma del sistema. Lo que nunca puede salir de aquí es
+# `no-se-pudo-preguntar`: eso sería que el proveedor no pudo ni preguntar, que es avería
+# nuestra y se arregla en otro sitio.
+- assertNotVisible: 'no-se-pudo-preguntar'
+
+# La vía manual sigue entera y **sigue estando disponible**, que es la regla del arranque:
+# se recorre solo si el permiso no llegó a concederse, porque con él concedido A1P3 ya ha
+# quedado atrás.
 - runFlow:
     when:
       visible:

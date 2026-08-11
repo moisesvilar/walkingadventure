@@ -626,6 +626,121 @@ Característica: El árbitro es el código y el narrador es el LLM
 ```gherkin
 # language: es
 
+@app @bucle @privacidad
+Característica: El permiso de ubicación se pide una vez y denegarlo no es un problema
+  Fuente: seguridad-privacidad.md §1 §2 · lenguaje.md · artefacto 1 pantallas 3 y 4
+
+  Escenario: Conceder el permiso deja la marca donde la puso el sensor
+    Dado un jugador en la pantalla del permiso de una instalación limpia
+    Cuando pulsa "Permitir" y concede
+    Entonces pasa a elegir dónde se levanta el mapa
+    Y la marca está en la posición que entregó el sensor
+    Y el origen del punto queda anotado como concedido
+
+  Escenario: Denegar el permiso sigue por la vía manual sin llamarlo problema
+    Dado un jugador en la pantalla del permiso
+    Cuando pulsa "Permitir" y deniega
+    Entonces pasa a elegir dónde se levanta el mapa igual
+    Y la marca está en el punto por defecto
+    Y no aparece ninguna pantalla intermedia
+    Y ningún texto lo llama error
+
+  Escenario: No poder preguntar el permiso se queda en la pantalla y lo dice
+    Dado un jugador en la pantalla del permiso y un sistema que falla al preguntar
+    Cuando pulsa "Permitir"
+    Entonces se queda en la pantalla del permiso
+    Y ve el motivo literal del fallo
+    Y no pasa a la siguiente como si hubiera denegado
+
+  Escenario: Sin módulo de ubicación "Permitir" sale apagado y la vía manual queda entera
+    Dado una compilación que no trae el módulo de ubicación
+    Cuando el jugador abre la pantalla del permiso
+    Entonces "Permitir" está apagado con su motivo a la vista
+    Y la vía de elegir el punto a mano llega hasta el final
+
+  Escenario: El diálogo del sistema no ofrece la ubicación permanente
+    Dado un jugador en la pantalla del permiso
+    Cuando pulsa "Permitir" y el sistema pregunta
+    Entonces el diálogo ofrece la ubicación mientras se usa la app
+    Y no ofrece ninguna opción de ubicación permanente
+```
+
+```gherkin
+# language: es
+
+@nucleo @bucle @privacidad
+Característica: La cadena del sensor de una salida es una y va en orden
+  Fuente: seguridad-privacidad.md §2 · bucle-jugable.md §8 · accesibilidad.md §3
+
+  Escenario: Una salida abierta tiene una sola suscripción al sensor
+    Dado un jugador que echa a andar
+    Cuando se cuentan las suscripciones al sensor
+    Entonces hay exactamente una
+    Y de ella cuelgan la fuente de posiciones y el seguidor
+
+  Escenario: De cada posición del sensor sobreviven cuatro campos
+    Dado un módulo de ubicación que entrega precisión, rumbo, altitud y velocidad
+    Cuando la posición entra en la app
+    Entonces solo se copian la latitud, la longitud, la marca y la precisión
+    Y una lectura sin precisión declarada la deja sin saber y nunca en cero
+
+  Escenario: La posición llega al seguidor ya clasificada
+    Dado una salida abierta con el detector de transporte montado
+    Cuando el seguidor entrega una posición
+    Entonces viene clasificada en andando, parada, vehículo o ambiguo
+    Y la clasificación la produjo el detector y no la pantalla
+
+  Escenario: Tras una interrupción la traza se vuelve a anclar
+    Dado una salida abierta que lleva un rato sin recibir posiciones
+    Cuando llega la primera posición nueva
+    Entonces no forma tramo con la última de antes de la interrupción
+
+  Escenario: Sin permiso de ubicación no se abre ninguna salida
+    Dado un jugador con el permiso de ubicación denegado
+    Cuando echa a andar
+    Entonces la salida no se abre
+    Y se dice que sin punto de partida no hay regreso que detectar
+
+  Escenario: Una salida que se cierra deja el sensor sin nadie leyendo
+    Dado una salida abierta que se cierra por cualquiera de sus vías
+    Cuando se mira el sensor
+    Entonces la suscripción queda retirada
+```
+
+```gherkin
+# language: es
+
+@app @bucle
+Característica: El rótulo del sistema es austero y visible a propósito
+  Fuente: seguridad-privacidad.md §2 · bucle-jugable.md §8
+
+  Escenario: El rótulo no se puede descartar deslizando
+    Dado un jugador con una salida abierta
+    Cuando intenta descartar el rótulo deslizándolo
+    Entonces el rótulo sigue ahí
+
+  Escenario: El canal del rótulo no avisa de nada
+    Dado un jugador con una salida abierta
+    Cuando se mira el canal de notificación del rótulo
+    Entonces su importancia es baja
+    Y el rótulo no suena ni enciende la pantalla
+
+  Escenario: El momento en marcha se alcanza andando desde la portada
+    Dado un jugador en la portada con el permiso concedido
+    Cuando pulsa "Salir a andar sin más"
+    Entonces la salida queda abierta con el rótulo puesto
+    Y lo que ve es el momento en marcha con su marca de posición
+
+  Escenario: En iOS una salida no se abre y se dice por qué
+    Dado un jugador con una compilación de iOS
+    Cuando echa a andar
+    Entonces la salida no se abre
+    Y el motivo que se enseña es el del rótulo que falta
+```
+
+```gherkin
+# language: es
+
 @app @bucle
 Característica: Antes de salir es el único momento que pide atención
   Fuente: bucle-jugable.md cuatro momentos §3 §4 · artefacto 2
