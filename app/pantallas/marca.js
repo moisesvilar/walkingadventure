@@ -28,3 +28,27 @@ export const MARCA = { width: 1, height: 1 };
  * el rectángulo es siempre el mismo y siempre legible.
  */
 export const MARCA_SUPERPUESTA = { position: 'absolute', top: 0, left: 0, width: 1, height: 1 };
+
+/**
+ * El estilo de **una marca superpuesta entre varias**, apartada de sus hermanas.
+ *
+ * Es la misma forma de fallo que arriba, un paso más allá y descubierta el 11-ago-2026: seis
+ * marcas del momento en marcha caían las seis en el mismo `[0,0][3,3]`, apiladas, y Maestro
+ * descarta como invisible todo lo que tapa un hermano. Que sean 1×1 no basta si están todas
+ * en el mismo punto: **ninguna de las seis se podía afirmar**. Arreglar 0×0 y dejar el
+ * apilamiento es arreglar la mitad del problema.
+ *
+ * Cada una se aparta un punto independiente de densidad a la derecha, así que sus rectángulos
+ * no se tocan. Sigue sin verse, sigue sin tocarse y sigue sin desplazar nada, porque va fuera
+ * del flujo; un punto por marca es un coste que no existe.
+ *
+ * `fila` es para las marcas de un **envoltorio**, que viven en otro contenedor y no pueden
+ * coordinar su numeración con las de la pantalla que envuelven: con `fila: 1` no chocan con
+ * las de dentro sea cual sea el número que aquellas usen.
+ */
+export function marcaSuperpuesta(n = 0, { fila = 0 } = {}) {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new Error(`una marca superpuesta se aparta por su número de orden y llegó ${JSON.stringify(n) ?? String(n)}`);
+  }
+  return { position: 'absolute', top: fila, left: n, width: 1, height: 1 };
+}

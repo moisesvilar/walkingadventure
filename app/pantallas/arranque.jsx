@@ -26,7 +26,7 @@ import { OFICIOS } from '@walkingadventure/nucleo/quests/oficios.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { MapaRealSinMontar } from './mapa-real.jsx';
 import { PantallaMapa } from './mapa.jsx';
-import { MARCA_SUPERPUESTA } from './marca.js';
+import { marcaSuperpuesta } from './marca.js';
 
 const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
@@ -220,8 +220,8 @@ export function PantallaArranque({
   return (
     <View style={estilos.raiz} testID="arranque">
       {/* Los dos que el sistema de diseño manda declarar siempre. */}
-      <View testID="momento-antes-de-salir" style={estilos.marca} />
-      <View testID="arranque-paso" accessibilityLabel={paso} style={estilos.marca} />
+      <View testID="momento-antes-de-salir" style={marcaSuperpuesta(0)} />
+      <View testID="arranque-paso" accessibilityLabel={paso} style={marcaSuperpuesta(1)} />
 
       {cabecera}
 
@@ -372,7 +372,7 @@ export function PantallaArranque({
 
       {/* El motivo de un fallo viaja como marca y no se pinta: lo que se lee sigue sin
           nombrar la red ni ningún código. */}
-      <View testID="arranque-motivo" accessibilityLabel={fallo ?? ''} style={estilos.marca} />
+      <View testID="arranque-motivo" accessibilityLabel={fallo ?? ''} style={marcaSuperpuesta(2)} />
     </View>
   );
 }
@@ -479,8 +479,8 @@ function ElPermiso({ arranque, alPermitir, alAMano, respuesta = 'sin-pedir' }) {
     <View style={estilos.cuerpo}>
       {/* La respuesta del permiso y si hay con qué pedirlo. Las dos son marcas y no texto:
           lo que se lee en A1P3 no cambia por haber denegado, que es media pantalla. */}
-      <View testID="permiso-respuesta" accessibilityLabel={respuesta} style={estilos.marca} />
-      <View testID="ubicacion-estado" accessibilityLabel={sinMontar ? 'sin-montar' : 'montado'} style={estilos.marca} />
+      <View testID="permiso-respuesta" accessibilityLabel={respuesta} style={marcaSuperpuesta(0, { fila: 1 })} />
+      <View testID="ubicacion-estado" accessibilityLabel={sinMontar ? 'sin-montar' : 'montado'} style={marcaSuperpuesta(1, { fila: 1 })} />
 
       <Text style={estilos.seccion}>{textoDelGuion('el-permiso', 'seccion')}</Text>
       <Text style={estilos.titulo}>{textoDelGuion('el-permiso', 'titulo')}</Text>
@@ -579,7 +579,7 @@ function Accion({ testID, texto, onPress, apagada = false, motivo = null }) {
       </Pressable>
       {/* Una acción apagada dice por qué, y lo dice donde se puede leer con un lector
           de pantalla: un botón que no responde y no explica nada es peor que no estar. */}
-      {apagada ? <View testID={`${testID}-motivo`} accessibilityLabel={motivo ?? ''} style={estilos.marca} /> : null}
+      {apagada ? <View testID={`${testID}-motivo`} accessibilityLabel={motivo ?? ''} style={marcaSuperpuesta(0, { fila: 2 })} /> : null}
     </View>
   );
 }
@@ -653,5 +653,4 @@ const estilos = StyleSheet.create({
   accionTexto: { fontFamily: 'serif', fontSize: 18, color: TINTA, textDecorationLine: 'underline' },
   accionMenor: { marginTop: 14, alignSelf: 'flex-start' },
   accionMenorTexto: { fontSize: 15, color: TINTA, opacity: 0.8 },
-  marca: MARCA_SUPERPUESTA,
 });

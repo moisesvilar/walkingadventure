@@ -47,7 +47,7 @@ import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
 import { AbrirCopia } from './pantallas/copia.jsx';
 import { ConsultaMontada } from './pantallas/consulta-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
-import { MARCA_SUPERPUESTA } from './pantallas/marca.js';
+import { marcaSuperpuesta } from './pantallas/marca.js';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { EnMarchaMontado } from './pantallas/en-marcha-montado.jsx';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
@@ -502,7 +502,7 @@ export function App() {
     return (
       <AreaSegura style={estilos.raiz}>
         <View style={estilos.hueco} testID="telon-sin-pantalla">
-          <View testID="salida-situacion" accessibilityLabel={laSalida.situacion()} style={estilos.marca} />
+          <View testID="salida-situacion" accessibilityLabel={laSalida.situacion()} style={marcaSuperpuesta(0)} />
           <Text style={estilos.huecoTexto}>Esto todavía no está dibujado: el telón de tu última salida.</Text>
           {/* Una sola acción, y **marca el telón como leído**: nunca lo marca el paso de
               nada. Leerlo es un toque de quien lo lee, y esa regla es de SPEC-030. */}
@@ -649,7 +649,6 @@ const estilos = StyleSheet.create({
   huecoTexto: { fontFamily: 'serif', fontSize: 20, lineHeight: 30, color: '#1e2b18' },
   huecoAccion: { paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1e2b18' },
   huecoAccionTexto: { fontFamily: 'serif', fontSize: 18, color: '#1e2b18' },
-  marca: MARCA_SUPERPUESTA,
   averia: { padding: 24, gap: 16 },
   averiaTitular: { fontSize: 20, color: '#1e2b18' },
   averiaMotivo: { fontSize: 13, lineHeight: 19, color: '#1e2b18', opacity: 0.75 },

@@ -36,7 +36,7 @@ import { creaVibradorDeExpo } from '../plataforma/vibrador.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
 import { Lamina } from '../render/lamina.jsx';
 import { PantallaEnMarcha } from './en-marcha.jsx';
-import { MARCA_SUPERPUESTA } from './marca.js';
+import { marcaSuperpuesta } from './marca.js';
 
 /**
  * El encuadre con el que se abre el momento: la celda entera, recentrada sobre la marca de
@@ -136,8 +136,8 @@ export function EnMarchaMontado({
       <View style={estilos.aviso} testID="en-marcha-sin-cablear">
         {/* La avería del momento con su motivo del vocabulario cerrado, y de qué está el
             sensor. Van como marca porque lo que se lee sigue sin nombrar ningún código. */}
-        <View testID="marcha-sin-ubicacion" accessibilityLabel={sinUbicacion ?? ''} style={estilos.marca} />
-        <View testID="ubicacion-estado" accessibilityLabel="sin-montar" style={estilos.marca} />
+        <View testID="marcha-sin-ubicacion" accessibilityLabel={sinUbicacion ?? ''} style={marcaSuperpuesta(0, { fila: 1 })} />
+        <View testID="ubicacion-estado" accessibilityLabel="sin-montar" style={marcaSuperpuesta(1, { fila: 1 })} />
         <Text style={estilos.texto}>{fallo ?? TEXTOS_SIN_UBICACION[sinUbicacion]}</Text>
       </View>
     );
@@ -146,8 +146,11 @@ export function EnMarchaMontado({
   return (
     <View style={estilos.pila}>
       {/* El sensor está montado y la marca se mueve con él. La marca de estado va aquí y
-          no dentro de la pantalla porque es del montaje: dice qué se cableó, no qué se ve. */}
-      <View testID="ubicacion-estado" accessibilityLabel={seguidor ? 'montado' : 'sin-montar'} style={estilos.marca} />
+          no dentro de la pantalla porque es del montaje: dice qué se cableó, no qué se ve.
+          Y va en **su propia fila** de marcas: vive en otro contenedor que el de la pantalla
+          que envuelve, así que no puede coordinar su número de orden con los de dentro, y
+          dos marcas en el mismo punto son dos marcas que la automatización no puede leer. */}
+      <View testID="ubicacion-estado" accessibilityLabel={seguidor ? 'montado' : 'sin-montar'} style={marcaSuperpuesta(0, { fila: 1 })} />
       <PantallaEnMarcha
         momento={montaje.momento}
         documento={mundo}
@@ -179,5 +182,4 @@ const estilos = StyleSheet.create({
   pila: { flex: 1 },
   aviso: { flex: 1, padding: 24 },
   texto: { fontSize: 14, lineHeight: 20 },
-  marca: MARCA_SUPERPUESTA,
 });

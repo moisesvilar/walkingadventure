@@ -70,6 +70,30 @@ function mensaje(e) {
 }
 
 /**
+ * Una copia mutable de un área congelada. Devuelve **la misma referencia** si ya lo era, que
+ * es el caso normal y el que no se puede tocar: el área que se muta tiene que seguir siendo
+ * la que la partida congela y exporta.
+ *
+ * Existe como red y no como camino. `cargaPartida` devuelve lo suyo con `congelaHondo`, y
+ * quien abra la partida sin deshelarla —hasta el 11-ago-2026, `app/datos/partida-guardada.js`—
+ * le pasaría a esta orquestación un área que `abreSalida` no puede mutar. Lo que se llevaba
+ * puesto era un `TypeError` del intérprete enseñado bajo «Salir a andar», que no es ni una
+ * respuesta del vocabulario cerrado ni algo que nadie pueda arreglar leyéndolo. Con la red,
+ * lo peor que pasa es lo declarado en `areaPropia()`; sin ella, la app se rompía el segundo
+ * día. El arreglo de verdad está en quien abre la partida, y esto es lo que impide que el
+ * mismo descuido vuelva a salir por la peor puerta posible.
+ */
+function descongelaElArea(salidas) {
+  if (!Object.isFrozen(salidas)) return { area: salidas, descongelada: false };
+  const copia = (valor) => {
+    if (Array.isArray(valor)) return valor.map(copia);
+    if (valor && typeof valor === 'object') return Object.fromEntries(Object.entries(valor).map(([k, v]) => [k, copia(v)]));
+    return valor;
+  };
+  return { area: copia(salidas), descongelada: true };
+}
+
+/**
  * La respuesta de «no se abre», con su marca comprobada contra el vocabulario cerrado. Una
  * marca inventada falla aquí y no en la pantalla, que es donde nadie la miraría.
  */
@@ -91,15 +115,18 @@ function noSeAbre(marca, motivo) {
  *   quien juega, del que sale la distancia de alejamiento del regreso; `alCambiar` a quién
  *   se avisa cuando algo se movió, que es cómo la pantalla se entera sin sondear.
  */
-export function creaLaSalida({ nucleo, salidas, rotulo, suscripcion = null, origen = null, tramo = null, alCambiar = null, pidePermisoDeAviso = null }) {
+export function creaLaSalida({ nucleo, salidas: areaRecibida, rotulo, suscripcion = null, origen = null, tramo = null, alCambiar = null, pidePermisoDeAviso = null }) {
   if (!nucleo) throw new Error('la vida de una salida necesita el núcleo inyectado: es quien decide las transiciones, el plazo y el regreso');
   const faltan = DEL_NUCLEO.filter((n) => nucleo[n] == null);
   if (faltan.length) {
     throw new Error(`al núcleo inyectado le faltan ${faltan.length} pieza(s) de la vida de una salida: ${faltan.join(', ')}`);
   }
-  if (!salidas || typeof salidas !== 'object' || !('salida' in salidas)) {
+  if (!areaRecibida || typeof areaRecibida !== 'object' || !('salida' in areaRecibida)) {
     throw new Error('la vida de una salida se monta sobre el área de salidas de la partida y llegó otra cosa');
   }
+  // El área sobre la que se trabaja de verdad. Con una mutable —el caso normal— es la misma
+  // que llegó, y por eso lo que se abre acaba en la partida que se congela.
+  const { area: salidas, descongelada } = descongelaElArea(areaRecibida);
   if (!rotulo) {
     throw new Error(
       'la vida de una salida se monta con el rótulo del sistema, aunque sea el que dice que no está: sin él, abrir una salida ' +
@@ -177,6 +204,16 @@ export function creaLaSalida({ nucleo, salidas, rotulo, suscripcion = null, orig
   };
 
   return {
+    /**
+     * El área que esta orquestación muta de verdad, y si tuvo que descongelarla.
+     *
+     * Se publica porque una copia es una degradación y las degradaciones se declaran (§6h):
+     * si `descongelada` sale `true`, lo que se abra **no está en la partida que se congela**
+     * y hay que arreglarlo en quien abrió la partida, no aquí. Con la partida abierta como
+     * es debido sale `false` y el área es la misma que llegó.
+     */
+    areaPropia: () => ({ area: salidas, descongelada }),
+
     /** La traza clasificada de la salida en curso, o `null`. No se guarda en ningún sitio. */
     traza: () => traza,
 

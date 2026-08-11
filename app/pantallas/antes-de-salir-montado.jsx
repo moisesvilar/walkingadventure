@@ -28,7 +28,7 @@ import { NUCLEO_DE_LA_PREPARACION } from '../nucleo/piezas.js';
 import { creaPreparacion } from '../salida/preparacion.js';
 import { PantallaAntesDeSalir } from './antes-de-salir.jsx';
 import { DIRECCION_DEL_PROXY } from './mapa-montado.jsx';
-import { MARCA_SUPERPUESTA } from './marca.js';
+import { marcaSuperpuesta } from './marca.js';
 
 /**
  * @param {object} props
@@ -113,9 +113,9 @@ export function AntesDeSalirMontado({
       {/* En qué situación está la salida, dónde está su rótulo y —cuando la hubo— por qué
           no se pudo abrir. Las tres son marcas: lo que se lee en la portada no cambia por
           tener o no tener rótulo, y el motivo literal se lee con un lector de pantalla. */}
-      <View testID="salida-situacion" accessibilityLabel={situacionDeSalida} style={estilos.marca} />
-      <View testID="rotulo-estado" accessibilityLabel={estadoDelRotulo} style={estilos.marca} />
-      {noSeAbre ? <View testID="salida-no-se-abre" accessibilityLabel={noSeAbre} style={estilos.marca} /> : null}
+      <View testID="salida-situacion" accessibilityLabel={situacionDeSalida} style={marcaSuperpuesta(0, { fila: 1 })} />
+      <View testID="rotulo-estado" accessibilityLabel={estadoDelRotulo} style={marcaSuperpuesta(1, { fila: 1 })} />
+      {noSeAbre ? <View testID="salida-no-se-abre" accessibilityLabel={noSeAbre} style={marcaSuperpuesta(2, { fila: 1 })} /> : null}
 
       <PantallaAntesDeSalir
         calendario={montaje.calendario}
@@ -136,5 +136,4 @@ const estilos = StyleSheet.create({
   pila: { flex: 1 },
   aviso: { flex: 1, padding: 24 },
   texto: { fontSize: 14, lineHeight: 20 },
-  marca: MARCA_SUPERPUESTA,
 });

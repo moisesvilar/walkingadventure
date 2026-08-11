@@ -23,11 +23,21 @@ import { PanResponder, StyleSheet, Text, View } from 'react-native';
 import { ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
 
 import { acerca, arrastra, normaliza, pixelDeMundo, vistaDe } from '../mapa/camara.js';
-import { MARCA_SUPERPUESTA } from './marca.js';
+import { marcaSuperpuesta } from './marca.js';
 
 /** El tamaño de la marca de posición, en px. La marca de aviso es algo menor. */
 const MARCA_POSICION_PX = 14;
 const MARCA_AVISO_PX = 10;
+
+/**
+ * Desde qué número de orden se apartan las marcas del aviso.
+ *
+ * Las marcas superpuestas de esta pantalla se numeran 0..4 y luego una por sitio rotulado,
+ * que son tantas como sitios tenga la aventura. Las dos del aviso empiezan por encima de
+ * cualquier lazo imaginable para no tener que contar sitios: dos marcas en el mismo punto
+ * son dos marcas que Maestro no puede leer, y esa cuenta no puede depender del mundo.
+ */
+const MARCA_DEL_AVISO = 64;
 
 /**
  * Dónde se pinta la marca, en píxeles de la lámina. Se recorta al borde de la pantalla en
@@ -107,10 +117,10 @@ export function PantallaEnMarcha({
     <View style={estilos.raiz} testID="en-marcha" {...gestos.panHandlers}>
       {/* El estado del momento y sus dos enumeraciones. `en-marcha-tocables` existe para
           poder afirmar que está vacío: es el criterio más importante de esta pantalla. */}
-      <View testID="momento-en-marcha" style={estilos.marca} />
-      <View testID="en-marcha-elementos" accessibilityLabel={momento.elementos.join(',')} style={estilos.marca} />
-      <View testID="en-marcha-tocables" accessibilityLabel={momento.tocables.join(',')} style={estilos.marca} />
-      <View testID="en-marcha-orientacion" accessibilityLabel={momento.orientacion} style={estilos.marca} />
+      <View testID="momento-en-marcha" style={marcaSuperpuesta(0)} />
+      <View testID="en-marcha-elementos" accessibilityLabel={momento.elementos.join(',')} style={marcaSuperpuesta(1)} />
+      <View testID="en-marcha-tocables" accessibilityLabel={momento.tocables.join(',')} style={marcaSuperpuesta(2)} />
+      <View testID="en-marcha-orientacion" accessibilityLabel={momento.orientacion} style={marcaSuperpuesta(3)} />
 
       {/* La lámina a sangre, de borde a borde y sin nada encima. El envoltorio existe solo
           para llevar el identificador que la spec declara: es el mismo `mapa-lamina` de
@@ -129,7 +139,7 @@ export function PantallaEnMarcha({
         </View>
       ) : null}
       {camaraNormal ? (
-        <View testID="mapa-camara" accessibilityLabel={`${camaraNormal.cx},${camaraNormal.cy},${camaraNormal.r},${tamano.ancho}x${tamano.alto}`} style={estilos.marca} />
+        <View testID="mapa-camara" accessibilityLabel={`${camaraNormal.cx},${camaraNormal.cy},${camaraNormal.r},${tamano.ancho}x${tamano.alto}`} style={marcaSuperpuesta(4)} />
       ) : null}
 
       {/* La marca de posición: roja, del propio mapa, y no un punto de sistema. Sin
@@ -162,8 +172,8 @@ export function PantallaEnMarcha({
       ))}
 
       {/* Los sitios a los que la aventura manda, rotulados aunque no se hayan pisado. */}
-      {momento.rotulados.map((sitio) => (
-        <View key={sitio.nombre} testID="sitio-rotulado" accessibilityLabel={`${sitio.nombre}:${sitio.encargado ? 'encargado' : 'pisado'}`} style={estilos.marca} />
+      {momento.rotulados.map((sitio, i) => (
+        <View key={sitio.nombre} testID="sitio-rotulado" accessibilityLabel={`${sitio.nombre}:${sitio.encargado ? 'encargado' : 'pisado'}`} style={marcaSuperpuesta(5 + i)} />
       ))}
 
       {/* El último aviso emitido y las capas por las que salió, con las que faltaron.
@@ -171,11 +181,11 @@ export function PantallaEnMarcha({
           leer andando, es algo que hay que poder inspeccionar después. */}
       {aviso ? (
         <>
-          <View testID="aviso-emitido" accessibilityLabel={`${aviso.tipo}:${aviso.emitido ? 'si' : 'no'}`} style={estilos.marca} />
+          <View testID="aviso-emitido" accessibilityLabel={`${aviso.tipo}:${aviso.emitido ? 'si' : 'no'}`} style={marcaSuperpuesta(MARCA_DEL_AVISO)} />
           <View
             testID="aviso-capas"
             accessibilityLabel={`salieron=${aviso.capas.salieron.join('|')};faltaron=${aviso.capas.faltaron.map((f) => `${f.capa}:${f.motivo}`).join('|')}`}
-            style={estilos.marca}
+            style={marcaSuperpuesta(MARCA_DEL_AVISO + 1)}
           />
         </>
       ) : null}
@@ -210,8 +220,6 @@ const LAPIZ = '#6b6250';
 const estilos = StyleSheet.create({
   // A sangre: la lámina ocupa la pantalla entera y no hay cabecera ni pie que la recorte.
   raiz: { flex: 1, backgroundColor: TINTA },
-  // Marcas de estado para la batería: un punto que no se ve pero que sí se puede leer.
-  marca: MARCA_SUPERPUESTA,
   // Sin `left`/`top` aquí: los pone `enPantalla` con el punto del mundo de cada momento.
   marcaPosicion: {
     position: 'absolute',

@@ -220,6 +220,35 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
   }
 
   /**
+   * La partida que sale de disco, **viva y no congelada**.
+   *
+   * `cargaPartida` devuelve lo suyo con `congelaHondo`, y ese congelado es deliberado: la
+   * reconstrucción no se toquetea. Lo que no puede pasar es que **la partida que la app
+   * lleva en memoria y muta mientras se juega sea esa misma referencia**, porque entonces
+   * abrir sale con dos clases de cosa según por dónde entrara: `nace()` entrega un estado
+   * mutable y `abre()` entregaba uno congelado.
+   *
+   * La asimetría costó un defecto entero de la fila 48: `abreSalida` muta su área en sitio,
+   * así que en **cualquier sesión que no fuera la del nacimiento** salir a andar moría con
+   * un `TypeError` del intérprete —«Cannot assign to read-only property 'salida'»— que
+   * además se enseñaba tal cual bajo «Salir a andar». O sea que el momento en marcha solo
+   * funcionaba el primer día. Medido en `wa-pixel` el 11-ago-2026.
+   *
+   * El deshielo es el **viaje de ida y vuelta del propio núcleo** y no una copia a mano:
+   * `congelaEstado` valida contra el esquema al escribir y `levantaEstado` al leer, así que
+   * lo que sale es exactamente lo que entró o falla nombrando el campo. Es la misma
+   * operación que la app hace en cada congelación, y por eso no añade ningún riesgo nuevo.
+   */
+  function viva({ estado, registro }) {
+    return {
+      estado: levantaEstado(congelaEstado(estado), 'el estado de la partida recién abierta'),
+      // El registro por la misma puerta: sus hechos son una lista que crece, y una lista
+      // congelada no crece. `levantaRegistro` revalida cada hecho al levantarlo.
+      registro: levantaRegistro({ generador: registro.reglas, hechos: registro.hechos }),
+    };
+  }
+
+  /**
    * Abre la partida guardada, con las tres salidas cerradas de la spec.
    *
    * Nunca lanza: un fallo sale como `no-se-pudo` con su motivo literal, que es lo que la
@@ -235,14 +264,18 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
       // También por el envoltorio: `cargaPartida` escribe cuando encuentra una compactación
       // a medias, y esa escritura es de la partida como cualquier otra.
       const cargada = await cargaPartida({ almacen: soloLoJugado });
+      // Lo que se entrega es la partida viva, de la misma clase que la que devuelve
+      // `nace()`: ver `viva()`. El sello se pone sobre ella y no sobre lo congelado, para
+      // que las dos vías produzcan el mismo texto canónico.
+      const partida = viva({ estado: cargada.estado, registro: cargada.registro ?? registroInicial() });
       // El sello se pone con lo que acaba de salir del disco: una congelación inmediata
       // después de abrir no reescribe nada, que es lo que hace barato congelar al volver de
       // cada pantalla de consulta.
-      sello = textoDelEstado(cargada.estado, cargada.registro ?? registroInicial());
+      sello = textoDelEstado(partida.estado, partida.registro);
       return {
         estado: APERTURAS.ABIERTA,
         motivo: null,
-        partida: { estado: cargada.estado, registro: cargada.registro ?? registroInicial() },
+        partida,
         migradaDesde,
         // Terminar la cola no es reconstruir: son hechos que el registro ya tenía y el
         // estado todavía no declaraba aplicados.
