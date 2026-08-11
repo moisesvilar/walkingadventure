@@ -347,3 +347,52 @@ La siembra que haría falta para levantar `repisa.yaml` la produce el núcleo si
 `mapas.yaml` declaraba como límite que «la app abre en el arranque». Desde que la partida se guarda eso deja de ser cierto, y con `clearState: false` su guarda afirmaba `arranque` visible y fallaba. Lo que le falta a ese flujo no era nunca la puerta —son dos mapas y el ofrecimiento cableado—, así que lo que se corrige es de qué depende su entrada, con la medida escrita dentro. Es un veredicto de defecto de prueba, tomado con el fallo reproducido tres veces para separarlo de la caída de `adb`.
 
 Y de paso: `diario.yaml` y `repisa.yaml` llevaban desde la fila 43 diciendo que no había puerta hasta sus pantallas, que es falso desde que la portada tiene las suyas. Corregido el motivo sin tocar la guarda — lo que decían seguía siendo verdad; lo que mentía era el porqué.
+
+## 7 · La fila 48, y la undécima aparición de §6h dentro de la propia fila que la buscaba
+
+### 7a · El alcance, recortado por el dueño después de medirlo
+
+El encargo de la fila (`docs/prompt-modulo-de-ubicacion.md`) pedía dos cosas incompatibles: «no estires la fila» y, a la vez, un criterio 4 que exigía **recorrer una llegada de principio a fin**. Eso último pide la máquina de la salida, que el checklist asigna a la **fila 44, `pending`**. El encargo nombraba la 49 y la 46 como fronteras y se olvidaba de la 44.
+
+Se llevó al dueño y decidió **acotar**: la 48 termina cuando en marcha se ve la posición moverse y el detector clasifica, con los tres contratos teniendo llamador de verdad desde `app/`, más el rótulo. El geofence, la llegada, el visor, lo que se cuenta y el descarte **se quedan en la 44**, que sigue entera. **El criterio 4 queda retirado de esta fila.** El motivo es el tamaño: una fila que no se puede verificar de una sentada es la que acaba cerrándose a medias, que es lo que pasó con las filas 34 y 36.
+
+Y autorizó una **segunda dependencia**, `expo-task-manager`, con lo que RF-INFRA-004 —el rótulo del sistema— entra en esta fila en vez de quedarse declarado.
+
+### 7b · Tres afirmaciones del encargo que resultaron falsas al medirlas
+
+1. **«Los dos contratos que lo esperan»: son tres.** Falta `app/plataforma/posiciones.js` —`creaFuenteDePosiciones`, `creaTrazaDeSalida`, `fuenteSinMontar`—, que es quien alimenta al detector de vehículo. Medido con grep: **no lo consumía nadie de `app/`**, solo `test/nucleo/transporte.test.mjs`. Y hay un cuarto de la misma familia, `creaRotulo`, que tampoco tenía llamador aunque `capacidades.js` prometiera por comentario que «sin rótulo una salida no se abre».
+2. **«Ni la posición, ni una traza, ni una marca de tiempo llegan a escribirse»: falso.** `congelaSalidas` escribe el punto de partida `{lat, lon}` —«la única posición que la partida guarda»— y **tres** marcas del sensor: `ultimoPropioMs`, `ultimaMarcaMs` y `regreso.dentroDesdeMs`. Todo de SPEC-030, declarado en `formato.js` y necesario. La frase venía de la cabecera de `ubicacion.js`, donde es cierta **acotada a ese módulo**, y se generalizó a promesa de sistema. Importa porque un AC escrito con la frase literal habría nacido rojo por algo que no es un defecto, y el arreglo probable habría sido ablandarlo: **un error del encargo se habría convertido en una prueba más floja.** Lo prohibido es la traza; el punto y las tres marcas están declarados y mueren con la salida.
+3. **El rótulo arrastra el cierre de la salida.** `recibePosicion` mide el plazo y cierra por regreso en la misma función, así que cablear el rótulo cablea el cierre, y cerrar deja un telón pendiente cuya pantalla es de la fila 49 — con el agravante de que `abreSalida` lanza si hay un telón sin leer, o sea que la app quedaría encallada. Resuelto con un hueco declarado de una sola acción, el patrón que `llegada.js` ya usa. Es la única costura con la 49 y está declarada.
+
+### 7c · El hallazgo grande: la fila metió trabajo de fondo en iOS y ninguna prueba lo veía
+
+`expo-task-manager` trae un config plugin que **empuja `fetch` a `UIBackgroundModes` sin condición ninguna** (`plugin/build/withTaskManager.js`). `app.json` declara solo `location`, pero el `Info.plist` **generado** salía con `['location', 'fetch']`.
+
+Lo que eso significa lo dice el propio `permisos.js` en el comentario de `MODOS_DE_FONDO`: *«un `processing`, un `fetch` o un `remote-notification` colados ahí son tarea periódica con otro nombre»*. O sea: **la fila cuyo encargo dice que la privacidad pesa más que en ninguna otra metió en el paquete de iOS la capacidad de fondo periódico que `TAREAS_PERIODICAS = []` existe para impedir.** No lo vio ninguna prueba porque todas miraban `app.json` en lugar del artefacto generado.
+
+Arreglado **por lista blanca y no por lista de prohibidos**: el plugin deja en `UIBackgroundModes` solo lo que declara `MODOS_DE_FONDO`, y borra la clave entera si no queda nada. Una lista de prohibidos solo protege de lo que ya se te ocurrió.
+
+**Y la lección de método, que vale más que el arreglo.** Yo había escrito que las cuatro claves de iOS de `LO_QUE_NUNCA_SE_DECLARA` quedaban «**permanentemente** sin verificar en esta máquina», porque no hay Xcode (§6t). Era falso: `npx expo prebuild --platform ios --no-install --skip-dependency-update expo` genera el `Info.plist` **sin Xcode ni CocoaPods**, deja el árbol limpio, y con el fichero delante el defecto apareció en dos minutos. La conclusión que me ahorraba trabajo era también la que me dejaba enviar la fila con un fallo de privacidad dentro. **«No se puede verificar en esta máquina» es una conclusión que hay que mirar dos veces**, y este es el aviso para la próxima vez que alguien la escriba.
+
+### 7d · `RECEIVE_BOOT_COMPLETED`: undécima aparición de §6h, y no es de esta fila
+
+Lo declara **`expo-notifications`** en su propio `AndroidManifest.xml`, desde SPEC-023. Verificado por tres vías: estaba en el APK instalado **antes** de empezar esta fila; está en el manifiesto de la librería; y sigue en el fusionado. `expo-task-manager` no declara ningún permiso y `expo-location` solo COARSE y FINE.
+
+O sea: **la app lleva unas veinticinco filas metiendo en el APK algo que `LO_QUE_NUNCA_SE_DECLARA` dice que no mete nunca**, y la guarda no lo veía porque leía `app.json`. Y no es solo el permiso: el receptor `NotificationsService` escucha `BOOT_COMPLETED`, `REBOOT`, `QUICKBOOT_POWERON` y `MY_PACKAGE_REPLACED`, o sea que **el sistema despierta a la app al arrancar el móvil**.
+
+**Decisión: no se arregla aquí y no se tolera.** El permiso no se puede retirar —`expo-task-manager` persiste su trabajo con `setPersisted(true)` clavado y sin él la app revienta con `IllegalArgumentException: Requested job cannot be persisted`, medido—, así que se declara con su motivo en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE` y el plugin retira los disparadores de arranque del receptor de tareas. Lo que **no** se hace es que la guarda nueva nazca tolerándolo para que la suite quede limpia: `test/nucleo/manifiesto-generado.test.mjs` **nace roja**, nombrando el permiso, la librería que lo mete y la fila dueña, igual que la fila 47 hizo con `partida-persistida.test.mjs`. Un rojo con dueño vale más que un verde cómodo.
+
+### 7e · Detectar todo, retirar solo lo decidido
+
+La guarda del manifiesto va por **lista blanca** —cualquier permiso o modo de fondo no declarado pone rojo, aunque a nadie se le hubiera ocurrido—, y se aplica a **las dos plataformas**: manifiesto fusionado de Android e `Info.plist` generado de iOS. Cuatro de las siete entradas de `LO_QUE_NUNCA_SE_DECLARA` son claves de iOS, así que una guarda que solo mirase Android vigilaría tres y dejaría cuatro en verde.
+
+**El plugin, en cambio, sigue siendo lista de prohibidos, y la asimetría es deliberada.** El plugin *retira*, y uno que retire lo que no reconoce rompe la app en la siguiente subida de dependencia, en silencio: el APK trae hoy una veintena de permisos de insignia de lanzador que vienen de `expo-notifications`. Detectar todo, retirar solo lo decidido y con su motivo escrito. `UIBackgroundModes` es la excepción y sí va por lista blanca también en el plugin, porque los modos son cuatro y están todos declarados.
+
+Y **la ausencia del artefacto no es verde**: `app/ios/` y `app/android/` están gitignorados y los manifiestos solo existen tras compilar, así que un `skip` o un `if (existe)` haría que la guarda pasara justo cuando no puede mirar. Se registra como infraestructura ausente y sale **en el veredicto del report, arriba**, no enterrada en la sección de infraestructura: `Android: mirado · iOS: NO MIRADO`.
+
+### 7f · Los dos defectos que la fila se dejó puestos, y los encontró la revisión
+
+1. **Con la partida abierta desde disco no se podía abrir ninguna salida.** `cargaPartida` devuelve `congelaHondo(...)`, así que en cualquier sesión que no fuera la del nacimiento el estado llegaba congelado y `abreSalida`, que muta en sitio, moría con un `TypeError` del intérprete enseñado tal cual bajo «Salir a andar». **El momento en marcha solo funcionaba el día que se creaba la partida.** La causa era una asimetría entre las dos vías de entrada de `app/datos/partida-guardada.js`: `nace()` devolvía mutable y `abre()` congelado. Arreglado haciendo que las dos entreguen lo mismo, con el viaje de ida y vuelta del propio núcleo.
+2. **Seis marcas del momento en marcha caían apiladas en `[0,0][3,3]`** y Maestro descarta como invisible todo lo que tapa un hermano, así que ninguna se podía afirmar. Es la misma forma que `marca.js` ya arregló una vez pasando de 0×0 a 1×1, reaparecida por apilamiento.
+
+Los dos son de la familia de §6r y §6v: **cada lado probado y nadie recorriendo el camino entero.** El primero solo aparece al abrir la app un segundo día, que es algo que ninguna prueba unitaria hace.
