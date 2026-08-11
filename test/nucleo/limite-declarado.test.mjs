@@ -45,6 +45,9 @@ import { fuente } from './mundo-de-prueba.mjs';
  * - `ajustes.yaml` y `empezar-de-nuevo.yaml` **salieron de esta lista con la fila 43**,
  *   que montó el momento de consulta: se entra por `puerta-ajustes`, que es la del pie de
  *   la portada, y desde ahí a A6P7. Recorrido medido en `wa-pixel` el 10-ago-2026.
+ * - `llegada.yaml` **salió de esta lista con la fila 44**, que cableó la máquina de una
+ *   salida: la escena valida sola y la pantalla se recorre entera. Recorrido medido en
+ *   `wa-pixel` el 12-ago-2026, 107 s y 113 s en dos tandas seguidas.
  * - `en-marcha.yaml` **salió de esta lista con la fila 48**, que cableó el módulo de
  *   ubicación y el rótulo del sistema: «Salir a andar sin más» abre una salida de verdad y
  *   deja el momento en marcha en pantalla. Recorrido medido en `wa-pixel` el 11-ago-2026,
@@ -55,31 +58,35 @@ import { fuente } from './mundo-de-prueba.mjs';
  * La columna pasa de nueve a ocho, y sale **uno solo**: `llegada.yaml`, `visor.yaml` y
  * `descarte.yaml` dependen del camino de la llegada, que es la fila 44 entera.
  *
- * **La fila 44 no bajó el número, y se dice con la cifra delante: sigue en ocho.** Su spec
- * preveía cinco, con los tres flujos de la llegada saliendo. Lo que se midió en `wa-pixel`
- * el 11-ago-2026 es que la máquina está cableada y aun así **la capa de llegadas no se monta
- * en el dispositivo**: parada noventa segundos en el centro exacto del geofence de un sitio,
- * con la cadencia ya por tiempo y la traza diciendo `parada`, el área congelada sigue con
- * `llegadas.salida = null`. La misma celda y la misma secuencia por el mismo código en Node
- * validan a los treinta segundos, así que lo que falla es el cableado de `app/App.js`, no el
- * paquete. Una causa está localizada con su mensaje —el camino de la partida recién nacida
- * guarda el mundo sin `cupos` y `creaLasLlegadas` muere pidiéndolos— y va a `wa-dev` como
- * defecto de código; el motivo entero está en la cabecera de cada uno de los tres.
+ * **La fila 44 la deja en siete, y sale uno de los tres: `llegada.yaml`.** Su spec preveía
+ * cinco. La primera medida de la fila dio ocho —la capa de llegadas no se montaba en el
+ * dispositivo y ninguna escena podía validar—; cerrados los cuatro defectos que aquello
+ * destapó, se volvió a medir el 12-ago-2026 en `wa-pixel` y el número es siete. **El que se
+ * publica es el medido, no el previsto, y las dos veces.**
  *
- * Y `visor.yaml` tiene **un segundo límite que sobrevive al primero**: sin lector de recursos
- * binarios cableado toda llegada se resuelve como ficha, así que el visor no se abre nunca en
- * el dispositivo por mucho que la capa se monte. Está declarado en su cabecera.
+ * - `llegada.yaml` **sale**: recorre el arranque entero, echa a andar desde la portada y la
+ *   escena valida sola estando parada dentro del geofence del sitio por el que empieza el
+ *   mapa —veintitrés segundos—, sin tocar nada. Recorre A4P5 entera, la ausencia de
+ *   navegación y de cifras, y el «Seguir» que devuelve al momento en marcha. Medido dos
+ *   veces seguidas: **107 s y 113 s**, 119 comandos. Un flujo que tarda diez segundos no ha
+ *   recorrido nada, y este recorre.
+ * - `descarte.yaml` **se queda**, y ya no por la capa: la capa de A4P8 cuelga de la ficha, y
+ *   la única llegada que un flujo alcanza sin coordenadas es la del sitio por el que empieza
+ *   el mapa, que es un núcleo y no lleva ficha. Andar hasta un paraje pediría su coordenada,
+ *   y el ancla del mapa no es reproducible entre ejecuciones.
+ * - `visor.yaml` **se queda** por su segundo límite, que sobrevivió al primero: sin lector de
+ *   recursos binarios cableado toda llegada se resuelve como ficha —medido en el aparato,
+ *   `llegada-estado` trae `ficha`—, así que el visor no se abre nunca.
  *
- * Lo que sí cambió con la fila 44 es que los tres dejaron de contar la historia vieja —«falta
- * `paso-llegada` en App.js»—, que era falsa desde que la máquina existe: un límite que se
- * declara por un motivo que ya no es el suyo es peor que no declararlo.
+ * Los dos que se quedan cuentan ese motivo en su cabecera, y ninguno de los tres cuenta ya la
+ * historia vieja —«falta `paso-llegada` en App.js»—, que era falsa desde que la máquina
+ * existe: un límite declarado por un motivo que ya no es el suyo es peor que no declararlo.
  */
 const FLUJOS_DE_LIMITE_DECLARADO = [
   'ajustes-filas-de-valor.yaml',
   'descarte.yaml',
   'diario.yaml',
   'escena.yaml',
-  'llegada.yaml',
   'mapas.yaml',
   'repisa.yaml',
   'visor.yaml',

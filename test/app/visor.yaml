@@ -2,8 +2,8 @@
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: la capa de llegadas no llega a montarse en el
-# dispositivo, así que no hay escena que ofrecer. Lo único que llega a ejecutarse es la
+# Este flujo **no recorre su pantalla**, y ya no por la capa de llegadas: el motivo está
+# medido y escrito abajo. Lo único que llega a ejecutarse es la
 # guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
 # pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
 # verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
@@ -29,14 +29,11 @@
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
-# - **Que la capa de llegadas se monte en el dispositivo**, que es el mismo límite que
-#   declara `test/app/llegada.yaml` y no es de este flujo. Medido en «LÍMITE DECLARADO».
 # - **Una ilustración residente en el almacén del mundo**, que es lo único que hace que la
 #   presentación sea el visor y no la ficha. Hoy no hay lector de recursos binarios cableado
 #   —`app/marcha/llegadas.js` lo declara con nombre y dueño en `SIN_RECURSOS` y
 #   `LECTOR_SIN_RESIDENTES`—, así que **toda llegada se resuelve como ficha y el visor no se
-#   abre nunca en el dispositivo**. O sea que este flujo tiene dos límites y no uno, y el
-#   segundo sobrevive al primero: arreglar la capa no basta para que el visor aparezca.
+#   abre nunca en el dispositivo**. Es el límite entero de este flujo y está medido abajo.
 # - **La pantalla de la escena (A4P3)**, que es de la fila 49: mientras no exista, cerrar
 #   el visor deja debajo el hueco con el paso nombrado y por eso se afirma `llegada-paso`.
 #
@@ -63,37 +60,26 @@ appId: com.walkingadventure.app
 
 # ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
 #
-# **Lo que impide recorrerla, medido en `wa-pixel` el 11-ago-2026 y no supuesto.** El párrafo
-# que había aquí decía que faltaba `paso-llegada` en `app/App.js`; eso ya no es cierto y se
-# corrige en lugar de arrastrarlo: SPEC-044 cableó la máquina y **no hay ningún paso
-# provisional**, porque quien decide qué se ve es el estado —si hay una llegada validada sin
-# cerrar, se monta su paso vigente— y no una puerta que se pueda tocar. Lo que falta ahora es
-# otra cosa y está medida:
+# **Lo que impide recorrerla, medido en `wa-pixel` el 12-ago-2026.** El motivo que había aquí
+# —que la capa de llegadas no se montaba en el dispositivo— **ya no es cierto y se corrige en
+# lugar de arrastrarlo**: la capa monta, la escena valida sola a los veintitrés segundos y
+# `test/app/llegada.yaml` recorre su pantalla de verdad y ha salido de esta columna. Lo que
+# queda es el segundo límite de este flujo, que sobrevivía al primero y sigue en pie:
 #
-# - Se recorre el arranque entero, se echa a andar, se lleva la marca al centro exacto del
-#   geofence de un sitio del mundo levantado y se está parada allí noventa segundos. La
-#   cadencia **sí** cambia —la petición del sistema pasa a `@+5s0ms` y `FusedLocation`
-#   registra `blocked - too fast` en vez de `too close`—, la traza **sí** dice `parada` en el
-#   punto del sitio (`marca-posicion` = `del-mapa:-682,-340:parada`), y aun así **no valida
-#   ninguna llegada**: el área congelada de la partida sigue con `llegadas.salida = null`,
-#   que es lo que escribe montar la capa. Reproducido cuatro veces.
-# - La misma celda, el mismo estado y la misma secuencia de posiciones, pasados por el mismo
-#   código en Node, **validan a los treinta segundos**. Así que el paquete y
-#   `app/marcha/llegadas.js` están bien: lo que falla es el cableado de `app/App.js`.
-# - Una causa está localizada con su mensaje: por el camino de la partida recién nacida
-#   —`App.js`, `partidaGuardada.nace(...).then(...)`— el mundo se guarda como
-#   `{ mapaId, documento, titulo }` **sin `cupos`**, así que `creaLasLlegadas` recibe
-#   `cupos: null` y muere con «la capa de descartes necesita el cupo que la celda congeló al
-#   generarse (cupos.parajes.suelo) y llegó undefined». Es justo el camino que toma todo
-#   flujo con `clearState: true`, y el de cualquier instalación nueva.
-# - Y el fallo es **silencioso**: `montaLasLlegadas` lo recoge en `averia` y nadie enseña
-#   `laSalida.averia()`, aunque su propio comentario diga «una capa que no se puede montar es
-#   avería y se dice». Es §6h otra vez.
+# - **No hay lector de recursos binarios cableado.** `app/marcha/llegadas.js` lo declara con
+#   nombre y con dueño en `SIN_RECURSOS` y `LECTOR_SIN_RESIDENTES`, así que el inventario de
+#   ilustraciones de todo mundo está vacío y **toda llegada se resuelve como ficha**. Medido
+#   en el aparato: en la llegada validada, `llegada-estado` trae `ficha`. Sin ilustración no
+#   hay visor, ni encadenado ni a un toque, y no lo va a haber por mucho que se camine.
+# - Y una segunda cosa que este flujo necesitaría aunque aquello estuviera: **un sitio con
+#   ilustración al que se pueda llegar desde un flujo**. La única llegada que un flujo
+#   alcanza sin coordenadas es la del sitio por el que empieza el mapa, y el ancla del mapa
+#   **no es reproducible entre ejecuciones** —tres tandas seguidas dieron `42.40,-8.77`,
+#   `42.40,-8.75` y `42.40,-8.76`—, así que un destino escrito a mano no vale.
 #
-# **Va a `wa-dev` como defecto de código.** Mientras tanto este flujo se queda marcado: su
-# verde significa «el límite sigue en pie», nunca «la pantalla funciona». El día que la capa
-# se monte, este fichero hay que reescribirlo para que entre por donde entra una persona
-# —arranque, portada, «Salir a andar», la marca dentro del geofence— y salga de la columna.
+# Mientras eso sea así, este flujo **no recorre nada y lo dice**: su verde significa «el
+# límite sigue en pie», nunca «el visor funciona». El día que haya recursos residentes, este
+# fichero se reescribe para entrar como entra `llegada.yaml` y sale de la columna.
 - runFlow:
     when:
       notVisible:

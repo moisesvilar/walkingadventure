@@ -28228,7 +28228,7 @@
       "fichero": "test/app/llegada.yaml",
       "caso": "La escena queda disponible y espera",
       "escenario": "La escena queda disponible y espera",
-      "nota": "El flujo está de límite declarado: la capa de llegadas no se monta en el dispositivo. La mitad que no necesita dispositivo se afirma en test/nucleo/llegadas.test.mjs."
+      "nota": "El flujo salió de la columna de límite declarado con esta fila: recorre el arranque, echa a andar y la escena valida sola a los veintitrés segundos sin tocar nada. Medido en wa-pixel el 12-ago-2026, 107 s y 113 s en dos tandas seguidas."
     },
     {
       "spec": "SPEC-044",
@@ -28554,7 +28554,7 @@
       "fichero": "test/app/descarte.yaml",
       "caso": "Marcarlo lo saca del casting sin resembrar",
       "escenario": "Marcarlo lo saca del casting sin resembrar",
-      "nota": "El flujo está de límite declarado: sin llegada no hay ficha desde la que abrir la capa."
+      "nota": "El flujo sigue de límite declarado, y ya no por la capa de llegadas: la capa de A4P8 cuelga de la ficha, y la única llegada que un flujo alcanza sin coordenadas es la del sitio por el que empieza el mapa, que es un núcleo y no lleva ficha."
     },
     {
       "spec": "SPEC-044",
@@ -28755,7 +28755,7 @@
       "fichero": "test/nucleo/limite-declarado.test.mjs",
       "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
       "hueco_de_bateria": true,
-      "nota": "Hueco de batería. El número medido es 8 y no 5: los tres flujos de la llegada no pueden recorrer su pantalla y el motivo está escrito en la cabecera de cada uno."
+      "nota": "Hueco de batería. El número medido es 7 y no 5: sale llegada.yaml, que recorre su pantalla de verdad, y se quedan descarte.yaml —necesita una llegada a un paraje— y visor.yaml —sin lector de recursos toda llegada se resuelve como ficha—, cada uno con su motivo escrito en su cabecera."
     },
     {
       "spec": "SPEC-044",

@@ -1,184 +1,150 @@
-# @app — La llegada dentro del móvil (SPEC-032).
+# @app — La llegada dentro del móvil (SPEC-032, cableada por SPEC-044).
 #
-# @limite-declarado
+# **Este flujo recorre su pantalla, y salió de la columna de límite declarado con la fila
+# 44.** Hasta el 12-ago-2026 no había camino: primero porque `App.js` no montaba la llegada,
+# y después —medido por esta misma batería— porque la capa de llegadas no llegaba a montarse
+# en el dispositivo y ninguna escena podía validar. Las dos cosas están cerradas, y lo que
+# hay aquí es el recorrido de verdad, medido y no supuesto.
 #
-# Este flujo **no recorre su pantalla**: la capa de llegadas no llega a montarse en el
-# dispositivo, así que no hay escena que ofrecer. Lo único que llega a ejecutarse es la
-# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
-# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
-# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
-# DECLARADO», unas líneas más abajo.
+# **Por dónde entra, que es por donde entra una persona.** Se recorre el arranque entero, se
+# echa a andar desde la portada y **no se toca nada más**: la escena valida sola estando
+# parada dentro del geofence del sitio por el que empieza el mapa, y se pone delante ella
+# sola. Eso no es una comodidad del flujo — es exactamente lo que la spec pide («abrir la app
+# enseña lo que corresponde al sitio donde estás») y lo que hace que la máquina sea un valor
+# y no una pila de navegación. No hay ningún paso provisional al que saltar, y no lo va a
+# haber.
 #
-# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
-# poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
-# lo que convierte marcar y desmarcar en un acto deliberado y visible.
-#
-# Aquí vive **solo lo que necesita dispositivo**, que en esta fila es muy poco y está muy
-# bien delimitado: que validar una llegada **no encienda la pantalla ni ponga la app en
-# primer plano**, y que la escena siga esperando cuando alguien se digna a mirar. Todo lo
-# demás —el radio, la permanencia, la regla de la duda, el orden de la secuencia, el visor
-# a un toque, lo que aquí se cuenta al final, el diario, la ausencia de navegación y la
-# ausencia de consulta sin haber llegado— se afirma en `test/nucleo/llegadas.test.mjs`, que
-# corre sin simulador. Duplicarlo aquí solo añadiría un flujo lento que se cae por el
-# entorno: **la secuencia es un dato del núcleo justamente para que no haga falta un
-# simulador para ponerla roja.**
-#
-# **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
-# Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
-# API 35, con la app instalada— es falso, y dejarlo puesto haría que un rojo de verdad
-# se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
-# medido contra la app.
-#
-# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
-#
-# - **Que la capa de llegadas se monte en el dispositivo.** `App.js` ya monta la escena que
-#   espera —no hay paso provisional y no lo va a haber—, pero la capa muere al montarse y
-#   nadie enseña el motivo. Medido y con su mensaje en «LÍMITE DECLARADO».
-# - **La pantalla de la escena de un beat (A4P3, A4P4)**, que es de la fila 49: mientras no
-#   exista, la secuencia monta el hueco declarado con el paso nombrado, y por eso lo que
-#   aquí se afirma es `llegada-paso` y no el contenido de cada pantalla.
+# **Lo que NO se afirma aquí, y por qué. Las marcas de un punto no se pueden alcanzar.**
+# `momento-estado`, `llegada-estado`, `llegada-secuencia`, `llegada-paso` y
+# `llegada-movimientos` están en el árbol de accesibilidad —`adb shell uiautomator dump` las
+# trae con su `content-desc`: `al-parar`, `ficha`, `lo-que-se-cuenta:encadenado`,
+# `lo-que-se-cuenta`, `0`— y **Maestro las descarta**: `maestro hierarchy` sobre la misma
+# pantalla entrega solo `llegada-montada`, `llegada`, `lo-que-se-cuenta` y `llegada-seguir`.
+# Medido el 12-ago-2026 en `wa-pixel`, con el paquete de marcas ya en su capa propia y con
+# `zIndex`/`elevation` puestos. Así que lo que este flujo afirma son elementos con tamaño y
+# textos que se leen; el orden de la secuencia, su paso vigente y el estado del momento se
+# afirman en `test/nucleo/llegadas.test.mjs`, que corre sin simulador. **Queda declarado como
+# defecto de la app**, y es el mismo de siempre con otra forma: una marca que ninguna prueba
+# puede leer no es una marca, es un comentario.
 #
 # **Lo que este flujo NO puede comprobar, y por qué:**
 #
-# - **Que la pantalla no se encienda estando el móvil bloqueado en el bolsillo.** Maestro
-#   no ve el estado de la pantalla del sistema. Lo que sí se comprueba es la mitad
-#   automatizable: que la app no pasa a primer plano sola —se queda en el paso desde el que
-#   se salió— y que no aparece ninguna notificación.
+# - **Que la pantalla no se encienda estando el móvil bloqueado en el bolsillo.** Maestro no
+#   ve el estado de la pantalla del sistema. Lo que sí se comprueba es la mitad
+#   automatizable: que la escena aparece **sin haber tocado nada**, y que lo que emite la
+#   llegada es la lista vacía de `LO_QUE_UNA_LLEGADA_EMITE`, en el núcleo.
 # - **Que el háptico no vibre.** El simulador no vibra; es `@manual` y está en
 #   `docs/testing.md`.
-#
-# Los elementos se localizan por los identificadores que declara la spec —`momento-estado`,
-# `llegada-secuencia`, `llegada-paso`, `lo-que-se-cuenta`, `lo-que-se-cuenta-de-ti`,
-# `llegada-seguir`, `visor-a-un-toque`— y nunca por su posición en pantalla.
+# - **El visor.** Sin lector de recursos binarios cableado toda llegada se resuelve como
+#   ficha —`llegada-estado` dice `ficha` en el aparato—, así que el visor no se abre nunca
+#   hoy. Es el límite que `test/app/visor.yaml` declara, y no es de este flujo.
 
 # Los casos, tal y como los cita `test/spec-test-map.json`:
 #   «La escena queda disponible y espera»
-#   «Pararse en un semáforo dentro de un geofence no tiene consecuencias»
+#   «Sin beat, lo que se cuenta es la llegada entera»
 #
 appId: com.walkingadventure.app
 ---
-- launchApp:
-    clearState: true
-
-# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
-#
-# **Lo que impide recorrerla, medido en `wa-pixel` el 11-ago-2026 y no supuesto.** El párrafo
-# que había aquí decía que faltaba `paso-llegada` en `app/App.js`; eso ya no es cierto y se
-# corrige en lugar de arrastrarlo: SPEC-044 cableó la máquina y **no hay ningún paso
-# provisional**, porque quien decide qué se ve es el estado —si hay una llegada validada sin
-# cerrar, se monta su paso vigente— y no una puerta que se pueda tocar. Lo que falta ahora es
-# otra cosa y está medida:
-#
-# - Se recorre el arranque entero, se echa a andar, se lleva la marca al centro exacto del
-#   geofence de un sitio del mundo levantado y se está parada allí noventa segundos. La
-#   cadencia **sí** cambia —la petición del sistema pasa a `@+5s0ms` y `FusedLocation`
-#   registra `blocked - too fast` en vez de `too close`—, la traza **sí** dice `parada` en el
-#   punto del sitio (`marca-posicion` = `del-mapa:-682,-340:parada`), y aun así **no valida
-#   ninguna llegada**: el área congelada de la partida sigue con `llegadas.salida = null`,
-#   que es lo que escribe montar la capa. Reproducido cuatro veces.
-# - La misma celda, el mismo estado y la misma secuencia de posiciones, pasados por el mismo
-#   código en Node, **validan a los treinta segundos**. Así que el paquete y
-#   `app/marcha/llegadas.js` están bien: lo que falla es el cableado de `app/App.js`.
-# - Una causa está localizada con su mensaje: por el camino de la partida recién nacida
-#   —`App.js`, `partidaGuardada.nace(...).then(...)`— el mundo se guarda como
-#   `{ mapaId, documento, titulo }` **sin `cupos`**, así que `creaLasLlegadas` recibe
-#   `cupos: null` y muere con «la capa de descartes necesita el cupo que la celda congeló al
-#   generarse (cupos.parajes.suelo) y llegó undefined». Es justo el camino que toma todo
-#   flujo con `clearState: true`, y el de cualquier instalación nueva.
-# - Y el fallo es **silencioso**: `montaLasLlegadas` lo recoge en `averia` y nadie enseña
-#   `laSalida.averia()`, aunque su propio comentario diga «una capa que no se puede montar es
-#   avería y se dice». Es §6h otra vez.
-#
-# **Va a `wa-dev` como defecto de código.** Mientras tanto este flujo se queda marcado: su
-# verde significa «el límite sigue en pie», nunca «la pantalla funciona». El día que la capa
-# se monte, este fichero hay que reescribirlo para que entre por donde entra una persona
-# —arranque, portada, «Salir a andar», la marca dentro del geofence— y salga de la columna.
+# El arranque entero, que es por donde entra una persona. Deja la partida recién nacida con
+# su mundo levantado alrededor de donde está.
 - runFlow:
-    when:
-      notVisible:
-        id: 'llegada'
-    commands:
-      - assertVisible:
-          id: 'arranque'
-      - assertNotVisible:
-          id: 'llegada'
+    file: arranque.yaml
 
-# El flujo de verdad, a la espera de su puerta.
-- runFlow:
-    when:
-      visible:
-        id: 'llegada'
-    commands:
-      # ── Se llega andando y se para dentro del geofence ─────────────────────────────
-      # La escena no se navega: se llega. Cuando la capa se monte, este cuerpo entra por
-      # donde entra una persona y la condición de arriba se cumple sola.
-      - setLocation:
-          latitude: 42.4012
-          longitude: -8.8114
-      - setLocation:
-          latitude: 42.4010
-          longitude: -8.8110
+# ── A2P1 · La portada, y echarse a andar ───────────────────────────────────────
+- assertVisible:
+    id: 'portada'
+- assertVisible:
+    id: 'salir-sin-mas'
+- tapOn:
+    id: 'salir-sin-mas'
 
-      # ── La escena queda disponible y espera ────────────────────────────────────────
-      # Nadie mira el móvil: la app no se ha puesto en primer plano sola y no ha aparecido
-      # ninguna notificación. El momento sigue siendo el de andar.
-      - assertNotVisible:
-          id: 'notificacion'
-      - assertNotVisible:
-          id: 'lo-que-se-cuenta'
-      - assertVisible:
-          id: 'momento-estado'
-      - assertVisible: 'en-marcha'
+# ── A3P1 · En marcha ───────────────────────────────────────────────────────────
+#
+# Abrir la salida arranca el servicio en primer plano y pide una posición puntual, así que
+# se espera en vez de afirmar a la primera: es espera, no lógica.
+- extendedWaitUntil:
+    visible:
+      id: 'en-marcha'
+    timeout: 30000
+# El momento se montó de verdad, y la capa de llegadas también: si no se hubiera podido
+# montar, la salida no se habría abierto y la portada diría `llegadas-sin-cablear`.
+- assertNotVisible:
+    id: 'en-marcha-sin-cablear'
+- assertNotVisible:
+    id: 'llegada-sin-cablear'
+- assertVisible:
+    id: 'mapa-lamina'
 
-      # Si el jugador mira, la escena está ahí. Esto es «abrir la app», no un control del juego.
-      - launchApp
-      - assertVisible:
-          id: 'llegada'
-      - assertVisible:
-          id: 'momento-estado'
-      - assertVisible: 'al-parar'
+# ── La escena valida sola y espera ─────────────────────────────────────────────
+#
+# **Aquí no se toca nada.** Validar es un estado y nunca un gesto: quien juega está parada
+# dentro del geofence del sitio por el que empieza el mapa, se cumple la permanencia y la
+# escena se pone delante ella sola. Medido: veintitrés segundos desde que se abre la salida.
+# El plazo es generoso a propósito —el fijo del emulador llega cada cinco segundos y la
+# ventana de parada necesita cubrirse—, y sigue siendo espera y no lógica.
+- extendedWaitUntil:
+    visible:
+      id: 'llegada'
+    timeout: 90000
+- assertVisible:
+    id: 'llegada-montada'
 
-      # La secuencia ofrecida, expuesta como la lista ordenada de tipos y modos: se afirma el
-      # orden entero sin recorrer cuatro pantallas.
-      - assertVisible:
-          id: 'llegada-secuencia'
-      - assertVisible: 'lo-que-se-cuenta:encadenado'
-      - assertVisible:
-          id: 'llegada-paso'
+# ── A4P5 · Lo que aquí se cuenta ───────────────────────────────────────────────
+#
+# El sitio es un núcleo y no se ha venido a nada, así que **la llegada entera es lo que allí
+# se cuenta**: es el paso encadenado único de la secuencia, y el antetítulo nombra el sitio.
+- assertVisible:
+    id: 'lo-que-se-cuenta'
+- assertVisible: '.*se habla de'
+- assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
+# Sin nada que se cuente de la jugadora, la sección «Y de ti» no existe: no se enseña vacía.
+- assertNotVisible:
+    id: 'lo-que-se-cuenta-de-ti'
 
-      # ── Ninguna de estas pantallas se navega ───────────────────────────────────────
-      # No hay barra, no hay flecha de atrás entre pasos y no hay manera de saltar al siguiente.
-      - assertNotVisible:
-          id: 'barra-de-pestanas'
-      - assertNotVisible:
-          id: 'cabecera'
-      - assertNotVisible:
-          id: 'boton-atras'
-      - assertNotVisible:
-          id: 'saltar'
+# ── Ninguna de estas pantallas se navega ───────────────────────────────────────
+# No hay barra, no hay flecha de atrás entre pasos y no hay manera de saltar al siguiente.
+- assertNotVisible:
+    id: 'barra-de-pestanas'
+- assertNotVisible:
+    id: 'cabecera'
+- assertNotVisible:
+    id: 'boton-atras'
+- assertNotVisible:
+    id: 'saltar'
+- assertNotVisible:
+    id: 'control-de-zoom'
+# Y el mapa no está: al parar, el mapa no se pinta.
+- assertNotVisible:
+    id: 'mapa-lamina'
 
-      # ── A4P5 · Lo que aquí se cuenta ───────────────────────────────────────────────
-      # El último paso encadenado de una llegada a un núcleo. Sin nada que se cuente de la
-      # jugadora, la sección «Y de ti» no existe —no se enseña vacía—.
-      - assertVisible:
-          id: 'lo-que-se-cuenta'
-      - assertNotVisible:
-          id: 'lo-que-se-cuenta-de-ti'
-      - assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
+# ── Ninguna cifra ──────────────────────────────────────────────────────────────
+# Ni de distancia, ni de tiempo, ni de ritmo, ni de progreso, ni de reputación.
+- assertNotVisible:
+    id: 'kilometros'
+- assertNotVisible:
+    id: 'porcentaje-de-aventura'
+- assertNotVisible: '.*\d+\s*%.*'
+- assertNotVisible: '.*\d+\s*(km|kcal|min|minutos)\b.*'
 
-      # «Seguir» es la única acción, y cierra la llegada: el móvil vuelve al bolsillo.
-      - tapOn:
-          id: 'llegada-seguir'
-      - assertNotVisible:
-          id: 'lo-que-se-cuenta'
+# ── «Seguir» es la única acción, y cierra la llegada ───────────────────────────
+# El móvil vuelve al bolsillo: debajo está el momento en marcha, no una pantalla anterior.
+- assertVisible:
+    id: 'llegada-seguir'
+- tapOn:
+    id: 'llegada-seguir'
+- extendedWaitUntil:
+    visible:
+      id: 'en-marcha'
+    timeout: 30000
+- assertVisible:
+    id: 'mapa-lamina'
+- assertNotVisible:
+    id: 'lo-que-se-cuenta'
 
-      # ── Pararse en un semáforo dentro de un geofence no tiene consecuencias ────────
-      # Se vuelve a pasar por el mismo sitio dentro de la misma salida: la llegada ya está
-      # cerrada y no se vuelve a ofrecer, y nada se enciende por volver a pisarlo.
-      - setLocation:
-          latitude: 42.4010
-          longitude: -8.8110
-      - assertNotVisible:
-          id: 'lo-que-se-cuenta'
-      - assertNotVisible:
-          id: 'notificacion'
+# ── Pararse en el mismo sitio no tiene consecuencias ───────────────────────────
+# Se sigue parada donde estaba y la llegada ya está cerrada: no se vuelve a ofrecer en la
+# misma salida, y nada se enciende por seguir pisándola.
+- assertNotVisible:
+    id: 'llegada'
+- assertNotVisible:
+    id: 'notificacion'

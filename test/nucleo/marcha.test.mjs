@@ -487,11 +487,37 @@ describe('La cadena del sensor: una suscripción, fuente, detector, seguidor', (
 // ── La vida de una salida, cableada ─────────────────────────────────────────────
 
 describe('Echarse a andar puede no poder, y entonces se dice por qué', () => {
-  test('Los motivos por los que una salida no se abre son un vocabulario cerrado', () => {
+  test('Los motivos por los que una salida no se abre son un vocabulario cerrado', async () => {
     assert.deepEqual([...MOTIVOS_DE_NO_ABRIR], [
       'rotulo-no-montado', 'rotulo-no-disponible', 'permiso-denegado',
       'permiso-no-preguntable', 'sensor-sin-responder', 'ya-hay-salida', 'telon-pendiente',
+      // `llegadas-sin-cablear` entra con SPEC-044, y este caso se puso rojo al añadirlo: eso
+      // es exactamente para lo que existe un vocabulario cerrado, que ampliarlo sea un acto
+      // con registro y no un motivo más que aparece en pantalla sin que nadie lo haya visto.
+      'llegadas-sin-cablear',
     ]);
+
+    // Y el motivo nuevo **se puede alcanzar**, que es la mitad que una lista no dice: una
+    // capa de llegadas que no se puede montar deja la salida sin abrir con su motivo
+    // literal, en vez de abrirla para andar por un mapa donde no puede pasar nada.
+    const suscripcion = suscripcionDoblada();
+    const laSalida = creaLaSalida({
+      nucleo: NUCLEO,
+      salidas: estadoDeSalidas(),
+      rotulo: rotuloQueFunciona(),
+      suscripcion,
+      origen: ORIGEN,
+      mundo: MUNDO,
+      tramo: TRAMO_M,
+      montaLlegadas: () => { throw new Error('la capa de descartes necesita el cupo que la celda congeló al generarse'); },
+    });
+    const respuesta = await laSalida.abre({ salida: 's1', mapa: 'm1', mundo: 'Reinos da Brétema' });
+    assert.equal(respuesta.abierta, false, 'la salida se abrió con la capa de llegadas sin montar');
+    assert.equal(respuesta.marca, 'llegadas-sin-cablear');
+    assert.match(respuesta.motivo, /cupo/, 'el motivo no lleva dentro lo que falló al montar la capa');
+    assert.equal(laSalida.situacion(), 'sin-salida', 'ha quedado una salida a medias en el área de la partida');
+    assert.equal(suscripcion.paradas.length, 1, 'la salida no se abrió y el servicio se ha quedado corriendo detrás');
+    assert.equal(laSalida.llegadasSinCablear(), respuesta.motivo, 'el motivo no queda a mano para el momento en marcha');
   });
 
   test('Sin rótulo no se abre ninguna salida, y «no montado» se distingue de «no disponible»', async () => {
