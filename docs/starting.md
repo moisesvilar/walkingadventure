@@ -1532,3 +1532,42 @@ Corolario para el runner: `device offline` va al `maestro.log` y **no a la salid
 Migrar leía el registro de hechos **antes** que `cargaPartida`, y era más estricto que él: un registro ilegible impedía abrir una partida perfectamente jugable, cuando el núcleo lo tolera por diseño —lo que se pierde es la red de seguridad, no la partida—. Corregido: el registro que no se puede leer se salta al migrar, y `cargaPartida` lo declara.
 
 Y una fragilidad que se vio de paso y no se toca aquí: **el registro de esquemas de `formato.js` se llena por efecto de importar cada módulo**. Validar una copia sin haber importado `onboarding.js` falla con «clase de documento desconocida "arranque-en-curso"». En la app no ocurre porque `arranque-montado.jsx` lo importa, pero es una dependencia por efecto secundario que un día morderá.
+
+# 11-ago-2026 (XXXI) · La app sabe leer el GPS, y el rótulo del sistema deja de ser un comentario
+
+## Lo que se decidió
+
+Entran **dos dependencias y ninguna más**, `expo-location` y `expo-task-manager`, autorizadas por el dueño del proyecto. Con ellas se cablean los tres contratos que llevaban escritos, probados contra dobles y **sin llamador** —`app/plataforma/ubicacion.js`, `app/plataforma/posiciones.js` y `app/marcha/seguidor.js`— más `creaRotulo` de `app/plataforma/rotulo.android.js`, y con el rótulo montado se llama por fin a `packages/nucleo/partida/salidas.js`, que esperaba desde SPEC-030.
+
+**Una sola suscripción al sensor por salida**, y de ella cuelgan la fuente, el detector y el seguidor. No es purismo: en Android el servicio en primer plano **es** el rótulo, así que pedir posiciones y poner la notificación persistente son la misma llamada. Dos suscripciones darían dos series de marcas para el mismo instante y la traza clasificada dejaría de cuadrar con el plazo.
+
+**La cadencia va por distancia** —diez metros— y no por tiempo, porque lo que se mide son metros propios. **Y la precisión es alta y no equilibrada**, que es una decisión que el encargo no preveía: `transporte.js` no funda un vehículo con más de treinta metros de error y la equilibrada entrega cien, así que con ella ningún segmento habría salido nunca `vehiculo` y la detección de transporte habría quedado escrita y muerta.
+
+## Lo que se implementó
+
+`app/marcha/salida.js` orquesta la vida de una salida con el generador inyectado desde `app/nucleo/piezas.js`, y `app/marcha/salida-montada.js` es lo único de la fila que importa de Expo. El hueco del telón vive en `App.js` con una sola acción, como `pantallas/llegada.js` resuelve la escena que no existe. La marca de posición pasa a pintarse **en el sitio del mundo donde estás** y no en el centro de la pantalla: clavada en el centro no se movía nunca, que es indistinguible de estar quieta.
+
+La guarda de fondo se reexpresa en vez de aflojarse: `expo-task-manager` sale de `MODULOS_DE_FONDO_QUE_NO_SE_MONTAN` y entra `TAREAS_QUE_LA_APP_DEFINE`, enumerada una a una, con `exigeTareaDeclarada` haciendo que registrar una sin declararla sea error de construcción. Y queda escrita `app/plataforma/contratos.js`, la lista de contratos sin llamador con dueño por entrada: poner llamador arregla los cuatro casos de hoy, la lista es lo único que arregla el de mañana.
+
+## Verificado con
+
+Emulador `wa-pixel`, API 35, mundo `G39DCH40H6A7ZD8G@42.40,-8.81#0,0` («Reinos da Brétema»), generado desde A1P4 con la posición que entregó el sensor.
+
+- **El diálogo del permiso es solo el de «mientras se usa»**: sale con «While using the app», «Only this time» y «Don't allow», y **no ofrece «Allow all the time»**. Concedido, A1P4 abre con `punto-pin` en `42.402,-8.809`, que es lo que dio el sensor y no el punto por defecto de la app.
+- **El rótulo, leído con `dumpsys notification`**: canal `com.walkingadventure.app:salida-abierta` con `importance=2` —baja—, notificación con `NO_CLEAR` —no se tira deslizando—, título «Walking Adventure» y línea **«Andando por Reinos da Brétema.»**, sin una cifra y compuesta por `partida/rotulo.js`. Sin ninguna acción, y eso es el límite de la fila (más abajo).
+- **El servicio en primer plano**, con `dumpsys activity services`: `isForeground=true`, `types=0x00000008` (ubicación).
+- **La posición se mueve y el detector clasifica.** A paso de andar —12 diezmilésimas de grado de longitud cada ocho segundos, unos 4,5 km/h— la marca recorre `x = 342 → 358 → 368 → 388 → 398` metros del mundo y sale **`andando`**. A velocidad de vehículo sostenida —73 diezmilésimas cada seis segundos, unos 36 km/h— sale **`ambiguo`** durante el minuto de confirmación y **`vehiculo`** a partir de ahí, que es exactamente lo que `CONFIRMACION_VEHICULO_S` declara. Bajando después a 15 km/h **sigue en `vehiculo`**, que también es correcto: salir del vehículo pide estar por debajo del umbral de andar dos minutos, y quince por hora no lo están.
+- **La salida sobrevive a cerrar la app y a reiniciar el móvil**: al reabrir, la portada enseña `salida-situacion = abierta-con-rotulo`, `rotulo-estado = puesto` y la tarjeta de a medias con sus dos acciones.
+- **El manifiesto generado y el paquete instalado**: `ACCESS_BACKGROUND_LOCATION` cero apariciones, `SCHEDULE_EXACT_ALARM` cero. En `Info.plist` la única clave de ubicación sigue siendo `NSLocationWhenInUseUsageDescription` y los modos de fondo siguen siendo exactamente `["location"]`.
+
+## Los tres hallazgos que contradicen lo que la fila daba por hecho
+
+**`RECEIVE_BOOT_COMPLETED` ya estaba en el APK, y no lo trajo esta fila.** Lo inyecta el manifiesto de `expo-notifications` al fusionarse, o sea desde SPEC-023. `LO_QUE_NUNCA_SE_DECLARA` lo prohibía y la guarda no lo veía **porque solo leía `app.json`**: el sitio donde hay que mirar es el manifiesto generado, y la promesa llevaba rota casi treinta filas sin que nada protestara. Peor: **tampoco se puede quitar**. `expo-task-manager` programa la entrega de cada posición como un trabajo persistido de `JobScheduler` —`setPersisted(true)` clavado en `TaskManagerUtils.java:205`— y Android exige ese permiso para persistir un trabajo; retirado con `tools:node="remove"`, la app revienta al llegar la primera posición con `IllegalArgumentException: Requested job cannot be persisted`. Medido. Lo que se hace a cambio es cambiar el sustituto por la propiedad: el permiso se declara con su motivo y el plugin `retira-permisos-prohibidos.js` **sustituye el receptor de tareas por uno sin `BOOT_COMPLETED` ni `MY_PACKAGE_REPLACED`**, así que no queda nada que pueda despertarse al arrancar el móvil.
+
+**El rótulo no puede tener su acción.** La notificación del servicio en primer plano la compone `expo-location` y sus opciones son título, línea, color y si muere con la app: no hay manera de añadirle una acción. «Dar la salida por terminada» desde el rótulo **no se entrega**, y queda declarado en `DECLARACION.loQueNoEntrega` con lo que haría falta —un servicio en primer plano propio en Kotlin— y con lo que hay mientras tanto: tocar el rótulo abre la app, y «dejarlo aquí» sigue entero en la tarjeta de a medias.
+
+**`hasStartedLocationUpdatesAsync` no dice lo que parece.** Dice si la **tarea sigue registrada**, no si el servicio está vivo: tras reiniciar el emulador devolvía `true` con el servicio muerto. Reconciliar con esa respuesta sola dejaba la salida creyéndose sostenida por nada, que es justo lo que `presente()` existe para impedir. Se resuelve juntando las dos: tarea registrada **y** arrancada por este proceso; si está registrada y este proceso no la arrancó, se vuelve a pedir —es idempotente— y solo si eso falla se anota la retirada por el sistema.
+
+## Y una trampa del emulador que costó una hora
+
+`adb emu geo fix` devolvía `OK` y **no movía nada**: un mock de `com.google.android.gms[fused_location_provider]` puesto veintitrés horas antes se re-emitía cada tres segundos con la misma coordenada, y `dumpsys location` lo delataba con la marca `mock` y un `et` que avanzaba sin que cambiaran los grados. `cmd location providers add-test-provider` no vale: `SecurityException: not allowed to perform MOCK_LOCATION`. Lo único que lo arregló fue **reiniciar el emulador**. Y después seguía sin llegar ninguna posición nueva hasta cambiar la precisión de la suscripción a alta: con la equilibrada el GPS ni se enciende —`gps provider: ProviderRequest[OFF]`—, y con la alta aparece `ProviderRequest[@+2s0ms, HIGH_ACCURACY, WorkSource{com.walkingadventure.app}]`. Antes de dar por rota la cadena del sensor, mirar `dumpsys location` y comprobar quién pide el GPS.
