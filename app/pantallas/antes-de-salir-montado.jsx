@@ -11,7 +11,7 @@
 // mensaje. Una portada que se monta con media tubería es indistinguible de una tarde sin
 // cobertura, y son dos cosas distintas (§6h).
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { PRESUPUESTO_FOTOS_MAPA_MS, PRESUPUESTO_PREPARACION_MS } from '@walkingadventure/nucleo/partida/recursos.js';
@@ -28,6 +28,7 @@ import { NUCLEO_DE_LA_PREPARACION } from '../nucleo/piezas.js';
 import { creaPreparacion } from '../salida/preparacion.js';
 import { PantallaAntesDeSalir } from './antes-de-salir.jsx';
 import { DIRECCION_DEL_PROXY } from './mapa-montado.jsx';
+import { MARCA_SUPERPUESTA } from './marca.js';
 
 /**
  * @param {object} props
@@ -48,7 +49,20 @@ export function AntesDeSalirMontado({
   alAndar = null,
   alAbrirPuerta = null,
   alEcharElTelon = null,
+  situacionDeSalida = 'sin-salida',
+  estadoDelRotulo = 'no-disponible',
 }) {
+  // El motivo literal de la última vez que echar a andar no pudo abrir la salida. Vive
+  // aquí y no en el estado del juego porque no es del juego: es lo que hay que enseñar
+  // debajo de la acción que no pudo, en el mismo sitio desde el que se intentó.
+  const [noSeAbre, setNoSeAbre] = useState(null);
+
+  const andar = useCallback(async (echada) => {
+    const respuesta = alAndar ? await alAndar(echada) : null;
+    setNoSeAbre(respuesta && respuesta.abierta === false ? (respuesta.motivo ?? 'no se pudo abrir la salida y nadie dijo por qué') : null);
+    return respuesta;
+  }, [alAndar]);
+
   const montaje = useMemo(() => {
     try {
       const pide = puertaDeRed();
@@ -95,21 +109,32 @@ export function AntesDeSalirMontado({
   }
 
   return (
-    <PantallaAntesDeSalir
-      calendario={montaje.calendario}
-      personaje={personaje}
-      mundo={mundo}
-      estado={partida}
-      preparacion={montaje.preparacion}
-      zurron={zurron}
-      alAndar={alAndar}
-      alAbrirPuerta={alAbrirPuerta}
-      alEcharElTelon={alEcharElTelon}
-    />
+    <View style={estilos.pila}>
+      {/* En qué situación está la salida, dónde está su rótulo y —cuando la hubo— por qué
+          no se pudo abrir. Las tres son marcas: lo que se lee en la portada no cambia por
+          tener o no tener rótulo, y el motivo literal se lee con un lector de pantalla. */}
+      <View testID="salida-situacion" accessibilityLabel={situacionDeSalida} style={estilos.marca} />
+      <View testID="rotulo-estado" accessibilityLabel={estadoDelRotulo} style={estilos.marca} />
+      {noSeAbre ? <View testID="salida-no-se-abre" accessibilityLabel={noSeAbre} style={estilos.marca} /> : null}
+
+      <PantallaAntesDeSalir
+        calendario={montaje.calendario}
+        personaje={personaje}
+        mundo={mundo}
+        estado={partida}
+        preparacion={montaje.preparacion}
+        zurron={zurron}
+        alAndar={andar}
+        alAbrirPuerta={alAbrirPuerta}
+        alEcharElTelon={alEcharElTelon}
+      />
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
+  pila: { flex: 1 },
   aviso: { flex: 1, padding: 24 },
   texto: { fontSize: 14, lineHeight: 20 },
+  marca: MARCA_SUPERPUESTA,
 });

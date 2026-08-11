@@ -130,6 +130,20 @@ export function PantallaAntesDeSalir({
     setRefresco((n) => n + 1);
   }, [estado, mapaId, calendario]);
 
+  /**
+   * Echarse a andar, que desde SPEC-048 **puede no poder**.
+   *
+   * El orden importa: primero se pregunta si la salida se abre de verdad —hay rótulo, hay
+   * permiso, hay posición— y solo entonces se anota la aventura en curso. Al revés, una
+   * salida que no se abre dejaría la tarjeta de a medias puesta sin nada detrás.
+   */
+  const echaAAndar = useCallback(async (echada) => {
+    const respuesta = alAndar ? await alAndar(echada) : null;
+    if (respuesta && respuesta.abierta === false) return respuesta;
+    if (!echada?.retomada) abre();
+    return respuesta;
+  }, [alAndar, abre]);
+
   const cierra = useCallback((via) => {
     const cerrada = cierraLaSalida(estado.aventuras, { via });
     setRefresco((n) => n + 1);
@@ -149,11 +163,8 @@ export function PantallaAntesDeSalir({
           setLista(componeLoQueHayHoy(peticion));
           setPantalla('lista');
         }}
-        alSalirSinMas={() => {
-          abre();
-          if (alAndar) alAndar({ conAventura: false });
-        }}
-        alSeguir={() => (alAndar ? alAndar({ conAventura: true, retomada: true }) : null)}
+        alSalirSinMas={() => { void echaAAndar({ conAventura: false }); }}
+        alSeguir={() => { void echaAAndar({ conAventura: true, retomada: true }); }}
         // La misma puerta en otro sitio: dispara el mismo cierre que llegar a casa.
         alDejarloAqui={() => cierra(VIAS_DE_CIERRE.DEJARLO_AQUI)}
         alAbrirPuerta={alAbrirPuerta}
@@ -170,10 +181,7 @@ export function PantallaAntesDeSalir({
         // dónde te mandan y nunca resiembra qué existe. Y no se encadena solo: la segunda
         // falta llega sin oferta, así que este botón deja de existir.
         alEstiron={() => setLista(aceptaElEstironDeHoy({ ...peticion, tramosDeMas: lista.tramosDeMas }))}
-        alAndarSinNada={() => {
-          abre();
-          if (alAndar) alAndar({ conAventura: false });
-        }}
+        alAndarSinNada={() => { void echaAAndar({ conAventura: false }); }}
       />
     );
   }
@@ -207,7 +215,9 @@ export function PantallaAntesDeSalir({
       // el botón espera, no lo que dice ninguna línea.
       preparacion={preparado?.pantalla ?? componePreparacion()}
       lista={preparado !== null}
-      alSalirAAndar={() => (alAndar ? alAndar({ conAventura: true, preparado }) : null)}
+      // La aventura ya quedó anotada al aceptarla en la ficha, así que aquí solo se
+      // pregunta si la salida se abre: `retomada` evita anotarla dos veces.
+      alSalirAAndar={() => { void echaAAndar({ conAventura: true, preparado, retomada: true }); }}
     />
   );
 }

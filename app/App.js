@@ -24,6 +24,7 @@ import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
 import { mundoDeLaPartida } from './mapa/mundo-guardado.js';
+import { montaLaSalida } from './marcha/salida-montada.js';
 // El área segura de la app. No es el `SafeAreaView` de `react-native`, que en Android es un
 // `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
 // respeta los insets en las dos plataformas.
@@ -46,6 +47,7 @@ import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
 import { AbrirCopia } from './pantallas/copia.jsx';
 import { ConsultaMontada } from './pantallas/consulta-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
+import { MARCA_SUPERPUESTA } from './pantallas/marca.js';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { EnMarchaMontado } from './pantallas/en-marcha-montado.jsx';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
@@ -58,6 +60,20 @@ const SIN_GANCHO = { ausentes: [], noReconocidos: [] };
 // `__DEV__` lo define el empaquetador. En una compilación de producción vale
 // false y el gancho queda inerte, que es lo que impide que sea una puerta trasera.
 const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
+
+/**
+ * La identidad de una salida: **el mapa y un contador del propio estado**.
+ *
+ * Y ninguna marca de tiempo, que es lo cómodo y lo que RF-PRIV-002 prohíbe: una hora
+ * escrita en la partida sobrevive a la copia exportada y es rastro de cuándo saliste a
+ * andar. El contador son los hechos anexados, que es un número que la partida ya lleva y
+ * que crece con lo jugado, así que dos salidas nunca comparten identidad.
+ */
+function identidadDeLaSalida(partida) {
+  const mapa = partida?.mundo?.mapaId ?? 'sin-mapa';
+  const cuantos = partida?.registro?.hechos?.length ?? 0;
+  return `${mapa}/s${cuantos + 1}`;
+}
 
 export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
@@ -104,6 +120,15 @@ export function App() {
   // sin más, o retomando la que estaba a medias. Mientras vale `null` no se anda. No se vuelve
   // desde aquí: se sale de una salida llegando a casa o echando el telón, que es de la fila 36.
   const [salida, setSalida] = useState(null);
+  // La vida de la salida, de SPEC-030 y cableada en la fila 48: el rótulo del sistema, la
+  // única suscripción al sensor y las transiciones. Se monta cuando hay partida abierta y
+  // **no antes**: sin mundo levantado no hay origen sobre el que proyectar los metros.
+  const [laSalida, setLaSalida] = useState(null);
+  // El área de salidas la muta el núcleo en sitio y React no se entera solo, así que cada
+  // posición recibida sube este contador. Además viaja al momento en marcha: el seguidor es
+  // un objeto estable y sin un valor que cambie la composición no se rehace, que es cómo la
+  // marca se quedaría quieta pareciendo que se anda en círculos.
+  const [pasoDeSalida, repintaLaSalida] = useState(0);
   // El paso provisional al momento en marcha, hermano de los otros dos y con su mundo: sin
   // partida no hay mapa levantado, así que se pinta sobre el mundo de revisión —el mismo
   // `__wa.demo()` del prototipo— en lugar de sobre uno inventado aquí.
@@ -247,6 +272,39 @@ export function App() {
   }, [partida, partidaGuardada]);
 
   /**
+   * Monta la vida de la salida en cuanto hay partida, y **reconcilia al arrancar**.
+   *
+   * Reconciliar es lo primero que se hace y no lo último: en Android el sistema puede
+   * matar el servicio en primer plano y devolver el proceso, así que la situación guardada
+   * puede estar diciendo que hay rótulo puesto cuando en la pantalla de bloqueo no hay
+   * nada. Es el riesgo 4 del PRD, y por eso `presente()` existe.
+   */
+  useEffect(() => {
+    if (!partida) {
+      setLaSalida(null);
+      return undefined;
+    }
+    let vivo = true;
+    montaLaSalida({
+      salidas: partida.estado.salidas,
+      origen: partida.mundo.documento?.origin ?? null,
+      tramo: partida.estado.personaje?.tramo ?? null,
+      alCambiar: () => repintaLaSalida((n) => n + 1),
+    })
+      .then(async (montada) => {
+        if (!vivo) return;
+        await montada.reconcilia();
+        if (!vivo) return;
+        setLaSalida(montada);
+        repintaLaSalida((n) => n + 1);
+      })
+      // Que la vida de la salida no se monte no tumba la app: la portada sigue entera y
+      // echar a andar responderá que no con su motivo, que es lo que hay que enseñar.
+      .catch(() => { if (vivo) setLaSalida(null); });
+    return () => { vivo = false; };
+  }, [partida]);
+
+  /**
    * La red que cubre lo que ningún corte del juego cubre: **a una app la mata el sistema
    * sin avisar**, y no hay ningún evento de «me van a matar». `inactive` entra igual que
    * `background` porque en iOS es el que llega primero y a veces el único.
@@ -255,9 +313,12 @@ export function App() {
     if (!partida) return undefined;
     const suscripcion = AppState.addEventListener('change', (siguiente) => {
       if (siguiente === 'background' || siguiente === 'inactive') congelaLaPartida();
+      // Y al volver al primer plano se reconcilia otra vez: entre medias el sistema pudo
+      // matar el servicio, y la salida no puede seguir creyéndose sostenida por él.
+      if (siguiente === 'active' && laSalida) void laSalida.reconcilia();
     });
     return () => suscripcion.remove();
-  }, [partida, congelaLaPartida]);
+  }, [partida, congelaLaPartida, laSalida]);
 
   useEffect(() => {
     let vivo = true;
@@ -422,7 +483,41 @@ export function App() {
       <EnMarchaMontado
         mundo={partida.mundo.documento}
         salidas={partida.estado.aventuras}
+        // El seguidor cuelga de la única suscripción de la salida. Sin él no se dibuja un
+        // mapa con la marca quieta: se enseña la avería con su motivo del vocabulario
+        // cerrado, que es lo que distingue «no sé por dónde andas» de «andas en círculos».
+        seguidor={laSalida?.seguidor() ?? null}
+        motivoSinUbicacion={laSalida?.seguidor() ? null : 'sensor-sin-responder'}
+        paso={pasoDeSalida}
       />
+    );
+  }
+
+  // El telón pendiente manda sobre la portada: una salida cerrada sin leer se lee antes de
+  // abrir otra, y esa regla es de SPEC-030. Su pantalla es de la fila 49 y **no está
+  // dibujada**, así que aquí va el hueco que la nombra, con el mismo patrón que
+  // `pantallas/llegada.js` usa para la escena que no existe: feo, honesto, y desaparece
+  // cuando la 49 llegue. Sin él la app se queda encallada.
+  if (partida && laSalida && laSalida.queOfrece() === 'telon') {
+    return (
+      <AreaSegura style={estilos.raiz}>
+        <View style={estilos.hueco} testID="telon-sin-pantalla">
+          <View testID="salida-situacion" accessibilityLabel={laSalida.situacion()} style={estilos.marca} />
+          <Text style={estilos.huecoTexto}>Esto todavía no está dibujado: el telón de tu última salida.</Text>
+          {/* Una sola acción, y **marca el telón como leído**: nunca lo marca el paso de
+              nada. Leerlo es un toque de quien lo lee, y esa regla es de SPEC-030. */}
+          <Pressable
+            testID="telon-cerrar"
+            onPress={() => {
+              laSalida.marcaElTelonComoLeido();
+              congelaLaPartida();
+            }}
+            style={estilos.huecoAccion}
+          >
+            <Text style={estilos.huecoAccionTexto}>Cerrarlo</Text>
+          </Pressable>
+        </View>
+      </AreaSegura>
     );
   }
 
@@ -484,10 +579,44 @@ export function App() {
           // Echarse a andar es un corte del juego y se congela: es el punto de enganche que
           // la fila 44 encontrará puesto cuando cablee la máquina de una salida, junto con el
           // del telón. Hoy la salida todavía no cambia nada del estado, así que no escribe.
-          alAndar={(echada) => {
+          // La vida de la salida, aquí. Las cuatro maneras de echarse a andar llegan a
+          // este sitio, y **este sitio puede decir que no**: sin rótulo, sin permiso o sin
+          // posición la salida no se abre y se devuelve el motivo literal, que la portada
+          // enseña debajo de la acción que no pudo. Abrirla igual significaría o perder la
+          // ubicación a los pocos minutos o pedir el permiso permanente.
+          alAndar={async (echada) => {
+            if (!laSalida) {
+              return { abierta: false, motivo: 'la vida de la salida no se ha podido montar en esta compilación, y sin ella el rótulo del sistema no sostiene nada' };
+            }
+            // «Seguir con ella» retoma la que ya estaba: vuelve a poner el rótulo y el
+            // plazo cuenta de nuevo. No se abre otra, que es lo que SPEC-028 pedía.
+            const respuesta = laSalida.situacion() === 'abierta-sin-rotulo'
+              ? await laSalida.retoma().then((r) => ({ abierta: r.retomada, motivo: r.motivo }))
+              : laSalida.situacion() === 'abierta-con-rotulo'
+                ? { abierta: true, motivo: null }
+                : await laSalida.abre({
+                  salida: identidadDeLaSalida(partida),
+                  mapa: partida.mundo.mapaId ?? 'sin-mapa',
+                  destino: null,
+                  mundo: partida.mundo.titulo ?? null,
+                });
             congelaLaPartida();
+            if (respuesta.abierta === false) return respuesta;
             setSalida(echada ?? { conAventura: false });
+            return respuesta;
           }}
+          // «Dejarlo aquí» de la tarjeta de a medias: la misma puerta que volver a casa,
+          // con otro motivo anotado. Cierra la salida de verdad y retira el rótulo en la
+          // misma transición, no en una posterior.
+          alEcharElTelon={() => {
+            if (!laSalida) return;
+            void laSalida.dejarloAqui().then(() => {
+              setSalida(null);
+              congelaLaPartida();
+            });
+          }}
+          situacionDeSalida={laSalida ? laSalida.situacion() : 'sin-salida'}
+          estadoDelRotulo={laSalida ? laSalida.estadoDelRotulo() : 'no-disponible'}
           // Las tres puertas del pie de la portada. La composición del núcleo las declara
           // en `PUERTAS` y la pantalla las pinta; lo que faltaba era esto, que llevaran a
           // algún sitio.
@@ -515,6 +644,12 @@ const estilos = StyleSheet.create({
   // La espera ocupa la pantalla entera: una marca de 0×0 no existe para la automatización,
   // y esta tiene que poder afirmarse.
   espera: { flex: 1 },
+  // El hueco del telón. Ocupa la pantalla: una marca de 0×0 no existe para la automatización.
+  hueco: { flex: 1, padding: 28, justifyContent: 'center', gap: 24 },
+  huecoTexto: { fontFamily: 'serif', fontSize: 20, lineHeight: 30, color: '#1e2b18' },
+  huecoAccion: { paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1e2b18' },
+  huecoAccionTexto: { fontFamily: 'serif', fontSize: 18, color: '#1e2b18' },
+  marca: MARCA_SUPERPUESTA,
   averia: { padding: 24, gap: 16 },
   averiaTitular: { fontSize: 20, color: '#1e2b18' },
   averiaMotivo: { fontSize: 13, lineHeight: 19, color: '#1e2b18', opacity: 0.75 },

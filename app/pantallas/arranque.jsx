@@ -32,6 +32,17 @@ const PLACA = '#efe3c0';
 const TINTA = '#1e2b18';
 
 /**
+ * Las cuatro respuestas que A1P3 puede tener, y **solo cuatro**.
+ *
+ * `denegado` y `no-se-pudo-preguntar` son dos y no una a propósito: la primera es una
+ * decisión de quien juega y sigue por la vía manual sin una palabra que la llame problema;
+ * la segunda es una avería nuestra, se queda en la pantalla con el motivo literal a la
+ * vista y se arregla en otro sitio. Confundirlas convertiría una pieza sin cablear en una
+ * elección, que es la forma de fallo que este repo lleva pagada ocho veces (§6h).
+ */
+export const RESPUESTAS_DEL_PERMISO = Object.freeze(['sin-pedir', 'concedido', 'denegado', 'no-se-pudo-preguntar']);
+
+/**
  * Cuántos grados de latitud son unos metros. La misma constante que la proyección
  * local del núcleo, y aquí solo sirve para traducir un arrastre de dedo a coordenadas
  * mientras no exista capa de teselas con su propia proyección.
@@ -133,6 +144,11 @@ export function PantallaArranque({
   const [errorDelNombre, setErrorDelNombre] = useState(null);
   const [lista, setLista] = useState(null);
   const [fallo, setFallo] = useState(null);
+  // La respuesta del permiso, del vocabulario cerrado de arriba. Vive en la pantalla y no
+  // en el arranque porque el núcleo no distingue «denegado» de «no se pudo preguntar»: para
+  // él las dos acaban en la vía manual, y lo que se arregla en sitios distintos es lo que
+  // hay que poder leer aquí.
+  const [respuestaDelPermiso, setRespuestaDelPermiso] = useState('sin-pedir');
 
   const paso = vista.paso;
   const refresca = useCallback((siguiente) => setVista(siguiente ?? arranque.vista()), [arranque]);
@@ -267,13 +283,20 @@ export function PantallaArranque({
       {paso === 'el-permiso' ? (
         <ElPermiso
           arranque={arranque}
+          respuesta={respuestaDelPermiso}
           alPermitir={async () => {
             setFallo(null);
             try {
-              refresca(await arranque.pideElPermiso());
+              const vistaNueva = await arranque.pideElPermiso();
+              // Concedido o denegado se leen de por dónde llegó el punto, que es lo que el
+              // núcleo sí distingue: con permiso concedido el origen es `permiso`, y
+              // denegarlo deja la marca en el punto por defecto por la vía manual.
+              setRespuestaDelPermiso(vistaNueva.precubierto.origenDelPunto === 'permiso' ? 'concedido' : 'denegado');
+              refresca(vistaNueva);
             } catch (e) {
               // No poder preguntar no es haber denegado: se dice, y la vía manual
               // sigue ahí abajo, que es la que resuelve el momento.
+              setRespuestaDelPermiso('no-se-pudo-preguntar');
               setFallo(mensajeDeError(e));
             }
           }}
@@ -449,11 +472,16 @@ function TuTramo({ vista, alResponder }) {
 
 // --- A1P3 ----------------------------------------------------------------------
 
-function ElPermiso({ arranque, alPermitir, alAMano }) {
+function ElPermiso({ arranque, alPermitir, alAMano, respuesta = 'sin-pedir' }) {
   const proveedor = arranque.proveedorDeUbicacion ? arranque.proveedorDeUbicacion() : null;
   const sinMontar = proveedor ? proveedor.montado === false : false;
   return (
     <View style={estilos.cuerpo}>
+      {/* La respuesta del permiso y si hay con qué pedirlo. Las dos son marcas y no texto:
+          lo que se lee en A1P3 no cambia por haber denegado, que es media pantalla. */}
+      <View testID="permiso-respuesta" accessibilityLabel={respuesta} style={estilos.marca} />
+      <View testID="ubicacion-estado" accessibilityLabel={sinMontar ? 'sin-montar' : 'montado'} style={estilos.marca} />
+
       <Text style={estilos.seccion}>{textoDelGuion('el-permiso', 'seccion')}</Text>
       <Text style={estilos.titulo}>{textoDelGuion('el-permiso', 'titulo')}</Text>
       <Text style={estilos.linea}>{textoDelGuion('el-permiso', 'razon')}</Text>

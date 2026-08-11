@@ -11,6 +11,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import * as Location from 'expo-location';
 
 import { CLAVE_DEL_ARRANQUE, creaArranque } from '@walkingadventure/nucleo/partida/onboarding.js';
 import { localeFor } from '@walkingadventure/nucleo/names/index.js';
@@ -28,7 +29,7 @@ import { creaLevantamiento } from '../mapa/levantamiento.js';
 import { componePrimeraLista } from '../mapa/primera-lista.js';
 import { evidenciaDelSistema, mecanismoDeAtestacion } from '../plataforma/atestacion.js';
 import { mensajeDeError } from '../plataforma/capacidades.js';
-import { proveedorSinMontar } from '../plataforma/ubicacion.js';
+import { creaProveedorDeUbicacionDeExpo, proveedorSinMontar } from '../plataforma/ubicacion.js';
 import { creaEnlaceReal } from '../render/enlace-real.js';
 import { AbrirCopia } from './copia.jsx';
 import { creaMedidorSkia } from '../render/medidor-skia.js';
@@ -60,7 +61,7 @@ export function idiomaDeArranque(punto = PUNTO_POR_DEFECTO) {
 const ALTO_DE_LOS_CONTROLES = 40;
 
 export function ArranqueMontado({
-  ubicacion = null,
+  ubicacion: ubicacionInyectada = null,
   puntoPorDefecto = PUNTO_POR_DEFECTO,
   base = DIRECCION_DEL_PROXY,
   alSalirAAndar = null,
@@ -69,6 +70,15 @@ export function ArranqueMontado({
   alAbrirCopia = null,
 }) {
   const { width, height } = useWindowDimensions();
+
+  // El proveedor de esta compilación, que desde SPEC-048 es `expo-location`. Devuelve
+  // `null` cuando el módulo no está en el binario, y entonces se monta el que dice que no
+  // está: un `app.json` con el plugin puesto y un binario sin el módulo dentro son la
+  // misma cosa para quien pulsa «Permitir», y solo esta pregunta los distingue.
+  const ubicacion = useMemo(
+    () => ubicacionInyectada ?? creaProveedorDeUbicacionDeExpo(Location),
+    [ubicacionInyectada],
+  );
 
   const montaje = useMemo(() => {
     try {

@@ -73,6 +73,29 @@ export function metrosPorPixel(camara, tamano) {
 }
 
 /**
+ * Dónde cae un punto del mundo dentro de la lámina, en píxeles.
+ *
+ * Es la inversa de `arrastra` y existe por una razón concreta de SPEC-048: **la marca de
+ * posición tiene que moverse**. Pintada en el centro de la pantalla no se mueve nunca —el
+ * centro es el centro—, y con la cámara siguiéndola tampoco se movería ella sino el mapa
+ * entero, que es lo contrario de lo que el momento en marcha promete: el mapa no cambia
+ * durante la salida y lo único que se mueve es la marca.
+ *
+ * El eje vertical se invierte por lo mismo que en `arrastra`: en la lámina la y crece hacia
+ * el norte y en la pantalla hacia abajo.
+ */
+export function pixelDeMundo(camara, tamano, punto) {
+  const m = metrosPorPixel(camara, tamano);
+  if (!punto || !Number.isFinite(punto.x) || !Number.isFinite(punto.y)) {
+    throw new Error(`un punto del mundo son dos metros y llegó ${JSON.stringify(punto) ?? String(punto)}`);
+  }
+  return {
+    x: tamano.ancho / 2 + (punto.x - camara.cx) / m,
+    y: tamano.alto / 2 - (punto.y - camara.cy) / m,
+  };
+}
+
+/**
  * Arrastrar: **se mueve la cámara y no el mundo**. El dedo va con el papel, así que
  * arrastrar hacia la derecha lleva la cámara hacia la izquierda; y el eje vertical se
  * invierte porque en la lámina la y crece hacia el norte y en la pantalla hacia abajo.

@@ -16,6 +16,16 @@
 // Aquí no se importa ningún módulo nativo, por lo mismo que en `ubicacion.js`: el
 // contrato se ejercita en `node --test` contra un doble y el módulo nativo entra por la
 // firma de `creaRotulo`.
+//
+// **El límite de esta plataforma, escrito y no disimulado (SPEC-048).** Las dos
+// dependencias que la fila 48 trajo —`expo-location` y `expo-task-manager`— no dan la
+// Actividad en Vivo: pide un widget de `ActivityKit` compilado dentro de la app, que es un
+// módulo nativo propio y ninguna spec lo ha nombrado todavía. La consecuencia se declara
+// en vez de degradarse: **en iOS una salida no se abre**, y lo que se enseña es el motivo
+// del rótulo que falta. Abrirla igual significaría o perder la ubicación a los pocos
+// minutos o pedir el permiso permanente, que es la exclusión 12 del PRD, y
+// `capacidades.js` ya declara que la ausencia del rótulo no admite degradar en silencio.
+// Quien lo cierre será la fila que nombre ese módulo, no esta.
 
 /** El mecanismo real de esta plataforma, para que nadie tenga que redescubrirlo. */
 export const MECANISMO = 'Actividad en Vivo de iOS en la pantalla de bloqueo, con la ubicación en segundo plano';
@@ -35,6 +45,17 @@ export const DECLARACION = Object.freeze({
   descartable: false,
   permisos: Object.freeze(['NSLocationWhenInUseUsageDescription']),
   permisoPermanente: false,
+  // Lo que esta plataforma no entrega hoy, con lo que haría falta. Es la pareja del mismo
+  // campo en `rotulo.android.js`: una ausencia declarada se puede poner roja; una ausencia
+  // que solo vive en un comentario, no.
+  loQueNoEntrega: Object.freeze([
+    Object.freeze({
+      que: 'el rótulo entero, y con él abrir una salida en iOS',
+      porque: 'la Actividad en Vivo pide un widget de ActivityKit compilado dentro de la app, y ni expo-location ni expo-task-manager lo dan',
+      haria_falta: 'un módulo nativo propio con su extensión de widget, o una dependencia que la envuelva; ninguna spec la ha nombrado',
+      mientras_tanto: 'la salida no se abre y se dice cuál es la capacidad que falta, en vez de abrirla y perder la ubicación a los pocos minutos',
+    }),
+  ]),
 });
 
 /** La capacidad, con el contrato de SPEC-020 sin tocarlo. La sonda no pide ningún permiso. */
@@ -48,7 +69,7 @@ export const rotulo = {
     return {
       montado: false,
       disponible: false,
-      motivo: `${MECANISMO}: esta compilación no trae el módulo nativo que la arranca, y ninguna spec ha nombrado todavía la dependencia que lo daría`,
+      motivo: `${MECANISMO}: hace falta un widget de ActivityKit compilado dentro de la app, que ni expo-location ni expo-task-manager dan, y ninguna spec ha nombrado todavía el módulo nativo que lo daría. Lo decidirá la fila que lo nombre; hasta entonces, en iOS una salida no se abre`,
     };
   },
 };

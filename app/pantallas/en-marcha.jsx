@@ -22,12 +22,23 @@ import { PanResponder, StyleSheet, Text, View } from 'react-native';
 
 import { ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
 
-import { acerca, arrastra, normaliza, vistaDe } from '../mapa/camara.js';
+import { acerca, arrastra, normaliza, pixelDeMundo, vistaDe } from '../mapa/camara.js';
 import { MARCA_SUPERPUESTA } from './marca.js';
 
 /** El tamaño de la marca de posición, en px. La marca de aviso es algo menor. */
 const MARCA_POSICION_PX = 14;
 const MARCA_AVISO_PX = 10;
+
+/**
+ * Dónde se pinta la marca, en píxeles de la lámina. Se recorta al borde de la pantalla en
+ * lugar de dejarla salir: quien arrastra el mapa lejos sigue viendo por qué lado queda, y
+ * una marca fuera del hueco es indistinguible de una marca que no está.
+ */
+function enPantalla(camara, tamano, punto) {
+  const p = pixelDeMundo(camara, tamano, punto);
+  const dentro = (v, tope) => Math.max(0, Math.min(tope - MARCA_POSICION_PX, v - MARCA_POSICION_PX / 2));
+  return { left: dentro(p.x, tamano.ancho), top: dentro(p.y, tamano.alto) };
+}
 
 /** La separación entre dos dedos. El ángulo no se calcula: la cámara no tiene rotación. */
 function separacion(toques) {
@@ -123,12 +134,20 @@ export function PantallaEnMarcha({
 
       {/* La marca de posición: roja, del propio mapa, y no un punto de sistema. Sin
           posición legible no se pinta y el mapa se queda como estaba; ninguna línea lo
-          cuenta como avería del mundo. */}
-      {momento.marcaPosicion.punto ? (
+          cuenta como avería del mundo.
+          **Va en el sitio del mundo donde estás y no en el centro de la pantalla**: lo que
+          se mueve durante una salida es la marca, y una marca clavada en el centro haría
+          que moverse se viera igual que estar quieta. La etiqueta lleva el punto en metros
+          del mundo para poder leerlo moverse sin mirar la pantalla. */}
+      {momento.marcaPosicion.punto && camaraNormal ? (
         <View
           testID="marca-posicion"
-          accessibilityLabel={momento.marcaPosicion.delMapa ? 'del-mapa' : 'de-sistema'}
-          style={[estilos.marcaPosicion, { backgroundColor: momento.marcaPosicion.color }]}
+          accessibilityLabel={`${momento.marcaPosicion.delMapa ? 'del-mapa' : 'de-sistema'}:${Math.round(momento.marcaPosicion.punto.x)},${Math.round(momento.marcaPosicion.punto.y)}:${momento.marcaPosicion.clasificacion ?? 'sin-clasificar'}`}
+          style={[
+            estilos.marcaPosicion,
+            enPantalla(camaraNormal, tamano, momento.marcaPosicion.punto),
+            { backgroundColor: momento.marcaPosicion.color },
+          ]}
         />
       ) : null}
 
@@ -193,14 +212,11 @@ const estilos = StyleSheet.create({
   raiz: { flex: 1, backgroundColor: TINTA },
   // Marcas de estado para la batería: un punto que no se ve pero que sí se puede leer.
   marca: MARCA_SUPERPUESTA,
+  // Sin `left`/`top` aquí: los pone `enPantalla` con el punto del mundo de cada momento.
   marcaPosicion: {
     position: 'absolute',
-    left: '50%',
-    top: '50%',
     width: MARCA_POSICION_PX,
     height: MARCA_POSICION_PX,
-    marginLeft: -MARCA_POSICION_PX / 2,
-    marginTop: -MARCA_POSICION_PX / 2,
     borderRadius: MARCA_POSICION_PX / 2,
     borderWidth: 2,
     borderColor: PLACA,

@@ -12,8 +12,17 @@
 // ubicación no es el permiso permanente**. `UIBackgroundModes: ["location"]` es lo que
 // hace que la app cuente como «en uso» con la pantalla apagada durante una salida abierta,
 // que es precisamente lo que `seguridad-privacidad.md` §2 pide para no tener que pedir el
-// otro. Lo que esta fila añade es que **no hay ningún modo ni tarea de fondo por los pasos
+// otro. Lo que SPEC-042 añadió es que **no hay ningún modo ni tarea de fondo por los pasos
 // del día a día**: se leen al abrir y no hay nada que corra con la app cerrada.
+//
+// Y lo que SPEC-048 cambia, que es el sustituto por la propiedad: hasta esta fila la guarda
+// era una lista de módulos prohibidos, y valía mientras nada legítimo necesitara ninguno.
+// `expo-task-manager` sí lo necesita —es con lo que se define la tarea del servicio en
+// primer plano que sostiene «mientras se usa» con la pantalla apagada—, así que sale de la
+// lista y entra `TAREAS_QUE_LA_APP_DEFINE`, **enumerada una a una** con su motivo y su
+// dueña. La propiedad protegida pasa de «no está el módulo que podría hacerlo» a «está
+// enumerado todo lo que hace, y nada de ello lee con la app cerrada», que es más fuerte:
+// registrar una tarea sin declararla es error de construcción y no un descuido silencioso.
 
 /** Los permisos que la app pide, cada uno con cuándo se pide y quién lo posee. */
 export const PERMISOS_QUE_SE_PIDEN = Object.freeze([
@@ -55,8 +64,40 @@ export const LO_QUE_NUNCA_SE_DECLARA = Object.freeze([
   'NSLocationAlwaysUsageDescription',
   'NSHealthUpdateUsageDescription',
   'BGTaskSchedulerPermittedIdentifiers',
-  'RECEIVE_BOOT_COMPLETED',
   'SCHEDULE_EXACT_ALARM',
+]);
+
+/**
+ * Los permisos que **una librería exige y la app declara a la fuerza**, con lo que se hace
+ * a cambio para que la propiedad que protegían siga en pie.
+ *
+ * Existe por un hallazgo de SPEC-048 que hay que contar entero, porque contradice lo que
+ * esta lista decía antes:
+ *
+ * - `RECEIVE_BOOT_COMPLETED` estaba en `LO_QUE_NUNCA_SE_DECLARA`, y **ya estaba en el APK**
+ *   desde SPEC-023: lo inyecta el `AndroidManifest.xml` de `expo-notifications` al
+ *   fusionarse. La guarda no lo veía porque solo leía `app.json`, así que la promesa
+ *   llevaba rota sin que nada protestara. El manifiesto generado es donde hay que mirar.
+ * - Y **no se puede quitar**: `expo-task-manager` programa la entrega de cada posición como
+ *   un trabajo persistido de `JobScheduler` con `setPersisted(true)` clavado en el código,
+ *   y Android exige ese permiso para persistir un trabajo. Retirado con `tools:node="remove"`,
+ *   la app revienta al llegar la primera posición con `IllegalArgumentException: Requested
+ *   job cannot be persisted`. Medido en el emulador el 11-ago-2026.
+ *
+ * Lo que se hace a cambio, que es lo que mantiene en pie la propiedad de verdad —«nada de
+ * esta app se despierta con la app cerrada»—: el plugin `plugins/retira-permisos-prohibidos.js`
+ * **sustituye el receptor de tareas por uno sin `BOOT_COMPLETED` ni `MY_PACKAGE_REPLACED`**,
+ * así que el permiso está declarado y no hay nada que pueda dispararse al arrancar el móvil.
+ * El sustituto se cambia por la propiedad, igual que con el módulo de fondo.
+ */
+export const PERMISOS_QUE_UNA_LIBRERIA_EXIGE = Object.freeze([
+  Object.freeze({
+    id: 'RECEIVE_BOOT_COMPLETED',
+    quienLoExige: 'expo-task-manager, para persistir el trabajo de JobScheduler con el que entrega cada posición',
+    porQueNoSeQuita: 'sin él la app revienta al recibir la primera posición: JobScheduler rechaza un trabajo persistido sin este permiso',
+    aCambio: 'el receptor de tareas se sustituye sin BOOT_COMPLETED ni MY_PACKAGE_REPLACED, así que nada se despierta al arrancar el móvil',
+    dueña: 'fila 48 del checklist',
+  }),
 ]);
 
 /**
@@ -81,12 +122,76 @@ export const MODOS_DE_FONDO = Object.freeze([
  */
 export const TAREAS_PERIODICAS = Object.freeze([]);
 
-/** Los identificadores de módulo de Expo que traerían fondo, y que esta app no monta. */
+/**
+ * Los identificadores de módulo de Expo que traerían fondo, y que esta app no monta.
+ *
+ * **`expo-task-manager` salió de esta lista en SPEC-048, y el motivo va escrito aquí para
+ * que nadie tenga que reconstruirlo desde un diff**: entra a sostener el servicio en primer
+ * plano de una salida abierta, que es exactamente lo que `seguridad-privacidad.md` §2 nombra
+ * como la razón de **no** pedir el permiso permanente. No entra a leer con la app cerrada, y
+ * lo que impide que acabe haciéndolo es `TAREAS_QUE_LA_APP_DEFINE`: la lista de módulos era
+ * un sustituto de esa propiedad, y el sustituto se cambia por la propiedad, no se afloja.
+ *
+ * Los dos que quedan sí son fondo con otro nombre y no tienen ningún uso legítimo aquí: los
+ * pasos del día a día se leen al abrir, y con la app cerrada no se lee nada.
+ */
 export const MODULOS_DE_FONDO_QUE_NO_SE_MONTAN = Object.freeze([
   'expo-background-fetch',
   'expo-background-task',
-  'expo-task-manager',
 ]);
+
+/**
+ * Las tareas que la app **define**, una a una, al estilo de `MODOS_DE_FONDO`.
+ *
+ * Exactamente una, y muere con la salida: la del servicio en primer plano que sostiene la
+ * lectura de posiciones mientras hay una salida abierta. No es periódica —no la despierta
+ * ningún planificador, la alimenta el propio sensor mientras el servicio corre— y no existe
+ * fuera de una salida abierta: se arranca al abrirla y se para al cerrarla o al retirarse el
+ * rótulo por plazo.
+ *
+ * Registrar una tarea que no esté aquí es **error de construcción** y no un descuido:
+ * `exigeTareaDeclarada` es por donde pasa el registro, y sin entrada no hay tarea.
+ */
+export const TAREAS_QUE_LA_APP_DEFINE = Object.freeze([
+  Object.freeze({
+    id: 'salida-abierta',
+    porque: 'es la tarea del servicio en primer plano de una salida abierta: sostiene «mientras se usa» con la pantalla apagada (SPEC-030) y muere con la salida',
+    dueña: 'fila 48 del checklist',
+  }),
+]);
+
+/**
+ * Las dependencias nativas que esta app monta para leer la ubicación, con para qué está
+ * cada una y qué fila la trajo. Dos, y ninguna más.
+ */
+export const DEPENDENCIAS_DE_UBICACION = Object.freeze([
+  Object.freeze({
+    id: 'expo-location',
+    porque: 'pide el permiso «mientras se usa», entrega la posición del arranque y arranca el servicio en primer plano con la notificación persistente del rótulo',
+    dueña: 'fila 48 del checklist',
+  }),
+  Object.freeze({
+    id: 'expo-task-manager',
+    porque: 'define la tarea a la que el servicio en primer plano entrega las posiciones; es lo único que hace, y sin ella no hay servicio que sostenga «mientras se usa»',
+    dueña: 'fila 48 del checklist',
+  }),
+]);
+
+/**
+ * Exige que una tarea esté declarada antes de registrarla. Falla nombrándola y enumerando
+ * las declaradas: una tarea que se registra sin declararse es trabajo de fondo que nadie
+ * ha decidido, y es la puerta que esta guarda existe para cerrar.
+ */
+export function exigeTareaDeclarada(id, quien = 'el registro de una tarea') {
+  const declarada = TAREAS_QUE_LA_APP_DEFINE.find((t) => t.id === id);
+  if (!declarada) {
+    throw new Error(
+      `${quien}: la tarea "${id}" no está declarada en TAREAS_QUE_LA_APP_DEFINE, y registrar una sin declararla es trabajo de fondo que nadie ha decidido. ` +
+      `Las declaradas son ${TAREAS_QUE_LA_APP_DEFINE.map((t) => t.id).join(', ') || '(ninguna)'}`,
+    );
+  }
+  return declarada;
+}
 
 /**
  * Revisa un manifiesto de Expo contra lo declarado aquí y devuelve lo que incumple, como

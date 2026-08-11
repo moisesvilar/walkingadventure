@@ -97,6 +97,23 @@ import {
   vaciaElZurron,
 } from '@walkingadventure/nucleo/partida/zurron.js';
 import { AJUSTES_DE_ORIGEN, cambiaAjuste } from '@walkingadventure/nucleo/partida/ajustes.js';
+import {
+  abreSalida,
+  dejarloAqui,
+  disponibilidadDelRotulo,
+  estadoDelRotulo,
+  marcaElTelonComoLeido,
+  queOfreceAlAbrirLaApp,
+  recibePosicion,
+  reconciliaConElRotulo,
+  retomaLaSalida,
+  salidaEnCurso,
+  situacionDeSalida,
+  terminaDesdeElRotulo,
+} from '@walkingadventure/nucleo/partida/salidas.js';
+import { componeRotulo } from '@walkingadventure/nucleo/partida/rotulo.js';
+import { creaDetectorDeTransporte } from '@walkingadventure/nucleo/partida/transporte.js';
+import { makeProjector } from '@walkingadventure/nucleo/core/geo.js';
 import { kilometrosDeFondo, tamanoDeLaReserva } from '@walkingadventure/nucleo/partida/kilometros.js';
 import { REGISTROS, coloca, textoConRegistro } from '@walkingadventure/nucleo/lenguaje/registro.js';
 import {
@@ -245,6 +262,38 @@ export const NUCLEO_DE_LA_PARTIDA_GUARDADA = Object.freeze({
   exigeSinImportacionAMedias,
   lee,
   textoCanonico,
+});
+
+/**
+ * Lo que `creaLaSalida` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-048 entra por la misma puerta que las siete filas anteriores (§6u): que haya una
+ * sola suscripción al sensor, que el plazo retire el rótulo sin cerrar la salida, que
+ * cerrar lo retire en la misma transición y que volver a casa en autobús cierre igual
+ * tienen que poder leerse desde `node --test` sin resolver nada instalado, que es el único
+ * sitio donde se pueden poner rojos.
+ *
+ * `makeProjector` viaja aquí y no dentro de `seguidor.js` por lo mismo y por una razón
+ * más: los metros del mundo se calculan **una vez y en el núcleo**, porque `geo.js`
+ * cuantiza al proyectar y una trigonometría paralela en la app daría puntos que no cuadran
+ * con los del mundo congelado.
+ */
+export const NUCLEO_DE_LA_SALIDA = Object.freeze({
+  abreSalida,
+  recibePosicion,
+  reconciliaConElRotulo,
+  retomaLaSalida,
+  dejarloAqui,
+  terminaDesdeElRotulo,
+  marcaElTelonComoLeido,
+  queOfreceAlAbrirLaApp,
+  situacionDeSalida,
+  estadoDelRotulo,
+  salidaEnCurso,
+  componeRotulo,
+  disponibilidadDelRotulo,
+  creaDetectorDeTransporte,
+  makeProjector,
 });
 
 /** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */

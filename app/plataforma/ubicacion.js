@@ -15,6 +15,10 @@
 // vía de elegir el punto a mano cuando no hay con qué pedir el permiso: eso sería la
 // pieza que, al no estar, no protesta (§6h). Denegar es una respuesta; no poder
 // preguntar es una avería, y se distinguen.
+//
+// Desde SPEC-048 el módulo nativo existe y es `expo-location`, pero **sigue entrando por
+// la firma**: `creaProveedorDeUbicacionDeExpo` lo recibe inyectado y no lo importa, que es
+// lo que mantiene este fichero cargable desde `node --test` sin `node_modules`.
 
 /** Las dos respuestas posibles a pedir el permiso. Vocabulario cerrado. */
 export const RESPUESTAS = Object.freeze(['concedido', 'denegado']);
@@ -66,14 +70,14 @@ export function creaProveedorDeUbicacion({ pidePermiso, leePosicion }) {
 /**
  * Un proveedor que **no está montado** y lo dice al usarlo.
  *
- * Existe porque esta entrega no trae módulo nativo de ubicación —ninguna spec ha
- * nombrado todavía la dependencia que lo daría— y la alternativa era peor: un
- * proveedor que respondiera «denegado» convertiría una pieza sin cablear en una
- * decisión de quien juega, y entonces la vía manual dejaría de ser una elección para
- * pasar a ser una caída silenciosa. Con este, «Permitir» se enseña apagado y con su
- * motivo a la vista, y la vía manual sigue funcionando entera.
+ * Nació porque hasta SPEC-048 no había módulo nativo de ubicación; sigue existiendo porque
+ * una compilación puede no traerlo, y la alternativa era peor: un proveedor que respondiera
+ * «denegado» convertiría una pieza sin cablear en una decisión de quien juega, y entonces
+ * la vía manual dejaría de ser una elección para pasar a ser una caída silenciosa. Con
+ * este, «Permitir» se enseña apagado y con su motivo a la vista, y la vía manual sigue
+ * funcionando entera.
  */
-export function proveedorSinMontar(motivo = 'no montado todavía: la app no trae módulo de ubicación, y ninguna spec ha nombrado la dependencia que lo daría') {
+export function proveedorSinMontar(motivo = 'no montado: expo-location no está en esta compilación, y sin él no hay con qué pedir el permiso') {
   return {
     montado: false,
     motivo,
@@ -81,4 +85,42 @@ export function proveedorSinMontar(motivo = 'no montado todavía: la app no trae
       throw new Error(`no se puede pedir el permiso de ubicación: ${motivo}. La vía de elegir el punto a mano sigue abierta y es la que hay que usar`);
     },
   };
+}
+
+/**
+ * El proveedor sobre `expo-location`, que desde SPEC-048 es dependencia de la app.
+ *
+ * Devuelve `null` —y no un proveedor que finja— cuando el módulo no está en la
+ * compilación: quien monta decide entonces qué poner, y lo que pone es el sin montar con
+ * su motivo, nunca uno que responda «denegado».
+ *
+ * Dos cosas que hace y que son de privacidad, no de comodidad. **Solo pide «mientras se
+ * usa»**: `requestForegroundPermissionsAsync` es el único que se llama aquí, y
+ * `requestBackgroundPermissionsAsync` no aparece en toda la app. Y **se lee y se tira**: de
+ * lo que devuelve el módulo —precisión, rumbo, altitud, velocidad y una marca de tiempo—
+ * salen de aquí dos números, porque los copia `creaProveedorDeUbicacion` y lo demás no
+ * llega a entrar.
+ *
+ * Lo que **no** hace: tragarse un fallo. Si el sistema no puede ni preguntar, la promesa
+ * se rechaza con su motivo y A1P3 se queda donde está; convertirlo en «denegado» sería
+ * hacer pasar una avería por una decisión de quien juega.
+ */
+export function creaProveedorDeUbicacionDeExpo(Location) {
+  if (typeof Location?.requestForegroundPermissionsAsync !== 'function' || typeof Location?.getCurrentPositionAsync !== 'function') {
+    return null;
+  }
+  return creaProveedorDeUbicacion({
+    async pidePermiso() {
+      const respuesta = await Location.requestForegroundPermissionsAsync();
+      // «Denegado» cubre también el denegado de siempre, en el que el sistema ni enseña
+      // el diálogo: para el arranque son la misma respuesta y llevan al mismo sitio.
+      return respuesta?.granted === true ? 'concedido' : 'denegado';
+    },
+    async leePosicion() {
+      // Precisión equilibrada y no la máxima: lo que sale de aquí acaba redondeado al
+      // anclaje de la rejilla, así que apurar el fijo gastaría batería para nada.
+      const leida = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy?.Balanced });
+      return { lat: leida?.coords?.latitude, lon: leida?.coords?.longitude };
+    },
+  });
 }

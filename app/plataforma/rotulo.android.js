@@ -14,9 +14,14 @@
 // preguntar de verdad — y por eso quien arranca reconcilia en lugar de dar por buena la
 // situación guardada.
 //
-// Aquí no se importa ningún módulo nativo, por lo mismo que en `ubicacion.js`: el
-// contrato se ejercita en `node --test` contra un doble y el módulo nativo entra por la
-// firma de `creaRotulo`.
+// El contrato de `creaRotulo` se ejercita en `node --test` contra un doble y el mecanismo
+// entra por la firma; lo único que este fichero importa del nativo es lo que su **sonda**
+// necesita para poder responder «montada» sin mentir, que es una pregunta que no se puede
+// contestar sin mirar la compilación. Sondear no es pedir: aquí no se llama a ningún
+// diálogo del sistema.
+
+import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
 
 /** El mecanismo real de esta plataforma, para que nadie tenga que redescubrirlo. */
 export const MECANISMO = 'servicio en primer plano de Android con notificación persistente';
@@ -37,6 +42,26 @@ export const DECLARACION = Object.freeze({
   descartable: false,
   permisos: Object.freeze(['FOREGROUND_SERVICE', 'FOREGROUND_SERVICE_LOCATION', 'ACCESS_FINE_LOCATION', 'POST_NOTIFICATIONS']),
   permisoPermanente: false,
+  // Lo que el mecanismo de esta compilación **no** entrega de lo que `DECLARACION` pide,
+  // medido sobre `expo-location` en SPEC-048 y escrito aquí en vez de disimulado. Las dos
+  // ausencias son de la librería y no del diseño, y las dos tienen arreglo conocido.
+  loQueNoEntrega: Object.freeze([
+    Object.freeze({
+      que: 'la única acción del rótulo',
+      porque: 'la notificación del servicio en primer plano la compone `expo-location` y sus opciones son título, línea, color y si muere con la app: no hay manera de añadirle una acción',
+      haria_falta: 'un servicio en primer plano propio en Kotlin, o que `expo-location` expusiera la categoría de la notificación',
+      mientras_tanto: 'tocar el rótulo abre la app, y «dejarlo aquí» sigue entero en la tarjeta de a medias de la portada',
+    }),
+  ]),
+  // Y lo que sí entrega y estaba en duda, medido sobre el dispositivo el 11-ago-2026 con
+  // `dumpsys notification`: el canal sale en `IMPORTANCE_LOW` —lo crea así el propio
+  // `expo-location`— y la notificación lleva `NO_CLEAR`, o sea que no se tira deslizando.
+  // Las dos son condiciones de `seguridad-privacidad.md` §2 y las dos se cumplen.
+  medido: Object.freeze({
+    importanciaDelCanal: 'baja',
+    seDescartaDeslizando: false,
+    cifrasEnLaLinea: 0,
+  }),
 });
 
 /** La capacidad, con el contrato de SPEC-020 sin tocarlo. La sonda no pide ningún permiso. */
@@ -47,11 +72,19 @@ export const rotulo = {
   // competir con los avisos, donde no pinta nada.
   capa: 'ninguna',
   async sonda() {
-    return {
-      montado: false,
-      disponible: false,
-      motivo: `${MECANISMO}: esta compilación no trae el módulo nativo que lo arranca, y ninguna spec ha nombrado todavía la dependencia que lo daría`,
-    };
+    // Se mira lo que la compilación trae, no lo que el proyecto declara: un `app.json`
+    // con el plugin puesto y un binario sin el módulo dentro son la misma cosa para quien
+    // abre una salida, y solo esta pregunta los distingue.
+    if (typeof Location?.startLocationUpdatesAsync !== 'function') {
+      return { montado: false, disponible: false, motivo: `${MECANISMO}: expo-location no está en esta compilación` };
+    }
+    if (typeof TaskManager?.defineTask !== 'function') {
+      return { montado: false, disponible: false, motivo: `${MECANISMO}: expo-task-manager no está en esta compilación, y sin él no hay tarea a la que el servicio entregue las posiciones` };
+    }
+    // Montado y disponible **sin pedir nada**: si el permiso está denegado, quien lo
+    // descubre es abrir la salida, y eso es otra respuesta con otro motivo. Sondear no es
+    // pedir, y una sonda que pidiera dispararía un diálogo del sistema al abrir la app.
+    return { montado: true, disponible: true, motivo: null };
   },
 };
 
