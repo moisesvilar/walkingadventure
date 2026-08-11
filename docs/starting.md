@@ -1585,3 +1585,22 @@ Verificado el ciclo entero en `wa-pixel` con la partida ya en disco: «Dejarlo a
 ## Y una trampa del emulador que costó una hora
 
 `adb emu geo fix` devolvía `OK` y **no movía nada**: un mock de `com.google.android.gms[fused_location_provider]` puesto veintitrés horas antes se re-emitía cada tres segundos con la misma coordenada, y `dumpsys location` lo delataba con la marca `mock` y un `et` que avanzaba sin que cambiaran los grados. `cmd location providers add-test-provider` no vale: `SecurityException: not allowed to perform MOCK_LOCATION`. Lo único que lo arregló fue **reiniciar el emulador**. Y después seguía sin llegar ninguna posición nueva hasta cambiar la precisión de la suscripción a alta: con la equilibrada el GPS ni se enciende —`gps provider: ProviderRequest[OFF]`—, y con la alta aparece `ProviderRequest[@+2s0ms, HIGH_ACCURACY, WorkSource{com.walkingadventure.app}]`. Antes de dar por rota la cadena del sensor, mirar `dumpsys location` y comprobar quién pide el GPS.
+
+## Verificado con
+
+`bash scripts/qa-tester-run.sh SPEC-048` → `test/reports/SPEC-048-run-20260811T080734Z.md`. **`@nucleo`: 103 ficheros, 2683 casos, 2679 pasan, 1 falla.** **`@app`: 19 ejecutados · 9 pasan · 2 fallan · 8 solo comprueban su límite.** Frontera intacta: 114 módulos de `packages/nucleo/` importan en Node sin React Native ni Expo, e idéntico con `node_modules` movido de sitio. **Guarda del manifiesto generado: Android mirado · iOS mirado**, las dos plataformas de verdad y no una.
+
+**El único rojo de núcleo está puesto a propósito y tiene dueño**: «Nada de esta app se despierta al arrancar el móvil», por el receptor `NotificationsService` de `expo-notifications` con `BOOT_COMPLETED`, `REBOOT`, `QUICKBOOT_POWERON` y `MY_PACKAGE_REPLACED`. Es de SPEC-023 y no de esta fila, y la guarda nace roja en vez de nacer tolerándolo, igual que la fila 47 hizo con `partida-persistida.test.mjs`.
+
+**Los dos rojos de `@app` son anteriores y siguen fichados**, los mismos dos de la tanda del 10-ago y por los mismos motivos: `empezar-de-nuevo-copia.yaml` —`Share.dismissedAction` es de iOS y en Android la hoja resuelve siempre como compartida— y `zurron.yaml`, que busca `paso-ajustes` y es de la fila 46. Ninguno lo mueve esta fila.
+
+**La columna de límite declarado baja de 9 a 8**, y sale exactamente uno: `en-marcha.yaml`, con **103 s medidos** de recorrido real —arranque, portada, «Salir a andar sin más», salida abierta con rótulo, lámina, marca de posición con su clasificación, arrastre, cerrar y reabrir la app, y «seguir con ella»—. Un flujo que tarda diez segundos no ha recorrido nada; este tarda ciento tres. Los ocho que quedan no los desbloquea esta fila: seis esperan el camino de la llegada (fila 44), uno la pantalla de elección de los ajustes (fila 38) y uno la siembra de una partida con contenido.
+
+Y el número que **no** se movió, dicho con la cifra delante: **las pantallas huérfanas siguen en ocho**. El alcance recortado dejó fuera las seis del momento «al parar», y prometer que bajaban habría sido leer el alcance viejo.
+
+## Lo que esta fila deja abierto, sin disimular
+
+- **El rótulo en iOS no se entrega.** La Actividad en Vivo pide un módulo nativo propio de ActivityKit que estas dos dependencias no dan. `rotulo.ios.js` mantiene su pareja de exportaciones y declara qué no entrega y qué haría falta; el límite tiene prueba, no comentario.
+- **«La marca se mueve» no se automatiza en esta máquina.** `adb emu geo fix` no mueve el fijo de forma fiable aquí, así que el escenario va como `@manual` apuntando al recorrido medido, en vez de fingir una automatización que no existe.
+- **El permiso de ubicación no llega a pedirse en `wa-pixel`**: la app se instala con los permisos concedidos y `clearState` no los revoca, así que el bloque del diálogo va condicionado y se salta. Lo que sí se afirma sin depender de eso es que el botón de «todo el rato» **no está**, por identificador del `permissioncontroller` y no por texto, que en el emulador sale en inglés.
+- **Y el receptor de arranque de `expo-notifications`**, que es el rojo con dueño. Retirar el permiso no es opción —`expo-task-manager` persiste su trabajo con `setPersisted(true)` clavado y sin él la app revienta con `IllegalArgumentException: Requested job cannot be persisted`, medido—, así que queda declarado con su motivo y con la propiedad protegida por otra vía: el plugin le quita al receptor de tareas sus disparadores de arranque. El de notificaciones sigue entero y es de quien monte esa fila.
