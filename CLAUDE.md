@@ -113,6 +113,8 @@ Indentación de 2 espacios, comillas simples, punto y coma, `const`/`let`, funci
 
 **La detección de Galicia es un bounding box**, no límites administrativos. Un mundo generado en el occidente de Asturias o el Bierzo puede salir en gallego.
 
+**Una tubería se traga el código de salida del runner.** `bash scripts/qa-tester-run.sh X | tail -3` devuelve el código de `tail`, no el del runner, así que un **2** —«no se pudo ejecutar nada», que explícitamente no es verde— se lee como un 0 limpio. Le pasó a la sesión de SPEC-048 con una etiqueta mal formada, y es justo el fallo que ese script se escribió para evitar. Redirige a fichero y mira `$?` (`bash scripts/qa-tester-run.sh SUITE > salida.log 2>&1; echo $?`), y recuerda que la etiqueta solo admite `SPEC-NNN`, `SPEC-NNN-iter-M` o `SUITE`. Aplica igual a cualquier otro comando cuyo veredicto importe: `git push ... | tail -2` esconde un 403 de permisos detrás de un éxito aparente.
+
 **El `README.md` puede ir por detrás del código.** Verifica siempre contra el código.
 
 ## Al terminar una iteración
