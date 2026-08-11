@@ -12,12 +12,15 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { acepta as aceptaLaAventuraEnElMotor } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
 import { componeFicha, componeLoQueHayHoy, aceptaElEstironDeHoy, aceptaLaEntrada } from '@walkingadventure/nucleo/partida/lo-que-hay-hoy.js';
+import { estadoDeMapa } from '@walkingadventure/nucleo/partida/pasos.js';
 import { componePortada } from '@walkingadventure/nucleo/partida/portada.js';
 import { componePreparacion } from '@walkingadventure/nucleo/partida/preparacion.js';
-import { VIAS_DE_CIERRE, abreSalida, cierraLaSalida, haySalidaAbierta } from '@walkingadventure/nucleo/partida/salida-abierta.js';
+import { abreSalida, haySalidaAbierta } from '@walkingadventure/nucleo/partida/salida-abierta.js';
 import { CATALOGO } from '@walkingadventure/nucleo/quests/catalogo.js';
 
+import { casteadaDelMundo } from '../marcha/llegadas.js';
 import { PantallaLoQueHayHoy, PantallaFicha } from './lo-que-hay-hoy.jsx';
 import { PantallaPortada } from './portada.jsx';
 import { PantallaOfrecimiento } from './ofrecimiento.jsx';
@@ -25,17 +28,6 @@ import { PantallaPreparacion } from './preparacion.jsx';
 
 /** Las pantallas del momento, tal como las encadena `docs/flujo.md`. */
 export const PANTALLAS = Object.freeze(['portada', 'lista', 'ficha', 'preparacion']);
-
-/**
- * La identidad de una salida.
- *
- * Sale del mapa y del día y de nada más: **ninguna marca de tiempo del reloj**, que es lo que
- * RF-PRIV-002 prohíbe guardar. Dos salidas el mismo día se distinguen por el contador, que la
- * partida ya lleva.
- */
-export function identidadDeSalida({ mapaId, dia, n = 1 }) {
-  return `${mapaId}/d${dia}/s${n}`;
-}
 
 /** La plantilla del catálogo de una entrada de la lista, o un error que la nombra. */
 function plantillaDe(id) {
@@ -57,13 +49,18 @@ function plantillaDe(id) {
  *   `ofrecimiento` lo que devuelve `componeOfrecimiento` cuando **no hay mapa activo**, que
  *   es el caso de estar lejos de todos los mapas de la partida. Sustituye a la portada y no
  *   se superpone a ella: sin mapa no hay portada que enseñar, y enseñar la de casa a
- *   trescientos kilómetros ofrecería salir a andar en un mundo donde no estás.
+ *   trescientos kilómetros ofrecería salir a andar en un mundo donde no estás;
+ *   `registro` el de hechos de la partida, que es lo que aceptar una aventura anexa;
+ *   `identidad` la identidad de la salida viva, que la compone **una sola función** y llega
+ *   desde la raíz para que las dos áreas escriban la misma (`app/marcha/identidad.js`).
  */
 export function PantallaAntesDeSalir({
   calendario,
   personaje,
   mundo,
   estado,
+  registro = null,
+  identidad = null,
   preparacion,
   zurron = {},
   criterios = [],
@@ -124,11 +121,24 @@ export function PantallaAntesDeSalir({
     );
   }
 
+  /**
+   * Abre el registro de la salida en el área `aventuras`, con **la identidad de siempre**.
+   *
+   * La identidad llega de fuera y no se compone aquí: es la misma función que usa la vida de
+   * la salida para el área `salidas`, y con dos el cierre no encontraba la salida que tenía
+   * abierta (`app/marcha/identidad.js`).
+   */
   const abre = useCallback(() => {
     if (haySalidaAbierta(estado.aventuras)) return;
-    abreSalida(estado.aventuras, { salida: identidadDeSalida({ mapaId, dia: calendario.dia() }), mapaId });
+    if (typeof identidad !== 'function') {
+      throw new Error(
+        'el momento antes de salir se monta con la identidad de la salida inyectada y no llegó ninguna: componerla aquí sería la ' +
+        'segunda identidad que impedía echar el telón, porque el cierre compara la que recibe con la que está abierta',
+      );
+    }
+    abreSalida(estado.aventuras, { salida: identidad(), mapaId });
     setRefresco((n) => n + 1);
-  }, [estado, mapaId, calendario]);
+  }, [estado, mapaId, identidad]);
 
   /**
    * Echarse a andar, que desde SPEC-048 **puede no poder**.
@@ -144,14 +154,20 @@ export function PantallaAntesDeSalir({
     return respuesta;
   }, [alAndar, abre]);
 
-  const cierra = useCallback((via) => {
-    const cerrada = cierraLaSalida(estado.aventuras, { via });
+  /**
+   * «Dejarlo aquí»: la misma puerta que volver a casa, **y no el sitio donde se cierra el
+   * registro de la salida**.
+   *
+   * Hasta esta fila aquí se llamaba a `cierraLaSalida(estado.aventuras, …)` por su cuenta, y
+   * eso hacía imposible echar el telón: `echaElTelon` exige que esa misma salida siga abierta
+   * y, si no lo está, falla con «su telón ya se echó». Quien la cierra es el cierre, en su
+   * paso 9, y las tres vías entran por la misma puerta (`bucle-jugable.md` §8).
+   */
+  const cierra = useCallback(() => {
     setRefresco((n) => n + 1);
     setPantalla('portada');
-    // El telón, con su cierre en corto, es de la fila 36: aquí se le entrega lo cerrado y no
-    // se inventa ningún desenlace.
-    if (alEcharElTelon) alEcharElTelon(cerrada);
-  }, [estado, alEcharElTelon]);
+    if (alEcharElTelon) alEcharElTelon();
+  }, [alEcharElTelon]);
 
   if (pantalla === 'portada') {
     return (
@@ -166,7 +182,7 @@ export function PantallaAntesDeSalir({
         alSalirSinMas={() => { void echaAAndar({ conAventura: false }); }}
         alSeguir={() => { void echaAAndar({ conAventura: true, retomada: true }); }}
         // La misma puerta en otro sitio: dispara el mismo cierre que llegar a casa.
-        alDejarloAqui={() => cierra(VIAS_DE_CIERRE.DEJARLO_AQUI)}
+        alDejarloAqui={() => cierra()}
         alAbrirPuerta={alAbrirPuerta}
       />
     );
@@ -195,6 +211,28 @@ export function PantallaAntesDeSalir({
         alAceptar={async () => {
           abre();
           aceptaLaEntrada({ lista, id: elegida.id, salidas: estado.aventuras, entregas: estado.entregas, mapaId });
+          // **Y se acepta en el motor**, que es lo que hasta esta fila no hacía nadie: la
+          // entrada quedaba anotada en el registro de la salida abierta y `estado.aventuras.enCurso`
+          // seguía siendo `null`, así que `resuelveBeat` era inalcanzable y el telón componía
+          // siempre el de un paseo sin aventura. Va aquí y no al salir a andar porque SPEC-034
+          // dice que el estado lo escribe la aceptación, y `docs/flujo.md` pone la arista en
+          // `A2P4 → A2P5`: aceptarla más tarde dejaría A2P5 preparando una aventura que el
+          // motor no conoce.
+          //
+          // Solo las de clase aventura. Un recado de la cola no trae cadena de beats ni
+          // plantilla del catálogo —es una entrada de SPEC-019— y el motor de la aventura en
+          // curso recorre cadenas: aceptarlo aquí fallaría nombrando la cadena que no tiene.
+          // Queda **declarado** y no tragado, que es la diferencia (§6h).
+          const casteada = casteadaDelMundo(mundo?.documento ?? null, elegida.id);
+          if (casteada) {
+            aceptaLaAventuraEnElMotor(estado.aventuras, {
+              aventura: casteada.aventura,
+              mapaId,
+              registro,
+              dia: calendario.dia(),
+              paso: estadoDeMapa(estado.pasos, mapaId).n,
+            });
+          }
           setPantalla('preparacion');
           const hecho = await preparacion.prepara({
             // La aventura para el narrador y para las ilustraciones es su reparto casteado, no
@@ -217,10 +255,11 @@ export function PantallaAntesDeSalir({
       lista={preparado !== null}
       // La aventura ya quedó anotada al aceptarla en la ficha, así que aquí solo se
       // pregunta si la salida se abre: `retomada` evita anotarla dos veces.
-      // El reparto casteado viaja con la salida y no se vuelve a buscar: es lo que la capa
-      // de llegadas necesita para saber qué beats hay hoy, y sin él una secuencia sin beat
-      // sería indistinguible de una llegada a la que no se ha venido a nada.
-      alSalirAAndar={() => { void echaAAndar({ conAventura: true, preparado, reparto: { beats: elegida?.beats ?? [] }, retomada: true }); }}
+      //
+      // **El reparto casteado ya no viaja con la salida**, y esa es la costura 5: se recupera
+      // del mundo congelado y de la plantilla que el estado guarda, así que sobrevive a cerrar
+      // la app (§10g). Mandarlo desde aquí era lo que hacía que solo estuviera el primer día.
+      alSalirAAndar={() => { void echaAAndar({ conAventura: true, preparado, retomada: true }); }}
     />
   );
 }

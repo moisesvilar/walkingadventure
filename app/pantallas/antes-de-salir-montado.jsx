@@ -39,6 +39,8 @@ import { marcaSuperpuesta } from './marca.js';
  */
 export function AntesDeSalirMontado({
   partida,
+  registro = null,
+  identidad = null,
   personaje,
   mundo,
   arrancadaEn,
@@ -122,6 +124,10 @@ export function AntesDeSalirMontado({
         personaje={personaje}
         mundo={mundo}
         estado={partida}
+        // El registro de hechos y la identidad de la salida: lo primero es lo que aceptar una
+        // aventura anexa, y lo segundo la compone una sola función para las dos áreas.
+        registro={registro}
+        identidad={identidad}
         preparacion={montaje.preparacion}
         zurron={zurron}
         alAndar={andar}

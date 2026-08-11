@@ -20,12 +20,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
-import { creaCalendario } from './datos/calendario.js';
+import { creaCalendario, relojDePared } from './datos/calendario.js';
 import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
 import { mundoDeLaCelda, mundoDeLaPartida } from './mapa/mundo-guardado.js';
-import { REPARTO_SIN_AVENTURA, creaLasLlegadas } from './marcha/llegadas.js';
+import { creaLaAventuraEnCurso } from './marcha/aventura.js';
+import { identidadDeLaSalidaViva } from './marcha/identidad.js';
+import { creaLasLlegadas, repartoDeLaAventuraEnCurso } from './marcha/llegadas.js';
 import { montaLaSalida } from './marcha/salida-montada.js';
 // El área segura de la app. No es el `SafeAreaView` de `react-native`, que en Android es un
 // `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
@@ -37,6 +39,7 @@ import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import {
   NUCLEO_DEL_MUNDO_GUARDADO,
   NUCLEO_DE_EMPEZAR_DE_NUEVO,
+  NUCLEO_DE_LA_AVENTURA_EN_CURSO,
   NUCLEO_DE_LA_COPIA,
   NUCLEO_DE_LAS_LLEGADAS,
   NUCLEO_DE_LA_PARTIDA_GUARDADA,
@@ -73,17 +76,20 @@ const VUELVEN_A_AJUSTES = ['empezar-de-nuevo', 'sitios-marcados'];
 const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
 
 /**
- * La identidad de una salida: **el mapa y un contador del propio estado**.
+ * La identidad de la salida viva, con **la única función que la compone**.
  *
- * Y ninguna marca de tiempo, que es lo cómodo y lo que RF-PRIV-002 prohíbe: una hora
- * escrita en la partida sobrevive a la copia exportada y es rastro de cuándo saliste a
- * andar. El contador son los hechos anexados, que es un número que la partida ya lleva y
- * que crece con lo jugado, así que dos salidas nunca comparten identidad.
+ * Hasta esta fila había dos —una aquí para el área `salidas` y otra en `antes-de-salir.jsx`
+ * para el área `aventuras`— y el cierre comparaba una con otra: la salida no se podía cerrar
+ * nunca. Ahora la decide `app/marcha/identidad.js` y, con una salida ya abierta, se lee de
+ * ella en lugar de recalcularse: aceptar una aventura anexa un hecho, así que recalcular
+ * entre aceptar y echar a andar volvería a dar dos cadenas distintas.
  */
 function identidadDeLaSalida(partida) {
-  const mapa = partida?.mundo?.mapaId ?? 'sin-mapa';
-  const cuantos = partida?.registro?.hechos?.length ?? 0;
-  return `${mapa}/s${cuantos + 1}`;
+  return identidadDeLaSalidaViva({
+    aventuras: partida?.estado?.aventuras ?? null,
+    mapaId: partida?.mundo?.mapaId ?? 'sin-mapa',
+    hechos: partida?.registro?.hechos?.length ?? 0,
+  });
 }
 
 export function App() {
@@ -319,6 +325,22 @@ export function App() {
       // coló que nadie la pasara.
       montaLlegadas: ({ detector, salida: laQueSeAbre, mapaId }) => creaLasLlegadas({
         nucleo: NUCLEO_DE_LAS_LLEGADAS,
+        // El motor de la aventura en curso, montado sobre el mismo reparto que la capa. Es lo
+        // que resuelve el beat al cerrar su paso y lo que compone A4P3 y A4P4.
+        aventura: creaLaAventuraEnCurso({
+          nucleo: NUCLEO_DE_LA_AVENTURA_EN_CURSO,
+          mundo: partida.mundo.documento,
+          estado: partida.estado,
+          reparto: repartoDeLaAventuraEnCurso({
+            mundo: partida.mundo.documento,
+            aventuras: partida.estado.aventuras,
+          }),
+          // El reloj de pared, que es la única entrada de la escena que no puede salir del
+          // estado: es la hora del sistema, y `packages/nucleo/` no la lee. **Sin valor por
+          // defecto**: el núcleo falla nombrándolo, que es lo que impide resolver una llegada
+          // de franja como si fuera dentro sin saberlo (§6h).
+          reloj: relojDePared(),
+        }),
         mundo: partida.mundo.documento,
         cupos: partida.mundo.cupos ?? null,
         mapaId: mapaId ?? partida.mundo.mapaId,
@@ -326,11 +348,15 @@ export function App() {
         estado: partida.estado,
         registro: partida.registro,
         detector,
-        // El reparto casteado llega con la salida que se echó a andar. Al reabrir la app
-        // no está —el estado guarda la aventura por su identificador y no su cadena—, así
-        // que se declara vacío: la secuencia guardada conserva su paso de beat y lo que se
-        // pierde es el beat de dentro, no el paso. Queda anotado con dueño.
-        reparto: laSalidaEchada.current?.reparto ?? REPARTO_SIN_AVENTURA,
+        // El reparto casteado **se recupera del mundo congelado**, y esa es la costura 5:
+        // hasta esta fila viajaba con la salida que se echó a andar y al reabrir la app se
+        // caía a `REPARTO_SIN_AVENTURA`, así que el paso de beat de una secuencia guardada
+        // llegaba con el beat dentro en nulo (§10g). La cadena no se persiste: el casting es
+        // determinista sobre el documento y el estado ya guarda de qué plantilla es.
+        reparto: repartoDeLaAventuraEnCurso({
+          mundo: partida.mundo.documento,
+          aventuras: partida.estado.aventuras,
+        }),
         dia: creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia(),
       }),
     })
@@ -649,6 +675,11 @@ export function App() {
       <AreaSegura style={estilos.raiz}>
         <AntesDeSalirMontado
           partida={partida.estado}
+          // El registro de hechos y la identidad de la salida. La segunda es **la misma
+          // función** que usa `alAndar` unas líneas más abajo: con dos, el cierre comparaba
+          // una identidad contra otra y la salida no se podía cerrar nunca.
+          registro={partida.registro}
+          identidad={() => identidadDeLaSalida(partida)}
           personaje={partida.personaje}
           mundo={partida.mundo}
           arrancadaEn={partida.arrancadaEn}
