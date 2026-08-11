@@ -28228,7 +28228,7 @@
       "fichero": "test/app/llegada.yaml",
       "caso": "La escena queda disponible y espera",
       "escenario": "La escena queda disponible y espera",
-      "nota": "El flujo salió de la columna de límite declarado con esta fila: recorre el arranque, echa a andar y la escena valida sola a los veintitrés segundos sin tocar nada. Medido en wa-pixel el 12-ago-2026, 107 s y 113 s en dos tandas seguidas."
+      "nota": "El flujo salió de la columna de límite declarado con esta fila: recorre el arranque, echa a andar y la escena valida sola sin tocar nada. Ramifica sobre la forma que salga —lo que allí se cuenta, la ficha o el hueco declarado—, porque qué sitio toca no lo decide el flujo, y atiende las escenas que queden. Medido en wa-pixel el 12-ago-2026: 117 s, 126 s y 119 s."
     },
     {
       "spec": "SPEC-044",
@@ -28554,7 +28554,7 @@
       "fichero": "test/app/descarte.yaml",
       "caso": "Marcarlo lo saca del casting sin resembrar",
       "escenario": "Marcarlo lo saca del casting sin resembrar",
-      "nota": "El flujo sigue de límite declarado, y ya no por la capa de llegadas: la capa de A4P8 cuelga de la ficha, y la única llegada que un flujo alcanza sin coordenadas es la del sitio por el que empieza el mapa, que es un núcleo y no lleva ficha."
+      "nota": "El flujo sigue de límite declarado. La puerta de A4P8 existe —ficha-descartar está en la ficha cuando el sitio de arranque es un servicio o un paraje—, pero no se puede garantizar llegar a ella: el flujo no elige el sitio y el ancla del mapa no la gobierna la posición que pone, porque el arranque lee la coordenada con precisión equilibrada."
     },
     {
       "spec": "SPEC-044",
@@ -28755,7 +28755,7 @@
       "fichero": "test/nucleo/limite-declarado.test.mjs",
       "caso": "La lista de flujos de límite declarado es exactamente la que está marcada",
       "hueco_de_bateria": true,
-      "nota": "Hueco de batería. El número medido es 7 y no 5: sale llegada.yaml, que recorre su pantalla de verdad, y se quedan descarte.yaml —necesita una llegada a un paraje— y visor.yaml —sin lector de recursos toda llegada se resuelve como ficha—, cada uno con su motivo escrito en su cabecera."
+      "nota": "Hueco de batería. El número medido es 7 y no 5: sale llegada.yaml, que recorre su pantalla de verdad, y se quedan descarte.yaml —no se puede garantizar llegar a la ficha desde la que cuelga el gesto— y visor.yaml —sin lector de recursos toda llegada se resuelve como ficha—, cada uno con su motivo medido escrito en su cabecera."
     },
     {
       "spec": "SPEC-044",

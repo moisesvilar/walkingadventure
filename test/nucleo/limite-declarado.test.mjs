@@ -67,13 +67,18 @@ import { fuente } from './mundo-de-prueba.mjs';
  * - `llegada.yaml` **sale**: recorre el arranque entero, echa a andar desde la portada y la
  *   escena valida sola estando parada dentro del geofence del sitio por el que empieza el
  *   mapa —veintitrés segundos—, sin tocar nada. Recorre A4P5 entera, la ausencia de
- *   navegación y de cifras, y el «Seguir» que devuelve al momento en marcha. Medido dos
- *   veces seguidas: **107 s y 113 s**, 119 comandos. Un flujo que tarda diez segundos no ha
- *   recorrido nada, y este recorre.
- * - `descarte.yaml` **se queda**, y ya no por la capa: la capa de A4P8 cuelga de la ficha, y
- *   la única llegada que un flujo alcanza sin coordenadas es la del sitio por el que empieza
- *   el mapa, que es un núcleo y no lleva ficha. Andar hasta un paraje pediría su coordenada,
- *   y el ancla del mapa no es reproducible entre ejecuciones.
+ *   navegación y de cifras, y el «Seguir» que devuelve al momento en marcha. **Ramifica sobre
+ *   la forma que salga** —lo que allí se cuenta, la ficha o el hueco declarado— porque qué
+ *   sitio toca no lo decide el flujo: su primera versión daba por hecho el núcleo y era
+ *   intermitente. Y atiende las escenas que queden, porque una parada valida más de una
+ *   llegada cuando dos geofences se solapan. Medido tres veces seguidas: **117 s, 126 s y
+ *   119 s**. Un flujo que tarda diez segundos no ha recorrido nada, y este recorre.
+ * - `descarte.yaml` **se queda**, y el motivo que llevaba escrito era falso: decía que no
+ *   había puerta hasta A4P8, y sí la hay —`ficha-descartar` está en la ficha, vista en el
+ *   aparato, cuando el sitio de arranque es un servicio o un paraje—. Lo que no se puede es
+ *   garantizar llegar a ella: el flujo no elige el sitio, y el ancla del mapa no la gobierna
+ *   la posición que el flujo pone, porque el arranque lee la coordenada con precisión
+ *   equilibrada y un fijo simulado no manda sobre esa lectura.
  * - `visor.yaml` **se queda** por su segundo límite, que sobrevivió al primero: sin lector de
  *   recursos binarios cableado toda llegada se resuelve como ficha —medido en el aparato,
  *   `llegada-estado` trae `ficha`—, así que el visor no se abre nunca.

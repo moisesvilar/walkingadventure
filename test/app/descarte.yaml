@@ -30,8 +30,8 @@
 #
 # **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
 #
-# - **Una llegada a un paraje**, que es la única que trae ficha. La que un flujo alcanza sin
-#   coordenadas es la del sitio por el que empieza el mapa, y es un núcleo. Medido abajo.
+# - **Poder elegir el sitio por el que empieza el mapa**, para que su llegada traiga ficha.
+#   Hoy sale un núcleo o un servicio según le toque, y el flujo no lo decide. Medido abajo.
 # - **La acción «Este sitio no pega» de A4P7**, que es de la fila 33 y es de donde cuelga
 #   el primer toque. Se localiza por su texto porque la spec no le da identificador.
 # - **La lista de sitios marcados dentro de A6P6.** La puerta de los ajustes ya existe y es
@@ -63,26 +63,32 @@ appId: com.walkingadventure.app
 
 # ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
 #
-# **Lo que impide recorrerla, medido en `wa-pixel` el 12-ago-2026.** El motivo que había aquí
-# —que la capa de llegadas no se montaba en el dispositivo— **ya no es cierto y se corrige en
-# lugar de arrastrarlo**: la capa monta y `test/app/llegada.yaml` recorre su pantalla de
-# verdad. Lo que falta ahora es otra cosa, y es de dónde cuelga el primer toque:
+# **Lo que impide recorrerla, medido en `wa-pixel` el 12-ago-2026, y no es lo que decía aquí
+# la vuelta pasada.** Escribí que la puerta no existía: que la capa de A4P8 cuelga de la
+# ficha, que la única llegada que un flujo alcanza es la del sitio por el que empieza el mapa
+# y que ese sitio es un núcleo, que no lleva ficha. **La primera mitad era cierta y la
+# segunda no.** El sitio de arranque no es siempre un núcleo: cuando cae en un servicio o en
+# un paraje, la llegada trae la ficha y con ella `ficha-descartar` — «Este sitio no pega»—,
+# vista en el aparato. La puerta está.
 #
-# - **La capa de A4P8 cuelga de la ficha, y la ficha solo la trae un paraje al que no se ha
-#   venido a nada.** La única llegada que un flujo alcanza sin coordenadas es la del sitio
-#   por el que empieza el mapa, que es un **núcleo**: su secuencia es el paso encadenado de
-#   lo que allí se cuenta y no lleva ficha, así que no hay ningún «Este sitio no pega» que
-#   tocar. Medido: en la llegada validada, `llegada-secuencia` trae
-#   `lo-que-se-cuenta:encadenado` y nada más.
-# - **Y andar hasta un paraje no se puede escribir.** Haría falta su coordenada, y el ancla
-#   del mapa **no es reproducible entre ejecuciones**: tres tandas seguidas, con la misma
-#   posición puesta antes del arranque, dieron `42.40,-8.77`, `42.40,-8.75` y `42.40,-8.76`.
-#   Un destino escrito a mano se caería por dónde estaba el emulador y no por lo que mide.
+# Lo que no está es **poder garantizar que se llega a ella**:
 #
-# Mientras eso sea así, este flujo **no recorre nada y lo dice**: su verde significa «el
-# límite sigue en pie», nunca «el descarte funciona». Lo que sí está vivo y sin dispositivo
-# es todo lo demás —lo saca del casting sin resembrar, es reversible, no hace falta motivo y
-# no se reporta a ningún sitio—, en `test/nucleo/descartes.test.mjs`.
+# - Qué sitio toca no lo decide el flujo. `test/app/llegada.yaml` ramifica sobre la forma que
+#   salga porque no se puede elegir, y en tandas seguidas salen las dos: un núcleo con lo que
+#   allí se cuenta y un servicio con su ficha.
+# - Y el ancla del mapa **no la gobierna la posición que el flujo pone**: con `setLocation` a
+#   `42.4000,-8.7700` antes del arranque, el mapa nace anclado en `42.40,-8.76` —dos tandas,
+#   el mismo resultado—, cuando el redondeo de `anclaje()` sobre esa coordenada da
+#   `42.40,-8.77`. La causa está localizada: `app/plataforma/ubicacion.js` lee la coordenada
+#   del arranque con `getCurrentPositionAsync({ accuracy: Balanced })`, y un fijo simulado no
+#   gobierna esa lectura. Sin eso no hay manera de andar hasta un paraje elegido.
+#
+# Un flujo que solo a veces ejecuta su gesto es un verde que a veces no verifica nada, que es
+# lo que §6w existe para no volver a contar. Así que este se queda marcado hasta que el
+# arranque lea la posición de manera que un flujo la pueda fijar — **y entonces sale, porque
+# la puerta ya está**. Mientras tanto, lo que sí está vivo y sin dispositivo es todo lo demás:
+# lo saca del casting sin resembrar, es reversible, no hace falta motivo y no se reporta a
+# ningún sitio, en `test/nucleo/descartes.test.mjs`.
 - runFlow:
     when:
       notVisible:

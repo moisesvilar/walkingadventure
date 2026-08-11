@@ -1604,3 +1604,49 @@ Y el número que **no** se movió, dicho con la cifra delante: **las pantallas h
 - **«La marca se mueve» no se automatiza en esta máquina.** `adb emu geo fix` no mueve el fijo de forma fiable aquí, así que el escenario va como `@manual` apuntando al recorrido medido, en vez de fingir una automatización que no existe.
 - **El permiso de ubicación no llega a pedirse en `wa-pixel`**: la app se instala con los permisos concedidos y `clearState` no los revoca, así que el bloque del diálogo va condicionado y se salta. Lo que sí se afirma sin depender de eso es que el botón de «todo el rato» **no está**, por identificador del `permissioncontroller` y no por texto, que en el emulador sale en inglés.
 - **Y el receptor de arranque de `expo-notifications`**, que es el rojo con dueño. Retirar el permiso no es opción —`expo-task-manager` persiste su trabajo con `setPersisted(true)` clavado y sin él la app revienta con `IllegalArgumentException: Requested job cannot be persisted`, medido—, así que queda declarado con su motivo y con la propiedad protegida por otra vía: el plugin le quita al receptor de tareas sus disparadores de arranque. El de notificaciones sigue entero y es de quien monte esa fila.
+
+---
+
+# 11-ago-2026 · SPEC-044, la navegación en la calle: la fila que descubrió que la capa de llegadas no podía dispararse
+
+La fila 44 venía a cablear el camino que `docs/flujo.md` ya declaraba —en marcha, geofence, llegada, visor, lo que allí se cuenta, descarte— porque las pantallas estaban escritas y la capa del núcleo también, y lo único que faltaba era quien las uniera. Lo primero que hizo fue medir una de las cuatro deudas que heredaba, y de ahí salió todo lo demás.
+
+## La deuda que apuntaba al revés, y lo que había detrás
+
+El encargo pedía medir `RADIO_DE_GEOFENCE_M = 40` contra `ERROR_MAXIMO_FIABLE_M = 30` porque «una fracción de las posiciones se descarta por poco fiable justo donde más falta hace». **Es falso, y lo dice la propia fuente**: `transporte.js` declara que *«las posiciones malas no se descartan —eso quitaría metros que sí se anduvieron—: solo dejan de poder afirmar un motor»*. Un fijo malo degrada `vehiculo` a `ambiguo`, y `ambiguo` **valida**. La precisión mala empuja a validar de más, no de menos.
+
+Pero el sitio al que apuntaba escondía lo peor que ha aparecido en todo el checklist. Montada la tubería real —el filtro de cadencia de `plataforma/posiciones.js`, el detector de `transporte.js` y `creaLlegadas().comprueba()` alimentado posición a posición—, con alguien parado 300 s dentro de un geofence y 400 semillas por celda: **con la cadencia por distancia que hay en producción, una llegada valida el 0 % de las veces con GPS perfecto y el 0 % con error de 10 m o más.** Hoy ninguna llegada podía validar en un dispositivo.
+
+Dos causas independientes, las dos confirmadas en la fuente y no solo modeladas. **Parado no llega ninguna posición**: `distanceInterval: 10` es `setMinUpdateDistanceMeters` del `LocationRequest` de Android, un filtro duro, y con GPS perfecto se entrega **un fijo en 300 s**. Y **el ruido del GPS se lee como andar**: `esUnaParada` mide `metros/duracionS < 0,5 m/s` sobre el salto crudo entre dos fijos, así que un ruido de σ metros con fijos a T segundos aparenta ~1,4·σ/T m/s y hace falta **T > 2,8·σ** para que un parado parezca parado.
+
+Es la **duodécima aparición de §6h** y la más cara: SPEC-032 escribió, probó y cerró las llegadas **sobre secuencias de posiciones fabricadas**, y su propia sección de frontera dice «Ninguna entrada nueva de sensor: las dos que hacen falta ya existen». Mil casos en verde sobre una capa que en un teléfono no se dispara jamás.
+
+## Lo que decidió el dueño, y cómo se fijó el número
+
+La medida se le llevó **antes de escribir la spec**, porque el encargo dice que si el número sale feo se escala y no se ajusta una constante por cuenta propia. Decidió **arreglar también la calle**, con el tamaño de la fila advertido.
+
+Anclar y comparar cada fijo contra un ancla no vale, y está medido: «parada dentro» y «de paso a 4 km/h» suben juntas con el radio de quietud —radio 15 m: 98 % de paradas y **36 %** de paseos—, porque con dos o tres fijos en la ventana el ruido y la deriva son indistinguibles. Lo que sí los separa es que **el ruido del GPS es de media cero y la deriva de quien anda no**: la regla nueva mide la **deriva de la ventana**, el centroide de su primera mitad contra el de la segunda, y promediar hunde el ruido como 1/√n dejando la deriva intacta.
+
+Con muestreo cada 5 s y 800 semillas por celda: ventana de 20 s con deriva ≤ 5 m valida el 100 % de las paradas hasta σ=10 m y deja pasar un 27,6 % de paseos a 4 km/h; ventana de 40 s con deriva ≤ 8 m valida el 100 % y deja pasar el 0,8 %. De ahí que la regla sea **adaptativa porque la medida lo pide**: con fijo bueno la ventana corta ya separa, así que **los veinte segundos de SPEC-032 se conservan donde el fijo los sostiene** y solo se estiran a cuarenta cuando el error declarado deja de sostenerlos. Alargarla para todos habría contradicho sin necesidad la razón por la que se puso corta: *validar es barato, y un beat que se atiende de paso valida igual*.
+
+**Las dos mitades se exigen a la vez**, y la segunda es la que se pierde sola en cualquier arreglo de ruido: el vehículo sigue apartando la llegada y el atasco sale **0 %** en todas las tandas. **Límite declarado con número**: por encima de σ ≈ 15 m la validación se degrada y por encima de σ ≈ 20 m deja de sostenerse. Cubre la calle normal y no el cañón urbano profundo.
+
+Como esto deroga decisiones cerradas, **el diseño se actualizó y no solo el código**: `SPEC-031-iter-1` (la traza clasificada deja de ser criterio suficiente y pasa a ser veto), `SPEC-032-iter-1` (los veinte segundos se conservan y cambia cómo se mide «parada dentro») y `game-design/bucle-jugable.md` momento 3.
+
+## La decimotercera aparición de §6h, cometida por esta misma fila
+
+Cerrados tres defectos que impedían validar en el dispositivo —los `cupos` que no llegaban por el camino de la partida recién nacida, el `?? null` que convertía «no viene» en «no hay», y una avería que nadie enseñaba porque **nadie consumía `laSalida.averia()`**—, la llegada seguía sin validar. La causa real: **`montaLaSalida` nunca pasaba `montaLlegadas`**. El parámetro se añadió a `creaLaSalida` y a `App.js` y el intermediario se quedó sin él; como «no hay fábrica» se leía igual que «no hay nada que montar», todo lo visible funcionaba y la capa no existía.
+
+Es la misma forma de fallo que la fila venía a cerrar, un nivel más arriba y cometida por ella. Cerrada por contrato donde vive el cableado: `montaLaSalida` se niega a montar la vida de una salida sin la fábrica.
+
+## El diagrama decía que a lo que se cuenta solo se llega por el beat
+
+Al cablear A4P5 apareció que **`docs/flujo.md` no tenía ningún camino hasta esa pantalla que no pasara por la escena de un beat**, y eso contradice a `secuencia.js` —que da ese paso a todo núcleo tenga beat o no—, al escenario «Sin beat, lo que se cuenta es la llegada entera» de `docs/testing.md` y a `quests.md`. El verificador no lo cazaba porque **comparaba nodos y no aristas**: la misma asimetría por la que §6y descubrió a mano que `ofrecimiento.jsx` no tenía nodo. Segunda vez que muerde.
+
+Se corrigió con las **cuatro** aristas que faltaban y con la guarda que las exige: `verifica-flujo.mjs` enumera ahora las 24 secuencias que `secuenciaDeLlegada` puede producir y exige que cada una tenga camino **usando las pantallas de sus propios pasos** —con alcanzabilidad a secas el camino del beat «cubría» la secuencia que no lo tiene, y la guarda nacía verde sobre el defecto que la motivó—. Nació roja con siete casos nombrados.
+
+## Tres vueltas del mismo fallo con las marcas, y la tercera era la esquina
+
+`marca.js` ya había arreglado dos veces que una marca no se pudiera afirmar: primero el tamaño 0×0, después el apilamiento. Esta fila encontró la tercera y **la diagnosticó mal dos veces antes de acertar**: se dio por buena con `adb shell uiautomator dump`, que las entrega, cuando `maestro hierarchy` no y un `assertVisible` falla. Están en el árbol del sistema y no se pueden afirmar; las dos medidas eran ciertas y el error fue verificar con el instrumento que no decide.
+
+La causa no era el tamaño ni el apilamiento: **era la esquina**. Una marca en `[0,0]` de una pantalla a sangre cae bajo la ventana de la barra de estado, y quien lee el árbol descarta lo que otra ventana tapa. Lo demostró comparar dos pantallas del mismo aparato: `momento-antes-de-salir` mide 3×3 px —lo mismo que las que fallaban— y Maestro la entrega, porque el área segura la baja a `y=128`. Y explica por qué `zIndex` y `elevation` no bastaban: el orden del árbol de accesibilidad no es el de pintado.

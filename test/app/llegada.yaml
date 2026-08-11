@@ -14,6 +14,23 @@
 # y no una pila de navegación. No hay ningún paso provisional al que saltar, y no lo va a
 # haber.
 #
+# **Qué sitio toca no se puede elegir, así que se afirma la forma que salga.** El sitio por
+# el que empieza el mapa puede ser un núcleo, un servicio o un paraje, y su secuencia es
+# distinta en cada caso: un núcleo trae lo que allí se cuenta y un servicio o un paraje traen
+# la ficha. La primera versión de este flujo daba por hecho el núcleo y era **intermitente**:
+# reproducido 2 de 2 el 12-ago-2026 fallando con «lo-que-se-cuenta is visible» sobre una
+# llegada perfectamente validada en un servicio, con `llegada-secuencia = ficha:encadenado`.
+# La máquina hacía lo correcto; el flujo estaba mal escrito.
+#
+# **Y elegir el sitio no está en la mano de un flujo**, medido: el ancla del mapa no la decide
+# la posición que el flujo pone. Con `setLocation` a `42.4000,-8.7700` antes del arranque, el
+# mapa nace anclado en `42.40,-8.76` —dos tandas, el mismo resultado—, cuando el redondeo de
+# `anclaje()` sobre esa coordenada da `42.40,-8.77`. La causa está localizada:
+# `app/plataforma/ubicacion.js` lee la coordenada del arranque con
+# `getCurrentPositionAsync({ accuracy: Balanced })`, y un fijo simulado no gobierna esa
+# lectura. Así que se afirma **lo que es cierto en las tres formas** y, dentro de cada una, lo
+# suyo entero. Queda escalado.
+#
 # **Lo que NO se afirma aquí, y por qué. Las marcas de un punto no se pueden alcanzar.**
 # `momento-estado`, `llegada-estado`, `llegada-secuencia`, `llegada-paso` y
 # `llegada-movimientos` están en el árbol de accesibilidad —`adb shell uiautomator dump` las
@@ -38,10 +55,14 @@
 # - **El visor.** Sin lector de recursos binarios cableado toda llegada se resuelve como
 #   ficha —`llegada-estado` dice `ficha` en el aparato—, así que el visor no se abre nunca
 #   hoy. Es el límite que `test/app/visor.yaml` declara, y no es de este flujo.
+# - **Qué forma va a tener la llegada.** Se afirma la que salga, entera, y que sea una de las
+#   tres declaradas: una cuarta forma pondría el flujo rojo en la línea que las enumera.
 
 # Los casos, tal y como los cita `test/spec-test-map.json`:
 #   «La escena queda disponible y espera»
 #   «Sin beat, lo que se cuenta es la llegada entera»
+#   «Llegar sin haber venido a nada da la ficha del sitio»
+#   «Pararse en un semáforo dentro de un geofence no tiene consecuencias»
 #
 appId: com.walkingadventure.app
 ---
@@ -89,17 +110,65 @@ appId: com.walkingadventure.app
 - assertVisible:
     id: 'llegada-montada'
 
-# ── A4P5 · Lo que aquí se cuenta ───────────────────────────────────────────────
+# ── La forma de la llegada es una de las tres declaradas ───────────────────────
 #
-# El sitio es un núcleo y no se ha venido a nada, así que **la llegada entera es lo que allí
-# se cuenta**: es el paso encadenado único de la secuencia, y el antetítulo nombra el sitio.
-- assertVisible:
-    id: 'lo-que-se-cuenta'
-- assertVisible: '.*se habla de'
-- assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
-# Sin nada que se cuente de la jugadora, la sección «Y de ti» no existe: no se enseña vacía.
-- assertNotVisible:
-    id: 'lo-que-se-cuenta-de-ti'
+# Esta línea es la que impide que las ramas de abajo se salten en silencio: si la pantalla no
+# fuera ninguna de las tres, aquí se pone rojo en vez de pasar sin haber afirmado nada de lo
+# que hay debajo. Es la misma trampa que §6w describe, y se cierra antes de ramificar.
+- assertVisible: '.*se habla de.*|.*En realidad:.*|.*Esto todavía no está dibujado\..*'
+
+# ── A4P5 · Lo que aquí se cuenta, cuando el sitio es un núcleo ─────────────────
+#
+# Sin haber venido a nada, **la llegada entera es lo que allí se cuenta**: es el paso
+# encadenado único de la secuencia, y el antetítulo nombra el sitio.
+- runFlow:
+    when:
+      visible:
+        id: 'lo-que-se-cuenta'
+    commands:
+      - assertVisible: '.*se habla de'
+      - assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
+      # Sin nada que se cuente de la jugadora, la sección «Y de ti» no existe: no se enseña
+      # vacía, porque enseñarla sería un marcador de reputación con otras palabras.
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta-de-ti'
+      # Y un núcleo no lleva ficha: la ficha es lo que hay cuando no se ha venido a nada y el
+      # sitio no es un pueblo.
+      - assertNotVisible:
+          id: 'ficha-texto'
+
+# ── A4P7 · La ficha, cuando el sitio es un servicio o un paraje ────────────────
+#
+# La otra mitad del mismo escenario, y la que la primera versión de este flujo daba por
+# imposible: la ficha dice el nombre de fantasía, qué es en realidad y que no se ha venido a
+# nada, sin llamarlo error ni falta. Y desde ella cuelga la acción discreta del descarte.
+- runFlow:
+    when:
+      visible:
+        id: 'ficha-texto'
+    commands:
+      - assertVisible: '.*En realidad:.*'
+      - assertNotVisible: 'Reintentar'
+      - assertNotVisible: 'Descargar'
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta'
+      # La puerta de A4P8, que es de donde cuelga el primer toque del descarte. Aquí solo se
+      # comprueba que está: el gesto entero es de `test/app/descarte.yaml`.
+      - assertVisible:
+          id: 'ficha-descartar'
+      - assertVisible: '.*Este sitio no pega.*'
+
+# ── El hueco declarado, cuando el paso vigente es un beat ──────────────────────
+#
+# Un paso sin pantalla **se enseña con su nombre, no se salta**: es el patrón del telón de la
+# fila 48 y desaparece cuando llegue la 49. Se afirma aquí porque un micro-encuentro mandado
+# por la cola produce beat también en una salida sin aventura aceptada.
+- runFlow:
+    when:
+      visible:
+        id: 'llegada-hueco'
+    commands:
+      - assertVisible: '.*Esto todavía no está dibujado\..*'
 
 # ── Ninguna de estas pantallas se navega ───────────────────────────────────────
 # No hay barra, no hay flecha de atrás entre pasos y no hay manera de saltar al siguiente.
@@ -127,11 +196,44 @@ appId: com.walkingadventure.app
 - assertNotVisible: '.*\d+\s*(km|kcal|min|minutos)\b.*'
 
 # ── «Seguir» es la única acción, y cierra la llegada ───────────────────────────
-# El móvil vuelve al bolsillo: debajo está el momento en marcha, no una pantalla anterior.
+#
+# **Y una parada puede validar más de una llegada**, que es lo que se descubrió midiendo:
+# el núcleo y su servicio caen a pocos metros el uno del otro, así que los dos geofences se
+# solapan y los dos validan en la misma parada. Al cerrar la primera **se ofrece la segunda
+# sin pasar por el momento en marcha**, que es lo que la spec pide: la escena que espera
+# manda sobre todo lo demás, y el mapa no vuelve hasta que no queda ninguna.
 - assertVisible:
     id: 'llegada-seguir'
 - tapOn:
     id: 'llegada-seguir'
+
+# Si había otra esperando, aquí está: sin mapa debajo y sin haber pasado por en marcha.
+- runFlow:
+    when:
+      visible:
+        id: 'llegada'
+    commands:
+      - assertVisible:
+          id: 'llegada-montada'
+      - assertNotVisible:
+          id: 'mapa-lamina'
+      - assertVisible: '.*se habla de.*|.*En realidad:.*|.*Esto todavía no está dibujado\..*'
+
+# Se atienden las que queden. El tope es de la prueba y no del juego: una parada no valida
+# seis llegadas ni de lejos, y un bucle sin tope escondería una escena que no se cierra.
+- repeat:
+    times: 6
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: 'llegada'
+          commands:
+            - tapOn:
+                id: 'llegada-seguir'
+
+# ── El móvil vuelve al bolsillo ────────────────────────────────────────────────
+# Cerradas todas, debajo está el momento en marcha y no una pantalla anterior.
 - extendedWaitUntil:
     visible:
       id: 'en-marcha'
@@ -140,6 +242,8 @@ appId: com.walkingadventure.app
     id: 'mapa-lamina'
 - assertNotVisible:
     id: 'lo-que-se-cuenta'
+- assertNotVisible:
+    id: 'ficha-texto'
 
 # ── Pararse en el mismo sitio no tiene consecuencias ───────────────────────────
 # Se sigue parada donde estaba y la llegada ya está cerrada: no se vuelve a ofrecer en la
