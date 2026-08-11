@@ -311,27 +311,28 @@ export function App() {
       alCambiar: () => repintaLaSalida((n) => n + 1),
       // La capa de llegadas de la salida, montada sobre **su** detector. Se monta aquí y no
       // dentro de la vida de la salida porque necesita la partida entera —el área de sitios
-      // pisados, la cola, el diario, los descartes— y esa la tiene esta raíz. Sin mundo
-      // levantado no hay geofences, así que no hay llegada posible y no se monta: es un
-      // estado normal de una partida que todavía no ha abierto ninguna celda.
-      montaLlegadas: partida.mundo.documento
-        ? ({ detector, salida: laQueSeAbre, mapaId }) => creaLasLlegadas({
-          nucleo: NUCLEO_DE_LAS_LLEGADAS,
-          mundo: partida.mundo.documento,
-          cupos: partida.mundo.cupos ?? null,
-          mapaId: mapaId ?? partida.mundo.mapaId,
-          salida: laQueSeAbre,
-          estado: partida.estado,
-          registro: partida.registro,
-          detector,
-          // El reparto casteado llega con la salida que se echó a andar. Al reabrir la app
-          // no está —el estado guarda la aventura por su identificador y no su cadena—, así
-          // que se declara vacío: la secuencia guardada conserva su paso de beat y lo que se
-          // pierde es el beat de dentro, no el paso. Queda anotado con dueño.
-          reparto: laSalidaEchada.current?.reparto ?? REPARTO_SIN_AVENTURA,
-          dia: creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia(),
-        })
-        : null,
+      // pisados, la cola, el diario, los descartes— y esa la tiene esta raíz.
+      //
+      // Va **siempre y sin condición**: sin mundo levantado la fábrica falla nombrando lo que
+      // falta y la salida no se abre con su motivo, que es la verdad —no se puede andar por un
+      // mapa que no existe—. Condicionarla a que hubiera documento era la puerta por la que se
+      // coló que nadie la pasara.
+      montaLlegadas: ({ detector, salida: laQueSeAbre, mapaId }) => creaLasLlegadas({
+        nucleo: NUCLEO_DE_LAS_LLEGADAS,
+        mundo: partida.mundo.documento,
+        cupos: partida.mundo.cupos ?? null,
+        mapaId: mapaId ?? partida.mundo.mapaId,
+        salida: laQueSeAbre,
+        estado: partida.estado,
+        registro: partida.registro,
+        detector,
+        // El reparto casteado llega con la salida que se echó a andar. Al reabrir la app
+        // no está —el estado guarda la aventura por su identificador y no su cadena—, así
+        // que se declara vacío: la secuencia guardada conserva su paso de beat y lo que se
+        // pierde es el beat de dentro, no el paso. Queda anotado con dueño.
+        reparto: laSalidaEchada.current?.reparto ?? REPARTO_SIN_AVENTURA,
+        dia: creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia(),
+      }),
     })
       .then(async (montada) => {
         if (!vivo) return;
