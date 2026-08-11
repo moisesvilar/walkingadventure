@@ -61,6 +61,11 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
   // aquella fila. Vive aquí y no dentro de la escena porque el criterio es que al salir de una
   // escena y entrar en otra siga puesto, y cada escena se monta de nuevo.
   const [tamanoDeTexto, setTamanoDeTexto] = useState(TAMANO_DE_TEXTO_DE_ORIGEN);
+  // En cuál de las dos mitades del paso de beat va: la escena o lo que te llevas. Vive aquí y
+  // no dentro de la escena porque la escena se remonta en cada repintado de este montaje —el
+  // componente se inyecta por tipo de paso y se compone de nuevo— y el escalón de tamaño de
+  // letra provoca uno: con el estado dentro, agrandar el texto habría devuelto a A4P3.
+  const [enLoQueTeLlevas, setEnLoQueTeLlevas] = useState(false);
 
   const avisa = useCallback(() => {
     repinta((n) => n + 1);
@@ -72,6 +77,7 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
     const movido = llegadas.avanza();
     setVisorAbierto(false);
     setDescarte(null);
+    setEnLoQueTeLlevas(false);
     avisa();
     if (movido.cerrada && movido.siguiente === null && alTerminar) alTerminar();
     return movido;
@@ -98,6 +104,8 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
         // El mismo `alSeguir` que la pantalla encadenada le da a cualquier paso: cerrar el
         // paso es lo único que mueve la secuencia, y no hay una segunda vía desde aquí.
         alSeguir={alSeguir}
+        enLoQueTeLlevas={enLoQueTeLlevas}
+        alLoQueTeLlevas={() => setEnLoQueTeLlevas(true)}
         // Cada toque avanza un escalón y el texto cambia en el sitio: lo que se recompone es
         // la escena, no la pantalla, y no se sale de ella.
         alCambiarTamano={() => setTamanoDeTexto((vigente) => siguienteTamanoDeTexto(vigente))}

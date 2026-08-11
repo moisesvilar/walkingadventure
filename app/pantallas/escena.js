@@ -26,7 +26,7 @@
 // y otra es qué texto se lee, así que aquí no hay ni reloj, ni candado, ni lista de requisitos
 // que dibujar — no llegan.
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ESTADOS_DE_ESCENA, TESTIDS, TEXTOS_DEL_TAMANO, factorDeTamano } from '@walkingadventure/nucleo/quests/escena.js';
@@ -48,7 +48,11 @@ function loQueSeLleva(seLleva) {
  *   `componeLoQueTeLlevas`, o `null`; `motivo` el motivo literal cuando la escena no se pudo
  *   componer —un beat nulo o recortado, el reloj sin cablear, la tenencia sin cablear—;
  *   `alSeguir` cerrar el paso del beat, que es lo único que mueve la secuencia;
- *   `alCambiarTamano` avanzar un escalón de la escala, que recompone la escena en el sitio.
+ *   `alCambiarTamano` avanzar un escalón de la escala, que recompone la escena en el sitio;
+ *   `enLoQueTeLlevas` en cuál de las dos mitades del paso va, y `alLoQueTeLlevas` pasar a la
+ *   segunda. **Las dos son del paso y no de esta pantalla**: A4P3 y A4P4 son el mismo paso de
+ *   la secuencia —lo que el estado guarda es el paso, no en qué mitad de él estás— y quien
+ *   monta el paso es quien puede garantizar que cambiar el tamaño de letra no lo reinicia.
  */
 export function PantallaEscena({
   escena = null,
@@ -56,11 +60,9 @@ export function PantallaEscena({
   motivo = null,
   alSeguir = null,
   alCambiarTamano = null,
+  enLoQueTeLlevas = false,
+  alLoQueTeLlevas = null,
 }) {
-  // En cuál de las dos pantallas va. Es local a propósito: A4P3 y A4P4 son el mismo paso de la
-  // secuencia —lo que el estado guarda es el paso, no en qué mitad de él estás— y tocar la
-  // acción de la escena no cierra nada todavía.
-  const [enLoQueTeLlevas, setEnLoQueTeLlevas] = useState(false);
 
   // La avería con su motivo literal, **y con la acción que cierra el paso**. Enseñarla sin
   // acción dejaría la app encallada dentro de una salida abierta, y saltar el paso en silencio
@@ -152,7 +154,10 @@ export function PantallaEscena({
         <Text style={estilos.tamanoTexto}>{TEXTOS_DEL_TAMANO.etiqueta}</Text>
       </Pressable>
 
-      <Pressable testID={TESTIDS.accion} onPress={() => setEnLoQueTeLlevas(true)} style={estilos.accion}>
+      {/* Sin la segunda mitad compuesta, la acción cierra el paso en lugar de llevar a una
+          pantalla que no existe: las dos se componen juntas, así que llegar aquí sin ella es
+          imposible, y quedarse encallado por eso no puede pasar. */}
+      <Pressable testID={TESTIDS.accion} onPress={loQueTeLlevas ? alLoQueTeLlevas : alSeguir} style={estilos.accion}>
         <Text style={estilos.accionTexto}>{escena.accion.verbo}</Text>
       </Pressable>
     </View>
