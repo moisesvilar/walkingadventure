@@ -31,18 +31,15 @@
 # lectura. Así que se afirma **lo que es cierto en las tres formas** y, dentro de cada una, lo
 # suyo entero. Queda escalado.
 #
-# **Lo que NO se afirma aquí, y por qué. Las marcas de un punto no se pueden alcanzar.**
-# `momento-estado`, `llegada-estado`, `llegada-secuencia`, `llegada-paso` y
-# `llegada-movimientos` están en el árbol de accesibilidad —`adb shell uiautomator dump` las
-# trae con su `content-desc`: `al-parar`, `ficha`, `lo-que-se-cuenta:encadenado`,
-# `lo-que-se-cuenta`, `0`— y **Maestro las descarta**: `maestro hierarchy` sobre la misma
-# pantalla entrega solo `llegada-montada`, `llegada`, `lo-que-se-cuenta` y `llegada-seguir`.
-# Medido el 12-ago-2026 en `wa-pixel`, con el paquete de marcas ya en su capa propia y con
-# `zIndex`/`elevation` puestos. Así que lo que este flujo afirma son elementos con tamaño y
-# textos que se leen; el orden de la secuencia, su paso vigente y el estado del momento se
-# afirman en `test/nucleo/llegadas.test.mjs`, que corre sin simulador. **Queda declarado como
-# defecto de la app**, y es el mismo de siempre con otra forma: una marca que ninguna prueba
-# puede leer no es una marca, es un comentario.
+# **Las marcas de un punto se afirman, y hubo que arreglarlas para eso.** Al escribir este
+# flujo se midió que `momento-estado`, `llegada-estado`, `llegada-secuencia` y las tres del
+# momento en marcha estaban en el árbol del sistema —`adb shell uiautomator dump` las traía
+# con su descripción— y **Maestro las descartaba**: `maestro hierarchy` sobre la misma
+# pantalla entregaba cuatro nodos y `assertVisible` fallaba. La causa era la esquina: en una
+# pantalla a sangre, una marca en `[0,0]` cae debajo de la ventana de la barra de estado. Se
+# arregló bajándolas del borde, y desde entonces este flujo las afirma. Queda escrito porque
+# es la diferencia entre una marca y un comentario: la que ninguna prueba puede leer no es
+# una marca.
 #
 # **Lo que este flujo NO puede comprobar, y por qué:**
 #
@@ -95,6 +92,16 @@ appId: com.walkingadventure.app
     id: 'llegada-sin-cablear'
 - assertVisible:
     id: 'mapa-lamina'
+# El sensor está montado, y la cadencia y el sitio bajo la marca se pueden leer: son las tres
+# marcas del montaje, y sin ellas el cambio de muestreo solo se podría afirmar sobre la
+# función pura del paquete, nunca sobre el aparato.
+- assertVisible:
+    id: 'ubicacion-estado'
+    text: 'montado'
+- assertVisible:
+    id: 'salida-cadencia'
+- assertVisible:
+    id: 'salida-sitio'
 
 # ── La escena valida sola y espera ─────────────────────────────────────────────
 #
@@ -109,6 +116,14 @@ appId: com.walkingadventure.app
     timeout: 90000
 - assertVisible:
     id: 'llegada-montada'
+# El momento del sistema de diseño es «al parar», y la secuencia trae su forma dentro.
+- assertVisible:
+    id: 'momento-estado'
+    text: 'al-parar'
+- assertVisible:
+    id: 'llegada-estado'
+- assertVisible:
+    id: 'llegada-secuencia'
 
 # ── La forma de la llegada es una de las tres declaradas ───────────────────────
 #
@@ -126,6 +141,10 @@ appId: com.walkingadventure.app
       visible:
         id: 'lo-que-se-cuenta'
     commands:
+      # La secuencia de un núcleo sin beat es un solo paso encadenado, y es este.
+      - assertVisible:
+          id: 'llegada-secuencia'
+          text: 'lo-que-se-cuenta:encadenado'
       - assertVisible: '.*se habla de'
       - assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
       # Sin nada que se cuente de la jugadora, la sección «Y de ti» no existe: no se enseña
@@ -147,6 +166,10 @@ appId: com.walkingadventure.app
       visible:
         id: 'ficha-texto'
     commands:
+      # La de un servicio o un paraje a los que no se ha venido a nada, también uno solo.
+      - assertVisible:
+          id: 'llegada-secuencia'
+          text: 'ficha:encadenado'
       - assertVisible: '.*En realidad:.*'
       - assertNotVisible: 'Reintentar'
       - assertNotVisible: 'Descargar'
@@ -224,13 +247,13 @@ appId: com.walkingadventure.app
 - repeat:
     times: 6
     commands:
-      - runFlow:
-          when:
-            visible:
-              id: 'llegada'
-          commands:
-            - tapOn:
-                id: 'llegada-seguir'
+      - tapOn:
+          id: 'llegada-seguir'
+          # Opcional porque es una carrera y no una afirmación: entre que se comprueba que
+          # queda escena y que se toca, la anterior puede haberse cerrado ya y el botón deja
+          # de estar. Lo que de verdad se exige —que no quede ninguna— se afirma abajo, con
+          # el momento en marcha delante; aquí solo se atiende lo que haya.
+          optional: true
 
 # ── El móvil vuelve al bolsillo ────────────────────────────────────────────────
 # Cerradas todas, debajo está el momento en marcha y no una pantalla anterior.
