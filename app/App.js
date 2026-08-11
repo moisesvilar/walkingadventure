@@ -53,12 +53,12 @@ import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
 import { AbrirCopia } from './pantallas/copia.jsx';
 import { ConsultaMontada } from './pantallas/consulta-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
-import { marcaSuperpuesta } from './pantallas/marca.js';
 import { PantallaAndamiaje } from './pantallas/andamiaje.js';
 import { EnMarchaMontado } from './pantallas/en-marcha-montado.jsx';
 import { LlegadaMontada } from './pantallas/llegada-montada.jsx';
 import { MapaMontado } from './pantallas/mapa-montado.jsx';
 import { RevisionMontada } from './pantallas/revision-montada.jsx';
+import { TelonMontado } from './pantallas/telon-montado.jsx';
 
 // Referencia estable: si fuera un literal en el cuerpo, cada repintado sería un
 // re-sondeo de las cinco capacidades.
@@ -596,30 +596,33 @@ export function App() {
   }
 
   // El telón pendiente manda sobre la portada: una salida cerrada sin leer se lee antes de
-  // abrir otra, y esa regla es de SPEC-030. Su pantalla es de la fila 49 y **no está
-  // dibujada**, así que aquí va el hueco que la nombra, con el mismo patrón que
-  // `pantallas/llegada.js` usa para la escena que no existe: feo, honesto, y desaparece
-  // cuando la 49 llegue. Sin él la app se queda encallada.
+  // abrir otra, y esa regla es de SPEC-030. El hueco que dejó la fila 48 ya no está: lo
+  // sustituye su pantalla, que **echa el telón al montarse** y lo recorre entero.
+  //
+  // No va envuelto en el área segura: dos de sus seis pantallas llevan lámina a sangre, y el
+  // área le comería el borde superior.
   if (partida && laSalida && laSalida.queOfrece() === 'telon') {
     return (
-      <AreaSegura style={estilos.raiz}>
-        <View style={estilos.hueco} testID="telon-sin-pantalla">
-          <View testID="salida-situacion" accessibilityLabel={laSalida.situacion()} style={marcaSuperpuesta(0)} />
-          <Text style={estilos.huecoTexto}>Esto todavía no está dibujado: el telón de tu última salida.</Text>
-          {/* Una sola acción, y **marca el telón como leído**: nunca lo marca el paso de
-              nada. Leerlo es un toque de quien lo lee, y esa regla es de SPEC-030. */}
-          <Pressable
-            testID="telon-cerrar"
-            onPress={() => {
-              laSalida.marcaElTelonComoLeido();
-              congelaLaPartida();
-            }}
-            style={estilos.huecoAccion}
-          >
-            <Text style={estilos.huecoAccionTexto}>Cerrarlo</Text>
-          </Pressable>
-        </View>
-      </AreaSegura>
+      <TelonMontado
+        partida={partida}
+        calendario={creaCalendario({ arrancadaEn: partida.arrancadaEn })}
+        situacion={laSalida.situacion()}
+        // Echar el telón es un corte del juego —entinta el mapa, ingresa el oro y apunta la
+        // hoja del diario— y se congela en ese mismo corte.
+        alEchado={() => congelaLaPartida()}
+        // Las **dos** salidas de la última pantalla marcan el telón como leído, y ninguna otra
+        // cosa lo marca. Si alguna no marcara, la app quedaría sin poder abrir ninguna salida,
+        // que es el fallo silencioso con forma de app muerta de §10h.
+        alLeido={() => {
+          laSalida.marcaElTelonComoLeido();
+          congelaLaPartida();
+        }}
+        alDiario={() => {
+          laSalida.marcaElTelonComoLeido();
+          congelaLaPartida();
+          setConsulta('diario');
+        }}
+      />
     );
   }
 
@@ -758,11 +761,6 @@ const estilos = StyleSheet.create({
   // La espera ocupa la pantalla entera: una marca de 0×0 no existe para la automatización,
   // y esta tiene que poder afirmarse.
   espera: { flex: 1 },
-  // El hueco del telón. Ocupa la pantalla: una marca de 0×0 no existe para la automatización.
-  hueco: { flex: 1, padding: 28, justifyContent: 'center', gap: 24 },
-  huecoTexto: { fontFamily: 'serif', fontSize: 20, lineHeight: 30, color: '#1e2b18' },
-  huecoAccion: { paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1e2b18' },
-  huecoAccionTexto: { fontFamily: 'serif', fontSize: 18, color: '#1e2b18' },
   averia: { padding: 24, gap: 16 },
   averiaTitular: { fontSize: 20, color: '#1e2b18' },
   averiaMotivo: { fontSize: 13, lineHeight: 19, color: '#1e2b18', opacity: 0.75 },

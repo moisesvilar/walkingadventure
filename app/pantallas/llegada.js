@@ -27,9 +27,12 @@
 // deja a la vista lo que ya estaba. Por eso cerrar es la única acción que el visor añade,
 // y existe igual cuando el visor no está.
 //
-// La pantalla de la escena (A4P3, A4P4) es de la fila 34 y **no está en disco**: entra
-// inyectada por su tipo de paso, y mientras no exista se monta el hueco con el paso
-// nombrado, en lugar de saltar el paso en silencio.
+// La pantalla de la escena (A4P3, A4P4) **entra inyectada por su tipo de paso**, y esa es
+// toda la puerta que esta pantalla tiene abierta. Desde SPEC-049 la hay, así que el hueco
+// declarado que dejó la fila 44 —`llegada-hueco`, y `nombraElPaso` con él— ya no está. Lo que
+// queda en su sitio no es otro hueco con otro nombre: es la avería con el paso nombrado y con
+// su acción, para el caso de que alguien monte esto sin inyectarle lo que un paso necesita.
+// Saltar el paso en silencio sería §6h; enseñarlo sin acción dejaría la app encallada.
 
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -53,15 +56,6 @@ export const TEXTOS = Object.freeze({
   seguir: 'Seguir',
   nada: 'Aquí no queda nada esperando.',
 });
-
-/**
- * Cómo se nombra un paso en el hueco. **El paso va nombrado y no en blanco**: un hueco que
- * no dice qué falta es un hueco que se puede dar por hecho, y la fila 49 tiene que poder
- * borrar exactamente estas líneas.
- */
-export function nombraElPaso(paso, sitio) {
-  return `${paso.tipo}: la escena de ${sitio}`;
-}
 
 /** La lista de tipos y modos de la secuencia, para poder afirmar el orden de un vistazo. */
 export function etiquetaDeSecuencia(secuencia) {
@@ -155,12 +149,11 @@ export function PantallaLlegada({
       ) : debajo && Pantalla ? (
         <Pantalla paso={debajo} sitio={llegada.sitio} alSeguir={alSeguir} />
       ) : debajo ? (
-        // El hueco declarado de la fila 49, con **el paso nombrado y una sola acción**. Es el
-        // mismo patrón, palabra por palabra, con el que la fila 48 dejó alcanzable el telón:
-        // feo, honesto, y desaparece cuando llegue la 49. Lo que no se hace es saltar el
-        // paso: una secuencia que parece completa sin serlo es exactamente §6h.
-        <View style={estilos.hueco} testID="llegada-hueco" accessibilityLabel={debajo.tipo}>
-          <Text style={estilos.mundo}>{nombraElPaso(debajo, llegada.sitio)}</Text>
+        // No es un hueco: es la avería de un paso al que no se le ha inyectado su pantalla,
+        // con el paso nombrado y con la acción que lo cierra. Los cuatro tipos de la secuencia
+        // tienen la suya desde esta fila, así que llegar aquí significa que alguien montó esto
+        // a medias, y eso se enseña en lugar de saltarse el paso (§6h).
+        <View style={estilos.hueco} testID="llegada-sin-pantalla" accessibilityLabel={debajo.tipo}>
           <Text style={estilos.mundo}>{TEXTOS.sinPantalla}</Text>
           <Pressable testID="llegada-seguir" onPress={alSeguir} style={estilos.accion}>
             <Text style={estilos.accionTexto}>{TEXTOS.seguir}</Text>

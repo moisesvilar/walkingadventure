@@ -33,18 +33,6 @@ import { ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
 import {
   componeEscena as componeLaEscenaDelBeat,
   componeLoQueTeLlevas,
-  sinEscena,
-  varianteDelBeat,
-  ESCALA_DE_TEXTO,
-  ESTADOS_DE_ESCENA,
-  IDS_DE_TAMANO_DE_TEXTO,
-  LO_QUE_LA_ESCENA_NO_LLEVA,
-  TAMANO_DE_TEXTO_DE_ORIGEN,
-  TESTIDS as TESTIDS_DE_LA_ESCENA,
-  TEXTOS_DEL_TAMANO,
-  exigeTamanoDeTexto,
-  factorDeTamano,
-  siguienteTamanoDeTexto,
 } from '@walkingadventure/nucleo/quests/escena.js';
 import { aventuraEnCurso, resuelveBeat } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
 import { apuntaHaberEstado, libroDePendientes } from '@walkingadventure/nucleo/partida/conocimiento.js';
@@ -418,28 +406,6 @@ export const NUCLEO_DEL_CIERRE_DE_SALIDA = Object.freeze({
   CATALOGO,
   VIAS_DE_CIERRE,
   MOTIVOS_DE_CIERRE,
-});
-
-/**
- * Lo que la escena de un beat y lo que te llevas necesitan del núcleo para pintarse: el
- * vocabulario cerrado, los identificadores y la escala de tamaño de texto.
- *
- * Va aparte del bloque de las llegadas porque lo consume la pantalla y no la orquestación:
- * lo que la capa compone es el dato, y esto es con lo que se dibuja y se recorre la escala.
- */
-export const NUCLEO_DE_LA_ESCENA = Object.freeze({
-  sinEscena,
-  varianteDelBeat,
-  ESCALA_DE_TEXTO,
-  ESTADOS_DE_ESCENA,
-  IDS_DE_TAMANO_DE_TEXTO,
-  LO_QUE_LA_ESCENA_NO_LLEVA,
-  TAMANO_DE_TEXTO_DE_ORIGEN,
-  TESTIDS: TESTIDS_DE_LA_ESCENA,
-  TEXTOS_DEL_TAMANO,
-  exigeTamanoDeTexto,
-  factorDeTamano,
-  siguienteTamanoDeTexto,
 });
 
 /** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */

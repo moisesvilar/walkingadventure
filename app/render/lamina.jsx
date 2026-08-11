@@ -26,6 +26,12 @@ import { MARCA_SUPERPUESTA } from '../pantallas/marca.js';
  *   paraje, escala }`; `tamano` `{ ancho, alto }` en px; `factorTexto` el ajuste
  *   de tamaño de letra; `enlace` el enlace con Skia; `colocador` el de rótulos, que
  *   por defecto es el que garantiza que ninguna caja pisa a otra.
+ *
+ *   Y dos que son del telón (SPEC-036, cableadas por SPEC-049): `entintado`, la tinta
+ *   de cada elemento tal como la deja `entintadoDelMundo`, y `telon`, que dice que
+ *   esta lámina es la del telón. `render/escena.js` las acepta desde aquella fila y
+ *   los cinco estilos ya declaran las tres tintas; lo que faltaba era pasarlas. **Aquí
+ *   no se añade ningún color**: ni uno vive en el código de dibujo.
  */
 export function Lamina({
   documento,
@@ -36,14 +42,16 @@ export function Lamina({
   factorTexto = 1,
   enlace,
   colocador = colocadorDeRotulos,
+  entintado = null,
+  telon = false,
 }) {
   const { Skia, enums, fuente, Canvas, Picture, creaCuadro } = exigeEnlace(enlace);
 
   // La escena se compone una vez por mundo, estilo, tamaño y vista: arrastrar y
   // hacer zoom mueven la cámara sobre la escena que ya existe, no la recomponen.
   const escena = useMemo(
-    () => componeEscena({ documento, estilo, catalogo, vista, tamano, factorTexto, medidor: creaMedidorSkia(fuente), colocador }),
-    [documento, estilo, catalogo, vista, tamano, factorTexto, fuente, colocador],
+    () => componeEscena({ documento, estilo, catalogo, vista, tamano, factorTexto, medidor: creaMedidorSkia(fuente), colocador, entintado, telon }),
+    [documento, estilo, catalogo, vista, tamano, factorTexto, fuente, colocador, entintado, telon],
   );
 
   const cuadro = useMemo(
