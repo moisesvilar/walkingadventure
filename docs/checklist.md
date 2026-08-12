@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 17 | catalogo-plantillas | RF-QUEST-009, RF-LANG-001, RF-LANG-003, RF-LANG-004 | must | done |
 | 18 | contrato-llm | RF-QUEST-006, RF-QUEST-007, RF-QUEST-008, RF-LANG-005, RF-PRIV-001 | must | done |
-| 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | done |
+| 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | done (mecanismo; **`siembraLaCola` no tiene llamador desde `app/`**, así que en un teléfono no salta ningún micro-encuentro — medido por la fila 49) |
 
 ## B4 · La app y el mapa
 
@@ -53,15 +53,15 @@
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
 | 27 | onboarding-arranque | RF-PJ-001, RF-PJ-002, RF-PJ-003, RF-PJ-005, RF-PJ-006, RF-PJ-007, RF-PJ-008, RF-PRIV-005, RF-PRIV-006 | must | done |
-| 28 | portada-antes-de-salir | RF-BUCLE-002, RF-QUEST-011, RF-QUEST-012, RNF-RED-001 | must | done |
+| 28 | portada-antes-de-salir | RF-BUCLE-002, RF-QUEST-011, RF-QUEST-012, RNF-RED-001 | must | done (la aceptación no llegaba al motor y la lista no tenía memoria; **cerrado por la fila 49**) |
 | 29 | en-marcha-mapa-avisos | RF-BUCLE-001, RF-BUCLE-004, RF-BUCLE-009, RF-BUCLE-014, RF-BUCLE-016, RF-MAPA-005 | must | done |
 | 30 | rotulo-sistema | RF-INFRA-004, RF-BUCLE-010, RF-BUCLE-017 | must | done |
 | 31 | deteccion-vehiculo | RF-INFRA-005, RF-BUCLE-015 | must | done |
 | 32 | llegadas-geofence | RF-BUCLE-005, RF-BUCLE-006, RF-RUMOR-005 | must | done |
 | 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | done |
-| 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done (paquete, no pantalla — ver fila 49) |
+| 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done (paquete; **su pantalla la entregó la fila 49**) |
 | 35 | descarte-anclaje | RF-PRIV-004 | must | done |
-| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | done (paquete, no pantalla — ver fila 49) |
+| 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | done (paquete; **su pantalla la entregó la fila 49**) |
 
 ## B6 · Lo que queda en casa
 
@@ -71,7 +71,7 @@
 | 38 | repisa-ajustes | RF-PROG-007, RF-PJ-010, RF-LANG-002 | must | done |
 | 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | done (mecanismo, no cableado — ver fila 47) |
 | 40 | empezar-de-nuevo | RF-PERS-006 | must | done |
-| 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | done |
+| 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | done (mecanismo; **A2P0 es inalcanzable**: `NUCLEO_DEL_OFRECIMIENTO` no lo importa nadie — medido por la fila 49) |
 | 42 | pasos-fondo-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | done |
 
 ## B7 · La navegación, que es la puerta que faltaba
@@ -86,7 +86,7 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 46 | fuente-de-salud-y-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | pending |
 | 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | done |
 | 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | done (sensor y rótulo; el camino de la llegada se queda en la 44 — ver §7a) |
-| 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | in-progress |
+| 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | done (entrega los cinco; **RF-QUEST-004 y RF-BUCLE-011**, que la 44 le pasó, quedan entregados) |
 
 La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 
@@ -115,3 +115,11 @@ Las dos van con la misma guarda, `test/nucleo/pantallas-huerfanas.test.mjs`, que
 - **Una fila por spec implementable y testeable de una pasada**, no una por RF: los RF de una misma feature cohesionada comparten fila (la capa de NPCs son cinco RF y una spec), y los RF transversales (RNF-DET, RF-PRIV-001/002) aparecen en la spec donde se implementa su garantía y se verifican como bloqueantes en todas (`RNF-DET-003`).
 - **El orden respeta dependencias**: nada de B2 sin el paquete y la rejilla de B1; nada de B5 sin el andamiaje `@app` de la fila 1 y el render de B4; el catálogo (17) puede avanzar en paralelo desde que existe el casting (10).
 - Los slugs son estables: serán el nombre del fichero de spec y parte de la rama del pipeline. No se renombran.
+
+La **49** entregó las ocho pantallas que SPEC-034 y SPEC-036 nunca escribieron —A4P3, A4P4 y A5P1 a A5P4 con su cartela— **y las once costuras que impedían que hicieran nada**. Cinco estaban antes de empezar y la más grave era que `acepta` de `aventura-en-curso.js` no la llamaba nadie: `enCurso` era `null` siempre, así que **no había aventura en curso ningún día** y el telón se habría compuesto como un paseo. El relato entero está en `pipeline/decisiones-orquestador.md` §11.
+
+**Verificado en `wa-pixel`, recorriendo el bucle entero dos veces** —antes y después de la migración—: aventura terminada con desenlace notable (oro 12, objeto, rango y rumor), cierre en corto sin oro ni rumor, paseo sin coger nada, día sin descubrimientos, y el telón desencallando la app por sus **dos** puertas. Lo que **no** se pudo verificar es el telón por regreso: el servicio en primer plano se cae a mitad de salida, dos veces sin provocarlo. Se verificó por «dejarlo aquí» y por la tarjeta de a medias, que `bucle-jugable.md` §8 declara la misma puerta.
+
+**La columna de límite declarado sube de siete a ocho, y se dice por qué.** `telon.yaml` **sale** —recorre el telón entero con el dedo, incluidas las dos salidas de A5P4— y `llegada.yaml` **vuelve a entrar**: su verde de la fila 44 no era reproducible, porque depende de que el sitio por el que empieza el mapa caiga bajo los pies de quien juega, y eso lo decide dónde quedó el GPS del emulador. Medido tres veces con `salida-sitio = sin-sitio`. `escena.yaml` no sale, y su motivo viejo era falso: no es que falte `paso-escena`, es que **no debe existir**.
+
+Y esta fila estrena la **primera migración de formato del proyecto** (`VERSION_FORMATO` 1 → 2). Costó tres cosas más: nueve pruebas que codificaban «todavía no hay migraciones» como invariante, un lector estricto que impedía que ningún documento viejo llegara a la cadena, y que la versión sea **global a las ocho clases de documento**, lo que dejaba el mapa sin migrar y una partida existente sin abrir. Lo último **no se arregla aquí y queda fichado**: mientras la versión sea una sola para ocho clases, la forma vuelve cada vez que una clase evolucione sola.
