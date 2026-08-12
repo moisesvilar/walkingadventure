@@ -379,6 +379,20 @@ Característica: El mundo avanza con los kilómetros del jugador, no con el cale
     Entonces la reserva contiene cinco pasos
     Y el contador del mundo ha avanzado cinco, no doce
 
+  Escenario: Los metros que la app de salud da al abrir llenan la reserva del mapa activo
+    Dado un jugador con el modo de pasos de fondo activado y metros nuevos desde la última lectura
+    Cuando abre la app
+    Entonces esos metros se convierten en pasos con su tramo personal
+    Y los pasos quedan en la reserva del mapa activo
+    Y la reserva del otro mapa de la partida no se toca
+
+  Escenario: Sin mapa levantado no se acredita ningún metro
+    Dado un jugador cuya partida no tiene ningún mapa levantado
+    Cuando abre la app con el modo de pasos de fondo activado
+    Entonces no se monta ningún motor de pasos
+    Y no se acredita ningún metro
+    Y se declara por qué no se pudo
+
   Escenario: Un paso solo añade
     Dado un mundo en el paso 40
     Cuando se ejecutan diez pasos sin que el jugador actúe
@@ -775,6 +789,28 @@ Característica: Antes de salir es el único momento que pide atención
     Dado un jugador con el modo de pasos de fondo apagado
     Cuando abre la app
     Entonces no aparece la pantalla del zurrón
+
+  Escenario: Con reserva sin vaciar se abre el zurrón y no la lista
+    Dado un jugador con el modo de pasos de fondo activo y reserva sin vaciar
+    Cuando pulsa "Ver qué se cuenta hoy"
+    Entonces se abre el zurrón
+    Y no se abre la lista del día
+
+  Escenario: Seguir lleva del zurrón a lo que hay hoy
+    Dado el zurrón a la vista
+    Cuando el jugador pulsa "Seguir"
+    Entonces se abre la lista de lo que hay hoy
+
+  Escenario: El zurrón no aparece por segunda vez
+    Dado un zurrón ya visto y su reserva vaciada
+    Cuando el jugador vuelve a la portada y pulsa "Ver qué se cuenta hoy"
+    Entonces se abre la lista del día
+    Y el zurrón no aparece otra vez
+
+  Escenario: Al zurrón no se llega desde ninguna otra pantalla
+    Dado el diario, la repisa y los ajustes abiertos
+    Cuando el jugador busca cómo llegar al zurrón
+    Entonces no hay ninguna puerta que lleve a él
 
   Escenario: La tarjeta de a medias solo existe con la salida abierta
     Dado un jugador que abandonó una aventura y llegó a casa
@@ -1242,6 +1278,160 @@ Característica: El juego es apto por diseño y no distingue a un menor
     Cuando se abren los ajustes
     Entonces "contar los pasos del día a día" está desactivado
     Y el juego es completo sin activarlo
+```
+
+```gherkin
+# language: es
+
+@nucleo @privacidad
+Característica: A la app de salud se le pide lo mínimo que mueve un contador
+  Los pasos del día a día se leen al abrir y de la app de salud del sistema.
+  Lo que se le pide son los metros o los pasos de una ventana, y nada con
+  recorrido; lo que cruza de ahí al núcleo es un número de metros.
+  Fuente: seguridad-privacidad.md §2 · quests.md decisión 4
+
+  Escenario: La sonda de salud dice si se puede contar y no pide ningún permiso
+    Dado una compilación con la app de salud del sistema disponible y el permiso concedido
+    Cuando se sondea la capacidad de salud
+    Entonces la capacidad está montada y disponible, y sin motivo
+    Y no se ha pedido ningún permiso al sistema
+
+  Escenario: Sin la app de salud del sistema no se puede contar y se dice por qué
+    Dado una compilación donde la app de salud del sistema no está disponible
+    Cuando se sondea la capacidad de salud
+    Entonces la capacidad está montada y no disponible
+    Y el motivo nombra que la app de salud del sistema no está
+
+  Escenario: Con la app de salud y sin permiso el motivo nombra el permiso
+    Dado una compilación con la app de salud del sistema y sin el permiso de lectura
+    Cuando se sondea la capacidad de salud
+    Entonces la capacidad está montada y no disponible
+    Y el motivo nombra el permiso y es distinto del de la app que falta
+
+  Escenario: En iOS no hay de dónde leer los pasos y se declara
+    Dado una compilación de iOS
+    Cuando se sondea la capacidad de salud
+    Entonces la capacidad no está montada
+    Y el motivo dice que la fuente es la de Android y que iOS la tendrá con su propia fila
+
+  Escenario: A la app de salud solo se le piden los metros y los pasos de una ventana
+    Dado lo que la app le pide a la app de salud del sistema
+    Cuando se enumera
+    Entonces son exactamente el permiso de distancia y el de pasos
+    Y no se piden entrenamientos, sesiones con ruta, frecuencia cardíaca ni ningún registro del cuerpo
+
+  Escenario: Del lector de salud al núcleo solo cruzan metros
+    Dado una lectura de la app de salud
+    Cuando se inspecciona lo que llega al núcleo
+    Entonces es un número de metros y nada más
+    Y no cruza ninguna ventana, ningún instante ni ninguna marca del reloj real
+
+  Escenario: El manifiesto no declara ningún permiso de salud fuera de los dos
+    Dado el manifiesto fusionado de Android
+    Cuando se enumeran sus permisos de salud
+    Entonces son exactamente el de distancia y el de pasos
+    Y no aparece el permiso de reconocimiento de actividad
+    Y el Info.plist generado no declara ninguna clave de uso de salud
+
+  Escenario: Del zurrón no sale nada del móvil
+    Dado un zurrón con cinco entradas
+    Cuando se inspecciona el tráfico saliente que provoca
+    Entonces no sale ningún nombre real de sitio, ni la reserva, ni cuánto se ha andado
+```
+
+```gherkin
+# language: es
+
+@nucleo @privacidad
+Característica: El interruptor de contar los pasos no miente
+  Encenderlo pide el permiso en contexto y nunca antes; sin fuente de la que
+  leer no se puede encender, y lo que se pinta es siempre el valor efectivo.
+  Fuente: seguridad-privacidad.md §2 · quests.md decisión 4
+
+  Escenario: Encender los pasos del día a día sin fuente es imposible
+    Dado una compilación sin fuente de salud
+    Cuando se toca la fila de contar los pasos del día a día
+    Entonces la fila sigue en "no"
+    Y no se ha pedido ningún permiso
+    Y la línea que aparece debajo dice que no se puede
+
+  Escenario: El interruptor cambia de valor sin salir y volver a entrar
+    Dado la fila de contar los pasos del día a día y el permiso concedido
+    Cuando se vuelve a leer la fila sin salir de los ajustes
+    Entonces vale "sí"
+    Y no hay ninguna línea de aviso debajo
+
+  Escenario: El interruptor atiende su fila y no la de al lado
+    Dado la fila "solo de día", que es de otra decisión
+    Cuando se toca
+    Entonces la orquestación de los pasos de fondo no la atiende y lo declara
+    Y no cambia ningún ajuste por el camino
+```
+
+```gherkin
+# language: es
+
+@nucleo @privacidad
+Característica: El sistema puede preguntar por qué se piden los permisos de salud
+  La pregunta llega desde fuera de la app, viaja por un enlace declarado como
+  superficie pública y aterriza en la pantalla donde esa razón ya está escrita.
+  Fuente: seguridad-privacidad.md §2
+
+  Escenario: Las dos puertas de la razón de permisos llevan a la actividad principal
+    Dado el manifiesto fusionado de Android
+    Cuando se buscan las puertas de la razón de permisos de salud
+    Entonces están la de las versiones antiguas y la de las nuevas
+    Y las dos apuntan a la actividad principal de la app
+
+  Escenario: El intento de la razón se traduce a un enlace y no decide nada más
+    Dado el intento con el que el sistema pregunta por la razón de los permisos
+    Cuando llega a la actividad principal
+    Entonces se reescribe al enlace de la razón de permisos
+    Y ninguna condición del juego se decide fuera de la app
+
+  Escenario: El enlace de la razón de permisos no escribe nada
+    Dado el enlace de la razón de permisos
+    Cuando se dispara
+    Entonces solo navega
+    Y no acredita metros, no toca la reserva y no cambia ningún ajuste
+
+  Escenario: El suelo de aparatos que la fuente de salud exige está en el artefacto
+    Dado el manifiesto fusionado de Android
+    Cuando se lee el mínimo de sistema que declara
+    Entonces es el que la fuente de salud exige
+    Y las demás claves de compilación están como estaban
+```
+
+```gherkin
+# language: es
+
+@app @privacidad
+Característica: La razón de los permisos aterriza donde ya está escrita
+  Fuente: seguridad-privacidad.md §2
+
+  Escenario: Con partida abierta, la razón de los permisos abre los ajustes
+    Dado un aparato con la app instalada y una partida abierta
+    Cuando el sistema dispara el intento de la razón de permisos de salud
+    Entonces se abren los ajustes con la fila de contar los pasos del día a día
+    Y no se escribe ningún texto nuevo para esa entrada
+
+  Escenario: Sin partida, la razón de los permisos cae al arranque
+    Dado un aparato recién limpiado y reinstalado
+    Cuando el sistema dispara el intento de la razón de permisos de salud
+    Entonces se ve el arranque de siempre
+    Y no se monta ninguna pantalla de ajustes sobre una partida que no existe
+
+  Escenario: El permiso de salud se pide al encender y denegarlo no se insiste
+    Dado la fila de contar los pasos del día a día en "no"
+    Cuando el jugador la toca y deniega el permiso del sistema
+    Entonces la fila vuelve a "no" con su línea de aviso debajo
+    Y volver más tarde a los ajustes no vuelve a pedirlo
+
+  Escenario: Un permiso revocado desde el sistema apaga el interruptor y lo dice
+    Dado el modo encendido y el permiso concedido
+    Cuando el permiso se revoca desde fuera de la app y se vuelve a los ajustes
+    Entonces la fila vale "no"
+    Y aparece la línea que dice que sin acceso no se pueden contar
 ```
 
 ---

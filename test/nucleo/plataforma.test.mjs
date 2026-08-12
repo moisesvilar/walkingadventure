@@ -66,7 +66,13 @@ function modulo(nombre, capa, respuesta) {
 /** Los cinco módulos como los monta la app hoy, doblados y sin tocar Expo. */
 function losCinco() {
   return [
-    modulo('salud', 'ninguna', { montado: false, disponible: false, motivo: 'no montada todavía: la monta la fila 42 (pasos de fondo)' }),
+    // Salud, con **la respuesta de la pareja de iOS**, que es la que sigue diciendo «no
+    // montada» desde la fila 46: la de Android ya monta Health Connect y contesta
+    // `montado: true`. Se dobla ésta y no aquélla a propósito, y el motivo es el de la
+    // decisión que la guarda dejaba abierta y que se cierra abajo, en `DEGRADABLES`: es la
+    // única de las cinco que hoy puede llegar no montada en una compilación real, así que
+    // es la que da de comer a los casos de degradación.
+    modulo('salud', 'ninguna', { montado: false, disponible: false, motivo: 'la fuente de salud de la fila 46 es Health Connect y solo Android; en iOS no hay de dónde leer' }),
     modulo('haptico', 'bolsillo', { montado: true, disponible: true, motivo: null }),
     modulo('notificaciones', 'pantalla', { montado: true, disponible: true, motivo: null }),
     modulo('respaldo', 'ninguna', { montado: true, disponible: true, motivo: null }),
@@ -83,6 +89,25 @@ function losCincoSin(...ausentes) {
  * Las cuatro que sí admiten faltar. El rótulo queda fuera **a propósito**: su
  * ausencia no se degrada, impide abrir la salida, y afirmarla como una degradación
  * más contradiría el criterio de SPEC-030 que la prohíbe.
+ *
+ * **La pregunta que esta guarda dejaba abierta, decidida por la fila 46: la sonda de iOS
+ * entra aquí, y no hace falta una categoría nueva.** Hasta esa fila salud estaba en la lista
+ * porque el módulo entero no existía; desde ella existe partido en dos —`salud.android.js`
+ * monta Health Connect y contesta `montado: true`, `salud.ios.js` contesta `montado: false`
+ * con su motivo—, y la pregunta era si eso es otra cosa que faltar.
+ *
+ * No lo es, y por dos medidas: `creaRegistro` normaliza la ausencia de un módulo a
+ * exactamente el mismo `montado: false, disponible: false` con motivo que devuelve la sonda
+ * de iOS, y la app degrada igual por los dos caminos —el interruptor de A6P6 no se puede
+ * encender y lo dice, y nada más cambia—. Lo único que las distingue es de dónde sale el
+ * motivo, y eso es una mejora: la de iOS lo dice con el nombre de su plataforma en lugar de
+ * con «ningún módulo la monta». Así que salud sigue siendo degradable, la sonda de iOS es la
+ * versión **declarada** de esa misma degradación, y la lista no crece.
+ *
+ * Lo que **no** entra aquí, y conviene dejarlo escrito para que nadie lo mueva: la sonda de
+ * Android con `montado: true, disponible: false` —sin app de salud o sin permiso— no es una
+ * degradación de esta lista, es una capacidad montada que no se puede usar. Esa distinción es
+ * la que sostiene los tres estados legibles, y meterla aquí los volvería dos.
  */
 const DEGRADABLES = ['salud', 'haptico', 'notificaciones', 'respaldo'];
 
@@ -103,7 +128,11 @@ describe('El contrato de un módulo de capacidad', () => {
     // Se leen y no se cargan: dos de los cinco importan de Expo, que es lo
     // correcto —son plataforma— y lo que impide ejecutarlos en Node.
     const ficheros = {
-      salud: 'app/plataforma/salud.js',
+      // Salud se parte por sufijo desde la fila 46: su fuente nativa es Health Connect, que
+      // es de Android, y un módulo compartido con un `if` de plataforma dentro llevaría la
+      // dependencia nativa al árbol de iOS. Se lee la de Android porque es la que la monta;
+      // la pareja entera se contrasta más abajo, con las otras dos partidas.
+      salud: 'app/plataforma/salud.android.js',
       haptico: 'app/plataforma/haptico.js',
       notificaciones: 'app/plataforma/notificaciones.js',
       respaldo: 'app/plataforma/respaldo.ios.js',
@@ -116,9 +145,10 @@ describe('El contrato de un módulo de capacidad', () => {
       assert.match(texto, /capa:\s*'(bolsillo|pantalla|ninguna)'/, `${fichero}: no declara su capa`);
       assert.match(texto, /async sonda\(\)/, `${fichero}: no expone una sonda de disponibilidad`);
     }
-    // Las dos capacidades partidas por plataforma tienen su pareja, y las dos
+    // Las **tres** capacidades partidas por plataforma tienen su pareja, y las tres
     // parejas declaran lo mismo: lo que difiere es el ciclo de vida, nunca el contrato.
-    for (const partida of ['respaldo', 'rotulo']) {
+    // Salud entra en el grupo con la fila 46 y por el mismo motivo que las otras dos.
+    for (const partida of ['salud', 'respaldo', 'rotulo']) {
       for (const p of ['ios', 'android']) {
         assert.equal(hay(`app/plataforma/${partida}.${p}.js`), true, `falta ${partida}.${p}.js`);
         assert.match(fuente(`app/plataforma/${partida}.${p}.js`), new RegExp(`nombre:\\s*'${partida}'`));
@@ -133,8 +163,10 @@ describe('El contrato de un módulo de capacidad', () => {
     // salud y respaldo no avisan de nada y por eso su capa es «ninguna».
     assert.match(fuente('app/plataforma/haptico.js'), /capa:\s*'bolsillo'/);
     assert.match(fuente('app/plataforma/notificaciones.js'), /capa:\s*'pantalla'/);
-    assert.match(fuente('app/plataforma/salud.js'), /capa:\s*'ninguna'/);
     for (const p of ['ios', 'android']) {
+      // Salud tampoco avisa de nada: solo aporta pasos. Su capa es la misma en las dos
+      // plataformas, que es la mitad de «lo que difiere es el ciclo de vida, no el contrato».
+      assert.match(fuente(`app/plataforma/salud.${p}.js`), /capa:\s*'ninguna'/);
       assert.match(fuente(`app/plataforma/respaldo.${p}.js`), /capa:\s*'ninguna'/);
       // El rótulo también, y no por descuido: `accesibilidad.md` §3 define las capas
       // como capas DE AVISO, y el rótulo no avisa de nada — es permanente y visible a
@@ -151,7 +183,22 @@ describe('El contrato de un módulo de capacidad', () => {
     // La del rótulo es la que más tentaba: podría comprobar si puede arrancar el
     // servicio pidiendo el permiso de notificaciones. Sondear no es pedir.
     const pedir = [/requestPermissionsAsync/, /requestPermission\b/, /\bAlert\.alert\b/, /openSettings/];
-    for (const fichero of ['salud.js', 'haptico.js', 'notificaciones.js', 'respaldo.ios.js', 'respaldo.android.js', 'rotulo.ios.js', 'rotulo.android.js']) {
+    // La de salud de Android es la que más tienta ahora: `requestPermission` está en el
+    // mismo módulo, a dos líneas de la sonda, y el permiso lo concede Health Connect por tipo
+    // de dato. Consultar no es preguntar, y el permiso se pide desde el interruptor de A6P6 y
+    // desde ningún otro sitio. Se busca en el fichero entero a propósito: la llamada existe
+    // ahí y lo que se afirma es que **no está dentro de la sonda**.
+    for (const fichero of ['salud.android.js', 'salud.ios.js', 'haptico.js', 'notificaciones.js', 'respaldo.ios.js', 'respaldo.android.js', 'rotulo.ios.js', 'rotulo.android.js']) {
+      if (fichero === 'salud.android.js') {
+        const texto = fuente('app/plataforma/salud.android.js');
+        const sonda = texto.slice(texto.indexOf('async sonda()'));
+        assert.ok(sonda.includes('async sonda()'), 'salud.android.js no expone una sonda que poder recortar');
+        for (const patron of pedir) {
+          assert.doesNotMatch(sonda, patron, 'app/plataforma/salud.android.js: la sonda pide algo al sistema');
+        }
+        assert.match(texto, /requestPermission/, 'salud.android.js ya no sabe pedir el permiso: el interruptor de A6P6 no tendría a quién pedírselo');
+        continue;
+      }
       const texto = fuente(`app/plataforma/${fichero}`);
       for (const patron of pedir) {
         assert.doesNotMatch(texto, patron, `app/plataforma/${fichero}: la sonda pide algo al sistema`);
@@ -161,12 +208,52 @@ describe('El contrato de un módulo de capacidad', () => {
     assert.match(fuente('app/plataforma/notificaciones.js'), /getPermissionsAsync/);
   });
 
-  test('La sonda de salud declara la capacidad no montada y nombra la fila que la monta', async () => {
-    assert.match(fuente('app/plataforma/salud.js'), /montado:\s*false/);
-    assert.match(fuente('app/plataforma/salud.js'), /fila 42/);
+  test('La sonda de salud dice la verdad de su plataforma', async () => {
+    // **Este caso cambió de verdad con la fila 46, no de redacción.** Hasta ella decía «la
+    // capacidad no está montada y nombra la fila que la monta», y era cierto porque
+    // `salud.js` era un solo módulo que declaraba `montado: false`. Ahora son dos, y lo que
+    // hay que afirmar es que **cada mitad dice lo suyo**: Android monta Health Connect y
+    // contesta montada; iOS no tiene fuente y lo declara nombrando su plataforma.
+    //
+    // La de iOS **se ejecuta de verdad** —no importa nada, ni de Expo ni de la librería
+    // nativa—, que es lo que la convierte en el doble declarado y no en una promesa. La de
+    // Android se lee: importa `react-native-health-connect`, y cargarla aquí ataría la
+    // batería a `node_modules`, que es lo que este repo no admite. Lo que la sonda de Android
+    // contesta con la app de salud delante es de `test/app/`, y está dicho ahí.
+    const ios = await import('../../app/plataforma/salud.ios.js');
+    assert.equal(ios.salud.nombre, 'salud');
+    const respuesta = await ios.salud.sonda();
+    assert.equal(respuesta.montado, false, 'la sonda de iOS dice estar montada, y en iOS no hay ninguna fuente de salud');
+    assert.equal(respuesta.disponible, false);
+    assert.match(respuesta.motivo, /Health Connect/, 'el motivo de iOS no nombra cuál es la fuente de esta fila');
+    assert.match(respuesta.motivo, /Android/, 'el motivo de iOS no dice que la fuente es solo de Android');
+    assert.equal(await ios.creaFuenteDeSalud(), null, 'iOS devuelve una fuente de salud, y no tiene ninguna: el lector lo traduciría a «hay de dónde leer»');
+
+    // Y la de Android, por su fuente: **todas** sus respuestas dicen montada. Que una sola
+    // se dejara `montado: false` sería volver al estado anterior a esta fila justo en el
+    // camino que menos se recorre, que es el del aparato sin app de salud.
+    const android = fuente('app/plataforma/salud.android.js');
+    const sondaDeAndroid = android.slice(android.indexOf('async sonda()'));
+    const respuestas = [...sondaDeAndroid.matchAll(/return \{ montado: (true|false)/g)].map((m) => m[1]);
+    assert.ok(respuestas.length >= 3, `la sonda de Android tiene ${respuestas.length} respuestas y la spec le pide tres: sin app de salud, sin permiso y todo en su sitio`);
+    assert.deepEqual([...new Set(respuestas)], ['true'], 'alguna respuesta de la sonda de Android dice que la capacidad no está montada, y en Android sí lo está');
+    // Y ningún motivo de la sonda difiere el trabajo a otra fila: hasta la 46 el de salud
+    // decía «la monta la fila 42», que era exacto y era el problema. Ahora los tres motivos
+    // nombran algo que quien lee puede arreglar hoy.
+    assert.doesNotMatch(fuente('app/plataforma/salud.android.js').slice(fuente('app/plataforma/salud.android.js').indexOf('MOTIVOS_DE_LA_SONDA = ')), /la monta la fila/, 'un motivo de la sonda de Android sigue difiriendo la fuente a otra fila');
+
+    // Los tres motivos de la sonda de Android son tres y distintos entre sí, porque se
+    // arreglan en tres sitios distintos: instalar la app de salud, conceder el permiso, o
+    // compilar con la dependencia resuelta. Uno solo para los tres los haría indistinguibles.
+    const motivos = [...android.matchAll(/^\s{2}([A-Z_]+): `([^`]+)`,$/gm)].map((m) => m[2]);
+    assert.equal(motivos.length, 3, `la sonda de Android declara ${motivos.length} motivos y son tres`);
+    assert.equal(new Set(motivos).size, 3, 'dos motivos de la sonda de Android dicen lo mismo, y se arreglan en sitios distintos');
+
+    // Y el registro sigue dando de comer a la degradación con la respuesta de iOS, que es la
+    // única de las cinco que hoy llega no montada en una compilación real.
     const { por } = await sondeado(losCinco());
     assert.equal(por('salud').montado, false);
-    assert.match(por('salud').motivo, /fila 42/);
+    assert.match(por('salud').motivo, /Health Connect/);
   });
 
   test('Una sonda que se deja un campo no produce una fila a medias', () => {

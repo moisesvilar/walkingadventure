@@ -11,12 +11,26 @@
 //
 // Eso es §6h en la escala más grande que ha tenido en este repo, y se cierra como se han
 // cerrado las otras: por contrato y con un número. Esta prueba fija el recuento actual y
-// **falla si sube**. No exige que sea cero —no lo es, y las que quedan tienen dueño
-// escrito—: exige que nadie añada una pantalla huérfana más sin que se vea.
+// **falla si sube**.
 //
 // Cuando una fila conecte una pantalla, este número baja y hay que bajarlo aquí a mano.
 // Que haya que tocarlo es la gracia: es lo que convierte conectar una pantalla en un acto
 // con registro, igual que el marcador de `limite-declarado.test.mjs`.
+//
+// ## El 12-ago-2026 el número llegó a cero, y es la primera vez
+//
+// La fila 46 cableó `zurron.jsx` —la última que quedaba— y con ella **el recuento pasa de 1
+// a 0 sobre 33 pantallas**. Es la primera vez desde que existe esta guarda que no hay
+// ninguna pantalla escrita a la que no llegue ningún import, y queda escrito aquí en lugar
+// de leerse como un borrado en un diff: la lista vacía de hoy no es una lista que se dejó de
+// mantener, es el sitio al que la serie 12 → 8 → 1 → 0 quería llegar.
+//
+// Lo que cambia al llegar a cero es qué puede fallar en silencio, y por eso el segundo caso
+// crece en lugar de encogerse: una lista vacía la satisface trivialmente cualquier medición
+// rota —un cierre transitivo que no resuelva ningún import mediría cero pantallas y también
+// mediría cero huérfanas—, así que ahora se afirma también **que se midió**: que hay
+// pantallas que contar, que las raíces existen y que el cierre alcanza de verdad a todas.
+// Sin eso, el cero de hoy sería indistinguible de una prueba apagada.
 //
 // **Nada de esto tiene escenario en `docs/testing.md`**, y es coherente: la batería
 // describe qué hace el juego, no cómo está conectado su código. Va como hueco de batería.
@@ -33,8 +47,10 @@ import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
  * alfabético, igual que la lista de flujos de límite declarado y por lo mismo: si se
  * descubriera sola, añadir una huérfana no costaría nada.
  *
- * Queda **una**, y es `zurron`: necesita la fuente de salud, el motor de pasos y el
- * registro de hechos, que son de la fila 46.
+ * **No queda ninguna.** La última era `zurron`, que necesitaba la fuente de salud, el motor
+ * de pasos y el registro de hechos: la fila 46 trajo las dos primeras, consumió la tercera
+ * —ya la tenían las filas 47 y 50— y montó A2P2 entre la portada y la lista, así que el
+ * cierre transitivo la alcanza desde `App.js` por `antes-de-salir.jsx`.
  *
  * SPEC-044 se llevó las otras siete. Seis eran las del momento «al parar» —`llegada`,
  * `visor`, `ficha`, `lo-que-se-cuenta`, `descarte`, `triangulacion`—, que estaban escritas y
@@ -44,9 +60,7 @@ import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
  * pasa por ella, así que baja de ocho a una y no a dos como se preveía. **El número que se
  * publica es el medido**, no el previsto.
  */
-const HUERFANAS = [
-  'app/pantallas/zurron.jsx',
-];
+const HUERFANAS = [];
 
 /** Las dos raíces desde las que se alcanza todo lo demás. */
 const RAICES = ['app/App.js', 'app/index.js'];
@@ -125,14 +139,31 @@ describe('Las pantallas que nadie puede abrir', () => {
 
   test('El recuento es el medido y no ha subido', () => {
     // El número, en crudo y a la vista. El 10-ago-2026 eran 12 de 32, la fila 43 lo dejó en
-    // 8 y la 44 en **1 de 33**; si alguien lo sube, esto lo dice con las dos cifras delante.
+    // 8, la 44 en 1 de 33 y la **46 en 0 de 33**; si alguien lo sube, esto lo dice con las
+    // dos cifras delante.
     const vistas = alcanzables();
     const todas = todasLasPantallas();
+
+    // Primero, que se midió algo. Con la lista vacía esto deja de ser una comprobación de
+    // cortesía y pasa a ser la mitad que sostiene el cero: un cierre transitivo que no
+    // resolviera ningún import daría cero huérfanas y el caso pasaría sin haber mirado nada.
+    assert.ok(todas.length >= 30, `se han contado ${todas.length} pantallas en app/pantallas/, y son muchas menos de las que hay: la medición está rota`);
+    for (const raiz of RAICES) {
+      assert.equal(vistas.has(raiz), true, `el cierre transitivo no llegó ni a ${raiz}: no se ha medido nada`);
+    }
+    assert.ok(vistas.size > todas.length, `el cierre transitivo alcanzó ${vistas.size} ficheros y hay ${todas.length} pantallas: no ha recorrido los imports`);
+
     const huerfanas = todas.filter((p) => !vistas.has(p));
+    assert.deepEqual(
+      huerfanas,
+      HUERFANAS,
+      `hay ${huerfanas.length} pantallas huérfanas de ${todas.length} y la lista declara ${HUERFANAS.length}`,
+    );
     assert.equal(
       huerfanas.length,
-      HUERFANAS.length,
-      `hay ${huerfanas.length} pantallas huérfanas de ${todas.length} y la lista declara ${HUERFANAS.length}`,
+      0,
+      'el recuento de pantallas huérfanas ha vuelto a subir por encima de cero. Desde la fila 46 el número es 0 de 33 y ese es el sitio ' +
+      'al que llegó la serie 12 → 8 → 1 → 0: una pantalla que nadie puede abrir no está entregada, por muy probada que esté en Node.',
     );
   });
 });

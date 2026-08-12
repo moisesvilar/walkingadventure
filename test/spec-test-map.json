@@ -30183,6 +30183,878 @@
       "fichero": "test/nucleo/donde-estas.test.mjs",
       "caso": "La pantalla recibe el ofrecimiento y sus dos acciones desde quien la monta",
       "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación de Android con Health Connect disponible y el permiso concedido, cuando se sondea la capacidad salud, entonces declara montado: true y disponible: true, sin motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "La sonda de salud dice si se puede contar y no pide ningún permiso",
+      "escenario": "La sonda de salud dice si se puede contar y no pide ningún permiso",
+      "nota": "La mitad de Android se lee y no se carga: salud.android.js importa react-native-health-connect y cargarla ataría la batería a node_modules, que es un criterio duro del repo. Se afirma la rama y la fila que el registro produce con ella."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación de Android con Health Connect no instalado o no disponible, cuando se sondea la capacidad salud, entonces declara montado: true, disponible: false y un motivo que nombra que la app de salud del sistema no está.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "Sin la app de salud del sistema no se puede contar y se dice por qué",
+      "escenario": "Sin la app de salud del sistema no se puede contar y se dice por qué"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación de Android con Health Connect disponible y sin permiso, cuando se sondea la capacidad salud, entonces declara montado: true, disponible: false y un motivo que nombra el permiso, distinto del anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "Con la app de salud y sin permiso el motivo nombra el permiso",
+      "escenario": "Con la app de salud y sin permiso el motivo nombra el permiso"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la sonda de salud, cuando se sondea, entonces no pide ningún permiso: consultar no es preguntar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Ninguna sonda pide un permiso al sistema ni abre un diálogo",
+      "hueco_de_bateria": true,
+      "nota": "RF-INFRA-006 está marcado sin escenario en docs/testing.md. La mitad con escenario es «La sonda de salud dice si se puede contar y no pide ningún permiso», que acota la búsqueda al cuerpo de la sonda; ésta la busca en los siete módulos de plataforma a la vez."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación de iOS, cuando se sondea la capacidad salud, entonces declara montado: false, disponible: false y el motivo dice que la fuente nativa de esta fila es Health Connect y solo Android.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "En iOS no hay de dónde leer los pasos y se declara",
+      "escenario": "En iOS no hay de dónde leer los pasos y se declara",
+      "nota": "Es la única de las cuatro respuestas que se ejecuta de verdad: salud.ios.js no importa nada. Eso es lo que la convierte en doble declarado y no en promesa."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado los ficheros de app/plataforma/, cuando se busca la fuente de salud, entonces hay pareja por sufijo —salud.android.js y salud.ios.js— y las dos exportan exactamente los mismos nombres.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "En iOS no hay de dónde leer los pasos y se declara",
+      "escenario": "En iOS no hay de dónde leer los pasos y se declara",
+      "nota": "Segunda mitad del mismo caso. La otra guarda, que compara todas las parejas del repo a la vez, es «Las dos implementaciones de una pareja exportan exactamente los mismos nombres» en app.test.mjs."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el registro de capacidades, cuando se enumeran, entonces siguen siendo las cinco de siempre y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plataforma.test.mjs",
+      "caso": "Los cuatro módulos de plataforma están y declaran nombre, capa y sonda",
+      "hueco_de_bateria": true,
+      "nota": "El nombre del caso es de SPEC-020 y se conserva para no romper el cruce; lo que enumera son cinco desde SPEC-030 y su fichero de salud es la pareja desde la 46."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el gancho de capacidad ausente, cuando se abre la app con walkingadventure://andamiaje?ausentes=salud, entonces la app funciona entera, la fila de A6P6 sigue a la vista y vale «no», y nada se cae.",
+      "nivel": "@app",
+      "fichero": "test/app/gancho-capacidad-ausente.yaml",
+      "caso": "El gancho de capacidad ausente deja la app entera y la capacidad declarada",
+      "hueco_de_bateria": true,
+      "nota": "Flujo de SPEC-020, que esta fila no toca: lo que cambia es que pedir «salud» ausente ahora tiene que dar lo mismo que una compilación sin fuente, y ese camino entra por el mismo sitio en App.js."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado lo que la app declara pedirle a la app de salud, cuando se enumera, entonces son exactamente dos permisos y ninguno más: READ_DISTANCE y READ_STEPS.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "A la app de salud solo se le piden los metros y los pasos de una ventana",
+      "escenario": "A la app de salud solo se le piden los metros y los pasos de una ventana"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado esos dos permisos, cuando se busca quién los usa, entonces el de distancia alimenta metrosEnVentana y el de pasos alimenta pasosEnVentana: los dos se usan y ninguno está pedido de más.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "A la app de salud solo se le piden los metros y los pasos de una ventana",
+      "escenario": "A la app de salud solo se le piden los metros y los pasos de una ventana"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado lo que la app le pide a la app de salud, cuando se inspecciona, entonces no pide entrenamientos, ni sesiones con ruta, ni frecuencia cardíaca, ni ningún registro del cuerpo, ni nada con recorrido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salud.test.mjs",
+      "caso": "A la app de salud solo se le piden los metros y los pasos de una ventana",
+      "escenario": "A la app de salud solo se le piden los metros y los pasos de una ventana"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el manifiesto fusionado de Android, cuando se revisa, entonces no aparece ACTIVITY_RECOGNITION.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El manifiesto no declara ningún permiso de salud fuera de los dos",
+      "escenario": "El manifiesto no declara ningún permiso de salud fuera de los dos",
+      "nota": "Este caso solo se registra si hay manifiesto fusionado: la guarda no cuenta como verde lo que no pudo mirar."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el manifiesto fusionado de Android, cuando se revisa, entonces no aparece ningún permiso que no esté declarado, y todo lo declarado sigue apareciendo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Todo permiso del manifiesto fusionado está declarado, y todo lo declarado sigue apareciendo",
+      "hueco_de_bateria": true,
+      "nota": "La lista blanca de SPEC-048. Esta fila la corrige: el campo android de un permiso admite una lista desde la iteración 1, y sin normalizar dejaba los dos de salud fuera del blanco sin que se notara, porque app.json los enumera también."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el manifiesto fusionado, cuando se cuentan los receptores que el sistema despierta con la app cerrada, entonces esta fila no añade ninguno, y los tipos de servicio en primer plano siguen siendo solo location.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Nada de esta app se despierta al arrancar el móvil",
+      "hueco_de_bateria": true,
+      "nota": "Rojo ajeno vivo: el receptor de expo-notifications entró con SPEC-023 y no es de esta fila. Lo que esta fila afirma es que no añade ninguno más."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el manifiesto fusionado, cuando se cuentan los tipos de servicio en primer plano, entonces siguen siendo solo location.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El único servicio en primer plano es el de la ubicación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la lista de tareas periódicas y la de módulos de fondo, cuando se leen, entonces siguen exactamente como estaban: los pasos se leen al abrir y con la app cerrada no se lee nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app no declara ninguna tarea periódica que lea con la app cerrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el Info.plist generado de iOS, cuando se revisa, entonces no declara ninguna clave de uso de salud, y NSHealthUpdateUsageDescription sigue sin declararse nunca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El Info.plist generado no declara ninguna clave de uso de salud",
+      "escenario": "El manifiesto no declara ningún permiso de salud fuera de los dos",
+      "nota": "El criterio se cubre con dos casos, uno por artefacto: el bloque de iOS solo se registra si hay Info.plist generado."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el permiso de ubicación, cuando se revisan los permisos que la app solicita, entonces solo pide la ubicación «mientras se usa».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La app no pide el permiso de ubicación permanente",
+      "escenario": "La app no pide el permiso de ubicación permanente"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la marca de agua de la lectura, cuando se busca dónde vive, entonces sigue fuera del estado y del registro de la partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La marca de la última lectura vive fuera del estado de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el manifiesto fusionado de Android, cuando se revisa, entonces declara el filtro de intención de la razón de permisos de salud, y su destino es la actividad principal de la app.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Las dos puertas de la razón de permisos llevan a la actividad principal",
+      "escenario": "Las dos puertas de la razón de permisos llevan a la actividad principal"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una partida abierta y lista, cuando el sistema dispara ese intento, entonces la app abre A6P6 y no la portada.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Con partida abierta, la razón de los permisos abre los ajustes",
+      "escenario": "Con partida abierta, la razón de los permisos abre los ajustes",
+      "nota": "El flujo entra por el enlace al que el plugin traduce el intento, que es el camino real de la app desde la traducción en adelante: am start -a no resuelve el filtro sin CATEGORY_DEFAULT, y el activity-alias exige START_VIEW_PERMISSION_USAGE, que adb no tiene. Los dos límites están medidos y escritos en la cabecera del flujo."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado A6P6 abierta por ese camino, cuando se lee, entonces enseña la fila «Contar los pasos del día a día» y su línea de aviso si procede, sin ningún texto nuevo escrito para esta entrada.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Con partida abierta, la razón de los permisos abre los ajustes",
+      "escenario": "Con partida abierta, la razón de los permisos abre los ajustes"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una instalación recién hecha, sin partida o con el arranque a medias, cuando el sistema dispara ese intento, entonces la app cae al arranque de siempre y no monta A6P6 sobre una partida que no existe.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Sin partida, la razón de los permisos cae al arranque",
+      "escenario": "Sin partida, la razón de los permisos cae al arranque"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado docs/flujo.md, cuando se lee, entonces declara esa entrada con sus dos condiciones escritas en las aristas y verifica-flujo.mjs pasa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "La pantalla de andamiaje no entra en docs/flujo.md y el diagrama sigue en verde",
+      "hueco_de_bateria": true,
+      "nota": "Hueco parcial y declarado: el recuento de aristas y la etiqueta de cada una los comprueba scripts/verifica-flujo.mjs, que no es un caso de node --test y no entra en el recuento de la batería. Lo que sí se afirma aquí es que el diagrama sigue en verde."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una instalación nueva, cuando se abren los ajustes, entonces la fila «Contar los pasos del día a día» está a la vista y vale «no», sin línea de aviso debajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Los pasos de fondo vienen apagados",
+      "escenario": "Los pasos de fondo vienen apagados"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una instalación nueva, cuando se abren los ajustes, entonces la fila está a la vista y su interruptor viene apagado.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Los pasos de fondo vienen apagados",
+      "escenario": "Los pasos de fondo vienen apagados",
+      "nota": "La mitad que necesita dispositivo. Se afirma el estado del interruptor y no la palabra «no»: una fila de interruptor no pinta su valor, medido en wa-pixel."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la fila del interruptor, cuando se toca con la fuente disponible, entonces se pide el permiso de salud en contexto y solo entonces, y nunca al instalar ni al abrir.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "El permiso de salud se pide al encender y denegarlo no se insiste",
+      "escenario": "El permiso de salud se pide al encender y denegarlo no se insiste",
+      "nota": "El flujo concede. Denegar y después conceder no cabe en un solo recorrido: Health Connect acota cuántas veces una app puede preguntar por el mismo tipo de dato. El camino de denegar se afirma contra el doble en @nucleo, con recuento de peticiones."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el permiso concedido, cuando se vuelve a leer la fila sin salir y volver a entrar, entonces vale «sí» y no hay línea de aviso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "El interruptor cambia de valor sin salir y volver a entrar",
+      "escenario": "El interruptor cambia de valor sin salir y volver a entrar"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el permiso denegado, cuando se vuelve a leer la fila, entonces vale «no» y debajo aparece la línea en voz de aplicación, una sola vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Denegar deja el interruptor apagado, se dice una vez y no se reintenta",
+      "escenario": "El permiso de salud se pide al encender y denegarlo no se insiste"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el permiso denegado, cuando se vuelve a los ajustes más tarde, entonces la fila sigue en «no» y no se reintenta pedir el permiso solo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Denegar deja el interruptor apagado, se dice una vez y no se reintenta",
+      "escenario": "El permiso de salud se pide al encender y denegarlo no se insiste",
+      "nota": "Declarado: la mitad @app no cabe en el flujo por el tope de peticiones de Health Connect. Lo que la sostiene sin dispositivo es el recuento de peticiones del doble, que es lo único que permite afirmar una ausencia."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el modo encendido y el permiso revocado después desde los ajustes del sistema, cuando se vuelve a la app y se abren los ajustes, entonces la fila vale «no» y lo dice.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "El interruptor refleja lo que ocurre y nunca lo que se pidió",
+      "escenario": "Un permiso revocado desde el sistema apaga el interruptor y lo dice",
+      "nota": "Declarado: la mitad @app no está en ningún flujo. Revocar obliga a conducir la interfaz de Health Connect, que es una app de terceros cuya navegación no gobierna ni el flujo ni el runner. El mecanismo entero —que el valor pintado es el efectivo y se relee cada vez— sí se afirma aquí y en «El interruptor cambia de valor sin salir y volver a entrar»."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación sin fuente de salud, cuando se toca la fila, entonces no se enciende, no se pide ningún permiso, y la línea que aparece dice que no se puede.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Encender los pasos del día a día sin fuente es imposible",
+      "escenario": "Encender los pasos del día a día sin fuente es imposible"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la fila «Solo de día», que es de otra fila del checklist, cuando se toca, entonces la orquestación de los pasos de fondo no la atiende y lo declara, y no cambia el ajuste ajeno por el camino.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "El interruptor atiende su fila y no la de al lado",
+      "escenario": "El interruptor atiende su fila y no la de al lado"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado un jugador que apaga el modo, cuando lo apaga, entonces dejan de leerse pasos, la reserva queda como estaba, y volver a encenderlo no recupera los kilómetros del tiempo apagado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Apagar el modo no borra ni ejecuta la reserva pendiente",
+      "hueco_de_bateria": true,
+      "nota": "La segunda mitad, la de volver a encender, es «Apagar y volver a encender no recupera los kilómetros del tiempo apagado»."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el núcleo, cuando se busca cómo sabe si el modo está activo, entonces lo recibe como dato de la partida y no consulta ninguna capa de la plataforma.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El núcleo recibe si el modo está activo como dato de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una partida abierta con su mapa levantado, cuando se busca el motor de pasos del mapa activo, entonces existe uno y lo construye la app, con la semilla, el mapa activo y las cuatro áreas de esa partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "El motor se arma con la semilla, el mapa activo y las áreas de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado ese motor, cuando se enumeran sus productores, entonces son los dos que el paquete declara y en su orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "Los productores son los dos que el paquete declara y en su orden",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado ese motor, cuando avanza un paso, entonces lo que produce entra en las áreas vivas de la partida y sobrevive a congelar y volver a abrir.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "Lo que produce un paso entra en las áreas vivas y sobrevive a congelar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una partida sin mapa levantado, cuando se abre la app, entonces no se monta ningún motor, no se acredita ningún metro y se declara por qué.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "Sin mapa levantado no se acredita ningún metro",
+      "escenario": "Sin mapa levantado no se acredita ningún metro",
+      "nota": "Los dos motivos —sin mapa y sin partida— se afirman por separado en «Sin partida abierta el motivo es otro, y por eso son dos y no uno»: uno se cierra levantando un mapa y el otro abriendo una partida."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una partida con dos mapas, cuando se acreditan kilómetros de fondo, entonces van al mapa activo en el momento de abrir la app y la reserva del otro no se toca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "Los kilómetros de fondo no tocan la reserva del mapa que no es el activo",
+      "escenario": "Los metros que la app de salud da al abrir llenan la reserva del mapa activo"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado dos aperturas con la misma semilla, el mismo mapa y los mismos metros leídos, cuando se ejecutan sus pasos, entonces salen los mismos pasos con los mismos números y los mismos efectos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "El contenido de un paso lo decide su número",
+      "escenario": "El contenido de un paso lo decide su número",
+      "nota": "Bloqueante (@determinismo). Por serialización completa del estado y no campo a campo, que es lo único que afirma «idéntico»."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el modo encendido y metros nuevos desde la última lectura, cuando se abre la app, entonces se leen esos metros, se convierten en pasos con el tramo personal y quedan en la reserva del mapa activo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "Los metros que la app de salud da al abrir llenan la reserva del mapa activo",
+      "escenario": "Los metros que la app de salud da al abrir llenan la reserva del mapa activo"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el modo encendido y metros nuevos, cuando se abre la app, entonces se leen y se convierten en pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Con el modo encendido se leen los metros acumulados y se convierten en pasos",
+      "escenario": "Los metros que la app de salud da al abrir llenan la reserva del mapa activo",
+      "nota": "La mitad de la lectura; la del motor y la reserva del mapa activo va en el otro caso."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado dos aperturas seguidas de la app, cuando se leen los pasos en la segunda, entonces no se vuelven a contar los metros ya contados en la primera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Dos aperturas seguidas no cuentan dos veces los mismos metros",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el modo apagado, cuando se abre la app, entonces no se lee nada, no se ejecuta ningún paso y ninguna pantalla lo llama fallo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Los pasos de fondo vienen apagados",
+      "escenario": "Los pasos de fondo vienen apagados"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la app de salud que no responde, cuando se abre la app, entonces el juego sigue igual, la marca de agua no se mueve y ninguna pantalla habla de ello.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La app de salud que no responde no es un fallo y el juego sigue igual",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una lectura que devuelve metros negativos o no numéricos, cuando se procesa, entonces falla nombrando el valor recibido y no se ejecuta ningún paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Una lectura con metros negativos o no numéricos falla nombrando el valor",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una jugadora que no ha abierto la app en tres meses, cuando la abre, entonces la reserva contiene cinco pasos como mucho y el contador ha avanzado cinco.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "La reserva de pasos de fondo tiene tope de cinco",
+      "escenario": "La reserva de pasos de fondo tiene tope de cinco",
+      "nota": "El tope de cinco es la decisión 4 de game-design/quests.md, leída antes de fijar el número: «esos sí se acumulan en una reserva con un máximo de 5 pasos»."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una jugadora que ha andado 0 km en treinta días, cuando abre la app, entonces el mundo no ha avanzado ningún paso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Estar un mes sin salir no acumula mundo pendiente",
+      "escenario": "Estar un mes sin salir no acumula mundo pendiente"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación de desarrollo con el modo encendido, cuando se abre walkingadventure://andamiaje?metrosDeFondo=6000, entonces esos metros se acreditan por el mismo camino que los de una lectura real y dejan reserva puesta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "El gancho acredita por el mismo camino que una lectura real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado ese mismo enlace con el modo apagado o sin fuente, cuando se abre, entonces no se acredita nada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "El gancho respeta el interruptor y no lo salta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el gancho con un valor que no es un número finito y no negativo, cuando se lee, entonces no se acredita nada y se declara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Un valor que no es un número finito y no negativo no acredita nada y se declara",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación de producción, cuando se abre ese mismo enlace, entonces es inerte y no acredita ni un metro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "En producción el gancho de metros es inerte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado pasos de fondo activos y reserva sin vaciar, cuando se pulsa «Ver qué se cuenta hoy», entonces se abre el zurrón y no la lista del día.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "nota": "antes-de-salir.jsx es JSX y lo compila Metro, no Node: se lee y no se carga, y va declarado como tal. Lo que se afirma es quién decide qué, que es donde estaba el defecto."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado pasos de fondo activos y reserva sin vaciar, cuando se pulsa «Ver qué se cuenta hoy», entonces se abre el zurrón y no la lista del día.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón a la vista, cuando se pulsa «Seguir», entonces se abre la lista de lo que hay hoy.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Seguir lleva del zurrón a lo que hay hoy",
+      "escenario": "Seguir lleva del zurrón a lo que hay hoy"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón a la vista, cuando se pulsa «Seguir», entonces se abre la lista de lo que hay hoy.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Seguir lleva del zurrón a lo que hay hoy",
+      "escenario": "Seguir lleva del zurrón a lo que hay hoy"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón ya visto y su reserva vaciada, cuando se vuelve a la portada y se pulsa «Ver qué se cuenta hoy», entonces se abre la lista del día y el zurrón no aparece por segunda vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El zurrón no aparece por segunda vez",
+      "escenario": "El zurrón no aparece por segunda vez"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón ya visto y su reserva vaciada, cuando se vuelve a la portada y se pulsa «Ver qué se cuenta hoy», entonces se abre la lista del día y el zurrón no aparece por segunda vez.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "El zurrón no aparece por segunda vez",
+      "escenario": "El zurrón no aparece por segunda vez",
+      "nota": "Se vuelve a la portada matando la app y reabriéndola, y no con el botón del sistema: docs/flujo.md no declara ninguna arista de A2P3 a A2P1 y lo medido en wa-pixel es que la app se va. Reabrir comprueba además que el vaciado quedó en disco."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado sin reserva que vaciar, cuando se pulsa «Ver qué se cuenta hoy», entonces se abre la lista del día directamente, sin pasar por el zurrón.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El zurrón solo aparece si hay reserva que vaciar",
+      "escenario": "El zurrón solo aparece si hay reserva que vaciar"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el diario, la repisa o los ajustes abiertos, cuando se busca cómo llegar al zurrón, entonces no hay ninguna puerta que lleve a él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Al zurrón no se llega desde ninguna otra pantalla",
+      "escenario": "Al zurrón no se llega desde ninguna otra pantalla"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el diario, la repisa o los ajustes abiertos, cuando se busca cómo llegar al zurrón, entonces no hay ninguna puerta que lleve a él.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Al zurrón no se llega desde ninguna otra pantalla",
+      "escenario": "Al zurrón no se llega desde ninguna otra pantalla"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado app/pantallas/, cuando se calcula el cierre transitivo de imports desde la raíz de la app, entonces no queda ninguna pantalla huérfana: el recuento pasa de una a cero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pantallas-huerfanas.test.mjs",
+      "caso": "El recuento es el medido y no ha subido",
+      "hueco_de_bateria": true,
+      "nota": "Primera vez que el recuento llega a cero desde que existe la guarda. Con la lista vacía el caso crece en lugar de encoger: afirma también que se midió —que hay pantallas que contar, que las raíces existen y que el cierre recorre imports—, porque una medición rota daría cero por el motivo equivocado."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una reserva con pasos que sí produjeron algo narrable, cuando se abre la salida, entonces el zurrón trae de una a cinco entradas, en el orden en que se ejecutaron sus pasos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Las entradas salen en el orden en que se ejecutaron sus pasos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una reserva cuyos pasos no produjeron nada narrable, cuando se abre la salida, entonces no aparece el zurrón, no se hace ninguna llamada y la reserva se vacía igual.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Una reserva con pasos que no produjeron nada se vacía sin pantalla y sin llamada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón en pantalla, cuando se buscan cifras, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El zurrón no enseña ninguna cifra",
+      "hueco_de_bateria": true,
+      "nota": "La mitad de dispositivo se afirma por lo que se puede ver —ninguna palabra de pasos, distancia ni días— y no con un comodín de dígitos: zurron.jsx pone el número del paso como etiqueta accesible de cada entrada, que es lo que las localiza, así que un assertNotVisible de dígitos no puede pasar en ninguna máquina."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón en pantalla, cuando se enumeran sus acciones, entonces hay una sola y ninguna entrada es tocable.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El zurrón tiene una sola acción, la que lo cierra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado un zurrón leído hasta el final, cuando se confirma «Seguir», entonces se anexa el hecho del vaciado al registro y solo entonces la reserva queda vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El vaciado se escribe con el hecho que lo registra, entero o nada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado un zurrón enseñado y una app que se cierra antes de confirmarlo, cuando se vuelve a abrir la salida, entonces el zurrón vuelve con las mismas entradas y la reserva sigue sin vaciarse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El zurrón enseñado y no confirmado vuelve con las mismas entradas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado un zurrón ya confirmado, cuando se confirma otra vez, entonces se declara que ya estaba vaciado y no se anexa un segundo hecho.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Confirmar dos veces el mismo zurrón no anexa dos hechos",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la misma reserva, cuando se compone el zurrón sin narrador y con el doble del narrador, entonces las entradas, su orden, sus sitios y sus pasos son los mismos y solo cambia la piel.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Con narrador y sin él las entradas son las mismas y solo cambia la piel",
+      "hueco_de_bateria": true,
+      "nota": "Bloqueante (@determinismo)."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón sin cobertura, cuando aparece, entonces dice lo mismo que con cobertura y ninguna pantalla menciona la red.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Sin cobertura, la preparación dice lo mismo",
+      "escenario": "Sin cobertura, la preparación dice lo mismo"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado un recorrido en el dispositivo con reserva puesta por el gancho, cuando se pulsa «Ver qué se cuenta hoy», entonces se ve A2P2 y al pulsar «Seguir» se ve la lista de hoy.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "nota": "El flujo se reescribió entero en esta fila: el anterior estaba escrito contra iOS en su tramo de revocación y usaba paso-ajustes, paso-diario y paso-repisa, que nunca existieron. Las puertas reales son las del pie de la portada."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado una compilación sin la dependencia nativa de salud resuelta, cuando se abre la app, entonces arranca entera y la única diferencia es que el interruptor no se puede encender y lo dice.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Encender los pasos del día a día sin fuente es imposible",
+      "escenario": "Encender los pasos del día a día sin fuente es imposible",
+      "nota": "Los tres caminos —iOS, el gancho de capacidad ausente y la compilación sin la dependencia— entran por el mismo sitio en App.js y por eso dan lo mismo: el lector recibe fuente en nulo."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón que no se puede cablear, cuando se monta el momento «antes de salir», entonces se dice nombrando la pieza que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "El zurrón se cablea con la misma llamada y el mismo presupuesto que la preparación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado un estado de permiso que no está en el enumerado, cuando llega, entonces falla nombrándolo, en lugar de tratarse como concedido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Una lectura de salud pide metros o pasos en una ventana, y nada con recorrido",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la partida tras leer los pasos al abrir y tras confirmar el zurrón, cuando se congela, entonces las dos escrituras quedan en disco y volver a abrir la app no las pierde.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "El zurrón no aparece por segunda vez",
+      "escenario": "El zurrón no aparece por segunda vez",
+      "nota": "La mitad de disco: el flujo mata la app y la reabre, así que un vaciado que solo estuviera en memoria haría reaparecer el zurrón."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado app/plataforma/contratos.js, cuando se enumeran los contratos sin llamador, entonces creaLectorDeSalud y creaMarcaDeAgua ya no están en la lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/contratos-sin-llamador.test.mjs",
+      "caso": "El lector de salud y su marca de agua ya tienen llamador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el código que esta fila añade a packages/nucleo/, cuando se busca en él, entonces no aparece Math.random, ni Date.now, ni new Date.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/motor-del-mapa-activo.test.mjs",
+      "caso": "En el motor del mapa activo no aparece ninguna fuente de azar ni de reloj",
+      "hueco_de_bateria": true,
+      "nota": "Esta fila no añade nada a packages/nucleo/, así que lo que se mide es la pieza nueva de la app que arma el motor: es donde la regla se podía romper."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado packages/nucleo/, cuando se revisan sus imports, entonces no importa React Native, ni Expo, ni la dependencia de Health Connect.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Ningún módulo del paquete importa de React Native ni de Expo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado la batería de núcleo, cuando se ejecuta en un clon limpio sin instalar nada, entonces arranca y corre entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/paquete.test.mjs",
+      "caso": "Cualquier módulo del paquete arranca en Node sin instalar ninguna dependencia",
+      "hueco_de_bateria": true,
+      "nota": "Es el criterio que decide cómo se prueba salud.android.js: importa react-native-health-connect, así que se lee y no se carga."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado lo que cruza del lector hacia el núcleo, cuando se inspecciona, entonces son metros, un número, y ninguna ventana, ningún instante y ninguna marca del reloj real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "Del lector de salud al núcleo solo cruzan metros",
+      "escenario": "Del lector de salud al núcleo solo cruzan metros",
+      "nota": "Bloqueante (@privacidad). Con núcleo espía: mirar el estado de después no distingue lo que se pasó de lo que se usó."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado los textos que esta fila toca, cuando se leen, entonces son aptos para menores, ninguno reprocha nada y ninguno dice lo que quien juega se ha perdido.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Sedimentar no se reprocha",
+      "escenario": "Sedimentar no se reprocha"
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado el zurrón entero, cuando se busca qué sale del móvil por su causa, entonces lo único que sale son los huecos inertes de la llamada agrupada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/zurron.test.mjs",
+      "caso": "Del zurrón no sale nada del móvil",
+      "escenario": "Del zurrón no sale nada del móvil",
+      "nota": "Bloqueante (@privacidad). Con el inspector de tráfico saliente en modo estricto: una prueba de privacidad que no mira el tráfico está fingiendo."
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado test/nucleo/pantallas-huerfanas.test.mjs, cuando se ejecuta, entonces la lista declarada está vacía y el recuento medido también, con el cambio anotado en su cabecera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pantallas-huerfanas.test.mjs",
+      "caso": "La lista de pantallas huérfanas es exactamente la declarada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado test/nucleo/piezas-sin-consumidor.test.mjs, cuando se ejecuta, entonces sigue con su lista vacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/piezas-sin-consumidor.test.mjs",
+      "caso": "La lista de bloques sin consumidor es exactamente la que se mide",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado test/nucleo/limite-declarado.test.mjs, cuando se ejecuta, entonces zurron.yaml sigue sin estar en la lista y la columna no sube por esta fila.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/limite-declarado.test.mjs",
+      "caso": "Los flujos que recorren la app de verdad no llevan marcador",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046",
+      "criterio": "Dado app/package.json, cuando se enumeran sus dependencias, entonces react-native-health-connect es la única que esta fila trae, y dice para qué está y qué fila la trajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "app/package.json declara exactamente las dependencias que la spec nombra",
+      "hueco_de_bateria": true,
+      "nota": "La otra mitad de abrir la lista: PERMISOS_DE_SALUD declara qué se le pide a la librería y para qué, y la librería entra por un solo fichero de la app —salud.android.js—, que es lo que impide que acabe en el árbol de iOS."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el manifiesto fusionado de Android, cuando se revisa su uses-sdk, entonces declara minSdkVersion=\"26\". La verificación es sobre el artefacto generado y no sobre la intención.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El suelo de aparatos que la fuente de salud exige está en el artefacto",
+      "escenario": "El suelo de aparatos que la fuente de salud exige está en el artefacto"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el suelo declarado, cuando se busca de dónde sale, entonces sale de un plugin de configuración propio de este repo y sin ninguna dependencia nueva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El plugin dice qué lo arrastra y cuánto cuesta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado ese plugin, cuando se lee, entonces lleva el porqué escrito dentro con el coste medido al lado: Android 7.0 y 7.1.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El plugin dice qué lo arrastra y cuánto cuesta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el intento de razón de permisos de salud, cuando llega a la actividad principal, entonces se reescribe a ACTION_VIEW con walkingadventure://razon-de-permisos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El intento de la razón se traduce a un enlace y no decide nada más",
+      "escenario": "El intento de la razón se traduce a un enlace y no decide nada más"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el Kotlin inyectado, cuando se lee, entonces reescribe esa acción concreta y nada más, y lleva el porqué dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El intento de la razón se traduce a un enlace y no decide nada más",
+      "escenario": "El intento de la razón se traduce a un enlace y no decide nada más"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el lado nativo, cuando se busca lógica de producto en él, entonces no hay ninguna: a dónde ir se decide en JavaScript.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El intento de la razón se traduce a un enlace y no decide nada más",
+      "escenario": "El intento de la razón se traduce a un enlace y no decide nada más"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el MainActivity parcheado, cuando se mira tras el prebuild, entonces el parche está aplicado y se puede leer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El parche del intento está en el MainActivity generado",
+      "hueco_de_bateria": true,
+      "nota": "Este caso solo se registra si el prebuild dejó el MainActivity.kt: app/android/ está gitignorado, y un caso que pasa sin haber mirado el artefacto sería el verde que esta doctrina existe para impedir."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado la app ya abierta con partida lista, cuando el sistema dispara el intento, entonces también se abre A6P6, porque la actividad es singleTask.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El parche del intento está en el MainActivity generado",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre el artefacto: el MainActivity generado tiene que traer onNewIntent además de la llamada del arranque en frío. La mitad de dispositivo no cabe en un flujo, porque disparar el intento por su acción necesita adb."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado las dos puertas que el manifiesto declara hoy, cuando se comprueba cuál de las dos traduce el plugin, entonces las dos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Las dos puertas de la razón de permisos llevan a la actividad principal",
+      "escenario": "Las dos puertas de la razón de permisos llevan a la actividad principal",
+      "nota": "Que las dos estén registradas y apunten a la misma actividad se afirma aquí; que el plugin traduzca las dos, en «El intento de la razón se traduce a un enlace y no decide nada más». Disparar la del activity-alias desde adb es imposible: exige START_VIEW_PERMISSION_USAGE, que es permiso de sistema (SecurityException, medido)."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el enlace walkingadventure://razon-de-permisos, cuando se pregunta quién puede dispararlo, entonces cualquier aplicación del sistema, y eso se declara.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El enlace de la razón de permisos no escribe nada",
+      "escenario": "El enlace de la razón de permisos no escribe nada",
+      "nota": "Lo que lo hace inofensivo es la guarda de partida, que se recorre en test/app/zurron.yaml en los dos estados."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado ese enlace, cuando se busca qué escribe, entonces no escribe nada: navega y solo navega.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El enlace de la razón de permisos no escribe nada",
+      "escenario": "El enlace de la razón de permisos no escribe nada"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado ese enlace, cuando se compara con los dos ganchos de andamiaje, entonces se distingue de ellos por escrito y vive en un módulo propio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "El enlace de la razón de permisos no escribe nada",
+      "escenario": "El enlace de la razón de permisos no escribe nada"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado test/reports/manifiesto-generado.estado.json, cuando se lee tras la tanda que cierre esta fila, entonces dice android.mirado: true y completo: true.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La guarda del manifiesto generado deja constancia de qué pudo mirar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado app/salida/pasos-de-fondo.js, cuando se enumeran los métodos de creaPasosDeFondo, entonces está pide(fila, quiere).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/pasos-de-fondo.test.mjs",
+      "caso": "El interruptor atiende su fila y no la de al lado",
+      "escenario": "El interruptor atiende su fila y no la de al lado"
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado app/plataforma/permisos.js, cuando se lee PERMISOS_QUE_SE_PIDEN, entonces el campo android admite una cadena o una lista.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/app.test.mjs",
+      "caso": "app/package.json declara exactamente las dependencias que la spec nombra",
+      "hueco_de_bateria": true,
+      "nota": "Se contrasta que salud-lectura pide exactamente los dos permisos declarados, normalizando la lista. La guarda del manifiesto fusionado hace la misma normalización desde esta fila: sin ella, la lista blanca dejaba los dos de salud fuera del blanco."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado la app con el cambio puesto, cuando se compila e instala en wa-pixel, entonces compila, instala y arranca.",
+      "nivel": "@app",
+      "fichero": "test/app/zurron.yaml",
+      "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "nota": "No hay ningún caso que compile: lo que lo sostiene es que los artefactos existen y están al día —el manifiesto fusionado con minSdk 26 y el MainActivity parcheado—, y que los flujos de @app corren contra la app instalada. Compilar es un paso del runner, no una prueba."
     }
   ]
 }

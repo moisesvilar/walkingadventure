@@ -224,6 +224,31 @@ describe('Los contratos de plataforma a los que no llega ningún llamador', () =
     );
   });
 
+  test('El lector de salud y su marca de agua ya tienen llamador', () => {
+    // SPEC-046. La lista baja de cuatro entradas a dos, y las dos que salen se afirman por su
+    // nombre en lugar de dejar que el recuento lo cuente: el Rojo 2 de arriba las cazaría si
+    // se hubieran quedado, pero **nada obligaría a que sigan fuera** si alguien las repusiera
+    // «por si acaso». Que salir de la lista sea un acto es la mitad que le faltaba.
+    const enLaLista = CONTRATOS_SIN_LLAMADOR.map((c) => `${c.fichero}::${c.contrato}`);
+    for (const contrato of ['creaLectorDeSalud', 'creaMarcaDeAgua']) {
+      assert.equal(
+        enLaLista.includes(`app/plataforma/lector-de-salud.js::${contrato}`),
+        false,
+        `"${contrato}" ha vuelto a la lista de contratos sin llamador. Lo cableó la fila 46: la fuente de salud es Health Connect y quien lo monta al abrir la app es app/App.js.`,
+      );
+    }
+    // Y tienen llamador de verdad, medido sobre el cierre de imports y no sobre la lista.
+    const vistas = alcanzables();
+    for (const contrato of ['creaLectorDeSalud', 'creaMarcaDeAgua']) {
+      assert.ok(
+        tieneLlamador({ fichero: 'app/plataforma/lector-de-salud.js', constructores: [contrato] }, vistas),
+        `"${contrato}" sigue sin llamador desde app/: la fila 46 lo daba por cableado`,
+      );
+    }
+    // Las dos que quedan son de otras filas, y se nombran para que la bajada tenga cifra.
+    assert.equal(CONTRATOS_SIN_LLAMADOR.length, 2, `la lista de contratos sin llamador tiene ${CONTRATOS_SIN_LLAMADOR.length} entradas y la fila 46 la dejó en 2`);
+  });
+
   test('Cada entrada de la lista nombra un contrato que su fichero exporta, con dueño y motivo', () => {
     assert.ok(CONTRATOS_SIN_LLAMADOR.length > 0, 'la lista está vacía: entonces no puede obligar a nadie, y el día que aparezca un contrato sin cablear no habrá dónde declararlo');
     const vistas = new Set();
