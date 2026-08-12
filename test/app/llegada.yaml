@@ -1,59 +1,86 @@
 # @app — La llegada dentro del móvil (SPEC-032, cableada por SPEC-044).
 #
-# **Este flujo recorre su pantalla, y salió de la columna de límite declarado con la fila
-# 44.** Hasta el 12-ago-2026 no había camino: primero porque `App.js` no montaba la llegada,
-# y después —medido por esta misma batería— porque la capa de llegadas no llegaba a montarse
-# en el dispositivo y ninguna escena podía validar. Las dos cosas están cerradas, y lo que
-# hay aquí es el recorrido de verdad, medido y no supuesto.
+# @limite-declarado
 #
-# **Por dónde entra, que es por donde entra una persona.** Se recorre el arranque entero, se
-# echa a andar desde la portada y **no se toca nada más**: la escena valida sola estando
-# parada dentro del geofence del sitio por el que empieza el mapa, y se pone delante ella
-# sola. Eso no es una comodidad del flujo — es exactamente lo que la spec pide («abrir la app
-# enseña lo que corresponde al sitio donde estás») y lo que hace que la máquina sea un valor
-# y no una pila de navegación. No hay ningún paso provisional al que saltar, y no lo va a
-# haber.
+# Este flujo **no recorre su pantalla**, y vuelve a la columna después de haber salido de
+# ella con la fila 44. El motivo no es que falte camino —lo hay, y es el bueno: quien juega
+# está parada y la escena valida sola— sino que **el flujo no puede garantizar que haya
+# ninguna llegada que validar**. Su verde significa «el límite sigue en pie» y nunca «la
+# llegada está verificada». El porqué medido está en «LÍMITE DECLARADO», unas líneas más
+# abajo.
 #
-# **Qué sitio toca no se puede elegir, así que se afirma la forma que salga.** El sitio por
-# el que empieza el mapa puede ser un núcleo, un servicio o un paraje, y su secuencia es
-# distinta en cada caso: un núcleo trae lo que allí se cuenta y un servicio o un paraje traen
-# la ficha. La primera versión de este flujo daba por hecho el núcleo y era **intermitente**:
-# reproducido 2 de 2 el 12-ago-2026 fallando con «lo-que-se-cuenta is visible» sobre una
-# llegada perfectamente validada en un servicio, con `llegada-secuencia = ficha:encadenado`.
-# La máquina hacía lo correcto; el flujo estaba mal escrito.
+# La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`, y
+# **este flujo la sube de siete a ocho**. Se dice con el número delante porque para eso está
+# esa lista: es la segunda vez en la fila 49 que la columna sube, y las dos veces por medir
+# algo que antes se había supuesto.
 #
-# **Y elegir el sitio no está en la mano de un flujo**, medido: el ancla del mapa no la decide
-# la posición que el flujo pone. Con `setLocation` a `42.4000,-8.7700` antes del arranque, el
-# mapa nace anclado en `42.40,-8.76` —dos tandas, el mismo resultado—, cuando el redondeo de
-# `anclaje()` sobre esa coordenada da `42.40,-8.77`. La causa está localizada:
-# `app/plataforma/ubicacion.js` lee la coordenada del arranque con
-# `getCurrentPositionAsync({ accuracy: Balanced })`, y un fijo simulado no gobierna esa
-# lectura. Así que se afirma **lo que es cierto en las tres formas** y, dentro de cada una, lo
-# suyo entero. Queda escalado.
+# ── LÍMITE DECLARADO, con el motivo medido ────────────────────────────────────
 #
-# **Las marcas de un punto se afirman, y hubo que arreglarlas para eso.** Al escribir este
-# flujo se midió que `momento-estado`, `llegada-estado`, `llegada-secuencia` y las tres del
-# momento en marcha estaban en el árbol del sistema —`adb shell uiautomator dump` las traía
-# con su descripción— y **Maestro las descartaba**: `maestro hierarchy` sobre la misma
-# pantalla entregaba cuatro nodos y `assertVisible` fallaba. La causa era la esquina: en una
-# pantalla a sangre, una marca en `[0,0]` cae debajo de la ventana de la barra de estado. Se
-# arregló bajándolas del borde, y desde entonces este flujo las afirma. Queda escrito porque
-# es la diferencia entre una marca y un comentario: la que ninguna prueba puede leer no es
-# una marca.
+# **Lo medido, el 12-ago-2026, tres ejecuciones de tres:** el flujo muere siempre en la misma
+# línea, `Assertion is false: id: llegada is visible`. Leído el aparato justo después:
 #
-# **Lo que este flujo NO puede comprobar, y por qué:**
+# - La salida **se abre bien**: `situacion: abierta-con-rotulo`, punto de partida
+#   `42.4089967,-8.7477`.
+# - El momento en marcha se monta entero: `en-marcha-elementos = lamina,marca-posicion`, la
+#   lámina pinta y **no hay ninguna avería** — ni `en-marcha-sin-cablear` ni
+#   `llegadas-sin-cablear`.
+# - `marca-posicion = del-mapa:-633,-112:ambiguo`: el sensor entrega y el detector clasifica.
+# - Y lo que lo explica: **`salida-sitio = sin-sitio`** y `salida-cadencia = por-distancia`.
+#   Quien juega no está dentro del geofence de nada.
+# - `llegadas: 0 validadas` en el estado. La semilla del mundo era `V9RTPAA7Q4Y4YNAF`.
+#
+# **Nada de lo que la fila 49 toca está roto.** Lo que ocurre es que este flujo daba por
+# hecho que el sitio por el que empieza el mapa cae bajo los pies de quien juega, y el mundo
+# no lo garantiza: el ancla sale de donde esté el GPS del emulador al arrancar, y alrededor
+# de esa coordenada puede no haber ningún sitio a menos del radio del geofence.
+#
+# **Por qué pasaba antes y por qué el verde de la fila 44 no era reproducible.** Aquella fila
+# lo midió con el GPS del emulador donde hubiera quedado entonces, y salió sitio debajo: tres
+# tandas de 117 s, 126 s y 119 s. Ahora el aparato se ha movido dos kilómetros conduciendo
+# otro recorrido y no lo hay. **Un flujo cuyo verde depende de dónde quedó el aparato la
+# última vez no es una prueba**, y esa es la parte que se cierra aquí. La cabecera vieja ya
+# había aprendido la mitad de la lección —«qué sitio toca no se puede elegir, así que se
+# afirma la forma que salga»— y le faltaba el caso anterior: **que puede no haber ninguna**.
+#
+# **Y no se arregla desde dentro de un flujo, medido:** para garantizar una llegada habría
+# que poner el aparato donde el mapa tenga un sitio debajo, y `setLocation` de Maestro **sale
+# con código 0 y no mueve nada** —medido el 11 y el 12-ago-2026, y está escrito en
+# `test/app/en-marcha.yaml` con la corrección de su porqué—. `adb emu geo fix` sí mueve, pero
+# un flujo de Maestro no tiene manera de invocar un comando del sistema. **Tampoco se arregla
+# esperando más**: no es espera, son tres ejecuciones con `salida-sitio = sin-sitio`, y
+# alargar el plazo solo haría que tardara más en decir lo mismo.
+#
+# **Lo que este flujo sí recorría y no se pierde.** Que la salida se abre, que el momento en
+# marcha se monta sin avería, que el módulo de ubicación está montado, la cadencia vigente y
+# el sitio bajo la marca **no dependen de que haya sitio debajo**, así que se han trasladado
+# a `test/app/en-marcha.yaml`, que recorre de verdad y está en la lista de los que no llevan
+# marcador. Aquí habrían tenido que colgar de una condición —un flujo de límite declarado no
+# puede afirmar nada fuera de ella— y eso los habría convertido en un verde que no verifica.
+#
+# **Qué levantaría el límite**, para que quede escrito y no haya que volver a medirlo: que
+# Maestro llegue a mover el aparato, o una manera de sembrar una partida con una llegada ya
+# validada —que es la deuda que §6z tiene fichada sin dueño—. Cualquiera de las dos deja el
+# cuerpo de abajo ejecutándose sin tocar una línea de este fichero.
+#
+# **Lo que este flujo NO puede comprobar aunque se levante el límite, y por qué:**
 #
 # - **Que la pantalla no se encienda estando el móvil bloqueado en el bolsillo.** Maestro no
-#   ve el estado de la pantalla del sistema. Lo que sí se comprueba es la mitad
-#   automatizable: que la escena aparece **sin haber tocado nada**, y que lo que emite la
-#   llegada es la lista vacía de `LO_QUE_UNA_LLEGADA_EMITE`, en el núcleo.
-# - **Que el háptico no vibre.** El simulador no vibra; es `@manual` y está en
-#   `docs/testing.md`.
+#   ve el estado de la pantalla del sistema. La mitad automatizable —que lo que una llegada
+#   emite es la lista vacía de `LO_QUE_UNA_LLEGADA_EMITE`— se afirma en el núcleo.
+# - **Que el háptico no vibre.** El simulador no vibra; es `@manual`.
 # - **El visor.** Sin lector de recursos binarios cableado toda llegada se resuelve como
-#   ficha —`llegada-estado` dice `ficha` en el aparato—, así que el visor no se abre nunca
-#   hoy. Es el límite que `test/app/visor.yaml` declara, y no es de este flujo.
-# - **Qué forma va a tener la llegada.** Se afirma la que salga, entera, y que sea una de las
-#   tres declaradas: una cuarta forma pondría el flujo rojo en la línea que las enumera.
+#   ficha, así que el visor no se abre nunca hoy. Es el límite que `test/app/visor.yaml`
+#   declara, y no es de este flujo.
+# - **Qué forma va a tener la llegada.** El cuerpo afirma la que salga, entera, y que sea una
+#   de las tres declaradas: una cuarta forma pondría el flujo rojo en la línea que las
+#   enumera. Esa parte de la lección de la fila 44 sigue en pie y es buena.
+#
+# **Las marcas de un punto se afirman, y hubo que arreglarlas para eso.** Al escribir la
+# versión anterior se midió que `momento-estado`, `llegada-estado`, `llegada-secuencia` y las
+# tres del momento en marcha estaban en el árbol del sistema y **Maestro las descartaba**: en
+# una pantalla a sangre, una marca en `[0,0]` cae debajo de la ventana de la barra de estado.
+# Se arregló bajándolas del borde. Queda escrito porque es la diferencia entre una marca y un
+# comentario: la que ninguna prueba puede leer no es una marca.
 
 # Los casos, tal y como los cita `test/spec-test-map.json`:
 #   «La escena queda disponible y espera»
@@ -63,174 +90,27 @@
 #
 appId: com.walkingadventure.app
 ---
-# El arranque entero, que es por donde entra una persona. Deja la partida recién nacida con
-# su mundo levantado alrededor de donde está.
-- runFlow:
-    file: arranque.yaml
+- launchApp:
+    clearState: true
 
-# ── A2P1 · La portada, y echarse a andar ───────────────────────────────────────
-- assertVisible:
-    id: 'portada'
-- assertVisible:
-    id: 'salir-sin-mas'
-- tapOn:
-    id: 'salir-sin-mas'
-
-# ── A3P1 · En marcha ───────────────────────────────────────────────────────────
-#
-# Abrir la salida arranca el servicio en primer plano y pide una posición puntual, así que
-# se espera en vez de afirmar a la primera: es espera, no lógica.
-- extendedWaitUntil:
-    visible:
-      id: 'en-marcha'
-    timeout: 30000
-# El momento se montó de verdad, y la capa de llegadas también: si no se hubiera podido
-# montar, la salida no se habría abierto y la portada diría `llegadas-sin-cablear`.
-- assertNotVisible:
-    id: 'en-marcha-sin-cablear'
-- assertNotVisible:
-    id: 'llegada-sin-cablear'
-- assertVisible:
-    id: 'mapa-lamina'
-# El sensor está montado, y la cadencia y el sitio bajo la marca se pueden leer: son las tres
-# marcas del montaje, y sin ellas el cambio de muestreo solo se podría afirmar sobre la
-# función pura del paquete, nunca sobre el aparato.
-- assertVisible:
-    id: 'ubicacion-estado'
-    text: 'montado'
-- assertVisible:
-    id: 'salida-cadencia'
-- assertVisible:
-    id: 'salida-sitio'
-
-# ── La escena valida sola y espera ─────────────────────────────────────────────
-#
-# **Aquí no se toca nada.** Validar es un estado y nunca un gesto: quien juega está parada
-# dentro del geofence del sitio por el que empieza el mapa, se cumple la permanencia y la
-# escena se pone delante ella sola. Medido: veintitrés segundos desde que se abre la salida.
-# El plazo es generoso a propósito —el fijo del emulador llega cada cinco segundos y la
-# ventana de parada necesita cubrirse—, y sigue siendo espera y no lógica.
-- extendedWaitUntil:
-    visible:
-      id: 'llegada'
-    timeout: 90000
-- assertVisible:
-    id: 'llegada-montada'
-# El momento del sistema de diseño es «al parar», y la secuencia trae su forma dentro.
-- assertVisible:
-    id: 'momento-estado'
-    text: 'al-parar'
-- assertVisible:
-    id: 'llegada-estado'
-- assertVisible:
-    id: 'llegada-secuencia'
-
-# ── La forma de la llegada es una de las tres declaradas ───────────────────────
-#
-# Esta línea es la que impide que las ramas de abajo se salten en silencio: si la pantalla no
-# fuera ninguna de las tres, aquí se pone rojo en vez de pasar sin haber afirmado nada de lo
-# que hay debajo. Es la misma trampa que §6w describe, y se cierra antes de ramificar.
-- assertVisible: '.*se habla de.*|.*En realidad:.*|.*Esto todavía no está dibujado\..*'
-
-# ── A4P5 · Lo que aquí se cuenta, cuando el sitio es un núcleo ─────────────────
-#
-# Sin haber venido a nada, **la llegada entera es lo que allí se cuenta**: es el paso
-# encadenado único de la secuencia, y el antetítulo nombra el sitio.
+# La guarda del límite: con el estado limpio la app abre en el arranque y no hay ninguna
+# llegada esperando, porque para que la haya hace falta una salida abierta **y** un sitio
+# bajo los pies. Se condiciona sobre `llegada`, que es el identificador de la propia
+# pantalla y no el de ninguna puerta de desarrollo: la máquina de una salida existe y
+# funciona —`test/app/en-marcha.yaml` la recorre—, y lo que falta no es camino.
 - runFlow:
     when:
-      visible:
-        id: 'lo-que-se-cuenta'
+      notVisible:
+        id: 'llegada'
     commands:
-      # La secuencia de un núcleo sin beat es un solo paso encadenado, y es este.
       - assertVisible:
-          id: 'llegada-secuencia'
-          text: 'lo-que-se-cuenta:encadenado'
-      - assertVisible: '.*se habla de'
-      - assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
-      # Sin nada que se cuente de la jugadora, la sección «Y de ti» no existe: no se enseña
-      # vacía, porque enseñarla sería un marcador de reputación con otras palabras.
+          id: 'arranque'
       - assertNotVisible:
-          id: 'lo-que-se-cuenta-de-ti'
-      # Y un núcleo no lleva ficha: la ficha es lo que hay cuando no se ha venido a nada y el
-      # sitio no es un pueblo.
-      - assertNotVisible:
-          id: 'ficha-texto'
+          id: 'llegada'
 
-# ── A4P7 · La ficha, cuando el sitio es un servicio o un paraje ────────────────
-#
-# La otra mitad del mismo escenario, y la que la primera versión de este flujo daba por
-# imposible: la ficha dice el nombre de fantasía, qué es en realidad y que no se ha venido a
-# nada, sin llamarlo error ni falta. Y desde ella cuelga la acción discreta del descarte.
-- runFlow:
-    when:
-      visible:
-        id: 'ficha-texto'
-    commands:
-      # La de un servicio o un paraje a los que no se ha venido a nada, también uno solo.
-      - assertVisible:
-          id: 'llegada-secuencia'
-          text: 'ficha:encadenado'
-      - assertVisible: '.*En realidad:.*'
-      - assertNotVisible: 'Reintentar'
-      - assertNotVisible: 'Descargar'
-      - assertNotVisible:
-          id: 'lo-que-se-cuenta'
-      # La puerta de A4P8, que es de donde cuelga el primer toque del descarte. Aquí solo se
-      # comprueba que está: el gesto entero es de `test/app/descarte.yaml`.
-      - assertVisible:
-          id: 'ficha-descartar'
-      - assertVisible: '.*Este sitio no pega.*'
-
-# ── El hueco declarado, cuando el paso vigente es un beat ──────────────────────
-#
-# Un paso sin pantalla **se enseña con su nombre, no se salta**: es el patrón del telón de la
-# fila 48 y desaparece cuando llegue la 49. Se afirma aquí porque un micro-encuentro mandado
-# por la cola produce beat también en una salida sin aventura aceptada.
-- runFlow:
-    when:
-      visible:
-        id: 'llegada-hueco'
-    commands:
-      - assertVisible: '.*Esto todavía no está dibujado\..*'
-
-# ── Ninguna de estas pantallas se navega ───────────────────────────────────────
-# No hay barra, no hay flecha de atrás entre pasos y no hay manera de saltar al siguiente.
-- assertNotVisible:
-    id: 'barra-de-pestanas'
-- assertNotVisible:
-    id: 'cabecera'
-- assertNotVisible:
-    id: 'boton-atras'
-- assertNotVisible:
-    id: 'saltar'
-- assertNotVisible:
-    id: 'control-de-zoom'
-# Y el mapa no está: al parar, el mapa no se pinta.
-- assertNotVisible:
-    id: 'mapa-lamina'
-
-# ── Ninguna cifra ──────────────────────────────────────────────────────────────
-# Ni de distancia, ni de tiempo, ni de ritmo, ni de progreso, ni de reputación.
-- assertNotVisible:
-    id: 'kilometros'
-- assertNotVisible:
-    id: 'porcentaje-de-aventura'
-- assertNotVisible: '.*\d+\s*%.*'
-- assertNotVisible: '.*\d+\s*(km|kcal|min|minutos)\b.*'
-
-# ── «Seguir» es la única acción, y cierra la llegada ───────────────────────────
-#
-# **Y una parada puede validar más de una llegada**, que es lo que se descubrió midiendo:
-# el núcleo y su servicio caen a pocos metros el uno del otro, así que los dos geofences se
-# solapan y los dos validan en la misma parada. Al cerrar la primera **se ofrece la segunda
-# sin pasar por el momento en marcha**, que es lo que la spec pide: la escena que espera
-# manda sobre todo lo demás, y el mapa no vuelve hasta que no queda ninguna.
-- assertVisible:
-    id: 'llegada-seguir'
-- tapOn:
-    id: 'llegada-seguir'
-
-# Si había otra esperando, aquí está: sin mapa debajo y sin haber pasado por en marcha.
+# El flujo de verdad, a la espera de una tanda en la que haya sitio bajo los pies. Empieza
+# con la escena ya delante: llegar hasta ella es exactamente lo que no se puede garantizar,
+# y **no se toca nada para conseguirlo** — validar es un estado y nunca un gesto.
 - runFlow:
     when:
       visible:
@@ -238,40 +118,164 @@ appId: com.walkingadventure.app
     commands:
       - assertVisible:
           id: 'llegada-montada'
+      # El momento del sistema de diseño es «al parar», y la secuencia trae su forma dentro.
+      - assertVisible:
+          id: 'momento-estado'
+          text: 'al-parar'
+      - assertVisible:
+          id: 'llegada-estado'
+      - assertVisible:
+          id: 'llegada-secuencia'
+
+      # ── La forma de la llegada es una de las tres declaradas ───────────────────────
+      #
+      # Esta línea es la que impide que las ramas de abajo se salten en silencio: si la
+      # pantalla no fuera ninguna de las tres, aquí se pone rojo en vez de pasar sin haber
+      # afirmado nada de lo que hay debajo. Es la misma trampa que §6w describe, y se cierra
+      # antes de ramificar. La tercera forma es la escena de un beat, que desde SPEC-049
+      # tiene pantalla: el hueco declarado que había en su sitio ya no existe.
+      - assertVisible: '.*se habla de.*|.*En realidad:.*'
+
+      # ── A4P5 · Lo que aquí se cuenta, cuando el sitio es un núcleo ─────────────────
+      #
+      # Sin haber venido a nada, **la llegada entera es lo que allí se cuenta**: es el paso
+      # encadenado único de la secuencia, y el antetítulo nombra el sitio.
+      - runFlow:
+          when:
+            visible:
+              id: 'lo-que-se-cuenta'
+          commands:
+            - assertVisible:
+                id: 'llegada-secuencia'
+                text: 'lo-que-se-cuenta:encadenado'
+            - assertVisible: '.*se habla de'
+            - assertVisible: 'Queda anotado en tu diario, con el sitio y el momento.'
+            # Sin nada que se cuente de la jugadora, la sección «Y de ti» no existe: no se
+            # enseña vacía, porque enseñarla sería un marcador de reputación con otras
+            # palabras.
+            - assertNotVisible:
+                id: 'lo-que-se-cuenta-de-ti'
+            # Y un núcleo no lleva ficha: la ficha es lo que hay cuando no se ha venido a
+            # nada y el sitio no es un pueblo.
+            - assertNotVisible:
+                id: 'ficha-texto'
+
+      # ── A4P7 · La ficha, cuando el sitio es un servicio o un paraje ────────────────
+      - runFlow:
+          when:
+            visible:
+              id: 'ficha-texto'
+          commands:
+            - assertVisible:
+                id: 'llegada-secuencia'
+                text: 'ficha:encadenado'
+            - assertVisible: '.*En realidad:.*'
+            - assertNotVisible: 'Reintentar'
+            - assertNotVisible: 'Descargar'
+            - assertNotVisible:
+                id: 'lo-que-se-cuenta'
+            # La puerta de A4P8, que es de donde cuelga el primer toque del descarte. Aquí
+            # solo se comprueba que está: el gesto entero es de `test/app/descarte.yaml`.
+            - assertVisible:
+                id: 'ficha-descartar'
+            - assertVisible: '.*Este sitio no pega.*'
+
+      # ── A4P3 · La escena de un beat, cuando el paso vigente es el suyo ─────────────
+      #
+      # El hueco declarado que la fila 44 dejó aquí ya no está: la fila 49 lo sustituyó por
+      # la pantalla. Se afirma la escena, no el hueco.
+      - runFlow:
+          when:
+            visible:
+              id: 'escena'
+          commands:
+            - assertVisible:
+                id: 'escena-estado'
+                text: 'escena'
+            - assertVisible:
+                id: 'escena-texto'
+            - assertVisible:
+                id: 'escena-accion'
+            - assertVisible:
+                id: 'escena-tamano-texto'
+            - assertNotVisible:
+                id: 'llegada-hueco'
+
+      # ── Ninguna de estas pantallas se navega ───────────────────────────────────────
+      - assertNotVisible:
+          id: 'barra-de-pestanas'
+      - assertNotVisible:
+          id: 'cabecera'
+      - assertNotVisible:
+          id: 'boton-atras'
+      - assertNotVisible:
+          id: 'saltar'
+      - assertNotVisible:
+          id: 'control-de-zoom'
+      # Y el mapa no está: al parar, el mapa no se pinta.
       - assertNotVisible:
           id: 'mapa-lamina'
-      - assertVisible: '.*se habla de.*|.*En realidad:.*|.*Esto todavía no está dibujado\..*'
 
-# Se atienden las que queden. El tope es de la prueba y no del juego: una parada no valida
-# seis llegadas ni de lejos, y un bucle sin tope escondería una escena que no se cierra.
-- repeat:
-    times: 6
-    commands:
+      # ── Ninguna cifra ──────────────────────────────────────────────────────────────
+      - assertNotVisible:
+          id: 'kilometros'
+      - assertNotVisible:
+          id: 'porcentaje-de-aventura'
+      - assertNotVisible: '.*\d+\s*%.*'
+      - assertNotVisible: '.*\d+\s*(km|kcal|min|minutos)\b.*'
+
+      # ── «Seguir» es la única acción, y cierra la llegada ───────────────────────────
+      #
+      # **Y una parada puede validar más de una llegada**: el núcleo y su servicio caen a
+      # pocos metros el uno del otro, así que los dos geofences se solapan y los dos validan
+      # en la misma parada. Al cerrar la primera **se ofrece la segunda sin pasar por el
+      # momento en marcha**, que es lo que la spec pide.
+      - assertVisible:
+          id: 'llegada-seguir'
       - tapOn:
           id: 'llegada-seguir'
-          # Opcional porque es una carrera y no una afirmación: entre que se comprueba que
-          # queda escena y que se toca, la anterior puede haberse cerrado ya y el botón deja
-          # de estar. Lo que de verdad se exige —que no quede ninguna— se afirma abajo, con
-          # el momento en marcha delante; aquí solo se atiende lo que haya.
-          optional: true
 
-# ── El móvil vuelve al bolsillo ────────────────────────────────────────────────
-# Cerradas todas, debajo está el momento en marcha y no una pantalla anterior.
-- extendedWaitUntil:
-    visible:
-      id: 'en-marcha'
-    timeout: 30000
-- assertVisible:
-    id: 'mapa-lamina'
-- assertNotVisible:
-    id: 'lo-que-se-cuenta'
-- assertNotVisible:
-    id: 'ficha-texto'
+      # Si había otra esperando, aquí está: sin mapa debajo y sin haber pasado por en marcha.
+      - runFlow:
+          when:
+            visible:
+              id: 'llegada'
+          commands:
+            - assertVisible:
+                id: 'llegada-montada'
+            - assertNotVisible:
+                id: 'mapa-lamina'
 
-# ── Pararse en el mismo sitio no tiene consecuencias ───────────────────────────
-# Se sigue parada donde estaba y la llegada ya está cerrada: no se vuelve a ofrecer en la
-# misma salida, y nada se enciende por seguir pisándola.
-- assertNotVisible:
-    id: 'llegada'
-- assertNotVisible:
-    id: 'notificacion'
+      # Se atienden las que queden. El tope es de la prueba y no del juego: una parada no
+      # valida seis llegadas ni de lejos, y un bucle sin tope escondería una escena que no se
+      # cierra.
+      - repeat:
+          times: 6
+          commands:
+            - tapOn:
+                id: 'llegada-seguir'
+                # Opcional porque es una carrera y no una afirmación: entre que se comprueba
+                # que queda escena y que se toca, la anterior puede haberse cerrado ya y el
+                # botón deja de estar.
+                optional: true
+
+      # ── El móvil vuelve al bolsillo ────────────────────────────────────────────────
+      # Cerradas todas, debajo está el momento en marcha y no una pantalla anterior.
+      - extendedWaitUntil:
+          visible:
+            id: 'en-marcha'
+          timeout: 30000
+      - assertVisible:
+          id: 'mapa-lamina'
+      - assertNotVisible:
+          id: 'lo-que-se-cuenta'
+      - assertNotVisible:
+          id: 'ficha-texto'
+
+      # ── Pararse en el mismo sitio no tiene consecuencias ───────────────────────────
+      # Se sigue parada donde estaba y la llegada ya está cerrada: no se vuelve a ofrecer en
+      # la misma salida, y nada se enciende por seguir pisándola.
+      - assertNotVisible:
+          id: 'llegada'
+      - assertNotVisible:
+          id: 'notificacion'

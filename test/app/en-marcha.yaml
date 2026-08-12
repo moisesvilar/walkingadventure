@@ -114,6 +114,33 @@ appId: com.walkingadventure.app
     id: 'marca-posicion'
 - assertVisible: 'del-mapa:.*'
 
+# ── La máquina de la salida, montada de verdad ─────────────────────────────────
+#
+# **Estas cuatro afirmaciones vienen de `test/app/llegada.yaml`, y su traslado es de la fila
+# 49.** Aquel flujo volvió a la columna de límite declarado porque no puede garantizar que
+# haya ninguna llegada que validar —el ancla del mapa sale de donde esté el GPS del emulador
+# y puede no haber ningún sitio bajo los pies—, y un flujo de límite no puede afirmar nada
+# fuera de una condición. Pero **estas cuatro no dependen de eso**: son ciertas haya sitio
+# debajo o no, y aquí se recorren de verdad.
+#
+# La capa de llegadas se montó: si no se hubiera podido montar, la salida no se habría
+# abierto y la portada diría `llegadas-sin-cablear` debajo de la acción que no pudo.
+- assertNotVisible:
+    id: 'llegadas-sin-cablear'
+# El módulo de ubicación, montado. Sin él no habría marca que mover.
+- assertVisible:
+    id: 'ubicacion-estado'
+    text: 'montado'
+# La cadencia vigente de la suscripción y el sitio bajo la marca. **Se afirma que están, no
+# qué valor traen**: `salida-sitio` dice `sin-sitio` cuando no hay ningún geofence debajo y
+# el nombre del sitio cuando lo hay, y `salida-cadencia` cambia de `por-distancia` a
+# `por-tiempo` con uno cerca. Atar el flujo a uno de los dos valores es exactamente lo que
+# hacía que `llegada.yaml` pasara o fallara según dónde quedara el aparato la última vez.
+- assertVisible:
+    id: 'salida-cadencia'
+- assertVisible:
+    id: 'salida-sitio'
+
 # ── Ni un control tocable ──────────────────────────────────────────────────────
 # Los controles que el momento prohíbe son los identificadores que tendría que declarar
 # quien los añadiese, y su ausencia es la entrega.

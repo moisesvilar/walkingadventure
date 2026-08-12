@@ -45,9 +45,10 @@ import { fuente } from './mundo-de-prueba.mjs';
  * - `ajustes.yaml` y `empezar-de-nuevo.yaml` **salieron de esta lista con la fila 43**,
  *   que montó el momento de consulta: se entra por `puerta-ajustes`, que es la del pie de
  *   la portada, y desde ahí a A6P7. Recorrido medido en `wa-pixel` el 10-ago-2026.
- * - `llegada.yaml` **salió de esta lista con la fila 44**, que cableó la máquina de una
- *   salida: la escena valida sola y la pantalla se recorre entera. Recorrido medido en
- *   `wa-pixel` el 12-ago-2026, 107 s y 113 s en dos tandas seguidas.
+ * - `llegada.yaml` salió de esta lista con la fila 44 y **ha vuelto con la 49**: el motivo
+ *   entero está más abajo, con su medida. Lo que aquella fila cableó sigue en pie —la máquina
+ *   de una salida existe y funciona—; lo que no se sostenía era que hubiera siempre una
+ *   llegada que validar.
  * - `en-marcha.yaml` **salió de esta lista con la fila 48**, que cableó el módulo de
  *   ubicación y el rótulo del sistema: «Salir a andar sin más» abre una salida de verdad y
  *   deja el momento en marcha en pantalla. Recorrido medido en `wa-pixel` el 11-ago-2026,
@@ -64,15 +65,17 @@ import { fuente } from './mundo-de-prueba.mjs';
  * destapó, se volvió a medir el 12-ago-2026 en `wa-pixel` y el número es siete. **El que se
  * publica es el medido, no el previsto, y las dos veces.**
  *
- * - `llegada.yaml` **sale**: recorre el arranque entero, echa a andar desde la portada y la
- *   escena valida sola estando parada dentro del geofence del sitio por el que empieza el
- *   mapa —veintitrés segundos—, sin tocar nada. Recorre A4P5 entera, la ausencia de
- *   navegación y de cifras, y el «Seguir» que devuelve al momento en marcha. **Ramifica sobre
- *   la forma que salga** —lo que allí se cuenta, la ficha o el hueco declarado— porque qué
- *   sitio toca no lo decide el flujo: su primera versión daba por hecho el núcleo y era
- *   intermitente. Y atiende las escenas que queden, porque una parada valida más de una
- *   llegada cuando dos geofences se solapan. Medido tres veces seguidas: **117 s, 126 s y
- *   119 s**. Un flujo que tarda diez segundos no ha recorrido nada, y este recorre.
+ * - `llegada.yaml` **salió** —y **volvió con la fila 49**, por lo que dice el bloque de abajo;
+ *   esto queda como lo que aquella fila midió y no como lo que vale hoy—: recorría el arranque
+ *   entero, echaba a andar desde la portada y la escena validaba sola estando parada dentro
+ *   del geofence del sitio por el que empieza el mapa —veintitrés segundos—, sin tocar nada.
+ *   Recorría A4P5 entera, la ausencia de navegación y de cifras, y el «Seguir» que devuelve al
+ *   momento en marcha. **Ramificaba sobre la forma que salga** —lo que allí se cuenta, la
+ *   ficha o el hueco declarado— porque qué sitio toca no lo decide el flujo: su primera
+ *   versión daba por hecho el núcleo y era intermitente. Medido tres veces seguidas: **117 s,
+ *   126 s y 119 s**. Lo que faltaba por aprender es que **eso solo era cierto con el aparato
+ *   donde estaba**: la lección de «afirma la forma que salga» tenía un caso anterior sin
+ *   cubrir, que puede no salir ninguna.
  * - `descarte.yaml` **se queda**, y el motivo que llevaba escrito era falso: decía que no
  *   había puerta hasta A4P8, y sí la hay —`ficha-descartar` está en la ficha, vista en el
  *   aparato, cuando el sitio de arranque es un servicio o un paraje—. Lo que no se puede es
@@ -87,10 +90,26 @@ import { fuente } from './mundo-de-prueba.mjs';
  * historia vieja —«falta `paso-llegada` en App.js»—, que era falsa desde que la máquina
  * existe: un límite declarado por un motivo que ya no es el suyo es peor que no declararlo.
  *
- * **La fila 49 la deja en siete, y sin sacar a nadie.** Su encargo preveía siete → seis
- * sacando `escena.yaml`, y lo medido es que no puede salir. `telon.yaml` estuvo dentro
- * durante media fila con un motivo que resultó falso, y sale antes de commitearse; queda
- * escrito porque la equivocación es la parte útil:
+ * **La fila 49 la deja en ocho, y la que entra es `llegada.yaml`.** Su encargo preveía siete
+ * → seis sacando `escena.yaml`, y lo medido es siete → ocho por un camino que nadie había
+ * previsto: no entra ninguna pantalla nueva sin camino, **vuelve una que ya había salido**.
+ *
+ * - `llegada.yaml` **vuelve**, y salió con la fila 44. No porque falte camino —lo hay, y es
+ *   el bueno: quien juega está parada y la escena valida sola— sino porque **el flujo no
+ *   puede garantizar que haya ninguna llegada que validar**. Medido el 12-ago-2026, tres
+ *   ejecuciones de tres muertas en `Assertion is false: id: llegada is visible`, con la
+ *   salida abierta (`abierta-con-rotulo`), el momento en marcha montado sin ninguna avería,
+ *   `marca-posicion = del-mapa:-633,-112:ambiguo` — y **`salida-sitio = sin-sitio`**, con
+ *   `llegadas: 0 validadas`. El ancla del mapa sale de donde esté el GPS del emulador al
+ *   arrancar, y alrededor de esa coordenada puede no haber ningún sitio a menos del radio del
+ *   geofence. **El verde de la fila 44 no era reproducible**: lo midió con el aparato donde
+ *   hubiera quedado entonces, y un flujo cuyo verde depende de eso no es una prueba. Lo que
+ *   sí recorría y no dependía del azar —la salida abierta, el momento en marcha sin avería,
+ *   el módulo de ubicación, la cadencia y el sitio bajo la marca— **se ha trasladado a
+ *   `en-marcha.yaml`**, que recorre de verdad: aquí habrían tenido que colgar de una
+ *   condición y habrían dejado de verificar nada.
+ *
+ * Y las dos de la fila que no se mueven, con lo que se aprendió midiéndolas:
  *
  * - `escena.yaml` **se queda**, y su motivo viejo era falso: decía que faltaba `paso-escena`
  *   en `App.js`. Hoy la escena se monta —inyectada en `PantallaLlegada` por su tipo de paso—
@@ -116,6 +135,7 @@ const FLUJOS_DE_LIMITE_DECLARADO = [
   'descarte.yaml',
   'diario.yaml',
   'escena.yaml',
+  'llegada.yaml',
   'mapas.yaml',
   'repisa.yaml',
   'visor.yaml',

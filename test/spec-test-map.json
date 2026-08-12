@@ -21057,7 +21057,7 @@
       "fichero": "test/app/llegada.yaml",
       "caso": "La escena queda disponible y espera",
       "escenario": "La escena queda disponible y espera",
-      "nota": "Lo único de este escenario que necesita dispositivo: que la app no pase a primer plano sola. Que la pantalla no se encienda con el móvil bloqueado sigue siendo @manual."
+      "nota": "El flujo volvió a la columna de límite declarado con SPEC-049: no puede garantizar que haya ninguna llegada que validar —el ancla del mapa sale de donde esté el GPS del emulador y puede no haber ningún sitio bajo los pies—. Medido el 12-ago-2026, tres ejecuciones de tres con salida-sitio = sin-sitio y 0 llegadas validadas, con la salida abierta y el momento en marcha montado sin avería. Lo afirmable sin depender del azar se trasladó a test/app/en-marcha.yaml; el escenario se sigue afirmando en @nucleo, en test/nucleo/llegadas.test.mjs y test/nucleo/escena-cableada.test.mjs."
     },
     {
       "spec": "SPEC-032",
@@ -21073,7 +21073,8 @@
       "nivel": "@app",
       "fichero": "test/app/llegada.yaml",
       "caso": "Pararse en un semáforo dentro de un geofence no tiene consecuencias",
-      "escenario": "Pararse en un semáforo dentro de un geofence no tiene consecuencias"
+      "escenario": "Pararse en un semáforo dentro de un geofence no tiene consecuencias",
+      "nota": "El flujo volvió a la columna de límite declarado con SPEC-049: no puede garantizar que haya ninguna llegada que validar —el ancla del mapa sale de donde esté el GPS del emulador y puede no haber ningún sitio bajo los pies—. Medido el 12-ago-2026, tres ejecuciones de tres con salida-sitio = sin-sitio y 0 llegadas validadas, con la salida abierta y el momento en marcha montado sin avería. Lo afirmable sin depender del azar se trasladó a test/app/en-marcha.yaml; el escenario se sigue afirmando en @nucleo, en test/nucleo/llegadas.test.mjs y test/nucleo/escena-cableada.test.mjs."
     },
     {
       "spec": "SPEC-032",
@@ -28228,7 +28229,7 @@
       "fichero": "test/app/llegada.yaml",
       "caso": "La escena queda disponible y espera",
       "escenario": "La escena queda disponible y espera",
-      "nota": "El flujo salió de la columna de límite declarado con esta fila: recorre el arranque, echa a andar y la escena valida sola sin tocar nada. Ramifica sobre la forma que salga —lo que allí se cuenta, la ficha o el hueco declarado—, porque qué sitio toca no lo decide el flujo, y atiende las escenas que queden. Medido en wa-pixel el 12-ago-2026: 117 s, 126 s y 119 s."
+      "nota": "El flujo volvió a la columna de límite declarado con SPEC-049: no puede garantizar que haya ninguna llegada que validar —el ancla del mapa sale de donde esté el GPS del emulador y puede no haber ningún sitio bajo los pies—. Medido el 12-ago-2026, tres ejecuciones de tres con salida-sitio = sin-sitio y 0 llegadas validadas, con la salida abierta y el momento en marcha montado sin avería. Lo afirmable sin depender del azar se trasladó a test/app/en-marcha.yaml; el escenario se sigue afirmando en @nucleo, en test/nucleo/llegadas.test.mjs y test/nucleo/escena-cableada.test.mjs."
     },
     {
       "spec": "SPEC-044",
