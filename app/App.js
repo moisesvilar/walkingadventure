@@ -50,6 +50,7 @@ import {
   NUCLEO_DE_LA_PARTIDA_GUARDADA,
 } from './nucleo/piezas.js';
 import { DONDE, levantaElMapaDeAqui, resuelveDondeEstas } from './mapa/donde-estas.js';
+import { PUNTO_DEL_ANCLAJE } from './mapa/primera-lista.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
 import { esPuertaDeDesarrollo } from './plataforma/puerta-de-desarrollo.js';
@@ -514,6 +515,7 @@ export function App() {
           tramoM: partida.estado.personaje?.tramo?.declaradoM ?? null,
           // La lámina se compone al tamaño real de la pantalla, que es donde se va a ver.
           tamano: { ancho: Math.round(Dimensions.get('window').width), alto: Math.round(Dimensions.get('window').height) },
+          anclaje: PUNTO_DEL_ANCLAJE,
         },
       );
       // El mapa nuevo pasa a ser el de la partida por la **misma puerta** que el primero, y

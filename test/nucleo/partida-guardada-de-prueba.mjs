@@ -22,6 +22,7 @@ import {
 import { CADENA_DEL_FORMATO, migra } from '../../packages/nucleo/partida/migracion.js';
 import { VERSION_FORMATO, lee, texto as textoCanonico } from '../../packages/nucleo/partida/formato.js';
 import { cargaCelda, cargaMapa, celdasAbiertas, listaMapas } from '../../packages/nucleo/partida/mapa.js';
+import { guardaElPrologo } from '../../packages/nucleo/partida/prologo.js';
 
 /** Lo que `creaPartidaGuardada` enumera en `DEL_NUCLEO`, ni una función más. */
 export const NUCLEO_DE_LA_PARTIDA_GUARDADA = Object.freeze({
@@ -43,6 +44,11 @@ export const NUCLEO_DE_LA_PARTIDA_GUARDADA = Object.freeze({
   exigeSinImportacionAMedias,
   lee,
   textoCanonico,
+  // Desde SPEC-050: es lo que hace que una partida nazca con el pasado de su mapa dentro.
+  // Va en la lista dura y no como pieza opcional a propósito — con ella opcional, un montaje
+  // que se la dejara fuera tiraría el prólogo en silencio, que es justo el defecto que la fila
+  // vino a cerrar (§6h).
+  guardaElPrologo,
 });
 
 /** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */

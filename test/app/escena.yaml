@@ -63,12 +63,14 @@
 #    único que valida es el sitio bajo el que arranca el mapa, y ese sitio es el que salga.
 #
 # Juntas: **qué sitio tiene beat no es reproducible entre tandas**, así que no se pueden
-# escribir coordenadas en el flujo como se escriben las formas en `llegada.yaml`. Y la
-# cuarta pieza cierra la única puerta que quedaba: **no puede saltar ningún
-# micro-encuentro**, porque `siembraLaCola` no tiene llamador desde `app/` y `atraviesa()`
-# sale por `if (!cola.length) return null`, así que una salida sin aventura aceptada
-# tampoco produce nunca un paso de beat. Es deuda de la fila 19, está fichada, y no es de
-# esta fila.
+# escribir coordenadas en el flujo como se escriben las formas en `llegada.yaml`.
+#
+# Había una cuarta pieza y **ya no está**: decía que no podía saltar ningún micro-encuentro
+# porque `siembraLaCola` no tenía llamador desde `app/`, así que `atraviesa()` salía siempre
+# por `if (!cola.length) return null`. Era deuda de la fila 19 y la cerró la 50: la cola se
+# siembra al nacer la partida, y una salida sin aventura aceptada sí puede producir un paso
+# de beat. Lo que mantiene este flujo en la columna son las **tres** de arriba, que son de
+# reproducibilidad y no de cableado.
 #
 # **Qué levantaría el límite**, para que quede escrito y no haya que volver a medirlo:
 # que el arranque acepte una semilla escrita —que es una decisión de producto, no una

@@ -193,12 +193,18 @@ export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
   SIN_MAPA_ACTIVO,
 });
 
-/** Lo que la pantalla del ofrecimiento necesita del núcleo, ni una función más. */
+/**
+ * Lo que resolver el mapa activo y componer el ofrecimiento necesitan del núcleo, ni una
+ * función más.
+ *
+ * Al cablearlo (SPEC-050) salieron cuatro piezas que **no las pedía nadie**:
+ * `ACCIONES_DEL_OFRECIMIENTO`, `TESTIDS_DE_MAPAS`, `ALCANCE_EN_TRAMOS` y `SIN_MAPA_ACTIVO`.
+ * No es que sobraran por poco: la pantalla lee las acciones y el localizador **del objeto
+ * que compone `componeOfrecimiento`**, no de constantes sueltas, así que nunca hicieron
+ * falta. Se retiran en lugar de dejarlas apuntadas como deuda, que es lo que el propio
+ * «ni una función más» de este bloque pedía desde que se escribió.
+ */
 export const NUCLEO_DEL_OFRECIMIENTO = Object.freeze({
-  ACCIONES_DEL_OFRECIMIENTO,
-  TESTIDS_DE_MAPAS,
-  ALCANCE_EN_TRAMOS,
-  SIN_MAPA_ACTIVO,
   componeOfrecimiento,
   hayQueOfrecerMapa,
 });

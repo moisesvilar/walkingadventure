@@ -354,7 +354,11 @@ export function guardaElPrologo(estado, prologo) {
   estado.nucleos.mapas[id] = prologo.nucleos.mapas[id] ?? {};
   if (prologo.par) estado.arranque.par = prologo.par;
 
-  return siembraLaCola(estado, { mapaId: id, entradas: prologo.entregas });
+  // La cola recibe **su área** y no el estado entero, que es lo que su firma pide. Merece
+  // decirse porque la primera versión de esto le pasaba el estado y la cola protestó
+  // nombrando lo que esperaba: es el contrato estricto de §6h haciendo su trabajo, en vez
+  // de una firma permisiva que habría sembrado en un sitio que nadie lee.
+  return siembraLaCola(estado.entregas, { mapaId: id, entradas: prologo.entregas });
 }
 
 /** Si un mapa ya tiene prólogo corrido, leído de lo que hay en la partida y no de una marca aparte. */

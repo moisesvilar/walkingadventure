@@ -16,7 +16,18 @@
 // (`alcance-del-mundo.md` §3), y al volver a un sitio conocido la portada aparece sin
 // transición ni aviso, que es lo que se consigue no haciendo nada especial.
 
-import { PUNTO_DEL_ANCLAJE } from './primera-lista.js';
+/**
+ * Lo que resolver dónde estás necesita del núcleo, ni una función más.
+ *
+ * Se declara como lista y no se comprueba a ojo por la regla de siempre en este repo: es lo
+ * que hace que meter una pieza en `piezas.js` que nadie pide se ponga rojo solo
+ * (`test/nucleo/piezas-sin-consumidor.test.mjs`), que es cómo se caza §6h antes de que
+ * cueste una fila entera.
+ */
+export const DEL_NUCLEO_DEL_OFRECIMIENTO = Object.freeze(['hayQueOfrecerMapa', 'componeOfrecimiento']);
+
+/** Lo que levantar un mapa que no es el primero necesita del núcleo, ni una función más. */
+export const DEL_NUCLEO_DEL_MAPA_NUEVO = Object.freeze(['correPrologo', 'siembraLaCola']);
 
 /** Las tres respuestas de resolver dónde estás. No hay una cuarta. */
 export const DONDE = Object.freeze({
@@ -46,7 +57,7 @@ export async function resuelveDondeEstas({ levantamiento, ubicacion, toponimos =
   if (!ubicacion || typeof ubicacion.pide !== 'function') {
     throw new Error('resolver dónde estás necesita el proveedor de ubicación inyectado');
   }
-  for (const pieza of ['hayQueOfrecerMapa', 'componeOfrecimiento']) {
+  for (const pieza of DEL_NUCLEO_DEL_OFRECIMIENTO) {
     if (typeof nucleo?.[pieza] !== 'function') {
       throw new Error(`resolver dónde estás necesita ${pieza} del núcleo, y el bloque que llegó no la trae`);
     }
@@ -116,8 +127,15 @@ export async function resuelveDondeEstas({ levantamiento, ubicacion, toponimos =
  *   pueda levantar un mapa que se ha pedido levantar no es una respuesta, es una avería, y
  *   quien llama tiene dónde enseñarla.
  */
-export async function levantaElMapaDeAqui({ levantamiento, ubicacion, nucleo }, { estado, tramoM = null, tamano, anclaje = PUNTO_DEL_ANCLAJE }) {
-  for (const pieza of ['correPrologo', 'siembraLaCola']) {
+export async function levantaElMapaDeAqui({ levantamiento, ubicacion, nucleo }, { estado, tramoM = null, tamano, anclaje }) {
+  // El anclaje llega por la firma y **no se importa de `primera-lista.js`**, que es donde
+  // vive: ese módulo cita el paquete por su nombre, y con el import puesto la batería de
+  // núcleo dejaba de arrancar en un clon limpio. Lo cazó la guarda del criterio duro de
+  // §6u en la misma tanda, que es exactamente para lo que está.
+  if (!anclaje || !Number.isFinite(anclaje.x) || !Number.isFinite(anclaje.y)) {
+    throw new Error('levantar un mapa aquí necesita el punto de anclaje del mapa, y no lo adivina');
+  }
+  for (const pieza of DEL_NUCLEO_DEL_MAPA_NUEVO) {
     if (typeof nucleo?.[pieza] !== 'function') {
       throw new Error(`levantar un mapa aquí necesita ${pieza} del núcleo, y el bloque que llegó no la trae`);
     }
@@ -146,7 +164,9 @@ export async function levantaElMapaDeAqui({ levantamiento, ubicacion, nucleo }, 
     rumores: estado.rumores,
     nucleos: estado.nucleos,
   });
-  const sembradas = nucleo.siembraLaCola(estado, { mapaId: levantado.mapaId, entradas: prologo.entregas });
+  // El área de la cola y no el estado entero: es lo que su firma pide, y pasarle el
+  // estado protesta en vez de sembrar donde nadie lee.
+  const sembradas = nucleo.siembraLaCola(estado.entregas, { mapaId: levantado.mapaId, entradas: prologo.entregas });
 
   return { levantado, prologo, sembradas };
 }

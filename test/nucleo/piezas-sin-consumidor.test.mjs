@@ -47,18 +47,21 @@ import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
  * mano, igual que la lista de pantallas huérfanas y por lo mismo: si se descubriera sola,
  * añadir un bundle muerto no costaría nada.
  *
- * Queda **uno**, y lo destapó esta guarda al escribirse:
+ * **La lista está vacía desde SPEC-050**, y eso es lo que esta guarda existía para conseguir.
  *
- * - `NUCLEO_DEL_OFRECIMIENTO` — las cinco piezas de A2P0, el ofrecimiento de levantar un mapa
- *   cuando no hay ninguno activo. `componeOfrecimiento` y `hayQueOfrecerMapa` **no los llama
- *   nadie desde `app/`**, y el bundle entero no lo importa ningún fichero:
- *   `antes-de-salir.jsx` recibe `ofrecimiento` como propiedad y quien lo monta nunca se la
- *   pasa, así que la pantalla existe, está probada y **es inalcanzable**. Es de la fila de los
- *   mapas (SPEC-041) y no de SPEC-049, que se limitó a medirlo.
+ * Quedaba uno, y lo destapó esta guarda al escribirse: `NUCLEO_DEL_OFRECIMIENTO`, las cinco
+ * piezas de A2P0 —el ofrecimiento de levantar un mapa cuando no hay ninguno activo—. Nadie
+ * desde `app/` llamaba a `componeOfrecimiento` ni a `hayQueOfrecerMapa`, el bloque entero no
+ * lo importaba ningún fichero, y `antes-de-salir.jsx` recibía `ofrecimiento` como propiedad
+ * que quien lo montaba no le pasaba nunca: la pantalla existía, estaba probada y **era
+ * inalcanzable**. Era de la fila de los mapas (SPEC-041); la 49 se limitó a medirlo y la 50
+ * lo cableó — `app/mapa/donde-estas.js` resuelve el mapa activo al abrir la app y `App.js`
+ * pasa el ofrecimiento cuando no hay ninguno.
+ *
+ * Que quede vacía **no jubila la guarda**: lo que vigila es que no vuelva a aparecer un
+ * bloque que nadie pide, y una lista vacía es la única forma en que eso se puede afirmar.
  */
-const BLOQUES_SIN_CONSUMIDOR = [
-  'NUCLEO_DEL_OFRECIMIENTO',
-];
+const BLOQUES_SIN_CONSUMIDOR = [];
 
 /** Dónde vive la puerta del núcleo, y desde dónde se mide quién pide qué. */
 const PIEZAS = 'app/nucleo/piezas.js';
@@ -141,9 +144,10 @@ describe('Lo que entra por la puerta del núcleo lo pide alguien', () => {
     const bloques = bloquesDePiezas();
     const pedidas = loQuePideAlguien();
 
-    const huerfanas = {
-      NUCLEO_DEL_OFRECIMIENTO: ['ACCIONES_DEL_OFRECIMIENTO', 'TESTIDS_DE_MAPAS', 'ALCANCE_EN_TRAMOS', 'componeOfrecimiento', 'hayQueOfrecerMapa'],
-    };
+    // Vacío desde SPEC-050, y la comprobación se queda: el día que alguien vuelva a meter un
+    // bloque en la lista tendrá que decir aquí **cuáles** de sus piezas no pide nadie, o la
+    // entrada se convertiría en un permiso para todo el bloque.
+    const huerfanas = {};
     assert.deepEqual(Object.keys(huerfanas).sort(), [...BLOQUES_SIN_CONSUMIDOR].sort(), 'la lista de bloques y el detalle de sus piezas se han desincronizado');
 
     for (const [nombre, esperadas] of Object.entries(huerfanas)) {
@@ -159,8 +163,9 @@ describe('Lo que entra por la puerta del núcleo lo pide alguien', () => {
 
   test('El bloque sin consumidor tampoco lo importa nadie, que es la mitad que lo explica', () => {
     // Una pieza que nadie pide podría estar en un bundle que sí se usa —y entonces sería solo
-    // una pieza de más—. Aquí no: el bundle entero no lo importa ningún fichero de `app/`, así
-    // que A2P0 no la monta nadie. Se dice porque es lo que convierte el número en un hallazgo.
+    // una pieza de más—. Lo que esto separa es el caso peor: un bundle que **no importa
+    // nadie**, que es como A2P0 llegó a existir, estar probada y ser inalcanzable. Con la
+    // lista vacía no recorre nada, y ése es exactamente el estado que se quería alcanzar.
     for (const nombre of BLOQUES_SIN_CONSUMIDOR) {
       const quienes = ficherosDeLaApp().filter((ruta) => ruta !== PIEZAS && texto(ruta).includes(nombre));
       assert.deepEqual(quienes, [], `${nombre} sí lo importa alguien (${quienes.join(', ')}): entonces lo que sobra son sus piezas, no el bloque`);
