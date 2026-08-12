@@ -1780,3 +1780,21 @@ Merece decirse cómo se encontró, porque es la lección: **`wa-dev` midió `mig
 **La undécima: `VERSION_FORMATO` es global a todas las clases.** Arreglada la décima, la partida migra —estado y registro a v2, la aventura en curso intacta por el beat donde iba— y la app **sigue sin abrir**, ahora por el mapa: `indice.json` y `celda/0,0.json` siguen en v1 y nadie los migra. Subir la versión por una clase invalida todas las demás aunque no cambien.
 
 Y ahí está la causa raíz, que **esta fila no toca y deja fichada**: mientras la versión de formato sea una sola para nueve clases de documento, esta forma de fallo vuelve cada vez que una clase evolucione sola. Lo que hay que decidir es versión por clase, o una guarda que exija que subir la versión venga acompañada de migración para **todas** las clases que la comparten.
+
+## El recorrido rehecho, después de la migración
+
+El primer recorrido se firmó antes de las tres últimas costuras, y esas tocan el cableado que lo sostenía, así que se rehizo entero sobre la app recompilada. Mismo mundo `1X9T5E7A039QP61Z@42.40,-8.74`.
+
+**La partida vieja migra y sigue jugándose.** Un documento v1 con `ronda-del-vigia` en curso por el beat 1, capturado con la compilación anterior: al abrir con la nueva, estado y registro suben a v2, los dos del mapa también, la aventura sigue donde estaba, las dos cerradas y el oro se conservan, y `procedencia.json` declara `"de":"migracion","migradaDesde":1`. **Esa procedencia es lo que firma la migración**, no la captura: `expo run:android` abre la app al instalar, así que cuando fui a leer el «antes» ya había migrado.
+
+**La cadena entera, con las coordenadas**: Covalonga a Vella (−1190, 364) → A Encrucillada do Aforcado do Sur (−461, 964) → O Torreón Caído do Solpor (−1250, 398) → Covalonga a Vella otra vez. Cuatro beats resueltos, con sus verbos propios —«Aceptar el encargo», «Contarlo»— y su objeto («catalejo del vigía»).
+
+**Y la novena, probada donde vive.** A mitad de la aventura se marcó «Taberna da Estrela Vermella» desde A4P8, se mató la app y se reabrió: la aventura sigue en `ronda-del-vigia` por el beat 4, **la huella sigue en `[]`** —congelada al aceptar, cuando no había nada marcado— mientras el área `anclajes` ya lleva la Taberna. Los dos datos desacoplados, y la app abre por la portada en vez de reventar, que es lo que hacía en 9 de 19 casos de `suelo-250m` antes del arreglo.
+
+## Dos cosas que el aparato enseñó y no son de esta fila
+
+**A4P8 no se puede marcar tocando el botón.** La capa de descarte desborda una pantalla de 1080×2400: los cinco motivos empujan hacia abajo y los dos últimos salen con cotas degeneradas —`ya-no-existe` en `[74,2215][1007,2122]`, con el borde inferior por encima del superior— **encima de «Marcarlo»**, que ocupa de 2185 a 2337. Un toque en el centro del botón se lo comen los motivos; el marcado solo entra tocando la franja de 2185 a 2215. Es la trampa que `CLAUDE.md` ya documenta —las listas variables empujan la acción bajo el pliegue— en su tercera aparición, y es la primera vez que alguien abre A4P8 en un teléfono: `descarte.yaml` lleva en límite declarado desde que existe.
+
+**El servicio en primer plano se cae a mitad de salida.** Ocurrió dos veces sin provocarlo: `ubicacion-estado` pasa a `sin-montar`, la marca deja de moverse y ningún fijo llega. La app responde como el diseño manda —al reabrir, `abierta-sin-rotulo`, rótulo `retirado-por-el-sistema` y la tarjeta de a medias con sus dos acciones—, así que no se pierde nada; pero es el motivo por el que **el telón por regreso no se ha podido verificar en el aparato**. Se verificó por «dejarlo aquí» y por la tarjeta de a medias, que `bucle-jugable.md` §8 declara la misma puerta.
+
+Y una hipótesis que **no** se ha podido sostener y por eso no se ficha como hallazgo: parada exactamente en el punto de partida, `regreso.dentroDesdeMs` seguía en nulo con la cadencia en `por-distancia`, lo que encajaría con §9a —el punto de partida no es un geofence, así que el muestreo nunca pasa a tiempo y parada no llega ningún fijo—. Pero al comprobarlo moviéndose dentro del radio, el sensor ya estaba caído, así que la medida no dice nada. Queda escrito como sospecha con su motivo, no como defecto.
