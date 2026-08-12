@@ -503,3 +503,62 @@ Lo que sí es cierto, y es lo que queda en pie de (i): **no la llama nadie desde
 Y el error de método, que es lo que vale la pena escribir porque lo cometimos **dos veces seguidas**: la 44 dijo «lo he vuelto a comprobar hoy: no hay ninguna» y quien orquesta dijo «verificado hoy otra vez», y los dos grepamos `componeDesenlace` — un nombre adivinado — en vez de buscar el concepto. **Un negativo no se verifica buscando un identificador que quizá nunca existió: se busca lo que el código haría si existiera** (`desenlace` en todo el repo, los exports de `quests/`, el commit que cerró la deuda). Un relato fiel de una verificación no es la verificación, y una verificación mal hecha tampoco.
 
 **Afinado por la 49, y es la lección que se queda:** el diagnóstico de arriba —«grepa el concepto y no el identificador»— es técnica, y no es el fallo de raíz. Un grep de `desenlace` a repo entero habría dado `quests/desenlace.js` en la primera línea; el que se hizo iba acotado al fichero que confirmaba la nota. Lo que falló es que **se reafirmó un negativo heredado de §6v sin volver a la fuente**: la comprobación tenía forma de confirmación, no de pregunta. La regla que evita repetirlo: **un negativo no se hereda — se vuelve a medir de cero o se marca como sospecha**, como los puntos (a) y (b) de §10, que es justo el hábito que en (i) no se aplicó. Y la consecuencia para quien orquesta: en los encargos, lo medido ahora y lo heredado de una nota van **etiquetados distinto**, porque tres filas seguidas encontrando falsa la premisa en el mismo sitio —una nota de decisiones reafirmada sin medir— ya no es suerte de quien caza: es una propiedad del método que había que corregir.
+
+## §11 · La fila 49, y las once costuras entre escribir una pantalla y poder abrirla
+
+La fila iba a ser «escribir las ocho pantallas que SPEC-034 y SPEC-036 nunca escribieron». Lo fue, y además destapó once cosas que impedían que esas pantallas hicieran nada. **Nueve de las once solo se ven recorriendo el bucle entero en un teléfono**, que es lo que su criterio 1 existía para obligar.
+
+### 11a · Las cinco que estaban antes de empezar, y que encontró medir la premisa
+
+El encargo daba por deuda conocida que «el reparto casteado no sobrevive a cerrar la app» y remataba que, si el telón se echaba en la misma sesión, no tocaba. Al medirlo con grep antes de escribir la spec:
+
+1. **`acepta` de `aventura-en-curso.js` no la llamaba nadie.** `estado.aventuras.enCurso` era `null` **siempre**, `resuelveBeat` inalcanzable y `echaElTelon` habría compuesto el telón de un paseo aunque hubiera aventura aceptada. No era que el beat llegase nulo el segundo día: **no había aventura en curso ningún día**.
+2. `antes-de-salir.jsx` cerraba la salida por su cuenta y dejaba a `echaElTelon` con «su telón ya se echó». El telón era inalcanzable por construcción.
+3. **Dos identidades de salida** sobre dos áreas —`mapa/dN/sN` de la 28 y `mapa/sN` de la 48— y el cierre las compara. Ninguna estaba mal en su fila: el defecto nace de que **nadie las cruzó nunca**, porque hasta ahora nadie cerraba una salida contra el cierre.
+4. `apuntaHaberEstado` sin llamador de producción: la lista de ascensos del telón habría salido siempre vacía y RF-BUCLE-012 no se habría cumplido nunca.
+5. `lamina.jsx` no pasaba `entintado` ni `telon` al render, que ya los aceptaba.
+
+El dueño decidió coserlas dentro de la fila con las once rutas advertidas.
+
+### 11b · Un negativo heredado que era falso
+
+§10i afirmaba, «verificado hoy otra vez», que `componeDesenlace` seguía sin existir. **Existe** desde `aec5efa`, el propio arreglo de §6v que la fichó. Lo cierto era que no la llamaba nadie desde `app/`. Corregido en §10-bis. La regla que sale, y que ya se aplicó tres veces en esta fila: **un negativo no se hereda — se vuelve a medir o se marca como sospecha.**
+
+### 11c · La séptima, decidida mal, y las dos que colgaron de ella
+
+Recorrer el bucle destapó que la lista de hoy no tenía memoria (sexta) **y** que los descartes no viajaban (séptima). La sexta la decidió el dueño. **La séptima la despachó quien orquesta esta fila sin llevársela**, aceptando de la sesión que escribe el registro un criterio que nadie había medido —«es la misma familia, mismo arreglo de una línea»—. No era simétrico: `aventuras` alimenta una lista con un consumidor; `descartes` alimenta un casting con **dos**, y arreglar uno solo los desincronizó.
+
+De ahí salieron la **octava** —que la ficha, el motor y la preparación resuelvan contra el mismo recasteo— y la **novena** —que la aventura aceptada congele contra qué descartes se casteó, porque si no marcar un sitio a mitad le cambia la cadena y en `suelo-250m` la reventaba 9 de 19 veces—.
+
+Lección de método, y es la cara b de §6h: **una pieza que al no estar no protesta es cara; un arreglo cuyo radio de acción no se ha medido lo es más.** `wa-dev` paró dos veces con la tabla delante en vez de seguir, y eso es lo que impidió que la octava y la novena se entregaran rotas.
+
+### 11d · Preguntar lo mismo por dos sitios
+
+Mientras se decidía la octava, la sesión que escribe el registro reportó que el dueño había pedido **revertir**; en la ventana de la fila había pedido **coser**. Las dos eran respuestas suyas de verdad, con distinto material delante: allí un resumen, aquí la tabla y el coste de reverificación.
+
+Se paró al implementador con el trabajo sin empezar y el árbol limpio, se preguntó **una sola vez más y en la ventana donde vive la fila**, con las dos respuestas y las tres salidas posibles, y se ejecutó lo de allí.
+
+§9b decía «un relato fiel de una decisión no es la decisión». Esto le añade la mitad que faltaba: aquí **la fidelidad no falló**. Falló preguntar lo mismo por dos sitios. **Una pregunta viva a la vez sobre un mismo asunto, y en la ventana de quien va a ejecutar la respuesta.**
+
+### 11e · La primera migración de formato, y las tres que costó
+
+Congelar la huella obliga a subir `VERSION_FORMATO` a 2, así que la fila estrena la cadena de `migracion.js`, escrita y vacía desde la 47.
+
+- **Nueve pruebas rojas**, todas con la misma raíz: **codificaban «todavía no hay ninguna migración» como invariante**. Veredicto: defecto de prueba en las nueve, retiradas escribiendo el porqué dentro. Dos de ellas se apoyaban en que la versión sintética fuera **mayor** que la real; al arreglarlas se derivó todo el fichero de `VERSION_FORMATO`, porque había ocho literales más con la misma trampa esperando turno.
+- **La décima**: `migraDocumentos()` leía con el lector estricto **antes** de migrar, y ese lector rechaza por definición toda versión anterior. Ningún documento viejo podía llegar a la cadena. Es la forma que la 47 ya había anotado y que no se había disparado nunca porque no había migraciones. La prueba de que era cuestión de puertas: `copia.js` parseaba sin exigir versión, **y por eso las copias sí se migraban**.
+- **La undécima**: `VERSION_FORMATO` es **global a las ocho clases de documento**, así que subirla por la partida invalidó también el índice y las celdas del mapa, que nadie migraba. Una partida existente **no abría** tras actualizar.
+
+**Y la causa raíz, que esta fila no toca y deja fichada**: mientras la versión de formato sea una sola para ocho clases, esta forma vuelve cada vez que una clase evolucione sola, y lo único que hoy sostiene que no falte ninguna es una lista escrita a mano. Lo pendiente es versión por clase, o una guarda que exija que subir la versión venga con migración para **todas** las que la comparten.
+
+### 11f · Lo que el aparato enseñó y no es de esta fila
+
+- **A4P8 no se puede marcar tocando el botón.** La capa de descarte desborda 1080×2400: los cinco motivos empujan y los dos últimos salen con cotas degeneradas **encima de «Marcarlo»**. El marcado solo entra por una franja de 30 px. Tercera aparición de la trampa del pliegue, y la primera vez que alguien abre A4P8 en un teléfono — `descarte.yaml` lleva en límite declarado desde que existe.
+- **El servicio en primer plano se cae a mitad de salida**, dos veces sin provocarlo. La app responde como el diseño manda —tarjeta de a medias con sus dos acciones—, pero es lo que impidió verificar **el telón por regreso**, que se queda sin firmar. El telón sí está verificado por «dejarlo aquí» y por la tarjeta, que `bucle-jugable.md` §8 declara la misma puerta.
+- **`siembraLaCola` no tiene llamador desde `app/`**: el prólogo produce sus entradas y nadie las encola, así que **hoy no puede saltar ni un micro-encuentro en un teléfono**. Es de la fila 19.
+- **`NUCLEO_DEL_OFRECIMIENTO` no lo importa nadie**: A2P0 existe, está probada y es inalcanzable. Es de SPEC-041. Lo destapó la guarda nueva `piezas-sin-consumidor.test.mjs`.
+- **Ninguna plantilla pone un beat sobre un rol humano**: 0 de 506 beats casteados de los cuatro mundos de referencia, así que `escena.cara` es **siempre** nula y el bloque de quien habla no se pinta nunca. Viene de SPEC-017; el número queda fijado y se pondrá rojo el día que una plantilla lo produzca.
+
+### 11g · Dos contradicciones del repo, dichas y no resueltas
+
+- **`naming.md` dice que los reports van en `test/reports/`; `.gitignore:31` los excluye** con su motivo escrito y veinte tandas de precedente sin ninguno versionado. Se ha seguido el `.gitignore` y el report de esta fila **no va al histórico**. Hay que decidirlo en un sitio y borrarlo del otro.
+- **`escena.yaml` no puede salir de límite declarado**, y su motivo viejo era falso. Lo miden cuatro cosas: el ancla del mapa no la gobierna el flujo, la semilla nace de entropía real sin sitio donde escribirla, **`setLocation` de Maestro sale con código 0 y no mueve el aparato** —medido contra `adb emu geo fix`, que sí lo mueve, en el mismo emulador y sin reiniciarlo— y sin `siembraLaCola` no hay micro-encuentro. Juntas: **qué sitio tiene beat no es reproducible entre tandas.** La nota que decía que se curaba reiniciando el emulador mandaba a perder el rato y está corregida.
