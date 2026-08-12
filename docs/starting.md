@@ -1729,3 +1729,38 @@ Y las otras dos variantes: **el paseo sin coger nada** sale mapa y diario, sin d
 - Acto seguido `adb emu geo fix -8.7480 42.4090` → `marca-posicion` pasa a `del-mapa:-657,1002:ambiguo`.
 
 La conclusión operativa se sostiene —**un flujo de Maestro no puede andar**— pero el motivo no: no son el mismo mecanismo y no se cura reiniciando. Con `geo fix` se han andado dos kilómetros esta misma noche en este mismo emulador.
+
+## Las tres costuras que aparecieron al recorrerlo, y de quién fue cada decisión
+
+Las cinco de arriba estaban antes de empezar y las encontró medir la premisa. Estas tres las destapó **haber recorrido el bucle entero**, que es exactamente para lo que el criterio existía.
+
+**La sexta: la lista de hoy no tenía memoria.** `componeLoQueHayHoy` sabe filtrar las plantillas ya vividas (`lo-que-hay-hoy.js:195`), pero la petición de `antes-de-salir.jsx:90` no le pasaba `aventuras`, así que recibía `null` y `cerradas` salía vacío. Medido en el aparato: terminada «El paquete que no era nada» y dejada a medias «La cita donde susurra el agua», **las dos volvían a ofrecerse** en la lista siguiente. Estaba fichado desde §6v y era **invisible hasta esta fila**, porque ninguna aventura podía cerrarse nunca. Lo decidió el dueño con la evidencia delante.
+
+**La séptima: los descartes tampoco viajaban, y la mandé yo sin preguntar.** La misma petición no lleva `descartes`, así que `repartoDeAventuras` recibe siempre `SIN_DESCARTES` — y el propio núcleo lo dice en el error de `exigeDescartes`: *«sin ella devolvería candidatos que quien juega ya marcó»*. O sea, un sitio marcado «este sitio no pega» seguía casteando aventuras: RF-PRIV-004 entregado a medias por la 44. La propuso la sesión que orquesta con un criterio que resultó falso —*«es la misma familia, mismo arreglo de una línea»*—, y **la despaché yo sin llevársela al dueño**. No era simétrica: `aventuras` alimenta una lista con un consumidor; `descartes` alimenta un casting con **dos**.
+
+**La octava, que es lo que la séptima abrió.** Con descartes de verdad, `repartoDeAventuras` **vuelve a castear**, y la cadena que sale del recasteo no es la de `mundo.casting` — que es de donde el cableado de esta fila lee la suya, por tres sitios: lo que se acepta en el motor (`antes-de-salir.jsx:253`), el reparto con el que se monta la capa de llegadas y se recupera al reabrir la app (`repartoDeLaAventuraEnCurso`), y la preparación. Consecuencia: **quien tuviera un solo sitio marcado vería un lazo en la ficha y sería mandado a otro**, posiblemente al que marcó.
+
+Medido marcando **un solo sitio** en cada mundo de referencia, el del primer beat de la primera aventura repartida:
+
+| mundo | repartidas | salen de la lista | siguen ofrecidas **con otros beats** |
+| --- | --- | --- | --- |
+| `barrio-tres-calles` | 24 → 1 | 23 | 1 |
+| `costero` | 29 → 29 | 0 | **24** |
+| `suelo-250m` | 19 → 19 | 0 | **11** |
+| `urbano-denso` | 30 → 30 | 0 | **22** |
+
+Con cero descartes no cambia nada —`hayDescartes` es falso y se usa `mundo.casting`—, así que el defecto está acotado a «hay algún descarte», y es **nuevo**: antes del arreglo séptimo el recasteo no ocurría jamás. `wa-dev` lo midió y **paró en vez de arreglarlo de paso**, que es lo que hay que hacer cuando el radio de acción de un arreglo se sale de lo decidido.
+
+Y un falso positivo que conviene no heredar: `app/mapa/primera-lista.js:95` llama a `repartoDeAventuras` sin descartes y **eso está bien**. Es la lista del día uno sobre una partida recién nacida, con el área `anclajes` vacía por construcción.
+
+## Dos respuestas distintas a la misma pregunta, y qué se hace con eso
+
+Mientras se decidía la octava, la sesión que orquesta escribió que el dueño había pedido **revertir**; en la ventana de esta fila el dueño había pedido **coser**. Las dos eran respuestas suyas de verdad, dadas con distinto material delante: la de allí sobre un resumen, la de aquí con la tabla y el coste de reverificación.
+
+Se paró a `wa-dev` con la octava sin empezar y el árbol limpio, se volvió a preguntar **una sola vez y en la ventana donde vive la fila**, con las dos respuestas y las tres salidas posibles delante, y se ejecutó lo que contestó allí.
+
+Es §9b aplicado contra quien lo escribió, y con la mitad que le faltaba. §9b decía «un relato fiel de una decisión no es la decisión». Aquí la fidelidad no fallaba: **falló preguntar lo mismo por dos sitios**. La regla que sale es de higiene de orquestación: **una pregunta viva a la vez sobre un mismo asunto, y en la ventana de quien va a ejecutar la respuesta.**
+
+## El cierre en corto, verificado sin andar
+
+La cuarta variante del telón no necesita caminata: se acepta una aventura, no se resuelve ni un beat, se mata la app y se cierra desde la tarjeta de a medias. Sale **A5P1B** (`mapa-sin-tinta`), después **A5P2B** —«LA CITA DONDE SUSURRA EL AGUA · Se resolvió sin ti · … Y hoy has andado, que es lo que mueve el mundo»— y **directo al diario**: entre medias **no aparece la pantalla del rumor**, que es la decisión de `bucle-jugable.md` §4. Comprobado en el estado del aparato: `oro` sigue en **12** —el cierre en corto no ingresa nada—, las dos aventuras quedan en `cerradas` con `comoAcabo` `terminada` y `a-medias`, y ningún rumor nuevo.
