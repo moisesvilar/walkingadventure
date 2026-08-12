@@ -13,6 +13,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { acepta as aceptaLaAventuraEnElMotor } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
+import { vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
 import { componeFicha, componeLoQueHayHoy, aceptaElEstironDeHoy, aceptaLaEntrada } from '@walkingadventure/nucleo/partida/lo-que-hay-hoy.js';
 import { estadoDeMapa } from '@walkingadventure/nucleo/partida/pasos.js';
 import { componePortada } from '@walkingadventure/nucleo/partida/portada.js';
@@ -96,6 +97,32 @@ export function PantallaAntesDeSalir({
     entregas: estado.entregas,
     mapaId,
     calendario,
+    // **La memoria de la lista.** `componeLoQueHayHoy` saca de la lista las plantillas ya
+    // vividas leyendo el registro de aventuras, y hasta esta fila la petición no se lo pasaba:
+    // llegaba en nulo, `cerradas` salía vacío y los mismos títulos volvían a ofrecerse después
+    // de haberlos terminado. Era invisible porque antes de SPEC-049 ninguna aventura podía
+    // cerrarse nunca; medido en el emulador el 12-ago-2026, con dos aventuras en `cerradas`
+    // —una terminada y otra a medias— la lista de hoy volvía a ofrecer las dos.
+    //
+    // Va **el área viva y no una copia**: `aventurasCerradas` la lee en el momento de componer
+    // la lista, así que cerrar una aventura durante la salida se nota en la lista siguiente sin
+    // depender de que este memo se haya vuelto a evaluar.
+    aventuras: estado.aventuras,
+    // **Los sitios marcados.** Mismo patrón: `componeLoQueHayHoy` declara `descartes` con un
+    // valor por defecto inocuo y se lo pasa a `repartoDeAventuras`, que con descartes de verdad
+    // vuelve a castear. Sin esto, un anclaje marcado «este sitio no pega» seguía casteando
+    // aventuras y RF-PRIV-004 cojeaba en silencio — el propio núcleo lo dice en el error de
+    // `exigeDescartes`: «sin ella devolvería candidatos que quien juega ya marcó».
+    //
+    // Es `vistaDeDescartes` y no `descartesDeMapa`, que se le parece: lo que el contrato pide
+    // es la vista con `descartado()`, y la lista pelada no la cumple.
+    //
+    // La vista es una **instantánea** y se toma aquí a propósito: castear el catálogo entero
+    // tiene que ver el mismo conjunto de la primera plantilla a la última. Que no se quede
+    // rancia lo sostiene el recorrido y no la suerte — marcar un sitio ocurre dentro de una
+    // llegada y deshacerlo dentro de los ajustes, y `App.js` monta otro momento en los dos
+    // casos, así que este componente se desmonta y vuelve con la instantánea recién tomada.
+    descartes: vistaDeDescartes(estado.anclajes, mapaId),
   }), [mundo, personaje, criterios, tamano, estado, mapaId, calendario]);
 
   const portada = useMemo(
