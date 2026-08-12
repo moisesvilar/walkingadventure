@@ -135,19 +135,6 @@ export function PantallaAntesDeSalir({
     [calendario, personaje, mundo, estado, zurron, refresco, ofrecimiento],
   );
 
-  // El ofrecimiento manda sobre todo lo demás y no es un paso de esta máquina: no se
-  // llega a él desde ninguna pantalla, se está en él porque no hay mapa donde estás.
-  if (ofrecimiento) {
-    return (
-      <PantallaOfrecimiento
-        ofrecimiento={ofrecimiento}
-        alLevantar={alLevantarMapa}
-        alDejarlo={alDejarloEstar}
-        alAbrirPuerta={alAbrirPuerta}
-      />
-    );
-  }
-
   /**
    * Abre el registro de la salida en el área `aventuras`, con **la identidad de siempre**.
    *
@@ -195,6 +182,26 @@ export function PantallaAntesDeSalir({
     setPantalla('portada');
     if (alEcharElTelon) alEcharElTelon();
   }, [alEcharElTelon]);
+
+  // El ofrecimiento manda sobre todo lo demás y no es un paso de esta máquina: no se
+  // llega a él desde ninguna pantalla, se está en él porque no hay mapa donde estás.
+  //
+  // Va **después de todos los hooks y no antes**, que es donde estaba desde SPEC-041. Ahí
+  // era un `return` en medio del cuerpo: la rama del ofrecimiento montaba menos hooks que
+  // las otras y React tumbaba la app con «Rendered fewer hooks than expected» en cuanto se
+  // entraba. Nunca saltó porque **nadie pasaba nunca `ofrecimiento`**, así que la rama no se
+  // ejecutó ni una vez hasta que SPEC-050 la cableó. Medido en `wa-pixel` el 12-ago-2026,
+  // abriendo la app a 500 km del único mapa de la partida.
+  if (ofrecimiento) {
+    return (
+      <PantallaOfrecimiento
+        ofrecimiento={ofrecimiento}
+        alLevantar={alLevantarMapa}
+        alDejarlo={alDejarloEstar}
+        alAbrirPuerta={alAbrirPuerta}
+      />
+    );
+  }
 
   if (pantalla === 'portada') {
     return (

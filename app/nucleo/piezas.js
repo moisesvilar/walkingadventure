@@ -101,6 +101,8 @@ import {
 } from '@walkingadventure/nucleo/partida/exportacion.js';
 import { CADENA_DEL_FORMATO, migra } from '@walkingadventure/nucleo/partida/migracion.js';
 import { congelaEstado, estadoInicial, levantaEstado } from '@walkingadventure/nucleo/partida/estado.js';
+import { correPrologo, guardaElPrologo } from '@walkingadventure/nucleo/partida/prologo.js';
+import { siembraLaCola } from '@walkingadventure/nucleo/partida/entregas.js';
 import { cuantosHechos, levantaRegistro, registroInicial } from '@walkingadventure/nucleo/partida/hechos.js';
 import { CLAVES_DE_PARTIDA, cargaPartida, guardaPartida } from '@walkingadventure/nucleo/partida/reconstruccion.js';
 import {
@@ -191,14 +193,32 @@ export const NUCLEO_DEL_LEVANTAMIENTO = Object.freeze({
   SIN_MAPA_ACTIVO,
 });
 
-/** Lo que la pantalla del ofrecimiento necesita del núcleo, ni una función más. */
+/**
+ * Lo que resolver el mapa activo y componer el ofrecimiento necesitan del núcleo, ni una
+ * función más.
+ *
+ * Al cablearlo (SPEC-050) salieron cuatro piezas que **no las pedía nadie**:
+ * `ACCIONES_DEL_OFRECIMIENTO`, `TESTIDS_DE_MAPAS`, `ALCANCE_EN_TRAMOS` y `SIN_MAPA_ACTIVO`.
+ * No es que sobraran por poco: la pantalla lee las acciones y el localizador **del objeto
+ * que compone `componeOfrecimiento`**, no de constantes sueltas, así que nunca hicieron
+ * falta. Se retiran en lugar de dejarlas apuntadas como deuda, que es lo que el propio
+ * «ni una función más» de este bloque pedía desde que se escribió.
+ */
 export const NUCLEO_DEL_OFRECIMIENTO = Object.freeze({
-  ACCIONES_DEL_OFRECIMIENTO,
-  TESTIDS_DE_MAPAS,
-  ALCANCE_EN_TRAMOS,
-  SIN_MAPA_ACTIVO,
   componeOfrecimiento,
   hayQueOfrecerMapa,
+});
+
+/**
+ * Lo que levantar un mapa **que no es el primero** necesita del núcleo.
+ *
+ * Va aparte del bloque del ofrecimiento porque son dos momentos distintos: aquél compone
+ * lo que se lee, éste corre el prólogo del mapa nuevo y siembra su cola. Hasta SPEC-050 no
+ * existía ninguno de los dos caminos, y por eso un segundo mapa nacía mudo.
+ */
+export const NUCLEO_DEL_MAPA_NUEVO = Object.freeze({
+  correPrologo,
+  siembraLaCola,
 });
 
 /** Lo que `creaPreparacion` enumera en su `DEL_NUCLEO`, ni una función más. */
@@ -285,6 +305,10 @@ export const NUCLEO_DE_LA_PARTIDA_GUARDADA = Object.freeze({
   levantaRegistro,
   registroInicial,
   estadoInicial,
+  // El prólogo se lleva al estado **aquí dentro**, en la misma operación que hace nacer
+  // la partida: trasladarlo después de la primera congelación escribiría en disco un
+  // mundo sin pasado, y la siguiente apertura no podría distinguirlo de uno que no lo tuvo.
+  guardaElPrologo,
   guardaPartida,
   cargaPartida,
   cuantosHechos,

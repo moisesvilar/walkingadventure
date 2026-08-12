@@ -35,7 +35,9 @@ import { marcaSuperpuesta } from './marca.js';
  *   `partida` el estado de la partida; `personaje` quien juega; `mundo` el mapa levantado;
  *   `arrancadaEn` cuándo empezó la partida, que es de donde sale el día; `base` la dirección
  *   del proxy; `almacen` dónde viven los binarios de las ilustraciones; `llamada` el cliente
- *   del narrador, que hoy no tiene montaje propio y se declara ausente en lugar de suponerse.
+ *   del narrador, que hoy no tiene montaje propio y se declara ausente en lugar de suponerse;
+ *   `ofrecimiento` lo que devuelve `componeOfrecimiento` cuando no hay mapa donde estás, con
+ *   sus dos acciones. Se pasa tal cual: aquí no se decide si hay mapa, solo se cablea.
  */
 export function AntesDeSalirMontado({
   partida,
@@ -48,6 +50,9 @@ export function AntesDeSalirMontado({
   almacen = null,
   llamada = null,
   zurron = {},
+  ofrecimiento = null,
+  alLevantarMapa = null,
+  alDejarloEstar = null,
   alAndar = null,
   alAbrirPuerta = null,
   alEcharElTelon = null,
@@ -130,6 +135,13 @@ export function AntesDeSalirMontado({
         identidad={identidad}
         preparacion={montaje.preparacion}
         zurron={zurron}
+        // A2P0. Llega hasta aquí y no se compone aquí: quien sabe si hay mapa donde estás es
+        // la raíz, que es la que tiene el levantamiento y la posición. Con ofrecimiento la
+        // pantalla **sustituye la portada por él**, que es lo que hace desde SPEC-041
+        // esperando a que alguien se lo pasara.
+        ofrecimiento={ofrecimiento}
+        alLevantarMapa={alLevantarMapa}
+        alDejarloEstar={alDejarloEstar}
         alAndar={andar}
         alAbrirPuerta={alAbrirPuerta}
         alEcharElTelon={alEcharElTelon}

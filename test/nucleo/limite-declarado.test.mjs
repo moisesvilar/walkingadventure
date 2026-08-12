@@ -118,9 +118,13 @@ import { fuente } from './mundo-de-prueba.mjs';
  *   son tres medidas que se suman: el ancla del mapa no la gobierna la posición que el flujo
  *   pone (fila 44), la semilla nace de entropía real y el arranque no ofrece dónde escribirla,
  *   y **`setLocation` no mueve la marca** en esta máquina, así que no se puede andar hasta un
- *   beat. Juntas: **qué sitio tiene beat no es reproducible entre tandas**. Y la cuarta cierra
- *   la última puerta: sin llamador de `siembraLaCola` no puede saltar ningún micro-encuentro,
- *   así que una salida sin aventura tampoco produce un paso de beat.
+ *   beat. Juntas: **qué sitio tiene beat no es reproducible entre tandas**.
+ *
+ *   La cuarta medida **ya no está**, y con SPEC-050 se corrige aquí en el mismo commit que la
+ *   cierra: decía que sin llamador de `siembraLaCola` no podía saltar ningún micro-encuentro,
+ *   y ahora la cola se siembra al nacer la partida, así que una salida sin aventura sí puede
+ *   producir un paso de beat. Lo que mantiene a `escena.yaml` en la lista son las **tres** de
+ *   arriba, que son de reproducibilidad y no de cableado, y que esta fila no toca.
  * - `telon.yaml` **no entra**, y estuvo a punto. Se escribió marcado con el motivo «las tres
  *   vías de cierre están fuera del alcance de un flujo», y era falso: al telón **se llega sin
  *   moverse**. Se sale a andar, se mata la app —el servicio en primer plano muere con el

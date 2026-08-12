@@ -16,6 +16,15 @@
 //
 // Cerrar la capa sin pulsar «Marcarlo» habiendo elegido un motivo **descarta la
 // elección y no marca nada**: el que escribe es el segundo toque.
+//
+// Y **es una capa de verdad, no un hermano en el flujo**. Hasta SPEC-050 su raíz era
+// `flex: 1` sin posicionar y `llegada.js` la montaba como último hijo de una columna
+// donde la ficha ya pedía `flex: 1`: los dos se repartían el alto, los cinco motivos
+// empujaban, y a 1080×2400 los dos últimos salían con cotas degeneradas (`y2 < y1`)
+// **encima de «Marcarlo»** — el marcado solo entraba por una franja de 30 px. La otra
+// capa del mismo fichero, el visor, siempre usó `absoluteFillObject`; esta no, y esa
+// es toda la diferencia. Con la capa acotada por la pantalla, el desplazable se queda
+// con los motivos y la acción, que va fuera de él, se queda abajo y entera.
 
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -35,7 +44,9 @@ export function CapaDescarte({ capa, alMarcar = null, alCerrar = null }) {
 
   return (
     <View style={estilos.raiz} testID="descarte-anclaje">
-      <ScrollView contentContainerStyle={estilos.contenido}>
+      {/* El desplazable se lleva el hueco que sobre y no más: `flex: 1` aquí es lo que
+          impide que los motivos empujen a «Marcarlo» fuera de la pantalla. */}
+      <ScrollView style={estilos.desplazable} contentContainerStyle={estilos.contenido}>
         <Text style={estilos.nombre}>{capa.nombre}</Text>
         <Text style={estilos.pregunta}>{capa.pregunta}</Text>
         {/* Va antes de los motivos y no después: es lo que convierte la lista en una
@@ -75,7 +86,18 @@ export function CapaDescarte({ capa, alMarcar = null, alCerrar = null }) {
 }
 
 const estilos = StyleSheet.create({
-  raiz: { flex: 1, backgroundColor: PLACA },
+  // Capa: cubre la pantalla y **no compite por el alto con la ficha**, que sigue montada
+  // debajo para que cerrar la devuelva con todo como estaba.
+  //
+  // Las cuatro anclas van **escritas una a una y no con `...StyleSheet.absoluteFillObject`**,
+  // que es lo que hace el visor. Medido en `wa-pixel` el 12-ago-2026: con el spread la capa
+  // salía en `[0,2122][1080,2400]` —o sea, apilada debajo de la ficha y no encima— y los
+  // cinco motivos no se pintaban; escritas así sale a pantalla completa. Se deja explícito
+  // en vez de perseguir por qué el spread no cuaja: lo que esta pantalla necesita es un
+  // posicionamiento que se pueda leer y afirmar, no una constante que dependa de cómo la
+  // exporte la versión de React Native que toque.
+  raiz: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: PLACA },
+  desplazable: { flex: 1 },
   contenido: { padding: 28, gap: 16 },
   nombre: { fontFamily: 'serif', fontSize: 22, color: LAPIZ },
   pregunta: { fontFamily: 'serif', fontSize: 28, color: TINTA },

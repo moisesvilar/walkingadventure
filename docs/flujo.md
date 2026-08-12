@@ -21,6 +21,7 @@ flowchart TD
     A1P7["pantalla 7 · artefacto 1<br/>La primera aventura"]
   end
   subgraph A2["Artefacto 2 · Antes de salir"]
+    A2P0["pantalla 0 · artefacto 2<br/>El ofrecimiento"]
     A2P1["pantalla 1 · artefacto 2<br/>La portada"]
     A2P2["pantalla 2 · artefacto 2<br/>El zurrón"]
     A2P3["pantalla 3 · artefacto 2<br/>Lo que hay hoy"]
@@ -80,6 +81,13 @@ flowchart TD
   A1P3 -.->|"‹ atrás"| A1P2
   A1P4 -.->|"‹ atrás"| A1P3
   A1P5 -.->|"desde aquí ya no se vuelve: lo generado no se resiembra"| A1P6
+  A2P1 -.->|"en su lugar, al abrir la app donde no llega ninguno de tus mapas"| A2P0
+  A2P0 -->|"Levantar un mapa aquí"| A1P5
+  A2P0 -.->|"Dejarlo estar · se cierra, y volver a abrir la app aquí lo vuelve a ofrecer"| A2P0
+  A2P0 -.->|"al volver a un sitio con mapa · sin transición, aviso ni bienvenida"| A2P1
+  A2P0 -->|"El diario · donde se leen los mapas donde ya no estás"| A6P2
+  A2P0 -->|"La repisa"| A6P5
+  A2P0 -->|"Ajustes"| A6P6
   A2P1 -.->|"misma pantalla, redibujada sin barra de pestañas"| A6P1
   A2P1 -->|"Ver qué se cuenta hoy · solo con pasos de fondo activos y reserva sin vaciar"| A2P2
   A2P2 -->|"Seguir"| A2P3

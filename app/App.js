@@ -17,7 +17,8 @@
 // producción no existe.
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, BackHandler, Dimensions, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
 import { creaCalendario, relojDePared } from './datos/calendario.js';
@@ -44,14 +45,21 @@ import {
   NUCLEO_DE_LA_AVENTURA_EN_CURSO,
   NUCLEO_DE_LA_COPIA,
   NUCLEO_DE_LAS_LLEGADAS,
+  NUCLEO_DEL_MAPA_NUEVO,
+  NUCLEO_DEL_OFRECIMIENTO,
   NUCLEO_DE_LA_PARTIDA_GUARDADA,
 } from './nucleo/piezas.js';
+import { DONDE, levantaElMapaDeAqui, resuelveDondeEstas } from './mapa/donde-estas.js';
+import { PUNTO_DEL_ANCLAJE } from './mapa/primera-lista.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho } from './plataforma/gancho.js';
 import { esPuertaDeDesarrollo } from './plataforma/puerta-de-desarrollo.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
 import { ArranqueMontado } from './pantallas/arranque-montado.jsx';
+import { DIRECCION_DEL_PROXY } from './pantallas/mapa-montado.jsx';
+import { montaElMapaDeLaPartida } from './mapa/montaje.js';
+import { creaProveedorDeUbicacionDeExpo, proveedorSinMontar } from './plataforma/ubicacion.js';
 import { AbrirCopia } from './pantallas/copia.jsx';
 import { ConsultaMontada } from './pantallas/consulta-montado.jsx';
 import { nombreCortoDeOficio } from './pantallas/arranque.jsx';
@@ -170,6 +178,20 @@ export function App() {
   // La puerta de desarrollo, abierta o no. No se persiste y no se puede abrir en
   // producción: `esPuertaDeDesarrollo` devuelve false sin mirar el enlace siquiera.
   const [enPuertaDeDesarrollo, setEnPuertaDeDesarrollo] = useState(false);
+  // En qué mapa de la partida estás, o el ofrecimiento de levantar uno donde no llega
+  // ninguno (A2P0). Es la mitad de SPEC-041 que hasta la fila 50 no llegó a la app:
+  // `levantamiento.mapaActivo` no tenía consumidor y `antes-de-salir.jsx` esperaba un
+  // `ofrecimiento` que nadie le pasaba, así que A2P0 era inalcanzable.
+  //
+  // Empieza en nulo y **no se supone nada mientras tanto**: hasta saber dónde estás se
+  // enseña la portada del mapa que la partida trae, que es lo que había antes de esta
+  // fila y no una pantalla en blanco. Lo que cambia al resolver es que, si no hay mapa
+  // donde estás, la portada da paso al ofrecimiento.
+  const [dondeEstas, setDondeEstas] = useState(null);
+  // Rechazar el ofrecimiento. **No se persiste y es la decisión**: volver a abrir la app
+  // aquí lo vuelve a ofrecer y no queda ninguna marca, porque recordar la negativa crea un
+  // estado invisible que solo se puede explicar como aplicación (SPEC-041).
+  const [ofrecimientoDejado, setOfrecimientoDejado] = useState(false);
 
   // El atrás de Android hace lo mismo que el «‹» de la pantalla, y no otra cosa. Que
   // discrepen es un defecto de plataforma y no una decisión: quien pulsa el del sistema
@@ -430,6 +452,88 @@ export function App() {
   }, [partida]);
 
   /**
+   * El mapa de la partida y el traedor de topónimos, montados **una vez** y solo con
+   * partida abierta: sin partida no hay mapas que resolver ni sitio donde levantar uno.
+   */
+  const elMapaDeLaPartida = useMemo(
+    () => (partida ? montaElMapaDeLaPartida({ almacen, base: DIRECCION_DEL_PROXY }) : null),
+    [partida, almacen],
+  );
+
+  /**
+   * Resuelve en qué mapa estás, y compone el ofrecimiento cuando no estás en ninguno.
+   *
+   * Ocurre **al abrir la app con partida**, que es cuando el diseño lo pide: el mapa activo
+   * lo decide dónde estás, y llegar a un sitio nuevo ofrece levantar uno. No se repite al
+   * volver de una pantalla de consulta ni al cerrar una salida — entre esas cosas no te has
+   * movido trescientos kilómetros, y volver a preguntar la posición sería mirar dónde está
+   * quien juega sin ninguna razón de juego.
+   */
+  useEffect(() => {
+    if (!partida || !elMapaDeLaPartida?.levantamiento) return undefined;
+    let vivo = true;
+    resuelveDondeEstas(
+      {
+        levantamiento: elMapaDeLaPartida.levantamiento,
+        ubicacion: creaProveedorDeUbicacionDeExpo(Location) ?? proveedorSinMontar(),
+        toponimos: elMapaDeLaPartida.toponimos,
+        nucleo: NUCLEO_DEL_OFRECIMIENTO,
+      },
+      { semilla: partida.estado.semilla, tramoM: partida.estado.personaje?.tramo?.declaradoM ?? null },
+    )
+      .then((resuelto) => { if (vivo) setDondeEstas(resuelto); })
+      // No saber dónde estás deja la portada del mapa que la partida trae, que es lo que
+      // había: lo que no se hace es enseñar el ofrecimiento por no haber podido preguntar.
+      .catch((e) => { if (vivo) setDondeEstas({ donde: DONDE.NO_SE_SABE, resolucion: null, ofrecimiento: null, motivo: mensajeDeError(e) }); });
+    return () => { vivo = false; };
+  }, [partida, elMapaDeLaPartida]);
+
+  /**
+   * «Levantar un mapa aquí», la acción principal de A2P0.
+   *
+   * Levanta el mapa donde estás **ahora** —se vuelve a preguntar la posición, porque entre
+   * ver el ofrecimiento y decidirte puedes haber andado— y le corre su prólogo, que es lo
+   * que le da pasado: rumores sedimentados, algo que contar en sus núcleos y su cola de
+   * entregas. Hasta SPEC-050 `levanta()` no corría ninguno, así que el segundo mapa de una
+   * partida nacía mudo y sin cola.
+   *
+   * El prólogo va con `primerMapa: false` y no es un detalle: la puesta en escena —el par
+   * compuesto y la regla de la primera aventura— es del arranque y solo del arranque
+   * (`arranque.md` §2), así que un mapa de vacaciones no puede pisar el par de casa.
+   */
+  const levantaUnMapaAqui = useCallback(async () => {
+    if (!partida || !elMapaDeLaPartida?.levantamiento) return;
+    try {
+      const { levantado } = await levantaElMapaDeAqui(
+        {
+          levantamiento: elMapaDeLaPartida.levantamiento,
+          ubicacion: creaProveedorDeUbicacionDeExpo(Location) ?? proveedorSinMontar(),
+          nucleo: NUCLEO_DEL_MAPA_NUEVO,
+        },
+        {
+          estado: partida.estado,
+          tramoM: partida.estado.personaje?.tramo?.declaradoM ?? null,
+          // La lámina se compone al tamaño real de la pantalla, que es donde se va a ver.
+          tamano: { ancho: Math.round(Dimensions.get('window').width), alto: Math.round(Dimensions.get('window').height) },
+          anclaje: PUNTO_DEL_ANCLAJE,
+        },
+      );
+      // El mapa nuevo pasa a ser el de la partida por la **misma puerta** que el primero, y
+      // no por una composición propia: ese camino ya se dejó `cupos` fuera una vez y el
+      // descarte de un anclaje murió en toda instalación nueva.
+      setPartida((viva) => (viva ? { ...viva, mundo: mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro }) } : viva));
+      // Se vuelve a resolver dónde estás: ahora sí hay mapa aquí, y lo que toca es su portada.
+      setDondeEstas(null);
+      setOfrecimientoDejado(false);
+      congelaLaPartida();
+    } catch (e) {
+      // Levantar es lo único de esta pantalla que puede no poder: se dice con su motivo por
+      // la misma puerta que la avería de apertura, y no se deja media partida montada.
+      setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) });
+    }
+  }, [partida, elMapaDeLaPartida, congelaLaPartida]);
+
+  /**
    * La red que cubre lo que ningún corte del juego cubre: **a una app la mata el sistema
    * sin avisar**, y no hay ningún evento de «me van a matar». `inactive` entra igual que
    * `background` porque en iOS es el que llega primero y a veces el único.
@@ -580,7 +684,20 @@ export function App() {
             // el personaje que cerró el arranque dentro del área —el área es lo que se
             // congela y lo que se exporta— y su registro de hechos vacío. Antes de esta fila
             // esto se componía aquí mismo y se moría al cerrar la app.
-            partidaGuardada.nace({ semilla: cerrado.semilla, personaje: cerrado.personaje })
+            //
+            // Y nace **con el prólogo dentro**, que es la costura de SPEC-050. Hasta esa
+            // fila este parámetro se llamaba `lista` y no se usaba en ninguna línea: el
+            // prólogo se componía entero —rumores sedimentados, lo que se cuenta en cada
+            // núcleo, el par del arranque y las entradas de la cola— y se tiraba. El mundo
+            // nacía sin pasado, `estado.nucleos` estaba siempre vacío y en un teléfono no
+            // podía saltar ni un micro-encuentro. Sin lista compuesta no hay prólogo que
+            // guardar y la partida nace igual, que es el caso de la celda sin contenido
+            // jugable.
+            partidaGuardada.nace({
+              semilla: cerrado.semilla,
+              personaje: cerrado.personaje,
+              prologo: lista?.prologo ?? null,
+            })
               .then((nacida) => {
                 setPartida({
                   estado: nacida.estado,
@@ -792,6 +909,16 @@ export function App() {
           }}
           situacionDeSalida={laSalida ? laSalida.situacion() : 'sin-salida'}
           estadoDelRotulo={laSalida ? laSalida.estadoDelRotulo() : 'no-disponible'}
+          // A2P0, el ofrecimiento de levantar un mapa donde no llega ninguno de los tuyos.
+          // Llega como propiedad y **sustituye a la portada** dentro de la pantalla, que es
+          // lo que `antes-de-salir.jsx` hace desde SPEC-041 esperando a que alguien se la
+          // pasara. Solo se ofrece con la resolución hecha: mientras no se sabe dónde estás
+          // se enseña la portada del mapa que la partida trae.
+          ofrecimiento={dondeEstas?.donde === DONDE.SIN_MAPA && !ofrecimientoDejado ? dondeEstas.ofrecimiento : null}
+          alLevantarMapa={levantaUnMapaAqui}
+          // «Dejarlo estar» cierra el ofrecimiento y **no escribe nada en ninguna parte**:
+          // volver a abrir la app aquí lo vuelve a ofrecer.
+          alDejarloEstar={() => setOfrecimientoDejado(true)}
           // Las tres puertas del pie de la portada. La composición del núcleo las declara
           // en `PUERTAS` y la pantalla las pinta; lo que faltaba era esto, que llevaran a
           // algún sitio.

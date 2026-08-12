@@ -24,6 +24,7 @@ import { makeRng } from '../core/rng.js';
 import { exigeSemilla, semillaDePasoDePrologo, semillaDePrologo } from '../core/semilla.js';
 import { medidorDeTrechos } from '../quests/casting.js';
 import { TAMANO_DE_LA_PRIMERA_SALIDA, componeElPar, estadoDeArranque, exigePuntoDePartida, exigeViario, nucleosAlcanzables, nucleosConReparto, repartoDelMapa } from './arranque.js';
+import { siembraLaCola } from './entregas.js';
 import { normalizaCriterios } from './filtro.js';
 import { estadoDeNucleos, loQueSeCuentaEn } from './nucleos.js';
 import { creaMotorDePasos, estadoDePasos, exigeMapaId } from './pasos.js';
@@ -306,6 +307,58 @@ function congelaResultado({ mapaId, arranque, rumores, nucleos, entregas, par, d
     // prohíbe enseñar cifras de progreso, y lo que no se guarda no se puede pintar.
     diagnostico: congelaHondo(diagnostico),
   };
+}
+
+/**
+ * Traslada el prólogo de un mapa **al estado de la partida**, y siembra su cola.
+ *
+ * Existe porque el prólogo corre antes de que la partida exista: en el arranque se
+ * compone la lista del día uno mientras la partida todavía no ha nacido, así que
+ * `correPrologo` asienta en áreas frescas y **alguien tiene que llevárselas**. Hasta
+ * SPEC-050 ese alguien no existía: `app/App.js` recibía el resultado entero y no lo
+ * usaba en ninguna línea, así que el mundo nacía sin pasado —ni rumores sedimentados,
+ * ni nada que contar en los núcleos, ni cola— y `siembraLaCola` no tenía llamador de
+ * producción. Es §6h en su variante de cableado, y su síntoma era que en un teléfono
+ * no podía saltar ni un micro-encuentro.
+ *
+ * Se copia **por mapa y no el área entera**, que es lo que permite que valga igual
+ * para el primer mapa de la partida y para uno levantado después: un segundo mapa no
+ * puede llevarse por delante lo que el de casa tenga sedimentado.
+ *
+ * El par **solo se guarda si el prólogo lo compuso**, y eso basta para que un mapa que
+ * no es el primero no lo pise nunca: `correPrologo` solo compone par con `primerMapa`,
+ * porque la puesta en escena es del arranque y solo del arranque (`arranque.md` §2).
+ *
+ * @param {object} estado el de la partida, vivo.
+ * @param {object} prologo lo que devolvió `correPrologo`.
+ * @returns las entradas que quedaron encoladas, para que quien llama pueda afirmarlo.
+ */
+export function guardaElPrologo(estado, prologo) {
+  if (!estado || typeof estado !== 'object' || !estado.rumores || !estado.nucleos || !estado.arranque || !estado.entregas) {
+    throw new Error('guardar el prólogo necesita el estado vivo de la partida con sus áreas: llegó algo que no las trae');
+  }
+  if (!prologo || prologo.corrido !== true) {
+    throw new Error(`guardar el prólogo necesita lo que devuelve correPrologo y llegó ${JSON.stringify(prologo) ?? String(prologo)}`);
+  }
+  const id = exigeMapaId(prologo.mapaId, 'guardar el prólogo en la partida');
+
+  // Un mapa que ya tiene pasado no lo vuelve a recibir. Es la misma negativa que
+  // `asienta` hace dentro del prólogo, y por la misma razón: una partida cargada de un
+  // respaldo no vuelve a ejecutar su prólogo, y sin esto «se cargó» y «se volvió a
+  // correr» serían indistinguibles desde fuera.
+  if (tienePrologo({ rumores: estado.rumores, mapaId: id })) {
+    throw new Error(`el mapa ${id} ya tiene su prólogo guardado en la partida: se guarda una sola vez`);
+  }
+
+  estado.rumores.mapas[id] = prologo.rumores.mapas[id] ?? { rumores: [] };
+  estado.nucleos.mapas[id] = prologo.nucleos.mapas[id] ?? {};
+  if (prologo.par) estado.arranque.par = prologo.par;
+
+  // La cola recibe **su área** y no el estado entero, que es lo que su firma pide. Merece
+  // decirse porque la primera versión de esto le pasaba el estado y la cola protestó
+  // nombrando lo que esperaba: es el contrato estricto de §6h haciendo su trabajo, en vez
+  // de una firma permisiva que habría sembrado en un sitio que nadie lee.
+  return siembraLaCola(estado.entregas, { mapaId: id, entradas: prologo.entregas });
 }
 
 /** Si un mapa ya tiene prólogo corrido, leído de lo que hay en la partida y no de una marca aparte. */

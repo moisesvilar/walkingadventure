@@ -10,7 +10,7 @@
 
 **Los enlaces son privados**, así que los seis HTML están además copiados en `docs/pantallas/`. No es redundancia: el paso 3 escribe el PRD a partir de ellos y no puede depender de una página que solo ve una persona. Al republicar un artefacto hay que refrescar su copia.
 
-**Y el flujo entre todas ellas está en `docs/flujo.md`**, en un diagrama de estados con las 40 pantallas como nodos y la acción o condición que lleva de cada una a la siguiente en las aristas. Es la vista que ningún artefacto por separado puede dar. Se comprueba con `node scripts/verifica-flujo.mjs`, que extrae las pantallas de los HTML de `docs/pantallas/` y falla si alguna no está en el diagrama, si el diagrama inventa alguna, si un nodo miente sobre a qué pantalla pertenece o si alguna queda sin ninguna arista.
+**Y el flujo entre todas ellas está en `docs/flujo.md`**, en un diagrama de estados con las 41 pantallas como nodos y la acción o condición que lleva de cada una a la siguiente en las aristas. Es la vista que ningún artefacto por separado puede dar. Se comprueba con `node scripts/verifica-flujo.mjs`, que extrae las pantallas de los HTML de `docs/pantallas/` y falla si alguna no está en el diagrama, si el diagrama inventa alguna, si un nodo miente sobre a qué pantalla pertenece o si alguna queda sin ninguna arista.
 
 ## 1 · Arranque
 
@@ -37,6 +37,8 @@ Dibujar la portada obligó a decidir qué **no** hay en ella, y las tres ausenci
 Cuatro decisiones nuevas: **máximo tres aventuras a la vez**, que es un tope y no un número fijo, porque a partir de ahí la pantalla se vuelve catálogo y elegir deja de ser un antojo · **la aventura a medias es una tarjeta en la portada**, y solo existe con la salida abierta, porque si llegaste a casa el cierre en corto ya se disparó · **sin cobertura no se avisa de nada**, así que la pantalla de preparación dice lo mismo haya red o no · y **no hay selector de mapas**, el activo lo decide dónde estás y los antiguos se leen desde el diario.
 
 Iteración: `docs/starting.md`, 6-ago-2026 (XIV).
+
+**Y desde la fila 50 son seis: se le ha añadido la pantalla 0, el ofrecimiento de levantar un mapa donde no llega ninguno de los tuyos.** El bloque no sale de un artefacto publicado —el enlace de arriba sigue teniendo cinco pantallas— sino del código ya cerrado: la composición estaba escrita en `packages/nucleo/partida/mapas.js` desde SPEC-041, la pantalla pintada en `app/pantallas/ofrecimiento.jsx`, y el diseño no la declaraba en ninguna parte, que es el único agujero que `verifica-flujo.mjs` no puede cazar por construcción. Se documenta aquí lo que ya estaba decidido, incluida la mitad que son ausencias —ni mapa de fondo, ni salir a andar, ni distancias, ni selector— y lo que sí se decidió al cablearla: sin topónimo, el sitio se dice con una frase del mundo en su lugar. Iteración: `docs/starting.md`, 12-ago-2026.
 
 ## 3 · En marcha
 

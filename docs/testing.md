@@ -1404,6 +1404,16 @@ Característica: Una partida, muchos mapas, y ningún selector
     Cuando abre la app
     Entonces se le ofrece levantar un mapa nuevo
 
+  # El sitio se dice como lugar y nunca como coordenada, y el nombre lo trae la misma ruta
+  # ciega por la que se levanta el mapa. Decidido el 12-ago-2026 al cablear A2P0: sin
+  # respaldo, no llegar el nombre dejaba una pantalla en blanco o la portada de casa a
+  # trescientos kilómetros, y de paso se perdían las tres puertas.
+  Escenario: Sin saber cómo se llama el sitio, se ofrece igual
+    Dado un jugador a 300 km de todos sus mapas y sin poder traer el nombre del sitio
+    Cuando abre la app
+    Entonces se le ofrece levantar un mapa nuevo con el sitio dicho en voz de mundo
+    Y no se nombra la red ni la cobertura en ninguna línea
+
   Escenario: No existe ningún selector de mapas
     Cuando el jugador recorre todas las pantallas
     Entonces no hay ninguna manera de cambiar el mapa activo a mano

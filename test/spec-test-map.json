@@ -29939,6 +29939,250 @@
       "caso": "Todo documento declara la versión del formato y la del generador",
       "hueco_de_bateria": true,
       "nota": "Defecto de prueba resuelto en esta fila: el caso comparaba contra el literal 1, que es justo la copia que el caso de al lado le prohíbe al código."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado un arranque que termina levantando su primer mapa, cuando la partida nace, entonces las entradas que dejó el prólogo están encoladas en su cola.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "La partida guarda las entradas que el prólogo dejó, y quedan pendientes en su cola",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado ese mismo arranque, cuando la partida nace, entonces los rumores sedimentados y lo que se cuenta en cada núcleo están en el estado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "La partida guarda los rumores sedimentados y lo que se cuenta en cada núcleo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado ese mismo arranque, cuando el prólogo compuso par, entonces el arranque de la partida lo lleva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "El par compuesto por el prólogo queda en el arranque de la partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una celda marcada sin contenido jugable, cuando corre su prólogo, entonces no se siembra ninguna entrada y la partida nace sin avería.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "Un mapa marcado sin contenido jugable se guarda sin sembrar nada y sin fallar",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una partida cuyo mapa ya tiene prólogo, cuando se vuelve a abrir, entonces el prólogo no se vuelve a correr.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "El prólogo de un mapa no se guarda dos veces",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la siembra de la cola, cuando recibe algo mal formado, entonces falla nombrando lo que llegó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "Guardar algo que no es un prólogo corrido falla nombrando lo que llegó",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una partida recién nacida con su prólogo asentado, cuando se congela y se vuelve a abrir, entonces las cuatro áreas vuelven con lo mismo dentro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "Lo que el prólogo dejó sobrevive a congelar la partida y volver a abrirla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado dos ejecuciones del arranque con la misma semilla, cuando las dos siembran, entonces las entradas encoladas son las mismas y en el mismo orden.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "Dos partidas con la misma semilla encolan lo mismo y en el mismo orden",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una partida con un mapa y un jugador lejos de él, cuando levanta un mapa nuevo, entonces ese mapa corre su prólogo y su cola queda sembrada bajo su propio identificador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "El prólogo del mapa nuevo no toca lo sedimentado en el de casa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la cola de un mapa y la de otro, cuando se consultan, entonces cada una devuelve lo suyo y ninguna entrada cruza de mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "Cada mapa tiene su cola y ninguna entrada cruza de mapa",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado un mapa que no es el primero, cuando corre su prólogo, entonces no se compone ningún par y el del arranque no se toca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/prologo-en-la-partida.test.mjs",
+      "caso": "Un mapa que no es el primero no compone par y no pisa el del arranque",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una posición dentro del alcance de un mapa de la partida, cuando se abre la app, entonces se ve la portada de ese mapa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "El mapa activo lo decide dónde estás",
+      "hueco_de_bateria": false,
+      "nota": "Escenario de docs/testing.md, reutilizado con su nombre literal.",
+      "escenario": "El mapa activo lo decide dónde estás"
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una partida abierta y una posición que no cae en ninguno de sus mapas, cuando se abre la app, entonces se ve el ofrecimiento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Llegar a un sitio nuevo ofrece levantar un mapa",
+      "hueco_de_bateria": false,
+      "nota": "Escenario de docs/testing.md, reutilizado con su nombre literal.",
+      "escenario": "Llegar a un sitio nuevo ofrece levantar un mapa"
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado el ofrecimiento compuesto, cuando se mira lo que sale de resolver, entonces no lleva ninguna coordenada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Lo que se resuelve no lleva ninguna coordenada dentro",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad, bloqueante."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado que no se puede saber dónde estás, cuando se abre la app, entonces se dice con su motivo y no se supone que hay mapa activo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Sin permiso de ubicación no se supone que hay mapa ni que no lo hay: se dice",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado un sensor que falla, cuando se resuelve dónde estás, entonces la app no se cae y deja dicho el motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Un sensor que falla no tumba la app y deja dicho por qué",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado el montaje sin alguna de sus piezas, cuando se resuelve dónde estás, entonces falla nombrando la que falta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Montar esto sin sus piezas falla nombrando la que falta",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado el topónimo que no se pudo traer por la ruta ciega, cuando se compone el ofrecimiento, entonces se compone igual con el respaldo y A2P0 se ve entera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Sin topónimo el ofrecimiento se compone igual, y entero",
+      "hueco_de_bateria": false,
+      "escenario": "Sin saber cómo se llama el sitio, se ofrece igual",
+      "nota": "El escenario se añadió a docs/testing.md con esta fila, porque el respaldo sin topónimo es decisión de diseño nueva y cerrada por el dueño."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado el respaldo del ofrecimiento, cuando se lee su texto, entonces no nombra la red, ni la cobertura, ni ninguna cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "El respaldo del sitio no nombra la red, ni la cobertura, ni ninguna cifra",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado el camino con red, cuando se compone el ofrecimiento sin sitio o con cadena vacía, entonces falla nombrándolo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Con red el contrato no se ablanda: sin sitio y con cadena vacía siguen siendo error",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una respuesta de OSM con varios lugares con nombre, cuando se elige el topónimo, entonces el elegido no depende del orden de llegada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "El nombre elegido no depende del orden en que Overpass devuelva los elementos",
+      "hueco_de_bateria": true,
+      "nota": "@determinismo, bloqueante."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la consulta del topónimo, cuando se mira qué sale del móvil, entonces viaja por la misma ruta ciega y no se añade ningún identificador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "El traedor pide por la ruta de generación y no manda nada más que la consulta",
+      "hueco_de_bateria": true,
+      "nota": "@privacidad, bloqueante."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado una respuesta sin ningún lugar con nombre, cuando se elige el topónimo, entonces no se inventa ninguno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "Sin ningún lugar con nombre no se inventa uno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la capa del descarte puesta sobre la ficha, cuando se mira cómo se compone, entonces cubre la pantalla como capa y la ficha sigue montada debajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capa-descarte.test.mjs",
+      "caso": "La capa del descarte cubre la pantalla en lugar de repartirse el alto con la ficha",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la capa del descarte con más motivos de los que caben, cuando se recorre, entonces los motivos se desplazan y la acción no se va de la pantalla.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capa-descarte.test.mjs",
+      "caso": "Lo que se desplaza son los motivos, y la acción se queda fuera del desplazable",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la capa del descarte, cuando se cierra, entonces se vuelve a la ficha con todo como estaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/capa-descarte.test.mjs",
+      "caso": "La ficha sigue montada debajo, que es lo que hace que cerrar la capa la devuelva entera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la capa del descarte, cuando se toca el centro de «Marcarlo», entonces el sitio queda marcado.",
+      "nivel": "@app",
+      "fichero": "test/app/descarte.yaml",
+      "caso": "El jugador puede marcar un anclaje que no vale",
+      "hueco_de_bateria": true,
+      "nota": "«El jugador puede marcar un anclaje que no vale» es una CARACTERÍSTICA de docs/testing.md, no un escenario, así que el mapa no puede citarla como tal. El flujo sigue en límite declarado por otro motivo —llegar a la puerta de A4P8 no lo gobierna un flujo, fila 44—; lo que esta fila arregla es que, una vez allí, el centro del botón pulse. Verificado a mano en wa-pixel."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la rama del ofrecimiento en la pantalla, cuando se entra en ella, entonces monta los mismos hooks que las demás y la app no se cae.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "El ofrecimiento no sale antes de los hooks de la pantalla",
+      "hueco_de_bateria": true,
+      "nota": "Defecto encontrado la primera vez que alguien entró en la rama, en wa-pixel el 12-ago-2026: el return del ofrecimiento estaba antes de tres hooks y React tumbaba la app con «Rendered fewer hooks than expected». Venía de SPEC-041 y no había saltado nunca porque nadie pasaba ofrecimiento."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado quien monta antes-de-salir, cuando hay que ofrecer un mapa, entonces le pasa el ofrecimiento y sus dos acciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "La pantalla recibe el ofrecimiento y sus dos acciones desde quien la monta",
+      "hueco_de_bateria": true
     }
   ]
 }
