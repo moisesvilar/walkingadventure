@@ -87,6 +87,7 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | done |
 | 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | done (sensor y rótulo; el camino de la llegada se queda en la 44 — ver §7a) |
 | 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | done (entrega los cinco; **RF-QUEST-004 y RF-BUCLE-011**, que la 44 le pasó, quedan entregados) |
+| 50 | cableados-que-faltan | RF-QUEST-010, RF-QUEST-016, RF-MUNDO-004, RF-PRIV-004 | must | pending |
 
 La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 
@@ -109,6 +110,8 @@ Y lo que la fila destapó y no arregla, porque no es suya: **la app lleva desde 
 La **49** son las dos pantallas que sus filas nunca escribieron: **A4P3, la escena de un beat**, y **A5P1-A5P4, el telón**. Medido por cierre de imports el 10-ago-2026: SPEC-034 y SPEC-036 son las dos únicas filas de B5 y B6 que **no tocaron ni un fichero de `app/`**. Las dos siguen en `done` y no se reabren —entregaron el paquete entero, con sus pruebas—, pero el checklist ya no dice que entregaran pantalla.
 
 Las dos van con la misma guarda, `test/nucleo/pantallas-huerfanas.test.mjs`, que fija en **8 de 32** las pantallas escritas a las que no llega ningún import desde `App.js` y falla si el número sube. Eran **12** antes de la fila 43. Ese número es el que mide de verdad el patrón: no que las filas no entreguen pantalla —doce de dieciséis la entregaron— sino que **una fila podía entregar una pantalla y darse por hecha sin que nadie pudiera abrirla**.
+
+La **50** son los tres hallazgos de la 49 que comparten forma —§6h en su variante de cableado: pieza escrita, probada y sin llamador— y que cambian el juego que se ve. Medido de cero el 12-ago-2026 al escribir su encargo: `siembraLaCola` sigue sin llamador desde `app/` (ningún micro-encuentro salta en un teléfono, deuda de la fila 19), `NUCLEO_DEL_OFRECIMIENTO` sigue sin importador (A2P0 inalcanzable, de SPEC-041), y A4P8 quedó medida por la 49 en el aparato: la capa de descarte desborda 1080×2400 y «Marcarlo» no se puede pulsar (RF-PRIV-004, de SPEC-035). Va antes que la 46 a propósito —cero dependencias nuevas, cero decisiones previas del dueño, y las guardas que vigilan las tres piezas ya existen—; las filas 19, 35 y 41 siguen en `done` y no se reabren: entregaron el mecanismo, y lo que faltaba era el cableado. El encargo completo está en `docs/prompts/prompt-cableados-que-faltan.md`.
 
 ## Notas de derivación
 
