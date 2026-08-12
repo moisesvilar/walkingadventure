@@ -37,7 +37,7 @@ Los niveles son los de `docs/testing.md` y se respetan aquí, porque son los que
 
 - **Nombre del caso** = el nombre del escenario de `docs/testing.md`, literal. Es lo que permite cruzar batería e implementación con un grep, y lo que consume el análisis de fallos.
 - **Mapa** en `test/spec-test-map.json`, validado contra `test/spec-test-map.schema.json`.
-- **Reports** en `test/reports/<SPEC-NNN|SPEC-NNN-iter-M|SUITE>-run-<YYYYMMDDTHHMMSSZ>.md`.
+- **Reports** en `test/reports/<SPEC-NNN|SPEC-NNN-iter-M|SUITE>-run-<YYYYMMDDTHHMMSSZ>.md`. **No se versionan** (`.gitignore` los excluye con su motivo: se regeneran); los números que importan viajan en la bitácora y en los mensajes de commit, y el report en disco es el instrumento de la sesión que lo corrió.
 
 ## Código
 
