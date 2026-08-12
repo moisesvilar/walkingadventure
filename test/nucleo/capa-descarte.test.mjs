@@ -7,8 +7,19 @@
 //
 // La causa no era el alto de los motivos: `app/pantallas/llegada.js` montaba `CapaDescarte`
 // como **último hijo del flujo normal**, y su raíz era `flex: 1` sin posicionar, así que se
-// repartía el alto con la ficha en vez de ponerse encima. La otra capa del mismo fichero,
-// el visor, siempre usó `absoluteFillObject`. Esa es toda la diferencia.
+// repartía el alto con la ficha en vez de ponerse encima.
+//
+// Y hay una segunda mitad, que solo apareció midiéndola en `wa-pixel` el 12-ago-2026: el
+// primer arreglo usó `...StyleSheet.absoluteFillObject`, que es lo que hace el visor, **y no
+// cuajó** — la capa seguía saliendo en `[0,2122][1080,2400]`, apilada debajo de la ficha, y
+// los cinco motivos no se pintaban. Con las cuatro anclas escritas una a una sale
+// `[0,0][1080,2400]`, los cinco motivos con cotas sanas y el centro de «Marcarlo» marca.
+// Por eso lo que se afirma aquí es **el posicionamiento**, no la constante: una prueba que
+// exigiera el spread habría dado por bueno exactamente el estado que no funciona.
+//
+// Queda una sospecha que no es de esta fila y se ficha: **el visor usa el spread**, así que
+// puede tener el mismo defecto. No se ha medido —`visor.yaml` está en límite declarado por
+// otro motivo— y no se toca a ciegas.
 //
 // Se afirma **leyendo la fuente**, que es el mismo mecanismo de `escena-cableada.test.mjs` y
 // por la misma razón: las dos pantallas llevan JSX y no se pueden importar desde
@@ -32,19 +43,26 @@ const fuente = (ruta) => readFileSync(join(RAIZ_REPO, ruta), 'utf8');
 
 describe('El sitio que no pega se marca desde una capa, y por eso se puede marcar', () => {
   test('La capa del descarte cubre la pantalla en lugar de repartirse el alto con la ficha', () => {
-    const codigo = codigoDe(fuente(DESCARTE));
+    // Sin limpiar: `codigoDe` vacía las cadenas, y `'absolute'` es precisamente una cadena.
+    const raiz = /raiz:\s*\{([^}]*)\}/.exec(fuente(DESCARTE));
+    assert.ok(raiz, 'la capa del descarte ya no declara su raíz');
     assert.match(
-      codigo,
-      /raiz:\s*\{[^}]*StyleSheet\.absoluteFillObject/,
-      'la raíz de la capa no está posicionada: con `flex: 1` compite por el alto con la ficha y empuja «Marcarlo» fuera de la pantalla',
+      raiz[1],
+      /position:\s*'absolute'/,
+      'la raíz de la capa no está posicionada: sin `position: absolute` compite por el alto con la ficha y empuja «Marcarlo» fuera de la pantalla',
     );
+    // Las cuatro anclas, una a una. Sin las cuatro, «absoluta» significa «flotando donde la
+    // dejó el flujo», que es medio arreglo y se ve igual de roto.
+    for (const ancla of ['top', 'right', 'bottom', 'left']) {
+      assert.match(raiz[1], new RegExp(`${ancla}:\\s*0`), `a la capa le falta el ancla ${ancla}`);
+    }
   });
 
-  test('La capa del descarte se posiciona igual que la otra capa del mismo momento', () => {
-    // El visor es el precedente, y estaba bien desde que se escribió. Se compara contra él
-    // en lugar de contra una constante para que las dos no puedan divergir en silencio.
+  test('El visor sigue siendo capa, aunque lo declare de otra manera', () => {
+    // Los dos son capas del mismo momento y por eso se miran juntos. **No se exige que lo
+    // declaren igual**: el descarte se midió en el aparato y el visor no, así que obligarlos
+    // a compartir mecanismo sería propagar a ciegas uno de los dos.
     assert.match(codigoDe(fuente(VISOR)), /capa:\s*\{[^}]*absoluteFillObject/);
-    assert.match(codigoDe(fuente(DESCARTE)), /raiz:\s*\{[^}]*absoluteFillObject/);
   });
 
   test('Lo que se desplaza son los motivos, y la acción se queda fuera del desplazable', () => {

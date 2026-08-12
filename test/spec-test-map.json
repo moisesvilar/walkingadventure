@@ -30164,6 +30164,23 @@
       "caso": "El jugador puede marcar un anclaje que no vale",
       "hueco_de_bateria": true,
       "nota": "«El jugador puede marcar un anclaje que no vale» es una CARACTERÍSTICA de docs/testing.md, no un escenario, así que el mapa no puede citarla como tal. El flujo sigue en límite declarado por otro motivo —llegar a la puerta de A4P8 no lo gobierna un flujo, fila 44—; lo que esta fila arregla es que, una vez allí, el centro del botón pulse. Verificado a mano en wa-pixel."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado la rama del ofrecimiento en la pantalla, cuando se entra en ella, entonces monta los mismos hooks que las demás y la app no se cae.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "El ofrecimiento no sale antes de los hooks de la pantalla",
+      "hueco_de_bateria": true,
+      "nota": "Defecto encontrado la primera vez que alguien entró en la rama, en wa-pixel el 12-ago-2026: el return del ofrecimiento estaba antes de tres hooks y React tumbaba la app con «Rendered fewer hooks than expected». Venía de SPEC-041 y no había saltado nunca porque nadie pasaba ofrecimiento."
+    },
+    {
+      "spec": "SPEC-050",
+      "criterio": "Dado quien monta antes-de-salir, cuando hay que ofrecer un mapa, entonces le pasa el ofrecimiento y sus dos acciones.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/donde-estas.test.mjs",
+      "caso": "La pantalla recibe el ofrecimiento y sus dos acciones desde quien la monta",
+      "hueco_de_bateria": true
     }
   ]
 }

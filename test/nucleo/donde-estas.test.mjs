@@ -12,6 +12,8 @@
 // `node --test` sin dispositivo y sin cobertura.
 
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, test } from 'node:test';
 
 import {
@@ -22,6 +24,7 @@ import {
 } from '../../app/mapa/donde-estas.js';
 import { consultaDeToponimo, eligeToponimo, creaTraedorDeToponimos } from '../../app/datos/toponimo.js';
 import { componeOfrecimiento, hayQueOfrecerMapa } from '../../packages/nucleo/partida/mapas.js';
+import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
 
 /** Las dos piezas del núcleo que este camino pide, armadas por ruta relativa (§6u). */
 const NUCLEO = { componeOfrecimiento, hayQueOfrecerMapa };
@@ -219,5 +222,37 @@ describe('El topónimo viaja por la ruta ciega y se elige en orden declarado', (
   test('Montar el traedor sin cliente falla nombrando la pieza', () => {
     assert.throws(() => creaTraedorDeToponimos({}), /cliente del proxy/);
     assert.throws(() => creaTraedorDeToponimos({ cliente: {} }), /cliente del proxy/);
+  });
+});
+
+describe('La rama de A2P0 se puede ejecutar, que es más que existir', () => {
+  const ANTES_DE_SALIR = 'app/pantallas/antes-de-salir.jsx';
+
+  test('El ofrecimiento no sale antes de los hooks de la pantalla', () => {
+    // Es el defecto que la fila 50 encontró **la primera vez que alguien entró en la rama**:
+    // el `return` del ofrecimiento estaba en medio del cuerpo, así que esa rama montaba menos
+    // hooks que las demás y React tumbaba la app con «Rendered fewer hooks than expected».
+    // Nunca había saltado porque nadie pasaba nunca `ofrecimiento` — SPEC-041 escribió la
+    // rama y la dejó sin llamador (§6h). Medido en `wa-pixel` el 12-ago-2026.
+    const codigo = readFileSync(join(RAIZ_REPO, ANTES_DE_SALIR), 'utf8');
+    const rama = codigo.indexOf('if (ofrecimiento) {');
+    assert.ok(rama > 0, 'la pantalla ya no tiene la rama del ofrecimiento');
+
+    // Ningún hook puede quedar por debajo del `return` de esa rama.
+    const despues = codigo.slice(rama);
+    for (const hook of ['useState(', 'useMemo(', 'useCallback(', 'useEffect(', 'useRef(']) {
+      assert.ok(
+        !despues.includes(hook),
+        `la pantalla monta ${hook} después del return del ofrecimiento: esa rama montaría menos hooks que las demás y React la tumbaría`,
+      );
+    }
+  });
+
+  test('La pantalla recibe el ofrecimiento y sus dos acciones desde quien la monta', () => {
+    // La mitad que faltaba: la pantalla lo aceptaba y quien la montaba no se lo pasaba nunca.
+    const montado = readFileSync(join(RAIZ_REPO, 'app/pantallas/antes-de-salir-montado.jsx'), 'utf8');
+    for (const propiedad of ['ofrecimiento=', 'alLevantarMapa=', 'alDejarloEstar=']) {
+      assert.ok(montado.includes(propiedad), `el punto de montaje no pasa ${propiedad}`);
+    }
   });
 });

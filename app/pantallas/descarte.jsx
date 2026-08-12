@@ -87,8 +87,16 @@ export function CapaDescarte({ capa, alMarcar = null, alCerrar = null }) {
 
 const estilos = StyleSheet.create({
   // Capa: cubre la pantalla y **no compite por el alto con la ficha**, que sigue montada
-  // debajo para que cerrar la devuelva con todo como estaba. Es lo mismo que hace el visor.
-  raiz: { ...StyleSheet.absoluteFillObject, backgroundColor: PLACA },
+  // debajo para que cerrar la devuelva con todo como estaba.
+  //
+  // Las cuatro anclas van **escritas una a una y no con `...StyleSheet.absoluteFillObject`**,
+  // que es lo que hace el visor. Medido en `wa-pixel` el 12-ago-2026: con el spread la capa
+  // salía en `[0,2122][1080,2400]` —o sea, apilada debajo de la ficha y no encima— y los
+  // cinco motivos no se pintaban; escritas así sale a pantalla completa. Se deja explícito
+  // en vez de perseguir por qué el spread no cuaja: lo que esta pantalla necesita es un
+  // posicionamiento que se pueda leer y afirmar, no una constante que dependa de cómo la
+  // exporte la versión de React Native que toque.
+  raiz: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: PLACA },
   desplazable: { flex: 1 },
   contenido: { padding: 28, gap: 16 },
   nombre: { fontFamily: 'serif', fontSize: 22, color: LAPIZ },
