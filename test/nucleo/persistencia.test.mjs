@@ -578,15 +578,20 @@ describe('El ida y vuelta', () => {
 describe('La versión del formato', () => {
   test('Todo documento declara la versión del formato y la del generador', async () => {
     const doc = await documentoDe('suelo-250m');
-    assert.equal(doc.version, 1, 'la versión del formato no es el entero 1');
+    // **Contra la constante y no contra el literal.** Hasta SPEC-049 aquí ponía `1`, que era
+    // cierto y era una copia: exactamente lo que el caso de al lado —«La versión del formato
+    // sale de una sola constante»— le exige al código. Cuando la primera migración de verdad
+    // subió la constante a 2, este caso se puso rojo por su propia copia y no por ningún
+    // defecto de lo escrito. Lo que hay que afirmar es que el documento declara **la** versión,
+    // que es un entero y que va la primera en el texto; cuál sea el número es de `formato.js`.
+    assert.equal(doc.version, VERSION_FORMATO, 'la versión del formato del documento no es la que declara la constante única');
     assert.equal(Number.isInteger(doc.version), true);
-    assert.equal(doc.version, VERSION_FORMATO);
     assert.equal(doc.generador, VERSION_GENERADOR, 'el documento no declara con qué versión del generador se escribió');
     assert.equal(typeof doc.generador, 'string');
     // Y la versión va antes que nada en el texto: es lo que permite rechazar un
     // documento futuro sin haber interpretado ningún otro campo.
     const crudo = texto(doc);
-    assert.ok(crudo.startsWith('{"version":1,'), `el documento no empieza por su versión: ${crudo.slice(0, 40)}`);
+    assert.ok(crudo.startsWith(`{"version":${VERSION_FORMATO},`), `el documento no empieza por su versión: ${crudo.slice(0, 40)}`);
   });
 
   test('La versión del formato sale de una sola constante', () => {

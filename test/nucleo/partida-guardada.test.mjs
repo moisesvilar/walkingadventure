@@ -9,10 +9,13 @@
 // La guarda hermana de esta fila —`partida-persistida.test.mjs`— comprueba que el cableado
 // existe leyendo la fuente de `app/`. Esto comprueba que además **hace lo que dice**.
 //
-// La migración se ejercita hoy, con la versión de formato todavía en 1, porque la cadena y
-// la versión de destino entran por la firma: es la mitad del diseño de `migracion.js`
-// (`decisiones-orquestador.md` §6o) y sin ella el criterio se cumpliría siempre por no
-// haber nada que migrar, que no mide nada.
+// La migración se ejercita **siempre**, tenga el formato la versión que tenga, porque la
+// cadena y la versión de destino entran por la firma: es la mitad del diseño de
+// `migracion.js` (`decisiones-orquestador.md` §6o) y sin ella el criterio se cumpliría por
+// no haber nada que migrar, que no mide nada. Esa frase decía «con la versión de formato
+// todavía en 1» y era una descripción del estado de las cosas: cuando SPEC-049 abrió la
+// primera migración de verdad, los tres casos de abajo se pusieron rojos por eso y no por
+// ningún defecto. El arreglo está escrito al lado de ellos.
 //
 // Nada toca la red ni el reloj del sistema.
 
@@ -37,7 +40,7 @@ import {
   componeExportacion,
 } from '../../packages/nucleo/partida/exportacion.js';
 import { creaCadena, paso } from '../../packages/nucleo/partida/migracion.js';
-import { sinRastroDeUbicacion } from '../../packages/nucleo/partida/formato.js';
+import { VERSION_FORMATO, sinRastroDeUbicacion } from '../../packages/nucleo/partida/formato.js';
 import { anexa, hecho } from '../../packages/nucleo/partida/hechos.js';
 import { CLAVES, listaMapas } from '../../packages/nucleo/partida/mapa.js';
 
@@ -318,8 +321,20 @@ describe('Una partida que no se puede abrir da la cara', () => {
 });
 
 describe('Versionado y migración del estado', () => {
-  /** La cadena de prueba: un paso 1→2 que solo sube la versión, y su destino sintético. */
-  const AL_FUTURO = { cadena: creaCadena([paso({ de: 1, a: 2, porque: 'ejercitar la cadena' })]), versionDeDestino: 2 };
+  // **La banda sintética, y por qué se deriva en vez de clavarse.** Estos tres casos nacían
+  // una partida y la migraban a la versión 2 con una cadena `1→2` escrita a mano, y eso
+  // funcionaba **solo mientras `VERSION_FORMATO` fuera 1**: la partida recién nacida se
+  // escribía en la 1 y el destino 2 quedaba por encima. Cuando SPEC-049 abrió la primera
+  // migración de verdad del proyecto y la constante pasó a 2, la partida nacía ya en la 2, no
+  // había nada que migrar y los tres se pusieron rojos por describir el estado de las cosas en
+  // vez de un criterio. Es el mismo defecto que `test/nucleo/migracion.test.mjs` tenía, con la
+  // misma causa y el mismo arreglo: **el origen es la versión real y el destino es la
+  // siguiente**, sea cual sea el número, para que la próxima migración no los vuelva a romper.
+  const V = VERSION_FORMATO;
+  const SALTO = `${V}→${V + 1}`;
+
+  /** La cadena de prueba: un paso que solo sube la versión, y su destino sintético. */
+  const AL_FUTURO = { cadena: creaCadena([paso({ de: V, a: V + 1, porque: 'ejercitar la cadena' })]), versionDeDestino: V + 1 };
 
   test('Una partida de una versión anterior se migra al abrirla', async () => {
     const almacen = enMemoria();
@@ -327,13 +342,13 @@ describe('Versionado y migración del estado', () => {
     await guardada(almacen, AL_FUTURO).abre();
 
     const doc = JSON.parse(await almacen.lee(CLAVES_DE_PARTIDA.estado));
-    assert.equal(doc.version, 2, 'el documento guardado queda en la versión de destino');
+    assert.equal(doc.version, V + 1, 'el documento guardado queda en la versión de destino');
     assert.equal(doc.areas.personaje.nombre, 'Sabela', 'y el contenido cruza el salto entero');
-    assert.equal(JSON.parse(await almacen.lee(CLAVES_DE_PARTIDA.registro)).version, 2, 'los dos documentos juntos, no uno');
+    assert.equal(JSON.parse(await almacen.lee(CLAVES_DE_PARTIDA.registro)).version, V + 1, 'los dos documentos juntos, no uno');
 
     const procedencia = JSON.parse(await almacen.lee(CLAVE_DE_PROCEDENCIA));
     assert.equal(procedencia.de, 'migracion');
-    assert.equal(procedencia.migradaDesde, 1, 'queda declarado de qué versión venía');
+    assert.equal(procedencia.migradaDesde, V, 'queda declarado de qué versión venía');
   });
 
   test('Un salto sin paso registrado no se interpreta con las reglas nuevas', async () => {
@@ -341,9 +356,9 @@ describe('Versionado y migración del estado', () => {
     await nacida(guardada(almacen));
     const antes = await almacen.lee(CLAVES_DE_PARTIDA.estado);
 
-    const abierta = await guardada(almacen, { cadena: creaCadena([]), versionDeDestino: 2 }).abre();
+    const abierta = await guardada(almacen, { cadena: creaCadena([]), versionDeDestino: V + 1 }).abre();
     assert.equal(abierta.estado, APERTURAS.NO_SE_PUDO);
-    assert.match(abierta.motivo, /falta el paso 1→2/, 'el motivo nombra el salto que falta');
+    assert.match(abierta.motivo, new RegExp(`falta el paso ${SALTO}`), 'el motivo nombra el salto que falta');
     assert.equal(await almacen.lee(CLAVES_DE_PARTIDA.estado), antes, 'y el documento guardado no se toca');
   });
 
@@ -354,10 +369,22 @@ describe('Versionado y migración del estado', () => {
 
     // Un paso que introduce un campo que el esquema cerrado no declara. Es la forma más
     // barata de un paso mal escrito, y lo que no puede pasar es que sustituya al bueno.
-    const rota = creaCadena([paso({ de: 1, a: 2, introduce: { 'areas.oro.regalo': 3 }, porque: 'un paso mal escrito' })]);
-    const abierta = await guardada(almacen, { cadena: rota, versionDeDestino: 2 }).abre();
+    //
+    // **Este caso protege algo real y no es statu quo**, aunque cayera con los otros dos: lo
+    // que lo hacía rojo era que no llegaba a migrar nada, no que hubiera dejado de proteger.
+    // Con el destino derivado vuelve a migrar de verdad, el paso escribe `areas.oro.regalo`
+    // —un campo que `AREA_ORO` no declara—, el documento migrado no pasa el esquema y la
+    // partida buena se queda donde estaba. Que el paso siga siendo imposible de levantar se
+    // afirma aquí abajo antes que nada: sin eso, el caso pasaría también con un paso correcto.
+    const rota = creaCadena([paso({ de: V, a: V + 1, introduce: { 'areas.oro.regalo': 3 }, porque: 'un paso mal escrito' })]);
+    const abierta = await guardada(almacen, { cadena: rota, versionDeDestino: V + 1 }).abre();
     assert.equal(abierta.estado, APERTURAS.NO_SE_PUDO);
+    assert.ok(abierta.motivo, 'la migración rota no dice por qué no se pudo abrir');
     assert.equal(await almacen.lee(CLAVES_DE_PARTIDA.estado), antes, 'no se escribe el documento migrado');
+
+    // Y la partida buena sigue abriéndose sin la cadena rota: lo que se descartó fue la
+    // migración, no la partida.
+    assert.equal((await guardada(almacen).abre()).estado, APERTURAS.ABIERTA, 'descartar la migración rota se ha llevado por delante la partida buena');
   });
 
   test('Una partida que ya está en la versión actual no se migra ni se reescribe', async () => {
