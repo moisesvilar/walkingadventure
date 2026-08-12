@@ -29776,6 +29776,168 @@
       "caso": "node scripts/verifica-flujo.mjs sigue en verde",
       "hueco_de_bateria": true,
       "nota": "Hueco de batería. Lo ejecuta el runner: no se añade ni se quita ninguna pantalla de docs/pantallas/ y no se cambia ninguna arista."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una aventura aceptada y un sitio que se marca a mitad de camino, cuando se recupera su cadena, entonces es la misma beat a beat: se recastea contra los sitios que estaban marcados al aceptarla y no contra los de ahora.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Marcar un sitio a mitad de camino no le cambia la cadena a la aventura aceptada",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Arreglo 3c0fbae, la novena costura. El caso afirma además el contraste: con el mundo de ahora la cadena sale distinta, que es lo que hace que mida algo."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una aventura aceptada con su huella de descartes, cuando se congela y se levanta el área, entonces la cadena que se recupera sigue siendo la misma: la huella cruza el documento.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La huella sobrevive a congelar y levantar el área, que es el día siguiente de verdad",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Se congela y se levanta de verdad, que es el día siguiente: leer el objeto vivo no probaría nada del documento."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una aventura que se acepta con sitios ya marcados, cuando se congela su huella, entonces son esos y no la lista vacía, y su cadena se recupera con ellos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Una aventura aceptada con sitios ya marcados congela esos y no la lista vacía",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. El otro lado del caso anterior: la huella no es siempre vacía."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una aventura que se cierra, cuando se mira su huella, entonces está vacía: la siguiente no se castea contra los sitios marcados de la anterior.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Cerrar la aventura vacía la huella, y la siguiente no se castea contra lo de la anterior",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una aventura que se acepta sin declarar contra qué sitios marcados se casteó, cuando se acepta, entonces falla nombrándolo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Aceptar una aventura sin declarar contra qué se casteó falla nombrándolo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Y el mundo de una aventura tampoco se recupera sin lista."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una plantilla ya vivida, cuando se compone la lista de hoy, entonces no se vuelve a ofrecer.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Una plantilla ya vivida no se vuelve a ofrecer",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Arreglo 82dc6ec. Era invisible porque antes de esta fila ninguna aventura podía cerrarse nunca. El caso lleva su contraste: sin pasarle el área, la misma plantilla sigue ahí."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado un anclaje marcado «este sitio no pega», cuando se compone la lista de hoy, entonces ningún lazo ofrecido pasa por él.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "Un anclaje marcado no castea, y sin pasarle los descartes sí",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Arreglo 82dc6ec, RF-PRIV-004."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado la petición que la pantalla le entrega a la lista de hoy, cuando se inspecciona, entonces lleva el registro de aventuras y la vista de descartes, y la aceptación declara contra qué se casteó.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/escena-cableada.test.mjs",
+      "caso": "La petición de la lista lleva la memoria y los descartes, y no una copia rancia",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Se lee de la fuente porque quien compone la petición es una pantalla con JSX."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado el paso 1→2 de la cadena real, cuando se inspecciona, entonces declara el valor que introduce, la clase de documento a la que se aplica y por qué existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "El paso 1→2 declara su valor, su clase y por qué existe",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. La primera migración de formato del proyecto (VERSION_FORMATO 1→2)."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una partida escrita en la versión 1, cuando se migra, entonces queda en la 2 con la huella vacía y la aventura en curso intacta por el beat donde iba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Una partida de la versión 1 migra a la 2 con la huella vacía y la aventura intacta",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado una partida de la versión 1 sin ninguna aventura en curso, cuando se migra, entonces enCurso sigue en nulo y no se convierte en objeto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Una partida sin aventura en curso migra con enCurso en nulo y no en un objeto",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Es el motivo por el que el campo va al lado de enCurso y no dentro: la cadena introduce campos por su ruta y no sabe bifurcar."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado un documento de la versión 1 que no pasa por la migración, cuando se levanta, entonces falla nombrando el campo en vez de abrirse a medias.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Un documento de la versión 1 que no pasa por la migración da la cara nombrando el campo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Sin la huella, la cadena se recuperaría contra los sitios marcados de ahora."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado un documento de otra clase, cuando se le aplica el paso 1→2, entonces sube de versión y no gana ningún campo que su esquema no declare.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "Un documento de otra clase sube de versión y no gana ningún campo",
+      "hueco_de_bateria": true,
+      "nota": "Hueco de batería. Sin la clase declarada, una copia antigua dejaría de poder abrirse entera."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado la cadena real del formato, cuando se comprueba, entonces cubre paso a paso desde la versión mínima soportada hasta la constante única, y cada paso dice por qué existe.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/migracion.test.mjs",
+      "caso": "La versión de formato que el juego escribe sale de la constante única y no de una copia",
+      "hueco_de_bateria": true,
+      "nota": "Defecto de prueba resuelto en esta fila: el caso exigía «la cadena real tiene que estar vacía», que era una descripción del estado de las cosas y no un criterio. Se sustituye por su inverso, con el porqué escrito en el fichero."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado el tamaño declarado del fichero exportado, cuando cambia el esquema del estado, entonces la cifra se remide con su causa y su delta escritos, y el presupuesto de SPEC-016 se afirma aparte con su margen.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/exportacion.test.mjs",
+      "caso": "El fichero de una partida de mil días queda medido entero y cabe en el presupuesto de SPEC-016",
+      "hueco_de_bateria": true,
+      "nota": "Defecto de prueba resuelto en esta fila: 718 693 → 718 718 B, +25 B, que es \"descartesDelCasting\":[]. Medido el 12-ago-2026: registro 695 324 B de 6 291 456 B (11,1 %) y estado 1 942 B de 2 097 152 B (0,1 %). Se añade una aserción de margen a la mitad para que la cifra declarada no tape el presupuesto."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado la migración del estado al abrir la partida, cuando se ejercita, entonces el origen es la versión real y el destino la siguiente, sea cual sea el número.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una partida de una versión anterior se migra al abrirla",
+      "hueco_de_bateria": true,
+      "nota": "Defecto de prueba resuelto en esta fila: los tres casos de migración clavaban el 2 y funcionaban solo mientras VERSION_FORMATO fuera 1. El destino se deriva, para que la próxima migración no los vuelva a romper."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado un paso de migración imposible de levantar, cuando se abre la partida, entonces se descarta la migración y la partida buena se queda donde estaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/partida-guardada.test.mjs",
+      "caso": "Una migración que no se puede levantar no sustituye a la buena",
+      "hueco_de_bateria": true,
+      "nota": "Defecto de prueba resuelto en esta fila: caía con los otros dos por no llegar a migrar nada, no por haber dejado de proteger. Se le añade la afirmación de que la partida buena sigue abriéndose."
+    },
+    {
+      "spec": "SPEC-049",
+      "criterio": "Dado cualquier documento de la partida, cuando se lee su versión de formato, entonces sale de la constante única y no de una copia escrita a mano.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/persistencia.test.mjs",
+      "caso": "Todo documento declara la versión del formato y la del generador",
+      "hueco_de_bateria": true,
+      "nota": "Defecto de prueba resuelto en esta fila: el caso comparaba contra el literal 1, que es justo la copia que el caso de al lado le prohíbe al código."
     }
   ]
 }

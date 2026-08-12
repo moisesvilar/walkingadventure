@@ -20,10 +20,12 @@
 // `creaLasLlegadas` y a `creaLaAventuraEnCurso` de `app/`, que es lo que la app monta.
 
 import { creaLaAventuraEnCurso } from '../../app/marcha/aventura.js';
+import { creaElCasting } from '../../app/marcha/casting.js';
 import { creaLasLlegadas, repartoDeLaAventuraEnCurso } from '../../app/marcha/llegadas.js';
 import { acepta, aventuraEnCurso, resuelveBeat } from '../../packages/nucleo/partida/aventura-en-curso.js';
 import { echaElTelon, piezasDeSerie } from '../../packages/nucleo/partida/cierre-de-salida.js';
 import { apuntaHaberEstado, libroDePendientes } from '../../packages/nucleo/partida/conocimiento.js';
+import { anclajesDe, hayDescartes, vistaDeAnclajes, vistaDeDescartes } from '../../packages/nucleo/partida/descartes.js';
 import { entradasDe, proyeccion } from '../../packages/nucleo/partida/diario.js';
 import { estadoInicial } from '../../packages/nucleo/partida/estado.js';
 import { registroInicial } from '../../packages/nucleo/partida/hechos.js';
@@ -37,12 +39,24 @@ import { componeElTelon } from '../../packages/nucleo/partida/telon.js';
 import { creaDetectorDeTransporte } from '../../packages/nucleo/partida/transporte.js';
 import { CATALOGO } from '../../packages/nucleo/quests/catalogo.js';
 import { componeElDesenlace, repuestoDe } from '../../packages/nucleo/quests/desenlace.js';
+import { castAll } from '../../packages/nucleo/quests/casting.js';
 import { componeEscena, componeLoQueTeLlevas } from '../../packages/nucleo/quests/escena.js';
 import { namesFor } from '../../packages/nucleo/names/index.js';
 import { relojDePared } from '../dobles/reloj-de-pared.mjs';
 import { SEMILLA_A } from './celda-de-prueba.mjs';
 import { NUCLEO_DE_LAS_LLEGADAS } from './llegadas-de-prueba.mjs';
 import { celdaDeFixture } from './partida-de-prueba.mjs';
+
+/** Lo mismo que `NUCLEO_DEL_CASTING` de `app/nucleo/piezas.js`, ni una función más. */
+export const NUCLEO_DEL_CASTING = Object.freeze({
+  castAll,
+  vistaDeDescartes,
+  vistaDeAnclajes,
+  hayDescartes,
+});
+
+/** El resolutor del casting vigente, montado como lo monta `App.js`. */
+export const elCasting = () => creaElCasting({ nucleo: NUCLEO_DEL_CASTING });
 
 /** Lo mismo que `NUCLEO_DE_LA_AVENTURA_EN_CURSO` de `app/nucleo/piezas.js`, ni una función más. */
 export const NUCLEO_DE_LA_AVENTURA_EN_CURSO = Object.freeze({
@@ -143,6 +157,8 @@ export async function partidaAbierta({ nombre = 'costero', plantilla = null, cum
       registro,
       dia: DIA,
       paso: estadoDeMapa(estado.pasos, celda.mapaId).n,
+      // Contra qué sitios marcados se casteó, por la misma puerta que `antes-de-salir.jsx`.
+      descartes: anclajesDe(vistaDeDescartes(estado.anclajes, celda.mapaId)),
     });
   }
   return { celda, mundo, cupos: celda.cupos, mapaId: celda.mapaId, salida, estado, registro, casteada };

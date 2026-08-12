@@ -31,10 +31,18 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { creaLaAventuraEnCurso, DEL_NUCLEO } from '../../app/marcha/aventura.js';
+import { creaLaAventuraEnCurso, descartesDeLaAventura, DEL_NUCLEO } from '../../app/marcha/aventura.js';
 import { REPARTO_SIN_AVENTURA, casteadaDelMundo, repartoDeLaAventuraEnCurso } from '../../app/marcha/llegadas.js';
-import { aventuraEnCurso } from '../../packages/nucleo/partida/aventura-en-curso.js';
-import { congelaAventuras } from '../../packages/nucleo/partida/aventura-en-curso.js';
+import {
+  acepta,
+  aventuraEnCurso,
+  cierra,
+  congelaAventuras,
+  descartesDelCasting,
+  levantaAventuras,
+} from '../../packages/nucleo/partida/aventura-en-curso.js';
+import { IDS_DE_MOTIVO, anclajesDe, anotaDescarte, vistaDeDescartes } from '../../packages/nucleo/partida/descartes.js';
+import { componeLoQueHayHoy } from '../../packages/nucleo/partida/lo-que-hay-hoy.js';
 import { TIPOS_DE_PASO } from '../../packages/nucleo/partida/secuencia.js';
 import { CATALOGO } from '../../packages/nucleo/quests/catalogo.js';
 import {
@@ -48,10 +56,12 @@ import {
 } from '../../packages/nucleo/quests/escena.js';
 import { relojDePared } from '../dobles/reloj-de-pared.mjs';
 import {
+  DIA,
   MEDIODIA,
   NUCLEO_DE_LA_AVENTURA_EN_CURSO,
   andaElLazoConLaApp,
   capaDeLaApp,
+  elCasting,
   partidaAbierta,
 } from './cableado-de-prueba.mjs';
 import { LOS_CUATRO, fuente } from './mundo-de-prueba.mjs';
@@ -578,3 +588,208 @@ function posicionesQueValidan(destino) {
   for (let t = 5000; t <= 60_000; t += 5000) posiciones.push({ x: destino.x, y: destino.y, tMs: t0 + t, precisionM: 3, clasificacion: 'parada' });
   return posiciones;
 }
+
+// ── La huella de descartes de la aventura aceptada ─────────────────────────────
+//
+// La novena costura, y la que obligó a la primera migración de formato del proyecto. Desde
+// que la lista de hoy respeta los sitios marcados, `repartoDeAventuras` vuelve a castear
+// cuando los hay; sin congelar contra qué se casteó, marcar un sitio a mitad de camino le
+// cambiaba la cadena a la aventura que ya estabas andando. Medido antes de coserlo, marcando
+// **un solo sitio**: en `costero` 14 de 29 volvían con otra cadena y 4 reventaban, y en
+// `suelo-250m` 9 de 19 reventaban y la salida quedaba encallada.
+
+describe('La huella de descartes con la que se aceptó la aventura', () => {
+  test('Marcar un sitio a mitad de camino no le cambia la cadena a la aventura aceptada', async () => {
+    const p = await partidaAbierta({ cumple: LA_PRIMERA });
+    const casting = elCasting();
+    const antes = repartoDeLaAventuraEnCurso({ mundo: p.mundo, aventuras: p.estado.aventuras });
+    assert.deepEqual(descartesDelCasting(p.estado.aventuras), [], 'la aventura se aceptó sin ningún sitio marcado y su huella no está vacía');
+
+    // Se marca **un sitio del propio lazo**, que es el caso que rompía: el que peor le sienta
+    // a la cadena que se está andando.
+    const marcado = p.casteada.aventura.beats[1].lugar.nombre;
+    anotaDescarte(p.estado.anclajes, { mapaId: p.mapaId, anclaje: marcado, porque: IDS_DE_MOTIVO[0] });
+
+    // **La mitad que hace que esto mida algo**: con el mundo de ahora la cadena es otra. Sin
+    // este contraste, el caso pasaría también si nadie estuviera recasteando nada.
+    const vigente = casting.mundoVigente({ mundo: p.mundo, anclajes: p.estado.anclajes, mapaId: p.mapaId });
+    assert.notEqual(vigente, p.mundo, 'marcar un sitio no ha hecho recastear, y entonces no hay nada que congelar');
+    let conElVigente = null;
+    try {
+      conElVigente = JSON.stringify(repartoDeLaAventuraEnCurso({ mundo: vigente, aventuras: p.estado.aventuras }));
+    } catch {
+      conElVigente = 'la plantilla deja de castear';
+    }
+    assert.notEqual(conElVigente, JSON.stringify(antes), 'con el mundo de ahora la cadena sale igual, así que el caso no distingue congelar de no congelar');
+
+    // Y con la huella congelada, la misma cadena beat a beat.
+    const suyo = casting.mundoDeLaAventura({ mundo: p.mundo, marcados: descartesDeLaAventura(p.estado.aventuras) });
+    assert.equal(
+      JSON.stringify(repartoDeLaAventuraEnCurso({ mundo: suyo, aventuras: p.estado.aventuras })),
+      JSON.stringify(antes),
+      'marcar un sitio le ha cambiado la cadena a la aventura que ya se estaba andando',
+    );
+  });
+
+  test('La huella sobrevive a congelar y levantar el área, que es el día siguiente de verdad', async () => {
+    // Congelando y levantando, no leyendo el objeto vivo: lo que hay que proteger es que la
+    // cadena sea la misma **al reabrir la app**, y eso pasa por el documento.
+    const p = await partidaAbierta({ cumple: LA_PRIMERA });
+    const casting = elCasting();
+    const antes = repartoDeLaAventuraEnCurso({ mundo: p.mundo, aventuras: p.estado.aventuras });
+    anotaDescarte(p.estado.anclajes, { mapaId: p.mapaId, anclaje: p.casteada.aventura.beats[1].lugar.nombre, porque: IDS_DE_MOTIVO[0] });
+
+    const vuelta = levantaAventuras(JSON.parse(JSON.stringify(congelaAventuras(p.estado.aventuras))));
+    assert.deepEqual(descartesDelCasting(vuelta), descartesDelCasting(p.estado.aventuras), 'la huella no cruza el viaje de ida y vuelta del documento');
+    assert.equal(aventuraEnCurso(vuelta).plantilla, p.casteada.plantilla, 'la aventura en curso no vuelve de su documento');
+
+    const suyo = casting.mundoDeLaAventura({ mundo: p.mundo, marcados: descartesDeLaAventura(vuelta) });
+    assert.equal(
+      JSON.stringify(repartoDeLaAventuraEnCurso({ mundo: suyo, aventuras: vuelta })),
+      JSON.stringify(antes),
+      'al reabrir la app la aventura vuelve con otra cadena',
+    );
+  });
+
+  test('Una aventura aceptada con sitios ya marcados congela esos y no la lista vacía', async () => {
+    // El otro lado: la huella no es siempre `[]`. Se marca **antes** de aceptar, y lo que se
+    // congela es lo que había, que es lo que hace que la cadena de la ficha y la que se
+    // recorre sean la misma.
+    const base = await partidaAbierta();
+    const marcado = (base.mundo.settlements ?? [])[0]?.name;
+    assert.ok(marcado, 'el mundo de referencia no tiene ningún núcleo que marcar');
+    anotaDescarte(base.estado.anclajes, { mapaId: base.mapaId, anclaje: marcado, porque: IDS_DE_MOTIVO[0] });
+
+    const casting = elCasting();
+    const vigente = casting.mundoVigente({ mundo: base.mundo, anclajes: base.estado.anclajes, mapaId: base.mapaId });
+    const suya = (vigente.casting ?? []).find((c) => c.ok);
+    assert.ok(suya, 'con un sitio marcado el mundo no castea ninguna aventura y el caso no mediría nada');
+
+    acepta(base.estado.aventuras, {
+      aventura: suya.aventura,
+      mapaId: base.mapaId,
+      registro: base.registro,
+      dia: DIA,
+      paso: 1,
+      descartes: anclajesDe(vistaDeDescartes(base.estado.anclajes, base.mapaId)),
+    });
+    assert.deepEqual([...descartesDelCasting(base.estado.aventuras)], [marcado], 'la aventura no ha congelado el sitio que ya estaba marcado');
+
+    // Y su cadena se recupera con esa foto, no con el mundo pelado.
+    const suyo = casting.mundoDeLaAventura({ mundo: base.mundo, marcados: descartesDeLaAventura(base.estado.aventuras) });
+    assert.equal(
+      JSON.stringify(repartoDeLaAventuraEnCurso({ mundo: suyo, aventuras: base.estado.aventuras })),
+      JSON.stringify({ beats: suya.beats }),
+      'la cadena recuperada no es la que se aceptó',
+    );
+  });
+
+  test('Cerrar la aventura vacía la huella, y la siguiente no se castea contra lo de la anterior', async () => {
+    const p = await partidaAbierta({ cumple: LA_PRIMERA });
+    anotaDescarte(p.estado.anclajes, { mapaId: p.mapaId, anclaje: p.casteada.aventura.beats[1].lugar.nombre, porque: IDS_DE_MOTIVO[0] });
+
+    cierra(p.estado.aventuras, { registro: p.registro, dia: DIA, paso: 1, motivo: 'volver' });
+    assert.equal(aventuraEnCurso(p.estado.aventuras), null);
+    assert.deepEqual(descartesDelCasting(p.estado.aventuras), [], 'la foto de la aventura cerrada sigue puesta, y la siguiente se castearía contra ella');
+    assert.deepEqual(descartesDeLaAventura(p.estado.aventuras), [], 'la app sigue leyendo la foto de una aventura que ya no está');
+  });
+
+  test('Aceptar una aventura sin declarar contra qué se casteó falla nombrándolo', async () => {
+    const p = await partidaAbierta();
+    const suya = p.mundo.casting.find((c) => c.ok);
+    assert.throws(
+      () => acepta(p.estado.aventuras, { aventura: suya.aventura, mapaId: p.mapaId, registro: p.registro, dia: DIA, paso: 1, descartes: 'ninguno' }),
+      /contra qué sitios marcados se casteó/,
+    );
+    // Y el mundo de una aventura tampoco se recupera con cualquier cosa: sin lista, falla.
+    assert.throws(() => elCasting().mundoDeLaAventura({ mundo: p.mundo, marcados: null }), /no ha llegado/);
+  });
+
+  test('La huella se lee del área y no se recalcula, que es lo que la app hace', () => {
+    // `descartesDeLaAventura` es la puerta de la app y lee el campo tal cual, como
+    // `identidadDeLaSalidaViva` lee la salida abierta: sin aventura en curso, la lista vacía es
+    // la respuesta correcta y no un valor por defecto tragado.
+    assert.deepEqual(descartesDeLaAventura(null), []);
+    assert.deepEqual(descartesDeLaAventura({ descartesDelCasting: ['b', 'a'] }), ['b', 'a']);
+    // Y es una copia: quien la reciba no puede mutar el área desde fuera.
+    const area = { descartesDelCasting: ['a'] };
+    descartesDeLaAventura(area).push('b');
+    assert.deepEqual(area.descartesDelCasting, ['a'], 'la lectura de la huella deja mutar el área desde fuera');
+  });
+});
+
+// ── La memoria de la lista y los sitios marcados ───────────────────────────────
+//
+// Los dos parámetros que `componeLoQueHayHoy` espera, que tienen valor por defecto inocuo y
+// que nadie le pasaba desde `app/`. Eran invisibles: la memoria porque hasta esta fila
+// ninguna aventura podía cerrarse nunca, y los descartes porque nadie recasteaba.
+
+describe('La lista de hoy recibe la memoria y los sitios marcados', () => {
+  test('Una plantilla ya vivida no se vuelve a ofrecer', async () => {
+    const p = await partidaAbierta();
+    const peticion = (extra) => componeLoQueHayHoy({
+      mundo: p.mundo, oficio: 'taberna', tramo: 2000, mapaId: p.mapaId, calendario: { dia: () => 1 }, ...extra,
+    });
+
+    const sinMemoria = peticion({});
+    assert.equal(sinMemoria.hayLista, true, 'el mundo de referencia no ofrece lista y el caso no mediría nada');
+    assert.ok(sinMemoria.entradas.length >= 1);
+
+    // Se vive la primera: aceptada y cerrada. Cómo acabó da igual —terminarla y que se
+    // resolviera sin ti son dos finales, y ninguno de los dos se repite.
+    const vivida = sinMemoria.entradas[0].id;
+    acepta(p.estado.aventuras, {
+      aventura: { id: vivida, plantilla: vivida, beats: sinMemoria.entradas[0].beats },
+      mapaId: p.mapaId, registro: p.registro, dia: 1, paso: 1, descartes: [],
+    });
+    cierra(p.estado.aventuras, { registro: p.registro, dia: 1, paso: 1, motivo: 'volver' });
+
+    const conMemoria = peticion({ aventuras: p.estado.aventuras });
+    assert.ok(!conMemoria.entradas.map((e) => e.id).includes(vivida), `la lista vuelve a ofrecer "${vivida}", que ya se vivió`);
+    // Y el contraste, que es lo que separa «la memoria funciona» de «la lista cambia sola»:
+    // sin pasarle el área, la misma plantilla sigue ahí.
+    assert.ok(peticion({}).entradas.map((e) => e.id).includes(vivida), 'la lista cambia sola sin registro de aventuras, así que la memoria no es lo que la está cambiando');
+  });
+
+  test('Un anclaje marcado no castea, y sin pasarle los descartes sí', async () => {
+    const p = await partidaAbierta();
+    const peticion = (extra) => componeLoQueHayHoy({
+      mundo: p.mundo, oficio: 'taberna', tramo: 2000, mapaId: p.mapaId, calendario: { dia: () => 1 }, ...extra,
+    });
+    const antes = peticion({});
+    assert.ok(antes.entradas.length >= 1, 'sin lista no se puede medir el efecto de marcar un sitio');
+
+    // Se marca un sitio del lazo de la primera entrada: el que de verdad la puede tumbar.
+    const suyo = antes.entradas[0].beats[0].lugar.nombre;
+    anotaDescarte(p.estado.anclajes, { mapaId: p.mapaId, anclaje: suyo, porque: IDS_DE_MOTIVO[0] });
+    const descartes = vistaDeDescartes(p.estado.anclajes, p.mapaId);
+    assert.equal(descartes.descartado(suyo), true, 'marcar el sitio no lo ha dejado marcado');
+
+    const despues = peticion({ descartes });
+    const mismoLazo = (a, b) => JSON.stringify(a?.beats?.map((x) => x.lugar.nombre)) === JSON.stringify(b?.beats?.map((x) => x.lugar.nombre));
+    const suya = despues.entradas.find((e) => e.id === antes.entradas[0].id);
+    assert.ok(
+      !suya || !mismoLazo(suya, antes.entradas[0]),
+      `la lista sigue ofreciendo "${antes.entradas[0].id}" con el mismo lazo, que pasa por el sitio que se marcó`,
+    );
+
+    // Y ningún lazo de la lista pisa el sitio marcado, que es lo que RF-PRIV-004 pide.
+    for (const entrada of despues.entradas) {
+      const sitios = (entrada.beats ?? []).map((b) => b.lugar.nombre);
+      assert.ok(!sitios.includes(suyo), `la aventura "${entrada.id}" sigue mandando al sitio marcado "${suyo}"`);
+    }
+  });
+
+  test('La petición de la lista lleva la memoria y los descartes, y no una copia rancia', () => {
+    // Se lee de la fuente porque quien compone la petición es la pantalla, y lo que esta fila
+    // corrige es exactamente que esos dos campos no viajaban.
+    const pantalla = codigoDe('app/pantallas/antes-de-salir.jsx');
+    assert.match(pantalla, /aventuras: estado\.aventuras,/, 'la petición de la lista no lleva el registro de aventuras, y una aventura vivida se vuelve a ofrecer');
+    assert.match(pantalla, /descartes: vistaDeDescartes\(estado\.anclajes, mapaId\)/, 'la petición de la lista no lleva los sitios marcados');
+    // Es la vista y no la lista pelada: `exigeDescartes` pide `descartado()`, y
+    // `descartesDeMapa` se le parece y no lo cumple.
+    assert.ok(!/descartes: descartesDeMapa\(/.test(pantalla), 'la petición lleva la lista pelada de descartes en vez de la vista con descartado()');
+    // Y la aventura se acepta declarando contra qué se casteó, por la misma puerta.
+    assert.match(pantalla, /descartes: anclajesDe\(vistaDeDescartes\(estado\.anclajes, mapaId\)\)/, 'la aventura se acepta sin declarar contra qué sitios marcados se casteó');
+  });
+});
