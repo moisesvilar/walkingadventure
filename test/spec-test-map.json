@@ -30088,7 +30088,9 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/donde-estas.test.mjs",
       "caso": "Sin topónimo el ofrecimiento se compone igual, y entero",
-      "hueco_de_bateria": true
+      "hueco_de_bateria": false,
+      "escenario": "Sin saber cómo se llama el sitio, se ofrece igual",
+      "nota": "El escenario se añadió a docs/testing.md con esta fila, porque el respaldo sin topónimo es decisión de diseño nueva y cerrada por el dueño."
     },
     {
       "spec": "SPEC-050",

@@ -1798,3 +1798,52 @@ El primer recorrido se firmó antes de las tres últimas costuras, y esas tocan 
 **El servicio en primer plano se cae a mitad de salida.** Ocurrió dos veces sin provocarlo: `ubicacion-estado` pasa a `sin-montar`, la marca deja de moverse y ningún fijo llega. La app responde como el diseño manda —al reabrir, `abierta-sin-rotulo`, rótulo `retirado-por-el-sistema` y la tarjeta de a medias con sus dos acciones—, así que no se pierde nada; pero es el motivo por el que **el telón por regreso no se ha podido verificar en el aparato**. Se verificó por «dejarlo aquí» y por la tarjeta de a medias, que `bucle-jugable.md` §8 declara la misma puerta.
 
 Y una hipótesis que **no** se ha podido sostener y por eso no se ficha como hallazgo: parada exactamente en el punto de partida, `regreso.dentroDesdeMs` seguía en nulo con la cadencia en `por-distancia`, lo que encajaría con §9a —el punto de partida no es un geofence, así que el muestreo nunca pasa a tiempo y parada no llega ningún fijo—. Pero al comprobarlo moviéndose dentro del radio, el sensor ya estaba caído, así que la medida no dice nada. Queda escrito como sospecha con su motivo, no como defecto.
+
+# XXXIV · Los cableados que faltaban (12-ago-2026)
+
+SPEC-050, la fila 50. Los tres hallazgos de la 49 que compartían forma —§6h en su variante de cableado: pieza escrita, probada y sin llamador— y que cambian el juego que se ve. No había que escribir pantallas ni mecanismo: había que coser. Y cosiendo apareció que dos de las tres piezas, además de no tener llamador, **estaban rotas por dentro**, y que ninguna prueba podía saberlo porque nadie las había ejecutado nunca.
+
+## Lo que el encargo decía y lo que se midió
+
+El encargo daba por medido que `siembraLaCola` no tiene llamador desde `app/`. Cierto, y **más grande**: en `App.js` el parámetro `lista` de `alSalirAAndar` no se usaba en ninguna línea, así que se tiraba el resultado entero del prólogo. Como `componePrimeraLista` tampoco le pasa a `correPrologo` las áreas de la partida —el prólogo corre en A1P6, cuando la partida todavía no existe—, el mundo nacía sin rumores sedimentados, sin nada que contar en sus núcleos y sin el par del arranque, además de sin cola. `app/marcha/llegadas.js:188` lleva desde SPEC-032 leyendo `estado.nucleos` contra un área que estaba **siempre vacía**.
+
+Y una segunda mitad que el encargo preguntaba y nadie había mirado: `levanta()` **no corre ningún prólogo**, así que el segundo mapa de una partida no tenía pasado. No era que corriera y no se sembrara: es que no corría.
+
+De los rojos declarados, uno no se sostuvo. El encargo decía «2 rojos de `@app`, fichados». La primera tanda sobre `main` dio **7**, y no era regresión: el emulador arrastraba un arranque a medias y un mapa levantado de una sesión anterior, y cinco flujos que asumen instalación limpia fallaban por eso. Con `pm clear` vuelven. Queda escrito porque el número del encargo solo es reproducible desde un aparato limpio, y decirlo sin esa condición invita a leer una avería donde hay estado.
+
+## Las tres decisiones del dueño
+
+A2P0 pide **el sitio dicho como lugar y no como coordenada** (`mapas.js`, pieza `sitio`, con `texto: null` a propósito) y la app no tenía de dónde sacarlo. El dueño eligió **la ruta ciega que ya hay**: una consulta pequeña por `pideGeneracion`, la misma que usa el levantamiento, con la misma ficha anónima. Se descartaron la geocodificación inversa del sistema —manda la coordenada exacta a un tercero, y el proxy ciego de SPEC-023 existe justamente para eso— y la frase fija siempre, porque el guion manda.
+
+Al medirlo apareció que `componeOfrecimiento` exige `sitio` **también con `sinRed: true`**: sin topónimo no se podía componer, y lo que quedaba era o una pantalla en blanco o la portada de casa a trescientos kilómetros. El dueño decidió un **respaldo en voz de mundo solo sin red** —«Un sitio todavía sin nombre»—, con el contrato intacto por el camino bueno: con red, `sitio` sigue siendo obligatorio y una cadena vacía sigue siendo error de construcción.
+
+Y el tercero: **A2P0 entra en el diseño**, porque el código tenía una pantalla que el diseño no declaraba y ése es el único agujero que `verifica-flujo.mjs` no puede cazar por construcción. Bloque «PANTALLA 0» en el artefacto 2, nodo `A2P0` con sus aristas, línea en `docs/pantallas.md` y los recuentos de «40 pantallas» al día. El diagrama queda en **41 pantallas, 41 nodos, 94 aristas, ninguna suelta**.
+
+## Los dos defectos que solo se ven en un teléfono
+
+**A2P0 tumbaba la app la primera vez que se entraba en ella.** El `return` del ofrecimiento estaba en medio del cuerpo de `PantallaAntesDeSalir`, por encima de tres hooks: esa rama montaba menos que las demás y React caía con «Rendered fewer hooks than expected». Viene de SPEC-041 y **nunca había saltado porque nadie pasaba nunca `ofrecimiento`**. Es §6h en su forma más cara: no es que la pieza faltara, es que estaba rota y no había manera de saberlo sin ejecutarla.
+
+**Y el primer arreglo de A4P8 tampoco funcionó, y hubo que medirlo para verlo.** El diagnóstico era bueno —`llegada.js` montaba `CapaDescarte` como hermano en el flujo, con `flex: 1` compitiendo por el alto con la ficha, donde la otra capa del mismo fichero usa `absoluteFillObject`— pero copiar el mecanismo del visor **no cuajó**: con `...StyleSheet.absoluteFillObject` la capa seguía saliendo en `[0,2122][1080,2400]`, apilada debajo, y los cinco motivos no se pintaban. Con las cuatro anclas escritas una a una sale `[0,0][1080,2400]`. La prueba que había escrito exigía el spread, o sea que **habría dado por bueno exactamente el estado que no funciona**; se corrigió con el código y con el porqué dentro. Queda fichado que el visor usa el spread y puede tener lo mismo: no se ha medido y no se toca a ciegas.
+
+## Verificado
+
+Mundo `P9SQCX177VESJYMX@42.41,-8.74` en `wa-pixel`, con el aparato limpio y la app recompilada.
+
+**La cola se siembra de verdad.** Tras el arranque, `estado.json` leído con `adb exec-out run-as` trae **2 entradas** encoladas y pendientes —`herramienta-por-devolver` en Valmar da Moura y `tejas-que-tiró-el-viento` en Castroño do Corvo—, **3 rumores** sedimentados y **7 de 7 núcleos** con algo que contar, más el par del arranque compuesto sobre Castroño do Corvo y Covanova a Vella. Antes de esta fila las cuatro áreas salían vacías.
+
+**«Marcarlo» se pulsa por el centro.** Recorrido real: salir a andar, andar hasta A Encrucillada do Mercador de Abaixo (−355, 26 → 42.410234, −8.744319) parándose allí, llegada validada, A4P7, «Este sitio no pega» → A4P8. Cotas: capa en `[0,0][1080,2400]`, los **cinco** motivos presentes y ninguno degenerado, «Marcarlo» en `[63,2185][1017,2337]`. Tocando su centro (540, 2261) el estado queda con `{"anclaje": "A Encrucillada do Mercador de Abaixo", "rol": "paraje", "porque": "casa-particular"}`.
+
+**A2P0 se ve.** Abriendo la app en Madrid (40.4168, −3.7038), a unos 500 km del único mapa de la partida: `mapa-activo` en `ninguno`, el sitio dice **MADRID** —topónimo real traído por la ruta ciega—, el titular y el cuerpo del guion, las dos acciones, las tres puertas, y **ni rastro de «salir a andar»**.
+
+**El micro-encuentro visto en pantalla no se firma**, y es el límite de esta fila. Con la cola sembrada la puerta está abierta, pero qué sitio tiene beat sigue sin ser reproducible entre tandas por las tres medidas de `escena.yaml` que esta fila no toca —el ancla del mapa no la gobierna el flujo, la semilla nace de entropía real y `setLocation` de Maestro no mueve el aparato—. Lo que sí queda afirmado siempre es lo de arriba: las entradas están encoladas en el disco de un teléfono.
+
+## Lo que se deja fichado
+
+- **El visor puede tener el defecto de la capa**: usa `...StyleSheet.absoluteFillObject`, que en el descarte no posicionaba. No medido; `visor.yaml` sigue en límite declarado por otro motivo.
+- **`creaMotorDeLaPartida` sigue sin llamador en `app/`.** Misma forma, otra fila.
+- **`escena.cara` sigue siendo nula siempre**, 0 de 506 beats sobre rol humano (SPEC-017).
+- **La versión de formato sigue siendo global** a las ocho clases de documento (§11e). Esta fila no sube ninguna.
+
+## La precondición que hay que escribir al lado de los números
+
+De aquí sale una regla de operativa que no estaba en ninguna parte y ya ha costado un susto: **antes de una tanda cuyos números vayan a compararse, el aparato se limpia con `adb shell pm clear com.walkingadventure.app` y se reinstala**. No basta `force-stop`, y `expo run:android` no borra los documentos. Sin ese paso, cinco flujos que asumen instalación limpia caen por estado arrastrado y se leen como regresión. Anotado en `CLAUDE.md`, junto a las otras trampas del aparato, porque el sitio donde tiene que estar es donde lo busca quien mide y no la bitácora de quien lo descubrió.

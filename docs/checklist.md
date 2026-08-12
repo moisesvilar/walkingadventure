@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 17 | catalogo-plantillas | RF-QUEST-009, RF-LANG-001, RF-LANG-003, RF-LANG-004 | must | done |
 | 18 | contrato-llm | RF-QUEST-006, RF-QUEST-007, RF-QUEST-008, RF-LANG-005, RF-PRIV-001 | must | done |
-| 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | done (mecanismo; **`siembraLaCola` no tiene llamador desde `app/`**, así que en un teléfono no salta ningún micro-encuentro — medido por la fila 49) |
+| 19 | cola-entregas-microencuentros | RF-QUEST-010, RF-QUEST-016 | must | done (la fila 50 cableó la siembra: la partida nace con la cola sembrada, verificado en `wa-pixel` leyendo `estado.json` con `run-as`) |
 
 ## B4 · La app y el mapa
 
@@ -60,7 +60,7 @@
 | 32 | llegadas-geofence | RF-BUCLE-005, RF-BUCLE-006, RF-RUMOR-005 | must | done |
 | 33 | visor-anclaje | RF-BUCLE-007, RF-BUCLE-008 | must | done |
 | 34 | escena-beat | RF-QUEST-004, RF-PJ-009 | must | done (paquete; **su pantalla la entregó la fila 49**) |
-| 35 | descarte-anclaje | RF-PRIV-004 | must | done |
+| 35 | descarte-anclaje | RF-PRIV-004 | must | done (la fila 50 arregló A4P8: la capa no se ponía encima y «Marcarlo» no se podía pulsar; ahora el centro del botón marca, verificado en `wa-pixel`) |
 | 36 | telon | RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013, RF-MAPA-004, RF-QUEST-013, RF-DIARIO-005, RF-DIARIO-006, RF-PROG-005 | must | done (paquete; **su pantalla la entregó la fila 49**) |
 
 ## B6 · Lo que queda en casa
@@ -71,7 +71,7 @@
 | 38 | repisa-ajustes | RF-PROG-007, RF-PJ-010, RF-LANG-002 | must | done |
 | 39 | partida-respaldo-export | RF-PERS-004, RF-PERS-005, RF-PERS-008, RF-PRIV-002 | must | done (mecanismo, no cableado — ver fila 47) |
 | 40 | empezar-de-nuevo | RF-PERS-006 | must | done |
-| 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | done (mecanismo; **A2P0 es inalcanzable**: `NUCLEO_DEL_OFRECIMIENTO` no lo importa nadie — medido por la fila 49) |
+| 41 | mapas-multiples | RF-PERS-007, RF-MUNDO-004, RF-PROG-003 | must | done (la fila 50 cableó A2P0 y arregló su rama, que tumbaba la app por montar menos hooks; vista en `wa-pixel` a 500 km del mapa de casa) |
 | 42 | pasos-fondo-zurron | RF-RUMOR-002, RF-RUMOR-006, RF-PRIV-003 | should | done |
 
 ## B7 · La navegación, que es la puerta que faltaba
@@ -87,7 +87,7 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | done |
 | 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | done (sensor y rótulo; el camino de la llegada se queda en la 44 — ver §7a) |
 | 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | done (entrega los cinco; **RF-QUEST-004 y RF-BUCLE-011**, que la 44 le pasó, quedan entregados) |
-| 50 | cableados-que-faltan | RF-QUEST-010, RF-QUEST-016, RF-MUNDO-004, RF-PRIV-004 | must | pending |
+| 50 | cableados-que-faltan | RF-QUEST-010, RF-QUEST-016, RF-MUNDO-004, RF-PRIV-004 | must | done |
 
 La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 
