@@ -161,6 +161,38 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
   }
 
   /**
+   * El documento **tal cual está escrito**, para dárselo a la migración.
+   *
+   * Aquí no se usa el lector estricto, y esa es toda la corrección: `lee()` comprueba la
+   * versión antes que nada y **rechaza cualquier documento más viejo que el actual** —«hay
+   * que migrarlo antes de abrirlo»—, que es justo la pregunta que la migración existe para
+   * contestar. Usarlo aquí hacía que ningún documento viejo pudiera llegar nunca a migrarse:
+   * medido en `wa-pixel` el 12-ago-2026 con una partida real, abrir daba la avería con ese
+   * mismo texto y el fichero se quedaba en la versión 1. No se había disparado nunca porque
+   * con `VERSION_FORMATO` en 1 ningún documento podía ser más viejo, y SPEC-049 es la
+   * primera fila que sube la versión.
+   *
+   * **`lee()` no se ablanda**: sigue protegiendo el camino normal —`cargaPartida` lo usa
+   * después, y un documento que ya está en la versión actual pasa por él entero—. Lo que se
+   * quita es solo de aquí, y lo que queda comprobado no lo comprueba esta capa sino `migra`,
+   * que ya lo hacía: un documento que no es un documento, uno sin `version`, uno con una
+   * versión que no es entera, uno de una versión **superior** —que sigue sin abrirse— y uno
+   * de una clase desconocida, que falla al validar el resultado contra el esquema de su
+   * clase. Lo único que deja de ser un error es «más viejo», que pasa a ser trabajo.
+   *
+   * Es además lo que ya hacía la otra puerta: `copia.js` migra las partes de una copia
+   * antigua parseando y nada más, y por eso las copias sí se migraban. Dos puertas a la
+   * misma cadena con dos exigencias distintas es cómo se coló esto.
+   */
+  function paraMigrar(crudo, donde) {
+    try {
+      return JSON.parse(crudo);
+    } catch (e) {
+      throw new Error(`${donde} no se puede leer: está roto o truncado (${e.message})`);
+    }
+  }
+
+  /**
    * Migra los dos documentos de la partida si vienen de una versión anterior.
    *
    * Devuelve de qué versión venían, o `null` si no había nada que migrar. Un salto sin
@@ -171,6 +203,14 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
    * la partida.** `cargaPartida` lo tolera por diseño —lo que se pierde es la red de
    * seguridad, no la partida— y migrar antes que él no puede ser más estricto que él, o
    * una partida perfectamente jugable dejaría de abrirse por culpa de su auditoría.
+   *
+   * Ese perdón **se ha vuelto a mirar con la migración de verdad delante**, y sigue en pie
+   * con el alcance más estrecho: ahora solo puede saltar por un registro roto o truncado,
+   * sin `version`, con una versión no entera, de una versión superior a la de este juego o
+   * de una clase desconocida — los cinco casos en los que `cargaPartida` tampoco lo va a
+   * poder leer, así que no esconde nada que no estuviera ya perdonado más adelante. Lo que
+   * **antes** sí escondía era un registro simplemente viejo: se lo tragaba y no se migraba
+   * nunca, y la partida se quedaba con dos versiones de formato dentro. Eso ya no pasa.
    */
   async function migraDocumentos() {
     const migrados = [];
@@ -179,18 +219,22 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
     for (const clave of [CLAVES_DE_PARTIDA.estado, CLAVES_DE_PARTIDA.registro]) {
       const crudo = await almacen.lee(clave);
       if (crudo == null) continue;
-      let doc;
+      // El perdón del registro cubre **leerlo y migrarlo**, que es exactamente lo que cubría
+      // cuando el lector estricto hacía las dos comprobaciones de una vez. Dejarlo solo
+      // alrededor del parseo habría estrechado la tolerancia sin decirlo: un registro de una
+      // clase desconocida o de una versión superior habría pasado a tumbar la partida entera,
+      // que es lo contrario de lo que SPEC-047 decidió.
+      let resultado;
       try {
-        doc = lee(crudo, `el documento ${clave}`);
+        resultado = migra(paraMigrar(crudo, `el documento ${clave}`), {
+          cadena: cadenaVigente,
+          donde: `el documento ${clave}`,
+          hasta: destino,
+        });
       } catch (e) {
         if (clave === CLAVES_DE_PARTIDA.registro) continue;
         throw e;
       }
-      const resultado = migra(doc, {
-        cadena: cadenaVigente,
-        donde: `el documento ${clave}`,
-        hasta: destino,
-      });
       if (!resultado.migrado) continue;
       // Se levanta antes de escribirlo, y por eso `levantaEstado` y `levantaRegistro` se
       // llaman aquí y no solo dentro de `cargaPartida`: un documento migrado que no se
