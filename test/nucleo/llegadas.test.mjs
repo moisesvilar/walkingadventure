@@ -1337,22 +1337,48 @@ describe('Las dos mitades del criterio de una llegada', () => {
   });
 });
 
-// ── El hueco declarado del paso que no tiene pantalla ──────────────────────────
+// ── El paso que no tiene pantalla ─────────────────────────────────────────────
 //
-// SPEC-044. Es la única defensa contra que la fila 49 se dé por hecha sin llegar, y la
-// batería no lo afirmaba: un paso que se salta en silencio deja una secuencia que parece
-// completa y no lo es, que es la forma de fallo que este repo ya ha pagado doce veces (§6h).
-// El precedente literal es el telón de la fila 48 (`telon-sin-pantalla` en `App.js`).
+// **Qué había aquí antes, quién lo puso y por qué ya no está.** Hasta SPEC-049 este bloque
+// afirmaba lo contrario de lo que afirma ahora, en un caso llamado «El paso de beat se monta
+// con el hueco declarado, con el paso nombrado y una sola acción»: exigía que
+// `app/pantallas/llegada.js` montara el hueco `llegada-hueco` y que `app/App.js` siguiera
+// llevando `telon-sin-pantalla`. Lo puso **SPEC-044** —la fila que dejó la máquina de una
+// salida cableada y las dos pantallas sin dibujar— con un cometido concreto: que retirar los
+// dos huecos fuera un acto con registro y no una limpieza silenciosa, porque un paso que se
+// salta en silencio deja una secuencia que parece completa y no lo es (§6h).
+//
+// **SPEC-049 los retira por criterio de aceptación** —«cuando se busca el hueco
+// `telon-sin-pantalla` con su acción `telon-cerrar`, entonces no queda ninguno», y lo mismo
+// para `llegada-hueco`—, así que la guarda hizo exactamente su trabajo: se puso roja el día
+// en que los huecos desaparecieron. El veredicto —defecto de prueba, no de código— lo tomó
+// quien orquesta el bucle, y lo que sigue es su inverso: que los dos huecos **ya no están** y
+// que en su sitio hay pantalla de verdad.
+//
+// **Lo que la guarda protegía de verdad no se pierde**, y por eso sigue afirmado aquí: que un
+// paso al que no se le ha inyectado pantalla **se enseña y no se salta**, con el paso nombrado
+// y con la acción que lo cierra. Aquello era un hueco —«esto no está dibujado»— y esto es una
+// avería —«alguien montó la llegada a medias»—, que son dos cosas distintas con la misma
+// consecuencia si desaparecen. Que la escena que ocupa su sitio se compone de verdad y que la
+// secuencia entera se anda con ella está en `test/nucleo/escena-cableada.test.mjs`.
 
 describe('Un paso sin pantalla se enseña, no se salta', () => {
-  test('El paso de beat se monta con el hueco declarado, con el paso nombrado y una sola acción', () => {
+  test('El paso de beat se monta con su pantalla, y un paso sin ella se enseña con su nombre y su acción', () => {
     const pantalla = codigoDe('app/pantallas/llegada.js');
-    // La marca del hueco existe y **lleva el tipo del paso dentro**: sin el nombre, el hueco
-    // sería indistinguible de una pantalla vacía y su desaparición no sería un acto con
-    // registro el día que llegue la fila 49.
-    assert.match(pantalla, /testID="llegada-hueco"/, 'la pantalla de la llegada no monta el hueco declarado');
-    assert.match(pantalla, /testID="llegada-hueco"[^>]*accessibilityLabel=\{[^}]*tipo\}/, 'el hueco no nombra el paso que no tiene pantalla');
-    assert.match(pantalla, /sinPantalla: 'Esto todavía no está dibujado\.'/, 'el hueco no dice que la pantalla no está dibujada');
+
+    // Los dos huecos declarados ya no están. Se afirma por su ausencia literal porque su
+    // presencia era lo que este caso exigía hasta esta fila.
+    assert.ok(!pantalla.includes('testID="llegada-hueco"'), 'el hueco declarado de la fila 44 vuelve a estar montado, y la escena ya tiene pantalla');
+    assert.ok(!/export function nombraElPaso/.test(pantalla), '`nombraElPaso` era la manera de nombrar el paso dentro del hueco, y se va con él');
+    assert.ok(!codigoDe('app/App.js').includes('telon-sin-pantalla'), 'el hueco del telón de la fila 48 vuelve a estar montado, y el telón ya tiene pantalla');
+
+    // Y en su sitio, la avería del paso al que no se le inyectó pantalla: **con el paso
+    // nombrado y con una sola acción**, que es lo que la guarda protegía. Enseñarla sin decir
+    // qué paso es la haría indistinguible de una pantalla vacía; enseñarla sin acción dejaría
+    // la app encallada dentro de una salida abierta.
+    assert.match(pantalla, /testID="llegada-sin-pantalla"/, 'un paso sin pantalla inyectada ya no se enseña, así que se salta en silencio');
+    assert.match(pantalla, /testID="llegada-sin-pantalla"[^>]*accessibilityLabel=\{[^}]*tipo\}/, 'la avería no nombra el paso que se quedó sin pantalla');
+    assert.match(pantalla, /testID="llegada-seguir"/, 'la avería del paso sin pantalla no lleva la acción que lo cierra');
 
     // Y el paso no se salta: la secuencia lo trae y `avanza` es la única manera de moverse,
     // así que llegar al siguiente cuesta pasar por él.
@@ -1361,9 +1387,5 @@ describe('Un paso sin pantalla se enseña, no se salta', () => {
     assert.ok(TIPOS_DE_SITIO.includes('paraje'));
     const encadenados = pasosEncadenados(conBeat);
     assert.equal(encadenados[encadenados.length - 1].tipo, TIPOS_DE_PASO.BEAT, 'el beat no es el paso al que se llega recorriendo');
-
-    // El telón sigue con su propio hueco, el que dejó la fila 48: esta fila no lo cierra y
-    // tampoco lo tapa.
-    assert.match(codigoDe('app/App.js'), /telon-sin-pantalla/, 'el hueco del telón ha desaparecido sin que llegue la fila 49');
   });
 });

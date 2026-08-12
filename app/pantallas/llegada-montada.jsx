@@ -22,7 +22,11 @@
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { TAMANO_DE_TEXTO_DE_ORIGEN, siguienteTamanoDeTexto } from '@walkingadventure/nucleo/quests/escena.js';
+import { TIPOS_DE_PASO } from '@walkingadventure/nucleo/partida/secuencia.js';
+
 import { mensajeDeError } from '../plataforma/capacidades.js';
+import { PantallaEscena } from './escena.js';
 import { PantallaLlegada } from './llegada.js';
 import { MARCA, capaDeMarcas } from './marca.js';
 import { PantallaTriangulacion } from './triangulacion.jsx';
@@ -52,6 +56,16 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
   const [triangulacion, setTriangulacion] = useState(null);
   // El área que la capa muta no la ve React, así que cada movimiento sube este contador.
   const [paso, repinta] = useState(0);
+  // El escalón de tamaño de letra de la escena. **Vive lo que dura la sesión**: SPEC-034 lo
+  // declara para que la pantalla de ajustes (fila 38) lo consuma tal cual, y persistirlo es de
+  // aquella fila. Vive aquí y no dentro de la escena porque el criterio es que al salir de una
+  // escena y entrar en otra siga puesto, y cada escena se monta de nuevo.
+  const [tamanoDeTexto, setTamanoDeTexto] = useState(TAMANO_DE_TEXTO_DE_ORIGEN);
+  // En cuál de las dos mitades del paso de beat va: la escena o lo que te llevas. Vive aquí y
+  // no dentro de la escena porque la escena se remonta en cada repintado de este montaje —el
+  // componente se inyecta por tipo de paso y se compone de nuevo— y el escalón de tamaño de
+  // letra provoca uno: con el estado dentro, agrandar el texto habría devuelto a A4P3.
+  const [enLoQueTeLlevas, setEnLoQueTeLlevas] = useState(false);
 
   const avisa = useCallback(() => {
     repinta((n) => n + 1);
@@ -63,6 +77,7 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
     const movido = llegadas.avanza();
     setVisorAbierto(false);
     setDescarte(null);
+    setEnLoQueTeLlevas(false);
     avisa();
     if (movido.cerrada && movido.siguiente === null && alTerminar) alTerminar();
     return movido;
@@ -70,13 +85,33 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
 
   let montaje;
   try {
-    montaje = llegadas.montaje();
+    montaje = llegadas.montaje({ tamanoDeTexto });
   } catch (e) {
     return <Averia mensaje={mensajeDeError(e)} />;
   }
   // No queda nada esperando. No es una avería y no se pinta una llegada vacía: quien decide
   // qué momento se monta es `App.js`, y aquí se responde lo que hay.
   if (!montaje) return <Averia mensaje="Aquí no queda nada esperando." />;
+
+  // La escena, atada a lo que la capa compuso para este paso. Va aquí y no dentro de un
+  // `useMemo` de arriba porque depende del montaje, que se rehace en cada repintado.
+  const pantallasPorTipoDePaso = {
+    [TIPOS_DE_PASO.BEAT]: ({ alSeguir }) => (
+      <PantallaEscena
+        escena={montaje.escena}
+        loQueTeLlevas={montaje.loQueTeLlevas}
+        motivo={montaje.motivoDeEscena}
+        // El mismo `alSeguir` que la pantalla encadenada le da a cualquier paso: cerrar el
+        // paso es lo único que mueve la secuencia, y no hay una segunda vía desde aquí.
+        alSeguir={alSeguir}
+        enLoQueTeLlevas={enLoQueTeLlevas}
+        alLoQueTeLlevas={() => setEnLoQueTeLlevas(true)}
+        // Cada toque avanza un escalón y el texto cambia en el sitio: lo que se recompone es
+        // la escena, no la pantalla, y no se sale de ella.
+        alCambiarTamano={() => setTamanoDeTexto((vigente) => siguienteTamanoDeTexto(vigente))}
+      />
+    ),
+  };
 
   return (
     <View style={estilos.raiz} testID="llegada-montada">
@@ -94,6 +129,10 @@ export function LlegadaMontada({ llegadas, textos = {}, alCambiar = null, alTerm
         visor={montaje.visor}
         ficha={montaje.ficha}
         loQueSeCuenta={montaje.loQueSeCuenta}
+        // La escena del beat, **inyectada por su tipo de paso**: es la puerta que
+        // `PantallaLlegada` ya tenía abierta y la que la fila 44 dejó nombrada. No hay ruta a
+        // la que ir, así que no hay manera de llegar a A4P3 sin haber llegado al sitio.
+        pantallas={pantallasPorTipoDePaso}
         visorAbierto={visorAbierto}
         alVisor={() => setVisorAbierto(true)}
         alCerrarVisor={() => setVisorAbierto(false)}

@@ -1,0 +1,326 @@
+# @app — El telón de una salida dentro del móvil (SPEC-036, cableado por SPEC-049).
+#
+# **Este flujo recorre su pantalla, y nace fuera de la columna de límite declarado.** La
+# primera versión que escribí lo dejaba dentro con el motivo «las tres vías de cierre están
+# fuera del alcance de un flujo». Era falso, y lo desmintió una medida a mano: **al telón se
+# llega sin moverse del sitio**, por la tercera vía, y se entra por donde entra una persona.
+#
+# **Por dónde entra, y por qué eso no es una puerta de servicio.** Se recorre el arranque
+# entero, se echa a andar desde la portada y **se mata la app**. El servicio en primer plano
+# muere con el proceso, así que al reabrir la salida sigue abierta pero sin rótulo y la
+# portada enseña **la tarjeta de a medias** con sus dos acciones. «Dejarlo aquí» es una de
+# las tres vías de cierre que la spec exige, y la tarjeta existe **exactamente para este
+# caso**: que el sistema mate la app durante una salida está diseñado a propósito en
+# `bucle-jugable.md` §9, y `test/app/en-marcha.yaml` ya recorre esa misma reapertura desde
+# la fila 48. Aquí no se publica nada que solo sirva para la prueba.
+#
+# **Se recorren las dos salidas de A5P4, y esa es la razón de ser de este flujo.** §10h dice
+# que si alguna de las dos no marcara el telón como leído, la app quedaría sin poder abrir
+# ninguna salida jamás — un fallo silencioso con forma de app muerta. Un flujo que probara
+# solo una lo dejaría medio afirmado, así que el ciclo se hace **dos veces**: la primera
+# sale por «Cerrar» y la segunda por «Ver el diario entero», y las dos terminan abriendo una
+# salida nueva de verdad.
+#
+# **Qué telón sale no lo decide el flujo, y por eso no se afirma su forma entera.** Sin
+# aventura aceptada la secuencia es el mapa y la entrada del día, y el mapa sale con tinta o
+# sin ella según lo que la partida ya conociera. Lo que se afirma sin condición es lo que es
+# cierto en las dos formas: que la primera pantalla es el mapa —con su título y su lámina—,
+# que la última es la entrada del día con sus dos salidas, y que entre medias solo se
+# avanza. Es el mismo criterio con el que `llegada.yaml` ramifica sobre la forma que salga
+# en lugar de dar por hecha una.
+#
+# **Lo que este flujo NO puede comprobar, y por qué. Medido, no supuesto:**
+#
+# - **Que la marca se mueva, y por tanto el telón por volver a casa.** `setLocation` de
+#   Maestro **no mueve la marca en esta máquina**: medido el 12-ago-2026 sobre una salida
+#   abierta, un `setLocation` a `42.4090,-8.7480` sale con código 0 y `marca-posicion` se
+#   queda donde estaba. `adb emu geo fix` con esa misma coordenada **sí la mueve**, tres
+#   fijos seguidos y la marca cambia — pero un flujo de Maestro no tiene manera de invocar
+#   un comando del sistema. Así que la vía del regreso no se recorre aquí; se recorre la de
+#   «dejarlo aquí», que es la misma puerta en otro sitio (`bucle-jugable.md` §8).
+# - **Cerrar la salida desde el rótulo del sistema.** Está en la notificación del servicio en
+#   primer plano, fuera de la ventana de la app; abrir la bandeja convertiría el estado del
+#   emulador en el resultado de la prueba.
+# - **Que el mapa del telón salga entintado.** Maestro no lee píxeles de un lienzo de Skia.
+#   Lo que sí se comprueba es que la lámina está; que cada elemento lleva una de tres tintas
+#   y ninguna otra se afirma en `test/nucleo/telon.test.mjs`.
+# - **La lista de ascensos.** `telon-ascensos` es un contenedor sin altura propia cuando no
+#   hay ni un ascenso ni un sitio por el que se pasó, y Maestro descarta como invisible lo
+#   que no ocupa. Que esté y que pueda estar vacía sin disculparse se afirma en
+#   `test/nucleo/telon-cableado.test.mjs`; aquí se afirma el título, que siempre está.
+# - **Que el telón no se eche dos veces al morir la app entre echarlo y leerlo.** Habría que
+#   matar el proceso en mitad de un efecto. Se afirma en `@nucleo` sobre el estado, y la
+#   marca `telon-recompuesto` está puesta en la pantalla para el día en que se pueda.
+# - **El desenlace, el cierre en corto y el rumor.** Piden una aventura aceptada y andada, y
+#   dónde caen sus beats no es reproducible entre tandas: es el mismo límite que mantiene a
+#   `test/app/escena.yaml` en la columna, y está escrito allí. Las tres pantallas se afirman
+#   en `test/nucleo/telon-cableado.test.mjs`.
+#
+# **Dos cosas que este flujo atiende en vez de dar por hechas, y por qué:**
+#
+# - **Una llegada puede validar sola durante la salida.** Quien juega está parada dentro del
+#   geofence del sitio por el que empieza el mapa, así que al reabrir la app puede que lo
+#   primero que se vea no sea la portada sino el paso vigente de una llegada —la escena que
+#   espera manda sobre todo lo demás—. Se atiende, que es lo que hace una persona, y después
+#   aparece la portada. Si alguna vez esto se pusiera intermitente, la causa es esa carrera y
+#   no el telón.
+# - **La cartela del hito puede aparecer.** Es una capa a pantalla completa sobre la entrada
+#   del día, así que se cierra **antes** de afirmar nada de esa pantalla: con la cartela
+#   puesta, Maestro descarta como invisible todo lo que queda debajo.
+#
+# **Y una discrepancia que se deja escrita en vez de elegir bando.** `test/app/en-marcha.yaml`
+# afirma que al reabrir la app la situación es `abierta-con-rotulo` con el rótulo `puesto`;
+# la medida a mano del 12-ago-2026 dio `abierta-sin-rotulo` con `retirado-por-el-sistema`.
+# Las dos dejan la tarjeta de a medias con sus dos acciones, que es lo único que este flujo
+# necesita, así que **aquí no se afirma el valor**: afirmarlo sería atar este flujo a una
+# carrera con el ciclo de vida del servicio. Que las cuatro situaciones y sus transiciones
+# son las que son se afirma en `test/nucleo/salidas.test.mjs`.
+#
+# Los elementos se localizan por los identificadores que declaró SPEC-036 y nunca por su
+# posición en pantalla.
+
+# Los casos, tal y como los cita `test/spec-test-map.json`:
+#   «Leer el telón deja abrir otra salida»
+#
+appId: com.walkingadventure.app
+---
+# El arranque entero, que es por donde entra una persona. Deja la partida recién nacida con
+# su mundo levantado alrededor de donde está, y la portada delante.
+- runFlow:
+    file: arranque.yaml
+
+# ── Vuelta 1 · se sale a andar, se mata la app y se deja aquí ──────────────────
+- assertVisible:
+    id: 'portada'
+- assertVisible:
+    id: 'salir-sin-mas'
+- tapOn:
+    id: 'salir-sin-mas'
+
+# Abrir la salida arranca el servicio en primer plano y pide una posición puntual, así que
+# se espera en vez de afirmar a la primera: es espera, no lógica.
+- extendedWaitUntil:
+    visible:
+      id: 'en-marcha'
+    timeout: 30000
+- assertNotVisible:
+    id: 'en-marcha-sin-cablear'
+
+# Matar el proceso, que es lo que hace el sistema sin avisar. **Sin `clearState`**: el punto
+# entero es que la salida siga abierta al volver.
+- stopApp
+- launchApp
+
+# Si una llegada validó sola mientras tanto, se atiende antes de nada: su paso vigente manda
+# sobre la portada, y cerrarlo es lo único que mueve la secuencia.
+- runFlow:
+    when:
+      visible:
+        id: 'llegada'
+    commands:
+      - repeat:
+          times: 6
+          commands:
+            - tapOn:
+                id: 'llegada-seguir'
+                optional: true
+
+# La portada, con la salida todavía abierta y sin rótulo: la tarjeta de a medias y sus dos
+# acciones. **No se afirma la situación**, por lo escrito en la cabecera.
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 60000
+- assertVisible:
+    id: 'tarjeta-a-medias'
+- assertVisible:
+    id: 'a-medias-seguir'
+- assertVisible:
+    id: 'a-medias-dejarlo'
+
+# «Dejarlo aquí»: la misma puerta que volver a casa, en otro sitio. Cierra la salida y deja
+# el telón sin leer, que es lo primero que la app enseña.
+- tapOn:
+    id: 'a-medias-dejarlo'
+- extendedWaitUntil:
+    visible:
+      id: 'telon'
+    timeout: 30000
+
+# ── El telón, recorrido entero ─────────────────────────────────────────────────
+#
+# La primera pantalla es el mapa, con tinta o sin ella: es la misma pantalla y lo que cambia
+# es el título, la lista y la línea. Saltársela haría desaparecer el objeto central del juego
+# justo el día en que menos apetece salir.
+- assertVisible:
+    id: 'telon-estado'
+- assertVisible:
+    id: 'telon-titulo'
+- assertVisible:
+    id: 'telon-mapa'
+
+# Ninguna leyenda de tintas: las tres se ven y no se explican.
+- assertNotVisible: 'Leyenda'
+
+# Y ninguna manera de navegar: el telón se lee una vez, no se recorre hacia atrás y no dice
+# por qué pantalla vas.
+- assertNotVisible:
+    id: 'volver'
+- assertNotVisible:
+    id: 'cabecera-atras'
+- assertNotVisible:
+    id: 'barra-de-pestanas'
+- assertNotVisible:
+    id: 'saltar'
+- assertNotVisible:
+    id: 'indicador-de-pantalla'
+
+# Se avanza hasta la última. El tope es de la prueba y no del juego: el telón más largo tiene
+# cuatro pantallas, y un bucle sin tope escondería una secuencia que no acaba. Los toques van
+# opcionales porque cuántas pantallas trae depende de cómo acabó la salida, y eso no lo
+# decide el flujo; lo que de verdad se exige —llegar a la entrada del día— va justo debajo.
+- repeat:
+    times: 5
+    commands:
+      - tapOn:
+          id: 'telon-seguir'
+          optional: true
+
+# La cartela del hito, si apareció, es una capa que se cierra tocando y no vuelve. Va antes
+# de afirmar nada de la entrada del día: con la cartela puesta, lo de debajo no se ve.
+- runFlow:
+    when:
+      visible:
+        id: 'hito-arranque'
+    commands:
+      - tapOn:
+          id: 'hito-arranque'
+      - assertNotVisible:
+          id: 'hito-arranque'
+
+# ── La entrada del día, y sus dos salidas ──────────────────────────────────────
+- assertVisible:
+    id: 'telon-estado'
+    text: 'diario'
+- assertVisible:
+    id: 'diario-del-dia'
+- assertVisible:
+    id: 'diario-lo-propio'
+- assertVisible:
+    id: 'telon-diario'
+- assertVisible:
+    id: 'telon-cerrar'
+# Ya no hay «Seguir»: la última pantalla ofrece las dos salidas naturales y ninguna
+# intermedia ofrece salir, para no partir la lectura por la mitad.
+- assertNotVisible:
+    id: 'telon-seguir'
+
+# La primera salida: «Cerrar». Deja el telón marcado como leído y devuelve a la portada.
+- tapOn:
+    id: 'telon-cerrar'
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 30000
+- assertNotVisible:
+    id: 'telon'
+- assertVisible:
+    id: 'salida-situacion'
+- assertVisible: 'cerrada-leida'
+# Y la tarjeta de a medias ya no está: no queda ninguna salida abierta.
+- assertNotVisible:
+    id: 'tarjeta-a-medias'
+
+# ── Y una salida nueva se puede abrir, que es §10h ─────────────────────────────
+#
+# Con el telón sin marcar, esto no ocurriría: la portada enseñaría el motivo
+# `telon-pendiente` debajo de la acción que no pudo, y la app quedaría muerta.
+- assertVisible:
+    id: 'salir-sin-mas'
+- tapOn:
+    id: 'salir-sin-mas'
+- assertNotVisible: 'telon-pendiente'
+- extendedWaitUntil:
+    visible:
+      id: 'en-marcha'
+    timeout: 30000
+
+# ── Vuelta 2 · la otra salida de la última pantalla ────────────────────────────
+#
+# La misma máquina otra vez, para salir por «Ver el diario entero». Las **dos** marcan, y
+# comprobar solo una dejaría medio afirmado el criterio que impide la app muerta.
+- stopApp
+- launchApp
+- runFlow:
+    when:
+      visible:
+        id: 'llegada'
+    commands:
+      - repeat:
+          times: 6
+          commands:
+            - tapOn:
+                id: 'llegada-seguir'
+                optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 60000
+- assertVisible:
+    id: 'a-medias-dejarlo'
+- tapOn:
+    id: 'a-medias-dejarlo'
+- extendedWaitUntil:
+    visible:
+      id: 'telon'
+    timeout: 30000
+- assertVisible:
+    id: 'telon-titulo'
+- repeat:
+    times: 5
+    commands:
+      - tapOn:
+          id: 'telon-seguir'
+          optional: true
+- runFlow:
+    when:
+      visible:
+        id: 'hito-arranque'
+    commands:
+      - tapOn:
+          id: 'hito-arranque'
+- assertVisible:
+    id: 'telon-estado'
+    text: 'diario'
+- assertVisible:
+    id: 'telon-diario'
+- assertVisible:
+    id: 'telon-cerrar'
+
+# La segunda salida: «Ver el diario entero». Marca el telón igual y lleva al diario.
+- tapOn:
+    id: 'telon-diario'
+- extendedWaitUntil:
+    visible:
+      id: 'diario-por-dias'
+    timeout: 30000
+- assertNotVisible:
+    id: 'telon'
+
+# Y de vuelta a la portada, donde el telón ya está leído y se puede abrir otra salida.
+- tapOn:
+    id: 'diario-volver'
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 30000
+- assertVisible:
+    id: 'salida-situacion'
+- assertVisible: 'cerrada-leida'
+- tapOn:
+    id: 'salir-sin-mas'
+- assertNotVisible: 'telon-pendiente'
+- extendedWaitUntil:
+    visible:
+      id: 'en-marcha'
+    timeout: 30000

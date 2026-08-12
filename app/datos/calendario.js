@@ -43,6 +43,33 @@ export function creaCalendario({ arrancadaEn, ahora = () => Date.now() }) {
 }
 
 /**
+ * El **reloj de pared** de SPEC-034: el minuto del día, y nada más.
+ *
+ * Vive aquí por lo mismo que el calendario: `packages/nucleo/` no lee `Date`, así que el
+ * único sitio de la app donde se mira la hora es esta puerta. Lo consume la escena de un
+ * beat de franja para decidir qué variante se lee, y **el minuto se usa y no se guarda**
+ * (RF-PRIV-002): lo que queda anotado en la partida es la variante, nunca la hora.
+ *
+ * Devuelve una función y no un objeto porque eso es lo que el núcleo exige: `varianteDelBeat`
+ * comprueba `typeof reloj !== 'function'` y falla nombrando el reloj si no está cableado, en
+ * lugar de resolver todas las llegadas como si fueran dentro de la franja.
+ */
+export function relojDePared({ ahora = () => new Date() } = {}) {
+  if (typeof ahora !== 'function') {
+    throw new Error('el reloj de pared recibe de dónde sale el instante actual como función, para que se pueda doblar sin tocar el reloj del sistema');
+  }
+  return () => {
+    const instante = ahora();
+    const horas = instante?.getHours?.();
+    const minutos = instante?.getMinutes?.();
+    if (!Number.isInteger(horas) || !Number.isInteger(minutos)) {
+      throw new Error('el reloj de pared no ha podido leer la hora del sistema: el minuto del día no se inventa cuando no se sabe');
+    }
+    return horas * 60 + minutos;
+  };
+}
+
+/**
  * Un calendario parado en un día concreto.
  *
  * No es un doble de pruebas escondido en producción: es lo que consume la revisión del render

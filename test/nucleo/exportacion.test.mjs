@@ -271,7 +271,15 @@ describe('Exportar la partida', () => {
     // nombres —que ahora llevan epíteto cuando la porción de la celda no da— y con ellos
     // lo que ocupa cada documento. Lo que el caso afirma sigue siendo lo mismo: que el
     // fichero es su cabecera más sus partes, y que su tamaño está declarado y no estimado.
-    assert.equal(fichero.length, 24112, `la partida de dos mapas y una salida ocupa ${fichero.length} B y estaba declarada en 24 112 B: el tamaño del fichero ha cambiado y hay que revisarlo, no actualizar el número a ciegas`);
+    //
+    // **Y se remidió en SPEC-049, con causa y delta exacto.** 24 112 → 24 137 B, **+25 B**,
+    // que es literalmente `"descartesDelCasting":[]`: el campo que el área `aventuras` gana
+    // para congelar contra qué sitios marcados se casteó la aventura en curso. Se dice el
+    // porqué al lado porque este número existe para detectar cambios, y actualizarlo sin
+    // saber cuál fue es exactamente lo que su propio mensaje prohíbe. El presupuesto de
+    // SPEC-016, que es el criterio de diseño y no el detector, se afirma en el caso de la
+    // partida larga con su margen medido.
+    assert.equal(fichero.length, 24137, `la partida de dos mapas y una salida ocupa ${fichero.length} B y estaba declarada en 24 137 B: el tamaño del fichero ha cambiado y hay que revisarlo, no actualizar el número a ciegas`);
   });
 
   test('El fichero de una partida de mil días queda medido entero y cabe en el presupuesto de SPEC-016', async () => {
@@ -290,10 +298,25 @@ describe('Exportar la partida', () => {
     assert.ok(dentro.registro < PRESUPUESTO_DE_REGISTRO_BYTES, `el registro de mil días mide ${dentro.registro} B y el presupuesto es ${PRESUPUESTO_DE_REGISTRO_BYTES} B`);
     assert.ok(dentro.estado < PRESUPUESTO_DE_ESTADO_BYTES, `el estado de mil días mide ${dentro.estado} B y el presupuesto es ${PRESUPUESTO_DE_ESTADO_BYTES} B`);
 
+    // **El presupuesto es el criterio de diseño y la cifra declarada es solo un detector de
+    // cambios: no se pueden tapar el uno al otro.** El campo que SPEC-049 añadió al área de
+    // aventuras movió la cifra declarada y no movió el presupuesto, y para que eso se vea sin
+    // tener que recalcularlo a mano, el margen se afirma con holgura de sobra. Medido el
+    // 12-ago-2026: registro 695 324 B de 6 291 456 B —el 11,1 %—, estado 1 942 B de
+    // 2 097 152 B —el 0,1 %—. El día que alguno se acerque a la mitad, esto se pone rojo
+    // mucho antes de que el presupuesto se rompa, que es cuando todavía se puede decidir algo.
+    assert.ok(dentro.registro * 2 < PRESUPUESTO_DE_REGISTRO_BYTES, `el registro de mil días mide ${dentro.registro} B y ya pasa de la mitad del presupuesto (${PRESUPUESTO_DE_REGISTRO_BYTES} B): toca decidir sobre la poda antes de que se rompa`);
+    assert.ok(dentro.estado * 2 < PRESUPUESTO_DE_ESTADO_BYTES, `el estado de mil días mide ${dentro.estado} B y ya pasa de la mitad del presupuesto (${PRESUPUESTO_DE_ESTADO_BYTES} B)`);
+
     // El tamaño declarado, fase a fase y entero. El registro es lo que crece con los
     // días, así que los documentos dominan todavía más que en una partida corta: es el
     // dato con el que se decidiría podar, y por eso se dice y no se estima.
-    assert.equal(fichero.length, 718693, `la partida de mil días ocupa ${fichero.length} B y estaba declarada en 718 693 B: el tamaño del fichero ha cambiado y hay que revisarlo`);
+    //
+    // **Remedido en SPEC-049: 718 693 → 718 718 B, +25 B**, el mismo delta exacto que la
+    // partida corta y por la misma causa —`"descartesDelCasting":[]` en el área de
+    // aventuras—. Que sea el mismo número en las dos es lo que confirma la causa: el campo
+    // está una vez por partida y no una vez por salida, así que mil días no lo multiplican.
+    assert.equal(fichero.length, 718718, `la partida de mil días ocupa ${fichero.length} B y estaba declarada en 718 718 B: el tamaño del fichero ha cambiado y hay que revisarlo`);
     assert.ok(medida.documento / medida.total > 0.99, 'los documentos han dejado de ser casi todo el fichero de una partida larga');
     assert.ok(fichero.length < 1024 * 1024, `el fichero de una partida de mil días pasa del mega: ${fichero.length} B`);
   });

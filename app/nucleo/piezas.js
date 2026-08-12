@@ -26,6 +26,28 @@
 
 import { componeEscena } from '@walkingadventure/nucleo/render/escena.js';
 import { ESTILO_POR_DEFECTO } from '@walkingadventure/nucleo/render/estilos.js';
+// SPEC-049. Las dos mitades del beat —el motor que lo resuelve y la composición de sus dos
+// pantallas— y las cuatro piezas del cierre. El `componeEscena` de `quests/` se renombra
+// aquí: hay dos con ese nombre en el paquete —el que compone la escena de un beat y el que
+// compone la escena de la lámina— y son cosas distintas.
+import {
+  componeEscena as componeLaEscenaDelBeat,
+  componeLoQueTeLlevas,
+} from '@walkingadventure/nucleo/quests/escena.js';
+import { aventuraEnCurso, resuelveBeat } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
+import { apuntaHaberEstado, libroDePendientes } from '@walkingadventure/nucleo/partida/conocimiento.js';
+import { castAll } from '@walkingadventure/nucleo/quests/casting.js';
+import { hayDescartes, vistaDeAnclajes, vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
+import { identidadDeCara } from '@walkingadventure/nucleo/partida/npcs.js';
+import { vistaDeTenencia } from '@walkingadventure/nucleo/partida/objetos.js';
+import { namesFor } from '@walkingadventure/nucleo/names/index.js';
+import { echaElTelon, piezasDeSerie } from '@walkingadventure/nucleo/partida/cierre-de-salida.js';
+import { componeElTelon } from '@walkingadventure/nucleo/partida/telon.js';
+import { componeElDesenlace, repuestoDe } from '@walkingadventure/nucleo/quests/desenlace.js';
+import { CATALOGO } from '@walkingadventure/nucleo/quests/catalogo.js';
+import { VIAS_DE_CIERRE, salidaAbierta } from '@walkingadventure/nucleo/partida/salida-abierta.js';
+import { MOTIVOS_DE_CIERRE, telonPendiente } from '@walkingadventure/nucleo/partida/salidas.js';
+import { entradasDe, proyeccion } from '@walkingadventure/nucleo/partida/diario.js';
 import {
   CLAVES,
   cargaCelda,
@@ -333,6 +355,76 @@ export const NUCLEO_DE_LAS_LLEGADAS = Object.freeze({
   PRESENTACIONES,
   TIPOS_DE_PASO,
   MODOS,
+});
+
+/**
+ * Lo que `creaElCasting` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-049 entra por la misma puerta que las diez filas anteriores (§6u): que sin ningún sitio
+ * marcado el casting sea **el mismo objeto** que trae el documento, que con uno marcado la
+ * cadena que se acepta sea la misma que enseña la ficha, y que esa cadena salga idéntica al
+ * reabrir la app tienen que poder leerse desde `node --test` sin resolver nada instalado.
+ */
+export const NUCLEO_DEL_CASTING = Object.freeze({
+  castAll,
+  vistaDeDescartes,
+  // La vista desde una lista ya resuelta: es la que recupera la cadena de una aventura
+  // aceptada contra los sitios que estaban marcados **cuando se aceptó**.
+  vistaDeAnclajes,
+  hayDescartes,
+});
+
+/**
+ * Lo que `creaLaAventuraEnCurso` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-049 entra por la misma puerta que las diez filas anteriores (§6u): que cerrar el paso
+ * de un beat resuelva **el que toca**, que uno que no toca se quede esperando sin que la app
+ * falle, que la escena se componga con su cara y su cierre por resultado y que resolver dos
+ * veces el mismo beat no duplique ningún hecho tienen que poder leerse desde `node --test` sin
+ * resolver nada instalado, que es el único sitio donde se pueden poner rojos.
+ */
+export const NUCLEO_DE_LA_AVENTURA_EN_CURSO = Object.freeze({
+  aventuraEnCurso,
+  resuelveBeat,
+  componeEscena: componeLaEscenaDelBeat,
+  componeLoQueTeLlevas,
+  identidadDeCara,
+  namesFor,
+  vistaDeTenencia,
+});
+
+/**
+ * Lo que `echaElTelonDeLaSalida` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-049 entra por la misma puerta que las diez filas anteriores (§6u): que el telón se
+ * eche **una sola vez** por las tres vías, que el desenlace se componga desde la plantilla del
+ * catálogo y la aventura casteada, que un cierre en corto use el repuesto que la plantilla
+ * declara y que la ausencia de una de las seis piezas falle nombrándola tienen que poder
+ * leerse desde `node --test` sin resolver nada instalado.
+ *
+ * `CATALOGO` viaja aquí y no se importa dentro del cierre porque es **la plantilla de la
+ * aventura aceptada** una de las cuatro entradas de la frontera de inyección de esta fila: sin
+ * ella el cierre echaría un telón sin desenlace, y lo que la spec pide es que falle nombrándola.
+ */
+export const NUCLEO_DEL_CIERRE_DE_SALIDA = Object.freeze({
+  echaElTelon,
+  piezasDeSerie,
+  componeElTelon,
+  componeElDesenlace,
+  repuestoDe,
+  salidaAbierta,
+  aventuraEnCurso,
+  telonPendiente,
+  libroDePendientes,
+  apuntaHaberEstado,
+  sitiosConPosicion,
+  entradasDe,
+  proyeccion,
+  estadoDeMapa,
+  namesFor,
+  CATALOGO,
+  VIAS_DE_CIERRE,
+  MOTIVOS_DE_CIERRE,
 });
 
 /** Lo que `mundoDeLaPartida` enumera en su `DEL_NUCLEO`, ni una función más. */

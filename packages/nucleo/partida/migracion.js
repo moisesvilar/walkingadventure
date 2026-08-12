@@ -17,7 +17,7 @@
 // migración existe para no romper.
 
 import { congelaHondo } from '../core/congelar.js';
-import { VERSION_FORMATO, VERSION_GENERADOR, escribe, esquemaDe } from './formato.js';
+import { CLASES, VERSION_FORMATO, VERSION_GENERADOR, escribe, esquemaDe } from './formato.js';
 
 /**
  * La versión más antigua que este juego sabe abrir migrando.
@@ -56,8 +56,8 @@ function exigeLiteral(valor, ruta) {
 }
 
 /**
- * Un paso de la cadena: **de qué versión a cuál va** y qué hace, dicho en tres
- * operaciones declarativas y ninguna más.
+ * Un paso de la cadena: **de qué versión a cuál va**, **sobre qué clase de documento**, y
+ * qué hace, dicho en tres operaciones declarativas y ninguna más.
  *
  * - `introduce`: rutas con el valor literal que hay que poner donde antes no había campo.
  * - `quita`: rutas que dejan de existir.
@@ -65,16 +65,32 @@ function exigeLiteral(valor, ruta) {
  *
  * Tres y no una función libre a propósito: con una función, «el paso declara lo que
  * introduce» dejaría de ser comprobable y volveríamos a poder deducir.
+ *
+ * **`clase` existe porque la versión de formato es una sola para las ocho clases de
+ * documento y los campos no lo son.** Medido antes de escribir esto: un paso que introduce
+ * `areas.aventuras.…` —un campo que solo tiene el estado de la partida— le mete un `areas`
+ * a las ocho, índice de mapa y celda incluidos, y como `migra` valida el resultado contra
+ * el esquema cerrado de su clase, **una copia antigua dejaría de poder abrirse entera**. Sin
+ * `clase`, la primera migración de verdad del proyecto habría roto todo lo que no fuera el
+ * estado. Un paso sin clase declarada sigue aplicándose a todas, que es lo que había y lo
+ * que un paso de prueba necesita.
+ *
+ * La versión **se sube siempre**, aplique el paso o no: lo que la cadena promete es que
+ * todo documento de la versión N llega a la N+1, y una clase que no cambia de forma no es
+ * una clase que se quede atrás.
  */
-export function paso({ de, a, introduce = {}, quita = [], renombra = {}, porque = '' } = {}) {
+export function paso({ de, a, clase = null, introduce = {}, quita = [], renombra = {}, porque = '' } = {}) {
   exigeEntero(de, 'un paso de migración declara de qué versión sale');
   exigeEntero(a, `el paso desde la versión ${de} declara a qué versión llega`);
   if (a !== de + 1) {
     throw new Error(`el paso ${de}→${a} salta más de una versión: la cadena se declara paso a paso para que un hueco se vea, y ${de}→${de + 1} es el único salto que este paso puede declarar`);
   }
+  if (clase !== null && (typeof clase !== 'string' || !clase)) {
+    throw new Error(`el paso ${de}→${a} declara la clase de documento a la que se aplica y llegó ${JSON.stringify(clase) ?? String(clase)}: o es una clase, o es nulo y se aplica a todas`);
+  }
   for (const ruta of Object.keys(introduce)) exigeLiteral(introduce[ruta], `el paso ${de}→${a} introduce "${ruta}"`);
   if (!Array.isArray(quita)) throw new Error(`el paso ${de}→${a}: "quita" es la lista de rutas que dejan de existir`);
-  return congelaHondo({ de, a, introduce: { ...introduce }, quita: quita.slice(), renombra: { ...renombra }, porque });
+  return congelaHondo({ de, a, clase, introduce: { ...introduce }, quita: quita.slice(), renombra: { ...renombra }, porque });
 }
 
 /**
@@ -89,13 +105,34 @@ export function creaCadena(pasos = []) {
 }
 
 /**
- * La cadena real del formato.
+ * La cadena real del formato. **La primera migración de verdad del proyecto.**
  *
- * **Hoy está vacía y eso es correcto**: la versión actual es la mínima soportada, así
- * que no hay ningún salto que cubrir. `compruebaCadena` lo afirma en lugar de darlo por
- * hecho, que es la diferencia entre un criterio y una suposición.
+ * Estuvo vacía mientras la versión actual fue la mínima soportada, y eso era correcto: no
+ * había ningún salto que cubrir. SPEC-049 abre el primero.
+ *
+ * **1→2 · con qué sitios marcados se casteó la aventura en curso.** Desde que la lista de hoy
+ * respeta los descartes, el casting se rehace cuando los hay, así que la cadena de una
+ * aventura ya aceptada tiene que recuperarse contra los sitios que estaban marcados **cuando
+ * se aceptó** y no contra los de ahora. El campo no existía, y su valor **se declara aquí y no
+ * se deduce**: la lista vacía, que es la que esas partidas tenían de verdad —antes de aquella
+ * fila el casting no se rehacía nunca, así que toda aventura en curso se casteó contra ningún
+ * sitio marcado—. No es un valor por defecto: es el valor que el documento tenía sin escribirlo.
+ *
+ * Va **declarado sobre la clase del estado**, y eso no es cosmético: la versión de formato es
+ * una sola para las ocho clases de documento, y medido antes de escribir esto, un paso sin
+ * clase le mete un `areas` al índice de mapa, a la celda, al registro y a las demás, y como
+ * `migra` valida contra el esquema cerrado de cada clase, **una copia antigua dejaría de poder
+ * abrirse entera**. Las otras siete suben de versión y no cambian de forma, que es la verdad.
  */
-export const CADENA_DEL_FORMATO = creaCadena([]);
+export const CADENA_DEL_FORMATO = creaCadena([
+  paso({
+    de: 1,
+    a: 2,
+    clase: CLASES.ESTADO,
+    introduce: { 'areas.aventuras.descartesDelCasting': [] },
+    porque: 'la aventura en curso declara contra qué sitios marcados se casteó, para que marcar uno a mitad de camino no le cambie la cadena (SPEC-049)',
+  }),
+]);
 
 /**
  * Que la cadena cubra sin huecos desde una versión hasta otra, o un error que
@@ -169,6 +206,12 @@ function copia(doc) {
 
 function aplicaPaso(doc, p) {
   const salida = copia(doc);
+  // La clase decide si el paso **toca campos**; la versión sube igual. Un paso de otra
+  // clase que renombrara o introdujera aquí dejaría el documento fuera de su esquema.
+  if (p.clase !== null && salida.clase !== p.clase) {
+    salida.version = p.a;
+    return salida;
+  }
   for (const [de, a] of Object.entries(p.renombra)) {
     const sacado = saca(salida, de);
     if (!sacado.habia) {
@@ -222,7 +265,17 @@ export function migra(doc, { cadena = CADENA_DEL_FORMATO, donde = 'el documento'
   // una migración de prueba llega a una versión que ningún esquema describe, y ese es
   // justo el punto de que se pueda ejercitar hoy.
   if (hasta === VERSION_FORMATO) {
-    escribe(actual, esquemaDe(actual.clase), `${donde} migrado de la versión ${desde} a la ${hasta}`);
+    // El esquema se resuelve **con el documento nombrado**: `esquemaDe` lanza por su cuenta
+    // cuando la clase no existe, y ese error no sabe de qué documento venía. Con varios
+    // documentos migrándose a la vez —los dos de la partida y los del mapa— «clase de
+    // documento desconocida» sin decir cuál no se puede arreglar leyéndolo.
+    let esquema;
+    try {
+      esquema = esquemaDe(actual.clase);
+    } catch (e) {
+      throw new Error(`${donde}: ${e.message}`);
+    }
+    escribe(actual, esquema, `${donde} migrado de la versión ${desde} a la ${hasta}`);
   }
   return congelaHondo({
     doc: actual,

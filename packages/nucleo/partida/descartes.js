@@ -247,13 +247,47 @@ export function exigeDescartes(descartes, quien = 'el casting de aventuras') {
  * mismo conjunto de descartes de la primera plantilla a la última.
  */
 export function vistaDeDescartes(estado, mapaId) {
-  const lista = descartesDeMapa(estado, mapaId);
+  return vistaDeAnclajes(descartesDeMapa(estado, mapaId));
+}
+
+/**
+ * La misma vista, **desde una lista de anclajes ya resuelta**.
+ *
+ * Existe para que una aventura ya aceptada pueda recuperar su cadena contra los sitios que
+ * estaban marcados **cuando se aceptó** y no contra los de ahora: marcar un sitio a mitad de
+ * camino no puede cambiarle el lazo a lo que ya estás andando (`docs/flujo.md`, A4P8: «anota
+ * sin resembrar»). Los anclajes se guardan con la aventura en curso y vuelven por aquí.
+ *
+ * Es la misma forma que `vistaDeDescartes` y no una parecida —aquella se construye con esta—,
+ * porque dos vistas que se parecen acabarían respondiendo distinto a `descartado()`.
+ */
+export function vistaDeAnclajes(anclajes) {
+  if (!Array.isArray(anclajes)) {
+    throw new Error(`la vista de descartes desde una lista de anclajes necesita la lista y llegó ${JSON.stringify(anclajes) ?? String(anclajes)}`);
+  }
+  const lista = congelaHondo(
+    anclajes
+      .map((a) => (typeof a === 'string' ? { anclaje: a, rol: null, porque: null } : { anclaje: a.anclaje, rol: a.rol ?? null, porque: a.porque ?? null }))
+      .slice()
+      .sort(porAnclaje),
+  );
   const marcados = new Set(lista.map((d) => d.anclaje));
   return congelaHondo({
     descartado: (anclaje) => typeof anclaje === 'string' && marcados.has(anclaje),
     cuantos: () => marcados.size,
     lista: () => lista,
   });
+}
+
+/**
+ * Los anclajes de una vista, en orden canónico y sin nada más.
+ *
+ * Es lo que se guarda con la aventura aceptada: **solo el identificador del sitio**, porque el
+ * casting pregunta `descartado(nombre)` y no mira ni el rol ni el motivo. Guardar los tres
+ * haría que cambiar un motivo pareciera cambiar la cadena.
+ */
+export function anclajesDe(descartes) {
+  return congelaHondo(exigeDescartes(descartes, 'los anclajes de una vista de descartes').lista().map((d) => d.anclaje));
 }
 
 /** Si una vista de descartes tiene alguno. Lo usa quien decide si hace falta recastear. */

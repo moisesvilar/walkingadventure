@@ -1,13 +1,14 @@
-# @app — La escena de un beat y lo que te llevas dentro del móvil (SPEC-034).
+# @app — La escena de un beat y lo que te llevas dentro del móvil (SPEC-034, cableada
+# por SPEC-049).
 #
 # @limite-declarado
 #
-# Este flujo **no recorre su pantalla**: falta `paso-escena` en `app/App.js`, así que
-# no hay ninguna puerta que lleve hasta ella. Lo único que llega a ejecutarse es la
-# guarda de más abajo, así que su verde significa «el límite sigue en pie» y nunca «la
-# pantalla funciona», y por eso no se cuenta en la misma casilla que un verde de
-# verdad. El porqué entero y lo que haría falta para levantarlo están en «LÍMITE
-# DECLARADO», unas líneas más abajo.
+# Este flujo **no recorre su pantalla**, y desde SPEC-049 el motivo es otro: la pantalla
+# existe, está montada y se alcanza andando, pero **un flujo no puede garantizar llegar
+# a ella**. Lo único que se ejecuta es la guarda de más abajo, así que su verde significa
+# «el límite sigue en pie» y nunca «la pantalla funciona», y por eso no se cuenta en la
+# misma casilla que un verde de verdad. El porqué medido está en «LÍMITE DECLARADO»,
+# unas líneas más abajo.
 #
 # La lista de flujos marcados está fijada en `test/nucleo/limite-declarado.test.mjs`:
 # poner o quitar este marcador sin tocar aquella lista pone la suite en rojo, que es
@@ -19,9 +20,10 @@
 # entrar en la escena siguiente. Todo lo demás —la composición de la escena, el titular y
 # el verbo de cada tipo, el cierre por resultado, la variante de franja, las dos vías del
 # objeto, que no aparezca ninguna cifra y que ningún texto se disculpe— se afirma en
-# `test/nucleo/escena.test.mjs`, que corre sin simulador. **La decisión vive en el paquete
-# justamente para que no haga falta un dispositivo para ponerla roja**, y duplicarla aquí
-# solo añadiría un flujo lento.
+# `test/nucleo/escena.test.mjs` y, desde SPEC-049, el cableado entero en
+# `test/nucleo/escena-cableada.test.mjs`, que corren sin simulador. **La decisión vive en
+# el paquete justamente para que no haga falta un dispositivo para ponerla roja**, y
+# duplicarla aquí solo añadiría un flujo lento.
 #
 # **YA SE EJECUTA.** Este párrafo decía que en esta máquina no había Xcode ni SDK de
 # Android y que ningún flujo `@app` podía correrse; desde que hay emulador —`wa-pixel`,
@@ -29,24 +31,57 @@
 # se leyera como infraestructura ausente. Lo que este flujo diga sobre la app se ha
 # medido contra la app.
 #
-# **Lo que este flujo necesita para poder pasar, y hoy no tiene:**
+# ── LÍMITE DECLARADO, con el motivo medido ────────────────────────────────────
 #
-# - **Las dos pantallas.** SPEC-034 entregó el paquete entero y **ni una línea de `app/`**:
-#   no existen `app/pantallas/escena.js` ni `app/pantallas/lo-que-te-llevas.js`, así que
-#   ninguno de los identificadores que la spec declara —`escena-estado`, `escena`,
-#   `escena-cara`, `escena-accion`, `escena-tamano-texto`, `escena-texto`,
-#   `lo-que-te-llevas`, `siguiente-sitio`— existe en el árbol de vistas. Es el hueco más
-#   grande de esta fila y está declarado en el resumen de cobertura.
-# - **Una puerta hasta la pantalla.** El primer paso va contra `paso-escena`, que es el
-#   nombre que le corresponde por la convención de los otros pasos provisionales
-#   (`paso-mapa`, `paso-marcha`, `paso-llegada`, `paso-revision-render`) y que **tampoco
-#   existe**: `App.js` no monta ninguna de estas pantallas. Es el mismo hueco de cableado
-#   que declaran `test/app/llegada.yaml` y `test/app/visor.yaml`.
-# - **Una aventura aceptada y en curso en el mundo de andamiaje**, con al menos dos beats,
-#   para que exista una escena siguiente a la que entrar y comprobar que el tamaño
-#   elegido sigue puesto.
+# **El motivo viejo era falso y se retira.** Decía que faltaba `paso-escena` en
+# `app/App.js` y que hacía falta montarlo. Hoy es falso por partida doble: la escena se
+# monta —`app/pantallas/escena.js`, inyectada en `PantallaLlegada` por su tipo de paso—
+# y **esa puerta no debe existir**. SPEC-049 lo dice con todas las letras: la ausencia
+# de rutas es la pieza, porque no hay manera de llegar a A4P3 sin haber llegado al sitio,
+# y publicar una puerta de servicio para que una prueba entre sería exactamente lo que la
+# spec prohíbe. Un límite declarado por un motivo que ya no es el suyo es peor que no
+# declararlo.
 #
-# **Lo que este flujo NO puede comprobar, y por qué:**
+# **Lo que de verdad lo mantiene aquí, medido y no supuesto, son tres cosas que se suman:**
+#
+# 1. **Dónde nace el mundo no lo decide el flujo.** `app/plataforma/ubicacion.js` lee la
+#    coordenada del arranque con `getCurrentPositionAsync({ accuracy: Balanced })` y un
+#    fijo simulado no manda sobre esa lectura: con `setLocation` a `42.4000,-8.7700` el
+#    mapa nació en `42.40,-8.76` en dos tandas seguidas. Medido por la fila 44 y anotado
+#    en `test/app/llegada.yaml`.
+# 2. **La semilla nace de entropía real y el arranque no ofrece dónde escribirla.**
+#    `app/datos/entropia.js` la produce con `creaSemilla` y `app/pantallas/arranque.jsx`
+#    no tiene ningún `testID` de semilla, así que con `clearState: true` **cada tanda
+#    genera un mundo distinto**. Qué aventuras hay y dónde caen sus beats cambia en cada
+#    ejecución.
+# 3. **El flujo no puede andar hasta el beat.** `setLocation` de Maestro **no mueve la
+#    marca**: medido el 11-ago-2026 y vuelto a medir el 12-ago-2026 sobre una salida
+#    abierta, sale con código 0 y `marca-posicion` se queda donde estaba. `adb emu geo
+#    fix` con esa misma coordenada **sí la mueve** —no son el mismo mecanismo, y la nota
+#    de `test/app/en-marcha.yaml` que decía lo contrario está corregida—, pero un flujo
+#    de Maestro no tiene manera de invocar un comando del sistema. Sin poder moverse, lo
+#    único que valida es el sitio bajo el que arranca el mapa, y ese sitio es el que salga.
+#
+# Juntas: **qué sitio tiene beat no es reproducible entre tandas**, así que no se pueden
+# escribir coordenadas en el flujo como se escriben las formas en `llegada.yaml`. Y la
+# cuarta pieza cierra la única puerta que quedaba: **no puede saltar ningún
+# micro-encuentro**, porque `siembraLaCola` no tiene llamador desde `app/` y `atraviesa()`
+# sale por `if (!cola.length) return null`, así que una salida sin aventura aceptada
+# tampoco produce nunca un paso de beat. Es deuda de la fila 19, está fichada, y no es de
+# esta fila.
+#
+# **Qué levantaría el límite**, para que quede escrito y no haya que volver a medirlo:
+# que el arranque acepte una semilla escrita —que es una decisión de producto, no una
+# puerta de pruebas—, o que Maestro llegue a mover la marca, que permitiría aceptar una
+# aventura y andar hasta su primer beat. Cualquiera de las dos, sola, deja el cuerpo de
+# abajo ejecutándose sin tocar una línea de este fichero.
+#
+# **Y lo que NO lo levanta, para que nadie lo intente dos veces:** matar la app y
+# reabrirla. Ese camino es el que saca a `test/app/telon.yaml` de esta columna —al telón
+# se llega sin moverse, por la tarjeta de a medias—, pero aquí no sirve de nada: reabrir
+# la app no cambia dónde nació el mundo ni qué sitio tiene beat.
+#
+# **Lo que este flujo NO puede comprobar aunque se levante el límite, y por qué:**
 #
 # - **Que el texto se vea más grande.** Maestro no mide tipografías. Lo que sí se comprueba
 #   es que el control existe, que tocarlo no saca a nadie de la escena y que el estado del
@@ -54,6 +89,11 @@
 # - **Que el ajuste sea el mismo que enseña la pantalla de ajustes (A6P6).** Esa pantalla
 #   es de la fila 38 y todavía no existe; el paquete ya comparte la escala
 #   (`ESCALA_DE_TEXTO`) y eso se afirma en `@nucleo`.
+# - **El bloque de quien habla.** Medido en SPEC-049 sobre los cuatro mundos de
+#   referencia: **0 de 506 beats casteados caen sobre un rol humano**, así que
+#   `escena-cara` no existe hoy en ningún mundo. El cuerpo de abajo lo afirma como
+#   condicional por eso, y el número está fijado en
+#   `test/nucleo/escena-cableada.test.mjs`.
 #
 # Los elementos se localizan por los identificadores que declara la spec y nunca por su
 # posición en pantalla.
@@ -68,40 +108,28 @@ appId: com.walkingadventure.app
 - launchApp:
     clearState: true
 
-# El paso a la escena, provisional como el del mapa y el de la llegada. Hoy no existe.
-
-# ── LÍMITE DECLARADO ───────────────────────────────────────────────────────────
-#
-# `paso-escena` **no existe en `app/App.js`**. Los únicos pasos provisionales que la app
-# monta hoy son `paso-mapa`, `paso-marcha` y `paso-revision-render`; la pantalla que
-# este flujo recorre está escrita y entera en `app/pantallas/`, pero no hay ninguna
-# puerta que lleve hasta ella y `App.js` ni siquiera la importa. No es un selector mal
-# escrito ni un fallo de esta máquina: es orquestación que todavía no se ha cableado.
-#
-# Mientras ese sea el caso, este flujo **no recorre nada y lo dice**: comprueba que la
-# puerta sigue sin existir y que la app abre donde abre. Su verde significa «el límite
-# declarado sigue en pie», nunca «la pantalla está verificada». El día que alguien monte
-# `paso-escena`, la condición cambia sola y el cuerpo de abajo —que está entero, tal y como
-# se escribió— pasa a ejecutarse sin tocar una línea de este fichero.
+# La guarda del límite: con el estado limpio la app abre en el arranque y la escena no
+# está a la vista, porque para verla hay que haber aceptado una aventura y haber llegado
+# a su primer beat. Se condiciona sobre `escena`, que es el identificador de la propia
+# pantalla y no el de ninguna puerta: el día que haya camino hasta ella, la condición
+# cambia sola y el cuerpo de abajo —que está entero, tal y como se escribió— pasa a
+# ejecutarse sin tocar una línea de este fichero.
 - runFlow:
     when:
       notVisible:
-        id: 'paso-escena'
+        id: 'escena'
     commands:
       - assertVisible:
           id: 'arranque'
       - assertNotVisible:
-          id: 'paso-escena'
+          id: 'escena'
 
-# El flujo de verdad, a la espera de su puerta.
+# El flujo de verdad, a la espera de una tanda en la que el sitio de arranque traiga beat.
 - runFlow:
     when:
       visible:
-        id: 'paso-escena'
+        id: 'escena'
     commands:
-      - tapOn:
-          id: 'paso-escena'
-
       # ── Un solo botón y ninguna manera de volver atrás ─────────────────────────────
 
       - assertVisible:
@@ -126,10 +154,10 @@ appId: com.walkingadventure.app
       - assertNotVisible:
           id: 'cabecera-atras'
 
-      # Y ningún retrato de quien habla: exclusión 6 del PRD. El bloque de la cara está, con su
-      # nombre y su puesto, y no lleva imagen.
-      - assertVisible:
-          id: 'escena-cara'
+      # Y ningún retrato de quien habla: exclusión 6 del PRD. El bloque de la cara, cuando lo
+      # hay, es su nombre y su puesto en una línea y no lleva imagen. **Hoy no lo hay en
+      # ningún mundo de referencia** —0 de 506 beats caen sobre un rol humano—, así que lo que
+      # se afirma sin condición es la ausencia del retrato.
       - assertNotVisible:
           id: 'escena-cara-retrato'
 
@@ -161,7 +189,8 @@ appId: com.walkingadventure.app
       - assertNotVisible: '125%'
 
       # Tres escalones y vuelta al principio: tres toques más dejan la escena donde estaba, sin
-      # haber salido de ella en ningún momento.
+      # haber salido de ella en ningún momento. Y sin volver a A4P3 desde lo que te llevas, que
+      # es el defecto que SPEC-049 midió y arregló subiendo esa mitad al montaje del paso.
       - repeat:
           times: 3
           commands:
@@ -179,30 +208,19 @@ appId: com.walkingadventure.app
       - tapOn:
           id: 'escena-accion'
 
-      # Lo que te llevas — A4P4. Misma voz, una sola acción, y el nombre del sitio siguiente.
+      # Lo que te llevas — A4P4. Misma voz, una sola acción, y el nombre del sitio siguiente
+      # salvo en el último beat de la cadena.
       - assertVisible:
           id: 'escena-estado'
           text: 'lo-que-te-llevas'
       - assertVisible:
           id: 'lo-que-te-llevas'
-          text: 'Llevas encima'
-      - assertVisible:
-          id: 'siguiente-sitio'
       - assertNotVisible:
           id: 'volver'
       - tapOn:
           id: 'escena-accion'
-          text: 'Seguir andando'
 
-      # Y en la escena del beat siguiente el control sigue donde se dejó: el modo compañía es
-      # una condición de la partida y no de una escena (`personaje.md` §4).
-      - tapOn:
-          id: 'paso-escena'
-      - assertVisible:
-          id: 'escena-estado'
-          text: 'escena'
-      - assertVisible:
-          id: 'escena-tamano-texto'
-          text: 'Tamaño del texto'
-      - assertVisible:
-          id: 'escena-texto'
+      # Cerrado el paso, debajo está lo que la secuencia diga y nunca el mapa a mitad de
+      # llegada: la escena que espera manda sobre todo lo demás.
+      - assertNotVisible:
+          id: 'mapa-lamina'

@@ -126,6 +126,30 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
     },
   };
 
+  /**
+   * La única escritura que sale de `partida/`: **volver a dejar un documento migrado en su
+   * propia clave**.
+   *
+   * La exigencia del prefijo de arriba protege de que este módulo invente claves fuera de lo
+   * jugado —lo que se escriba fuera no entra en la copia ni en el respaldo, y nadie lo echaría
+   * de menos—, y ese motivo **no alcanza a un documento del mapa**: `mapa/` está en
+   * `PREFIJOS_DE_LA_PARTIDA`, así que sí se exporta y sí se respalda. Lo que aquí ocurre no es
+   * escribir algo nuevo, es reescribir en su sitio algo que ya estaba y que se acaba de leer.
+   *
+   * Por eso la puerta es estrecha y se comprueba: solo admite claves que esta misma migración
+   * haya leído. Sin la comprobación sería una segunda puerta sin criterio, que es la forma de
+   * fallo que llevamos dos costuras persiguiendo.
+   */
+  function reescribeMigrado(leidas, clave, texto) {
+    if (!leidas.has(clave)) {
+      throw new Error(
+        `la migración solo reescribe documentos que acaba de leer, y "${clave}" no es uno de ellos: ` +
+        'escribir una clave que no estaba sería inventarse un documento en vez de migrarlo',
+      );
+    }
+    return almacen.escribe(clave, texto);
+  }
+
   /** El documento que se escribiría, ya en texto canónico. Es también el sello. */
   function textoDelEstado(estado, registro) {
     // La marca de aplicación la fija `guardaPartida` al escribir, así que el sello se
@@ -161,6 +185,61 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
   }
 
   /**
+   * El prefijo bajo el que viven los documentos del mapa: su índice y sus celdas.
+   *
+   * Está escrito aquí y no inyectado, y es la única duplicación de esta corrección: lo
+   * declaran `CLAVES.prefijoDeMapa` en `partida/mapa.js` y `PREFIJOS_DE_LA_PARTIDA` en
+   * `partida/exportacion.js`, y traerlo por el núcleo inyectado obligaría a añadirlo a
+   * `DEL_NUCLEO`, que está espejado a mano en la batería y se pondría rojo entero.
+   *
+   * **Y la raíz, dicha donde muerde**, porque esta forma de fallo va a volver: la versión de
+   * formato es **una sola para las ocho clases de documento**, así que cualquier fila que
+   * haga evolucionar una clase invalida todas las demás y obliga a acordarse de migrarlas
+   * aquí. Lo que hoy sostiene que no falte ninguna es una lista escrita a mano, no el
+   * mecanismo. Lo que queda por decidir —una versión por clase, o una guarda que exija que
+   * subir la versión venga con migración para todas las que la comparten— no es de esta fila.
+   *
+   * Lo demás que hay en disco no entra, y **no por olvido**: `camara/` lleva su propia
+   * versión y su lector es tolerante; la marca de borrado y la de importación se parsean sin
+   * esquema o solo se comprueba que estén; y `arranque/en-curso` se lee con un `JSON.parse`
+   * dentro de un `catch` y solo el primer día. El único que se lee con el lector estricto y
+   * no se migra es `partida/procedencia.json`, y hoy no lo lee nadie: queda dicho.
+   */
+  const PREFIJO_DE_MAPAS = 'mapa/';
+
+  /**
+   * El documento **tal cual está escrito**, para dárselo a la migración.
+   *
+   * Aquí no se usa el lector estricto, y esa es toda la corrección: `lee()` comprueba la
+   * versión antes que nada y **rechaza cualquier documento más viejo que el actual** —«hay
+   * que migrarlo antes de abrirlo»—, que es justo la pregunta que la migración existe para
+   * contestar. Usarlo aquí hacía que ningún documento viejo pudiera llegar nunca a migrarse:
+   * medido en `wa-pixel` el 12-ago-2026 con una partida real, abrir daba la avería con ese
+   * mismo texto y el fichero se quedaba en la versión 1. No se había disparado nunca porque
+   * con `VERSION_FORMATO` en 1 ningún documento podía ser más viejo, y SPEC-049 es la
+   * primera fila que sube la versión.
+   *
+   * **`lee()` no se ablanda**: sigue protegiendo el camino normal —`cargaPartida` lo usa
+   * después, y un documento que ya está en la versión actual pasa por él entero—. Lo que se
+   * quita es solo de aquí, y lo que queda comprobado no lo comprueba esta capa sino `migra`,
+   * que ya lo hacía: un documento que no es un documento, uno sin `version`, uno con una
+   * versión que no es entera, uno de una versión **superior** —que sigue sin abrirse— y uno
+   * de una clase desconocida, que falla al validar el resultado contra el esquema de su
+   * clase. Lo único que deja de ser un error es «más viejo», que pasa a ser trabajo.
+   *
+   * Es además lo que ya hacía la otra puerta: `copia.js` migra las partes de una copia
+   * antigua parseando y nada más, y por eso las copias sí se migraban. Dos puertas a la
+   * misma cadena con dos exigencias distintas es cómo se coló esto.
+   */
+  function paraMigrar(crudo, donde) {
+    try {
+      return JSON.parse(crudo);
+    } catch (e) {
+      throw new Error(`${donde} no se puede leer: está roto o truncado (${e.message})`);
+    }
+  }
+
+  /**
    * Migra los dos documentos de la partida si vienen de una versión anterior.
    *
    * Devuelve de qué versión venían, o `null` si no había nada que migrar. Un salto sin
@@ -171,26 +250,49 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
    * la partida.** `cargaPartida` lo tolera por diseño —lo que se pierde es la red de
    * seguridad, no la partida— y migrar antes que él no puede ser más estricto que él, o
    * una partida perfectamente jugable dejaría de abrirse por culpa de su auditoría.
+   *
+   * Ese perdón **se ha vuelto a mirar con la migración de verdad delante**, y sigue en pie
+   * con el alcance más estrecho: ahora solo puede saltar por un registro roto o truncado,
+   * sin `version`, con una versión no entera, de una versión superior a la de este juego o
+   * de una clase desconocida — los cinco casos en los que `cargaPartida` tampoco lo va a
+   * poder leer, así que no esconde nada que no estuviera ya perdonado más adelante. Lo que
+   * **antes** sí escondía era un registro simplemente viejo: se lo tragaba y no se migraba
+   * nunca, y la partida se quedaba con dos versiones de formato dentro. Eso ya no pasa.
    */
   async function migraDocumentos() {
     const migrados = [];
     let migradaDesde = null;
     let reglas = null;
-    for (const clave of [CLAVES_DE_PARTIDA.estado, CLAVES_DE_PARTIDA.registro]) {
+    // **Los del mapa también.** `VERSION_FORMATO` es una sola para las ocho clases de
+    // documento, así que subirla por la partida invalida de paso el índice y las celdas, y
+    // hasta aquí solo se miraban `partida/estado.json` y `partida/registro.json`. Medido en
+    // `wa-pixel` el 12-ago-2026: con la partida ya migrada, abrir seguía dando la avería —«el
+    // índice del mapa 42.40,-8.74 está escrito en la versión de formato 1»— y **una partida
+    // existente no se abría después de actualizar**, que es lo que la fila 47 juró que no
+    // pasaría. Van por la misma puerta y con las mismas exigencias que los otros dos: una
+    // segunda puerta con otro criterio es exactamente lo que dejó pasar la décima.
+    const delMapa = (await almacen.lista(PREFIJO_DE_MAPAS)) ?? [];
+    const leidas = new Set();
+    for (const clave of [CLAVES_DE_PARTIDA.estado, CLAVES_DE_PARTIDA.registro, ...delMapa]) {
       const crudo = await almacen.lee(clave);
       if (crudo == null) continue;
-      let doc;
+      leidas.add(clave);
+      // El perdón del registro cubre **leerlo y migrarlo**, que es exactamente lo que cubría
+      // cuando el lector estricto hacía las dos comprobaciones de una vez. Dejarlo solo
+      // alrededor del parseo habría estrechado la tolerancia sin decirlo: un registro de una
+      // clase desconocida o de una versión superior habría pasado a tumbar la partida entera,
+      // que es lo contrario de lo que SPEC-047 decidió.
+      let resultado;
       try {
-        doc = lee(crudo, `el documento ${clave}`);
+        resultado = migra(paraMigrar(crudo, `el documento ${clave}`), {
+          cadena: cadenaVigente,
+          donde: `el documento ${clave}`,
+          hasta: destino,
+        });
       } catch (e) {
         if (clave === CLAVES_DE_PARTIDA.registro) continue;
         throw e;
       }
-      const resultado = migra(doc, {
-        cadena: cadenaVigente,
-        donde: `el documento ${clave}`,
-        hasta: destino,
-      });
       if (!resultado.migrado) continue;
       // Se levanta antes de escribirlo, y por eso `levantaEstado` y `levantaRegistro` se
       // llaman aquí y no solo dentro de `cargaPartida`: un documento migrado que no se
@@ -200,18 +302,26 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
       // Solo cuando el destino es la versión de verdad, por lo mismo que `migra` solo
       // valida el esquema entonces: una migración de prueba llega a una versión que ningún
       // esquema describe, y ese es justo el punto de que se pueda ejercitar hoy.
+      // **Solo los dos de la partida se levantan aquí**, que son los que tienen su función
+      // inyectada. Un documento del mapa migrado se queda con la comprobación que `migra` ya
+      // le hizo —validarlo contra el esquema cerrado de su clase, que es lo que descarta un
+      // resultado mal formado antes de escribirlo— y lo levanta `cargaMapa`/`cargaCelda` unos
+      // milisegundos después, con el mapa nombrado si algo falla. Mandarlo a `levantaRegistro`,
+      // que es lo que hacía este `else` en cuanto la lista dejó de ser de dos, habría reventado
+      // toda migración de mapa nombrando el registro.
       if (destino === nucleo.VERSION_FORMATO) {
         if (clave === CLAVES_DE_PARTIDA.estado) levantaEstado(resultado.doc, 'el estado de la partida migrado');
-        else levantaRegistro(resultado.doc);
+        else if (clave === CLAVES_DE_PARTIDA.registro) levantaRegistro(resultado.doc);
       }
       migrados.push({ clave, texto: textoCanonico(resultado.doc) });
       migradaDesde = migradaDesde === null ? resultado.desde : Math.min(migradaDesde, resultado.desde);
       reglas = resultado.reglas;
     }
     if (!migrados.length) return null;
-    // Los dos juntos o ninguno: un estado migrado junto a un registro que no lo está son
-    // dos versiones de formato a la vez dentro de la misma partida.
-    for (const { clave, texto } of migrados) await soloLoJugado.escribe(clave, texto);
+    // **Todos juntos o ninguno**: un estado migrado junto a un registro que no lo está, o un
+    // índice de mapa migrado junto a celdas que no lo están, son dos versiones de formato a la
+    // vez dentro de la misma partida. Nada se escribe hasta que todo se ha podido migrar.
+    for (const { clave, texto } of migrados) await reescribeMigrado(leidas, clave, texto);
     await soloLoJugado.escribe(
       CLAVE_DE_PROCEDENCIA,
       textoCanonico(documentoDeProcedencia({ de: PROCEDENCIAS.MIGRADA, migradaDesde, reglas })),

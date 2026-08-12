@@ -44,6 +44,46 @@ export const DEL_NUCLEO = Object.freeze([
 export const REPARTO_SIN_AVENTURA = Object.freeze({ beats: [] });
 
 /**
+ * El reparto casteado de la aventura en curso, **recuperado del mundo congelado**.
+ *
+ * Es la costura 5 de SPEC-049 y la deuda §10g: hasta esta fila el reparto viajaba con la
+ * salida que se echó a andar y al reabrir la app no estaba, así que la capa se montaba con
+ * `REPARTO_SIN_AVENTURA` y el paso de beat de una secuencia guardada llegaba **con el beat
+ * dentro en nulo**. La cadena **no se persiste** y no hace falta: el casting es determinista
+ * sobre el documento congelado —`levantaCelda` lo recompone al leer la celda— y el estado ya
+ * guarda de qué plantilla es la aventura en curso. Es la misma vía por la que
+ * `partida/aventuras.js` vuelve a castear cuando hay descartes.
+ *
+ * Sin aventura en curso devuelve el reparto sin aventura, que es un caso normal del juego.
+ * Con una aventura en curso que el mundo no puede volver a castear **falla nombrándola**: un
+ * reparto vacío ahí dentro sería exactamente la degradación de §10g otra vez, solo que en
+ * silencio.
+ */
+export function repartoDeLaAventuraEnCurso({ mundo, aventuras }) {
+  const enCurso = aventuras?.enCurso ?? null;
+  if (!enCurso) return REPARTO_SIN_AVENTURA;
+  const casteada = casteadaDelMundo(mundo, enCurso.plantilla);
+  if (!casteada) {
+    throw new Error(
+      `la aventura en curso es de la plantilla "${enCurso.plantilla}" y el casting del mundo congelado no la trae: ` +
+      'sin su cadena de beats la escena no tendría nada que pintar, y montar la capa con el reparto vacío dejaría el paso de beat sin beat dentro',
+    );
+  }
+  return { beats: casteada.beats };
+}
+
+/**
+ * La aventura casteada de una plantilla dentro de un mundo congelado, o `null`.
+ *
+ * El casting va en `mundo.casting` y no en el documento de la celda: `levantaCelda` lo
+ * recompone al leer, que es lo que hace que la cadena sea la misma antes y después de cerrar
+ * la app sin guardar ni un texto de plantilla en la partida.
+ */
+export function casteadaDelMundo(mundo, plantilla) {
+  return (mundo?.casting ?? []).find((c) => c.ok && c.plantilla === plantilla) ?? null;
+}
+
+/**
  * El inventario de recursos de un mundo del que no se ha conseguido ninguno, que es el
  * **modo sin cobertura** que `partida/visor.js` declara como respuesta legítima.
  *
@@ -79,7 +119,11 @@ function exigePieza(pieza, nombre, paraQue) {
  *   sus beats, o `REPARTO_SIN_AVENTURA`; `recursos` y `lector` el inventario del mundo y el
  *   lector de binarios; `dia` el día del calendario de la partida, que entra inyectado
  *   porque el núcleo no lee el reloj; `trazado` la lista de sitios del lazo vigente, o `null`
- *   cuando se anda sin aventura y el lugar se resuelve por llegada real.
+ *   cuando se anda sin aventura y el lugar se resuelve por llegada real; `aventura` el motor
+ *   de la aventura en curso (`app/marcha/aventura.js`), que es quien resuelve el beat y
+ *   compone sus dos pantallas. **Con reparto de beats se exige**: sin él, cerrar el paso de
+ *   un beat no movería el motor y la aventura no se podría terminar nunca, en silencio.
+ *   Salir a andar sin aventura no lo necesita, y ahí `null` es una respuesta.
  */
 export function creaLasLlegadas({
   nucleo,
@@ -95,6 +139,7 @@ export function creaLasLlegadas({
   lector = LECTOR_SIN_RESIDENTES,
   dia,
   trazado = null,
+  aventura = null,
 }) {
   exigePieza(nucleo, 'el núcleo inyectado', 'es quien decide qué valida una llegada y qué pasos tiene');
   const faltan = DEL_NUCLEO.filter((n) => nucleo[n] == null);
@@ -159,6 +204,17 @@ export function creaLasLlegadas({
     return aflorado.get(sitio);
   };
 
+  // El motor de la aventura en curso. **Con beats en el reparto se exige**: cerrar el paso de
+  // un beat sin él no movería el motor, la cadena no avanzaría nunca y la aventura acabaría
+  // siempre a medias sin que nada protestara, que es §6h con otro disfraz. Sin beats no hace
+  // falta ninguno, porque salir a andar sin aventura es un caso normal del juego.
+  if ((reparto?.beats ?? []).length && !aventura) {
+    throw new Error(
+      'la capa de llegadas de la salida se monta con el motor de la aventura en curso cuando hay beats en el reparto, y no llegó ninguno: ' +
+      'sin él cerrar el paso de un beat no resolvería nada y la aventura no se podría terminar jamás',
+    );
+  }
+
   return {
     mapaId,
     salida,
@@ -178,20 +234,58 @@ export function creaLasLlegadas({
      * lo que aquí se cuenta si el paso es el suyo.
      *
      * `null` cuando no hay nada esperando, que es una respuesta y no un error.
+     *
+     * @param {object} opciones  `tamanoDeTexto` el escalón vigente del ajuste de la escena,
+     *   que vive lo que dura la sesión y por eso llega desde quien la pinta.
      */
-    montaje() {
+    montaje({ tamanoDeTexto } = {}) {
       const llegada = llegadas.espera();
       if (!llegada) return null;
       const presentacion = visor.presentacionDe(llegada.sitio);
       const tipos = new Set(llegada.secuencia.map((p) => p.tipo));
       const conVisor = presentacion.presentacion !== nucleo.PRESENTACIONES.FICHA;
       const cuenta = tipos.has(nucleo.TIPOS_DE_PASO.LO_QUE_SE_CUENTA) ? loQueAquiSeCuenta(llegada.sitio) : null;
+      const beat = tipos.has(nucleo.TIPOS_DE_PASO.BEAT) ? llegadas.beatDe(llegada.sitio) : null;
+      // Las dos pantallas del beat se **componen** aquí, con las mismas dos funciones del
+      // paquete que la batería ya ejercita: la app las pinta y no redacta ni una línea.
+      //
+      // Y la avería se recoge con su motivo literal en lugar de propagarse: un beat que llega
+      // nulo o recortado tiene que **enseñarse** —§10g dejó ese caso vivo y la spec tiene
+      // criterio para él— y el paso tiene que seguir cerrándose, porque una escena que revienta
+      // sin acción deja la app encallada dentro de una salida abierta.
+      let escena = null;
+      let loQueTeLlevas = null;
+      let motivoDeEscena = null;
+      if (tipos.has(nucleo.TIPOS_DE_PASO.BEAT)) {
+        try {
+          if (!beat) {
+            throw new Error(
+              `la llegada a "${llegada.sitio}" trae paso de beat y el beat llega en nulo: la secuencia guardada conserva el paso ` +
+              'y el reparto casteado tiene que volver a repartirlo, así que un nulo aquí es que la aventura en curso no se pudo recuperar',
+            );
+          }
+          if (!aventura) {
+            throw new Error(`la llegada a "${llegada.sitio}" trae un beat y no hay motor de aventura en curso montado que sepa componer su escena`);
+          }
+          const compuesto = aventura.escenaDe(beat, { tamanoDeTexto });
+          escena = compuesto.escena;
+          loQueTeLlevas = compuesto.loQueTeLlevas;
+        } catch (e) {
+          escena = null;
+          loQueTeLlevas = null;
+          motivoDeEscena = e?.message ?? String(e);
+        }
+      }
       return {
         llegada,
         estado: presentacion.estado,
         visor: conVisor ? visor.visorDe(llegada.sitio) : null,
         ficha: tipos.has(nucleo.TIPOS_DE_PASO.FICHA) ? visor.fichaDe(llegada.sitio) : null,
         loQueSeCuenta: cuenta ? cuenta.pantalla : null,
+        beat,
+        escena,
+        loQueTeLlevas,
+        motivoDeEscena,
         // La escena de la primera coincidencia, que ocurre una sola vez en toda la partida y
         // solo donde te cuentan la segunda versión. Quién decide cuándo se enciende ya lo
         // decidió `llegadas.js`; aquí solo se lleva a pantalla.
@@ -199,8 +293,21 @@ export function creaLasLlegadas({
       };
     },
 
-    /** Avanza al paso siguiente. **La única manera de moverse por la secuencia**. */
-    avanza: () => llegadas.avanza(),
+    /**
+     * Avanza al paso siguiente. **La única manera de moverse por la secuencia**.
+     *
+     * Y cuando el paso que se cierra es el del beat, **el beat se resuelve**: es el único
+     * sitio de la app donde el motor de la aventura en curso avanza, y va aquí y no en la
+     * pantalla porque cerrar el paso es lo que ocurre haya mirado alguien el móvil o no.
+     */
+    avanza() {
+      const antes = llegadas.espera();
+      const vigente = antes?.vigente ?? null;
+      const suyo = vigente && vigente.tipo === nucleo.TIPOS_DE_PASO.BEAT ? llegadas.beatDe(antes.sitio) : null;
+      const movido = llegadas.avanza();
+      if (suyo && aventura) aventura.resuelve(suyo);
+      return movido;
+    },
 
     /** Cierra el marcador de la primera coincidencia. Lo cierra quien la enseña, no la capa. */
     cierraLaTriangulacion: () => nucleo.cierraLaEscena(estado.diario),

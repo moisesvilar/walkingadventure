@@ -1676,3 +1676,125 @@ La llegada recorrida entera en `wa-pixel`, con las coordenadas escritas: mundo `
 - **El reparto casteado no sobrevive a cerrar la app.** El estado guarda la aventura por su identificador y no su cadena de beats: el mismo día llega, y al reabrir la secuencia conserva su paso de beat pero el beat de dentro se pierde. Persistirlo es decisión de diseño.
 - **RF-QUEST-004 y RF-BUCLE-011 no los entrega esta fila** y pasan a la 49, que es la escena del beat (A4P3/A4P4) y el telón (A5). El checklist lo declara. Se dice porque SPEC-034 y SPEC-036 se cerraron en `done` sin tocar un fichero de `app/`, y una fila que cierra cubriendo un RF que no entregó es un agujero que tarda meses en salir.
 - **Por encima de σ ≈ 20 m de error del fijo la validación deja de sostenerse.** Cubre la calle normal y no el cañón urbano profundo. Es un límite medido, con número, y no una esperanza.
+
+---
+
+# 12-ago-2026 · SPEC-049, las pantallas de la escena y el telón: la fila que descubrió que la aventura no se aceptaba nunca
+
+SPEC-034 y SPEC-036 cerraron en `done` sin tocar un solo fichero de `app/`. Esta fila escribe lo que ninguna de las dos escribió —A4P3, A4P4 y las seis del telón— y, al ir a hacerlo, encuentra que el problema no era que faltaran las pantallas.
+
+## La premisa del encargo se quedaba corta, y por debajo había cinco costuras
+
+El encargo daba por deuda conocida que «el reparto casteado no sobrevive a cerrar la app», y remataba: *mientras el telón se eche en la misma sesión no te toca*. Medido antes de escribir la spec, con grep sobre el repo entero:
+
+1. **`acepta` de `partida/aventura-en-curso.js` no la llamaba nadie.** `aceptaLaEntrada` anotaba la aventura en la salida abierta y nunca en el motor, así que **`estado.aventuras.enCurso` era `null` siempre**, `resuelveBeat` era inalcanzable y `echaElTelon` habría compuesto el telón de un paseo aunque hubieras aceptado una aventura. No es que el beat llegase nulo el segundo día: es que **no había aventura en curso ningún día**.
+2. **`antes-de-salir.jsx` cerraba la salida por su cuenta** con `cierraLaSalida`, y `echaElTelon` exige que siga abierta: fallaba con «su telón ya se echó». El telón era inalcanzable por construcción.
+3. **Dos identidades de salida distintas** sobre dos áreas: `mapa/dN/sN` en `aventuras` (de la 28) y `mapa/sN` en `salidas` (de la 48). El cierre compara una con otra. Ninguna estaba mal en su fila; el defecto nace de que **nadie las cruzó nunca**, porque hasta ahora nadie cerraba una salida contra `echaElTelon`.
+4. **`apuntaHaberEstado` no tenía llamador de producción**, así que la lista de ascensos del telón habría salido siempre vacía y RF-BUCLE-012 no se habría cumplido nunca.
+5. **`lamina.jsx` no pasaba `entintado` ni `telon`** al render, que ya los aceptaba: A5P1 habría pintado el mapa de andar.
+
+Ninguna es una pantalla y las cinco impiden que las pantallas funcionen. El dueño decidió coserlas dentro de la fila, con las once rutas advertidas.
+
+## Un negativo heredado que era falso, y el que no lo era
+
+`decisiones-orquestador.md` §10i afirmaba, «verificado hoy otra vez», que `componeDesenlace` seguía sin existir. **Existe**: `packages/nucleo/quests/desenlace.js` exporta `componeElDesenlace`, `lugarDelDesenlace` y `repuestoDe` desde el commit `aec5efa`, que es el propio arreglo de §6v que la fichó. Lo cierto era otra cosa —que no la llamaba nadie desde `app/`—, y la diferencia importa: construirla habría duplicado la que ya estaba. Está corregido en §10-bis, con la lección que sale de ahí: **un negativo no se hereda, se vuelve a medir o se marca como sospecha**.
+
+El que sí era cierto y esta fila confirma: **`siembraLaCola` no tiene llamador desde `app/`**. El prólogo corre en el dispositivo, produce sus entradas y nadie las encola, así que `atraviesa()` sale siempre por `if (!cola.length)`: **hoy no puede saltar ni un micro-encuentro en un teléfono**. Es de la fila 19 y queda fichado, no arreglado aquí.
+
+## El bucle completo, recorrido en `wa-pixel` con las coordenadas escritas
+
+Es la primera vez que ese recorrido es posible. Mundo `1X9T5E7A039QP61Z@42.40,-8.74`, partida en `42.4035467,-8.7554983` — en metros del mundo, `(-1274, 395)`.
+
+Aventura **«El paquete que no era nada»** (`entrega-sospechosa`), cuatro paradas. **Castrotoño** `(-739, 551)` → A4P3 con su verbo propio, «Aceptar el encargo», y A4P4 nombrando el sitio siguiente. **A Encrucillada do Aforcado do Sur** `(-461, 964)`, verbo «Asomarse». **O Cruce do Aforcado do Solpor** `(-874, 1390)`. Y el cuarto beat **otra vez en Castrotoño**, que es el lazo cerrado y el caso que hacía que ninguna aventura se pudiera terminar antes de §6v. Regreso a `(-1274, 395)`.
+
+Leído del propio aparato con `run-as`, no de la pantalla: `enCurso` deja de ser `null` al aceptar (`beatEnCurso: 1`), las dos áreas comparten ya **la misma identidad** `42.40,-8.74/s1`, los cuatro beats quedan en `resueltos` y `beatEnCurso` pasa a `null`. Al cerrar: `oro: {saldo: 12}`, la aventura en `cerradas` con `comoAcabo: "terminada"` y su desenlace, y una entrada de diario.
+
+El telón entero, en el orden que manda `bucle-jugable.md` §8: **A5P1** «Hoy has ensanchado el mapa» con el mapa entintado y cinco ascensos en palabras del mundo —«Castrotoño · lo conoces»—, **A5P2** con oro 12, el objeto `hule-del-paquete` y «En Castrotoño ya saben quién eres», **A5P3** con el rumor saliendo de Castrotoño y nada más, y **A5P4** con lo propio en primera persona y autoridad `lo-se`.
+
+Y las otras dos variantes: **el paseo sin coger nada** sale mapa y diario, sin desenlace ni rumor; y **A5P1B**, con el mapa ya conocido entero, sale `telon-estado: mapa-sin-tinta` con «Hoy no has visto nada que no supieras · Andaste por sitios tuyos. El mundo, mientras, anduvo lo suyo» — constatación y no reproche, que es la cuerda floja de `accesibilidad.md` §1.
+
+**§10h verificado por las dos puertas**: `telon-cerrar` y `telon-diario` dejan las dos `salida-situacion: cerrada-leida`, y después «Salir a andar sin más» abre una salida nueva de verdad (`42.40,-8.74/s10`, `abierta-con-rotulo`). La app no queda encallada por ninguna de las dos.
+
+## Dos cosas que salieron andando y valen más que las pantallas
+
+**El detector de vehículo hizo su trabajo contra quien lo medía.** El beat 4 no validaba y `marca-posicion` decía `vehiculo`: yo estaba «andando» a 35 m cada 4 s, **31 km/h**. No era un defecto de la fila, era `bucle-jugable.md` §9 apartando el vehículo, y dos minutos quieta lo recuperó solo. Sin leer esa marca se habría reportado como fallo de la fila y se habría «arreglado» algo que funcionaba.
+
+**El sensor se cayó a mitad de salida** sin que nadie lo provocara, y la app respondió como el diseño manda: al reabrir, `abierta-sin-rotulo`, `rotulo-estado: retirado-por-el-sistema` y la tarjeta de a medias con «Seguir con ella» y «Dejarlo aquí». La rama de §9 que nadie había visto funcionar, funcionando.
+
+## `setLocation` de Maestro no es `adb emu geo fix`, y la nota que lo decía manda a reiniciar el emulador para nada
+
+`en-marcha.yaml` declaraba que «`setLocation` de Maestro es `adb emu geo fix`» y que en esta máquina no mueve nada por un mock de `fused_location_provider` **que se quita reiniciando el emulador**. Medido el 12-ago-2026 en la misma pantalla y el mismo minuto, con una salida abierta y la marca viva:
+
+- `maestro test` con `setLocation: {latitude: 42.4090, longitude: -8.7480}` → **EXIT 0 y `marca-posicion` intacta** en `del-mapa:-1274,395:parada`.
+- Acto seguido `adb emu geo fix -8.7480 42.4090` → `marca-posicion` pasa a `del-mapa:-657,1002:ambiguo`.
+
+La conclusión operativa se sostiene —**un flujo de Maestro no puede andar**— pero el motivo no: no son el mismo mecanismo y no se cura reiniciando. Con `geo fix` se han andado dos kilómetros esta misma noche en este mismo emulador.
+
+## Las tres costuras que aparecieron al recorrerlo, y de quién fue cada decisión
+
+Las cinco de arriba estaban antes de empezar y las encontró medir la premisa. Estas tres las destapó **haber recorrido el bucle entero**, que es exactamente para lo que el criterio existía.
+
+**La sexta: la lista de hoy no tenía memoria.** `componeLoQueHayHoy` sabe filtrar las plantillas ya vividas (`lo-que-hay-hoy.js:195`), pero la petición de `antes-de-salir.jsx:90` no le pasaba `aventuras`, así que recibía `null` y `cerradas` salía vacío. Medido en el aparato: terminada «El paquete que no era nada» y dejada a medias «La cita donde susurra el agua», **las dos volvían a ofrecerse** en la lista siguiente. Estaba fichado desde §6v y era **invisible hasta esta fila**, porque ninguna aventura podía cerrarse nunca. Lo decidió el dueño con la evidencia delante.
+
+**La séptima: los descartes tampoco viajaban, y la mandé yo sin preguntar.** La misma petición no lleva `descartes`, así que `repartoDeAventuras` recibe siempre `SIN_DESCARTES` — y el propio núcleo lo dice en el error de `exigeDescartes`: *«sin ella devolvería candidatos que quien juega ya marcó»*. O sea, un sitio marcado «este sitio no pega» seguía casteando aventuras: RF-PRIV-004 entregado a medias por la 44. La propuso la sesión que orquesta con un criterio que resultó falso —*«es la misma familia, mismo arreglo de una línea»*—, y **la despaché yo sin llevársela al dueño**. No era simétrica: `aventuras` alimenta una lista con un consumidor; `descartes` alimenta un casting con **dos**.
+
+**La octava, que es lo que la séptima abrió.** Con descartes de verdad, `repartoDeAventuras` **vuelve a castear**, y la cadena que sale del recasteo no es la de `mundo.casting` — que es de donde el cableado de esta fila lee la suya, por tres sitios: lo que se acepta en el motor (`antes-de-salir.jsx:253`), el reparto con el que se monta la capa de llegadas y se recupera al reabrir la app (`repartoDeLaAventuraEnCurso`), y la preparación. Consecuencia: **quien tuviera un solo sitio marcado vería un lazo en la ficha y sería mandado a otro**, posiblemente al que marcó.
+
+Medido marcando **un solo sitio** en cada mundo de referencia, el del primer beat de la primera aventura repartida:
+
+| mundo | repartidas | salen de la lista | siguen ofrecidas **con otros beats** |
+| --- | --- | --- | --- |
+| `barrio-tres-calles` | 24 → 1 | 23 | 1 |
+| `costero` | 29 → 29 | 0 | **24** |
+| `suelo-250m` | 19 → 19 | 0 | **11** |
+| `urbano-denso` | 30 → 30 | 0 | **22** |
+
+Con cero descartes no cambia nada —`hayDescartes` es falso y se usa `mundo.casting`—, así que el defecto está acotado a «hay algún descarte», y es **nuevo**: antes del arreglo séptimo el recasteo no ocurría jamás. `wa-dev` lo midió y **paró en vez de arreglarlo de paso**, que es lo que hay que hacer cuando el radio de acción de un arreglo se sale de lo decidido.
+
+Y un falso positivo que conviene no heredar: `app/mapa/primera-lista.js:95` llama a `repartoDeAventuras` sin descartes y **eso está bien**. Es la lista del día uno sobre una partida recién nacida, con el área `anclajes` vacía por construcción.
+
+## Dos respuestas distintas a la misma pregunta, y qué se hace con eso
+
+Mientras se decidía la octava, la sesión que orquesta escribió que el dueño había pedido **revertir**; en la ventana de esta fila el dueño había pedido **coser**. Las dos eran respuestas suyas de verdad, dadas con distinto material delante: la de allí sobre un resumen, la de aquí con la tabla y el coste de reverificación.
+
+Se paró a `wa-dev` con la octava sin empezar y el árbol limpio, se volvió a preguntar **una sola vez y en la ventana donde vive la fila**, con las dos respuestas y las tres salidas posibles delante, y se ejecutó lo que contestó allí.
+
+Es §9b aplicado contra quien lo escribió, y con la mitad que le faltaba. §9b decía «un relato fiel de una decisión no es la decisión». Aquí la fidelidad no fallaba: **falló preguntar lo mismo por dos sitios**. La regla que sale es de higiene de orquestación: **una pregunta viva a la vez sobre un mismo asunto, y en la ventana de quien va a ejecutar la respuesta.**
+
+## El cierre en corto, verificado sin andar
+
+La cuarta variante del telón no necesita caminata: se acepta una aventura, no se resuelve ni un beat, se mata la app y se cierra desde la tarjeta de a medias. Sale **A5P1B** (`mapa-sin-tinta`), después **A5P2B** —«LA CITA DONDE SUSURRA EL AGUA · Se resolvió sin ti · … Y hoy has andado, que es lo que mueve el mundo»— y **directo al diario**: entre medias **no aparece la pantalla del rumor**, que es la decisión de `bucle-jugable.md` §4. Comprobado en el estado del aparato: `oro` sigue en **12** —el cierre en corto no ingresa nada—, las dos aventuras quedan en `cerradas` con `comoAcabo` `terminada` y `a-medias`, y ningún rumor nuevo.
+
+## La primera migración de formato del proyecto, y las tres costuras que destapó
+
+Congelar la huella obliga a subir `VERSION_FORMATO` de 1 a 2, así que esta fila estrena la cadena de `partida/migracion.js`, que llevaba escrita y vacía desde SPEC-047. Estrenarla costó tres cosas más, y **las tres las encontró el aparato, no la batería**.
+
+**Nueve rojos de prueba, todos con la misma raíz.** Al subir la versión se pusieron rojas nueve pruebas que **codificaban «en este repo todavía no hay ninguna migración» como si fuera un invariante del diseño**: la cadena real tiene que estar vacía, el literal `1` en vez de la constante, dos cifras de tamaño medidas a mano y tres casos que montaban un documento v1 esperando que no se pudiera abrir. Veredicto de orquestación: **defecto de prueba en los nueve**, y se retiran escribiendo el porqué dentro, como manda `CLAUDE.md`. Dos merecen mención: los del mecanismo de migración se apoyaban en que la versión sintética `2` fuera **mayor** que la real y por eso no se validaba contra esquema, así que al arreglarlos se derivó **todo el fichero** de `VERSION_FORMATO` en lugar de clavar números — había ocho literales más con la misma trampa esperando su turno. Y las dos cifras de tamaño suben **+25 B exactos**, que es `"descartesDelCasting":[]`; los presupuestos de SPEC-016 pasan con margen enorme —registro 695 324 B de 6 291 456, estado 1 942 B de 2 097 152— y se añade una aserción de margen a la mitad, para que la cifra declarada no pueda tapar al criterio.
+
+**La décima: migrar leía con el lector estricto.** Compilada la app y abierta sobre una partida real de v1, salía la pantalla de avería: *«el documento partida/estado.json está escrito en la versión de formato 1 y esta versión del juego usa la 2: hay que migrarlo antes de abrirlo»*. La causa, localizada: `migraDocumentos()` hacía `lee(crudo, …)` **antes** de migrar, y `lee()` llama a `compruebaVersion()`, que lanza para cualquier documento anterior al actual. **El lector que se usa antes de migrar era más estricto que la migración a la que precede**, así que ningún documento viejo podía llegar nunca a la cadena.
+
+Es la forma que SPEC-047 ya había anotado —«migrar leía el registro antes que `cargaPartida` y era más estricto que él»— y que **no se había disparado nunca porque no había ninguna migración**: con la versión en 1, ningún documento podía ser más viejo. Y la prueba de que era cuestión de puertas y no de la pieza: `copia.js` parseaba sin exigir versión, **y por eso las copias sí se migraban**. Dos puertas a la misma cadena con dos exigencias distintas.
+
+Merece decirse cómo se encontró, porque es la lección: **`wa-dev` midió `migra()` directamente y funcionaba; yo hice lo mismo y también funcionaba**. El defecto vivía en el envoltorio. Solo apareció abriendo la app con un documento del día anterior, que es algo que ninguna prueba unitaria hace. Y de camino, un aviso sobre uno mismo: mi primera reproducción importó `migracion.js` sin `estado.js`, el registro de esquemas nació con dos clases en vez de nueve y me dio un error falso —«clase de documento desconocida "estado-de-partida"»— que estuve a punto de mandar como diagnóstico. Lo cazó volver a medirlo bien, no sospecharlo.
+
+**La undécima: `VERSION_FORMATO` es global a todas las clases.** Arreglada la décima, la partida migra —estado y registro a v2, la aventura en curso intacta por el beat donde iba— y la app **sigue sin abrir**, ahora por el mapa: `indice.json` y `celda/0,0.json` siguen en v1 y nadie los migra. Subir la versión por una clase invalida todas las demás aunque no cambien.
+
+Y ahí está la causa raíz, que **esta fila no toca y deja fichada**: mientras la versión de formato sea una sola para nueve clases de documento, esta forma de fallo vuelve cada vez que una clase evolucione sola. Lo que hay que decidir es versión por clase, o una guarda que exija que subir la versión venga acompañada de migración para **todas** las clases que la comparten.
+
+## El recorrido rehecho, después de la migración
+
+El primer recorrido se firmó antes de las tres últimas costuras, y esas tocan el cableado que lo sostenía, así que se rehizo entero sobre la app recompilada. Mismo mundo `1X9T5E7A039QP61Z@42.40,-8.74`.
+
+**La partida vieja migra y sigue jugándose.** Un documento v1 con `ronda-del-vigia` en curso por el beat 1, capturado con la compilación anterior: al abrir con la nueva, estado y registro suben a v2, los dos del mapa también, la aventura sigue donde estaba, las dos cerradas y el oro se conservan, y `procedencia.json` declara `"de":"migracion","migradaDesde":1`. **Esa procedencia es lo que firma la migración**, no la captura: `expo run:android` abre la app al instalar, así que cuando fui a leer el «antes» ya había migrado.
+
+**La cadena entera, con las coordenadas**: Covalonga a Vella (−1190, 364) → A Encrucillada do Aforcado do Sur (−461, 964) → O Torreón Caído do Solpor (−1250, 398) → Covalonga a Vella otra vez. Cuatro beats resueltos, con sus verbos propios —«Aceptar el encargo», «Contarlo»— y su objeto («catalejo del vigía»).
+
+**Y la novena, probada donde vive.** A mitad de la aventura se marcó «Taberna da Estrela Vermella» desde A4P8, se mató la app y se reabrió: la aventura sigue en `ronda-del-vigia` por el beat 4, **la huella sigue en `[]`** —congelada al aceptar, cuando no había nada marcado— mientras el área `anclajes` ya lleva la Taberna. Los dos datos desacoplados, y la app abre por la portada en vez de reventar, que es lo que hacía en 9 de 19 casos de `suelo-250m` antes del arreglo.
+
+## Dos cosas que el aparato enseñó y no son de esta fila
+
+**A4P8 no se puede marcar tocando el botón.** La capa de descarte desborda una pantalla de 1080×2400: los cinco motivos empujan hacia abajo y los dos últimos salen con cotas degeneradas —`ya-no-existe` en `[74,2215][1007,2122]`, con el borde inferior por encima del superior— **encima de «Marcarlo»**, que ocupa de 2185 a 2337. Un toque en el centro del botón se lo comen los motivos; el marcado solo entra tocando la franja de 2185 a 2215. Es la trampa que `CLAUDE.md` ya documenta —las listas variables empujan la acción bajo el pliegue— en su tercera aparición, y es la primera vez que alguien abre A4P8 en un teléfono: `descarte.yaml` lleva en límite declarado desde que existe.
+
+**El servicio en primer plano se cae a mitad de salida.** Ocurrió dos veces sin provocarlo: `ubicacion-estado` pasa a `sin-montar`, la marca deja de moverse y ningún fijo llega. La app responde como el diseño manda —al reabrir, `abierta-sin-rotulo`, rótulo `retirado-por-el-sistema` y la tarjeta de a medias con sus dos acciones—, así que no se pierde nada; pero es el motivo por el que **el telón por regreso no se ha podido verificar en el aparato**. Se verificó por «dejarlo aquí» y por la tarjeta de a medias, que `bucle-jugable.md` §8 declara la misma puerta.
+
+Y una hipótesis que **no** se ha podido sostener y por eso no se ficha como hallazgo: parada exactamente en el punto de partida, `regreso.dentroDesdeMs` seguía en nulo con la cadencia en `por-distancia`, lo que encajaría con §9a —el punto de partida no es un geofence, así que el muestreo nunca pasa a tiempo y parada no llega ningún fijo—. Pero al comprobarlo moviéndose dentro del radio, el sensor ya estaba caído, así que la medida no dice nada. Queda escrito como sospecha con su motivo, no como defecto.

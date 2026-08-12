@@ -1026,6 +1026,13 @@ Característica: El telón se echa solo al cerrarse la salida
     Cuando aparece la pantalla de lo que se pone en camino
     Entonces se ve que algo ha salido del núcleo
     Pero no se ve a qué núcleos llegará, ni cuándo, ni con qué nivel
+
+  Escenario: Leer el telón deja abrir otra salida
+    Dado el telón en su última pantalla, la entrada del día
+    Cuando el jugador toca cualquiera de sus dos salidas
+    Entonces el telón queda marcado como leído
+    Y se puede abrir una salida nueva
+    Pero avanzar de pantalla no lo había marcado
 ```
 
 ---

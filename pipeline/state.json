@@ -9,8 +9,8 @@
     "git": "limpio",
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
-  "spec_actual": "SPEC-049",
-  "fase": "spec",
+  "spec_actual": null,
+  "fase": "completo-y-verificado",
   "iteracion": 0,
   "historial": [
     {
@@ -454,6 +454,19 @@
       "nota": "La fila descubrio que la capa de llegadas no podia dispararse en un dispositivo: la cadencia por distancia no entrega nada a quien esta parado y esUnaParada medida de fijo a fijo lee el ruido del GPS como andar. Medido 0% de validacion con la cadencia de produccion. Duodecima aparicion de 6h, sobre una capa con mil casos en verde probada solo con posiciones fabricadas. El dueno autorizo arreglar tambien la calle: muestreo por tiempo con geofence cerca y parada por deriva de ventana, con los numeros fijados midiendo (ver 9c). Los 20 s de SPEC-032 se conservan donde el fijo los sostiene. Diseno actualizado: SPEC-031-iter-1, SPEC-032-iter-1 y game-design/bucle-jugable.md. Decimotercera aparicion de 6h cometida por la propia fila: montaLaSalida no pasaba montaLlegadas. Pantallas huerfanas 8 -> 1.",
       "entrega": "RF-BUCLE-005, RF-BUCLE-007 y RF-PRIV-004. RF-QUEST-004 y RF-BUCLE-011 pasan a la fila 49 (escena del beat y telon), declarado en el checklist.",
       "no_desbloqueado": "descarte.yaml y visor.yaml siguen en la columna. El motivo de descarte.yaml estaba mal escrito y se ha corregido: la puerta de A4P8 existe, lo que no se puede es garantizar llegar a ella, porque app/plataforma/ubicacion.js:122 lee la coordenada del arranque con accuracy Balanced y ningun flujo puede fijar donde nace el mapa. No se toca aqui: esa lectura decide donde nace el mundo de un jugador real."
+    },
+    {
+      "spec": "SPEC-049",
+      "slug": "pantallas-de-la-escena-y-el-telon",
+      "resultado": "verde con un rojo heredado y con dueno",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-049-run-20260812T070545Z.md (no versionado: .gitignore:31 excluye test/reports/*)",
+      "casos": "2787 casos: 2783 pasan, 1 falla, 3 saltados. El unico rojo es manifiesto-generado.test.mjs (BOOT_COMPLETED), dueno SPEC-023.",
+      "app": "20 flujos: 10 pasan, 3 fallan, 7 solo comprueban su limite. Los tres rojos reproducidos y ninguno es la caida de adb. empezar-de-nuevo-copia y zurron venian fichados; llegada.yaml se resolvio como defecto de prueba y vuelve a limite declarado. telon.yaml sale de limite declarado. Columna 7 -> 8.",
+      "nota": "Entrega A4P3, A4P4 y A5P1-A5P4 mas once costuras de cableado. La mayor: acepta() de aventura-en-curso.js no la llamaba nadie, asi que enCurso era null siempre. Estrena la primera migracion de formato del proyecto (1 -> 2).",
+      "verificado_en_dispositivo": "Bucle completo recorrido dos veces en wa-pixel con coordenadas escritas. Cuatro variantes del telon. Telon desencallando por sus dos puertas. Migracion v1->v2 de partida y mapa con la aventura en curso intacta, firmada por procedencia.json (de: migracion, migradaDesde: 1). Huella congelada: marcar un sitio a mitad no mueve la cadena.",
+      "no_verificado": "El telon por regreso: el servicio en primer plano se cae a mitad de salida, dos veces sin provocarlo. Verificado por dejarlo aqui y por la tarjeta de a medias, que el diseno declara la misma puerta.",
+      "fichado_sin_dueno_o_de_otras_filas": "A4P8 no se puede marcar tocando el centro del boton (la capa desborda 1080x2400). siembraLaCola sin llamador: ningun micro-encuentro en un telefono (fila 19). NUCLEO_DEL_OFRECIMIENTO sin importador: A2P0 inalcanzable (SPEC-041). Ninguna plantilla pone un beat sobre rol humano, 0 de 506 (SPEC-017). VERSION_FORMATO global a ocho clases. naming.md y .gitignore se contradicen sobre los reports."
     }
   ],
   "bloqueos": [],
