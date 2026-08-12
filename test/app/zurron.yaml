@@ -62,6 +62,21 @@
 # - **Que el texto del envoltorio sea el del narrador y no el de plantilla.** Los dos se leen
 #   igual a propósito —es la promesa entera de «sin cobertura dice lo mismo»—, así que desde
 #   fuera no se distinguen. El origen se afirma como dato en `test/nucleo/`.
+# - **El estado del interruptor de A6P6.** Medido el 12-ago-2026 en `wa-pixel`: el nodo
+#   `ajustes-pasos-de-fondo` es un `ViewGroup` no marcable —`checked=false` también con el
+#   interruptor encendido— y el `Switch` es un nodo aparte sin identificador propio; se puede
+#   tocar con `rightOf`, pero el filtro `checked:` sobre ese selector no discrimina en ninguna
+#   de las dos direcciones. Lo que este flujo afirma en su lugar es la línea de aviso y **lo
+#   que el modo hace**, que es lo que de verdad estaba en juego.
+#
+# **Y una precondición que no es de este flujo pero le llega: `ajustes.yaml` deja el aparato
+# con los dos permisos de salud concedidos.** Medido: desde `pm clear`, con los dos en
+# `granted=false`, correr `ajustes.yaml` entero —que pasa en verde— los deja en `granted=true`;
+# su único toque a la fila es el que los concede, y abrir la app sin tocar nada no los mueve.
+# A este flujo no le afecta porque empieza por `arranque.yaml`, que arranca con `clearState` y
+# eso sí los resetea, pero cualquier flujo que corra después de `ajustes.yaml` sin limpiar
+# estado arranca con un permiso de salud concedido que nadie le ha dado. Queda dicho aquí
+# porque es donde se descubrió; la decisión de qué hacer con ese toque no es de este fichero.
 #
 # **Y una corrección de una afirmación que este flujo llevaba y no podía pasar**: había un
 # `assertNotVisible: '.*\d+.*'` para «ninguna cifra». No puede pasar en ninguna máquina, porque
@@ -119,14 +134,23 @@ appId: com.walkingadventure.app
 - assertVisible:
     id: 'ajustes-pasos-de-fondo'
 - assertVisible: 'Contar los pasos del día a día'
-# Una fila de interruptor **no pinta su valor**: `ajustes.jsx` dibuja un `Switch` y reserva el
-# texto del valor para las filas de valor y las puertas. Lo que sí se puede afirmar, y es lo
-# que el criterio quiere decir, es el estado del interruptor. Medido en `wa-pixel`: la palabra
-# «no» no está en el árbol de accesibilidad de esta fila.
-- assertVisible:
-    id: 'ajustes-pasos-de-fondo'
-    checked: false
-# Y sin línea de aviso debajo: no se ha denegado nada todavía, así que no hay nada que decir.
+# **Aquí había `checked: false` sobre `ajustes-pasos-de-fondo`, y no medía nada.** Medido el
+# 12-ago-2026 en `wa-pixel`, volcando la jerarquía: ese nodo es un `android.view.ViewGroup`,
+# `clickable=false` y **`checked=false` siempre**, también con el interruptor encendido de
+# verdad; el `Switch` es un nodo aparte, `[906,1428][1028,1499]`, sin identificador propio.
+# Así que `checked: false` sobre esa fila es cierto por construcción y `checked: true` no
+# puede pasar en ninguna máquina. Es la misma familia que el `assertVisible: 'no'` que este
+# repositorio ya corrigió en `ajustes.yaml` —«una fila de interruptor no pinta su valor»—, y
+# lo copié de allí sin volver a medirlo.
+#
+# **El estado del interruptor no es legible desde Maestro en esta pantalla**, y queda
+# declarado: el `Switch` se alcanza con `rightOf`, pero el filtro `checked:` sobre ese
+# selector **no discrimina** —medido las dos direcciones: con el interruptor encendido pasa
+# `checked: false`, y con él apagado pasa `checked: true`—. Lo que sí discrimina es la línea
+# de aviso, que aparece exactamente cuando el modo no se pudo encender, y **lo que el modo
+# hace**, que es lo que el recorrido comprueba más abajo.
+#
+# Sin línea de aviso debajo: no se ha pedido nada todavía, así que no hay nada que decir.
 - assertNotVisible:
     id: 'ajustes-pasos-de-fondo-aviso'
 
@@ -148,11 +172,13 @@ appId: com.walkingadventure.app
     text: 'Permitir'
     optional: true
 
-# De vuelta en A6P6, y **sin salir y volver a entrar**: la fila vale «sí» y no hay línea de
-# aviso. Que repinte sin reabrir la pantalla es la decisión de interacción que esta fila añade.
+# De vuelta en A6P6, y **sin salir y volver a entrar**. El estado del interruptor no es
+# legible desde aquí (ver arriba), así que lo que se afirma es lo que sí discrimina en este
+# punto exacto del recorrido: acabamos de tocar, así que o el modo quedó encendido —y no hay
+# línea— o no se pudo —y la línea está—. Que el modo quedó encendido de verdad lo prueba el
+# tramo del zurrón, que no existe sin reserva y la reserva no se acredita con el modo apagado.
 - assertVisible:
     id: 'ajustes-pasos-de-fondo'
-    checked: true
 - assertNotVisible:
     id: 'ajustes-pasos-de-fondo-aviso'
 # La línea, si apareciera, no ofrecería ir a los ajustes del sistema ni insistiría después.

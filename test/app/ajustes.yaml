@@ -148,12 +148,30 @@ appId: com.walkingadventure.app
 # dato para `@nucleo`, y allí se afirma. Medido en `wa-pixel`: el texto no está en el árbol
 # de accesibilidad y el `assertVisible` no puede pasar en ninguna máquina.
 #
-# Lo que sí se puede afirmar, y es lo que el criterio quería decir, es **el estado del
-# interruptor**: apagado de origen y apagado después de tocarlo, porque tocarlo lo pide y
-# no lo enciende.
+# Y el `checked: false` que se puso en su lugar **tampoco medía nada**, medido el
+# 12-ago-2026 en `wa-pixel` volcando la jerarquía: `ajustes-pasos-de-fondo` es un
+# `android.view.ViewGroup`, `clickable=false` y **`checked=false` siempre**, también con el
+# interruptor encendido de verdad. El `Switch` es un nodo hermano, `[906,1428][1028,1499]`,
+# sin identificador propio; se alcanza con `rightOf`, pero ahí el filtro `checked:` no
+# discrimina en ninguna de las dos direcciones —con el interruptor encendido pasa
+# `checked: false` y con él apagado pasa `checked: true`—. Es decir: **el estado del
+# interruptor no es legible desde Maestro en esta pantalla**, y una aserción cierta por
+# construcción es peor que ninguna, porque ocupa el sitio de la que sí mediría.
+#
+# **Y hay algo que este toque sí hace y que no estaba dicho**: concede los dos permisos de
+# salud a nivel de sistema. Medido: desde `pm clear`, con `READ_DISTANCE` y `READ_STEPS` en
+# `granted=false`, este flujo entero los deja en `granted=true`, y abrir la app sin tocar
+# nada no los mueve. Los flujos que corran después sin limpiar estado arrancan con un
+# permiso concedido que nadie les ha dado. Qué hacer con eso no se decide en este fichero.
+#
+# Lo que queda afirmado es lo que este flujo sí puede ver: que tocar la fila no saca a nadie
+# de A6P6 ni deja la pantalla a medias. Lo que el toque hace se afirma contra el doble en
+# `test/nucleo/pasos-de-fondo.test.mjs`, con recuento de peticiones de permiso, que es lo
+# único que permite afirmar una ausencia.
 - assertVisible:
     id: 'ajustes-pasos-de-fondo'
-    checked: false
+- assertVisible:
+    id: 'ajustes-lista'
 
 # ── Lo destructivo no se marca en la lista ─────────────────────────────────────
 # «Empezar de nuevo» es la última y aquí es una puerta más; el aviso vive en su pantalla.
