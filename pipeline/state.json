@@ -467,6 +467,19 @@
       "verificado_en_dispositivo": "Bucle completo recorrido dos veces en wa-pixel con coordenadas escritas. Cuatro variantes del telon. Telon desencallando por sus dos puertas. Migracion v1->v2 de partida y mapa con la aventura en curso intacta, firmada por procedencia.json (de: migracion, migradaDesde: 1). Huella congelada: marcar un sitio a mitad no mueve la cadena.",
       "no_verificado": "El telon por regreso: el servicio en primer plano se cae a mitad de salida, dos veces sin provocarlo. Verificado por dejarlo aqui y por la tarjeta de a medias, que el diseno declara la misma puerta.",
       "fichado_sin_dueno_o_de_otras_filas": "A4P8 no se puede marcar tocando el centro del boton (la capa desborda 1080x2400). siembraLaCola sin llamador: ningun micro-encuentro en un telefono (fila 19). NUCLEO_DEL_OFRECIMIENTO sin importador: A2P0 inalcanzable (SPEC-041). Ninguna plantilla pone un beat sobre rol humano, 0 de 506 (SPEC-017). VERSION_FORMATO global a ocho clases. naming.md y .gitignore se contradicen sobre los reports."
+    },
+    {
+      "spec": "SPEC-050",
+      "slug": "cableados-que-faltan",
+      "resultado": "verde con los rojos leidos: 1 de nucleo fichado, 2 de @app fichados y 2 esperados desde aparato limpio",
+      "iteraciones": 0,
+      "report": "test/reports/SPEC-050-run-20260812T114303Z.md (no versionado); cotejo independiente: SUITE-run-20260812T124409Z.md",
+      "casos": "2825 casos: 2821 pasan, 1 falla, 3 saltados. El unico rojo de nucleo es BOOT_COMPLETED, dueno SPEC-023.",
+      "app": "20 flujos: 8 pasan, 4 fallan, 8 solo comprueban su limite. empezar-de-nuevo-copia y zurron siguen fichados; en-marcha y telon caen en 'Current location is unavailable' al abrir la salida y NO son regresion, atribuido midiendo (decisiones 13b): el mismo codigo los paso esa manana con el emulador caliente, el rojo se reproduce sobre main sin el merge, y tras reiniciar el emulador con la posicion alimentada cada 2 s. Trampa en CLAUDE.md; la decision de producto que lo cerraria, en docs/pendientes.md.",
+      "nota": "Los tres cableados mas lo que el encargo no sabia: App.js tiraba el prologo entero (no solo la cola), levanta() no corria ningun prologo (el segundo mapa no tenia pasado), A2P0 estaba rota por orden de hooks y nunca habia podido protestar, y el primer arreglo de A4P8 (spread de absoluteFillObject) no posicionaba y su propia prueba lo habria dado por bueno — corregida con el porque dentro. A2P0 entra en el diseno: bloque en el artefacto 2, nodo con aristas, 41 pantallas y 94 aristas verificadas. Tres decisiones del dueno en la ventana de la fila: el sitio de A2P0 sale de Overpass por la ruta ciega, respaldo en voz de mundo solo sin red, y el paquete de diseno entero dentro de la fila.",
+      "verificado_en_dispositivo": "Semilla P9SQCX177VESJYMX, mapa 42.41,-8.74, formato v2. Cola sembrada leida con run-as (2 entradas pendientes, 3 rumores, 7 de 7 nucleos con algo que contar). A4P8: capa [0,0][1080,2400] sin cotas degeneradas y 'Marcarlo' pulsando en su centro (540, 2261). A2P0: abierta en Madrid a ~500 km, sitio MADRID por la ruta ciega, dos acciones, tres puertas, sin 'salir a andar'.",
+      "no_desbloqueado": "El micro-encuentro visto en pantalla: con la cola sembrada la puerta esta abierta, pero que sitio tiene beat sigue sin ser reproducible (las tres medidas de escena.yaml que la fila no toco). La columna de limite declarado sigue en 8. Y el visor usa el mismo spread que en el descarte no posicionaba: fichado sin medir, sin dueno hasta que una fila toque el visor.",
+      "merge": "7d3c5ac"
     }
   ],
   "bloqueos": [],
@@ -508,8 +521,9 @@
     }
   ],
   "suite_final": {
-    "casos": "2711: 2707 pasan, 1 falla, 3 saltados",
-    "app": "19 flujos: 10 pasan, 2 fallan (los dos fichados de otras filas), 7 solo comprueban su limite"
+    "casos": "2825: 2821 pasan, 1 falla, 3 saltados",
+    "app": "20 flujos: 8 pasan, 4 fallan (2 fichados de otras filas + 2 esperados desde aparato limpio, ver decisiones 13b), 8 solo comprueban su limite",
+    "precondicion": "aparato limpio: pm clear + reinstalar + posicion alimentada cada 2 s (CLAUDE.md)"
   },
   "bloque": "B7",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",

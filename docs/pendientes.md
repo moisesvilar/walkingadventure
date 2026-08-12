@@ -29,6 +29,8 @@ Tres sí conviene mirarlos antes de tocar lo que dependa de ellos: **el tamaño 
 
 **Dos más que destapó la fila 49 al recorrer el bucle** (12-ago-2026), y que nadie ha decidido en voz alta: **abandonar una aventura la quema para siempre** — cerrar a medias la mete en `cerradas` igual que terminarla, y la memoria de la lista filtra por plantilla, así que en un barrio de tres calles con pocas plantillas el catálogo se agota rápido; puede ser lo que `bucle-jugable.md` §4 quiere, pero no está dicho. Y **marcar «este sitio no pega» en un sitio del lazo que estás andando no te libra de él**: con la huella congelada ya no cambia la cadena —correcto—, pero el juego te sigue mandando allí; qué debería pasar no está decidido.
 
+**Y uno del cotejo de la fila 50** (12-ago-2026): **qué hace abrir una salida cuando el aparato no da posición puntual pero hay una última conocida fresca.** Hoy la apertura pide `getCurrentPositionAsync`, y si el proveedor no responde la salida no se abre y la pantalla guarda el motivo («sin una posición no hay punto de partida, y sin punto de partida no hay regreso que detectar»). El comportamiento es honesto, pero en el emulador limpio pasa siempre (la trampa está en `CLAUDE.md`) y en un teléfono real puede pasar en un portal con mal cielo. Caer a la última posición conocida con una cota de frescura resolvería los dos casos — y cuánta frescura es aceptable para fijar el punto de partida del regreso es decisión de diseño, no de implementación.
+
 ## Ideas sin cerrar
 
 Vienen de `docs/ideas.md` y no son compromisos: falta decidir si entran.

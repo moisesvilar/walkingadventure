@@ -87,7 +87,7 @@ Las tres filas salen de `pipeline/decisiones-orquestador.md` §6y y del punto 1 
 | 47 | partida-persistida | RF-PERS-001, RF-PERS-002, RF-PERS-003, RF-PERS-008 | must | done |
 | 48 | modulo-de-ubicacion | RF-BUCLE-001, RF-BUCLE-005, RF-BUCLE-006, RF-INFRA-004, RF-PRIV-002 | must | done (sensor y rótulo; el camino de la llegada se queda en la 44 — ver §7a) |
 | 49 | pantallas-de-la-escena-y-el-telon | RF-QUEST-004, RF-PJ-009, RF-BUCLE-011, RF-BUCLE-012, RF-BUCLE-013 | must | done (entrega los cinco; **RF-QUEST-004 y RF-BUCLE-011**, que la 44 le pasó, quedan entregados) |
-| 50 | cableados-que-faltan | RF-QUEST-010, RF-QUEST-016, RF-MUNDO-004, RF-PRIV-004 | must | done |
+| 50 | cableados-que-faltan | RF-QUEST-010, RF-QUEST-016, RF-MUNDO-004, RF-PRIV-004 | must | done (cotejo independiente 12-ago: números confirmados desde aparato limpio; los rojos de `en-marcha`/`telon` **no son regresión** — proveedor de ubicación frío, ver §13b y la trampa en `CLAUDE.md`) |
 
 La **46** sale de `SPEC-043-iter-1` y **no es de este encargo**: recoge lo que el zurrón necesita y la navegación no da. Son tres piezas y ninguna sirve sola —la fuente nativa de salud, el motor de pasos montado y el registro de hechos de la partida—, más el gancho `metrosDeFondo` con el que dejar una reserva puesta desde el dispositivo. Trae dependencia nativa nueva, así que se decide antes de implementarse.
 

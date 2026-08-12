@@ -578,3 +578,21 @@ La cosecha más larga hasta ahora, como corresponde a la fila más dura. Lo bara
 **e · Costuras con lo que venga, declaradas**: la cadena de migraciones no sabe bifurcar (`paso()` introduce por ruta — por eso la huella vive al lado de `enCurso` y no dentro); `echaElTelon` exige la salida abierta, y una fila futura que cierre salidas por su cuenta repetirá el síntoma «su telón ya se echó» que no se parece a la causa; la memoria del casting tiene tope de cuatro ranuras por `(mapa, huella)`; y **ninguna pantalla se ha visto nunca en un iPhone** — la guarda del manifiesto mira iOS, los ojos no.
 
 **f · Su última frase, que es el estándar**: «lo que no esté aquí ni en el repo, no existe».
+
+## §13 · El cierre de la fila 50, y los dos rojos que no eran regresión
+
+### 13a · El cotejo, número a número
+
+Cotejo independiente el 12-ago-2026, `SUITE-run-20260812T124409Z`, con la precondición declarada por la fila (aparato limpio: `pm clear` + posición alimentada cada 2 s). Todo cuadra con lo declarado: @nucleo **2825 · 2821 · 1 · 3** con el único rojo siendo `BOOT_COMPLETED` (SPEC-023); @app **20 · 8 · 4 · 8**; frontera intacta (114 módulos); manifiesto mirado en las dos plataformas; mapa de pruebas 3567 entradas; `verifica-flujo` verde con 41 pantallas y 94 aristas; `BLOQUES_SIN_CONSUMIDOR` vacía; pantallas huérfanas 1; límite declarado 8. Merge `7d3c5ac`, empujado tras el cotejo.
+
+### 13b · Los dos rojos nuevos, atribuidos midiendo: aparato, no código
+
+`en-marcha.yaml` y `telon.yaml` caen los dos en «Current location is unavailable» al abrir la salida (el motivo viaja en el `accessibilityLabel` de `salida-no-se-abre`, no en su texto — para leerlo, la jerarquía de Maestro, no el nodo). La triangulación que descarta regresión: el mismo código los pasó la mañana del 12-ago (`SUITE-run-20260812T080830Z`, emulador caliente); la fila los reprodujo rojos **sobre main sin su merge**; y el cotejo los reprodujo tras reiniciar el emulador, con túneles y bucle de posición repuestos, con `dumpsys location` enseñando fijo fresco en `gps` y `fused` **y el arranque de la misma tanda anclando el mapa en ese fijo**. La posición puntual de la apertura es lo único que no llega con el proveedor frío. Trampa escrita en `CLAUDE.md`; la decisión de producto que lo cerraría (caer a la última posición conocida con cota de frescura), en `docs/pendientes.md`. Hasta que se decida, esos dos rojos se leen con la trampa delante: **rojo esperado desde aparato limpio, verde solo con el proveedor caliente.**
+
+### 13c · Método: la instrucción de subagentes viaja en el prompt, no en un mensaje
+
+La fila hizo sus fases en su propia ventana. La condición de trabajo enviada a mitad («un subagente por fase») fue **rechazada, con razón**: su configuración prohíbe la herramienta de agentes salvo petición directa del dueño, y un mensaje de quien orquesta no lo es — la misma asimetría de §9b, vista del otro lado. La corrección que queda: la instrucción va **dentro del encargo que el dueño pega**, que sí cuenta como petición directa suya, y el punto 1 del método de `pipeline/plan-restante.md` queda endurecido. Mitigación que la fila aplicó y vale como práctica: volcados de suites y ficheros a disco, lectura con grep, nunca en la ventana.
+
+### 13d · Lo que la fila dejó dicho al cerrarse
+
+Su despedida, respondida sin que se la preguntaran: «no queda nada en mi cabeza que no esté en el repo». Lo verificado del cierre lo confirma: la entrada XXXIV de la bitácora, las dos trampas nuevas de `CLAUDE.md`, y el único cabo suelto declarado en los dos sitios — `app/pantallas/visor.js` usa `...StyleSheet.absoluteFillObject`, el mismo spread que en el descarte no posicionaba, **y nadie lo ha medido**. Sin dueño hasta que una fila toque el visor.
