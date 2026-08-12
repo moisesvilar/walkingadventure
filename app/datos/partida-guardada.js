@@ -70,7 +70,7 @@ export const DEL_NUCLEO = Object.freeze([
   'CLAVES_DE_PARTIDA', 'CLAVE_DE_PROCEDENCIA', 'PROCEDENCIAS', 'CADENA_DEL_FORMATO', 'VERSION_FORMATO',
   'congelaEstado', 'levantaEstado', 'levantaRegistro', 'registroInicial', 'estadoInicial',
   'guardaPartida', 'cargaPartida', 'cuantosHechos', 'migra', 'documentoDeProcedencia',
-  'exigeSinImportacionAMedias', 'lee', 'textoCanonico',
+  'exigeSinImportacionAMedias', 'lee', 'textoCanonico', 'guardaElPrologo',
 ]);
 
 /**
@@ -407,16 +407,26 @@ export function creaPartidaGuardada({ almacen, nucleo, cadena = null, versionDeD
    * distingue «el registro no se puede leer» de «no está», y un registro ausente en la
    * primera sesión y presente en la segunda haría que ese diagnóstico dijera cosas
    * distintas por la edad de la partida y no por lo que le pasa.
+   *
+   * Y **nace con el pasado de su mapa dentro**, que es lo que SPEC-050 cableó. El prólogo
+   * corre en A1P6, cuando la partida todavía no existe, así que asienta en áreas frescas
+   * y su resultado tiene que llegar aquí: los rumores que sedimentó, lo que dejó dicho en
+   * cada núcleo, el par compuesto y las entradas de la cola. Va **antes** de la primera
+   * congelación a propósito — trasladarlo después escribiría en disco un mundo sin pasado,
+   * y la siguiente apertura no podría distinguirlo de uno que nunca lo tuvo.
    */
-  async function nace({ semilla, personaje = null }) {
+  async function nace({ semilla, personaje = null, prologo = null }) {
     const estado = estadoInicial({ semilla });
     // El personaje que cerró el arranque **es** el del área de la partida, y no una copia
     // suya al lado: el área es lo que se congela y lo que se exporta.
     if (personaje) estado.personaje = { ...estado.personaje, ...personaje };
     const registro = registroInicial();
+    // Sin prólogo la partida nace igual y sin pasado, que es lo que pasa con una celda sin
+    // contenido jugable. Lo que no puede pasar es que **haya** prólogo y se quede fuera.
+    const sembradas = prologo ? nucleo.guardaElPrologo(estado, prologo) : [];
     sello = null;
     await congela({ estado, registro });
-    return { estado, registro };
+    return { estado, registro, sembradas };
   }
 
   /** Que la siguiente congelación escriba pase lo que pase. Lo usa quien sustituye la partida. */

@@ -86,6 +86,18 @@ export const PUERTAS = congelaHondo(['diario', 'repisa', 'ajustes']);
  */
 export const GUION = congelaHondo([
   { id: 'sitio', registro: REGISTROS.MUNDO, texto: null, de: 'el sitio donde estás, dicho como lugar y no como coordenada' },
+  // El respaldo del sitio, y por qué existe (SPEC-050). El topónimo lo trae la ruta
+  // ciega del proxy, la misma por la que se levanta el mapa. Si no llega, hasta esta
+  // fila el ofrecimiento **no se podía componer** —`sitio` era obligatorio incluso con
+  // `sinRed`— y lo que quedaba era o una pantalla en blanco indistinguible de «todavía
+  // no se sabe» o la portada de casa a trescientos kilómetros, que es justo lo que A2P0
+  // existe para no enseñar. Y de paso se perderían las tres puertas, con el diario, que
+  // es precisamente donde se leen los mapas donde ya no estás.
+  //
+  // Habla en voz de mundo y **no nombra la red ni la cobertura**, igual que `no-se-pudo`,
+  // que es su precedente dentro de este mismo guion: lo que no se sabe hoy es el nombre
+  // del sitio, no el estado de una conexión.
+  { id: 'sitio-sin-nombre', registro: REGISTROS.MUNDO, texto: 'Un sitio todavía sin nombre' },
   { id: 'titular', registro: REGISTROS.MUNDO, texto: 'Hasta aquí no llega ninguno de tus mapas' },
   { id: 'cuerpo', registro: REGISTROS.MUNDO, texto: 'Si esto va a ser sitio tuyo, se puede levantar uno.' },
   { id: 'levantar', registro: REGISTROS.MUNDO, texto: 'Levantar un mapa aquí' },
@@ -229,17 +241,27 @@ export function hayQueOfrecerMapa(resolucion) {
  * kilómetros ofrecería salir a andar en un mundo donde no estás.
  *
  * @param {{ sitio: string, sinRed?: boolean }} opciones `sitio` es el lugar donde
- *   estás dicho con palabras, nunca una coordenada.
+ *   estás dicho con palabras, nunca una coordenada. **Con red es obligatorio**: el
+ *   contrato no se ablanda por el camino bueno, y una cadena vacía sigue siendo error
+ *   de construcción. Solo la variante `sinRed` admite componer sin él, y entonces el
+ *   sitio se dice con la pieza `sitio-sin-nombre` del guion — ver ahí el porqué.
  */
-export function componeOfrecimiento({ sitio, sinRed = false } = {}) {
-  if (typeof sitio !== 'string' || !sitio) {
+export function componeOfrecimiento({ sitio = null, sinRed = false } = {}) {
+  // El topónimo y el mapa vienen por la misma puerta, así que si el nombre no llegó,
+  // dibujar tampoco iba a llegar: es una puerta y no dos, y por eso el respaldo cuelga
+  // de `sinRed` y no de una detección de conectividad aparte (SPEC-050).
+  const sinNombre = sinRed && (sitio === null || sitio === undefined);
+  if (!sinNombre && (typeof sitio !== 'string' || !sitio)) {
     throw new Error(`el ofrecimiento de levantar un mapa se compone sobre el sitio donde estás, dicho como lugar, y llegó ${JSON.stringify(sitio) ?? String(sitio)}`);
   }
   return congelaHondo({
     momento: MOMENTO,
     testid: TESTIDS.ofrecimiento,
     mapaActivo: SIN_MAPA_ACTIVO,
-    sitio,
+    sitio: sinNombre ? textoDelGuion('sitio-sin-nombre') : sitio,
+    // Si el sitio es el respaldo y no su nombre de verdad, se dice: quien pinta no tiene
+    // que adivinarlo comparando cadenas, y quien mide puede afirmar cuál de los dos salió.
+    sitioConNombre: !sinNombre,
     titular: textoDelGuion('titular'),
     cuerpo: textoDelGuion('cuerpo'),
     // El momento en que no se pudo dibujar el mundo se dice en voz de mundo y sin
