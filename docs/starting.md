@@ -1847,3 +1847,13 @@ Mundo `P9SQCX177VESJYMX@42.41,-8.74` en `wa-pixel`, con el aparato limpio y la a
 ## La precondición que hay que escribir al lado de los números
 
 De aquí sale una regla de operativa que no estaba en ninguna parte y ya ha costado un susto: **antes de una tanda cuyos números vayan a compararse, el aparato se limpia con `adb shell pm clear com.walkingadventure.app` y se reinstala**. No basta `force-stop`, y `expo run:android` no borra los documentos. Sin ese paso, cinco flujos que asumen instalación limpia caen por estado arrastrado y se leen como regresión. Anotado en `CLAUDE.md`, junto a las otras trampas del aparato, porque el sitio donde tiene que estar es donde lo busca quien mide y no la bitácora de quien lo descubrió.
+
+## Los dos rojos de `@app` que no son de esta fila, y cómo se atribuyeron
+
+La tanda final dejó **cuatro** flujos en rojo, y el encargo declaraba dos. Los otros dos —`en-marcha.yaml` y `telon.yaml`— fallan los dos en la misma aserción, `id: en-marcha is visible`, y el motivo lo guarda la propia pantalla en `salida-no-se-abre`: «sin una posición no hay punto de partida... Current location is unavailable». La salida no se abre porque `getCurrentPositionAsync` no devuelve fijo en este emulador en ese instante.
+
+**No son de esta fila, y se comprobó en vez de suponerse.** Tres medidas, en este orden: desactivar el efecto que resuelve dónde estás → siguen rojos; desactivar además el montaje del mapa de la partida → siguen rojos; **y correrlos sobre `main` con el mismo procedimiento —`pm clear`, reinstalar, alimentador de posición cada dos segundos— → rojos igual**. La atribución es la última: lo demás solo descarta.
+
+Merece decirse porque el orden importa. La primera sonda no aisló nada: desactivó el efecto y dejó vivo el otro añadido de la fila, así que su verde no habría demostrado nada y su rojo tampoco. Una sonda que no apaga todo lo tuyo no separa lo tuyo de lo ajeno.
+
+Queda **sin dueño y fichado**: la fila 48 midió `en-marcha.yaml` en verde con 103 s de recorrido real, y hoy no abre la salida. O es deriva del emulador o es regresión de alguna fila posterior; lo que sí se sabe es que la ubicación funciona **durante** una salida —el recorrido a pie de esta fila validó su llegada— y falla al abrirla.
