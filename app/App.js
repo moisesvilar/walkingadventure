@@ -16,7 +16,7 @@
 // herramientas y no pantallas del juego, y la distinción está escrita en §6y. En
 // producción no existe.
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { creaAlmacenDuradero, directorioDeLaPartida } from './datos/almacen-duradero.js';
@@ -26,6 +26,7 @@ import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
 import { mundoDeLaCelda, mundoDeLaPartida } from './mapa/mundo-guardado.js';
 import { creaLaAventuraEnCurso } from './marcha/aventura.js';
+import { creaElCasting } from './marcha/casting.js';
 import { identidadDeLaSalidaViva } from './marcha/identidad.js';
 import { creaLasLlegadas, repartoDeLaAventuraEnCurso } from './marcha/llegadas.js';
 import { montaLaSalida } from './marcha/salida-montada.js';
@@ -39,6 +40,7 @@ import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import {
   NUCLEO_DEL_MUNDO_GUARDADO,
   NUCLEO_DE_EMPEZAR_DE_NUEVO,
+  NUCLEO_DEL_CASTING,
   NUCLEO_DE_LA_AVENTURA_EN_CURSO,
   NUCLEO_DE_LA_COPIA,
   NUCLEO_DE_LAS_LLEGADAS,
@@ -119,6 +121,10 @@ export function App() {
   // La partida en disco, de la fila 47: congelarla en los cortes del juego y levantarla al
   // abrir. Antes de esta fila el estado se componía en memoria y se moría al cerrar.
   const [partidaGuardada] = useState(() => creaPartidaGuardada({ almacen, nucleo: NUCLEO_DE_LA_PARTIDA_GUARDADA }));
+  // El casting vigente del mapa activo, con su memoria por (mapa, huella de los descartes).
+  // Va aquí y no dentro de un momento porque lo consumen tres: la portada con su lista, la
+  // capa de llegadas y su recuperación al reabrir la app.
+  const [elCasting] = useState(() => creaElCasting({ nucleo: NUCLEO_DEL_CASTING }));
   const [enRevision, setEnRevision] = useState(false);
   const [enMapa, setEnMapa] = useState(false);
   // La app abre en el arranque **solo el primer día**. Desde la fila 47, quien decide por
@@ -294,6 +300,37 @@ export function App() {
   }, [partida, partidaGuardada]);
 
   /**
+   * El mapa activo **con su casting vigente dentro**, que es la única fuente de la cadena.
+   *
+   * Desde que la lista de hoy recibe los sitios marcados, `repartoDeAventuras` vuelve a castear
+   * cuando hay descartes, y `mundo.casting` dejó de ser lo que quien juega ve en la ficha:
+   * medido sobre `costero` marcando un solo sitio, 24 de 29 aventuras seguían ofreciéndose con
+   * otra cadena. Aquí se resuelve **una vez** y de aquí lo cogen todos —la portada y su lista,
+   * la aceptación en el motor, la preparación, la capa de llegadas y su recuperación al reabrir
+   * la app—, así que no hay dos caminos que se parezcan.
+   *
+   * Sin ningún sitio marcado devuelve el mismo objeto que trae la partida, así que el camino
+   * normal no recompone nada y no cuesta nada.
+   */
+  const elMundo = useMemo(() => {
+    if (!partida) return null;
+    const documento = elCasting.mundoVigente({
+      mundo: partida.mundo.documento ?? null,
+      anclajes: partida.estado.anclajes,
+      mapaId: partida.mundo.mapaId ?? 'sin-mapa',
+    });
+    // La misma referencia mientras el casting vigente no cambie: la petición de la lista y la
+    // lámina memoizan por identidad, y un objeto nuevo en cada repintado las recompondría.
+    return documento === partida.mundo.documento ? partida.mundo : { ...partida.mundo, documento };
+  }, [partida, elCasting]);
+
+  /** La partida con ese mismo mapa dentro. Una sola verdad viaja a las pantallas. */
+  const laPartida = useMemo(
+    () => (partida && elMundo ? { ...partida, mundo: elMundo } : partida),
+    [partida, elMundo],
+  );
+
+  /**
    * Monta la vida de la salida en cuanto hay partida, y **reconcilia al arrancar**.
    *
    * Reconciliar es lo primero que se hace y no lo último: en Android el sistema puede
@@ -309,10 +346,10 @@ export function App() {
     let vivo = true;
     montaLaSalida({
       salidas: partida.estado.salidas,
-      origen: partida.mundo.documento?.origin ?? null,
+      origen: elMundo.documento?.origin ?? null,
       // El documento del mundo, del que salen los geofences: de ellos cuelgan la cadencia
       // del muestreo y el sitio bajo la marca de posición.
-      mundo: partida.mundo.documento ?? null,
+      mundo: elMundo.documento ?? null,
       tramo: partida.estado.personaje?.tramo ?? null,
       alCambiar: () => repintaLaSalida((n) => n + 1),
       // La capa de llegadas de la salida, montada sobre **su** detector. Se monta aquí y no
@@ -329,10 +366,10 @@ export function App() {
         // que resuelve el beat al cerrar su paso y lo que compone A4P3 y A4P4.
         aventura: creaLaAventuraEnCurso({
           nucleo: NUCLEO_DE_LA_AVENTURA_EN_CURSO,
-          mundo: partida.mundo.documento,
+          mundo: elMundo.documento,
           estado: partida.estado,
           reparto: repartoDeLaAventuraEnCurso({
-            mundo: partida.mundo.documento,
+            mundo: elMundo.documento,
             aventuras: partida.estado.aventuras,
           }),
           // El reloj de pared, que es la única entrada de la escena que no puede salir del
@@ -341,9 +378,9 @@ export function App() {
           // de franja como si fuera dentro sin saberlo (§6h).
           reloj: relojDePared(),
         }),
-        mundo: partida.mundo.documento,
-        cupos: partida.mundo.cupos ?? null,
-        mapaId: mapaId ?? partida.mundo.mapaId,
+        mundo: elMundo.documento,
+        cupos: elMundo.cupos ?? null,
+        mapaId: mapaId ?? elMundo.mapaId,
         salida: laQueSeAbre,
         estado: partida.estado,
         registro: partida.registro,
@@ -354,7 +391,7 @@ export function App() {
         // llegaba con el beat dentro en nulo (§10g). La cadena no se persiste: el casting es
         // determinista sobre el documento y el estado ya guarda de qué plantilla es.
         reparto: repartoDeLaAventuraEnCurso({
-          mundo: partida.mundo.documento,
+          mundo: elMundo.documento,
           aventuras: partida.estado.aventuras,
         }),
         dia: creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia(),
@@ -575,7 +612,7 @@ export function App() {
   if (partida && salida) {
     return (
       <EnMarchaMontado
-        mundo={partida.mundo.documento}
+        mundo={elMundo.documento}
         salidas={partida.estado.aventuras}
         // El seguidor cuelga de la única suscripción de la salida. Sin él no se dibuja un
         // mapa con la marca quieta: se enseña la avería con su motivo del vocabulario
@@ -604,7 +641,7 @@ export function App() {
   if (partida && laSalida && laSalida.queOfrece() === 'telon') {
     return (
       <TelonMontado
-        partida={partida}
+        partida={laPartida}
         calendario={creaCalendario({ arrancadaEn: partida.arrancadaEn })}
         situacion={laSalida.situacion()}
         // Echar el telón es un corte del juego —entinta el mapa, ingresa el oro y apunta la
@@ -637,7 +674,7 @@ export function App() {
           puerta={consulta}
           partida={partida.estado}
           personaje={partida.personaje}
-          mundo={partida.mundo}
+          mundo={elMundo}
           almacen={almacen}
           empezarDeNuevo={empezarDeNuevo}
           // El registro y el día, que es lo que deshacer un descarte necesita para dejar su
@@ -684,7 +721,9 @@ export function App() {
           registro={partida.registro}
           identidad={() => identidadDeLaSalida(partida)}
           personaje={partida.personaje}
-          mundo={partida.mundo}
+          // **El mapa con su casting vigente**, que es de donde salen la lista de hoy, la
+          // cadena que se acepta en el motor y los beats que se le piden a la preparación.
+          mundo={elMundo}
           arrancadaEn={partida.arrancadaEn}
           // Las cuatro maneras de echarse a andar pasan por aquí, y las cuatro llegan al mismo
           // sitio: «salir a andar» de la preparación, «salir a andar sin más» de la portada y de

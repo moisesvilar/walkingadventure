@@ -36,6 +36,8 @@ import {
 } from '@walkingadventure/nucleo/quests/escena.js';
 import { aventuraEnCurso, resuelveBeat } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
 import { apuntaHaberEstado, libroDePendientes } from '@walkingadventure/nucleo/partida/conocimiento.js';
+import { castAll } from '@walkingadventure/nucleo/quests/casting.js';
+import { hayDescartes, vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
 import { identidadDeCara } from '@walkingadventure/nucleo/partida/npcs.js';
 import { vistaDeTenencia } from '@walkingadventure/nucleo/partida/objetos.js';
 import { namesFor } from '@walkingadventure/nucleo/names/index.js';
@@ -353,6 +355,20 @@ export const NUCLEO_DE_LAS_LLEGADAS = Object.freeze({
   PRESENTACIONES,
   TIPOS_DE_PASO,
   MODOS,
+});
+
+/**
+ * Lo que `creaElCasting` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-049 entra por la misma puerta que las diez filas anteriores (§6u): que sin ningún sitio
+ * marcado el casting sea **el mismo objeto** que trae el documento, que con uno marcado la
+ * cadena que se acepta sea la misma que enseña la ficha, y que esa cadena salga idéntica al
+ * reabrir la app tienen que poder leerse desde `node --test` sin resolver nada instalado.
+ */
+export const NUCLEO_DEL_CASTING = Object.freeze({
+  castAll,
+  vistaDeDescartes,
+  hayDescartes,
 });
 
 /**
