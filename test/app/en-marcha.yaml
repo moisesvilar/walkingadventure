@@ -26,14 +26,23 @@
 #
 # **Lo que este flujo NO puede comprobar, y por qué. Medido, no supuesto:**
 #
-# - **Que la marca se mueva.** `setLocation` de Maestro es `adb emu geo fix`, y en esta
-#   máquina **devuelve OK y no mueve nada**: medido el 11-ago-2026, tres fijos seguidos
-#   dejaron la etiqueta de `marca-posicion` idéntica. Es la trampa que la bitácora de la
-#   fila 48 documenta —un mock de `fused_location_provider` que se re-emite solo, y que solo
-#   se quita reiniciando el emulador—. Meter aquí una afirmación que depende de eso
-#   convertiría el estado del emulador en el resultado de la prueba. Que la posición se
-#   mueve y que el detector clasifica **está medido a mano** y anotado en `docs/starting.md`
-#   con el recorrido concreto; en cuanto `geo fix` sea fiable, esas líneas van aquí.
+# - **Que la marca se mueva.** `setLocation` de Maestro **devuelve OK y no mueve nada** en
+#   esta máquina: medido el 11-ago-2026, tres fijos seguidos dejaron la etiqueta de
+#   `marca-posicion` idéntica, y vuelto a medir el 12-ago-2026 sobre una salida abierta con
+#   `setLocation: {latitude: 42.4090, longitude: -8.7480}` — salida con código 0 y
+#   `marca-posicion` intacta en `del-mapa:-1274,395:parada`.
+#
+#   **El porqué que este párrafo daba era falso y se corrige.** Decía que `setLocation` de
+#   Maestro «es `adb emu geo fix`» y que lo rompía un mock de `fused_location_provider` que
+#   se quita reiniciando el emulador. Las dos mitades son falsas y juntas mandan a reiniciar
+#   el emulador esperando que se cure: **no son el mismo mecanismo**, y `adb emu geo fix` con
+#   esa misma coordenada **sí mueve la marca** —tres fijos seguidos y `marca-posicion` pasa a
+#   `del-mapa:-657,1002:ambiguo`, medido el 12-ago-2026 en este mismo emulador, sin
+#   reiniciarlo—. Lo que no hay es manera de que un flujo de Maestro invoque un comando del
+#   sistema, así que **andar sigue fuera del alcance de un flujo** y la conclusión de abajo no
+#   cambia: meter aquí una afirmación que dependa de la marca convertiría el estado del
+#   emulador en el resultado de la prueba. Que la posición se mueve y que el detector
+#   clasifica **está medido a mano** y anotado en `docs/starting.md` con el recorrido concreto.
 # - **Las marcas apiladas del momento.** `momento-en-marcha`, `en-marcha-elementos`,
 #   `en-marcha-tocables`, `en-marcha-orientacion`, `mapa-camara` y `ubicacion-estado` son
 #   `MARCA_SUPERPUESTA`, o sea 1 dp anclado a la esquina del contenedor, y **las seis caen

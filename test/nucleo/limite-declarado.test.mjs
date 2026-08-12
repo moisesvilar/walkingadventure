@@ -87,9 +87,10 @@ import { fuente } from './mundo-de-prueba.mjs';
  * historia vieja —«falta `paso-llegada` en App.js»—, que era falsa desde que la máquina
  * existe: un límite declarado por un motivo que ya no es el suyo es peor que no declararlo.
  *
- * **La fila 49 la deja en ocho, y es la primera vez que la columna sube.** Se dice con el
- * número delante porque para eso está esta lista. Su encargo preveía siete → seis, sacando
- * `escena.yaml`; lo medido es siete → ocho:
+ * **La fila 49 la deja en siete, y sin sacar a nadie.** Su encargo preveía siete → seis
+ * sacando `escena.yaml`, y lo medido es que no puede salir. `telon.yaml` estuvo dentro
+ * durante media fila con un motivo que resultó falso, y sale antes de commitearse; queda
+ * escrito porque la equivocación es la parte útil:
  *
  * - `escena.yaml` **se queda**, y su motivo viejo era falso: decía que faltaba `paso-escena`
  *   en `App.js`. Hoy la escena se monta —inyectada en `PantallaLlegada` por su tipo de paso—
@@ -97,17 +98,18 @@ import { fuente } from './mundo-de-prueba.mjs';
  *   porque no hay manera de llegar a A4P3 sin haber llegado al sitio. Lo que lo mantiene aquí
  *   son tres medidas que se suman: el ancla del mapa no la gobierna la posición que el flujo
  *   pone (fila 44), la semilla nace de entropía real y el arranque no ofrece dónde escribirla,
- *   y `setLocation` **no mueve nada** en esta máquina (fila 48), así que no se puede andar
- *   hasta un beat. Juntas: **qué sitio tiene beat no es reproducible entre tandas**. Y la
- *   cuarta cierra la última puerta: sin llamador de `siembraLaCola` no puede saltar ningún
- *   micro-encuentro, así que una salida sin aventura tampoco produce un paso de beat.
- * - `telon.yaml` **entra**, y es nuevo. Lo que necesita dedo del telón —que las dos salidas de
- *   A5P4 dejen el telón leído y una salida nueva abrible, §10h— pide una salida cerrada sin
- *   leer, y **las tres vías de cierre están fuera del alcance de un flujo**: volver a casa
- *   exige moverse y `geo fix` no mueve; «dejarlo aquí» cuelga de la tarjeta de a medias, que
- *   solo aparece pasados noventa minutos de reloj del sistema; y «dar la salida por terminada»
- *   vive en la notificación del servicio, fuera de la ventana de la app. Se escribe entero y
- *   marcado en vez de no escribirse: así vuelve solo el día que `geo fix` mueva la marca.
+ *   y **`setLocation` no mueve la marca** en esta máquina, así que no se puede andar hasta un
+ *   beat. Juntas: **qué sitio tiene beat no es reproducible entre tandas**. Y la cuarta cierra
+ *   la última puerta: sin llamador de `siembraLaCola` no puede saltar ningún micro-encuentro,
+ *   así que una salida sin aventura tampoco produce un paso de beat.
+ * - `telon.yaml` **no entra**, y estuvo a punto. Se escribió marcado con el motivo «las tres
+ *   vías de cierre están fuera del alcance de un flujo», y era falso: al telón **se llega sin
+ *   moverse**. Se sale a andar, se mata la app —el servicio en primer plano muere con el
+ *   proceso—, y al reabrir la portada enseña la tarjeta de a medias, cuyo «dejarlo aquí» es
+ *   una de las tres vías. Recorrido a mano el 12-ago-2026, dos veces, y `en-marcha.yaml` ya
+ *   recorría esa misma reapertura desde la fila 48. El error de método fue razonar sobre lo
+ *   que un flujo puede hacer en lugar de mirar lo que el juego ya hace cuando el sistema mata
+ *   la app, que es un caso diseñado a propósito en `bucle-jugable.md` §9.
  */
 const FLUJOS_DE_LIMITE_DECLARADO = [
   'ajustes-filas-de-valor.yaml',
@@ -116,7 +118,6 @@ const FLUJOS_DE_LIMITE_DECLARADO = [
   'escena.yaml',
   'mapas.yaml',
   'repisa.yaml',
-  'telon.yaml',
   'visor.yaml',
 ];
 
@@ -281,9 +282,12 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
   test('Los flujos que recorren la app de verdad no llevan marcador', () => {
     // La otra mitad del contrato, y la que evita que esto se convierta en una manera
     // barata de callar un rojo: los flujos que sí recorren pantallas no pueden marcarse
-    // sin que alguien lo vea aquí. `en-marcha.yaml` entra en esta lista con la fila 48, que
-    // es lo que impide que vuelva a la columna sin que nadie se entere.
-    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'zurron.yaml', 'en-marcha.yaml']) {
+    // sin que alguien lo vea aquí. `en-marcha.yaml` entra en esta lista con la fila 48 y
+    // `telon.yaml` con la 49, que es lo que impide que vuelvan a la columna sin que nadie se
+    // entere. `llegada.yaml` no está por lo de siempre: hasta la 44 sí llevaba marcador, y
+    // meterlo aquí obligaría a recordar por qué; lo que lo sostiene es la lista de arriba,
+    // donde su salida está escrita con la medida.
+    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'zurron.yaml', 'en-marcha.yaml', 'telon.yaml']) {
       const texto = fuente(`test/app/${fichero}`);
       assert.ok(
         !texto.split('\n').some((l) => l.trim() === MARCADOR),

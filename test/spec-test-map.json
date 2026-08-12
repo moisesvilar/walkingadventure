@@ -29479,7 +29479,7 @@
       "fichero": "test/app/telon.yaml",
       "caso": "Leer el telón deja abrir otra salida",
       "escenario": "Leer el telón deja abrir otra salida",
-      "nota": "Flujo de límite declarado nuevo: es §10h y necesita dedo, pero las tres vías de cierre de una salida están fuera del alcance de un flujo en esta máquina. La mitad afirmable sin dispositivo está en test/nucleo/telon-cableado.test.mjs con el mismo nombre."
+      "nota": "Recorre de verdad: entra por el arranque, sale a andar, mata la app —el servicio en primer plano muere con el proceso— y cierra la salida desde la tarjeta de a medias, que es una de las tres vías. Hace el ciclo dos veces para recorrer las dos salidas de A5P4, «Cerrar» y «Ver el diario entero», y las dos terminan abriendo una salida nueva. La mitad afirmable sin dispositivo está en test/nucleo/telon-cableado.test.mjs con el mismo nombre."
     },
     {
       "spec": "SPEC-049",
