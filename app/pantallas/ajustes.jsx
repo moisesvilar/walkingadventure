@@ -39,24 +39,44 @@ function Fila({ fila, sans, aviso, alTocar, alCambiar }) {
     <View style={estilos.fila}>
       <Text style={[estilos.etiqueta, sans]}>{fila.etiqueta}</Text>
       {fila.tipo === 'interruptor' ? (
-        <Switch
-          value={encendida}
-          // El interruptor no se enciende solo por tocarlo: lo que hace es pedirlo, y el
-          // valor que se pinta es siempre el real. El comportamiento del permiso es de su
-          // dueña; lo que aquí se sostiene es que no se dibuje lo pedido.
-          onValueChange={alCambiar ? (quiere) => alCambiar(fila.id, quiere) : null}
-        />
+        // **El interruptor no recibe el toque: lo recibe la fila entera**, y por eso va
+        // dentro de un envoltorio sordo. Dos cosas, y las dos están medidas:
+        //
+        // - **La fila es el control.** El `Switch` ocupa la esquina derecha —medido en
+        //   `wa-pixel`: `[906,1428][1028,1499]` dentro de una fila `[53,1397][1028,1532]`—,
+        //   así que tocar la etiqueta no hacía absolutamente nada: ni se pedía el permiso,
+        //   ni cambiaba el valor, ni aparecía la línea de aviso. Una fila de ajustes cuyo
+        //   85 % izquierdo es inerte es la degradación silenciosa de §6h con forma de
+        //   pantalla normal, y además deja un estado que su dueña no puede producir —el
+        //   valor no cambió y tampoco hay motivo escrito—, que es como se descubrió.
+        // - **Y el valor que se pinta no se puede mover solo.** Un `Switch` que recibe el
+        //   toque se dibuja encendido en el acto y avisa después; si quien decide dice que
+        //   no, queda un interruptor pintado en «sí» que no lee nada. Sordo, eso es
+        //   imposible por construcción: lo que se ve es siempre el valor real.
+        <View pointerEvents="none">
+          <Switch value={encendida} />
+        </View>
       ) : (
         <Text style={[estilos.valor, sans]}>{fila.chevron ? '›' : fila.valor}</Text>
       )}
     </View>
   );
 
-  // Un interruptor cambia en el sitio y no abre nada, así que no es pulsable entero.
+  // Un interruptor cambia en el sitio y no abre ninguna pantalla, pero **sí es pulsable
+  // entero**: lo que no abre nada es el destino, no el área que responde. Tocarlo no lo
+  // enciende —lo pide—, y el valor que se pinta sigue siendo el real.
   if (fila.tipo === 'interruptor') {
     return (
       <View testID={fila.testid} accessibilityLabel={fila.id}>
-        {cuerpo}
+        <Pressable
+          onPress={alCambiar ? () => alCambiar(fila.id, !encendida) : null}
+          // Se anuncia como interruptor y con su valor, que es lo que un lector de pantalla
+          // necesita para decir qué hace la fila y en qué estado está.
+          accessibilityRole="switch"
+          accessibilityState={{ checked: encendida }}
+        >
+          {cuerpo}
+        </Pressable>
         {/* La línea que aparece **solo** cuando el permiso se ha denegado o revocado. En
             voz de aplicación —el único sitio del juego donde eso está permitido—, del color
             tenue de los valores y **sin ningún control dentro**: no ofrece ir a los ajustes
