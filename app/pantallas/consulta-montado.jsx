@@ -165,7 +165,33 @@ function RepisaMontada({ partida, mundo, alVolver }) {
  * lo que falte hace fallar la composición nombrando la pieza: es exactamente lo que la
  * pantalla quiere en lugar de pintar una fila apagada.
  */
-function AjustesMontados({ partida, personaje, mundo, criterios, pasosDeFondo, alVolver, alAbrirPuerta }) {
+function AjustesMontados({ partida, personaje, mundo, criterios, pasosDeFondo, alCambiarAjuste, alVolver, alAbrirPuerta }) {
+  // Cuántas veces ha cambiado un interruptor. El área de ajustes la muta el núcleo en sitio
+  // y React no se entera solo: sin esto, tocar la fila no repintaría su valor hasta salir y
+  // volver a entrar, y una aplicación que no repinta lo que acabas de tocar está rota
+  // (`design-system.md`). Es el mismo patrón que la lista de sitios marcados.
+  const [movimientos, repinta] = useState(0);
+  // La línea que aparece **solo** cuando el permiso se deniega o se revoca, con su
+  // localizador. Vive aquí y no en el estado del juego porque no es del juego: es lo que hay
+  // que leer bajo la fila que no se pudo encender.
+  const [avisoDelFondo, setAvisoDelFondo] = useState(null);
+
+  // Al abrir los ajustes se lee el valor **efectivo** del interruptor, no el pedido: un
+  // permiso revocado desde fuera lo apaga aquí y lo dice, en lugar de seguir en «sí» sin
+  // leer nada. Consultar no es preguntar: esto no pide ningún permiso.
+  useEffect(() => {
+    if (!pasosDeFondo) return undefined;
+    let vivo = true;
+    pasosDeFondo.efectivo()
+      .then((estado) => {
+        if (!vivo) return;
+        setAvisoDelFondo(estado.aviso ? { texto: estado.aviso, testid: estado.testid, fila: pasosDeFondo.fila } : null);
+        repinta((n) => n + 1);
+      })
+      .catch(() => { if (vivo) setAvisoDelFondo(null); });
+    return () => { vivo = false; };
+  }, [pasosDeFondo]);
+
   const montaje = useMemo(() => {
     try {
       const marcados = descartesDeMapa(partida.anclajes, mundo?.mapaId ?? null);
@@ -186,18 +212,30 @@ function AjustesMontados({ partida, personaje, mundo, criterios, pasosDeFondo, a
     } catch (e) {
       return { ajustes: null, fallo: mensajeDeError(e) };
     }
-  }, [partida, personaje, mundo, criterios]);
+  }, [partida, personaje, mundo, criterios, movimientos]);
 
   if (montaje.fallo !== null) return <Averia mensaje={montaje.fallo} />;
   return (
     <PantallaAjustes
       ajustes={montaje.ajustes}
+      aviso={avisoDelFondo}
       alVolver={alVolver}
       alAbrirFila={(id) => (PUERTA_DE_LA_FILA[id] ? alAbrirPuerta(PUERTA_DE_LA_FILA[id]) : null)}
       // El interruptor no se enciende por tocarlo: lo pide. Quien sabe pedirlo es la
       // orquestación de los pasos de fondo, y sin ella la fila no cambia de valor —que es
       // lo correcto, porque encenderla sin poder leer nada sería el interruptor que miente.
-      alCambiarInterruptor={pasosDeFondo ? (id, quiere) => pasosDeFondo.pide(id, quiere) : null}
+      //
+      // Y **atiende su fila y solo la suya**: lo que no atiende vuelve declarado y sin haber
+      // tocado nada, que es lo que impide que el toque de un interruptor de otra fila del
+      // checklist cambie un ajuste que nadie ha decidido cambiar aquí.
+      alCambiarInterruptor={pasosDeFondo ? (id, quiere) => {
+        void pasosDeFondo.pide(id, quiere).then((respuesta) => {
+          if (!respuesta.atendida) return;
+          setAvisoDelFondo(respuesta.aviso ? { texto: respuesta.aviso, testid: respuesta.testid, fila: pasosDeFondo.fila } : null);
+          repinta((n) => n + 1);
+          if (alCambiarAjuste) alCambiarAjuste();
+        });
+      } : null}
     />
   );
 }
@@ -296,6 +334,7 @@ export function ConsultaMontada({
   almacen,
   empezarDeNuevo,
   pasosDeFondo = null,
+  alCambiarAjuste = null,
   criterios = [],
   registro = null,
   dia = 0,
@@ -327,6 +366,7 @@ export function ConsultaMontada({
         mundo={mundo}
         criterios={criterios}
         pasosDeFondo={pasosDeFondo}
+        alCambiarAjuste={alCambiarAjuste}
         alVolver={alVolver}
         alAbrirPuerta={alAbrirPuerta}
       />

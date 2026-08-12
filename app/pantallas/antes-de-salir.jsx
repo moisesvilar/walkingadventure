@@ -1,6 +1,9 @@
-// El encadenado de las cinco pantallas del momento «antes de salir»: portada → lista → ficha
-// → preparación, y de ahí a andar. A2P2, el zurrón, es de la fila 42: aquí existe la arista
-// que lleva a ella y la condición que la hace existir, y nada más.
+// El encadenado de las pantallas del momento «antes de salir»: portada → lista → ficha →
+// preparación, y de ahí a andar. Desde la fila 46 el zurrón (A2P2) es **una pantalla más de
+// esta máquina**, intercalada entre la portada y la lista cuando hay reserva sin vaciar:
+// `docs/flujo.md` la pone ahí y `portada.acciones` ya trae el destino resuelto, así que aquí
+// se **obedece** ese destino y no se vuelve a decidir. Que un solo sitio opine sobre si hay
+// zurrón es lo que impide que dos se contradigan.
 //
 // Como en el arranque, **esta capa no decide nada del juego**. Qué bloques hay, qué entradas
 // trae la lista, si se ofrece el estirón, si se puede aceptar y qué dice cada texto sale del
@@ -26,9 +29,10 @@ import { PantallaLoQueHayHoy, PantallaFicha } from './lo-que-hay-hoy.jsx';
 import { PantallaPortada } from './portada.jsx';
 import { PantallaOfrecimiento } from './ofrecimiento.jsx';
 import { PantallaPreparacion } from './preparacion.jsx';
+import { PantallaZurron } from './zurron.jsx';
 
 /** Las pantallas del momento, tal como las encadena `docs/flujo.md`. */
-export const PANTALLAS = Object.freeze(['portada', 'lista', 'ficha', 'preparacion']);
+export const PANTALLAS = Object.freeze(['portada', 'zurron', 'lista', 'ficha', 'preparacion']);
 
 /** La plantilla del catálogo de una entrada de la lista, o un error que la nombra. */
 function plantillaDe(id) {
@@ -73,6 +77,7 @@ export function PantallaAntesDeSalir({
   alEcharElTelon = null,
   alAbrirPuerta = null,
   alZurron = null,
+  alSeguirDelZurron = null,
 }) {
   if (!preparacion || typeof preparacion.prepara !== 'function') {
     throw new Error(
@@ -86,6 +91,9 @@ export function PantallaAntesDeSalir({
   const [lista, setLista] = useState(null);
   const [preparado, setPreparado] = useState(null);
   const [refresco, setRefresco] = useState(0);
+  // Lo que compuso el núcleo para A2P2, mientras se está en ella. No se guarda más allá:
+  // el zurrón se lee una vez y se va.
+  const [loDelZurron, setLoDelZurron] = useState(null);
 
   const mapaId = mundo?.mapaId ?? null;
   const peticion = useMemo(() => ({
@@ -177,6 +185,12 @@ export function PantallaAntesDeSalir({
    * y, si no lo está, falla con «su telón ya se echó». Quien la cierra es el cierre, en su
    * paso 9, y las tres vías entran por la misma puerta (`bucle-jugable.md` §8).
    */
+  /** Abrir «lo que hay hoy». Es el destino de dos puertas y por eso vive en un solo sitio. */
+  const abreLaLista = useCallback(() => {
+    setLista(componeLoQueHayHoy(peticion));
+    setPantalla('lista');
+  }, [peticion]);
+
   const cierra = useCallback(() => {
     setRefresco((n) => n + 1);
     setPantalla('portada');
@@ -209,15 +223,49 @@ export function PantallaAntesDeSalir({
         portada={portada}
         alVerQueSeCuenta={() => {
           const accion = portada.acciones.find((a) => a.id === 'ver-que-se-cuenta');
-          if (accion.destino === 'zurron' && alZurron) return alZurron();
-          setLista(componeLoQueHayHoy(peticion));
-          setPantalla('lista');
+          if (accion.destino !== 'zurron' || !alZurron) return abreLaLista();
+          // El destino lo trajo la portada y aquí no se vuelve a decidir. Lo único que se
+          // decide es qué hacer con lo que el núcleo devuelva: con entradas, la pantalla;
+          // sin entradas pero con algo que vaciar, se vacía sin enseñar nada y sin llamar a
+          // nadie; y si no hay nada, la lista de siempre.
+          void Promise.resolve(alZurron())
+            .then((abierto) => {
+              if (abierto?.hay) {
+                setLoDelZurron(abierto.zurron);
+                setPantalla('zurron');
+                return;
+              }
+              if (abierto?.vaciar && alSeguirDelZurron) alSeguirDelZurron(0);
+              abreLaLista();
+            })
+            // Que el zurrón no se pueda abrir no deja a nadie encerrado en la portada: se
+            // sigue a lo que hay hoy, que es lo que la puerta prometía.
+            .catch(() => abreLaLista());
         }}
         alSalirSinMas={() => { void echaAAndar({ conAventura: false }); }}
         alSeguir={() => { void echaAAndar({ conAventura: true, retomada: true }); }}
         // La misma puerta en otro sitio: dispara el mismo cierre que llegar a casa.
         alDejarloAqui={() => cierra()}
         alAbrirPuerta={alAbrirPuerta}
+      />
+    );
+  }
+
+  // A2P2, el zurrón: **un paso obligado del recorrido y no una tarjeta**. Una sola acción,
+  // ninguna manera de saltarlo y ninguna entrada tocable; lo que se pinta lo compuso el
+  // núcleo y aquí no se calcula nada.
+  if (pantalla === 'zurron') {
+    return (
+      <PantallaZurron
+        zurron={loDelZurron}
+        alSeguir={() => {
+          // El vaciado ocurre **al confirmar** y no al componer: cerrar la app antes de
+          // pasar por aquí devuelve el mismo zurrón la próxima vez, que es lo que se
+          // decidió. `narrados` es cuántas entradas se llegaron a enseñar.
+          if (alSeguirDelZurron) alSeguirDelZurron(loDelZurron?.entradas?.length ?? 0);
+          setLoDelZurron(null);
+          abreLaLista();
+        }}
       />
     );
   }

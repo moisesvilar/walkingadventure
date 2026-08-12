@@ -33,7 +33,7 @@ const FILETE = '#8a6d34';
 const PUNTEADO = '#d9d2be';
 
 /** Una fila. Los tres tipos se pintan aquí y no hay un cuarto camino. */
-function Fila({ fila, sans, alTocar, alCambiar }) {
+function Fila({ fila, sans, aviso, alTocar, alCambiar }) {
   const encendida = fila.valor === PALABRAS_DE_INTERRUPTOR.si;
   const cuerpo = (
     <View style={estilos.fila}>
@@ -54,7 +54,17 @@ function Fila({ fila, sans, alTocar, alCambiar }) {
 
   // Un interruptor cambia en el sitio y no abre nada, así que no es pulsable entero.
   if (fila.tipo === 'interruptor') {
-    return <View testID={fila.testid} accessibilityLabel={fila.id}>{cuerpo}</View>;
+    return (
+      <View testID={fila.testid} accessibilityLabel={fila.id}>
+        {cuerpo}
+        {/* La línea que aparece **solo** cuando el permiso se ha denegado o revocado. En
+            voz de aplicación —el único sitio del juego donde eso está permitido—, del color
+            tenue de los valores y **sin ningún control dentro**: no ofrece ir a los ajustes
+            del sistema, no ofrece reintentar y no insiste después. El texto lo trae quien
+            sabe por qué no se pudo; aquí no se redacta ninguno. */}
+        {aviso ? <Text testID={aviso.testid} style={[estilos.aviso, sans]}>{aviso.texto}</Text> : null}
+      </View>
+    );
   }
   return (
     <Pressable testID={fila.testid} accessibilityLabel={fila.id} onPress={alTocar ? () => alTocar(fila.id) : null}>
@@ -66,9 +76,12 @@ function Fila({ fila, sans, alTocar, alCambiar }) {
 /**
  * @param {object} props
  *   `ajustes` lo que devuelve `componeAjustes`; `alVolver` la flecha de atrás;
- *   `alAbrirFila` una fila de valor o una puerta; `alCambiarInterruptor` un interruptor.
+ *   `alAbrirFila` una fila de valor o una puerta; `alCambiarInterruptor` un interruptor;
+ *   `aviso` la línea que va bajo la fila que no se pudo encender, con su localizador y el
+ *   identificador de la fila a la que pertenece. Es `{ texto, testid, fila }` o nada: la
+ *   pantalla no decide cuándo aparece ni qué dice.
  */
-export function PantallaAjustes({ ajustes, alVolver = null, alAbrirFila = null, alCambiarInterruptor = null }) {
+export function PantallaAjustes({ ajustes, aviso = null, alVolver = null, alAbrirFila = null, alCambiarInterruptor = null }) {
   const sans = { fontFamily: familiaDe(ajustes.registro) };
   const texto = (id) => ajustes.textos.find((t) => t.id === id).texto;
 
@@ -87,7 +100,17 @@ export function PantallaAjustes({ ajustes, alVolver = null, alAbrirFila = null, 
             <View key={grupo.id} testID={TESTIDS.grupo} accessibilityLabel={grupo.id} style={estilos.grupo}>
               <Text style={[estilos.tituloDeGrupo, sans]}>{grupo.titulo}</Text>
               {grupo.filas.map((fila) => (
-                <Fila key={fila.id} fila={fila} sans={sans} alTocar={alAbrirFila} alCambiar={alCambiarInterruptor} />
+                <Fila
+                  key={fila.id}
+                  fila={fila}
+                  sans={sans}
+                  // El aviso va bajo **su** fila y no bajo cualquiera: lo dice el
+                  // identificador que trae, y sin él una línea de una fila se leería como si
+                  // fuera de otra.
+                  aviso={aviso && aviso.fila === fila.id ? aviso : null}
+                  alTocar={alAbrirFila}
+                  alCambiar={alCambiarInterruptor}
+                />
               ))}
             </View>
           ))}
@@ -118,4 +141,7 @@ const estilos = StyleSheet.create({
   },
   etiqueta: { flexShrink: 1, fontSize: 14, color: TINTA },
   valor: { fontSize: 13, color: LAPIZ },
+  // Del color tenue de los valores y con aire arriba: es una línea que se lee bajo la fila,
+  // no una descripción de la fila. Sin ningún control dentro.
+  aviso: { fontSize: 13, lineHeight: 19, color: LAPIZ, marginTop: -4, marginBottom: 10 },
 });

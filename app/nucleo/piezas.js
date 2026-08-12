@@ -121,6 +121,7 @@ import {
   vaciaElZurron,
 } from '@walkingadventure/nucleo/partida/zurron.js';
 import { AJUSTES_DE_ORIGEN, cambiaAjuste } from '@walkingadventure/nucleo/partida/ajustes.js';
+import { PRODUCTORES_DE_LA_PARTIDA, creaMotorDeLaPartida } from '@walkingadventure/nucleo/partida/motor.js';
 import {
   abreSalida,
   dejarloAqui,
@@ -250,6 +251,24 @@ export const NUCLEO_DEL_ZURRON = Object.freeze({
   ACCIONES: ACCIONES_DEL_ZURRON,
   TOPE_DE_ENTRADAS,
   MOTIVOS_SIN_ZURRON,
+});
+
+/**
+ * Lo que `creaMotorDelMapaActivo` enumera en su `DEL_NUCLEO`, ni una función más.
+ *
+ * SPEC-046 entra por la misma puerta y por lo mismo (§6u): que el motor cuelgue de la
+ * semilla de la partida y del mapa activo, que sus dos productores sean los que el paquete
+ * declara y en su orden, que lo que un paso produce entre en las áreas vivas y sobreviva a
+ * congelar, y que sin mapa levantado no se monte ninguno tienen que poder leerse desde
+ * `node --test` sin resolver nada instalado.
+ *
+ * `PRODUCTORES_DE_LA_PARTIDA` viaja aquí y no se importa dentro de la orquestación porque es
+ * lo que **se lee y no se elige**: el orden de los productores lo fija el paquete, y
+ * enumerarlo aparte en la app sería una segunda lista que se desincroniza.
+ */
+export const NUCLEO_DEL_MOTOR_DE_LA_PARTIDA = Object.freeze({
+  creaMotorDeLaPartida,
+  PRODUCTORES_DE_LA_PARTIDA,
 });
 
 /** Lo que `creaPasosDeFondo` enumera en su `DEL_NUCLEO`, ni una función más. */
