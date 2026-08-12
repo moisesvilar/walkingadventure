@@ -45,7 +45,8 @@
         }
       ],
       "./plugins/retira-permisos-prohibidos.js",
-      "react-native-health-connect"
+      "react-native-health-connect",
+      "./plugins/lo-que-exige-health-connect.js"
     ]
   }
 }

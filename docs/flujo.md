@@ -6,7 +6,7 @@ Es la vista que ningún artefacto por separado puede dar: cada uno dibuja un mom
 
 **Se verifica solo.** `node scripts/verifica-flujo.mjs` extrae las pantallas de los seis HTML de `docs/pantallas/` y comprueba que el diagrama las contiene todas, sin sobrantes ni sueltas. Si se añade una pantalla a un artefacto, el script falla hasta que aparezca aquí.
 
-**Lectura de las aristas.** Línea continua es un paso que ocurre; línea punteada es una relación que no es un paso: volver atrás, una equivalencia entre pantallas, o algo que se desbloquea. Los rombos son los tres puntos donde el camino se bifurca por el estado del mundo y no por lo que el jugador toque.
+**Lectura de las aristas.** Línea continua es un paso que ocurre; línea punteada es una relación que no es un paso: volver atrás, una equivalencia entre pantallas, o algo que se desbloquea. Los rombos no son pantallas: tres de ellos son los puntos donde el camino se bifurca por el estado del mundo y no por lo que el jugador toque, y el cuarto —`RAZON`— es la única entrada que no viene de dentro del juego.
 
 ```mermaid
 flowchart TD
@@ -69,6 +69,9 @@ flowchart TD
   LLEGA{"pararse dentro del<br/>geofence de un sitio"}
   CIERRA{"qué hay debajo<br/>del visor"}
   NUCLEO{"¿el sitio es<br/>un núcleo?"}
+
+  %% ————— Y la única entrada que no viene de dentro del juego —————
+  RAZON{"el sistema pregunta<br/>por qué se piden<br/>los permisos de salud"}
 
   %% ————— Las aristas: acción que se pulsa o condición que la hace existir —————
   A1P1 -->|"Seguir"| A1P2
@@ -165,6 +168,8 @@ flowchart TD
   A6P6 -->|"Empezar de nuevo"| A6P7
   A6P7 -.->|"Dejarlo como está"| A6P6
   A6P7 -->|"Guardar una copia primero, o Borrar sin guardar nada"| A1P1
+  RAZON -->|"razón de permisos de Health Connect, con partida lista · el sistema abre walkingadventure://razon-de-permisos, y cualquier app puede abrirlo"| A6P6
+  RAZON -->|"sin partida, o con el arranque a medias · se cae al arranque de siempre y no se monta A6P6 sobre una partida que no existe"| A1P1
 
   classDef descartada stroke-dasharray: 5 4,opacity:0.55;
   class A3P7 descartada;
@@ -174,7 +179,9 @@ flowchart TD
 
 **El bolsillo es el centro de gravedad.** *Pantalla 1 · artefacto 3* es el nodo con más aristas de todo el diagrama, y es la pantalla que está diseñada para no mirarse. Todo lo que ocurre en la calle sale de ahí y vuelve ahí; el resto de los momentos son paréntesis entre dos ratos de andar.
 
-**Solo hay tres rombos**, y ninguno es una pregunta al jugador: el sitio al que llegas, lo que hay debajo del visor y si el sitio es un núcleo. Las bifurcaciones de este juego las decide el mundo y el jugador decide con las piernas, que es lo que `bucle-jugable.md` §3 quería.
+**Solo hay tres bifurcaciones**, y ninguna es una pregunta al jugador: el sitio al que llegas, lo que hay debajo del visor y si el sitio es un núcleo. Las bifurcaciones de este juego las decide el mundo y el jugador decide con las piernas, que es lo que `bucle-jugable.md` §3 quería.
+
+**Y una entrada desde fuera, una sola.** `RAZON` es el sistema preguntando por qué se piden los permisos de salud, y aterriza en los ajustes porque allí está escrita la respuesta —la fila de contar los pasos y su línea de aviso—, no en una pantalla nueva. Llega como enlace profundo (`walkingadventure://razon-de-permisos`, que traduce el intento del sistema en `MainActivity`), así que **cualquier app instalada puede abrirlo**: es superficie pública y por eso la condición va escrita en la arista. Con partida lista lleva a A6P6; sin ella se cae al arranque, porque montar los ajustes sobre una partida que no existe sería enseñar una pantalla de la nada.
 
 **El artefacto 3 casi no tiene aristas hacia dentro de sí mismo.** Sus pantallas cuelgan de la 1 y vuelven a la 1, sin encadenarse entre ellas: es la forma que toma en un diagrama la regla de que en marcha no hay ni un control tocable.
 

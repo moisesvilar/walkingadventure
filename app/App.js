@@ -61,6 +61,7 @@ import { DONDE, levantaElMapaDeAqui, resuelveDondeEstas } from './mapa/donde-est
 import { PUNTO_DEL_ANCLAJE } from './mapa/primera-lista.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
 import { leeGancho, leeMetrosDeFondo } from './plataforma/gancho.js';
+import { esRazonDePermisos } from './plataforma/razon-de-permisos.js';
 import { esPuertaDeDesarrollo } from './plataforma/puerta-de-desarrollo.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
@@ -116,6 +117,10 @@ function identidadDeLaSalida(partida) {
 export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
   const [metrosDelGancho, setMetrosDelGancho] = useState(SIN_METROS_DE_GANCHO);
+  // Si el sistema ha preguntado por qué se piden los permisos de salud. No es una pantalla:
+  // es una entrada que aterriza en una que ya existe, y por eso vive como una petición
+  // pendiente de aplicar y no como un momento más de la máquina.
+  const [razonDePermisos, setRazonDePermisos] = useState(false);
   // El almacén duradero, cableado **aquí y una sola vez**: es lo que hace que cerrar la
   // app deje de perder la partida. Si el sistema de ficheros no estuviera, esto lanza y
   // la app no arranca, que es lo que la spec pide en lugar de caer al de memoria: una
@@ -686,6 +691,12 @@ export function App() {
       // dos enlaces con anfitriones distintos y se pueden usar por separado o encadenados
       // —abrir la puerta y después poner una capacidad en rojo—, que es como se usa.
       if (esPuertaDeDesarrollo(url, EN_DESARROLLO) && vivo) setEnPuertaDeDesarrollo(true);
+      // «¿Por qué me pides esto?». Llega como enlace profundo porque el plugin traduce el
+      // intento del sistema —la acción a secas no llega a JavaScript—, y a partir de aquí es
+      // navegación de la app y se decide **aquí**, que es donde las guardas lo ven. Se
+      // guarda y lo aplica el efecto de abajo: el enlace puede llegar antes de que se sepa
+      // si hay partida, y A6P6 presupone una.
+      if (esRazonDePermisos(url) && vivo) setRazonDePermisos(true);
       // Los metros de fondo del gancho, que **no son navegación**: son una fuente de metros
       // y entran por el mismo camino que los de una lectura real, con el mismo tope y
       // respetando el interruptor. Se guardan aquí y los acredita el efecto de abajo, que es
@@ -705,6 +716,23 @@ export function App() {
       suscripcion.remove();
     };
   }, []);
+
+  /**
+   * Lleva la pregunta del sistema a A6P6, **con su guarda**.
+   *
+   * La guarda es la mitad de la decisión y no un detalle de implementación: el sistema puede
+   * disparar esto con la app recién instalada o con el arranque a medias, y A6P6 presupone
+   * partida. Sin ella no se monta nada sobre una partida que no existe y se cae al arranque
+   * de siempre, que es lo que la arista de `docs/flujo.md` declara.
+   *
+   * Se espera a que la apertura resuelva: mientras no se sabe si hay partida, decidir sería
+   * decidir a cara o cruz.
+   */
+  useEffect(() => {
+    if (!razonDePermisos || apertura.estado === APERTURAS.ABRIENDO) return;
+    if (partida) setConsulta('ajustes');
+    setRazonDePermisos(false);
+  }, [razonDePermisos, apertura, partida]);
 
   /**
    * Acredita los metros que pidió el gancho, **por el camino de siempre**.
