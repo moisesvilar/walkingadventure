@@ -265,7 +265,17 @@ export function migra(doc, { cadena = CADENA_DEL_FORMATO, donde = 'el documento'
   // una migración de prueba llega a una versión que ningún esquema describe, y ese es
   // justo el punto de que se pueda ejercitar hoy.
   if (hasta === VERSION_FORMATO) {
-    escribe(actual, esquemaDe(actual.clase), `${donde} migrado de la versión ${desde} a la ${hasta}`);
+    // El esquema se resuelve **con el documento nombrado**: `esquemaDe` lanza por su cuenta
+    // cuando la clase no existe, y ese error no sabe de qué documento venía. Con varios
+    // documentos migrándose a la vez —los dos de la partida y los del mapa— «clase de
+    // documento desconocida» sin decir cuál no se puede arreglar leyéndolo.
+    let esquema;
+    try {
+      esquema = esquemaDe(actual.clase);
+    } catch (e) {
+      throw new Error(`${donde}: ${e.message}`);
+    }
+    escribe(actual, esquema, `${donde} migrado de la versión ${desde} a la ${hasta}`);
   }
   return congelaHondo({
     doc: actual,
