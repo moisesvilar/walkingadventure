@@ -35,6 +35,17 @@ export const DEL_NUCLEO = Object.freeze([
 ]);
 
 /**
+ * Contra qué sitios marcados se casteó la aventura en curso, leído del área.
+ *
+ * Es un campo del área `aventuras` y se lee tal cual, como `identidadDeLaSalidaViva` lee la
+ * salida abierta: sin aventura en curso la lista está vacía, que es la respuesta correcta y no
+ * un valor por defecto. De aquí sale el mundo con el que se recupera su cadena.
+ */
+export function descartesDeLaAventura(aventuras) {
+  return (aventuras?.descartesDelCasting ?? []).slice();
+}
+
+/**
  * Monta el motor de la aventura en curso de una salida.
  *
  * @param {object} piezas

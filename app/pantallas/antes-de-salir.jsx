@@ -13,7 +13,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { acepta as aceptaLaAventuraEnElMotor } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
-import { vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
+import { anclajesDe, vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
 import { componeFicha, componeLoQueHayHoy, aceptaElEstironDeHoy, aceptaLaEntrada } from '@walkingadventure/nucleo/partida/lo-que-hay-hoy.js';
 import { estadoDeMapa } from '@walkingadventure/nucleo/partida/pasos.js';
 import { componePortada } from '@walkingadventure/nucleo/partida/portada.js';
@@ -258,6 +258,10 @@ export function PantallaAntesDeSalir({
               registro,
               dia: calendario.dia(),
               paso: estadoDeMapa(estado.pasos, mapaId).n,
+              // **Contra qué sitios marcados se casteó**, congelado con la aventura. Sin esto,
+              // marcar un sitio a mitad de camino le cambiaba la cadena a lo que ya estabas
+              // andando, y a veces la dejaba sin castear y la salida encallada.
+              descartes: anclajesDe(vistaDeDescartes(estado.anclajes, mapaId)),
             });
           }
           setPantalla('preparacion');

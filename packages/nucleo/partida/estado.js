@@ -282,6 +282,11 @@ const AREA_ENTREGAS = campos({
  */
 const AREA_AVENTURAS = campos({
   abierta: uno(['nulo', campos({ salida: 'texto', mapa: 'texto', aventura: 'texto?', sitio: 'texto?' })]),
+  // Contra qué sitios marcados se casteó la aventura en curso (SPEC-049). Va al lado y no
+  // dentro de `enCurso` porque la cadena de migraciones introduce campos por su ruta y no
+  // sabe bifurcar: dentro, el paso 1→2 le habría puesto un objeto a toda partida con
+  // `enCurso` en nulo y la habría dejado fuera de este mismo esquema.
+  descartesDelCasting: lista('texto'),
   enCurso: uno(['nulo', campos({
     aventura: 'texto',
     plantilla: 'texto',

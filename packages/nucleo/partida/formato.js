@@ -13,7 +13,7 @@
  * esta entrega garantiza es que el campo existe desde el primer documento, porque
  * un documento escrito sin versión ya no se puede migrar nunca.
  */
-export const VERSION_FORMATO = 1;
+export const VERSION_FORMATO = 2;
 
 /**
  * Con qué versión del generador se escribió un documento. No decide nada hoy:

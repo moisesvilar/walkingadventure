@@ -31,7 +31,7 @@
 //     inyectado desde `app/nucleo/piezas.js`.
 
 /** Lo que esto le pide al generador, enumerado. Ni una función más. */
-export const DEL_NUCLEO = Object.freeze(['castAll', 'vistaDeDescartes', 'hayDescartes']);
+export const DEL_NUCLEO = Object.freeze(['castAll', 'vistaDeDescartes', 'vistaDeAnclajes', 'hayDescartes']);
 
 /**
  * La huella de un conjunto de descartes: **los anclajes marcados y nada más**.
@@ -58,11 +58,29 @@ export function creaElCasting({ nucleo }) {
     throw new Error(`al núcleo inyectado le faltan ${faltan.length} pieza(s) del casting vigente: ${faltan.join(', ')}`);
   }
 
-  // **Una sola ranura**, y es de sobra: la huella cambia cuando alguien marca o desmarca un
-  // sitio —un gesto raro, y siempre desde otra pantalla— y el mapa activo es uno. Un caché con
-  // varias entradas necesitaría una política de desalojo para un problema que no existe, y sin
-  // memoria ninguna se recastearía el catálogo entero en cada repintado de la portada.
-  let ranura = null;
+  // La memoria, por `(mapaId, huella de los descartes)`. **Dos huellas vivas como mucho**: la
+  // de ahora, que es contra la que se compone la lista, y la que la aventura en curso congelo
+  // al aceptarse, que solo se separa de la otra si alguien marca un sitio a mitad de camino.
+  // Con el tope en cuatro sobra para las dos y para un cambio de mapa, y desalojar la mas
+  // vieja es una politica de una linea; sin memoria ninguna se recastearia el catalogo entero
+  // en cada repintado de la portada, que son 158,7 ms medidos en `urbano-denso`.
+  const TOPE = 4;
+  const memoria = new Map();
+
+  const recuerda = (clave, documento, hazlo) => {
+    const suya = memoria.get(clave);
+    if (suya && suya.documento === documento) return suya.mundo;
+    const mundo = hazlo();
+    memoria.set(clave, { documento, mundo });
+    while (memoria.size > TOPE) memoria.delete(memoria.keys().next().value);
+    return mundo;
+  };
+
+  /** El mundo con el casting que sale de una vista de descartes. El mismo si no hay ninguno. */
+  const conLosDescartes = (mundo, descartes, clave) => {
+    if (!nucleo.hayDescartes(descartes)) return mundo;
+    return recuerda(clave, mundo, () => Object.freeze({ ...mundo, casting: nucleo.castAll(mundo, mundo.seed, { descartes }) }));
+  };
 
   /**
    * El mundo con su casting vigente dentro.
@@ -87,29 +105,46 @@ export function creaElCasting({ nucleo }) {
       throw new Error(`el casting vigente se resuelve sobre un mapa y llegó ${JSON.stringify(mapaId) ?? String(mapaId)}: lo marcado en un mapa no dice nada de otro`);
     }
 
-    const descartes = nucleo.vistaDeDescartes(anclajes, mapaId);
-    // Sin ningún sitio marcado, el casting del documento **ya es el vigente**. No se recastea,
-    // no se copia el mundo y no se toca la ranura: el camino normal cuesta exactamente lo que
+    // Sin ningun sitio marcado, el casting del documento **ya es el vigente**. No se recastea,
+    // no se copia el mundo y no se toca la memoria: el camino normal cuesta exactamente lo que
     // costaba antes de esta costura.
-    if (!nucleo.hayDescartes(descartes)) return mundo;
+    const descartes = nucleo.vistaDeDescartes(anclajes, mapaId);
+    return conLosDescartes(mundo, descartes, `${mapaId}#${huellaDeDescartes(descartes)}`);
+  };
 
-    const clave = `${mapaId}${huellaDeDescartes(descartes)}`;
-    if (ranura && ranura.clave === clave && ranura.documento === mundo) return ranura.mundo;
-
-    const casting = nucleo.castAll(mundo, mundo.seed, { descartes });
-    ranura = { clave, documento: mundo, mundo: { ...mundo, casting } };
-    return ranura.mundo;
+  /**
+   * El mundo con el casting **de una aventura ya aceptada**: el que sale de los sitios que
+   * estaban marcados cuando se acepto, y no de los de ahora.
+   *
+   * Es la novena costura. Marcar un sitio sigue estando disponible siempre y sigue siendo
+   * reversible; lo que no puede es cambiarle la cadena a lo que ya estas andando
+   * (`docs/flujo.md`, A4P8: «Marcarlo - reversible, y anota sin resembrar»). Medido antes de
+   * coserlo: marcando **un solo sitio** a mitad de camino, de las 19 aventuras de `suelo-250m`
+   * 9 dejaban de castear y la salida quedaba encallada, y en `costero` 14 de 29 volvian con
+   * otra cadena.
+   */
+  const mundoDeLaAventura = ({ mundo, marcados }) => {
+    if (!mundo) return null;
+    if (!Array.isArray(marcados)) {
+      throw new Error(
+        'la cadena de una aventura aceptada se recupera contra los sitios que estaban marcados cuando se acepto, y no ha llegado '
+        + `ninguna lista (${JSON.stringify(marcados) ?? String(marcados)}): recuperarla contra los de ahora le cambiaria el lazo a lo que ya se esta andando`,
+      );
+    }
+    const descartes = nucleo.vistaDeAnclajes(marcados);
+    return conLosDescartes(mundo, descartes, `aventura#${huellaDeDescartes(descartes)}`);
   };
 
   return {
     mundoVigente,
+    mundoDeLaAventura,
 
     /** El casting vigente de un mapa, suelto. Es lo mismo que `mundoVigente(...).casting`. */
     vigente(peticion) {
       return mundoVigente(peticion)?.casting ?? [];
     },
 
-    /** Si la última resolución tuvo que recastear. Se publica para poder medir el coste. */
-    recasteado: () => ranura !== null,
+    /** Cuantas huellas hay memorizadas. Se publica para poder medir el coste. */
+    memorizadas: () => memoria.size,
   };
 }

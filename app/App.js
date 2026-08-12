@@ -25,7 +25,7 @@ import { creaCopia } from './datos/copia.js';
 import { creaEmpezarDeNuevo } from './datos/empezar-de-nuevo.js';
 import { APERTURAS, creaPartidaGuardada } from './datos/partida-guardada.js';
 import { mundoDeLaCelda, mundoDeLaPartida } from './mapa/mundo-guardado.js';
-import { creaLaAventuraEnCurso } from './marcha/aventura.js';
+import { creaLaAventuraEnCurso, descartesDeLaAventura } from './marcha/aventura.js';
 import { creaElCasting } from './marcha/casting.js';
 import { identidadDeLaSalidaViva } from './marcha/identidad.js';
 import { creaLasLlegadas, repartoDeLaAventuraEnCurso } from './marcha/llegadas.js';
@@ -324,6 +324,25 @@ export function App() {
     return documento === partida.mundo.documento ? partida.mundo : { ...partida.mundo, documento };
   }, [partida, elCasting]);
 
+  /**
+   * El mapa **con el casting de la aventura en curso**: el que sale de los sitios que estaban
+   * marcados cuando se aceptó, y no de los de ahora.
+   *
+   * Son dos mundos y la diferencia es la novena costura, así que conviene decirla en voz alta:
+   * `elMundo` lleva lo marcado **ahora** y de él salen la lista de hoy y lo que se acepta;
+   * este lleva lo marcado **cuando se aceptó** y de él salen la cadena que se recorre y la que
+   * se recupera al reabrir la app. En el momento de aceptar son el mismo, porque la huella se
+   * congela ahí; solo se separan si alguien marca un sitio a mitad de camino, que es
+   * exactamente lo que no puede cambiarle el lazo a lo que ya se está andando.
+   */
+  const elMundoDeLaAventura = useMemo(() => {
+    if (!partida || !elMundo) return null;
+    return elCasting.mundoDeLaAventura({
+      mundo: partida.mundo.documento ?? null,
+      marcados: descartesDeLaAventura(partida.estado.aventuras),
+    });
+  }, [partida, elMundo, elCasting]);
+
   /** La partida con ese mismo mapa dentro. Una sola verdad viaja a las pantallas. */
   const laPartida = useMemo(
     () => (partida && elMundo ? { ...partida, mundo: elMundo } : partida),
@@ -346,10 +365,10 @@ export function App() {
     let vivo = true;
     montaLaSalida({
       salidas: partida.estado.salidas,
-      origen: elMundo.documento?.origin ?? null,
+      origen: elMundoDeLaAventura?.origin ?? null,
       // El documento del mundo, del que salen los geofences: de ellos cuelgan la cadencia
       // del muestreo y el sitio bajo la marca de posición.
-      mundo: elMundo.documento ?? null,
+      mundo: elMundoDeLaAventura ?? null,
       tramo: partida.estado.personaje?.tramo ?? null,
       alCambiar: () => repintaLaSalida((n) => n + 1),
       // La capa de llegadas de la salida, montada sobre **su** detector. Se monta aquí y no
@@ -366,10 +385,10 @@ export function App() {
         // que resuelve el beat al cerrar su paso y lo que compone A4P3 y A4P4.
         aventura: creaLaAventuraEnCurso({
           nucleo: NUCLEO_DE_LA_AVENTURA_EN_CURSO,
-          mundo: elMundo.documento,
+          mundo: elMundoDeLaAventura,
           estado: partida.estado,
           reparto: repartoDeLaAventuraEnCurso({
-            mundo: elMundo.documento,
+            mundo: elMundoDeLaAventura,
             aventuras: partida.estado.aventuras,
           }),
           // El reloj de pared, que es la única entrada de la escena que no puede salir del
@@ -378,7 +397,7 @@ export function App() {
           // de franja como si fuera dentro sin saberlo (§6h).
           reloj: relojDePared(),
         }),
-        mundo: elMundo.documento,
+        mundo: elMundoDeLaAventura,
         cupos: elMundo.cupos ?? null,
         mapaId: mapaId ?? elMundo.mapaId,
         salida: laQueSeAbre,
@@ -391,7 +410,7 @@ export function App() {
         // llegaba con el beat dentro en nulo (§10g). La cadena no se persiste: el casting es
         // determinista sobre el documento y el estado ya guarda de qué plantilla es.
         reparto: repartoDeLaAventuraEnCurso({
-          mundo: elMundo.documento,
+          mundo: elMundoDeLaAventura,
           aventuras: partida.estado.aventuras,
         }),
         dia: creaCalendario({ arrancadaEn: partida.arrancadaEn }).dia(),

@@ -60,9 +60,18 @@ export const HECHOS_QUE_EMITE = congelaHondo(['aventura-aceptada', 'aventura-cer
  */
 export const HECHO_QUE_NADIE_EMITE = 'decision-en-aventura';
 
-/** El registro de aventuras de una partida recién creada: ninguna en curso y ninguna cerrada. */
+/**
+ * El registro de aventuras de una partida recién creada: ninguna en curso, ninguna cerrada y
+ * **ningún sitio marcado contra el que se casteara nada**.
+ *
+ * `descartesDelCasting` es de SPEC-049 y va al lado de `enCurso` y no dentro, por una razón de
+ * migración medida: la cadena de pasos introduce campos por su ruta y no sabe bifurcar, así
+ * que una ruta dentro de `enCurso` le habría puesto un objeto a toda partida que lo tenía en
+ * nulo —o sea a casi todas— y las habría dejado fuera del esquema. Es de la aventura en curso
+ * y se vacía con ella.
+ */
 export function estadoDeAventuras() {
-  return { enCurso: null, cerradas: [] };
+  return { enCurso: null, cerradas: [], descartesDelCasting: [] };
 }
 
 function exigeRegistroDeAventuras(estado) {
@@ -93,6 +102,16 @@ function exigeRegistroDeHechos(registro, quien) {
 export function aventuraEnCurso(estado) {
   const enCurso = exigeRegistroDeAventuras(estado).enCurso;
   return enCurso ? congelaHondo({ ...enCurso, resueltos: enCurso.resueltos.map((r) => ({ ...r })) }) : null;
+}
+
+/**
+ * Los sitios que estaban marcados cuando se aceptó la aventura en curso.
+ *
+ * Es contra lo que hay que recastear para recuperar su cadena, y por eso se guarda: el mundo
+ * congelado más esta lista determinan la cadena entera, beats incluidos.
+ */
+export function descartesDelCasting(estado) {
+  return congelaHondo(exigeRegistroDeAventuras(estado).descartesDelCasting.slice());
 }
 
 /** Si hay una aventura en curso. */
@@ -138,7 +157,7 @@ function exigeCadena(aventura) {
  * Con una ya en curso **falla nombrándola**: hay una salida y una aventura, y aceptar la
  * segunda en silencio perdería la primera.
  */
-export function acepta(estado, { aventura, mapaId, registro, dia, paso }) {
+export function acepta(estado, { aventura, mapaId, registro, dia, paso, descartes = [] }) {
   const suyo = exigeRegistroDeAventuras(estado);
   const id = exigeTexto(aventura?.id, 'la aventura que se acepta');
   const plantilla = exigeTexto(aventura?.plantilla, `la plantilla de la aventura "${id}"`);
@@ -151,7 +170,20 @@ export function acepta(estado, { aventura, mapaId, registro, dia, paso }) {
       'hay una salida y una aventura, y la anterior se cierra —terminada o a medias— antes de aceptar otra',
     );
   }
+  if (!Array.isArray(descartes)) {
+    throw new Error(
+      `la aventura "${id}" se acepta declarando contra qué sitios marcados se casteó y llegó ${JSON.stringify(descartes) ?? String(descartes)}: ` +
+      'es la lista de anclajes, y la vacía significa que no había ninguno',
+    );
+  }
   suyo.enCurso = { aventura: id, plantilla, mapa, beatEnCurso: 1, resueltos: [] };
+  // **Contra qué se casteó**, congelado aquí y para siempre. Desde que la lista de hoy
+  // respeta los sitios marcados, el casting se rehace cuando los hay; sin esta foto, marcar
+  // un sitio a mitad de camino le cambiaba la cadena a la aventura que ya estabas andando
+  // —medido: de 19 aventuras de `suelo-250m`, 9 dejaban de castear y la salida quedaba
+  // encallada—. Marcar sigue estando disponible y sigue siendo reversible: lo que no hace es
+  // resembrar lo aceptado (`docs/flujo.md`, A4P8).
+  suyo.descartesDelCasting = descartes.slice().sort();
   anexa(registro, [hecho({ tipo: 'aventura-aceptada', mapa, dia, paso, carga: { aventura: id, plantilla } })]);
   return aventuraEnCurso(suyo);
 }
@@ -275,6 +307,9 @@ export function cierra(estado, { registro, dia, paso, desenlace = null, motivo =
 
   suyo.cerradas = [...suyo.cerradas, cerrada];
   suyo.enCurso = null;
+  // La foto muere con la aventura: sin nada en curso no hay ninguna cadena que sostener, y
+  // dejarla puesta haría que la siguiente se casteara contra los marcados de la anterior.
+  suyo.descartesDelCasting = [];
   return congelaHondo({ ...cerrada, resueltos, conseguido });
 }
 
@@ -294,6 +329,7 @@ export function congelaAventuras(estado) {
         resueltos: enCurso.resueltos.map((r) => ({ n: r.n, via: r.via, variante: r.variante ?? null, objeto: r.objeto ?? null })),
       }
       : null,
+    descartesDelCasting: suyo.descartesDelCasting.slice(),
     cerradas: suyo.cerradas.map((c) => ({
       aventura: c.aventura,
       plantilla: c.plantilla ?? null,
@@ -308,6 +344,19 @@ export function congelaAventuras(estado) {
 /** El registro de vuelta de su documento. */
 export function levantaAventuras(doc) {
   const estado = estadoDeAventuras();
+  // **Se exige y no se supone.** Un documento anterior a SPEC-049 no lo trae, y quien lo pone
+  // es el paso 1→2 de la cadena de migraciones con el valor declarado: la lista vacía, que es
+  // la que tenía de verdad —antes de aquella fila el casting no se rehacía nunca—. Llegar
+  // aquí sin él significa que el documento no pasó por la migración, y eso se dice en vez de
+  // abrirlo a medias con una cadena que podría no ser la suya.
+  if (doc && !Array.isArray(doc.descartesDelCasting)) {
+    throw new Error(
+      'el área de aventuras guardada no declara contra qué sitios marcados se casteó la aventura en curso ' +
+      '("descartesDelCasting"): es un documento anterior a SPEC-049 que no ha pasado por el paso 1→2 de la cadena ' +
+      'de migraciones, y abrirlo sin él recuperaría la cadena contra los sitios marcados de ahora en vez de los suyos',
+    );
+  }
+  estado.descartesDelCasting = (doc?.descartesDelCasting ?? []).map((a) => exigeTexto(a, 'un anclaje marcado del casting de la aventura en curso')).slice().sort();
   const enCurso = doc?.enCurso ?? null;
   if (enCurso) {
     estado.enCurso = {

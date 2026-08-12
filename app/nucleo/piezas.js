@@ -37,7 +37,7 @@ import {
 import { aventuraEnCurso, resuelveBeat } from '@walkingadventure/nucleo/partida/aventura-en-curso.js';
 import { apuntaHaberEstado, libroDePendientes } from '@walkingadventure/nucleo/partida/conocimiento.js';
 import { castAll } from '@walkingadventure/nucleo/quests/casting.js';
-import { hayDescartes, vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
+import { hayDescartes, vistaDeAnclajes, vistaDeDescartes } from '@walkingadventure/nucleo/partida/descartes.js';
 import { identidadDeCara } from '@walkingadventure/nucleo/partida/npcs.js';
 import { vistaDeTenencia } from '@walkingadventure/nucleo/partida/objetos.js';
 import { namesFor } from '@walkingadventure/nucleo/names/index.js';
@@ -368,6 +368,9 @@ export const NUCLEO_DE_LAS_LLEGADAS = Object.freeze({
 export const NUCLEO_DEL_CASTING = Object.freeze({
   castAll,
   vistaDeDescartes,
+  // La vista desde una lista ya resuelta: es la que recupera la cadena de una aventura
+  // aceptada contra los sitios que estaban marcados **cuando se aceptó**.
+  vistaDeAnclajes,
   hayDescartes,
 });
 
