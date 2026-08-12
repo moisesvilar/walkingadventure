@@ -26,6 +26,7 @@ La fuente nativa de salud es dependencia nueva que ninguna spec nombra (`app/pla
 - **El telón por regreso** (§12b): el servicio en primer plano se cae a mitad de salida. Hay hipótesis con hilo barato **que no necesita dispositivo**: `cadenciaDeMuestreo` con una posición en el punto de partida y el índice real de geofences — si devuelve `por-distancia`, la hipótesis tiene pata y pasa a fila. Quien persiga la caída: `adb logcat` filtrado por el task manager desde **antes** de abrir la salida.
 - **El lector de recursos del visor**: sin dueño natural hasta decidir de dónde salen las ilustraciones. Mientras, toda llegada resuelve a ficha o a lo-que-se-cuenta, y `visor.yaml` sigue en la columna.
 - **Decisiones de diseño sin tomar**, en `docs/pendientes.md`: el botón atrás del sistema, abandonar quema la plantilla, y marcar un sitio del lazo en curso no te libra de él.
+- **El salto a iPhone**, que el dueño quiere «más pronto que tarde» en cuanto Android esté verificado: el inventario vivo está en `docs/iphone.md` — lo preparado, las tres decisiones de dependencia que exigirá (HealthKit, App Attest, Actividad en Vivo), los rojos que lo esperan (`empezar-de-nuevo-copia`) y la tabla de procedimientos de aparato que hay que re-medir. Toda fila que fiche algo con forma de iOS lo anota allí; el paso cero es instalar Xcode, que esta máquina no tiene.
 
 ## Cómo se orquesta (el método, destilado de seis filas)
 
