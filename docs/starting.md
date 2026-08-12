@@ -1676,3 +1676,56 @@ La llegada recorrida entera en `wa-pixel`, con las coordenadas escritas: mundo `
 - **El reparto casteado no sobrevive a cerrar la app.** El estado guarda la aventura por su identificador y no su cadena de beats: el mismo día llega, y al reabrir la secuencia conserva su paso de beat pero el beat de dentro se pierde. Persistirlo es decisión de diseño.
 - **RF-QUEST-004 y RF-BUCLE-011 no los entrega esta fila** y pasan a la 49, que es la escena del beat (A4P3/A4P4) y el telón (A5). El checklist lo declara. Se dice porque SPEC-034 y SPEC-036 se cerraron en `done` sin tocar un fichero de `app/`, y una fila que cierra cubriendo un RF que no entregó es un agujero que tarda meses en salir.
 - **Por encima de σ ≈ 20 m de error del fijo la validación deja de sostenerse.** Cubre la calle normal y no el cañón urbano profundo. Es un límite medido, con número, y no una esperanza.
+
+---
+
+# 12-ago-2026 · SPEC-049, las pantallas de la escena y el telón: la fila que descubrió que la aventura no se aceptaba nunca
+
+SPEC-034 y SPEC-036 cerraron en `done` sin tocar un solo fichero de `app/`. Esta fila escribe lo que ninguna de las dos escribió —A4P3, A4P4 y las seis del telón— y, al ir a hacerlo, encuentra que el problema no era que faltaran las pantallas.
+
+## La premisa del encargo se quedaba corta, y por debajo había cinco costuras
+
+El encargo daba por deuda conocida que «el reparto casteado no sobrevive a cerrar la app», y remataba: *mientras el telón se eche en la misma sesión no te toca*. Medido antes de escribir la spec, con grep sobre el repo entero:
+
+1. **`acepta` de `partida/aventura-en-curso.js` no la llamaba nadie.** `aceptaLaEntrada` anotaba la aventura en la salida abierta y nunca en el motor, así que **`estado.aventuras.enCurso` era `null` siempre**, `resuelveBeat` era inalcanzable y `echaElTelon` habría compuesto el telón de un paseo aunque hubieras aceptado una aventura. No es que el beat llegase nulo el segundo día: es que **no había aventura en curso ningún día**.
+2. **`antes-de-salir.jsx` cerraba la salida por su cuenta** con `cierraLaSalida`, y `echaElTelon` exige que siga abierta: fallaba con «su telón ya se echó». El telón era inalcanzable por construcción.
+3. **Dos identidades de salida distintas** sobre dos áreas: `mapa/dN/sN` en `aventuras` (de la 28) y `mapa/sN` en `salidas` (de la 48). El cierre compara una con otra. Ninguna estaba mal en su fila; el defecto nace de que **nadie las cruzó nunca**, porque hasta ahora nadie cerraba una salida contra `echaElTelon`.
+4. **`apuntaHaberEstado` no tenía llamador de producción**, así que la lista de ascensos del telón habría salido siempre vacía y RF-BUCLE-012 no se habría cumplido nunca.
+5. **`lamina.jsx` no pasaba `entintado` ni `telon`** al render, que ya los aceptaba: A5P1 habría pintado el mapa de andar.
+
+Ninguna es una pantalla y las cinco impiden que las pantallas funcionen. El dueño decidió coserlas dentro de la fila, con las once rutas advertidas.
+
+## Un negativo heredado que era falso, y el que no lo era
+
+`decisiones-orquestador.md` §10i afirmaba, «verificado hoy otra vez», que `componeDesenlace` seguía sin existir. **Existe**: `packages/nucleo/quests/desenlace.js` exporta `componeElDesenlace`, `lugarDelDesenlace` y `repuestoDe` desde el commit `aec5efa`, que es el propio arreglo de §6v que la fichó. Lo cierto era otra cosa —que no la llamaba nadie desde `app/`—, y la diferencia importa: construirla habría duplicado la que ya estaba. Está corregido en §10-bis, con la lección que sale de ahí: **un negativo no se hereda, se vuelve a medir o se marca como sospecha**.
+
+El que sí era cierto y esta fila confirma: **`siembraLaCola` no tiene llamador desde `app/`**. El prólogo corre en el dispositivo, produce sus entradas y nadie las encola, así que `atraviesa()` sale siempre por `if (!cola.length)`: **hoy no puede saltar ni un micro-encuentro en un teléfono**. Es de la fila 19 y queda fichado, no arreglado aquí.
+
+## El bucle completo, recorrido en `wa-pixel` con las coordenadas escritas
+
+Es la primera vez que ese recorrido es posible. Mundo `1X9T5E7A039QP61Z@42.40,-8.74`, partida en `42.4035467,-8.7554983` — en metros del mundo, `(-1274, 395)`.
+
+Aventura **«El paquete que no era nada»** (`entrega-sospechosa`), cuatro paradas. **Castrotoño** `(-739, 551)` → A4P3 con su verbo propio, «Aceptar el encargo», y A4P4 nombrando el sitio siguiente. **A Encrucillada do Aforcado do Sur** `(-461, 964)`, verbo «Asomarse». **O Cruce do Aforcado do Solpor** `(-874, 1390)`. Y el cuarto beat **otra vez en Castrotoño**, que es el lazo cerrado y el caso que hacía que ninguna aventura se pudiera terminar antes de §6v. Regreso a `(-1274, 395)`.
+
+Leído del propio aparato con `run-as`, no de la pantalla: `enCurso` deja de ser `null` al aceptar (`beatEnCurso: 1`), las dos áreas comparten ya **la misma identidad** `42.40,-8.74/s1`, los cuatro beats quedan en `resueltos` y `beatEnCurso` pasa a `null`. Al cerrar: `oro: {saldo: 12}`, la aventura en `cerradas` con `comoAcabo: "terminada"` y su desenlace, y una entrada de diario.
+
+El telón entero, en el orden que manda `bucle-jugable.md` §8: **A5P1** «Hoy has ensanchado el mapa» con el mapa entintado y cinco ascensos en palabras del mundo —«Castrotoño · lo conoces»—, **A5P2** con oro 12, el objeto `hule-del-paquete` y «En Castrotoño ya saben quién eres», **A5P3** con el rumor saliendo de Castrotoño y nada más, y **A5P4** con lo propio en primera persona y autoridad `lo-se`.
+
+Y las otras dos variantes: **el paseo sin coger nada** sale mapa y diario, sin desenlace ni rumor; y **A5P1B**, con el mapa ya conocido entero, sale `telon-estado: mapa-sin-tinta` con «Hoy no has visto nada que no supieras · Andaste por sitios tuyos. El mundo, mientras, anduvo lo suyo» — constatación y no reproche, que es la cuerda floja de `accesibilidad.md` §1.
+
+**§10h verificado por las dos puertas**: `telon-cerrar` y `telon-diario` dejan las dos `salida-situacion: cerrada-leida`, y después «Salir a andar sin más» abre una salida nueva de verdad (`42.40,-8.74/s10`, `abierta-con-rotulo`). La app no queda encallada por ninguna de las dos.
+
+## Dos cosas que salieron andando y valen más que las pantallas
+
+**El detector de vehículo hizo su trabajo contra quien lo medía.** El beat 4 no validaba y `marca-posicion` decía `vehiculo`: yo estaba «andando» a 35 m cada 4 s, **31 km/h**. No era un defecto de la fila, era `bucle-jugable.md` §9 apartando el vehículo, y dos minutos quieta lo recuperó solo. Sin leer esa marca se habría reportado como fallo de la fila y se habría «arreglado» algo que funcionaba.
+
+**El sensor se cayó a mitad de salida** sin que nadie lo provocara, y la app respondió como el diseño manda: al reabrir, `abierta-sin-rotulo`, `rotulo-estado: retirado-por-el-sistema` y la tarjeta de a medias con «Seguir con ella» y «Dejarlo aquí». La rama de §9 que nadie había visto funcionar, funcionando.
+
+## `setLocation` de Maestro no es `adb emu geo fix`, y la nota que lo decía manda a reiniciar el emulador para nada
+
+`en-marcha.yaml` declaraba que «`setLocation` de Maestro es `adb emu geo fix`» y que en esta máquina no mueve nada por un mock de `fused_location_provider` **que se quita reiniciando el emulador**. Medido el 12-ago-2026 en la misma pantalla y el mismo minuto, con una salida abierta y la marca viva:
+
+- `maestro test` con `setLocation: {latitude: 42.4090, longitude: -8.7480}` → **EXIT 0 y `marca-posicion` intacta** en `del-mapa:-1274,395:parada`.
+- Acto seguido `adb emu geo fix -8.7480 42.4090` → `marca-posicion` pasa a `del-mapa:-657,1002:ambiguo`.
+
+La conclusión operativa se sostiene —**un flujo de Maestro no puede andar**— pero el motivo no: no son el mismo mecanismo y no se cura reiniciando. Con `geo fix` se han andado dos kilómetros esta misma noche en este mismo emulador.
