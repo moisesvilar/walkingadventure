@@ -27,6 +27,8 @@ Tres sí conviene mirarlos antes de tocar lo que dependa de ellos: **el tamaño 
 
 **Y uno nuevo, que solo apareció al ejecutar los flujos en un dispositivo** (10-ago-2026): **qué hace el botón atrás del sistema en Android**. `docs/flujo.md` declara las vueltas del arranque y la de la ficha a la lista, y nada más; en «Lo que hay hoy» no hay camino declarado de vuelta a la portada. Medido en el emulador: pulsarlo allí **se lleva la app entera** y deja la raíz vacía. En Android el botón existe siempre, así que no decidir es decidir que salga del juego desde cualquier pantalla. No bloquea nada hoy —la prueba dejó de afirmar una transición que el diseño no promete—, pero es de las cosas que se notan el primer día de uso real.
 
+**Dos más que destapó la fila 49 al recorrer el bucle** (12-ago-2026), y que nadie ha decidido en voz alta: **abandonar una aventura la quema para siempre** — cerrar a medias la mete en `cerradas` igual que terminarla, y la memoria de la lista filtra por plantilla, así que en un barrio de tres calles con pocas plantillas el catálogo se agota rápido; puede ser lo que `bucle-jugable.md` §4 quiere, pero no está dicho. Y **marcar «este sitio no pega» en un sitio del lazo que estás andando no te libra de él**: con la huella congelada ya no cambia la cadena —correcto—, pero el juego te sigue mandando allí; qué debería pasar no está decidido.
+
 ## Ideas sin cerrar
 
 Vienen de `docs/ideas.md` y no son compromisos: falta decidir si entran.

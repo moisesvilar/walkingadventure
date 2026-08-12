@@ -562,3 +562,19 @@ Congelar la huella obliga a subir `VERSION_FORMATO` a 2, así que la fila estren
 
 - **`naming.md` dice que los reports van en `test/reports/`; `.gitignore:31` los excluye** con su motivo escrito y veinte tandas de precedente sin ninguno versionado. Se ha seguido el `.gitignore` y el report de esta fila **no va al histórico**. Hay que decidirlo en un sitio y borrarlo del otro.
 - **`escena.yaml` no puede salir de límite declarado**, y su motivo viejo era falso. Lo miden cuatro cosas: el ancla del mapa no la gobierna el flujo, la semilla nace de entropía real sin sitio donde escribirla, **`setLocation` de Maestro sale con código 0 y no mueve el aparato** —medido contra `adb emu geo fix`, que sí lo mueve, en el mismo emulador y sin reiniciarlo— y sin `siembraLaCola` no hay micro-encuentro. Juntas: **qué sitio tiene beat no es reproducible entre tandas.** La nota que decía que se curaba reiniciando el emulador mandaba a perder el rato y está corregida.
+
+## §12 · Lo que la fila 49 dijo al cerrarse
+
+La cosecha más larga hasta ahora, como corresponde a la fila más dura. Lo barato lo he verificado; lo que es medida suya va con su firma, y lo que es sospecha, etiquetado.
+
+**a · Dos callejones de instrumentación, probados.** `ESQUEMAS` de `formato.js` se puebla al importar cada módulo de área: importar `migracion.js` sin `estado.js` da «clase de documento desconocida» **que es falso** y parece defecto — quien mida migraciones en Node importa primero el módulo del área. Y el envoltorio del almacén solo deja escribir bajo `partida/`: al migrar el mapa, la primera versión del arreglo no escribía nada **y no protestaba**.
+
+**b · El telón por regreso: hipótesis con hilo barato, sin fichar a propósito.** Que el punto de partida no sea geofence → la cadencia nunca pasa a `por-tiempo` cerca de casa → parada no llega ni un fijo → `dentroDesdeMs` no acumula. Sería §9a en el regreso. No se fichó porque el sensor estaba caído al ir a medirla. **El hilo no necesita dispositivo**: `cadenciaDeMuestreo` con una posición en el punto de partida y el índice real de geofences — si devuelve `por-distancia`, pasa a fila. Y la caída del servicio en primer plano (dos veces, sin logcat): quien la persiga arranca `adb logcat` filtrado por el task manager **antes** de abrir la salida.
+
+**c · Dos decisiones de diseño que nadie ha tomado en voz alta**, movidas a `docs/pendientes.md`: abandonar una aventura la quema para siempre (verificado: `cierra` mete a-medias en `cerradas`, línea 170, y la lista filtra por plantilla), y marcar «no pega» un sitio del lazo en curso ya no cambia la cadena pero **el juego te sigue mandando allí**.
+
+**d · Operativa del aparato**, a `CLAUDE.md`: el JDK de compilar (17, no 26), las variables que no estaban escritas, `exec-out` para JSON grande, y que `expo run:android` abre la app sola — se come el «antes» de cualquier medición de migración. Y al tocar por `adb`: leer las cotas y desconfiar de nodos con `y2 < y1`, que se comen el toque (así estaba tapado A4P8).
+
+**e · Costuras con lo que venga, declaradas**: la cadena de migraciones no sabe bifurcar (`paso()` introduce por ruta — por eso la huella vive al lado de `enCurso` y no dentro); `echaElTelon` exige la salida abierta, y una fila futura que cierre salidas por su cuenta repetirá el síntoma «su telón ya se echó» que no se parece a la causa; la memoria del casting tiene tope de cuatro ranuras por `(mapa, huella)`; y **ninguna pantalla se ha visto nunca en un iPhone** — la guarda del manifiesto mira iOS, los ojos no.
+
+**f · Su última frase, que es el estándar**: «lo que no esté aquí ni en el repo, no existe».

@@ -115,6 +115,10 @@ Indentación de 2 espacios, comillas simples, punto y coma, `const`/`let`, funci
 
 **Una tubería se traga el código de salida del runner.** `bash scripts/qa-tester-run.sh X | tail -3` devuelve el código de `tail`, no el del runner, así que un **2** —«no se pudo ejecutar nada», que explícitamente no es verde— se lee como un 0 limpio. Le pasó a la sesión de SPEC-048 con una etiqueta mal formada, y es justo el fallo que ese script se escribió para evitar. Redirige a fichero y mira `$?` (`bash scripts/qa-tester-run.sh SUITE > salida.log 2>&1; echo $?`), y recuerda que la etiqueta solo admite `SPEC-NNN`, `SPEC-NNN-iter-M` o `SUITE`. Aplica igual a cualquier otro comando cuyo veredicto importe: `git push ... | tail -2` esconde un 403 de permisos detrás de un éxito aparente.
 
+**Compilar la app pide el JDK 17, y las variables no vienen puestas.** No hay Java del sistema (`/usr/libexec/java_home` falla): `expo run:android` compila con `JAVA_HOME=/opt/homebrew/opt/openjdk@17` — con el 26 revienta en `jlink` —, mientras que Maestro corre bien con el 26 (el runner se lo resuelve solo). `ANDROID_HOME=$HOME/Library/Android/sdk`, y `platform-tools` y `emulator` no están en el PATH. Medido por la fila 49 tras buscarlas a ciegas.
+
+**El aparato tiene tres trampas de medición.** `expo run:android` abre la app sola al instalar, así que se come el «antes» de cualquier medición de migración: copia los documentos fuera antes de compilar, o `force-stop` inmediato. Para extraer JSON grande usa `adb exec-out run-as com.walkingadventure.app cat ...` — con `shell` un documento de 1,3 MB sale corrompido por la conversión de saltos de línea (para el estado pequeño, `shell` vale). Y al tocar por `adb`, lee las cotas del nodo y desconfía de los degenerados (`y2 < y1`): se comen el toque, y tocar el centro de un botón puede no pulsarlo.
+
 **El `README.md` puede ir por detrás del código.** Verifica siempre contra el código.
 
 ## Al terminar una iteración
