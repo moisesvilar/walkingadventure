@@ -11,10 +11,14 @@
 // Dos reglas de encadenado que no son de estilo, y las dos son de `partida-guardada.md`
 // §4:
 //
-// - **La copia se ofrece y no se hace sola**, y si falla o se cancela **no se borra
-//   nada**. Quien elige guardar copia primero no puede perderla por un fallo
-//   silencioso; encadenar el borrado a una exportación fallida sería la peor
-//   degradación posible del proyecto.
+// - **La copia se ofrece y no se hace sola**, y **el borrado tampoco se hace de paso**:
+//   guardar y borrar son dos gestos con dos funciones, y **ninguna llama a la otra**. Lo
+//   que lo decide: *lo destructivo no se ejecuta sobre una señal que el sistema no
+//   garantiza*. `Share.share` en Android resuelve en cuanto lanza el selector de destino,
+//   así que la hoja **nunca** dice que se canceló y encadenar el borrado a ella borraba la
+//   partida mientras quien juega elegía dónde guardarla — medido, y costó una partida. La
+//   decisión no depende de que hoy la hoja mienta: una copia guardada no es una orden de
+//   borrar ni el día que diga la verdad.
 // - **Se marca antes de borrar**, y de eso se encarga el núcleo: aquí solo se llama en
 //   orden y se lleva al arranque cuando termina.
 //
@@ -23,18 +27,31 @@
 // generador igual que recibe el almacén o la copia. Quien lo monta lo cita por su
 // nombre, en `app/nucleo/piezas.js`.
 
-/** Los textos fijos de A6P7, en voz de aplicación, que es la voz de esta pantalla. */
+/**
+ * Los textos fijos de A6P7, en voz de aplicación, que es la voz de esta pantalla.
+ *
+ * Los de las dos acciones nombran **lo que hace cada una y nada más**, porque desde que
+ * son dos gestos separados ninguna es el primer paso de la otra: «guardar una copia
+ * primero» prometía un segundo paso que ya no ocurre, y «borrar sin guardar nada» es
+ * falso justo después de haber guardado una copia. Un texto que puede ser mentira en un
+ * botón que destruye es la peor clase de texto que este juego puede escribir.
+ *
+ * Y la línea de la copia dice **hecha** y no *guardada donde querías*: la app empaqueta
+ * el fichero y se lo da a la hoja del sistema, y adónde fue a parar no lo sabe. Decirlo
+ * es lo único honesto que se puede decir de las dos ramas a la vez.
+ */
 export const TEXTOS_DE_EMPEZAR_DE_NUEVO = Object.freeze({
   volver: '‹ Ajustes',
   titulo: 'Empezar de nuevo',
-  guardar: 'Guardar una copia primero',
-  borrar: 'Borrar sin guardar nada',
+  guardar: 'Guardar una copia',
+  borrar: 'Borrar la partida',
   dejarlo: 'Dejarlo como está',
   salida: 'Si guardas una copia, el fichero se puede volver a abrir cuando quieras.',
   guardando: 'Preparando la copia…',
   borrando: 'Borrando la partida…',
+  copiaHecha: 'La copia ya está hecha. Tu partida sigue como estaba.',
   sinGuardar: 'No se ha guardado nada. Tu partida sigue como estaba.',
-  noSePudoGuardar: 'No se ha podido guardar la copia. No se ha borrado nada y tu partida sigue como estaba.',
+  noSePudoGuardar: 'No se ha podido guardar la copia. Tu partida sigue como estaba.',
   noSePudoBorrar: 'No se ha podido borrar del todo. Se terminará de borrar al volver a abrir.',
 });
 
@@ -147,10 +164,12 @@ export function bloquesDe(compuesta, nucleo) {
  * @param {object} piezas
  *   `almacen` el almacén duradero de la partida; `binarios` el almacén de recursos
  *   binarios residentes, que se van con el mundo congelado; `copia` lo que devuelve
- *   `creaCopia`, que es quien sabe guardar el fichero; `nucleo` el generador con las
- *   piezas de `DEL_NUCLEO` y ni una menos.
+ *   `creaCopia`, que es quien sabe guardar el fichero; `limpiaCopiasDeTrabajo` la
+ *   limpieza de la carpeta de copias de la caché, que es del sistema de ficheros y por
+ *   eso entra inyectada como todo lo que toca el dispositivo; `nucleo` el generador con
+ *   las piezas de `DEL_NUCLEO` y ni una menos.
  */
-export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, nucleo } = {}) {
+export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, limpiaCopiasDeTrabajo = null, nucleo } = {}) {
   if (!almacen) throw new Error('empezar de nuevo necesita el almacén de la partida inyectado: sin él no hay nada que borrar');
   if (!copia) {
     throw new Error(
@@ -165,6 +184,16 @@ export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, nuc
   }
 
   const { ESTADOS_DE_EMPEZAR, DESTINO_TRAS_BORRAR } = nucleo;
+  // La quinta palabra del vocabulario se comprueba **al construir**, por lo mismo que
+  // `DEL_NUCLEO`: un núcleo con el vocabulario viejo dejaría la pantalla anunciando un
+  // estado indefinido justo después de guardar una copia, que es el momento en el que
+  // quien juega tiene que poder leer que no se ha borrado nada.
+  if (!ESTADOS_DE_EMPEZAR?.COPIA_GUARDADA) {
+    throw new Error(
+      'al vocabulario de estados de empezar de nuevo le falta «copia-guardada»: desde que guardar una copia dejó de encadenar el ' +
+      'borrado, es la palabra con la que la pantalla dice que la copia está hecha y que la partida sigue entera',
+    );
+  }
 
   /**
    * La pantalla entera: lo que se pierde, el mapa congelado si lo hay, las tres
@@ -188,11 +217,18 @@ export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, nuc
     return { ...compuesta, textos, registro: nucleo.REGISTROS.APLICACION, tipografia: textos[0].tipografia };
   }
 
-  /** Borra sin guardar nada. Es la elección explícita, y no lleva un segundo aviso. */
+  /**
+   * Borra la partida. Es la elección explícita, y no lleva un segundo aviso.
+   *
+   * **Nadie la llama de paso**: es el único camino por el que una partida desaparece, y
+   * llega solo desde el toque de quien juega. Guardar una copia no acaba aquí ni cuando
+   * la copia sale bien.
+   */
   async function borra() {
     try {
       const { borradas } = await nucleo.borraPartida({ almacen, binarios });
-      return { estado: ESTADOS_DE_EMPEZAR.BORRANDO, borrado: true, destino: DESTINO_TRAS_BORRAR, borradas, aviso: null, error: null };
+      const copiaDeTrabajo = await limpiaLaCopiaDeTrabajo();
+      return { estado: ESTADOS_DE_EMPEZAR.BORRANDO, borrado: true, destino: DESTINO_TRAS_BORRAR, borradas, copiaDeTrabajo, aviso: null, error: null };
     } catch (e) {
       return {
         estado: ESTADOS_DE_EMPEZAR.NO_SE_PUDO,
@@ -205,13 +241,18 @@ export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, nuc
   }
 
   /**
-   * Guarda una copia y, **solo si se guardó de verdad**, borra.
+   * Guarda una copia. **Solo guarda**, y las tres salidas vuelven a la pantalla.
    *
-   * Los dos caminos que no borran son los que sostienen la decisión más discutible de
-   * esta pantalla: la exportación que falla y la hoja del sistema que se cancela. En
-   * los dos la partida sigue entera y se dice en una línea.
+   * Los tres finales posibles —la copia hecha, la hoja cancelada y la exportación que
+   * falla— terminan igual en lo único que importa: **la partida sigue entera**. Lo único
+   * que los distingue es la línea que se lee, y esa línea no gobierna nada destructivo.
+   *
+   * La rama de la hoja cancelada se conserva aunque Android no la dispare nunca —allí
+   * `Share.share` resuelve al lanzar el selector de destino—: donde el sistema sí lo dice
+   * se dice, y donde no, se calla en lugar de suponerlo. Lo que ya no hay es un camino en
+   * el que suponerlo borre algo.
    */
-  async function guardaCopiaYBorra() {
+  async function guardaCopia() {
     let guardada;
     try {
       guardada = await copia.guarda();
@@ -234,7 +275,39 @@ export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, nuc
         error: null,
       };
     }
-    return { ...(await borra()), copia: { nombre: guardada?.nombre ?? null, bytes: guardada?.bytes ?? 0 } };
+    return {
+      estado: ESTADOS_DE_EMPEZAR.COPIA_GUARDADA,
+      borrado: false,
+      cancelada: false,
+      destino: null,
+      aviso: TEXTOS_DE_EMPEZAR_DE_NUEVO.copiaHecha,
+      copia: { nombre: guardada?.nombre ?? null, bytes: guardada?.bytes ?? 0 },
+      error: null,
+    };
+  }
+
+  /**
+   * La copia de trabajo de la caché, que se va **dentro del borrado**.
+   *
+   * Sin esto quedaba el fichero entero de la partida en `cache/copias/` después de
+   * haberla borrado, que contradice «no queda nada de la partida anterior bajo ningún
+   * prefijo». Va aquí y no al salir de la pantalla: quien guarda y se va sin borrar deja
+   * su copia de trabajo donde el sistema puede llevársela, que es para lo que está la
+   * caché, y tirarla en cuanto la hoja se resuelve podría quitarle al sistema el fichero
+   * que todavía está leyendo por su URI.
+   *
+   * Si la limpieza falla **no convierte el borrado en un fallo**: la partida ya no está,
+   * y decir «no se ha podido borrar, se terminará al volver a abrir» por un fichero de
+   * caché sería mentir sobre lo que ha pasado.
+   */
+  async function limpiaLaCopiaDeTrabajo() {
+    if (typeof limpiaCopiasDeTrabajo !== 'function') return false;
+    try {
+      await limpiaCopiasDeTrabajo();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -252,5 +325,5 @@ export function creaEmpezarDeNuevo({ almacen, binarios = null, copia = null, nuc
     return nucleo.hayBorradoAMedias({ almacen });
   }
 
-  return { pregunta, borra, guardaCopiaYBorra, terminaPendiente, hayPendiente };
+  return { pregunta, borra, guardaCopia, terminaPendiente, hayPendiente };
 }

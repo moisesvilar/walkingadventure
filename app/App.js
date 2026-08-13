@@ -35,7 +35,7 @@ import { montaLaSalida } from './marcha/salida-montada.js';
 // `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
 // respeta los insets en las dos plataformas.
 import { AreaSegura } from './plataforma/area-segura.jsx';
-import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
+import { comparteConElSistema, eligeConElSistema, limpiaCopiasDeTrabajo } from './plataforma/copia-del-sistema.js';
 import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import {
@@ -142,7 +142,10 @@ export function App() {
   // A6P6, que a su vez cuelga de la portada—; lo que además sigue colgando de aquí, porque
   // es del ciclo de vida de la app y no de ninguna pantalla, es **rematar el borrado que un
   // cierre dejó a medias**.
-  const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
+  // La limpieza de la copia de trabajo entra por la puerta como todo lo que toca el
+  // sistema de ficheros: `app/datos/` no cita la plataforma, y por eso el borrado puede
+  // seguir corriéndose entero en `node --test`.
+  const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, limpiaCopiasDeTrabajo, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
   // La partida en disco, de la fila 47: congelarla en los cortes del juego y levantarla al
   // abrir. Antes de esta fila el estado se componía en memoria y se moría al cerrar.
   const [partidaGuardada] = useState(() => creaPartidaGuardada({ almacen, nucleo: NUCLEO_DE_LA_PARTIDA_GUARDADA }));
