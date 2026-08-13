@@ -819,6 +819,193 @@ Característica: La cadena del sensor de una salida es una y va en orden
 ```gherkin
 # language: es
 
+@nucleo @bucle
+Característica: Una sola cota de frescura para el fijo que ancla el punto de partida
+  Lo que ancla el punto de partida es un fijo, no la puerta por la que entró. Aplicarle rasero distinto según venga de la puntual o de la última conocida es el defecto, no la excepción.
+  Fuente: bucle-jugable.md §8 · seguridad-privacidad.md §2
+
+  Escenario: Los cuatro números de la apertura están declarados con su motivo y en un solo sitio
+    Dado la cota de frescura, el tope de espera, la precisión exigida y el plazo de re-anclaje
+    Cuando se busca dónde están escritos
+    Entonces cada uno aparece una sola vez y con su motivo al lado
+    Y la app los recibe del paquete en lugar de llevar su propia copia
+
+  Escenario: Con la puntual dentro de la cota ancla ella y el origen queda anotado
+    Dado un jugador que echa a andar con el permiso concedido
+    Cuando el fijo puntual llega con la marca dentro de la cota
+    Entonces la salida se abre con ese fijo
+    Y el origen del punto de partida queda anotado como la puntual
+
+  Escenario: Con la puntual rancia ancla la última conocida, y el respaldo abre la salida
+    Dado un fijo puntual cuya marca es más vieja que la cota
+    Y una última posición conocida que sí la cumple
+    Cuando se decide con qué anclar
+    Entonces el fijo puntual se descarta igual que se descartaría una última conocida vieja
+    Y la salida se abre con la última conocida
+    Y el origen del punto queda anotado como la última conocida
+
+  Escenario: Sin fijo puntual, la salida se abre con la última posición conocida
+    Dado un proveedor que no entrega ningún fijo puntual antes del tope
+    Y una última posición conocida dentro de la cota
+    Cuando el jugador echa a andar
+    Entonces la salida se abre
+    Y la última conocida se pidió con la edad máxima y la precisión exigida escritas
+
+  Escenario: Un fijo sin marca, sin precisión o con la precisión peor que la exigida no ancla
+    Dado un fijo al que le falta la marca de tiempo, o la precisión, o la trae peor que la exigida
+    Cuando se decide si puede anclar el punto de partida
+    Entonces se descarta
+    Y da igual por cuál de las dos puertas haya entrado
+
+  Escenario: Sin ninguna posición dentro de la cota no se ancla, y el motivo lo dice
+    Dado un aparato cuyo único fijo conocido es de hace veinticinco horas
+    Cuando el jugador echa a andar
+    Entonces la salida no se abre
+    Y el motivo dice que sin una posición no hay punto de partida
+    Y ninguna cota razonable acepta ese fijo
+
+  Escenario: La cota, el tope y la precisión llegan del paquete y no de una copia de la app
+    Dado el código de la app
+    Cuando se buscan los números de la apertura
+    Entonces no hay ninguna constante propia que los repita
+    Y la precisión con la que se pide la puntual sale del mismo sitio que la de la suscripción
+
+  Escenario: El motivo se decide consultando el permiso y no el texto de la excepción
+    Dado el permiso concedido y un proveedor que lanza al pedir el fijo
+    Cuando se decide por qué no se abrió la salida
+    Entonces el motivo sale del estado del permiso
+    Y no dice que el permiso esté denegado
+
+  Escenario: La línea que se lee mientras se busca no lleva ninguna cifra
+    Dado la línea que se enseña mientras se busca la posición
+    Cuando se lee
+    Entonces dice que se está buscando dónde estás
+    Y no lleva barra, ni porcentaje, ni cuenta atrás, ni ninguna cifra
+```
+
+```gherkin
+# language: es
+
+@nucleo @bucle @privacidad
+Característica: El punto de partida se re-ancla una vez y después es inmutable
+  La cota puede ser generosa porque el residuo lo paga el re-anclaje; y mover «casa» a mitad de salida cambia el sitio al que hay que volver bajo los pies de quien vuelve.
+  Fuente: bucle-jugable.md §8 · seguridad-privacidad.md §2 · partida-guardada.md §2
+
+  Escenario: El primer fijo bueno dentro del plazo sustituye el punto de partida
+    Dado una salida abierta con el punto de partida anclado
+    Cuando llega el primer fijo con precisión suficiente y dentro del plazo
+    Entonces el punto de partida pasa a ser ese fijo
+    Y el punto anterior no queda guardado en ninguna parte
+
+  Escenario: El re-anclaje ocurre como mucho una vez por salida
+    Dado una salida que ya se re-ancló
+    Cuando llega otro fijo mejor todavía dentro del plazo
+    Entonces el punto de partida no se mueve
+
+  Escenario: Un fijo bueno que llega pasado el plazo no mueve el punto de partida
+    Dado una salida abierta cuyo primer fijo bueno llega pasado el plazo
+    Cuando llega
+    Entonces el punto de partida sigue siendo el de la apertura
+
+  Escenario: Después de alejarse el punto de partida es inmutable
+    Dado una salida que ya se declaró alejada
+    Cuando llega cualquier fijo
+    Entonces el punto de partida no se re-ancla por ninguna vía
+
+  Escenario: El re-anclaje no distingue por el origen del punto
+    Dado una salida abierta con el punto de partida anclado por la puntual
+    Cuando llega el primer fijo bueno dentro del plazo
+    Entonces se re-ancla igual que si el punto hubiera venido de la última conocida
+
+  Escenario: Los cuatro campos del anclaje mueren con la salida
+    Dado una salida re-anclada, cerrada y con el telón leído
+    Cuando se abre otra salida
+    Entonces el origen, la marca de re-anclaje, el desplazamiento y el desfase ya no están
+    Y ninguno de los cuatro era una coordenada ni una marca de reloj
+
+  Escenario: El re-anclaje no lee el reloj: resta dos marcas del sensor
+    Dado el cálculo de la antigüedad con la que se decide re-anclar
+    Cuando se mira de dónde sale el tiempo
+    Entonces sale de restar la marca del fijo nuevo y la del punto de partida
+    Y el paquete no consulta ningún reloj propio
+```
+
+```gherkin
+# language: es
+
+@nucleo @bucle
+Característica: El punto de partida cuenta para la cadencia del sensor y para nada más
+  Estando quieta con cadencia por distancia no llega ni un fijo, así que la permanencia del regreso no acumula y el telón no puede caer. Y el portal de casa sigue sin ser un sitio al que se llega.
+  Fuente: bucle-jugable.md §8
+
+  Escenario: En el punto de partida la cadencia es por tiempo aunque no haya ningún geofence debajo
+    Dado una salida abierta y el jugador en el punto de partida
+    Cuando se pide la cadencia del muestreo
+    Entonces es por tiempo
+    Y lo es aunque no haya ningún sitio del mundo debajo
+
+  Escenario: En el punto de partida de los ocho mundos de referencia la cadencia es por tiempo
+    Dado los ocho mundos de referencia
+    Cuando se pide la cadencia en el punto de partida de cada uno
+    Entonces sale por tiempo en los ocho
+    Y no en seis, que es lo que salía cuando dependía del trazado
+
+  Escenario: La cadencia decidida por el punto de partida no nombra ningún sitio y declara su razón
+    Dado una cadencia por tiempo decidida por el punto de partida
+    Cuando se lee lo que devuelve la decisión
+    Entonces no nombra ningún sitio
+    Y declara que la razón es el punto de partida
+
+  Escenario: El radio de casa es el del regreso, y alejarse devuelve la cadencia por distancia
+    Dado un jugador que se aleja del punto de partida
+    Cuando pasa del radio del regreso más el margen de cercanía
+    Entonces la cadencia vuelve a ser por distancia
+    Y el radio que se usó es el del regreso y no el de geofence
+
+  Escenario: La histéresis de casa es la misma que la de un sitio
+    Dado una posición en el borde del radio del regreso que entra y sale por el ruido del fijo
+    Cuando se decide la cadencia en cada muestra
+    Entonces no cambia de cadencia en cada una
+
+  Escenario: Dentro de un geofence y cerca de casa a la vez, el sitio nombrado es el sitio real
+    Dado una posición dentro del geofence de un sitio y cerca del punto de partida
+    Cuando se decide la cadencia
+    Entonces sale por tiempo una sola vez
+    Y el sitio nombrado es el sitio del mundo
+
+  Escenario: Sin salida abierta la cadencia se decide solo con los geofences y no falla
+    Dado una partida sin ninguna salida abierta
+    Cuando se pide la cadencia
+    Entonces se decide con los geofences del mapa activo
+    Y no falla por no haber punto de partida
+    Y el punto de partida entra por la firma de la decisión y no al índice de sitios
+```
+
+```gherkin
+# language: es
+
+@app @bucle
+Característica: La apertura de una salida se ve desde el aparato
+  Lo que solo se ve con la app delante: que la espera se diga y no se quede puesta, y de qué puerta salió el punto de partida.
+  Fuente: bucle-jugable.md §8 · lenguaje.md
+
+  Escenario: La espera de la posición se dice y desaparece siempre
+    Dado un jugador en la portada sin ninguna salida abierta
+    Cuando toca salir a andar y la apertura termina de la manera que sea
+    Entonces la línea de espera ya no está
+    Y no queda ninguna cifra ni ningún porcentaje en pantalla
+    Y se ve el momento en marcha, o la acción de vuelta con el motivo debajo
+
+  Escenario: El punto de partida declara de qué puerta salió
+    Dado una salida recién abierta
+    Cuando se lee lo que la apertura anotó
+    Entonces el origen del punto es una de las dos puertas y ninguna palabra nueva
+    Y se dice también si el punto se re-ancló
+```
+
+```gherkin
+# language: es
+
 @app @bucle
 Característica: El rótulo del sistema es austero y visible a propósito
   Fuente: seguridad-privacidad.md §2 · bucle-jugable.md §8
@@ -1600,6 +1787,71 @@ Característica: Los plugins que reescriben el proyecto nativo están nombrados 
     Entonces arranca sin instalar ninguna dependencia
 ```
 
+```gherkin
+# language: es
+
+@nucleo @privacidad
+Característica: Nada de esta app se despierta con la app cerrada
+  La promesa siempre fue la ancha; lo que se comprobaba era la estrecha —«al arrancar el móvil»— y solo sobre los receptores, así que los servicios quedaban fuera del barrido por construcción. La lista cerrada es lo que hace que una vía nueva no pueda entrar callando.
+  Fuente: seguridad-privacidad.md §2
+
+  Escenario: Nada de esta app se despierta al arrancar el móvil
+    Dado el manifiesto fusionado de Android
+    Cuando se enumeran todos sus receptores con sus filtros
+    Entonces ninguno declara ninguna de las seis acciones de arranque
+    Y no hay lista de tolerados ni excepción por clase
+
+  Escenario: Nada de esta app se despierta con la app cerrada, y la lista de vías lo enumera
+    Dado el manifiesto fusionado de Android
+    Cuando se enumeran sus receptores y sus servicios con sus filtros
+    Entonces todos los que pueden levantar el proceso están nombrados en la lista
+    Y uno sin nombrar pone la batería roja
+
+  Escenario: La lista de vías de despertar nombra cada una con su mecanismo y su motivo
+    Dado la lista declarada en la app
+    Cuando se lee una de sus entradas
+    Entonces dice su clase, si es receptor o servicio, qué la descubre, quién la declara y por qué está
+    Y dice si su mecanismo está medido o solo declarado
+    Y las declaradas sin medir se cuentan con el número delante
+
+  Escenario: La lectura de vías enumera los servicios y no solo los receptores
+    Dado un manifiesto con receptores y servicios capaces de levantar el proceso
+    Cuando la guarda lo recorre
+    Entonces mira las dos clases de bloque
+    Y no deja fuera los servicios
+
+  Escenario: Un servicio exportado con filtro que la lista no nombra se señala con su clase y su filtro
+    Dado un manifiesto de ejemplo con un servicio exportado con filtro que nadie ha nombrado
+    Cuando se le aplica la lectura de la guarda
+    Entonces se pone roja
+    Y nombra la clase y el filtro
+    Y no hay ninguna excepción por clase ni ninguna lista de tolerados sin motivo
+
+  Escenario: Las tres piezas de FCM no llegan al manifiesto fusionado, y la pareja queda cerrada
+    Dado el manifiesto fusionado tras retirar las tres piezas
+    Cuando se busca el receptor de c2dm y los dos servicios del mismo filtro de mensajería
+    Entonces ninguno puede ya recibir por la forma que su descubrimiento exige
+    Y los dos servicios están neutralizados, no uno
+
+  Escenario: Un manifiesto con solo el servicio de Expo neutralizado se pone rojo
+    Dado un manifiesto de ejemplo en el que solo se neutraliza el servicio de Expo
+    Cuando se le aplica la guarda
+    Entonces se pone roja
+    Y el motivo es que el de Firebase resolvería en su lugar por el mismo filtro
+
+  Escenario: Nada del código vivo pide un token de push
+    Dado todo el código vivo de la app y del paquete
+    Cuando se buscan las llamadas que piden un token de push
+    Entonces no hay ninguna
+    Y tampoco hay fichero de servicios de Firebase declarado
+
+  Escenario: La cabecera del plugin dice cómo vuelven las tres piezas el día que haya push
+    Dado la cabecera del plugin que retira las tres piezas
+    Cuando se lee
+    Entonces dice cómo se vuelven a declarar el día que el producto adopte push
+    Y dice que ese día es una decisión de producto y no un ajuste de configuración nativa
+```
+
 ---
 
 ## 10 · La partida guardada
@@ -1737,6 +1989,55 @@ Característica: Empezar de nuevo borra y no reinicia
     Cuando termina
     Entonces está en la primera pantalla del arranque
     Y no queda nada de la partida anterior
+```
+
+```gherkin
+# language: es
+
+@nucleo @persistencia
+Característica: Guardar una copia y borrar la partida son dos gestos
+  Lo destructivo no se ejecuta sobre una señal que el sistema no garantiza: en Android la hoja de compartir resuelve al lanzar el selector, así que encadenar el borrado a su promesa borraba la partida mientras quien juega elegía destino.
+  Fuente: partida-guardada.md §4 · lenguaje.md
+
+  Escenario: Guardar una copia no borra la partida por ninguna de sus tres ramas
+    Dado un jugador que elige guardar una copia
+    Cuando la hoja del sistema se resuelve de la manera que sea
+    Entonces la partida sigue entera
+    Y borrar sigue exigiendo su propio gesto
+
+  Escenario: Cancelar la hoja del sistema deja la partida entera y las tres acciones vuelven
+    Dado un jugador que elige guardar una copia y cancela la hoja con el botón atrás
+    Cuando vuelve a la pantalla
+    Entonces la partida sigue entera
+    Y las tres acciones están puestas
+
+  Escenario: La copia hecha se dice en una línea y las tres acciones siguen estando
+    Dado un jugador que guardó la copia
+    Cuando vuelve a la pantalla
+    Entonces una línea dice que la copia está hecha
+    Y las tres acciones siguen estando
+
+  Escenario: La acción destructiva no afirma que no se ha guardado nada
+    Dado la copia ya guardada
+    Cuando se lee la acción de borrar
+    Entonces dice lo que hace
+    Y lo dice igual se haya guardado o no
+
+  Escenario: Una exportación que falla antes de borrar deja la partida entera y sin marca
+    Dado una exportación que falla
+    Cuando termina
+    Entonces la partida sigue entera
+    Y se dice en una línea
+
+  Escenario: Un borrado terminado se lleva la copia de trabajo de la caché
+    Dado un borrado que termina
+    Cuando se busca lo que queda
+    Entonces no queda la copia de trabajo de la caché
+
+  Escenario: Los ficheros que se exportaron no se tocan al borrar
+    Dado un jugador que guardó su copia fuera con la hoja del sistema
+    Cuando borra la partida
+    Entonces esos ficheros siguen donde los dejó
 ```
 
 ---
@@ -2066,3 +2367,4 @@ Característica: Los dobles del andamiaje son reproducibles y no tocan el mundo 
     Dado el inspector de tráfico saliente en modo estricto
     Cuando se importan todos los módulos del andamiaje
     Entonces no se registra ninguna llamada saliente
+```
