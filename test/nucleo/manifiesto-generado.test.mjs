@@ -79,6 +79,9 @@ import {
   PERMISOS_DE_SALUD,
   PERMISOS_QUE_SE_PIDEN,
   PERMISOS_QUE_UNA_LIBRERIA_EXIGE,
+  VIAS_DE_DESPERTAR,
+  VIAS_NEUTRALIZADAS,
+  viasSinMecanismoMedido,
 } from '../../app/plataforma/permisos.js';
 
 /** Dónde deja Gradle el manifiesto fusionado de la compilación de depuración. */
@@ -287,6 +290,109 @@ function problemasDelReceptorDeAvisos(xml) {
     if (receptor.exportado !== 'false') problemas.push(`"${RECEPTOR_DE_AVISOS}" no queda sin exportar: android:exported="${receptor.exportado}"`);
   }
   return problemas;
+}
+
+// ── Las vías de despertar: receptores **y servicios**, contra la lista cerrada ──
+//
+// SPEC-053. La propiedad que `app/plataforma/permisos.js` promete desde SPEC-030 es la
+// **ancha** —«nada de esta app se despierta con la app cerrada»— y lo que esta guarda
+// comprobaba era la **estrecha**, «nada se despierta al arrancar el móvil», y encima solo
+// sobre los receptores: `receptoresQueDespiertan` recorta bloques `<receiver …>` y nada más,
+// así que **los servicios no entraban en el barrido por construcción** — no por lista de
+// tolerados—. Por esas dos puertas a la vez vivían las tres piezas de FCM.
+//
+// Lo que cierra la diferencia no es una acción más en la lista: es enumerar **todos** los
+// receptores y **todos** los servicios del manifiesto fusionado y contrastarlos contra
+// `VIAS_DE_DESPERTAR`, que es el dato en producción con su veredicto escrito. El juicio de
+// si un componente puede levantar el proceso se escribe allí; aquí solo se contrasta. Una
+// guarda que lo decidiera sola sería una guarda con criterio propio, y **un componente que
+// llegue sin estar nombrado pone la batería roja**, venga de quien venga.
+
+/** El filtro por el que se descubren los dos servicios de mensajería, y la unidad que se cierra. */
+const FILTRO_DE_MENSAJERIA = 'com.google.firebase.MESSAGING_EVENT';
+
+/** El filtro del receptor de c2dm: la puerta por la que un push levanta el proceso. */
+const FILTRO_DE_C2DM = 'com.google.android.c2dm.intent.RECEIVE';
+
+/**
+ * Los bloques de una etiqueta del manifiesto, con lo que hace falta saber de cada uno.
+ *
+ * Analizador propio y no una librería de XML, por lo de siempre: la batería corre sin
+ * `node_modules`. Se busca **el final de la etiqueta de apertura primero** y solo entonces si
+ * se cierra sola, que es lo que evita recortar el bloque en el primer `<action …/>` de dentro
+ * y dejarlo sin sus acciones — que son justo lo que se viene a leer.
+ */
+function bloquesDe(xml, etiqueta) {
+  const texto = sinComentarios(xml);
+  const bloques = [];
+  const abre = new RegExp(`<${etiqueta}(?=[\\s>/])`, 'g');
+  let m;
+  while ((m = abre.exec(texto)) !== null) {
+    const finCabecera = texto.indexOf('>', m.index);
+    if (finCabecera === -1) break;
+    const cabecera = texto.slice(m.index, finCabecera + 1);
+    const cierre = texto.indexOf(`</${etiqueta}>`, finCabecera);
+    const hasta = cabecera.endsWith('/>') || cierre === -1 ? finCabecera + 1 : cierre + `</${etiqueta}>`.length;
+    const bloque = texto.slice(m.index, hasta);
+    bloques.push({
+      clase: (cabecera.match(/android:name="([^"]+)"/) ?? [, '(sin nombre)'])[1],
+      habilitado: (cabecera.match(/android:enabled="([^"]+)"/) ?? [, null])[1],
+      exportado: (cabecera.match(/android:exported="([^"]+)"/) ?? [, null])[1],
+      permiso: (cabecera.match(/android:permission="([^"]+)"/) ?? [, null])[1],
+      acciones: [...bloque.matchAll(/<action[^>]*?android:name="([^"]+)"/gs)].map((a) => a[1]),
+    });
+  }
+  return bloques;
+}
+
+/**
+ * Todo lo que el sistema puede alcanzar por su cuenta: **los receptores y los servicios**.
+ *
+ * Los dos y no uno, que es la mitad del agujero que esta fila cierra. Los `provider` quedan
+ * fuera a propósito y está dicho en `VIAS_DE_DESPERTAR`: los tres del manifiesto fusionado
+ * son `exported="false"`, así que ningún proceso ajeno puede consultarlos; el día que uno se
+ * exporte, es una vía nueva y entra por la lista.
+ */
+function componentesDelManifiesto(xml) {
+  return [
+    ...bloquesDe(xml, 'receiver').map((b) => ({ ...b, tipo: 'receptor' })),
+    ...bloquesDe(xml, 'service').map((b) => ({ ...b, tipo: 'servicio' })),
+  ];
+}
+
+/** Cómo se nombra un componente en un mensaje de fallo: clase, tipo y el filtro que lo descubre. */
+function comoSeLlama(componente) {
+  const filtro = componente.acciones.length ? ` ← ${componente.acciones.join(', ')}` : '';
+  return `${componente.clase} (${componente.tipo})${filtro}`;
+}
+
+/**
+ * Los componentes del manifiesto que **la lista cerrada no nombra**.
+ *
+ * Sale de dentro del caso para que se le pueda aplicar a un manifiesto de ejemplo: una
+ * comprobación que solo existe dentro de su `test` no se puede poner roja a propósito, y
+ * entonces nadie sabe si detecta lo que dice detectar.
+ */
+function componentesSinNombrar(xml, vias = VIAS_DE_DESPERTAR) {
+  const nombradas = new Set(vias.map((v) => `${v.tipo}:${v.clase}`));
+  return componentesDelManifiesto(xml)
+    .filter((c) => !nombradas.has(`${c.tipo}:${c.clase}`))
+    .map(comoSeLlama);
+}
+
+/**
+ * Quién atiende una acción en el manifiesto, receptor o servicio.
+ *
+ * **La unidad de neutralización es el filtro y no la clase**, y esto es lo que lo mide:
+ * neutralizar solo el servicio de Expo deja al de Firebase resolviendo en su lugar por el
+ * mismo filtro y con la misma prioridad relativa, así que la vía se cierra por la pareja o no
+ * se cierra. `ServiceStarter.resolveServiceClassName` resuelve con `PackageManager.resolveService`
+ * sobre `MESSAGING_EVENT` y solo entonces hace `setClassName` — leído sobre bytecode con `javap`.
+ */
+function quienAtiende(xml, accion) {
+  return componentesDelManifiesto(xml)
+    .filter((c) => c.acciones.includes(accion))
+    .map((c) => `${c.clase} (${c.tipo})`);
 }
 
 /**
@@ -534,6 +640,187 @@ describe('La lectura del manifiesto detecta lo que dice detectar', () => {
   });
 });
 
+// ── La lista cerrada de vías de despertar, y la lectura que la contrasta ────────
+//
+// Estos casos **se registran siempre**: no miran ningún artefacto, miran la lista declarada
+// en producción y la lectura con la que se mira el artefacto. En un clon sin compilar son lo
+// único que puede afirmarse de esta propiedad, y en uno compilado son lo que dice que el
+// contraste de abajo detecta lo que dice detectar.
+
+/** Un componente de ejemplo, con la etiqueta, los atributos y las acciones que se le pongan. */
+function componenteDeEjemplo(etiqueta, clase, acciones = [], atributos = 'android:exported="false"') {
+  const filtro = acciones.length
+    ? `<intent-filter android:priority="-1">${acciones.map((a) => `<action android:name="${a}" />`).join('')}</intent-filter>`
+    : '';
+  return `<${etiqueta} android:name="${clase}" ${atributos}>${filtro}</${etiqueta}>`;
+}
+
+/** Un manifiesto mínimo con los componentes que se le pasen. */
+function manifiestoConComponentes(...componentes) {
+  return `<manifest><application>${componentes.join('')}</application></manifest>`;
+}
+
+describe('Las vías por las que el sistema puede despertar esta app están enumeradas una a una', () => {
+  test('La lista de vías de despertar nombra cada una con su mecanismo y su motivo', () => {
+    // Lo que separa una lista cerrada de una lista de tolerados es que sus motivos se puedan
+    // distinguir de excusas. Cada entrada dice clase, tipo, cómo se la descubre, quién la
+    // declara, si su mecanismo está **medido o solo declarado** y por qué está — y si puede
+    // levantar el proceso o no, que es el juicio que se escribe donde vive el dato.
+    assert.ok(VIAS_DE_DESPERTAR.length > 0, 'la lista de vías de despertar está vacía: así no podría ponerse roja nunca');
+    for (const via of VIAS_DE_DESPERTAR) {
+      assert.ok(via.clase && via.clase.includes('.'), `una vía se declara sin clase: ${JSON.stringify(via)}`);
+      assert.ok(['receptor', 'servicio'].includes(via.tipo), `la vía "${via.clase}" declara el tipo "${via.tipo}" y los dos que el sistema alcanza son receptor y servicio`);
+      assert.ok(via.descubrimiento, `la vía "${via.clase}" no dice cómo se la descubre`);
+      assert.ok(via.quienLaDeclara, `la vía "${via.clase}" no dice quién la declara`);
+      assert.ok(['medido', 'declarado'].includes(via.mecanismo), `la vía "${via.clase}" declara el mecanismo "${via.mecanismo}" y solo hay dos: medido o declarado`);
+      assert.equal(typeof via.puedeDespertar, 'boolean', `la vía "${via.clase}" no dice si puede levantar el proceso`);
+      assert.ok(via.porque && via.porque.length >= 60, `la vía "${via.clase}" no explica por qué está: son ${via.porque?.length ?? 0} caracteres`);
+      assert.equal(Object.isFrozen(via), true, `la vía "${via.clase}" se puede cambiar en caliente, y entonces la lista no es cerrada`);
+    }
+    const clases = VIAS_DE_DESPERTAR.map((v) => `${v.tipo}:${v.clase}`);
+    assert.equal(new Set(clases).size, clases.length, 'la lista repite una vía, y un nombre repetido esconde una que falta');
+
+    // **Y las declaradas sin medir se cuentan con el número delante**, en vez de disolverse
+    // en una frase: nombrar un adyacente no es aprobarlo, es dejarlo contado para que la fila
+    // que lo mida lo pueda quitar de la cuenta. De las diez de hoy, tres están medidas.
+    assert.equal(VIAS_DE_DESPERTAR.length, 10, `la lista tiene ${VIAS_DE_DESPERTAR.length} vías y las contadas son 10: crecer o menguar es un acto con registro`);
+    assert.equal(
+      viasSinMecanismoMedido().length,
+      7,
+      `hay ${viasSinMecanismoMedido().length} vías con el mecanismo declarado y sin medir, y las contadas son 7. ` +
+      'Bajar el número es la buena noticia y se hace con la medida delante; subirlo, también, pero se dice.',
+    );
+    for (const via of viasSinMecanismoMedido()) {
+      // El énfasis en negrita se quita antes de mirar: estos motivos llevan `**no**` dentro y
+      // buscar la frase sobre el texto crudo la partiría por la mitad.
+      assert.match(
+        via.porque.replace(/\*/g, ''),
+        /[Ss]in medir|no est[aá] medido|no se ha (comprobado|le[ií]do|hecho)/,
+        `la vía "${via.clase}" está sin medir y no lo dice en su motivo. Una lista cerrada cuyos motivos no se distinguen de excusas es una lista de tolerados con otro nombre.`,
+      );
+    }
+
+    // Los tres adyacentes que la fila 53 obligó a nombrar están, cada uno con su motivo: si
+    // salen de la lista, vuelve a abrirse el agujero que esta fila cierra.
+    for (const clase of [
+      'androidx.health.platform.client.impl.sdkservice.HealthDataSdkService',
+      'androidx.profileinstaller.ProfileInstallReceiver',
+      'com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService',
+    ]) {
+      assert.ok(VIAS_DE_DESPERTAR.some((v) => v.clase === clase), `"${clase}" ha salido de la lista de vías sin que nadie lo mida`);
+    }
+
+    // Y la lista **no admite excepciones ni tolerados**: todo lo que está, está explicado.
+    const fuente = readFileSync(join(RAIZ_REPO, 'app', 'plataforma', 'permisos.js'), 'utf8');
+    const declaracion = fuente.slice(fuente.indexOf('export const VIAS_DE_DESPERTAR'), fuente.indexOf('export const VIAS_NEUTRALIZADAS'));
+    const sinCadenasNiComentarios = declaracion.replace(/'(?:[^'\\]|\\.)*'/g, "''").replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+    assert.doesNotMatch(sinCadenasNiComentarios, /tolerad|salvo|excepto|skip/i, 'la lista de vías admite excepciones');
+  });
+
+  test('Las tres piezas de FCM se declaran retiradas y la pareja se cierra entera', () => {
+    // La marca de retirada que el plugin escribe **empareja por `android:name`**, así que un
+    // nombre mal escrito no falla: no hace nada. Por eso las clases viven también aquí, en
+    // producción, y por eso el contraste con el manifiesto fusionado es lo que lo detecta.
+    assert.equal(VIAS_NEUTRALIZADAS.length, 3, `se declaran ${VIAS_NEUTRALIZADAS.length} piezas retiradas y son tres: el receptor de c2dm y los dos servicios de mensajería`);
+    for (const via of VIAS_NEUTRALIZADAS) {
+      assert.ok(['receptor', 'servicio'].includes(via.tipo));
+      assert.ok(['directa', 'indirecta'].includes(via.evidencia), `la pieza "${via.clase}" no dice si la evidencia de su descubrimiento es directa o indirecta`);
+      assert.ok(via.porque && via.porque.length >= 60, `la pieza "${via.clase}" no explica por qué se retira`);
+    }
+    // **Los dos servicios comparten el filtro**, que es lo que obliga a cerrar la pareja.
+    const porElFiltro = VIAS_NEUTRALIZADAS.filter((v) => v.filtro === FILTRO_DE_MENSAJERIA);
+    assert.deepEqual(
+      porElFiltro.map((v) => v.clase).sort(),
+      ['com.google.firebase.messaging.FirebaseMessagingService', 'expo.modules.notifications.service.ExpoFirebaseMessagingService'],
+      'los dos servicios que declaran el filtro de mensajería no están los dos retirados: cerrar solo uno deja al otro resolviendo en su lugar',
+    );
+    assert.ok(VIAS_NEUTRALIZADAS.some((v) => v.filtro === FILTRO_DE_C2DM), 'el receptor de c2dm no está entre las piezas retiradas');
+    // Y ninguna de las tres está a la vez en la lista de vías vivas: retirada y viva a la vez
+    // sería una contradicción que nadie leería.
+    const enLasDos = VIAS_NEUTRALIZADAS.filter((n) => VIAS_DE_DESPERTAR.some((v) => v.clase === n.clase));
+    assert.deepEqual(enLasDos.map((v) => v.clase), [], 'una pieza retirada aparece también como vía viva');
+  });
+
+  test('Un servicio exportado con filtro que la lista no nombra se señala con su clase y su filtro', () => {
+    // **El caso que esta fila estrena, y el que dice que el barrido ya no se salta los
+    // servicios.** Con el artefacto de verdad no se puede medir, porque el artefacto está
+    // bien: se mide con un manifiesto escrito a mano.
+    const ejemplo = manifiestoConComponentes(
+      componenteDeEjemplo('service', 'com.ejemplo.ServicioNuevo', ['com.ejemplo.BIND'], 'android:exported="true"'),
+    );
+    assert.deepEqual(componentesSinNombrar(ejemplo), ['com.ejemplo.ServicioNuevo (servicio) ← com.ejemplo.BIND']);
+
+    // Un receptor nuevo también, que es la puerta que ya se miraba; y los dos a la vez.
+    const conReceptor = manifiestoConComponentes(
+      componenteDeEjemplo('receiver', 'com.ejemplo.ReceptorNuevo', ['com.ejemplo.ALGO'], 'android:exported="true"'),
+      componenteDeEjemplo('service', 'com.ejemplo.ServicioNuevo'),
+    );
+    assert.deepEqual(componentesSinNombrar(conReceptor), [
+      'com.ejemplo.ReceptorNuevo (receptor) ← com.ejemplo.ALGO',
+      'com.ejemplo.ServicioNuevo (servicio)',
+    ]);
+
+    // Y uno que **sí** está nombrado no se señala: es lo que separa «la comprobación es
+    // exigente» de «la comprobación es imposible de cumplir».
+    const nombrado = VIAS_DE_DESPERTAR.find((v) => v.tipo === 'servicio');
+    assert.deepEqual(componentesSinNombrar(manifiestoConComponentes(componenteDeEjemplo('service', nombrado.clase))), []);
+    // Y la lectura no se conforma con la clase: un receptor con el nombre de un servicio
+    // declarado sigue sin estar nombrado, porque el tipo es parte de la vía.
+    assert.deepEqual(componentesSinNombrar(manifiestoConComponentes(componenteDeEjemplo('receiver', nombrado.clase))), [`${nombrado.clase} (receptor)`]);
+  });
+
+  test('Un manifiesto con solo el servicio de Expo neutralizado se pone rojo', () => {
+    // **La vía se cierra por la pareja y no por la pieza.** Los dos servicios se descubren
+    // por acción sobre el mismo filtro, así que retirar solo el de Expo —prioridad −1— deja
+    // al de Firebase —prioridad −500— resolviendo en su lugar. Este ejemplo es exactamente
+    // ese arreglo a medias, y tiene que salir rojo nombrando quién se queda atendiendo.
+    const aMedias = manifiestoConComponentes(
+      componenteDeEjemplo('service', 'com.google.firebase.messaging.FirebaseMessagingService', [FILTRO_DE_MENSAJERIA], 'android:exported="false"'),
+    );
+    assert.deepEqual(
+      quienAtiende(aMedias, FILTRO_DE_MENSAJERIA),
+      ['com.google.firebase.messaging.FirebaseMessagingService (servicio)'],
+      'la lectura no ve quién sigue atendiendo el filtro de mensajería con el servicio de Expo ya retirado',
+    );
+    // Y ese servicio, además, no está nombrado en la lista de vías vivas: las dos guardas se
+    // ponen rojas por el mismo manifiesto, y cada una por su motivo.
+    assert.deepEqual(componentesSinNombrar(aMedias), ['com.google.firebase.messaging.FirebaseMessagingService (servicio) ← com.google.firebase.MESSAGING_EVENT']);
+
+    // Con la pareja cerrada entera no queda nadie atendiendo, que es la forma que se entrega.
+    assert.deepEqual(quienAtiende(manifiestoConComponentes(componenteDeEjemplo('service', 'com.ejemplo.Otro')), FILTRO_DE_MENSAJERIA), []);
+    // Y el receptor de c2dm por su lado: mientras exista alguien con ese filtro, un mensaje
+    // de push levanta el proceso.
+    const conC2dm = manifiestoConComponentes(
+      componenteDeEjemplo('receiver', 'com.google.firebase.iid.FirebaseInstanceIdReceiver', [FILTRO_DE_C2DM], 'android:exported="true"'),
+    );
+    assert.deepEqual(quienAtiende(conC2dm, FILTRO_DE_C2DM), ['com.google.firebase.iid.FirebaseInstanceIdReceiver (receptor)']);
+  });
+
+  test('La lectura de vías enumera los servicios y no solo los receptores', () => {
+    // La regresión que esta fila viene a impedir, y que se ablandaría sola: bastaría con que
+    // el barrido volviera a mirar solo `<receiver>` para que un servicio con filtro pasara
+    // en verde sin que nadie hubiera decidido nada. Se afirma sobre la lectura, midiendo un
+    // manifiesto donde **lo único que hay es un servicio**.
+    const soloServicio = manifiestoConComponentes(componenteDeEjemplo('service', 'com.ejemplo.SoloServicio', ['com.ejemplo.BIND']));
+    assert.equal(componentesDelManifiesto(soloServicio).length, 1, 'la lectura no ve un manifiesto que solo tiene un servicio');
+    assert.equal(componentesDelManifiesto(soloServicio)[0].tipo, 'servicio');
+    assert.deepEqual(receptoresQueDespiertan(soloServicio), [], 'la guarda de arranque ve el servicio, y entonces este caso no mide la diferencia entre las dos');
+    assert.equal(componentesSinNombrar(soloServicio).length, 1, 'el servicio sin nombrar no se señala');
+
+    // Y las dos etiquetas conviven: un manifiesto con receptor y servicio da los dos, con su
+    // tipo y sus atributos leídos de **la cabecera** y no del bloque entero.
+    const mixto = manifiestoConComponentes(
+      componenteDeEjemplo('receiver', 'com.ejemplo.R', [], 'android:enabled="true" android:exported="false"'),
+      componenteDeEjemplo('service', 'com.ejemplo.S', [], 'android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE"'),
+    );
+    const leidos = componentesDelManifiesto(mixto);
+    assert.deepEqual(leidos.map((c) => `${c.tipo}:${c.clase}`), ['receptor:com.ejemplo.R', 'servicio:com.ejemplo.S']);
+    assert.equal(leidos[0].habilitado, 'true');
+    assert.equal(leidos[1].exportado, 'true');
+    assert.equal(leidos[1].permiso, 'android.permission.BIND_JOB_SERVICE');
+  });
+});
+
 // ── Android, sobre el manifiesto fusionado ──────────────────────────────────────
 //
 // Los casos de aquí abajo **solo se registran si hay manifiesto**. No se saltan con `skip`
@@ -634,6 +921,61 @@ if (HAY_ANDROID) {
       );
     });
 
+    test('Nada de esta app se despierta con la app cerrada, y la lista de vías lo enumera', () => {
+      // **La propiedad ancha, por fin comprobada entera.** Hasta SPEC-053 esto se afirmaba
+      // de boca —`permisos.js` lo promete desde SPEC-030— y lo que se medía era la estrecha
+      // y solo sobre receptores. Aquí se enumeran **todos** los receptores y **todos** los
+      // servicios del manifiesto fusionado y se contrastan contra la lista cerrada.
+      //
+      // Las dos direcciones son rojo, igual que con el arrastre de permisos: uno que aparezca
+      // sin estar nombrado —es de una librería que nadie ha mirado, y se mira— y uno de la
+      // lista que ya no aparezca —bajar el número es la buena noticia y también es un acto—.
+      const sinNombrar = componentesSinNombrar(XML_ANDROID);
+      assert.deepEqual(
+        sinNombrar,
+        [],
+        `estos componentes del manifiesto fusionado pueden ser alcanzados por el sistema y nadie los ha nombrado: ${sinNombrar.join(' · ')}. ` +
+        'Se miran uno a uno y se añaden a VIAS_DE_DESPERTAR en `app/plataforma/permisos.js`, con su tipo, su filtro, quién los declara, ' +
+        'si su mecanismo está medido y por qué están. No se añade nada a ninguna lista de tolerados.',
+      );
+
+      const enElManifiesto = new Set(componentesDelManifiesto(XML_ANDROID).map((c) => `${c.tipo}:${c.clase}`));
+      const yaNoEstan = VIAS_DE_DESPERTAR.filter((v) => !enElManifiesto.has(`${v.tipo}:${v.clase}`)).map((v) => v.clase);
+      assert.deepEqual(
+        yaNoEstan,
+        [],
+        `estas vías están declaradas y ya no aparecen en el manifiesto fusionado: ${yaNoEstan.join(', ')}. ` +
+        'Bajar el número es la buena noticia: se quitan de la lista a mano.',
+      );
+    });
+
+    test('Las tres piezas de FCM no llegan al manifiesto fusionado, y la pareja queda cerrada', () => {
+      // La marca de retirada empareja por `android:name`, así que un nombre mal escrito **no
+      // falla: no hace nada**, y eso solo se ve aquí. Las tres tienen que haber desaparecido.
+      const clases = new Set(componentesDelManifiesto(XML_ANDROID).map((c) => c.clase));
+      const vivas = VIAS_NEUTRALIZADAS.filter((v) => clases.has(v.clase)).map((v) => v.clase);
+      assert.deepEqual(
+        vivas,
+        [],
+        `estas piezas se declaran retiradas en VIAS_NEUTRALIZADAS y siguen en el manifiesto fusionado: ${vivas.join(', ')}. ` +
+        'La retirada se escribe con `tools:node="remove"` en `app/plugins/retira-permisos-prohibidos.js` y empareja por el nombre exacto de la clase.',
+      );
+
+      // Y **por el filtro, que es la unidad de neutralización**: mientras alguien atienda
+      // `MESSAGING_EVENT` la vía sigue abierta, sea quien sea la clase que lo haga. Es lo
+      // que hace que cerrar solo el servicio de Expo no valga.
+      assert.deepEqual(
+        quienAtiende(XML_ANDROID, FILTRO_DE_MENSAJERIA),
+        [],
+        'alguien sigue atendiendo el filtro de mensajería de Firebase: la vía se cierra por la pareja y no por la pieza',
+      );
+      assert.deepEqual(
+        quienAtiende(XML_ANDROID, FILTRO_DE_C2DM),
+        [],
+        'alguien sigue atendiendo el mensaje de c2dm, que es la puerta por la que un push levanta el proceso',
+      );
+    });
+
     test('El receptor de notificaciones conserva su acción de entrega y ninguna más', () => {
       // La otra mitad de la fila 52, y la que impide que el arreglo se pase de frenada: el
       // reemplazo que se le escribe a `expo-notifications` **sustituye la declaración
@@ -668,6 +1010,12 @@ if (HAY_ANDROID) {
       // permiso por media promesa.
       assert.match(impuesto.aCambio, /los dos receptores/, 'el a-cambio no dice que sean dos los receptores neutralizados, y desde SPEC-052 lo son');
       assert.match(impuesto.aCambio, /notificaciones/, 'el a-cambio no nombra el receptor de notificaciones, que es el que inyecta este permiso y el que escuchaba el arranque desde SPEC-023');
+      // Y desde SPEC-053 el a-cambio cierra en **la propiedad ancha**, que es la que este
+      // fichero promete desde el principio: no solo «nada se despierta al arrancar el móvil»
+      // sino «nada de esta app se despierta con la app cerrada». Un a-cambio que cerrara en
+      // la estrecha estaría admitiendo el permiso por media promesa otra vez.
+      assert.match(impuesto.aCambio, /con la app cerrada/, 'el a-cambio sigue cerrando en la propiedad estrecha, y lo que permisos.js promete es la ancha');
+      assert.match(impuesto.aCambio, /FCM|push/i, 'el a-cambio no nombra las tres piezas de FCM que esta fila retira');
 
       const deTareas = receptoresDelManifiesto(XML_ANDROID).filter((r) => /taskManager/i.test(r.clase));
       assert.equal(deTareas.length, 1, `se esperaba un único receptor de tareas en el manifiesto fusionado y hay ${deTareas.length}`);

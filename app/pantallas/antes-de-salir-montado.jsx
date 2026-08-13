@@ -15,6 +15,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { PRESUPUESTO_FOTOS_MAPA_MS, PRESUPUESTO_PREPARACION_MS } from '@walkingadventure/nucleo/partida/recursos.js';
+import { salidaEnCurso } from '@walkingadventure/nucleo/partida/salidas.js';
 
 import { atestacionDeLaApp } from '../datos/atestacion.js';
 import { creaCalendario } from '../datos/calendario.js';
@@ -66,12 +67,32 @@ export function AntesDeSalirMontado({
   // aquí y no en el estado del juego porque no es del juego: es lo que hay que enseñar
   // debajo de la acción que no pudo, en el mismo sitio desde el que se intentó.
   const [noSeAbre, setNoSeAbre] = useState(null);
+  // Si se está buscando la posición ahora mismo. Vive aquí, en un solo sitio, y baja hasta
+  // A2P1 y A2P5 como propiedad: la marca que lo declara y la línea que lo dice tienen que
+  // salir del mismo estado, porque dos estados paralelos es cómo una marca acaba diciendo
+  // que se busca mientras la pantalla ya enseñó otra cosa.
+  const [buscando, setBuscando] = useState(false);
 
   const andar = useCallback(async (echada) => {
-    const respuesta = alAndar ? await alAndar(echada) : null;
-    setNoSeAbre(respuesta && respuesta.abierta === false ? (respuesta.motivo ?? 'no se pudo abrir la salida y nadie dijo por qué') : null);
-    return respuesta;
+    // **Se dice de inmediato y desaparece siempre**, gane o pierda la búsqueda. Pedir la
+    // posición con precisión alta enciende el GPS y eso cuesta segundos; la elección real
+    // no es entre rápido y lento sino entre espera muda y espera dicha, y una espera muda
+    // de diez segundos se lee como una app colgada. El `finally` es la mitad que importa:
+    // una línea de espera que se queda puesta es peor que no tenerla.
+    setBuscando(true);
+    try {
+      const respuesta = alAndar ? await alAndar(echada) : null;
+      setNoSeAbre(respuesta && respuesta.abierta === false ? (respuesta.motivo ?? 'no se pudo abrir la salida y nadie dijo por qué') : null);
+      return respuesta;
+    } finally {
+      setBuscando(false);
+    }
   }, [alAndar]);
+
+  // De qué puerta salió el punto de partida de la salida abierta y si se re-ancló. Se leen
+  // del área **viva** y no de una propiedad: la orquestación de la salida la muta en sitio,
+  // así que una copia tomada antes seguiría diciendo «sin reanclar» con el ancla ya movida.
+  const laSalida = salidaEnCurso(partida?.salidas ?? { salida: null });
 
   const montaje = useMemo(() => {
     try {
@@ -179,6 +200,14 @@ export function AntesDeSalirMontado({
       <View testID="salida-situacion" accessibilityLabel={situacionDeSalida} style={marcaSuperpuesta(0, { fila: 1 })} />
       <View testID="rotulo-estado" accessibilityLabel={estadoDelRotulo} style={marcaSuperpuesta(1, { fila: 1 })} />
       {noSeAbre ? <View testID="salida-no-se-abre" accessibilityLabel={noSeAbre} style={marcaSuperpuesta(2, { fila: 1 })} /> : null}
+      {/* Y las tres del anclaje. `salida-buscando` está solo mientras se busca —que es lo
+          que hace afirmable que la espera aparece al instante y desaparece siempre, en vez
+          de leerse como una app lenta—; las otras dos declaran de qué puerta salió el punto
+          de partida y si se re-ancló, que sobre la función pura se puede afirmar y sobre el
+          aparato no, y es sobre el aparato donde nacieron los dos rojos. */}
+      {buscando ? <View testID="salida-buscando" accessibilityLabel="buscando" style={marcaSuperpuesta(3, { fila: 1 })} /> : null}
+      {laSalida ? <View testID="salida-punto-origen" accessibilityLabel={laSalida.origenDelPunto ?? 'sin-declarar'} style={marcaSuperpuesta(0, { fila: 2 })} /> : null}
+      {laSalida ? <View testID="salida-reanclaje" accessibilityLabel={laSalida.reanclada ? 'reanclada' : 'sin-reanclar'} style={marcaSuperpuesta(1, { fila: 2 })} /> : null}
 
       <PantallaAntesDeSalir
         calendario={montaje.calendario}
@@ -203,6 +232,9 @@ export function AntesDeSalirMontado({
         alLevantarMapa={alLevantarMapa}
         alDejarloEstar={alDejarloEstar}
         alAndar={andar}
+        // El estado de espera baja como dato y no se vuelve a decidir abajo: la marca de
+        // arriba y la línea que se lee en A2P1 y A2P5 salen del mismo booleano.
+        buscando={buscando}
         alAbrirPuerta={alAbrirPuerta}
         alEcharElTelon={alEcharElTelon}
       />

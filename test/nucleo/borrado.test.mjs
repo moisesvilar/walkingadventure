@@ -148,10 +148,38 @@ function hojaDeCompartir({ falla = false, cancelada = false } = {}) {
   return comparte;
 }
 
+/**
+ * La limpieza de la copia de trabajo de la caché, doblada. Apunta cuántas veces se la llamó.
+ *
+ * Es del sistema de ficheros y entra inyectada, así que doblarla es pasar otro argumento.
+ * `falla` es la limpieza que se cae, que **no puede convertir el borrado en un fallo**: la
+ * partida ya no está, y decir «no se ha podido borrar» por un fichero de caché sería mentir
+ * sobre lo que ha pasado.
+ */
+function limpiezaDeLaCache({ falla = false } = {}) {
+  const limpieza = async () => {
+    limpieza.veces += 1;
+    if (falla) throw new Error('la caché del sistema no ha dejado borrar la carpeta de copias');
+    return { limpiada: true };
+  };
+  limpieza.veces = 0;
+  return limpieza;
+}
+
 /** Empezar de nuevo sobre una partida, con la copia de SPEC-039 de verdad detrás. */
-function empezarSobre({ almacen, binarios = creaAlmacenDeBinarios(), comparte = hojaDeCompartir() } = {}) {
+function empezarSobre({
+  almacen,
+  binarios = creaAlmacenDeBinarios(),
+  comparte = hojaDeCompartir(),
+  limpiaCopiasDeTrabajo = limpiezaDeLaCache(),
+} = {}) {
   const copia = creaCopia({ almacen, binarios, comparte, elige: async () => ({ cancelada: true }), nucleo: NUCLEO_DE_LA_COPIA });
-  return { comparte, copia, empezar: creaEmpezarDeNuevo({ almacen, binarios, copia, nucleo: NUCLEO_DE_EMPEZAR }) };
+  return {
+    comparte,
+    copia,
+    limpiaCopiasDeTrabajo,
+    empezar: creaEmpezarDeNuevo({ almacen, binarios, copia, limpiaCopiasDeTrabajo, nucleo: NUCLEO_DE_EMPEZAR }),
+  };
 }
 
 /** Una partida del primer día: personaje con nombre, ningún mapa, ningún día, ningún mote. */
@@ -215,7 +243,11 @@ describe('Empezar de nuevo borra y no reinicia', () => {
     assert.ok(guardar, 'la pantalla no ofrece guardar una copia');
     assert.equal(guardar.orden, 1);
     assert.equal(guardar.peso, 'principal');
-    assert.equal(TEXTOS_DE_EMPEZAR_DE_NUEVO.guardar, 'Guardar una copia primero');
+    // El texto **solo nombra lo que hace**, desde que guardar dejó de encadenar el borrado:
+    // «primero» prometía un segundo paso que ya no ocurre, y un botón que promete de más en
+    // una pantalla que destruye es la peor clase de texto que este juego puede escribir.
+    assert.equal(TEXTOS_DE_EMPEZAR_DE_NUEVO.guardar, 'Guardar una copia');
+    assert.doesNotMatch(TEXTOS_DE_EMPEZAR_DE_NUEVO.guardar, /primero|antes|luego|despu[eé]s/i, 'el texto de guardar promete un segundo paso que ya no ocurre');
     // Y se dice que el fichero se puede volver a abrir cuando se quiera.
     assert.match(textoDe(pantalla, BLOQUES.SALIDA).texto, /volver a abrir/, 'no se dice que la copia se puede volver a abrir');
 
@@ -239,9 +271,18 @@ describe('Empezar de nuevo borra y no reinicia', () => {
     const partida = await partidaCompleta();
     const { comparte, empezar } = empezarSobre(partida);
 
-    const resultado = await empezar.guardaCopiaYBorra();
-    assert.equal(resultado.borrado, true, 'la exportación fue bien y el borrado no ha continuado');
+    // **Guardar solo guarda**, que es lo que SPEC-040-iter-1 desacopla: la copia sale y la
+    // partida sigue entera. Borrar es un segundo toque, y es el único camino por el que una
+    // partida desaparece.
+    const guardada = await empezar.guardaCopia();
+    assert.equal(guardada.borrado, false, 'guardar una copia ha borrado la partida de paso');
+    assert.equal(guardada.estado, ESTADOS_DE_EMPEZAR.COPIA_GUARDADA);
+    assert.equal(guardada.destino, null, 'guardar una copia saca a quien juega de la pantalla');
     assert.equal(comparte.compartido.length, 1, 'no se ha entregado ningún fichero a la hoja de compartir');
+    assert.notDeepEqual(await partida.almacen.lista(''), [], 'la partida se ha borrado al guardar la copia');
+
+    const resultado = await empezar.borra();
+    assert.equal(resultado.borrado, true, 'el segundo gesto no ha borrado');
     assert.deepEqual(await partida.almacen.lista(''), [], 'la partida sigue en el almacén después de guardar la copia y borrar');
 
     // Y el fichero se vuelve a abrir en un móvil limpio: el mundo, el personaje, el
@@ -503,8 +544,15 @@ describe('Las tres salidas de empezar de nuevo, y cuál es la principal', () => 
   test('No hay segundo aviso, ni casilla, ni texto que teclear, ni cuenta atrás', async () => {
     // Hueco de la batería, y su ausencia es una afirmación: el vocabulario de estados es
     // cerrado y no tiene ninguno de confirmación, y no hay ningún `data-testid` para él.
-    assert.deepEqual(IDS_DE_ESTADO, ['preguntando', 'guardando-copia', 'borrando', 'no-se-pudo']);
-    assert.deepEqual(Object.values(ESTADOS_DE_EMPEZAR).sort(), ['borrando', 'guardando-copia', 'no-se-pudo', 'preguntando']);
+    // Cinco desde SPEC-040-iter-1, y la nueva **no es una confirmación**: `copia-guardada`
+    // es donde para una copia recién hecha, y existe justamente porque guardar dejó de
+    // encadenar el borrado. Un vocabulario con un estado de confirmación sería otra cosa, y
+    // por eso el barrido de abajo sigue buscando esa palabra y no la encuentra.
+    assert.deepEqual(IDS_DE_ESTADO, ['preguntando', 'guardando-copia', 'copia-guardada', 'borrando', 'no-se-pudo']);
+    assert.deepEqual(Object.values(ESTADOS_DE_EMPEZAR).sort(), ['borrando', 'copia-guardada', 'guardando-copia', 'no-se-pudo', 'preguntando']);
+    for (const id of IDS_DE_ESTADO) {
+      assert.doesNotMatch(id, /confirma|seguro|avisa/i, `el estado "${id}" es el de una confirmación secundaria, y aquí no hay ninguna`);
+    }
     assert.equal(Object.isFrozen(ESTADOS_DE_EMPEZAR), true, 'un vocabulario cerrado que se puede ampliar en caliente no es cerrado');
     assert.deepEqual(
       Object.keys(TESTIDS).sort(),
@@ -556,13 +604,17 @@ describe('La copia se ofrece pero no se hace sola, y si no se guarda no se borra
     const antes = await volcado(partida.almacen);
     const { comparte, empezar } = empezarSobre({ ...partida, comparte: hojaDeCompartir({ falla: true }) });
 
-    const resultado = await empezar.guardaCopiaYBorra();
+    const resultado = await empezar.guardaCopia();
 
     assert.equal(resultado.borrado, false, 'la exportación ha fallado y la partida se ha borrado igual');
     assert.equal(resultado.estado, ESTADOS_DE_EMPEZAR.NO_SE_PUDO);
     assert.equal(resultado.destino, null, 'una exportación fallida lleva al arranque');
-    assert.match(resultado.aviso, /No se ha borrado nada/, 'no se dice que no se ha borrado nada');
+    assert.match(resultado.aviso, /No se ha podido guardar la copia/, 'no se dice que la copia no se pudo guardar');
     assert.match(resultado.aviso, /sigue como estaba/, 'no se dice que la partida sigue como estaba');
+    // Y **ya no habla de borrar**, que es lo que SPEC-040-iter-1 cambia y no un descuido:
+    // desde que guardar solo guarda, decir «no se ha borrado nada» en la línea de una copia
+    // fallida nombra un borrado que en este camino no podía ocurrir de ninguna manera.
+    assert.doesNotMatch(resultado.aviso, /borrad|borrar/i, 'la línea de la copia fallida habla de un borrado que este camino nunca hace');
     assert.deepEqual(comparte.compartido, [], 'ha salido un fichero de una exportación que falló');
 
     // Byte a byte igual, sin marca de borrado y sin binarios olvidados.
@@ -575,11 +627,18 @@ describe('La copia se ofrece pero no se hace sola, y si no se guarda no se borra
   test('Cancelar la hoja del sistema deja la partida entera y las tres acciones vuelven', async () => {
     // Hueco de la batería, y la otra mitad del mismo criterio: quien se echa atrás en la
     // hoja del sistema no ha decidido borrar.
+    //
+    // **Esta rama se conserva aunque Android no la dispare nunca**, y por eso hace falta
+    // decir qué mide y qué no: `Share.share` en Android resuelve en cuanto lanza el selector
+    // de destino, así que allí `compartida` nunca vale `false` y este camino no se recorre
+    // en el aparato. Lo que la deja inofensiva es que ya **ninguna rama de guardar borra**,
+    // y eso es lo que afirma el caso «Guardar una copia no borra la partida por ninguna de
+    // sus tres ramas» de aquí abajo. Donde el sistema sí lo dice, se dice.
     const partida = await partidaCompleta();
     const antes = await volcado(partida.almacen);
     const { comparte, empezar } = empezarSobre({ ...partida, comparte: hojaDeCompartir({ cancelada: true }) });
 
-    const resultado = await empezar.guardaCopiaYBorra();
+    const resultado = await empezar.guardaCopia();
 
     assert.equal(resultado.borrado, false, 'cancelar la hoja del sistema ha borrado la partida');
     assert.equal(resultado.cancelada, true);
@@ -600,9 +659,14 @@ describe('La copia se ofrece pero no se hace sola, y si no se guarda no se borra
     // Hueco de la batería, y es lo que convierte «guardar una copia» en una salida real:
     // el fichero vive fuera del directorio de la partida y es de quien juega.
     const partida = await partidaCompleta();
-    const { comparte, empezar } = empezarSobre(partida);
+    const { comparte, empezar, limpiaCopiasDeTrabajo } = empezarSobre(partida);
 
-    await empezar.guardaCopiaYBorra();
+    await empezar.guardaCopia();
+    // Guardar **no limpia nada**: la copia de trabajo se queda donde el sistema puede
+    // llevársela mientras la partida siga entera, y tirarla en cuanto la hoja se resuelve
+    // podría quitarle al sistema el fichero que todavía está leyendo por su URI.
+    assert.equal(limpiaCopiasDeTrabajo.veces, 0, 'guardar una copia ha limpiado la carpeta de trabajo con la partida todavía entera');
+    await empezar.borra();
 
     assert.equal(comparte.compartido.length, 1);
     const fichero = comparte.compartido[0].contenido;
@@ -633,6 +697,18 @@ describe('La copia se ofrece pero no se hace sola, y si no se guarda no se borra
     assert.throws(() => creaEmpezarDeNuevo({ ...completo, almacen: null }), /almac[eé]n/i);
     assert.throws(() => creaEmpezarDeNuevo({ ...completo, copia: null }), /guardar una copia/);
     assert.throws(() => creaEmpezarDeNuevo({ ...completo, nucleo: null }), /n[uú]cleo inyectado/);
+    // Y la quinta palabra del vocabulario se exige **al construir** y no al guardar: un
+    // núcleo con el vocabulario de antes de SPEC-040-iter-1 dejaría la pantalla anunciando
+    // un estado indefinido justo después de guardar una copia, que es el momento en el que
+    // quien juega tiene que poder leer que no se ha borrado nada.
+    assert.throws(
+      () => creaEmpezarDeNuevo({
+        ...completo,
+        nucleo: { ...NUCLEO_DE_EMPEZAR, ESTADOS_DE_EMPEZAR: { PREGUNTANDO: 'preguntando', GUARDANDO_COPIA: 'guardando-copia', BORRANDO: 'borrando', NO_SE_PUDO: 'no-se-pudo' } },
+      }),
+      /copia-guardada/,
+      'empezar de nuevo se ha construido con el vocabulario de estados anterior al desacople',
+    );
 
     assert.equal(DEL_NUCLEO.length, 15, `empezar de nuevo enumera ${DEL_NUCLEO.length} piezas y la comprobación esperaba 15`);
     assert.deepEqual([...DEL_NUCLEO].sort(), Object.keys(NUCLEO_DE_EMPEZAR).sort(), 'el bundle de prueba y lo que la pantalla exige han dejado de ser lo mismo');
@@ -647,7 +723,135 @@ describe('La copia se ofrece pero no se hace sola, y si no se guarda no se borra
     // Y lo que expone es esto y nada más: cualquier ruta nueva tiene que ponerse roja
     // aquí antes de existir.
     const { empezar } = empezarSobre(partida);
-    assert.deepEqual(Object.keys(empezar).sort(), ['borra', 'guardaCopiaYBorra', 'hayPendiente', 'pregunta', 'terminaPendiente']);
+    assert.deepEqual(Object.keys(empezar).sort(), ['borra', 'guardaCopia', 'hayPendiente', 'pregunta', 'terminaPendiente']);
+    // Y la ruta que encadenaba los dos gestos **ya no existe**, ni con su nombre ni con
+    // ninguno: mientras exista una sola función que guarde y borre, alguien la puede llamar.
+    assert.equal('guardaCopiaYBorra' in empezar, false, 'sigue existiendo una ruta que guarda y borra en el mismo gesto');
+    assert.equal(codigoDe('app/datos/empezar-de-nuevo.js').includes('guardaCopiaYBorra'), false, 'el código sigue nombrando la ruta que encadenaba guardar con borrar');
+  });
+
+  test('Guardar una copia no borra la partida por ninguna de sus tres ramas', async () => {
+    // **El defecto destructivo de la fila 40, cerrado por donde no depende de Android.**
+    // Medido en `wa-pixel` el 10-ago-2026: se tocaba guardar, se cancelaba la hoja del
+    // sistema con el botón atrás y la partida se borraba igual — `Share.share` resuelve al
+    // lanzar el selector de destino, así que `compartida` nunca valía `false` y la rama que
+    // protegía el caso no se disparaba nunca.
+    //
+    // La defensa que se deja puesta **no es una rama mejor**: es que ninguna de las tres
+    // termine borrando. Las tres se recorren aquí, y las tres dejan la partida byte a byte
+    // igual, sin marca de borrado y sin haber tocado la caché. Lo destructivo no se ejecuta
+    // sobre una señal que el sistema no garantiza.
+    const ramas = [
+      { nombre: 'la copia se hace', comparte: hojaDeCompartir(), estado: ESTADOS_DE_EMPEZAR.COPIA_GUARDADA },
+      { nombre: 'la hoja se cancela', comparte: hojaDeCompartir({ cancelada: true }), estado: ESTADOS_DE_EMPEZAR.PREGUNTANDO },
+      { nombre: 'la exportación falla', comparte: hojaDeCompartir({ falla: true }), estado: ESTADOS_DE_EMPEZAR.NO_SE_PUDO },
+    ];
+    for (const rama of ramas) {
+      const partida = await partidaCompleta();
+      const antes = await volcado(partida.almacen);
+      const { empezar, limpiaCopiasDeTrabajo } = empezarSobre({ ...partida, comparte: rama.comparte });
+
+      const resultado = await empezar.guardaCopia();
+
+      assert.equal(resultado.borrado, false, `con «${rama.nombre}» guardar una copia ha borrado la partida`);
+      assert.equal(resultado.estado, rama.estado, `con «${rama.nombre}» la pantalla no para donde debe`);
+      assert.equal(resultado.destino, null, `con «${rama.nombre}» guardar saca a quien juega de la pantalla`);
+      assert.equal(
+        JSON.stringify(await volcado(partida.almacen)),
+        JSON.stringify(antes),
+        `con «${rama.nombre}» la partida ha cambiado al guardar la copia`,
+      );
+      assert.equal(await hayBorradoAMedias({ almacen: partida.almacen }), false, `con «${rama.nombre}» ha quedado la marca de borrado puesta`);
+      assert.equal(partida.binarios.tiene(partida.referencia), true, `con «${rama.nombre}» se han ido los binarios del mundo congelado`);
+      assert.equal(limpiaCopiasDeTrabajo.veces, 0, `con «${rama.nombre}» se ha limpiado la caché sin haber borrado la partida`);
+      // Y la partida se puede volver a abrir después, que es la comprobación que de verdad
+      // dice «sigue entera»: un borrado a medias también deja documentos en el almacén.
+      assert.equal(await exigeSinBorradoAMedias({ almacen: partida.almacen }), true, `con «${rama.nombre}» la partida no se puede volver a abrir`);
+    }
+  });
+
+  test('La copia hecha se dice en una línea y las tres acciones siguen estando', async () => {
+    // Hueco de la batería. Las dos ramas que Android no distingue —copia hecha y hoja
+    // cancelada— terminan en el mismo sitio: la pantalla, con sus tres acciones. Lo único
+    // que cambia es la línea, y esa línea no gobierna nada destructivo.
+    const partida = await partidaCompleta();
+    const { empezar } = empezarSobre(partida);
+
+    const guardada = await empezar.guardaCopia();
+    assert.equal(guardada.estado, ESTADOS_DE_EMPEZAR.COPIA_GUARDADA);
+    assert.equal(guardada.aviso, TEXTOS_DE_EMPEZAR_DE_NUEVO.copiaHecha);
+    assert.match(guardada.aviso, /copia ya está hecha/i, 'no se dice que la copia está hecha');
+    assert.match(guardada.aviso, /sigue como estaba/, 'no se dice que la partida sigue entera');
+    assert.equal(guardada.error, null, 'una copia que salió bien se cuenta como un error');
+    assert.ok(guardada.copia.nombre, 'la copia hecha no dice con qué nombre salió el fichero');
+    assert.ok(guardada.copia.bytes > 0, 'la copia hecha dice que salió un fichero vacío');
+
+    // La línea dice **hecha** y no dónde: la app empaqueta el fichero y se lo da a la hoja
+    // del sistema, y adónde fue a parar no lo sabe. Prometerlo sería afirmar lo que no consta.
+    assert.doesNotMatch(guardada.aviso, /guardad[oa] en|carpeta|Descargas|Drive/i, 'la línea de la copia hecha promete saber dónde fue el fichero');
+    // Y sin ninguna cifra, como el resto de los textos de esta pantalla.
+    assert.doesNotMatch(guardada.aviso, /\d/, 'la línea de la copia hecha lleva una cifra');
+
+    // Y después de guardar, la pantalla vuelve a ofrecer las tres: quien guardó puede querer
+    // borrar justo después, que es el caso que motiva la pantalla entera.
+    const pantalla = await empezar.pregunta({ estado: partida.estado });
+    assert.deepEqual(pantalla.acciones.map((a) => a.id), ['guardar', 'borrar', 'dejarlo']);
+  });
+
+  test('La acción destructiva no afirma que no se ha guardado nada', async () => {
+    // `lenguaje.md`: un texto no puede afirmar algo que puede ser falso, y «sin guardar
+    // nada» es falso justo después de guardar una copia — que ahora es un camino que se
+    // puede recorrer sin salir de la pantalla. El texto dice lo que hace, y lo dice igual
+    // se haya guardado o no.
+    assert.equal(TEXTOS_DE_EMPEZAR_DE_NUEVO.borrar, 'Borrar la partida');
+    assert.doesNotMatch(TEXTOS_DE_EMPEZAR_DE_NUEVO.borrar, /sin guardar|guardad|copia/i, 'el texto de borrar afirma algo sobre la copia, que puede ser falso');
+    assert.doesNotMatch(TEXTOS_DE_EMPEZAR_DE_NUEVO.borrar, /\d/, 'el texto de borrar lleva una cifra');
+    // Sigue siendo la destructiva y sigue sin ser la principal: el desacople no la asciende.
+    const partida = await partidaCompleta();
+    const { empezar } = empezarSobre(partida);
+    const pantalla = await empezar.pregunta({ estado: partida.estado });
+    const borrar = pantalla.acciones.find((a) => a.id === 'borrar');
+    assert.equal(borrar.peso, 'hueca');
+    assert.equal(borrar.destructiva, true);
+    assert.equal(pantalla.acciones.find((a) => a.id === 'guardar').peso, 'principal');
+  });
+
+  test('Un borrado terminado se lleva la copia de trabajo de la caché', async () => {
+    // El residuo medido en `wa-pixel`: `cache/copias/terras-de-eldoria.partida`, 1,78 MB,
+    // seguía ahí con la partida ya borrada — un fichero de partida que sobrevive a «empezar
+    // de nuevo», y el AC de SPEC-040 dice que no queda nada de la partida anterior **bajo
+    // ningún prefijo**. Se limpia dentro del borrado y solo esa carpeta.
+    const partida = await partidaCompleta();
+    const { empezar, limpiaCopiasDeTrabajo } = empezarSobre(partida);
+
+    const resultado = await empezar.borra();
+    assert.equal(resultado.borrado, true);
+    assert.equal(limpiaCopiasDeTrabajo.veces, 1, 'el borrado no se ha llevado la copia de trabajo de la caché');
+    assert.equal(resultado.copiaDeTrabajo, true, 'el borrado no dice si se llevó la copia de trabajo');
+
+    // Y una limpieza que falla **no convierte el borrado en un fallo**: la partida ya no
+    // está, y decir «no se ha podido borrar, se terminará al volver a abrir» por un fichero
+    // de caché sería mentir sobre lo que ha pasado.
+    const otra = await partidaCompleta();
+    const rota = empezarSobre({ ...otra, limpiaCopiasDeTrabajo: limpiezaDeLaCache({ falla: true }) });
+    const conFallo = await rota.empezar.borra();
+    assert.equal(conFallo.borrado, true, 'una limpieza de caché fallida ha convertido el borrado en un fallo');
+    assert.equal(conFallo.estado, ESTADOS_DE_EMPEZAR.BORRANDO);
+    assert.equal(conFallo.copiaDeTrabajo, false, 'una limpieza fallida se declara como hecha');
+    assert.deepEqual(await otra.almacen.lista(''), [], 'la partida sigue en el almacén después de un borrado con la caché rota');
+
+    // Sin la limpieza inyectada el borrado sigue funcionando: es del sistema de ficheros y
+    // `app/datos/` no lo cita, que es lo que deja este camino corriendo en `node --test`.
+    const tercera = await partidaCompleta();
+    const sinLimpieza = creaEmpezarDeNuevo({
+      almacen: tercera.almacen,
+      binarios: tercera.binarios,
+      copia: empezarSobre(tercera).copia,
+      nucleo: NUCLEO_DE_EMPEZAR,
+    });
+    const sinNada = await sinLimpieza.borra();
+    assert.equal(sinNada.borrado, true, 'sin la limpieza inyectada el borrado deja de funcionar');
+    assert.equal(sinNada.copiaDeTrabajo, false);
   });
 });
 

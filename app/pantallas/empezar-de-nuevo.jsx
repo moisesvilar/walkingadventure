@@ -13,9 +13,10 @@
 //   ajustes de los que cuelga. No se elige aquí: sale del registro que declara la
 //   composición.
 // - **Lo destructivo no es el botón principal.** Guardar una copia va arriba y es la
-//   única sólida; borrar sin guardar nada es hueca, con el borde y el texto en el color
-//   de lo destructivo; dejarlo como está es texto sin caja y **no desaparece en ningún
-//   estado**.
+//   única sólida; borrar la partida es hueca, con el borde y el texto en el color de lo
+//   destructivo; dejarlo como está es texto sin caja y **no desaparece en ningún
+//   estado**. Que guardar y borrar sean dos gestos no asciende lo destructivo: la
+//   jerarquía es exactamente la misma que antes.
 // - **La espera se cuenta con una línea y sin cifra**: ninguna barra y ningún
 //   porcentaje, el mismo criterio que SPEC-026 aplicó a la generación y SPEC-039 a la
 //   exportación.
@@ -23,6 +24,13 @@
 // Y lo que aquí **no** hay, que es una afirmación: ninguna casilla de confirmación,
 // ningún texto que teclear, ninguna cuenta atrás y ningún segundo aviso encima del
 // aviso. Un segundo aviso es la manera de no tener que escribir bien el primero.
+//
+// El segundo toque de esta pantalla **no es un segundo aviso**: guardar una copia y
+// borrar la partida son dos acciones distintas, con su texto y su botón, y quien guarda
+// puede perfectamente no querer borrar. Guardar deja la pantalla donde está y las tres
+// acciones vuelven siempre — se guardara o no —, porque *lo destructivo no se ejecuta
+// sobre una señal que el sistema no garantiza* y la hoja de compartir de Android no
+// garantiza ninguna.
 
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -49,13 +57,15 @@ export function PantallaEmpezarDeNuevo({ pantalla, empezarDeNuevo, alVolver = nu
   const sans = { fontFamily: familiaDe(pantalla.registro) };
   const bloque = (id) => pantalla.textos.find((t) => t.id === id) ?? null;
   const congelado = bloque(BLOQUES.CONGELADO);
-  // Las cuatro palabras del estado vienen en la composición: aquí no se escribe ninguna.
+  // Las cinco palabras del estado vienen en la composición: aquí no se escribe ninguna.
   const ESTADOS = pantalla.estados;
 
-  async function alGuardarYBorrar() {
+  // Guardar **solo guarda**: lo que vuelve nunca trae `borrado`, así que de aquí no se
+  // sale de la pantalla por ninguna rama.
+  async function alGuardarCopia() {
     setAviso(null);
     setEstado(ESTADOS.GUARDANDO_COPIA);
-    aplica(await empezarDeNuevo.guardaCopiaYBorra());
+    aplica(await empezarDeNuevo.guardaCopia());
   }
 
   async function alBorrar() {
@@ -90,6 +100,9 @@ export function PantallaEmpezarDeNuevo({ pantalla, empezarDeNuevo, alVolver = nu
       </ScrollView>
 
       <View style={estilos.acciones}>
+        {/* La línea de estado va encima de las acciones: se lee antes de volver a tocar,
+            y es donde cae tanto la copia hecha como la que no se pudo hacer. */}
+        {aviso ? <Text style={[estilos.aviso, sans]}>{aviso}</Text> : null}
         {enEspera ? (
           <Text style={[estilos.espera, sans]}>
             {estado === ESTADOS.BORRANDO ? TEXTOS_DE_EMPEZAR_DE_NUEVO.borrando : TEXTOS_DE_EMPEZAR_DE_NUEVO.guardando}
@@ -99,7 +112,7 @@ export function PantallaEmpezarDeNuevo({ pantalla, empezarDeNuevo, alVolver = nu
             <Pressable
               testID={pantalla.testids.guardar}
               accessibilityLabel={TEXTOS_DE_EMPEZAR_DE_NUEVO.guardar}
-              onPress={alGuardarYBorrar}
+              onPress={alGuardarCopia}
               style={estilos.principal}
             >
               <Text style={[estilos.textoPrincipal, sans]}>{TEXTOS_DE_EMPEZAR_DE_NUEVO.guardar}</Text>
@@ -123,7 +136,6 @@ export function PantallaEmpezarDeNuevo({ pantalla, empezarDeNuevo, alVolver = nu
         >
           <Text style={[estilos.textoSalida, sans]}>{TEXTOS_DE_EMPEZAR_DE_NUEVO.dejarlo}</Text>
         </Pressable>
-        {aviso ? <Text style={[estilos.aviso, sans]}>{aviso}</Text> : null}
       </View>
     </View>
   );

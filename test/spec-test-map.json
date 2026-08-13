@@ -31968,6 +31968,592 @@
       "caso": "Un reemplazo del receptor de notificaciones que entrega de menos se pone rojo",
       "hueco_de_bateria": true,
       "nota": "Las cinco formas de que el reemplazo salga mal van medidas: sin acción de entrega, con acciones de más, sin la forma (habilitado y sin exportar), duplicado y ausente. Y el reemplazo tal y como lo escribe el plugin no da ningún problema, que es lo que separa «exigente» de «imposible de cumplir»."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado la cota, el tope de espera y la precisión exigida, cuando se busca dónde están escritos, entonces son constantes del paquete con su motivo, y la app las recibe inyectadas en lugar de llevar su propia copia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Los cuatro números de la apertura están declarados con su motivo y en un solo sitio",
+      "hueco_de_bateria": true,
+      "nota": "Los cuatro números y su motivo escrito al lado, incluido lo que cada uno declara sin medir: la cota es calibración pendiente y el tope no está medido. La precisión exigida se lee de RADIO_DE_REGRESO_M y no se copia."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el código entregado, cuando se buscan las cotas de frescura del punto de partida, entonces hay una sola constante y ninguna comparación que use un número distinto según la puerta.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Los cuatro números de la apertura están declarados con su motivo y en un solo sitio",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma contando las constantes de frescura declaradas en el módulo: si aparece una segunda, aquí salen dos. La asimetría por defecto queda prohibida y esto es lo que la pondría roja."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado un fijo sin marca de tiempo o sin precisión declarada, cuando se decide, entonces se descarta: lo que no se puede fechar no se puede acotar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un fijo sin marca, sin precisión o con la precisión peor que la exigida no ancla",
+      "hueco_de_bateria": true,
+      "nota": "Siete formas de fijo malo, cada una con su motivo, más el borde exacto de la precisión exigida, que sí ancla. Ninguna lanza: un fijo malo es una respuesta prevista del sensor."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado un fijo cuya precisión declarada es peor que la exigida, cuando se decide, entonces se descarta igual que si no existiera, venga de la puerta que venga.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un fijo sin marca, sin precisión o con la precisión peor que la exigida no ancla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida que se echa a andar con el permiso concedido, cuando el fijo puntual llega dentro de la cota, entonces la salida se abre con él y el origen del punto de partida queda anotado como `puntual`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Con la puntual dentro de la cota ancla ella y el origen queda anotado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida que se echa a andar con el permiso concedido, cuando el fijo puntual llega dentro de la cota, entonces la salida se abre con él y el origen del punto de partida queda anotado como `puntual`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un fijo puntual fresco ancla el punto de partida aunque no haya última conocida",
+      "hueco_de_bateria": true,
+      "nota": "ROJO A PROPÓSITO, y su rojo es correcto: decideElPuntoDePartida exige que la última conocida certificada sirva antes de mirar la puntual, así que sin ella no ancla nada por buena que sea. Es el estado del emulador wa-pixel, cuyo último fijo conocido es de 25 h 24 min. Dueño: fila 53, entrega 1 (SPEC-048-iter-1), wa-dev. No se ablanda: el caso afirma el criterio."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado un fijo puntual que llega pero cuya marca es más vieja que la cota, cuando se decide, entonces no ancla: se descarta exactamente igual que una última conocida vieja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Con la puntual rancia ancla la última conocida, y el respaldo abre la salida",
+      "hueco_de_bateria": true,
+      "nota": "Se usa la caché de 643,3 s que la medición del 13-ago-2026 encontró en wa-pixel, y se comprueba además que la salida se abre con el respaldo y anota su origen en el área."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el permiso concedido y una puntual que no trae nada dentro de la cota, cuando hay una última posición conocida que sí la cumple, entonces la salida se abre con ella y el origen queda anotado como `ultima-conocida`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Sin fijo puntual, la salida se abre con la última posición conocida",
+      "hueco_de_bateria": true,
+      "nota": "Sobre la orquestación entera y con las dos ramas: con la puntual respondiendo el origen es «puntual», sin ella «ultima-conocida». Es lo que hace afirmable el respaldo sin deducirlo de que la salida se abrió."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado ese mismo caso, cuando se leen las opciones con las que se pidió la última conocida, entonces llevan la edad máxima y la precisión exigida escritas, y ninguna de las dos queda por omisión.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "La cota, el tope y la precisión llegan del paquete y no de una copia de la app",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre lo que la orquestación le pide al módulo nativo, que es donde se vería la copia, y además se comprueba que la capa de plataforma no lleva ninguno de los dos números escrito a mano."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado un último fijo conocido de 25 h 24 min, cuando se echa a andar, entonces la salida no se abre y el motivo es `sensor-sin-responder`, con el texto honesto de que sin una posición no hay punto de partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Sin ninguna posición dentro de la cota no se ancla, y el motivo lo dice",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el permiso concedido y un proveedor que lanza al pedir el fijo, cuando se decide el motivo, entonces se decide consultando el estado del permiso y no interpretando el texto de la excepción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El motivo se decide consultando el permiso y no el texto de la excepción",
+      "hueco_de_bateria": true,
+      "nota": "El defecto medido: hasta esta fila cualquier excepción de la posición se archivaba como permiso-denegado con el permiso concedido. Se recorre con el texto literal que wa-pixel devolvía, «Current location is unavailable»."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el permiso de ubicación denegado, cuando se echa a andar, entonces la salida no se abre y el motivo es `permiso-denegado`: no cae a la última conocida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El motivo se decide consultando el permiso y no el texto de la excepción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el permiso que no se pudo preguntar, cuando se echa a andar, entonces el motivo sigue siendo `permiso-no-preguntable` y sigue viéndose distinto de denegado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El motivo se decide consultando el permiso y no el texto de la excepción",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida que no se pudo abrir, cuando se lee la marca de motivo, entonces dice una del vocabulario cerrado que ya existe y ninguna palabra nueva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Los motivos por los que una salida no se abre son un vocabulario cerrado",
+      "hueco_de_bateria": true,
+      "nota": "El vocabulario no crece con esta fila: las cuatro marcas que la apertura puede devolver se comprueban contra él en «El motivo se decide consultando el permiso y no el texto de la excepción»."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado un origen del punto de partida que no está en el vocabulario, cuando se abre la salida, entonces falla nombrando las dos puertas declaradas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un origen del punto que no está en el vocabulario falla nombrando las dos puertas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado esa línea de espera, cuando se lee, entonces es voz de aplicación, dice que se está buscando dónde estás, y no lleva barra, ni porcentaje, ni cuenta atrás, ni ninguna cifra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "La línea que se lee mientras se busca no lleva ninguna cifra",
+      "hueco_de_bateria": true,
+      "nota": "El texto vive en el paquete y no en la pantalla, que es lo que permite afirmar que no lleva cifras sin encender ningún aparato."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el toque en «Salir a andar» con el permiso concedido, cuando empieza la búsqueda de posición, entonces la pantalla lo dice de inmediato con una línea de espera; y cuando la apertura termina de la manera que sea, la línea desaparece.",
+      "nivel": "@app",
+      "fichero": "test/app/apertura-de-salida.yaml",
+      "caso": "La espera de la posición se dice y desaparece siempre",
+      "hueco_de_bateria": true,
+      "nota": "Lo que un flujo puede ver sin cronómetro es la ausencia después, que es estable; la presencia durante es una carrera contra el proveedor. Que la apertura no tarde más que el tope se mide a mano y se escribe con el número: la spec lo deja pendiente. CORREGIDO EN LA FILA 53: el bloque se ejecutaba antes de que la apertura terminara —la espera era extendedWaitUntil visible: salida-situacion, y la portada pinta esa marca siempre— y salía verde sin medir nada. Ahora se espera por en-marcha, que no existe hasta que la apertura terminó bien, y la ausencia de la línea se vuelve a afirmar sobre la portada reabierta, que es la pantalla que sí tiene dónde pintarla. La rama del motivo cuando la salida no se abre no la puede provocar un flujo y se afirma en test/nucleo/marcha.test.mjs."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida abierta, cuando se lee su marca de origen del punto, entonces dice de qué puerta salió, con vocabulario cerrado.",
+      "nivel": "@app",
+      "fichero": "test/app/apertura-de-salida.yaml",
+      "caso": "El punto de partida declara de qué puerta salió",
+      "hueco_de_bateria": true,
+      "nota": "CORREGIDO EN LA FILA 53: colgaba de un runFlow when visible: salida-punto-origen que se saltó en silencio tres tandas seguidas, y no podía cumplirse nunca donde estaba: cuando la salida se abre la portada se desmonta y esas marcas se van con ella. Ahora se afirman sin ningún when sobre la portada reabierta, donde la salida en curso vuelve del disco y el estado de React nace nulo. RIESGO QUE QUEDA: son marcaSuperpuesta de la fila 2 y esa fila no se ha medido; la fila 1 —salida-situacion y rotulo-estado— sí, en en-marcha.yaml y telon.yaml, y la portada no va a sangre, así que el riesgo de la esquina está descontado para esta pantalla."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida abierta con el punto de partida anclado, cuando llega el primer fijo cuya precisión declarada es suficiente y dentro del plazo de re-anclaje, entonces el punto de partida se sustituye por ese fijo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El primer fijo bueno dentro del plazo sustituye el punto de partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida ya re-anclada, cuando llega otro fijo mejor, entonces no se vuelve a re-anclar: el re-anclaje ocurre como mucho una vez por salida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El re-anclaje ocurre como mucho una vez por salida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida abierta cuyo primer fijo bueno llega pasado el plazo de re-anclaje, cuando llega, entonces el punto de partida no se mueve.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un fijo bueno que llega pasado el plazo no mueve el punto de partida",
+      "hueco_de_bateria": true,
+      "nota": "Con el borde exacto por sus dos lados: el fijo justo en el plazo sí re-ancla y el de un milisegundo después no."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado un fijo cuya precisión declarada es peor que la exigida, cuando llega dentro del plazo, entonces no re-ancla el punto de partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Un fijo con la precisión peor que la exigida no re-ancla",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida que ya se declaró alejada, cuando llega cualquier fijo, entonces el punto de partida es inmutable y no se re-ancla por ninguna vía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Después de alejarse el punto de partida es inmutable",
+      "hueco_de_bateria": true,
+      "nota": "Sobre la transición entera y sobre la función pura, con las cuatro condiciones del re-anclaje una a una: ya re-anclada, alejada, sin marca del ancla y fuera de plazo."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida abierta con el punto de partida `puntual`, cuando llega el primer fijo bueno, entonces también se re-ancla: la regla no distingue por el origen del punto.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El re-anclaje no distingue por el origen del punto",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida re-anclada, cuando se cierra la app y se vuelve a abrir, entonces el punto de partida que vuelve es el re-anclado y la salida sigue declarándose re-anclada.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una salida re-anclada vuelve del documento re-anclada y con el punto nuevo",
+      "hueco_de_bateria": true,
+      "nota": "Y la otra mitad, que es una consecuencia declarada y no un caso especial: una salida que no se re-ancló y pasa por disco ya no puede re-anclarse, porque la marca del ancla vive solo en memoria a propósito — el esquema declara exactamente dos marcas del sensor."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una partida guardada antes de esta entrega, cuando se levanta, entonces los cuatro campos nuevos se leen con su valor por defecto y la salida abierta sigue funcionando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Una partida guardada antes de esta fila se levanta sin los cuatro campos y sigue funcionando",
+      "hueco_de_bateria": true,
+      "nota": "Retrocompatibilidad sin migración, y un origen inventado en el documento se lee como no declarado en vez de propagarse."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado el esquema del área de salidas después de esta fila, cuando se enumeran sus campos nuevos, entonces son exactamente cuatro; y ninguno es una coordenada ni una marca de reloj.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "hueco_de_bateria": true,
+      "nota": "BLOQUEANTE (@privacidad). Sobre el documento congelado tras cien posiciones: los cuatro campos, su naturaleza —vocabulario cerrado, booleano, distancia y duración— y que la duración cabe dentro del plazo, que es lo que la distingue de un instante disfrazado."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida re-anclada, cuando se inspecciona el documento de partida, entonces la única coordenada que contiene sigue siendo el punto de partida, uno y no dos; y el anterior no está en ninguna parte: se sustituye, no se apila.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "El rastro de ubicación no se guarda nunca",
+      "hueco_de_bateria": true,
+      "nota": "BLOQUEANTE (@privacidad). Se cuenta el par de coordenadas del documento entero y se comprueba que el punto de la apertura ya no aparece: dos puntos separados por metros y segundos son el principio de una traza (RF-PRIV-002)."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado una salida cerrada y su telón leído, cuando se abre otra, entonces los cuatro campos nuevos mueren con la salida anterior, igual que el punto y las dos marcas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "Los cuatro campos del anclaje mueren con la salida",
+      "hueco_de_bateria": true,
+      "nota": "BLOQUEANTE (@privacidad)."
+    },
+    {
+      "spec": "SPEC-048-iter-1",
+      "criterio": "Dado `packages/nucleo/`, cuando se busca `Math.random`, `Date.now` o `new Date`, entonces no hay ninguno: la antigüedad del re-anclaje se calcula restando dos marcas del sensor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/salidas.test.mjs",
+      "caso": "El re-anclaje no lee el reloj: resta dos marcas del sensor",
+      "hueco_de_bateria": true,
+      "nota": "Y la misma secuencia de posiciones dos veces da documentos idénticos, re-anclaje incluido: es función de las posiciones y de nada más."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado una salida abierta y quien juega en el punto de partida, cuando se pide la cadencia del muestreo, entonces es por tiempo, aunque no haya ningún geofence de sitio debajo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "En el punto de partida la cadencia es por tiempo aunque no haya ningún geofence debajo",
+      "hueco_de_bateria": true,
+      "nota": "Con la contraprueba delante: sin el punto de partida en la firma, ese mismo descampado sale por distancia. Sin ella el caso mediría el trazado y no la decisión."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado los ocho mundos de referencia de `test/nucleo/mundo-de-prueba.mjs`, cuando se pide la cadencia en el punto de partida de cada uno, entonces sale por tiempo en los ocho, y no en seis.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "En el punto de partida de los ocho mundos de referencia la cadencia es por tiempo",
+      "hueco_de_bateria": true,
+      "nota": "Ocho de ocho, medido, y con la contraprueba que dice que mide algo: sin el punto de partida siguen saliendo seis por distancia, exactamente el número que la spec declara. Si ese seis cambia, ha cambiado el trazado de los mundos congelados y hay que volver a medirlo antes de leer el caso."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado quien se aleja del punto de partida, cuando la última posición queda a más del radio del regreso más el margen de cercanía, entonces la cadencia vuelve a ser por distancia.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "El radio de casa es el del regreso, y alejarse devuelve la cadencia por distancia",
+      "hueco_de_bateria": true,
+      "nota": "El radio es el del regreso y no el del geofence: lo que la cadencia rápida compra es que la permanencia del regreso pueda acumular, y con los 40 m del geofence quedaría un anillo de diez metros donde se cuenta el regreso y no llegan fijos."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado una posición en el borde del radio del regreso que entra y sale por el ruido del fijo, cuando se decide la cadencia, entonces la histéresis impide que se cambie de cadencia en cada muestra, igual que con los geofences de sitio.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La histéresis de casa es la misma que la de un sitio",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado una cadencia por tiempo decidida por el punto de partida, cuando se lee lo que devuelve la decisión, entonces no nombra ningún sitio y declara que la razón es el punto de partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "La cadencia decidida por el punto de partida no nombra ningún sitio y declara su razón",
+      "hueco_de_bateria": true,
+      "nota": "Y el vocabulario de razones es cerrado y son dos; fuera de las dos la razón es la nada y no una palabra inventada."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado una posición que está a la vez dentro del geofence de un sitio y cerca del punto de partida, cuando se decide la cadencia, entonces sale por tiempo una sola vez y el sitio nombrado es el sitio real.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Dentro de un geofence y cerca de casa a la vez, el sitio nombrado es el sitio real",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado una partida sin salida abierta, cuando se pide la cadencia, entonces se decide solo con los geofences del mapa activo, sin punto de partida y sin fallar.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Sin salida abierta la cadencia se decide solo con los geofences y no falla",
+      "hueco_de_bateria": true,
+      "nota": "Un índice ausente y una partida sin salida tienen que ser distinguibles: el punto de partida en nulo responde y uno mal formado falla nombrándolo."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado una salida que se abre, cuando se decide la cadencia por primera vez, entonces se decide con el punto de partida y antes de arrancar el servicio, como ya hacía.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Al abrir, la cadencia se decide con el punto de partida y antes de arrancar el servicio",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre la cadencia que llegó al módulo nativo al arrancar, no sobre la que quedó puesta: una suscripción que arranca por distancia y se corrige después se pierde justo los fijos que hacían falta."
+    },
+    {
+      "spec": "SPEC-044-iter-1",
+      "criterio": "Dado la superficie del paquete, cuando se busca por dónde entra el punto de partida a la decisión de cadencia, entonces entra por la firma de la decisión y no metiéndolo en el índice de geofences.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/llegadas.test.mjs",
+      "caso": "Sin salida abierta la cadencia se decide solo con los geofences y no falla",
+      "hueco_de_bateria": true,
+      "nota": "La separación es de forma: `sitiosConPosicion` no cambia y el punto de partida es un parámetro propio. El índice sigue conteniendo exactamente los núcleos, sus servicios y los parajes, que es lo que afirman los casos de `sitiosConPosicion` que ya existían y esta fila no toca."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado `app/plataforma/permisos.js`, cuando se lee la declaración nueva, entonces enumera una a una las vías por las que el sistema puede levantar este proceso, cada una con su clase, su tipo, la acción o el filtro que la descubre, quién la declara y su motivo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La lista de vías de despertar nombra cada una con su mecanismo y su motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado una entrada de la lista, cuando se lee, entonces dice si su mecanismo está medido o solo declarado, y el número de las declaradas sin medir se dice con el número delante en vez de disolverse.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La lista de vías de despertar nombra cada una con su mecanismo y su motivo",
+      "hueco_de_bateria": true,
+      "nota": "Diez vías, tres con el mecanismo medido y siete declaradas sin medir, y las siete lo dicen en su propio motivo. Bajar el número es la buena noticia y se hace con la medida delante; subirlo también, pero se dice."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado los tres adyacentes que hoy existen, cuando se leen sus entradas, entonces cada una nombra lo que la declara y por qué está, y ninguna se da por inocua sin decir si se midió.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La lista de vías de despertar nombra cada una con su mecanismo y su motivo",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado la lista, cuando se busca una excepción por clase, un `skip` o una lista de tolerados sin motivo, entonces no hay ninguna: todo lo que está, está nombrado y explicado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La lista de vías de despertar nombra cada una con su mecanismo y su motivo",
+      "hueco_de_bateria": true,
+      "nota": "Se lee sobre la declaración misma, sin cadenas ni comentarios: los motivos hablan de lo que se tolera y buscar la palabra sobre el texto entero convertiría la explicación en el fallo."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado el manifiesto fusionado de una compilación de depuración, cuando se enumeran sus receptores y sus servicios con sus filtros, entonces todos los que pueden levantar el proceso están nombrados en la lista, y uno sin nombrar pone la batería roja.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Nada de esta app se despierta con la app cerrada, y la lista de vías lo enumera",
+      "hueco_de_bateria": true,
+      "nota": "Las dos direcciones son rojo, igual que con el arrastre de permisos: uno que aparezca sin estar nombrado y uno de la lista que ya no aparezca. Solo se registra si hay manifiesto fusionado."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado un manifiesto de ejemplo con un servicio exportado con filtro que la lista no nombra, cuando se le aplica la lectura de la guarda, entonces lo señala nombrando la clase y el filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Un servicio exportado con filtro que la lista no nombra se señala con su clase y su filtro",
+      "hueco_de_bateria": true,
+      "nota": "Con el artefacto de verdad no se puede medir, porque el artefacto está bien. Y la lectura no se conforma con la clase: el tipo es parte de la vía, así que un receptor con el nombre de un servicio declarado sigue sin estar nombrado."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado la guarda anterior, que solo recortaba bloques `<receiver>`, cuando se le aplica un manifiesto cuyo único componente es un servicio, entonces la lectura nueva lo ve y la vieja no.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La lectura de vías enumera los servicios y no solo los receptores",
+      "hueco_de_bateria": true,
+      "nota": "La regresión que esta fila viene a impedir y que se ablandaría sola: bastaría con que el barrido volviera a mirar solo <receiver> para que un servicio con filtro pasara en verde sin que nadie hubiera decidido nada."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado el manifiesto fusionado tras esta fila, cuando se busca `com.google.firebase.iid.FirebaseInstanceIdReceiver`, entonces ya no puede recibir el mensaje de c2dm.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Las tres piezas de FCM no llegan al manifiesto fusionado, y la pareja queda cerrada",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado ese mismo manifiesto, cuando se buscan los dos servicios que declaran `com.google.firebase.MESSAGING_EVENT`, entonces están neutralizados los dos, y no uno.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Las tres piezas de FCM no llegan al manifiesto fusionado, y la pareja queda cerrada",
+      "hueco_de_bateria": true,
+      "nota": "Y se afirma por el filtro además de por la clase: mientras alguien atienda MESSAGING_EVENT la vía sigue abierta, sea quien sea quien lo haga."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado un manifiesto de ejemplo en el que se neutraliza solo el de Expo, cuando se le aplica la guarda, entonces se pone roja: el de Firebase resolvería en su lugar por el mismo filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Un manifiesto con solo el servicio de Expo neutralizado se pone rojo",
+      "hueco_de_bateria": true,
+      "nota": "El ejemplo es exactamente el arreglo a medias, y las dos guardas se ponen rojas por él: la del filtro nombrando a quien sigue atendiendo, y la de la lista cerrada nombrando la clase sin nombrar."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado las tres piezas declaradas retiradas, cuando se leen, entonces dicen si la evidencia de su descubrimiento es directa o indirecta, y ninguna aparece a la vez como vía viva.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Las tres piezas de FCM se declaran retiradas y la pareja se cierra entera",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado todo el código vivo de `app/` y `packages/`, cuando se buscan las llamadas que piden un token de push, entonces no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "Nada del código vivo pide un token de push",
+      "hueco_de_bateria": true,
+      "nota": "La premisa de la neutralización, como guarda y no como comentario: se pone roja el día que alguien pida un token, porque neutralizar una vía que sí se usa dejaría las notificaciones push rotas en silencio."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado el árbol y `app.json`, cuando se busca el fichero de servicios de Firebase, entonces no hay `google-services.json` ni `googleServicesFile` declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "No hay fichero de servicios de Firebase ni declarado ni en el árbol",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado la cabecera del plugin, cuando se lee, entonces dice cómo vuelven declaradas las tres piezas el día que el producto adopte push, y que ese día es una decisión de producto y no un ajuste de configuración nativa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "La cabecera del plugin dice cómo vuelven las tres piezas el día que haya push",
+      "hueco_de_bateria": true,
+      "nota": "Y que la unidad de neutralización es el filtro y no la clase, y que el prefijo tools se comprueba antes de aplicar nada: sin él la retirada se escribe igual y no retira nada."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado la app tras la neutralización, cuando entrega un aviso local, entonces lo entrega igual que antes: en primer plano, al momento y sin disparador.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "El notificador de Expo entrega el aviso al momento y sin disparador",
+      "hueco_de_bateria": true,
+      "nota": "Guarda verde desde SPEC-052 y esta fila no la toca: está aquí para que se vea que no enrojeció al retirar las tres piezas de FCM."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado `test/nucleo/plugins-declarados.test.mjs`, cuando corre contra el plugin cambiado, entonces la huella nombrada coincide con la del código nuevo y el `cometido` nombra las piezas que ahora toca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plugins-declarados.test.mjs",
+      "caso": "Ningún plugin ha cambiado de forma sin que alguien lo vuelva a nombrar",
+      "hueco_de_bateria": true,
+      "nota": "Huella a3e9ed77ba0d38ff → 1e093aec465233d0. La guarda no se ablandó ni se le añadió tolerancia: se renombró la huella con el cometido al día, que es el mecanismo para el que existe."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado ese mismo fichero, cuando se lee el `cometido` declarado del plugin, entonces nombra las tres piezas de FCM, el filtro por el que se descubren y el prefijo tools.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plugins-declarados.test.mjs",
+      "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
+      "hueco_de_bateria": true,
+      "nota": "`nombraAlMenos` gana tres piezas: sin ellas el cometido podría renombrarse sin decir que el plugin pasó de neutralizar dos receptores a neutralizar dos receptores y tres piezas de FCM, y la huella cambia igual."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado la entrada de `RECEIVE_BOOT_COMPLETED` en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE`, cuando se lee su `aCambio`, entonces nombra también lo neutralizado en esta fila y sigue conteniendo literalmente la expresión «receptor de tareas se sustituye».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Lo que se hace a cambio de un permiso impuesto se cumple de verdad",
+      "hueco_de_bateria": true,
+      "nota": "Y desde esta fila el a-cambio cierra en la propiedad ancha —«con la app cerrada»— y no solo en la estrecha: uno que cerrara en la estrecha estaría admitiendo el permiso por media promesa otra vez."
+    },
+    {
+      "spec": "SPEC-053",
+      "criterio": "Dado un clon sin compilar, sin manifiesto fusionado y sin `Info.plist` generado, cuando corre la batería de núcleo, entonces los casos del manifiesto no se registran y la constancia dice `mirado: false`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La guarda del manifiesto generado deja constancia de qué pudo mirar",
+      "hueco_de_bateria": true,
+      "nota": "Vale para los casos que miran el artefacto. Los cuatro que esta fila añade sobre la lista declarada y sobre manifiestos de ejemplo sí se registran siempre: no miran ningún artefacto, miran la lista y la lectura con la que se mira."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado la pantalla de empezar de nuevo, cuando se enumeran sus acciones, entonces siguen siendo tres, y la primera solo guarda.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia guardada se puede volver a abrir",
+      "hueco_de_bateria": true,
+      "nota": "Guardar devuelve `borrado: false` y `destino: null`, y la partida sigue en el almacén; borrar es un segundo gesto y es el único camino por el que desaparece."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado quien elige guardar una copia, cuando la hoja del sistema se resuelve de la manera que sea, entonces la partida no se borra.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Guardar una copia no borra la partida por ninguna de sus tres ramas",
+      "hueco_de_bateria": true,
+      "nota": "Las tres ramas —copia hecha, hoja cancelada y exportación fallida— se recorren enteras y las tres dejan la partida byte a byte igual, sin marca de borrado, con los binarios y volviendo a abrirse. La defensa no es una rama mejor: es que ninguna termina borrando."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado quien elige guardar una copia y cancela la hoja del sistema, incluido con el botón atrás, cuando vuelve a la pantalla, entonces la partida sigue entera y las tres acciones están.",
+      "nivel": "@app",
+      "fichero": "test/app/empezar-de-nuevo-copia.yaml",
+      "caso": "La copia se ofrece pero no se hace sola",
+      "hueco_de_bateria": true,
+      "nota": "El rojo de este flujo se apaga afirmando lo nuevo y no suavizando lo viejo: se hace el mismo gesto que destapó el defecto —tocar guardar, cancelar con atrás— y se comprueba la partida entera por tres sitios, incluido matar el proceso y volver a abrir, que es donde el defecto se veía como A1P1 con el contador en 1/5."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado quien elige guardar una copia y la copia se hace, cuando vuelve a la pantalla, entonces una línea dice que la copia está hecha y las tres acciones siguen estando.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La copia hecha se dice en una línea y las tres acciones siguen estando",
+      "hueco_de_bateria": true,
+      "nota": "La línea dice «hecha» y no dónde: la app empaqueta el fichero y se lo da a la hoja del sistema, y adónde fue a parar no lo sabe. Y sin ninguna cifra, como el resto de los textos de la pantalla."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado la copia ya hecha, cuando se lee la acción destructiva, entonces su texto no afirma que no se ha guardado nada: dice lo que hace, y lo dice igual se haya guardado o no.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "La acción destructiva no afirma que no se ha guardado nada",
+      "hueco_de_bateria": true,
+      "nota": "Y sigue siendo la hueca y no la principal: el desacople no asciende lo destructivo."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado la partida borrada, cuando se busca cómo ocurrió, entonces ocurrió tras el gesto explícito de borrar y nunca al resolverse la hoja del sistema.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Empezar de nuevo no se construye sin la copia, sin el almacén o sin el núcleo entero",
+      "hueco_de_bateria": true,
+      "nota": "Se afirma sobre la superficie: lo que la pantalla expone son cinco rutas y `guardaCopiaYBorra` no está en ninguna, ni con su nombre ni en el código. Mientras exista una sola función que guarde y borre, alguien la puede llamar."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado un borrado terminado, cuando se comprueba lo que queda, entonces no queda la copia de trabajo de la caché, y sí quedan intactos los ficheros que quien juega guardó fuera.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Un borrado terminado se lleva la copia de trabajo de la caché",
+      "hueco_de_bateria": true,
+      "nota": "El residuo medido: 1,78 MB de partida en cache/copias con la partida ya borrada. Se limpia dentro del borrado y solo esa carpeta; una limpieza que falla no convierte el borrado en un fallo, y sin la limpieza inyectada el borrado sigue funcionando."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado el vocabulario de estados de la pantalla, cuando se enumera, entonces gana `copia-guardada` y sigue sin tener ninguno de confirmación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "No hay segundo aviso, ni casilla, ni texto que teclear, ni cuenta atrás",
+      "hueco_de_bateria": true,
+      "nota": "Cinco estados, y la palabra nueva no es una confirmación: es donde para una copia recién hecha. Se exige además al construir, porque un núcleo con el vocabulario viejo dejaría la pantalla anunciando un estado indefinido justo después de guardar."
+    },
+    {
+      "spec": "SPEC-040-iter-1",
+      "criterio": "Dado la exportación que falla, cuando termina, entonces la partida sigue entera y se dice en una línea, como ya estaba.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/borrado.test.mjs",
+      "caso": "Una exportación que falla antes de borrar deja la partida entera y sin marca",
+      "hueco_de_bateria": true,
+      "nota": "La línea ya no habla de borrar, y no es un descuido: desde que guardar solo guarda, decir «no se ha borrado nada» nombraría un borrado que este camino no podía hacer de ninguna manera."
     }
   ]
 }

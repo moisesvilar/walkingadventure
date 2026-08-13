@@ -16,6 +16,9 @@
 
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { TEXTO_MIENTRAS_SE_BUSCA } from '@walkingadventure/nucleo/partida/salidas.js';
+
 import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
@@ -39,6 +42,7 @@ function Accion({ testID, texto, onPress, secundaria = false }) {
  */
 export function PantallaPortada({
   portada,
+  buscando = false,
   alVerQueSeCuenta = null,
   alSalirSinMas = null,
   alSeguir = null,
@@ -73,16 +77,26 @@ export function PantallaPortada({
             <Text style={estilos.tarjetaTitulo}>{portada.aMedias.titulo}</Text>
             {portada.aMedias.aventura ? <Text style={estilos.tarjetaLinea}>{portada.aMedias.aventura}</Text> : null}
             {portada.aMedias.donde ? <Text style={estilos.tarjetaLinea}>{portada.aMedias.donde}</Text> : null}
-            <Accion testID="a-medias-seguir" texto={portada.aMedias.acciones[0].texto} onPress={alSeguir} />
+            {buscando ? null : <Accion testID="a-medias-seguir" texto={portada.aMedias.acciones[0].texto} onPress={alSeguir} />}
             {/* Sin «¿seguro?»: cerrar una salida no destruye nada, produce un desenlace. */}
-            <Accion testID="a-medias-dejarlo" texto={portada.aMedias.acciones[1].texto} onPress={alDejarloAqui} secundaria />
+            {buscando ? null : <Accion testID="a-medias-dejarlo" texto={portada.aMedias.acciones[1].texto} onPress={alDejarloAqui} secundaria />}
           </View>
         ) : null}
 
-        <View style={estilos.salidas}>
-          <Accion testID="ver-que-se-cuenta" texto={accionDe('ver-que-se-cuenta').texto} onPress={alVerQueSeCuenta} />
-          <Accion testID="salir-sin-mas" texto={accionDe('salir-sin-mas').texto} onPress={alSalirSinMas} />
-        </View>
+        {/* Mientras se busca la posición **las acciones se sustituyen por una línea**, y no
+            se quedan puestas a medias: un botón de salir que sigue ahí durante la espera es
+            un botón que se toca dos veces, y uno de cerrar la salida es peor. La línea no
+            lleva barra, ni porcentaje, ni cuenta atrás: la espera está acotada por un tope,
+            pero un tope no es una promesa que se pueda enseñar. Las puertas del pie siguen
+            estando, que es la única salida de esta pantalla mientras dura. */}
+        {buscando ? (
+          <Text testID="portada-buscando" style={estilos.espera}>{TEXTO_MIENTRAS_SE_BUSCA}</Text>
+        ) : (
+          <View style={estilos.salidas}>
+            <Accion testID="ver-que-se-cuenta" texto={accionDe('ver-que-se-cuenta').texto} onPress={alVerQueSeCuenta} />
+            <Accion testID="salir-sin-mas" texto={accionDe('salir-sin-mas').texto} onPress={alSalirSinMas} />
+          </View>
+        )}
       </ScrollView>
 
       <View style={estilos.puertas}>
@@ -114,6 +128,7 @@ const estilos = StyleSheet.create({
   tarjetaTitulo: { fontSize: 18, color: TINTA },
   tarjetaLinea: { fontSize: 14, color: TINTA, lineHeight: 20 },
   salidas: { gap: 12 },
+  espera: { fontSize: 15, color: LAPIZ, textAlign: 'center', paddingVertical: 18 },
   accion: { paddingVertical: 14, paddingHorizontal: 20, borderWidth: 1, borderColor: TINTA, borderRadius: 4, alignItems: 'center' },
   accionSecundaria: { borderColor: LAPIZ },
   accionTexto: { fontSize: 16, color: TINTA },

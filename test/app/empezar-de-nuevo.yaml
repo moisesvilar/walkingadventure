@@ -115,12 +115,26 @@ appId: com.walkingadventure.app
 # El orden y el peso van en el dato; lo que se mira aquí es que las tres están y que la
 # destructiva no es la que se toca sin querer.
 
+#
+# Los textos son los de SPEC-040-iter-1, y los dos primeros cambiaron con motivo: guardar ya
+# no es «primero» de nada —no encadena ningún segundo paso— y borrar ya no puede afirmar «sin
+# guardar nada», porque justo después de guardar una copia eso sería falso. Y ojo con el
+# primero: **«Guardar una copia» es también el texto de una fila de A6P6**, así que la
+# afirmación se ancla a esta pantalla con su identificador y con la ausencia de la lista de
+# ajustes; sin anclarla, este tramo pasaría sin haber llegado a A6P7.
+
+- assertVisible:
+    id: 'empezar-de-nuevo'
+- assertNotVisible:
+    id: 'ajustes-lista'
 - assertVisible:
     id: 'empezar-de-nuevo-guardar'
-- assertVisible: 'Guardar una copia primero'
+- assertVisible: 'Guardar una copia'
+- assertNotVisible: 'Guardar una copia primero'
 - assertVisible:
     id: 'empezar-de-nuevo-borrar'
-- assertVisible: 'Borrar sin guardar nada'
+- assertVisible: 'Borrar la partida'
+- assertNotVisible: 'Borrar sin guardar nada'
 - assertVisible:
     id: 'empezar-de-nuevo-dejarlo'
 - assertVisible: 'Dejarlo como está'

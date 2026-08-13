@@ -35,7 +35,7 @@ import { montaLaSalida } from './marcha/salida-montada.js';
 // `View` corriente y dejaba la cabecera del arranque bajo la barra de estado: es el que
 // respeta los insets en las dos plataformas.
 import { AreaSegura } from './plataforma/area-segura.jsx';
-import { comparteConElSistema, eligeConElSistema } from './plataforma/copia-del-sistema.js';
+import { comparteConElSistema, eligeConElSistema, limpiaCopiasDeTrabajo } from './plataforma/copia-del-sistema.js';
 import { creaFicherosDelDispositivo, directorioDeDocumentos } from './plataforma/ficheros.js';
 import { mundoDeRevision } from './nucleo/mundo-de-revision.js';
 import {
@@ -142,7 +142,10 @@ export function App() {
   // A6P6, que a su vez cuelga de la portada—; lo que además sigue colgando de aquí, porque
   // es del ciclo de vida de la app y no de ninguna pantalla, es **rematar el borrado que un
   // cierre dejó a medias**.
-  const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
+  // La limpieza de la copia de trabajo entra por la puerta como todo lo que toca el
+  // sistema de ficheros: `app/datos/` no cita la plataforma, y por eso el borrado puede
+  // seguir corriéndose entero en `node --test`.
+  const [empezarDeNuevo] = useState(() => creaEmpezarDeNuevo({ almacen, copia, limpiaCopiasDeTrabajo, nucleo: NUCLEO_DE_EMPEZAR_DE_NUEVO }));
   // La partida en disco, de la fila 47: congelarla en los cortes del juego y levantarla al
   // abrir. Antes de esta fila el estado se componía en memoria y se moría al cerrar.
   const [partidaGuardada] = useState(() => creaPartidaGuardada({ almacen, nucleo: NUCLEO_DE_LA_PARTIDA_GUARDADA }));
@@ -941,7 +944,19 @@ export function App() {
   // Con la salida echada a andar ya no hay portada: se anda. Es el momento en marcha sobre el
   // mapa que la partida levantó, y **no se dibuja envuelto en la raíz**: la lámina va a sangre,
   // de borde a borde, y el área segura le comería el borde superior.
-  if (partida && salida) {
+  //
+  // Las dos condiciones dicen cosas distintas y hacen falta las dos. `salida` es «se echó a
+  // andar **en esta sesión**», que es lo que distingue andar de abrir la app con una salida a
+  // medias de ayer —esa se ofrece desde la tarjeta de la portada y no metiéndote en el mapa—.
+  // Y `enCurso()` es «y sigue andando», que es lo que faltaba: de las tres puertas de cierre,
+  // las dos que se tocan devuelven el flag a nulo ellas mismas, pero **el regreso no lo toca
+  // nadie** porque no lo dispara ningún toque —lo dispara una posición dentro de
+  // `recibeLaPosicion`—. Medido el 13-ago-2026 en el aparato, la primera vez que el telón por
+  // regreso fue alcanzable: la salida se cerraba bien, el flag se quedaba puesto y lo que se
+  // veía era esta rama con el sensor ya parado, o sea el aviso de «no sé por dónde andas». El
+  // telón solo aparecía reabriendo la app. Quien decide qué se ve es el estado, y esta línea
+  // es donde eso se cumple o no.
+  if (partida && salida && laSalida?.enCurso()) {
     return (
       <EnMarchaMontado
         mundo={elMundo.documento}
@@ -959,6 +974,13 @@ export function App() {
         // **Acercarse a un geofence no se dibuja**: si se dibujara sería el medidor de
         // progreso que `design-system.md` prohíbe, y un motivo para mirar el móvil andando.
         cadencia={laSalida?.cadencia() ?? null}
+        // El último fallo recogido al recibir una posición, que hasta la fila 53 **no lo
+        // consumía nadie**. Una posición que revienta al entrar en el núcleo deja la salida
+        // sorda —no avanza el regreso, no avanza el plazo— y desde el aparato se veía
+        // exactamente igual que una salida sana: mapa pintado, marca moviéndose y ningún
+        // telón. Va a una marca y no a la pantalla porque no es del juego: es la
+        // instrumentación que hace que la próxima vez se vea sin logcat.
+        averia={laSalida?.averia() ?? null}
         paso={pasoDeSalida}
       />
     );

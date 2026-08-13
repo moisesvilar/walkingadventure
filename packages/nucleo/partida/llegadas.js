@@ -37,6 +37,11 @@ import { PROTAGONISTAS } from './deformacion.js';
 import { apuntaLoQueSeCuenta } from './diario.js';
 import { paraLaCapaQuePinta } from './nucleos.js';
 import { exigeMapaId } from './pasos.js';
+// El radio del punto de partida se **lee** del módulo del regreso y no se copia aquí:
+// lo que la cadencia rápida en casa compra es que la permanencia del regreso pueda
+// acumular, y esa permanencia se cuenta dentro de ese radio. Dos números que significan
+// lo mismo se desincronizan.
+import { RADIO_DE_REGRESO_M } from './regreso.js';
 import { creaVentanaDeParada, validaLlegadaPorGeofence } from './ritmo.js';
 import {
   MODOS,
@@ -220,6 +225,15 @@ export const IDS_DE_CADENCIA = congelaHondo([CADENCIAS.POR_DISTANCIA, CADENCIAS.
  * entera. Existe porque `distanceInterval` es un filtro duro del sensor —parada no llega
  * ninguna posición, medido: **un fijo en trescientos segundos** con GPS perfecto— y una
  * permanencia se cuenta sobre posiciones que llegan.
+ *
+ * **La medida de arriba se queda corta, y la nueva no la borra**: el 13-ago-2026, en el
+ * emulador `wa-pixel`, parada y con cadencia `por-distancia` llegaron **cero fijos en
+ * 5 min 56 s** —nueve muestras con la última marca congelada en el mismo milisegundo— y el
+ * primero llegó a los **355,8 s**, solo al mover la posición. La contraprueba cierra el
+ * mecanismo por el otro lado: parada dentro de un geofence con cadencia `por-tiempo`, la
+ * marca avanza en cada muestra (+25 a +35 s) y el último metro propio no se mueve ni un
+ * milisegundo. Así que esto no es una mejora de latencia: es **condición necesaria** para
+ * que la permanencia del regreso acumule y el telón pueda caer.
  */
 export const CADENCIA_CERCA_S = 5;
 
@@ -232,8 +246,14 @@ export const CADENCIA_CERCA_S = 5;
 export const MARGEN_DE_CERCANIA_M = 20;
 
 /**
+ * Las razones por las que la cadencia puede ser la rápida. **Dos y cerradas**: un sitio del
+ * mundo debajo, o el punto de partida de la salida abierta cerca.
+ */
+export const RAZONES_DE_CADENCIA = congelaHondo(['sitio', 'punto-de-partida']);
+
+/**
  * Con qué cadencia se pide la posición siguiente: por distancia mientras no hay ningún
- * geofence debajo, por tiempo mientras lo hay.
+ * geofence debajo ni casa cerca, por tiempo mientras lo hay.
  *
  * Vive aquí y no en la app **porque es una decisión de juego y no de sensor**: lo que la
  * gobierna es dónde están los sitios a los que se llega, y la app solo aplica lo que sale.
@@ -241,17 +261,30 @@ export const MARGEN_DE_CERCANIA_M = 20;
  * entrega un fijo por la cadencia de distancia, así que el halo no compraría nada y en un
  * mundo urbano denso dejaría el sensor a cinco segundos casi toda la salida.
  *
+ * **El punto de partida entra por aquí, por la firma, y no al índice de geofences**, y esa
+ * es la mitad importante de la decisión: el índice alimenta a la vez la cadencia y las
+ * llegadas, así que meterlo ahí convertiría el portal de casa en un sitio al que se llega,
+ * con su escena y su ficha, y eso no lo ha decidido nadie. La separación es **de forma**:
+ * hacerlo mal exige escribirlo aposta. Su radio es el del regreso y no el de geofence,
+ * porque lo que se compra es que la permanencia del regreso pueda acumular; con los 40 m
+ * del geofence quedaría un anillo de diez metros dentro del cual se cuenta el regreso y no
+ * llegan fijos, que es el agujero de hoy en pequeño.
+ *
  * @param {object} opciones
  *   `posicion` la última conocida, en metros del mundo —al abrir una salida es el punto de
  *   partida, que es lo que evita esperar a un fijo que no va a llegar—; `sitios` el índice
  *   de geofences del mapa activo, el que devuelve `sitiosConPosicion`; `vigente` la cadencia
  *   que está puesta ahora mismo, de la que sale la histéresis; `metrosPorDistancia` la
  *   cadencia por distancia de SPEC-048, que es decisión de batería de aquella fila y esta no
- *   la toca: entra por la firma en lugar de copiarse aquí.
- * @returns `{ modo, segundos, metros, sitio, distanciaM }`. Por distancia `segundos` es
- *   `null` y por tiempo lo es `metros`: una cadencia con las dos puestas no existe.
+ *   la toca: entra por la firma en lugar de copiarse aquí; `puntoDePartida` el de la salida
+ *   abierta, en metros del mundo, o `null` cuando no hay ninguna abierta —que es un estado
+ *   normal de la partida y no un cableado a medias—.
+ * @returns `{ modo, segundos, metros, sitio, distanciaM, razon }`. Por distancia `segundos`
+ *   es `null` y por tiempo lo es `metros`: una cadencia con las dos puestas no existe. Con
+ *   la rápida decidida por el punto de partida, `sitio` es `null` y la razón lo dice: a un
+ *   sitio se le nombra, y un sitio fantasma en la respuesta acabaría en algún índice.
  */
-export function cadenciaDeMuestreo({ posicion, sitios, vigente = null, metrosPorDistancia }) {
+export function cadenciaDeMuestreo({ posicion, sitios, vigente = null, metrosPorDistancia, puntoDePartida = null }) {
   if (!posicion || !Number.isFinite(posicion.x) || !Number.isFinite(posicion.y)) {
     throw new Error(
       `la cadencia del muestreo se decide sobre la última posición conocida y llegó ${JSON.stringify(posicion) ?? String(posicion)}: ` +
@@ -273,6 +306,12 @@ export function cadenciaDeMuestreo({ posicion, sitios, vigente = null, metrosPor
   if (vigente !== null && !IDS_DE_CADENCIA.includes(vigente)) {
     throw new Error(`la cadencia vigente llega como ${JSON.stringify(vigente) ?? String(vigente)} y las declaradas son ${IDS_DE_CADENCIA.join(', ')}`);
   }
+  if (puntoDePartida !== null && (!Number.isFinite(puntoDePartida?.x) || !Number.isFinite(puntoDePartida?.y))) {
+    throw new Error(
+      `el punto de partida de la salida abierta llega como ${JSON.stringify(puntoDePartida) ?? String(puntoDePartida)} y se espera { x, y } en metros del mundo: ` +
+      'sin salida abierta se pasa en nulo, que es lo que distingue «no hay ninguna» de «hay una y no se sabe dónde empezó»',
+    );
+  }
 
   // El más cercano, que es el mismo criterio con el que se ordenan dos llegadas validadas a
   // la vez: dos criterios distintos para lo mismo es cómo se desincronizan.
@@ -286,15 +325,25 @@ export function cadenciaDeMuestreo({ posicion, sitios, vigente = null, metrosPor
 
   // Entrar cuesta el radio; salir, el radio más el margen. Esa asimetría es toda la
   // histéresis, y sin ella la suscripción se volvería a pedir en cada muestra del borde.
+  // **La misma para las dos razones**: un fijo ruidoso en el borde de casa entraría y
+  // saldría igual que en el borde de un sitio.
   const limite = vigente === CADENCIAS.POR_TIEMPO ? MARGEN_DE_CERCANIA_M : 0;
-  const dentro = cerca !== null && cerca.distanciaM <= cerca.radioM + limite;
+  const enUnSitio = cerca !== null && cerca.distanciaM <= cerca.radioM + limite;
+  const enCasa = puntoDePartida !== null
+    && Math.hypot(posicion.x - puntoDePartida.x, posicion.y - puntoDePartida.y) <= RADIO_DE_REGRESO_M + limite;
+  const dentro = enUnSitio || enCasa;
 
   return congelaHondo({
     modo: dentro ? CADENCIAS.POR_TIEMPO : CADENCIAS.POR_DISTANCIA,
     segundos: dentro ? CADENCIA_CERCA_S : null,
     metros: dentro ? null : metrosPorDistancia,
-    sitio: dentro ? cerca.nombre : null,
+    // El sitio nombrado es **el sitio real y solo él**: estar a la vez dentro de un
+    // geofence y cerca de casa da una sola cadencia por tiempo, con el nombre del sitio.
+    sitio: enUnSitio ? cerca.nombre : null,
     distanciaM: cerca === null ? null : cerca.distanciaM,
+    // Por qué la rápida, cuando lo es. El sitio manda sobre casa al declararla, por la
+    // misma razón por la que es él quien se nombra.
+    razon: enUnSitio ? 'sitio' : (enCasa ? 'punto-de-partida' : null),
   });
 }
 

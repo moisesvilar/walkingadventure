@@ -89,9 +89,16 @@ const LOS_PLUGINS = [
     fichero: 'retira-permisos-prohibidos.js',
     exporta: 'retiraPermisosProhibidos',
     mods: ['withAndroidManifest', 'withInfoPlist'],
-    huella: 'a3e9ed77ba0d38ff',
-    cometido: 'Limpia del manifiesto fusionado y del Info.plist generado lo que esta app no declara y llega por las librerías: los dos permisos prohibidos de Android, los modos de fondo de iOS fuera de la lista blanca y las acciones de arranque de los dos receptores que las escuchaban — el receptor de tareas, que se queda sin ningún intent-filter, y el receptor de notificaciones, que conserva solo su acción de entrega.',
-    nombraAlMenos: ['permisos prohibidos', 'modos de fondo', 'receptor de tareas', 'receptor de notificaciones'],
+    huella: '1e093aec465233d0',
+    cometido: 'Limpia del manifiesto fusionado y del Info.plist generado lo que esta app no declara y llega por las librerías: los dos permisos prohibidos de Android, los modos de fondo de iOS fuera de la lista blanca, las acciones de arranque de los dos receptores que las escuchaban — el receptor de tareas, que se queda sin ningún intent-filter, y el receptor de notificaciones, que conserva solo su acción de entrega — y, desde SPEC-053, las tres piezas de FCM, que se retiran enteras porque los dos servicios se descubren por el filtro MESSAGING_EVENT y cerrar solo uno deja al otro resolviendo en su lugar; y grita si el manifiesto generado no declara el espacio de nombres tools, sin el cual nada de esto retira nada.',
+    nombraAlMenos: [
+      'permisos prohibidos', 'modos de fondo', 'receptor de tareas', 'receptor de notificaciones',
+      // Lo que la fila 53 le añade, y por lo mismo que la 52 estrenó este campo: el plugin
+      // pasó de neutralizar dos receptores a neutralizar dos receptores **y tres piezas de
+      // FCM**, y sin nombrarlas aquí el cometido podría renombrarse sin decirlo. La unidad
+      // que hay que nombrar es el filtro y no la clase, porque es lo que decide la forma.
+      'piezas de FCM', 'MESSAGING_EVENT', 'tools',
+    ],
   },
 ];
 

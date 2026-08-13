@@ -250,3 +250,87 @@ describe('Lo que el plugin de configuración nativa declara de sí mismo', () =>
     );
   });
 });
+
+// ── La vía de push, cerrada por la pareja ──────────────────────────────────────
+//
+// SPEC-053. Las tres piezas de FCM —el receptor de c2dm y los **dos** servicios que declaran
+// `com.google.firebase.MESSAGING_EVENT`— se retiran enteras, y eso solo se puede hacer sin
+// romper nada porque **la acción no la usa nadie**. Esa premisa es lo que se guarda aquí: si
+// algún día alguien pide un token de push, deja de ser cierta y las tres vías hay que
+// reabrirlas, que es una decisión de producto con su fila y no un ajuste nativo.
+//
+// La diferencia con SPEC-052 es exactamente esta y por eso va escrita: allí la acción estaba
+// **en uso** —la entrega de avisos— y quitarle el filtro habría dejado la app muda en
+// silencio; aquí quitar el bloque entero no le quita nada a nadie, y esta guarda es lo que lo
+// mantiene cierto.
+
+/** Las llamadas con las que se pide un token de push. Ninguna aparece hoy, y esa es la premisa. */
+const LO_QUE_PIDE_UN_TOKEN = [
+  'getExpoPushTokenAsync',
+  'getDevicePushTokenAsync',
+];
+
+describe('La vía de push está cerrada porque no la usa nadie', () => {
+  test('Nada del código vivo pide un token de push', () => {
+    // **La premisa de la neutralización, como guarda y no como comentario.** Se pone roja el
+    // día que alguien pida un token: neutralizar una vía que sí se usa dejaría las
+    // notificaciones push rotas en silencio, que es la forma de fallo que este repo ya ha
+    // pagado una vez con el receptor de avisos.
+    const apariciones = [];
+    for (const ruta of RAICES.flatMap((raiz) => ficherosDeCodigo(raiz))) {
+      const codigo = sinComentarios(texto(ruta));
+      for (const llamada of LO_QUE_PIDE_UN_TOKEN) {
+        if (codigo.includes(llamada)) apariciones.push(`${ruta} → ${llamada}`);
+      }
+    }
+    assert.deepEqual(
+      apariciones,
+      [],
+      `hay código que pide un token de push: ${apariciones.join(', ')}. Las tres piezas de FCM están retiradas del manifiesto porque ` +
+      'nadie las usa; en cuanto alguien pide un token, la premisa deja de ser cierta y hay que volver a declararlas en VIAS_DE_DESPERTAR ' +
+      'con su motivo. Es una decisión de producto con su propia fila, no un ajuste de configuración nativa.',
+    );
+    // Y la lista no puede quedarse vacía sin protestar: una guarda que itera cero nombres
+    // pasa trivialmente, que es la manera silenciosa de dejar de mirar.
+    assert.ok(LO_QUE_PIDE_UN_TOKEN.length >= 2, 'la lista de llamadas que piden un token se ha quedado corta');
+  });
+
+  test('No hay fichero de servicios de Firebase ni declarado ni en el árbol', () => {
+    // La segunda y la tercera dirección de la misma premisa, medidas donde viven: sin
+    // `google-services.json` el AAR de mensajería no tiene proyecto al que hablar, y sin
+    // `googleServicesFile` en `app.json` el config plugin no lo copiaría aunque estuviera.
+    const app = JSON.parse(texto('app/app.json'));
+    assert.equal('googleServicesFile' in (app.expo?.android ?? {}), false, 'app.json declara un fichero de servicios de Firebase para Android');
+    assert.equal('googleServicesFile' in (app.expo?.ios ?? {}), false, 'app.json declara un fichero de servicios de Firebase para iOS');
+    assert.equal(texto('app/app.json').includes('google-services'), false, 'app.json nombra el fichero de servicios de Google');
+
+    // Y en el árbol tampoco está. Se busca en el código vivo de la app, que es donde tendría
+    // que estar para que la compilación lo recogiera.
+    const enElArbol = readdirSync(join(RAIZ_REPO, 'app')).filter((n) => n.includes('google-services'));
+    assert.deepEqual(enElArbol, [], `hay un fichero de servicios de Google en app/: ${enElArbol.join(', ')}`);
+  });
+
+  test('La cabecera del plugin dice cómo vuelven las tres piezas el día que haya push', () => {
+    // Quien lea esto dentro de un año no puede creer que las quitó un descuido. La cabecera
+    // tiene que decir las tres cosas: que se retiran enteras, por qué la unidad es el filtro
+    // y no la clase, y **cómo vuelven** — con el fichero de servicios, el token pedido
+    // explícitamente y la vía nombrada en la lista —, y que ese día es una decisión de
+    // producto y no un ajuste de configuración nativa.
+    const fuente = texto(PLUGIN);
+    for (const clase of [
+      'com.google.firebase.iid.FirebaseInstanceIdReceiver',
+      'com.google.firebase.messaging.FirebaseMessagingService',
+      'expo.modules.notifications.service.ExpoFirebaseMessagingService',
+    ]) {
+      assert.ok(fuente.includes(clase), `la cabecera de ${PLUGIN} no nombra "${clase}", que es una de las tres piezas que retira`);
+    }
+    assert.ok(fuente.includes('com.google.firebase.MESSAGING_EVENT'), `${PLUGIN} no nombra el filtro por el que se descubren los dos servicios`);
+    assert.match(fuente, /pareja/, `${PLUGIN} no dice que la vía se cierra por la pareja: neutralizar solo uno deja al otro resolviendo en su lugar`);
+    assert.match(fuente, /decisi[oó]n de producto/, `${PLUGIN} no dice que volver a declarar las tres piezas es una decisión de producto y no un ajuste nativo`);
+    assert.match(fuente, /C[oó]mo vuelven/, `${PLUGIN} no dice cómo vuelven las tres piezas el día que el producto adopte push`);
+    // Y las tres se retiran de verdad, con la marca que la fusión respeta: un reemplazo
+    // conservando el filtro sería el molde de SPEC-052, y aquí es justo el que no vale.
+    assert.match(fuente, /tools:node['"]?\s*[:=]\s*['"]remove/, `${PLUGIN} ya no retira nada con tools:node="remove"`);
+    assert.match(fuente, /xmlns:tools/, `${PLUGIN} no comprueba el prefijo tools, y sin él la retirada se escribe igual y no retira nada`);
+  });
+});

@@ -48,11 +48,20 @@ import {
   SITUACIONES,
   SITUACIONES_ABIERTAS,
   SIN_SALIDA,
+  COTA_DE_FRESCURA_MS,
+  ORIGENES_DEL_PUNTO,
+  PLAZO_DE_REANCLAJE_MS,
+  ERROR_MAXIMO_PARA_ANCLAR_M,
+  TEXTO_MIENTRAS_SE_BUSCA,
+  TOPE_DE_ESPERA_MS,
   abreSalida,
   cambiaElDestino,
   cierraLaSalida,
   congelaSalidas,
+  decideElPuntoDePartida,
+  decideElReanclaje,
   dejarloAqui,
+  fijoQuePuedeAnclar,
   disponibilidadDelRotulo,
   estadoDeSalidas,
   estadoDelRotulo,
@@ -1193,5 +1202,432 @@ describe('El estado de la partida no guarda ningún rastro de ubicación', () =>
     busca(doc, 'salidas');
     assert.deepEqual(encontradas, ['salidas.salida.partida'], 'el documento de la salida guarda más de una posición');
     assert.doesNotThrow(() => sinRastroDeUbicacion({ areas: { salidas: doc } }));
+  });
+});
+
+// ── La apertura: una sola cota, respaldo y tope ────────────────────────────────
+//
+// SPEC-048-iter-1. La raíz del rojo estaba en la app —la puntual pedía con precisión
+// equilibrada y con ella el sistema no enciende el GPS—, pero el defecto de fondo que la
+// medición destapó es de aquí: **dos raseros para la misma ancla, con el estricto puesto en
+// la puerta rara**. Lo que ancla el punto de partida es un fijo, no una puerta, así que la
+// cota, la precisión exigida y la decisión de cuál sirve viven en un solo sitio y se aplican
+// igual a las dos. Medido el 13-ago-2026 en `wa-pixel`: la puntual devolvía caché de 90,2 s,
+// 279,6 s y 643,3 s sin decirlo, y con la posición movida 100 m y el GPS apagado 150 s la
+// salida se abría anclando en un fijo de 193,5 s. Nada protestaba.
+
+describe('La apertura de una salida: precisión, cota única y respaldo', () => {
+  /** Un fijo bien formado, con los cuatro campos que la decisión mira. */
+  const fijo = ({ tMs = T0, precisionM = 8, lat = PARTIDA.lat, lon = PARTIDA.lon } = {}) => ({ lat, lon, tMs, precisionM });
+
+  test('Los cuatro números de la apertura están declarados con su motivo y en un solo sitio', () => {
+    // Los cuatro viven en el paquete y la app los recibe inyectados: dos números que
+    // significan lo mismo escritos en dos ficheros se desincronizan, y el que se queda viejo
+    // es siempre el que nadie mira.
+    assert.equal(COTA_DE_FRESCURA_MS, 90 * 1000);
+    assert.equal(TOPE_DE_ESPERA_MS, 10 * 1000);
+    assert.equal(PLAZO_DE_REANCLAJE_MS, 25 * 1000);
+    // La precisión exigida **se lee** del radio del regreso y no se copia: un fijo con más
+    // incertidumbre que el radio dentro del cual se cuenta que se ha vuelto no puede anclar
+    // ese radio. Que sean el mismo objeto es lo que impide que se separen.
+    assert.equal(ERROR_MAXIMO_PARA_ANCLAR_M, RADIO_DE_REGRESO_M);
+
+    // Y el porqué de cada uno está escrito donde vive el número, con su medida: un número
+    // sin motivo es el que la fila siguiente cambia sin saber qué rompe.
+    const codigo = fuente('packages/nucleo/partida/salidas.js');
+    assert.match(codigo, /COTA_DE_FRESCURA_MS[\s\S]{0,60}=/, 'la cota no está declarada');
+    for (const [nombre, huella] of [
+      ['la cota', /calibración pendiente/i],
+      ['el tope de espera', /no está medido/i],
+      ['el plazo de re-anclaje', /1,4 m\/s|paso de paseo/],
+    ]) {
+      assert.match(codigo, huella, `${nombre} no dice con qué medida se entrega ni qué falta por medir`);
+    }
+
+    // **Una sola cota, y ninguna comparación con un número distinto según la puerta.** Es
+    // la propiedad que la medición obligó a escribir, y se afirma contando: si aparece un
+    // segundo número de frescura, aquí hay dos constantes en vez de una.
+    const constantesDeFrescura = [...codigo.matchAll(/^export const ([A-Z_]*(?:COTA|FRESCURA)[A-Z_]*)\s*=/gm)].map((m) => m[1]);
+    assert.deepEqual(constantesDeFrescura, ['COTA_DE_FRESCURA_MS'], `hay más de una cota de frescura declarada: ${constantesDeFrescura.join(', ')}`);
+  });
+
+  test('Un fijo sin marca, sin precisión o con la precisión peor que la exigida no ancla', () => {
+    // Lo que no se puede fechar no se puede acotar, y lo que no declara su incertidumbre
+    // tampoco: los dos se descartan igual que si no existieran, **vengan de la puerta que
+    // vengan**. Y no se lanza: un fijo malo es una respuesta prevista del sensor.
+    assert.equal(fijoQuePuedeAnclar(fijo()).sirve, true);
+    assert.equal(fijoQuePuedeAnclar(fijo({ precisionM: ERROR_MAXIMO_PARA_ANCLAR_M })).sirve, true, 'el fijo justo en la precisión exigida se descarta');
+
+    const malos = [
+      [null, /ningún fijo/],
+      [{ lat: 42.88, tMs: T0, precisionM: 8 }, /sin coordenada/],
+      [{ lat: 42.88, lon: -8.545, precisionM: 8 }, /sin marca de tiempo/],
+      [{ lat: 42.88, lon: -8.545, tMs: 'ahora', precisionM: 8 }, /sin marca de tiempo/],
+      [{ lat: 42.88, lon: -8.545, tMs: T0 }, /sin precisión/],
+      [{ lat: 42.88, lon: -8.545, tMs: T0, precisionM: null }, /sin precisión/],
+      [fijo({ precisionM: ERROR_MAXIMO_PARA_ANCLAR_M + 1 }), /incertidumbre/],
+    ];
+    for (const [malo, motivo] of malos) {
+      const veredicto = fijoQuePuedeAnclar(malo);
+      assert.equal(veredicto.sirve, false, `este fijo ha anclado y no debía: ${JSON.stringify(malo)}`);
+      assert.match(veredicto.motivo, motivo, `el motivo no dice qué le pasa a ${JSON.stringify(malo)}`);
+    }
+  });
+
+  test('Con la puntual dentro de la cota ancla ella y el origen queda anotado', () => {
+    // El camino feliz: la puntual trae un fijo al menos tan reciente como el último conocido
+    // certificado, así que ancla ella y se anota de qué puerta salió — que es lo que hace
+    // afirmable que la apertura **no** cayó al respaldo, sin tener que deducirlo de que la
+    // salida se abrió.
+    const elegido = decideElPuntoDePartida({ puntual: fijo({ tMs: T0 + 5000 }), ultimaConocida: fijo({ tMs: T0 }) });
+    assert.equal(elegido.origen, 'puntual');
+    assert.deepEqual(elegido.ancla, { lat: PARTIDA.lat, lon: PARTIDA.lon, tMs: T0 + 5000, precisionM: 8 });
+    assert.equal(elegido.motivo, null);
+
+    // Y el vocabulario del origen es cerrado y de dos palabras.
+    assert.deepEqual([...ORIGENES_DEL_PUNTO], ['puntual', 'ultima-conocida']);
+    assert.ok(ORIGENES_DEL_PUNTO.includes(elegido.origen));
+  });
+
+  test('Un fijo puntual fresco ancla el punto de partida aunque no haya última conocida', () => {
+    // ⚠ **ESTE CASO ESTÁ ROJO Y SU ROJO ES CORRECTO.** No se ablanda ni se le pone tolerancia.
+    //
+    // **Defecto**: `decideElPuntoDePartida` exige que la última conocida certificada sirva
+    // **antes de mirar la puntual** (`packages/nucleo/partida/salidas.js`, la primera guarda
+    // de la función), así que sin ella no ancla nada — por buena y fresca que sea la puntual.
+    // El razonamiento escrito en su docstring es que la última conocida es «por construcción
+    // al menos tan reciente» como cualquier fijo que la puntual pueda devolver, y eso es
+    // cierto **del fijo**, no de lo que `getLastKnownPositionAsync({ maxAge, requiredAccuracy })`
+    // devuelve: ese módulo responde `null` cuando el último conocido es viejo o impreciso, y
+    // entonces la puntual fresca se descarta con él.
+    //
+    // **Por qué importa aquí y ahora**: es exactamente el estado del emulador `wa-pixel`, cuyo
+    // último fijo conocido es de **25 h 24 min** — medido el 13-ago-2026 y citado por la
+    // propia SPEC-053—. Con esa segunda puerta devolviendo `null`, la apertura no puede
+    // anclar aunque la puntual con precisión alta entregue un fijo de 0,6 s, y **los dos
+    // rojos de `@app` que esta fila viene a cerrar seguirían rojos**. Que en el aparato
+    // funcione depende de un efecto lateral que nadie ha medido: que el fijo que produce
+    // `getCurrentPositionAsync` actualice el último conocido del proveedor fusionado antes de
+    // que la app lo consulte. La orquestación pide las dos puertas en ese orden —afirmado en
+    // `test/nucleo/marcha.test.mjs`, «La puntual se pide antes que la última conocida»—, así
+    // que la mitigación existe; lo que no existe es la medida.
+    //
+    // **Criterio que incumple**: SPEC-053, «La apertura de una salida» → «Dado una salida que
+    // se echa a andar con el permiso concedido, cuando el fijo puntual llega dentro de la
+    // cota, entonces la salida se abre con él y el origen del punto de partida queda anotado
+    // como `puntual`».
+    //
+    // **Dueño**: la fila 53 del checklist, entrega 1 (SPEC-048-iter-1), `wa-dev`. El arreglo
+    // no puede ser una cota distinta por puerta —la spec lo prohíbe—: la puntual necesita
+    // poder acotarse **contra algo que no sea el último conocido**, o la ausencia de última
+    // conocida tiene que dejar de invalidar una puntual que sí trae marca y precisión.
+    const fresco = { lat: PARTIDA.lat, lon: PARTIDA.lon, tMs: T0, precisionM: 6 };
+
+    const sinUltima = decideElPuntoDePartida({ puntual: fresco, ultimaConocida: null });
+    assert.equal(
+      sinUltima.origen,
+      'puntual',
+      'una puntual bien formada y precisa no ancla el punto de partida porque el sistema no tiene última conocida: ' +
+      'es el estado del emulador wa-pixel, cuyo último fijo es de 25 h 24 min, y con él la salida no se abre nunca',
+    );
+    assert.deepEqual(sinUltima.ancla, fresco);
+
+    // Y la misma forma con la segunda puerta rechazada por precisión, que es el otro camino
+    // por el que el módulo nativo devuelve nada: la puntual sigue siendo buena.
+    const conUltimaImprecisa = decideElPuntoDePartida({ puntual: fresco, ultimaConocida: null });
+    assert.equal(conUltimaImprecisa.origen, 'puntual');
+  });
+
+  test('Con la puntual rancia ancla la última conocida, y el respaldo abre la salida', () => {
+    // **El fijo puntual rancio se descarta exactamente igual que una última conocida vieja**,
+    // que es toda la decisión: la asimetría por defecto queda prohibida. Medido: la puntual
+    // resuelve en ~2,45 s devolviendo caché de hasta 643,3 s sin pedir fijo nuevo y sin
+    // decirlo, así que el rasero estricto puesto solo en el respaldo dejaba el camino
+    // principal tragándose diez minutos de caché en silencio.
+    const rancia = fijo({ tMs: T0 - 643_300 });
+    const certificada = fijo({ tMs: T0, lat: PARTIDA.lat + 0.001 });
+    const elegido = decideElPuntoDePartida({ puntual: rancia, ultimaConocida: certificada });
+    assert.equal(elegido.origen, 'ultima-conocida');
+    assert.equal(elegido.ancla.tMs, T0, 'ha anclado el fijo rancio de la puntual');
+    assert.equal(elegido.ancla.lat, certificada.lat);
+
+    // Y la salida se abre con él, con el origen anotado en el área: el estado sabe por qué
+    // puerta entró su punto de partida.
+    const estado = estadoDeSalidas();
+    const abre = abreSalida(estado, {
+      salida: 'salida-1',
+      mapa: 'mapa-1',
+      partida: { lat: elegido.ancla.lat, lon: elegido.ancla.lon },
+      tMs: elegido.ancla.tMs,
+      mundo: 'O Val de Arriba',
+      origenDelPunto: elegido.origen,
+      rotulo: rotuloQueFunciona(),
+      fuente: fuenteDePosiciones(),
+    });
+    assert.equal(abre.abierta, true);
+    assert.equal(salidaEnCurso(estado).origenDelPunto, 'ultima-conocida');
+    assert.equal(salidaEnCurso(estado).reanclada, false, 'una salida recién abierta ya se declara re-anclada');
+  });
+
+  test('Un origen del punto que no está en el vocabulario falla nombrando las dos puertas', () => {
+    const estado = estadoDeSalidas();
+    assert.throws(
+      () => abreSalida(estado, {
+        salida: 'salida-1', mapa: 'mapa-1', partida: PARTIDA, tMs: T0, mundo: 'O Val de Arriba',
+        origenDelPunto: 'del-cielo', rotulo: rotuloQueFunciona(), fuente: fuenteDePosiciones(),
+      }),
+      /puntual, ultima-conocida/,
+    );
+    // Sin declararlo se abre igual y queda en nulo: una salida de antes de esta fila no
+    // tiene por qué saber de qué puerta salió su punto.
+    const sinDeclarar = estadoDeSalidas();
+    abreSalida(sinDeclarar, { salida: 's', mapa: 'm', partida: PARTIDA, tMs: T0, mundo: 'O Val de Arriba', rotulo: rotuloQueFunciona(), fuente: fuenteDePosiciones() });
+    assert.equal(salidaEnCurso(sinDeclarar).origenDelPunto, null);
+  });
+
+  test('Sin ninguna posición dentro de la cota no se ancla, y el motivo lo dice', () => {
+    // El estado vacío de la apertura, y el caso medido de `wa-pixel`: su último fijo conocido
+    // es de **25 h 24 min**, y no hay cota razonable que le diga que sí — ni la de 90 s ni la
+    // de 25. La salida no se abre y el motivo es honesto en vez de mandar a quien juega a
+    // arreglar un permiso que está bien.
+    const sinNada = decideElPuntoDePartida({ puntual: null, ultimaConocida: null });
+    assert.equal(sinNada.ancla, null);
+    assert.equal(sinNada.origen, null);
+    assert.match(sinNada.motivo, /dentro de la cota de frescura/);
+
+    // Un último conocido demasiado impreciso tampoco vale, aunque llegue.
+    const impreciso = decideElPuntoDePartida({ puntual: null, ultimaConocida: fijo({ precisionM: 500 }) });
+    assert.equal(impreciso.ancla, null);
+    assert.match(impreciso.motivo, /incertidumbre/);
+  });
+
+  test('La línea que se lee mientras se busca no lleva ninguna cifra', () => {
+    // Vive en el paquete y no en la pantalla por lo mismo que el resto de los textos del
+    // juego: así se puede afirmar que no lleva cifras sin encender ningún aparato. Una
+    // cuenta atrás convertiría el tope en una promesa que el sistema no garantiza.
+    assert.equal(typeof TEXTO_MIENTRAS_SE_BUSCA, 'string');
+    assert.ok(TEXTO_MIENTRAS_SE_BUSCA.length > 0);
+    assert.doesNotMatch(TEXTO_MIENTRAS_SE_BUSCA, /\d/, 'la línea de espera lleva una cifra');
+    assert.doesNotMatch(TEXTO_MIENTRAS_SE_BUSCA, /%|por ciento|segundo|minuto|falta/i, 'la línea de espera promete cuánto falta');
+    // Y es voz de aplicación en segunda persona, como el resto de A2P1 y A2P5.
+    assert.match(TEXTO_MIENTRAS_SE_BUSCA, /Buscando dónde estás/);
+  });
+});
+
+// ── El re-anclaje del punto de partida ─────────────────────────────────────────
+//
+// Una vez por salida, dentro del plazo y solo mientras no se haya andado. Las dos piezas
+// —cota generosa y re-anclaje— son **una sola decisión**: sin el re-anclaje, 90 s no se
+// sostendrían y habría que bajar a 25; con él, la cota puede ser generosa porque el error que
+// introduce tiene quien lo repare, y siempre antes de haber andado nada.
+
+describe('El re-anclaje del punto de partida', () => {
+  /** Una posición a `metros` al norte, con su marca en milisegundos desde la apertura. */
+  const fijoA = (metros, desdeMs, precisionM = 8) => ({ ...alNorte(metros), tMs: T0 + desdeMs, precisionM, clasificacion: 'andando' });
+
+  test('El primer fijo bueno dentro del plazo sustituye el punto de partida', () => {
+    const { estado, rotulo } = abierta();
+    const antes = { ...salidaEnCurso(estado).partida };
+    recibePosicion(estado, { posicion: fijoA(30, 10_000), tramo: TRAMO_M, rotulo });
+
+    const salida = salidaEnCurso(estado);
+    assert.equal(salida.reanclada, true, 'el primer fijo bueno no ha re-anclado el punto de partida');
+    assert.notDeepEqual({ ...salida.partida }, antes, 'el punto de partida no se ha movido');
+    assert.equal(Math.round(metrosEntre(salida.partida, alNorte(30))), 0, 'el ancla nueva no es la del fijo que la sustituyó');
+    // Lo que se anota es **una distancia y una duración**, y ninguna coordenada.
+    assert.equal(salida.desplazamientoDelAnclaM, 30);
+    assert.equal(salida.antiguedadAlReanclarMs, 10_000);
+  });
+
+  test('El re-anclaje ocurre como mucho una vez por salida', () => {
+    const { estado, rotulo } = abierta();
+    recibePosicion(estado, { posicion: fijoA(30, 5_000), tramo: TRAMO_M, rotulo });
+    const despuesDelPrimero = { ...salidaEnCurso(estado).partida };
+    // Otro fijo mejor y todavía dentro del plazo: no se vuelve a re-anclar.
+    recibePosicion(estado, { posicion: fijoA(35, 9_000, 3), tramo: TRAMO_M, rotulo });
+    assert.deepEqual({ ...salidaEnCurso(estado).partida }, despuesDelPrimero, 'el punto de partida se ha vuelto a mover');
+    assert.equal(salidaEnCurso(estado).desplazamientoDelAnclaM, 30, 'el desplazamiento anotado es el del segundo re-anclaje');
+  });
+
+  test('Un fijo bueno que llega pasado el plazo no mueve el punto de partida', () => {
+    const { estado, rotulo } = abierta();
+    const antes = { ...salidaEnCurso(estado).partida };
+    recibePosicion(estado, { posicion: fijoA(30, PLAZO_DE_REANCLAJE_MS + 1), tramo: TRAMO_M, rotulo });
+    assert.equal(salidaEnCurso(estado).reanclada, false);
+    assert.deepEqual({ ...salidaEnCurso(estado).partida }, antes);
+    // Y el borde exacto sí entra: el plazo es inclusivo y se dice.
+    const justo = abierta();
+    recibePosicion(justo.estado, { posicion: fijoA(30, PLAZO_DE_REANCLAJE_MS), tramo: TRAMO_M, rotulo: justo.rotulo });
+    assert.equal(salidaEnCurso(justo.estado).reanclada, true, 'el fijo justo en el plazo no re-ancla');
+  });
+
+  test('Un fijo con la precisión peor que la exigida no re-ancla', () => {
+    const { estado, rotulo } = abierta();
+    recibePosicion(estado, { posicion: fijoA(30, 5_000, ERROR_MAXIMO_PARA_ANCLAR_M + 1), tramo: TRAMO_M, rotulo });
+    assert.equal(salidaEnCurso(estado).reanclada, false, 'un fijo más impreciso que el radio del regreso ha anclado ese radio');
+    // Y uno sin precisión declarada tampoco: en la duda se exige más y no menos.
+    const sinPrecision = abierta();
+    recibePosicion(sinPrecision.estado, {
+      posicion: { ...alNorte(30), tMs: T0 + 5_000, precisionM: null, clasificacion: 'andando' },
+      tramo: TRAMO_M,
+      rotulo: sinPrecision.rotulo,
+    });
+    assert.equal(salidaEnCurso(sinPrecision.estado).reanclada, false);
+  });
+
+  test('Un fijo que se mueve menos de lo que declara de incertidumbre no re-ancla', () => {
+    // La otra mitad de la propiedad, y la que impide aflojar la guarda sin enterarse:
+    // moverse 5 m cuando el propio fijo dice que puede estar equivocado por 8 **no es
+    // haberse movido**, es ruido, y no hay nada que reparar. Medido en el aparato: el
+    // primer fijo de la suscripción era literalmente el mismo que devolvió la puntual —0 m
+    // y 0 ms—, así que el único re-anclaje de la salida se gastaba en una operación que no
+    // corregía nada y dejaba fuera al fijo bueno que venía detrás.
+    const { estado, rotulo } = abierta();
+    const antes = { ...salidaEnCurso(estado).partida };
+    recibePosicion(estado, { posicion: fijoA(5, 5_000, 8), tramo: TRAMO_M, rotulo });
+    assert.equal(salidaEnCurso(estado).reanclada, false, 'un fijo que se mueve menos que su propia incertidumbre ha gastado el re-anclaje');
+    assert.deepEqual({ ...salidaEnCurso(estado).partida }, antes, 'el punto de partida se ha movido con un desplazamiento que es ruido');
+    // El motivo lo dice, porque un rechazo mudo aquí se lee como «el plazo se pasó».
+    const veredicto = decideElReanclaje({ anclaMs: T0, ancla: antes, fijo: fijoA(5, 5_000, 8) });
+    assert.equal(veredicto.reancla, false);
+    assert.match(veredicto.motivo, /no repara nada/, 'el rechazo por ruido no dice por qué no se gasta el re-anclaje');
+
+    // El borde exacto **no** repara: la comparación es «no supera», así que un
+    // desplazamiento igual a la incertidumbre declarada se queda fuera.
+    const justo = abierta();
+    recibePosicion(justo.estado, { posicion: fijoA(8, 5_000, 8), tramo: TRAMO_M, rotulo: justo.rotulo });
+    assert.equal(salidaEnCurso(justo.estado).reanclada, false, 'el fijo que se mueve exactamente su incertidumbre ha re-anclado');
+
+    // Y un metro más allá sí: la guarda rechaza el ruido, no el re-anclaje.
+    const supera = abierta();
+    recibePosicion(supera.estado, { posicion: fijoA(9, 5_000, 8), tramo: TRAMO_M, rotulo: supera.rotulo });
+    assert.equal(salidaEnCurso(supera.estado).reanclada, true, 'un fijo que supera su incertidumbre no ha re-anclado, y la guarda se ha comido el caso bueno');
+    assert.equal(salidaEnCurso(supera.estado).desplazamientoDelAnclaM, 9);
+  });
+
+  test('Después de alejarse el punto de partida es inmutable', () => {
+    // «Casa» es lo que decide cuándo cae el telón: mover el ancla a mitad de salida cambiaría
+    // el sitio al que hay que volver bajo los pies de quien vuelve, y eso es peor que un
+    // ancla imperfecta. El re-anclaje vive en la ventana en la que todavía no se ha andado.
+    const { estado, rotulo } = abierta();
+    recorre(estado, rotulo, [posicion(2000, 20, 'andando')]);
+    assert.equal(congelaSalidas(estado).salida.regreso.seAlejo, true, 'no se ha declarado alejada, y entonces esto no mide la inmutabilidad');
+    const anclaLejos = { ...salidaEnCurso(estado).partida };
+
+    // Un fijo perfecto y a un metro: no re-ancla por ninguna vía.
+    recibePosicion(estado, { posicion: { ...alNorte(1), tMs: T0 + 21 * MINUTO, precisionM: 1, clasificacion: 'andando' }, tramo: TRAMO_M, rotulo });
+    assert.deepEqual({ ...salidaEnCurso(estado).partida }, anclaLejos, 'el punto de partida se ha movido con la salida ya alejada');
+    assert.equal(salidaEnCurso(estado).reanclada, false);
+
+    // Y la función pura lo dice con las tres condiciones, cada una por su cuenta.
+    const bueno = { ...alNorte(10), tMs: T0 + 1000, precisionM: 5 };
+    assert.equal(decideElReanclaje({ anclaMs: T0, fijo: bueno }).reancla, true);
+    assert.match(decideElReanclaje({ anclaMs: T0, fijo: bueno, seAlejo: true }).motivo, /inmutable/);
+    assert.match(decideElReanclaje({ anclaMs: T0, fijo: bueno, reanclada: true }).motivo, /como mucho una vez/);
+    assert.match(decideElReanclaje({ anclaMs: null, fijo: bueno }).motivo, /ventana no se puede medir/);
+    assert.match(decideElReanclaje({ anclaMs: T0, fijo: { ...bueno, tMs: T0 - 1 } }).motivo, /plazo de re-anclaje/);
+  });
+
+  test('El re-anclaje no distingue por el origen del punto', () => {
+    // Un fijo puntual rancio es tan malo como una última conocida vieja —está medido que la
+    // puntual devuelve caché de hasta 643,3 s sin decirlo—, así que el re-anclaje repara
+    // **las dos puertas** y no solo el respaldo.
+    for (const origen of ORIGENES_DEL_PUNTO) {
+      const estado = estadoDeSalidas();
+      abreSalida(estado, {
+        salida: 's', mapa: 'm', partida: PARTIDA, tMs: T0, mundo: 'O Val de Arriba', origenDelPunto: origen,
+        rotulo: rotuloQueFunciona(), fuente: fuenteDePosiciones(),
+      });
+      recibePosicion(estado, { posicion: { ...alNorte(20), tMs: T0 + 3000, precisionM: 6, clasificacion: 'andando' }, tramo: TRAMO_M, rotulo: rotuloQueFunciona() });
+      assert.equal(salidaEnCurso(estado).reanclada, true, `con el punto de partida de origen "${origen}" el re-anclaje no ocurre`);
+      assert.equal(salidaEnCurso(estado).origenDelPunto, origen, 'el re-anclaje ha cambiado de qué puerta salió el punto');
+    }
+  });
+
+  test('Una salida re-anclada vuelve del documento re-anclada y con el punto nuevo', () => {
+    const { estado, rotulo } = abierta();
+    recibePosicion(estado, { posicion: fijoA(30, 8_000), tramo: TRAMO_M, rotulo });
+    const antes = salidaEnCurso(estado);
+
+    const vuelta = levantaSalidas(JSON.parse(JSON.stringify(congelaSalidas(estado))));
+    const despues = salidaEnCurso(vuelta);
+    assert.deepEqual({ ...despues.partida }, { ...antes.partida }, 'el punto que vuelve no es el re-anclado');
+    assert.equal(despues.reanclada, true, 'la salida vuelve del documento sin saber que se re-ancló');
+    assert.equal(despues.origenDelPunto, antes.origenDelPunto);
+    assert.equal(despues.desplazamientoDelAnclaM, antes.desplazamientoDelAnclaM);
+    assert.equal(despues.antiguedadAlReanclarMs, antes.antiguedadAlReanclarMs);
+
+    // Y una salida que **no** se re-ancló y pasa por disco ya no puede re-anclarse: su
+    // ventana no se puede medir, porque la marca del ancla vive solo en memoria a propósito
+    // —el esquema declara exactamente dos marcas del sensor y una tercera sería una promesa
+    // de privacidad rota por una comodidad—. No es un caso especial: es el plazo aplicándose.
+    const sinReanclar = abierta();
+    const deDisco = levantaSalidas(JSON.parse(JSON.stringify(congelaSalidas(sinReanclar.estado))));
+    const puntoAntes = { ...salidaEnCurso(deDisco).partida };
+    recibePosicion(deDisco, { posicion: fijoA(20, 2_000), tramo: TRAMO_M, rotulo: rotuloQueFunciona() });
+    assert.equal(salidaEnCurso(deDisco).reanclada, false);
+    assert.deepEqual({ ...salidaEnCurso(deDisco).partida }, puntoAntes);
+  });
+
+  test('Una partida guardada antes de esta fila se levanta sin los cuatro campos y sigue funcionando', () => {
+    // Retrocompatibilidad sin migración: los cuatro se leen con su valor por defecto y la
+    // salida abierta sigue viva. Una migración para cuatro escalares que mueren con la salida
+    // habría sido más riesgo que el que evita.
+    const { estado } = abierta();
+    const vieja = JSON.parse(JSON.stringify(congelaSalidas(estado)));
+    for (const campo of ['origenDelPunto', 'reanclada', 'desplazamientoDelAnclaM', 'antiguedadAlReanclarMs']) delete vieja.salida[campo];
+
+    const vuelta = levantaSalidas(vieja);
+    const salida = salidaEnCurso(vuelta);
+    assert.equal(salida.origenDelPunto, null);
+    assert.equal(salida.reanclada, false);
+    assert.equal(salida.desplazamientoDelAnclaM, null);
+    assert.equal(salida.antiguedadAlReanclarMs, null);
+    assert.equal(salida.situacion, 'abierta-con-rotulo');
+    // Y un origen inventado en el documento se lee como no declarado, no se propaga.
+    const conBasura = JSON.parse(JSON.stringify(congelaSalidas(estado)));
+    conBasura.salida.origenDelPunto = 'del-cielo';
+    assert.equal(salidaEnCurso(levantaSalidas(conBasura)).origenDelPunto, null);
+  });
+
+  test('Los cuatro campos del anclaje mueren con la salida', () => {
+    // La misma promesa que el punto y las dos marcas: lo que se guarda **nunca es más de una
+    // salida**, así que los cuatro escalares de la anterior no están en ninguna parte cuando
+    // se abre la siguiente.
+    const { estado, rotulo } = abierta();
+    recibePosicion(estado, { posicion: fijoA(30, 8_000), tramo: TRAMO_M, rotulo });
+    assert.equal(salidaEnCurso(estado).reanclada, true);
+    dejarloAqui(estado, { rotulo });
+    marcaElTelonComoLeido(estado);
+
+    abreSalida(estado, {
+      salida: 'salida-2', mapa: 'mapa-1', partida: PARTIDA, tMs: T0 + MINUTO, mundo: 'O Val de Arriba',
+      origenDelPunto: 'puntual', rotulo: rotuloQueFunciona(), fuente: fuenteDePosiciones(),
+    });
+    const nueva = salidaEnCurso(estado);
+    assert.equal(nueva.reanclada, false, 'la salida nueva hereda el re-anclaje de la anterior');
+    assert.equal(nueva.desplazamientoDelAnclaM, null);
+    assert.equal(nueva.antiguedadAlReanclarMs, null);
+    const doc = congelaSalidas(estado);
+    assert.deepEqual(Object.keys(doc), ['salida'], 'el documento guarda algo más que la última salida');
+    assert.equal(JSON.stringify(doc).includes('30'), false, 'el desplazamiento de la salida anterior sigue escrito');
+  });
+
+  test('El re-anclaje no lee el reloj: resta dos marcas del sensor', () => {
+    // La antigüedad se calcula restando la marca del fijo nuevo de la del ancla, que es la
+    // misma disciplina que ya rige el plazo del rótulo. Un reloj más es una entrada más que
+    // desincronizar, y el determinismo del paquete lo prohíbe.
+    const codigo = codigoSinComentarios('packages/nucleo/partida/salidas.js');
+    for (const reloj of [/Date\.now/, /new Date/, /Math\.random/, /performance\.now/]) {
+      assert.doesNotMatch(codigo, reloj, `el módulo de la salida lee el reloj o siembra azar (${reloj})`);
+    }
+    // Y la misma secuencia dos veces da lo mismo, incluido el re-anclaje: es una función de
+    // las posiciones y de nada más.
+    const pasos = [fijoA(30, 8_000), fijoA(120, 60_000), fijoA(2000, 300_000)];
+    const unaVez = abierta();
+    for (const p of pasos) recibePosicion(unaVez.estado, { posicion: p, tramo: TRAMO_M, rotulo: unaVez.rotulo });
+    const otraVez = abierta();
+    for (const p of pasos) recibePosicion(otraVez.estado, { posicion: p, tramo: TRAMO_M, rotulo: otraVez.rotulo });
+    assert.deepEqual(congelaSalidas(unaVez.estado), congelaSalidas(otraVez.estado));
   });
 });

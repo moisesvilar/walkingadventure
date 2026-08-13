@@ -331,6 +331,16 @@ const AREA_SALIDAS = campos({
     situacion: 'texto',
     rotulo: 'texto',
     partida: campos({ lat: 'numero', lon: 'numero' }),
+    // Los cuatro escalares del anclaje, de SPEC-048-iter-1. **Ninguno es una coordenada
+    // y ninguno es una marca de reloj**: de qué puerta salió el punto —vocabulario
+    // cerrado de dos palabras—, si se re-ancló, cuántos metros se movió el ancla y qué
+    // duración separaba las dos marcas del sensor. Guardar en su lugar las dos
+    // coordenadas del re-anclaje habría sido lo cómodo de auditar y habría metido una
+    // segunda posición en la partida, que es exactamente lo que RF-PRIV-002 prohíbe.
+    origenDelPunto: 'texto?',
+    reanclada: 'booleano',
+    desplazamientoDelAnclaM: 'entero?',
+    antiguedadAlReanclarMs: 'entero?',
     regreso: campos({ seAlejo: 'booleano', dentroDesdeMs: 'entero?' }),
     ultimoPropioMs: 'entero',
     ultimaMarcaMs: 'entero',

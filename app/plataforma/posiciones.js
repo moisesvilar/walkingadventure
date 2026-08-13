@@ -177,6 +177,85 @@ export function exigeCadencia(cadencia, quien = 'la cadencia de la suscripción'
 export const NOMBRE_DE_LA_APP = 'Walking Adventure';
 
 /**
+ * **La precisión con la que esta app le pide posición al sistema, y sale de un solo
+ * sitio.** La usan la suscripción y el fijo puntual, y esa es toda la defensa que esta
+ * fila deja puesta.
+ *
+ * Alta y no equilibrada, por dos motivos medidos en el emulador y con fecha. El primero,
+ * del 11-ago-2026: `partida/transporte.js` no funda un vehículo con un error mayor de
+ * treinta metros y la equilibrada entrega cien, así que con ella ningún segmento podría
+ * salir nunca `vehiculo` y la detección de transporte quedaría escrita y muerta. El
+ * segundo, del 13-ago-2026, y es el que costó dos cotejos: **con la equilibrada el
+ * sistema ni siquiera enciende el GPS** — durante los 30-32 s que tardaba en fallar el
+ * fijo puntual, el Event Log de `dumpsys location` no registró **ni una petición**,
+ * mientras que la suscripción, que ya pedía alta, registraba
+ * `ProviderRequest[@+2s0ms, HIGH_ACCURACY]` en cuanto la salida se abría.
+ *
+ * La lección va aquí porque vale más que el arreglo: la causa llevaba **dos días escrita
+ * veinte líneas por encima del defecto**, y aun así dos cotejos independientes
+ * atribuyeron el rojo a que «el proveedor está frío». No faltaba la medida: la medida no
+ * llegó al sitio. Por eso la defensa es **de forma y no de disciplina** — las dos
+ * peticiones leen esta función, así que no se pueden volver a separar sin escribirlo
+ * aposta.
+ */
+export function precisionQueSePide(Location) {
+  return Location?.Accuracy?.High;
+}
+
+/**
+ * Lo que se le pide al proveedor y cuánto se espera, todo por parámetro y **sin ninguna
+ * copia de los números en esta capa**: la cota de frescura, el tope de espera y la
+ * precisión exigida los declara `packages/nucleo/partida/salidas.js` con su motivo, y
+ * llegan hasta aquí desde la orquestación de la salida. Falla nombrando el que falta, que
+ * es mejor que un valor por omisión que nadie decidió.
+ */
+function exigeNumero(valor, quien) {
+  if (!Number.isFinite(valor) || valor <= 0) {
+    throw new Error(
+      `${quien} llega como ${JSON.stringify(valor) ?? String(valor)}: lo declara el paquete con su motivo y entra por la firma, ` +
+      'porque una copia en esta capa es el número que se queda viejo sin que nadie lo mire',
+    );
+  }
+  return valor;
+}
+
+/**
+ * Si un fijo está dentro de la cota de frescura, **medido contra el reloj del sistema**.
+ *
+ * Aquí sí hay reloj, y ese es el reparto que la fila 53 fijó con la medida delante: sin
+ * saber qué hora es no se puede decir si un fijo es fresco, y `packages/nucleo/` no puede
+ * saberlo —`Date.now` dentro del paquete rompe el determinismo, que es la regla más dura
+ * del repo—. La regla se había aplicado de más a toda la app, y la consecuencia fue usar
+ * la marca de la última posición conocida como patrón de la puntual: con el último
+ * conocido viejo o impreciso el módulo nativo devuelve nada, y con él se caía una puntual
+ * fresca y perfecta. Es el estado de `wa-pixel`, cuyo último fijo es de 25 h 24 min.
+ *
+ * **Sigue habiendo una sola cota** para cualquier fijo que ancle el punto de partida: la
+ * declara el paquete, llega por la firma y se aplica igual a las dos puertas. Lo que
+ * cambia es **quién** decide la frescura, no que haya dos raseros — a la última conocida
+ * se la certifica el módulo nativo con `maxAge`, y a la puntual, que no admite edad
+ * máxima, se la certifica aquí con el mismo número.
+ *
+ * El reloj entra **inyectado y no importado** para que se pueda doblar, igual que el de
+ * `plataforma/lector-de-salud.js`.
+ */
+function dentroDeLaCota(fijo, { cotaMs, ahora }) {
+  if (!fijo) return null;
+  const instante = ahora();
+  if (!Number.isFinite(instante)) {
+    throw new Error(
+      `el reloj de la capa de plataforma ha devuelto ${JSON.stringify(instante) ?? String(instante)}: sin él no se puede decir si un fijo ` +
+      'es fresco, y anclar el punto de partida con uno que no se puede fechar es lo que esta cota existe para impedir',
+    );
+  }
+  // La antigüedad negativa —un fijo con la marca por delante del reloj— se trata como
+  // fresca y no como avería: el desfase entre el reloj del sensor y el del sistema es de
+  // milisegundos, y descartar por él dejaría la salida sin abrir por un detalle que nadie
+  // puede arreglar desde la app.
+  return instante - fijo.tMs <= cotaMs ? fijo : null;
+}
+
+/**
  * La única suscripción al sensor de una salida abierta.
  *
  * **Una y no dos**, y es la decisión de más consecuencias del módulo: con una para la
@@ -207,6 +286,9 @@ export function creaSuscripcionDeUbicacion({
   alRecibir = null,
   tarea = NOMBRE_DE_LA_TAREA,
   cadenciaM = CADENCIA_M,
+  // El reloj real de la app, **inyectado y no importado**: es lo único con lo que se puede
+  // certificar la frescura de un fijo, y el paquete no lo puede tener. Ver `dentroDeLaCota`.
+  ahora = () => Date.now(),
 }) {
   if (typeof Location?.startLocationUpdatesAsync !== 'function' || typeof TaskManager?.defineTask !== 'function') {
     return null;
@@ -258,12 +340,9 @@ export function creaSuscripcionDeUbicacion({
     : { distanceInterval: cadencia.metros });
 
   const opciones = (compuesto) => ({
-    // **Precisión alta y no equilibrada**, y no por gusto: `partida/transporte.js` no funda
-    // un vehículo con un error mayor de treinta metros, y la equilibrada entrega cien. Con
-    // ella ningún segmento podría salir nunca `vehiculo` —caerían todos en `ambiguo`— y la
-    // detección de transporte quedaría escrita y muerta. Medido en el emulador el
-    // 11-ago-2026: con la equilibrada el sistema ni siquiera enciende el GPS.
-    accuracy: Location.Accuracy?.High,
+    // La precisión sale de `precisionQueSePide` y no de aquí: es el mismo sitio del que
+    // la lee el fijo puntual, que es lo que impide que las dos se desincronicen otra vez.
+    accuracy: precisionQueSePide(Location),
     // Por distancia fuera de un geofence y por tiempo dentro. Ver `CADENCIA_M` y
     // `cadenciaDeMuestreo` de `partida/llegadas.js`, que es quien lo decide.
     ...porCadencia(),
@@ -335,14 +414,40 @@ export function creaSuscripcionDeUbicacion({
     /** La cadencia puesta ahora mismo. Es lo que la marca observable del momento enseña. */
     cadencia: () => cadencia.modo,
 
-    /** Para el servicio. Retirado el rótulo se acabó la suscripción: no queda nadie leyendo. */
+    /**
+     * Para el servicio. Retirado el rótulo se acabó la suscripción: no queda nadie leyendo.
+     *
+     * **Y parar lo que ya está parado no es una avería.** Es la raíz del rojo que la fila 53
+     * midió el 13-ago-2026 en el aparato: cerrar por regreso para el sensor **dos veces** —el
+     * núcleo retira el rótulo dentro de `cierraLaSalida`, que aquí es `void suscripcion.para()`,
+     * y la orquestación llama a `paraElSensor()` con el paso ya devuelto—, las dos preguntan
+     * por `hasStartedLocationUpdatesAsync` antes de que ninguna haya desregistrado nada, las
+     * dos piden la parada y la segunda se lleva un `TaskNotFoundException`. Esa excepción se
+     * archivaba como avería de la salida y lo que veía quien juega al volver a casa era un
+     * aviso de avería en vez de su telón. La comprobación de arriba no basta: no es una
+     * guarda contra dos paradas a la vez, porque entre la pregunta y la parada hay un `await`.
+     *
+     * Lo que decide que no fue una avería es **dato y no el texto de la excepción**: se le
+     * vuelve a preguntar al sistema si la tarea sigue registrada, por la misma razón que
+     * `estadoDelPermiso()` existe —ese texto lo escribe el módulo nativo y cambia con su
+     * versión—. Si sigue registrada, la parada falló de verdad y el fallo sale por donde
+     * salía: una avería que se traga es exactamente lo que la marca `salida-averia` vino a
+     * cerrar.
+     */
     async para() {
       corriendo = false;
       if (typeof Location.hasStartedLocationUpdatesAsync === 'function') {
         const habia = await Location.hasStartedLocationUpdatesAsync(tarea);
         if (!habia) return;
       }
-      await Location.stopLocationUpdatesAsync(tarea);
+      try {
+        await Location.stopLocationUpdatesAsync(tarea);
+      } catch (e) {
+        if (typeof Location.hasStartedLocationUpdatesAsync !== 'function') throw e;
+        if ((await Location.hasStartedLocationUpdatesAsync(tarea)) === true) throw e;
+        // La tarea ya no está registrada: lo que se pedía —que no quede nadie leyendo— es
+        // cierto, y da igual quién de las dos paradas llegó primero.
+      }
     },
 
     /** Lo que se creía del servicio la última vez que se preguntó de verdad. */
@@ -369,17 +474,97 @@ export function creaSuscripcionDeUbicacion({
      * ha abierto. No es una suscripción y no deja nada abierto: es un fijo y se acabó, y
      * hace falta porque `abreSalida` exige el punto de partida antes de que haya rótulo
      * que sostenga la lectura.
+     *
+     * **Con precisión alta**, que es la raíz del rojo que esta fila cierra: ver
+     * `precisionQueSePide`, de donde sale, con la medida y su fecha. Y **con tope de
+     * espera**, porque pedirla así enciende el GPS y eso cuesta tiempo: agotarlo no es un
+     * error, es el paso siguiente —se prueba la última conocida—, y la apertura no puede
+     * tardar más que el tope. El módulo nativo no acepta ninguno, así que el tope es una
+     * carrera contra un temporizador y el fijo que llegue tarde se descarta solo.
+     *
+     * Y **ya certificada dentro de la cota**, que es lo que cambió la fila 53: está medido
+     * que esta llamada devuelve caché de 90,2 s, 279,6 s y 643,3 s sin decirlo, así que el
+     * fijo se compara con el reloj del sistema aquí mismo y se devuelve nada si es viejo.
+     * Devolver nada es exactamente lo que hace `getLastKnownPositionAsync` con su `maxAge`:
+     * **la misma cota y la misma respuesta para las dos puertas**, que es el principio
+     * escrito en forma. Antes esto lo decidía el paquete comparando la marca de la puntual
+     * con la del último conocido, y sin último conocido se caía la puntual con él.
      */
-    async posicionPuntual() {
-      const leida = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy?.Balanced });
-      if (!leida?.coords) return null;
-      return {
-        lat: leida.coords.latitude,
-        lon: leida.coords.longitude,
-        tMs: Math.round(leida.timestamp),
-        precisionM: Number.isFinite(leida.coords.accuracy) ? leida.coords.accuracy : null,
-      };
+    async posicionPuntual({ topeMs, cotaMs } = {}) {
+      exigeNumero(topeMs, 'el tope de espera del fijo puntual');
+      exigeNumero(cotaMs, 'la cota de frescura del fijo puntual');
+      let corta;
+      const espera = new Promise((resuelve) => { corta = setTimeout(() => resuelve(null), topeMs); });
+      try {
+        const leida = await Promise.race([
+          Location.getCurrentPositionAsync({ accuracy: precisionQueSePide(Location) }),
+          espera,
+        ]);
+        return dentroDeLaCota(unFijoDeExpo(leida), { cotaMs, ahora });
+      } finally {
+        clearTimeout(corta);
+      }
     },
+
+    /**
+     * La última posición conocida del sistema, **si cumple la cota de frescura y la
+     * precisión exigida**. Es la segunda puerta del punto de partida.
+     *
+     * Los dos parámetros van **explícitos y ninguno por omisión**: `getLastKnownPositionAsync`
+     * devuelve `null` cuando el fijo es más viejo que `maxAge` o más impreciso que
+     * `requiredAccuracy`, así que por esta puerta la frescura la certifica el módulo nativo
+     * —con el mismo número que `posicionPuntual` le aplica a la suya con el reloj de la app—.
+     * Un `null` es una respuesta prevista —el emulador `wa-pixel` tiene su último conocido en
+     * 25 h 24 min, y no hay cota razonable que le diga que sí— y no una avería.
+     */
+    async ultimaConocida({ cotaMs, precisionM } = {}) {
+      exigeNumero(cotaMs, 'la cota de frescura de la última posición conocida');
+      exigeNumero(precisionM, 'la precisión exigida a la última posición conocida');
+      if (typeof Location.getLastKnownPositionAsync !== 'function') return null;
+      const leida = await Location.getLastKnownPositionAsync({ maxAge: cotaMs, requiredAccuracy: precisionM });
+      return unFijoDeExpo(leida);
+    },
+
+    /**
+     * En qué estado está el permiso de ubicación **mientras se usa**, con vocabulario
+     * cerrado. Existe para que el motivo por el que una salida no se abre se decida
+     * consultando **dato** y no interpretando el texto de una excepción: ese texto lo
+     * escribe el módulo nativo y cambia con su versión, y hasta esta fila cualquier
+     * excepción de la posición se archivaba como `permiso-denegado` con el permiso
+     * concedido, mandando a quien juega a los ajustes del sistema a arreglar algo que no
+     * estaba roto.
+     *
+     * Responde `no-se-sabe` cuando no se puede preguntar, que es distinto de denegado y no
+     * se hace pasar por él.
+     */
+    async estadoDelPermiso() {
+      if (typeof Location.getForegroundPermissionsAsync !== 'function') return 'no-se-sabe';
+      try {
+        const respuesta = await Location.getForegroundPermissionsAsync();
+        if (respuesta?.granted === true) return 'concedido';
+        if (respuesta?.canAskAgain === false) return 'no-preguntable';
+        return 'denegado';
+      } catch {
+        return 'no-se-sabe';
+      }
+    },
+  };
+}
+
+/**
+ * Un fijo de `expo-location` en los cuatro números que la app usa, o `null`.
+ *
+ * Los campos se copian **aquí, en el punto de entrada**, igual que en la suscripción:
+ * rumbo, altitud y velocidad no llegan a entrar en la app, y lo que no entra no se puede
+ * guardar por descuido.
+ */
+function unFijoDeExpo(leida) {
+  if (!leida?.coords || !Number.isFinite(leida.timestamp)) return null;
+  return {
+    lat: leida.coords.latitude,
+    lon: leida.coords.longitude,
+    tMs: Math.round(leida.timestamp),
+    precisionM: Number.isFinite(leida.coords.accuracy) ? leida.coords.accuracy : null,
   };
 }
 

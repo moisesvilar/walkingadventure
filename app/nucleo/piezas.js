@@ -123,7 +123,11 @@ import {
 import { AJUSTES_DE_ORIGEN, cambiaAjuste } from '@walkingadventure/nucleo/partida/ajustes.js';
 import { PRODUCTORES_DE_LA_PARTIDA, creaMotorDeLaPartida } from '@walkingadventure/nucleo/partida/motor.js';
 import {
+  COTA_DE_FRESCURA_MS,
+  ERROR_MAXIMO_PARA_ANCLAR_M,
+  TOPE_DE_ESPERA_MS,
   abreSalida,
+  decideElPuntoDePartida,
   dejarloAqui,
   disponibilidadDelRotulo,
   estadoDelRotulo,
@@ -375,6 +379,16 @@ export const NUCLEO_DE_LA_SALIDA = Object.freeze({
   sitiosConPosicion,
   cadenciaDeMuestreo,
   CADENCIAS,
+  // SPEC-048-iter-1, y por la misma puerta: la cota de frescura, el tope de espera y la
+  // precisión exigida son **los del paquete y no una copia de la app**, y la decisión de
+  // cuál de las dos puertas ancla el punto de partida es una función pura sobre dos fijos.
+  // Que la cota sea una sola para las dos puertas, que un fijo puntual rancio se descarte
+  // igual que una última conocida vieja y que la apertura se respalde tienen que poder
+  // leerse desde `node --test` sin resolver nada instalado.
+  COTA_DE_FRESCURA_MS,
+  TOPE_DE_ESPERA_MS,
+  ERROR_MAXIMO_PARA_ANCLAR_M,
+  decideElPuntoDePartida,
 });
 
 /**

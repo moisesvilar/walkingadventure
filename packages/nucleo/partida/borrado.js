@@ -61,15 +61,23 @@ export const TESTIDS = congelaHondo({
  * No hay ningún estado de confirmación: **no hay segundo aviso, ni casilla, ni texto
  * que teclear**. Un segundo aviso es la manera de no tener que escribir bien el
  * primero, y además enseña a confirmar sin leer.
+ *
+ * `copia-guardada` **no es una confirmación**: es el sitio donde para una copia recién
+ * hecha, y existe desde que guardar dejó de encadenar el borrado. Lo obligó una medida:
+ * la hoja de compartir de Android resuelve al lanzar el selector de destino, así que
+ * decía «guardada» mientras quien juega todavía elegía dónde, y la partida se borraba
+ * debajo. Que la palabra viaje en el vocabulario es lo que hace afirmable desde el
+ * aparato que guardar terminó **y que no borró**.
  */
 export const ESTADOS_DE_EMPEZAR = Object.freeze({
   PREGUNTANDO: 'preguntando',
   GUARDANDO_COPIA: 'guardando-copia',
+  COPIA_GUARDADA: 'copia-guardada',
   BORRANDO: 'borrando',
   NO_SE_PUDO: 'no-se-pudo',
 });
 
-/** Los cuatro estados, en el orden en que se declaran. */
+/** Los cinco estados, en el orden en que se declaran. */
 export const IDS_DE_ESTADO = congelaHondo(Object.values(ESTADOS_DE_EMPEZAR));
 
 /** Adónde lleva un borrado terminado. A la primera pantalla, y a ninguna otra. */

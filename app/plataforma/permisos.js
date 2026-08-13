@@ -23,6 +23,15 @@
 // dueña. La propiedad protegida pasa de «no está el módulo que podría hacerlo» a «está
 // enumerado todo lo que hace, y nada de ello lee con la app cerrada», que es más fuerte:
 // registrar una tarea sin declararla es error de construcción y no un descuido silencioso.
+//
+// Y lo que SPEC-053 añade, que es una anchura de más que llevaba aquí desde el principio: lo
+// que este fichero promete es la propiedad **ancha** —«nada de esta app se despierta con la
+// app cerrada»— y lo que se estaba comprobando era la **estrecha**, «nada se despierta al
+// arrancar el móvil», y encima solo sobre los receptores. Los servicios no entraban en el
+// barrido por construcción, y por esas dos puertas a la vez se colaban tres piezas de FCM
+// capaces de levantar el proceso. `VIAS_DE_DESPERTAR` es la lista cerrada que cierra la
+// diferencia: **todos** los receptores y **todos** los servicios del manifiesto fusionado,
+// uno a uno, con su mecanismo y con si ese mecanismo está medido o solo declarado.
 
 /**
  * Los dos permisos de Health Connect, y **ninguno más** (RF-PRIV-003).
@@ -140,10 +149,208 @@ export const PERMISOS_QUE_UNA_LIBRERIA_EXIGE = Object.freeze([
     id: 'RECEIVE_BOOT_COMPLETED',
     quienLoExige: 'expo-task-manager, para persistir el trabajo de JobScheduler con el que entrega cada posición',
     porQueNoSeQuita: 'sin él la app revienta al recibir la primera posición: JobScheduler rechaza un trabajo persistido sin este permiso',
-    aCambio: 'los dos receptores que escuchaban el arranque se neutralizan: el receptor de tareas se sustituye sin BOOT_COMPLETED ni MY_PACKAGE_REPLACED, y el de notificaciones de expo-notifications por uno que solo conserva su acción de entrega, así que nada se despierta al arrancar el móvil',
-    dueña: 'fila 48 del checklist',
+    aCambio: 'los dos receptores que escuchaban el arranque se neutralizan: el receptor de tareas se sustituye sin BOOT_COMPLETED ni MY_PACKAGE_REPLACED, y el de notificaciones de expo-notifications por uno que solo conserva su acción de entrega; y desde SPEC-053 se retiran enteras las tres piezas de FCM que quedaban —el receptor de c2dm y los dos servicios que declaran MESSAGING_EVENT—, así que nada de esta app se despierta con la app cerrada: ni al arrancar el móvil ni por un mensaje de push',
+    dueña: 'fila 48 del checklist, ensanchada por la 53',
   }),
 ]);
+
+/**
+ * **Las vías por las que el sistema puede levantar este proceso, una a una y con lista
+ * cerrada**: todos los receptores y todos los servicios del manifiesto fusionado, nombrados
+ * con su clase, su tipo, el filtro que los descubre, quién los declara y su motivo.
+ *
+ * Es lo que hace afirmable la propiedad **ancha** que este fichero promete desde SPEC-030 —
+ * **«nada de esta app se despierta con la app cerrada»**— y no solo la estrecha de «nada se
+ * despierta al arrancar el móvil», que era lo único comprobado hasta SPEC-053. La diferencia
+ * entre las dos tenía dos puertas y las dos estaban abiertas a la vez: la guarda solo miraba
+ * **acciones de arranque** y solo sobre **receptores**, así que un servicio con filtro no
+ * entraba en el barrido por construcción. Por ahí vivían las tres piezas de FCM.
+ *
+ * **La lista enumera también lo que no despierta**, y es deliberado: decidir si un componente
+ * puede levantar el proceso es exactamente el juicio que hay que escribir, y una guarda que
+ * lo decidiera sola sería una guarda con criterio propio. Aquí está el dato con su veredicto;
+ * allí, el contraste. Un receptor o un servicio que aparezca en el manifiesto sin estar en
+ * esta lista pone la batería roja, y no hay excepción por clase ni tolerado sin motivo.
+ *
+ * **`mecanismo` dice si eso está medido o solo declarado, y se cuenta con el número delante:
+ * de las diez vías de hoy, tres tienen el mecanismo medido y las otras siete están
+ * declaradas sin medir.** Se dice así porque una lista cerrada cuyos motivos no se distinguen
+ * de excusas es una lista de tolerados con otro nombre; el recuento vivo lo da
+ * `viasSinMecanismoMedido()`, para que el número no pueda quedarse viejo en una frase.
+ * Nombrar un adyacente **no es aprobarlo**: es dejarlo contado para que la fila que lo mida
+ * lo pueda quitar de las siete en vez de heredarlo disuelto.
+ *
+ * Lo que esta lista **no** enumera, dicho para que la ausencia no se lea como olvido: los
+ * `provider`. Los tres del manifiesto fusionado —el de ficheros de Expo, el de arranque de
+ * AndroidX y el de Firebase— son `exported="false"`, así que ningún proceso ajeno puede
+ * consultarlos y levantar este; si alguno se exportara, sería una vía nueva y entraría aquí.
+ */
+export const VIAS_DE_DESPERTAR = Object.freeze([
+  Object.freeze({
+    clase: 'expo.modules.taskManager.TaskBroadcastReceiver',
+    tipo: 'receptor',
+    filtro: null,
+    descubrimiento: 'por clase',
+    quienLaDeclara: 'expo-task-manager, reescrito por plugins/retira-permisos-prohibidos.js',
+    mecanismo: 'medido',
+    puedeDespertar: false,
+    porque: 'sin ningún intent-filter y sin exportar desde SPEC-048: las posiciones se le entregan con un intent explícito construido con la clase (TaskManagerUtils.java:180), así que nadie de fuera puede alcanzarlo',
+  }),
+  Object.freeze({
+    clase: 'expo.modules.notifications.service.NotificationsService',
+    tipo: 'receptor',
+    filtro: 'expo.modules.notifications.NOTIFICATION_EVENT',
+    descubrimiento: 'por acción',
+    quienLaDeclara: 'expo-notifications, reescrito por plugins/retira-permisos-prohibidos.js',
+    mecanismo: 'medido',
+    puedeDespertar: false,
+    porque: 'conserva solo su acción de entrega —las cinco de arranque se las quitó SPEC-052— y no está exportado; quien la emite es la propia app, con setPackage, y esta app entrega los avisos en primer plano y sin disparador, así que no hay alarma pendiente que lo despierte',
+  }),
+  Object.freeze({
+    clase: 'androidx.profileinstaller.ProfileInstallReceiver',
+    tipo: 'receptor',
+    filtro: 'androidx.profileinstaller.action.INSTALL_PROFILE (y SKIP_FILE, SAVE_PROFILE, BENCHMARK_OPERATION)',
+    descubrimiento: 'por acción',
+    quienLaDeclara: 'androidx.profileinstaller, transitiva de AndroidX',
+    mecanismo: 'declarado',
+    puedeDespertar: true,
+    porque: 'está exportado y con filtro, así que el sistema puede alcanzarlo; lo que lo acota es que exige android.permission.DUMP, que solo tienen la shell y el sistema, y lo que hace es instalar el perfil de arte compilado. Sin medir: no se ha comprobado qué levanta ni cuándo lo dispara el sistema',
+  }),
+  Object.freeze({
+    clase: 'com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver',
+    tipo: 'receptor',
+    filtro: null,
+    descubrimiento: 'por clase',
+    quienLaDeclara: 'com.google.android.datatransport, que llega con firebase-messaging a través de expo-notifications',
+    mecanismo: 'declarado',
+    puedeDespertar: true,
+    porque: 'no está exportado y no declara filtro, pero la propia librería lo programa con AlarmManager por intent explícito, y una alarma pendiente sí levanta el proceso. Con FCM retirado no tiene nada que transportar; sin medir: no se ha comprobado si llega a programar alguna alarma en esta app',
+  }),
+  Object.freeze({
+    clase: 'expo.modules.location.services.LocationTaskService',
+    tipo: 'servicio',
+    filtro: null,
+    descubrimiento: 'por clase',
+    quienLaDeclara: 'expo-location',
+    mecanismo: 'medido',
+    puedeDespertar: false,
+    porque: 'es el servicio en primer plano de una salida abierta: lo arranca la app al abrirla y lo para al cerrarla o al retirarse el rótulo, no está exportado y no tiene filtro. Es lo que sostiene «mientras se usa» con la pantalla apagada (SPEC-030 y SPEC-048), y muere con la salida',
+  }),
+  Object.freeze({
+    clase: 'expo.modules.taskManager.TaskJobService',
+    tipo: 'servicio',
+    filtro: null,
+    descubrimiento: 'por vínculo del planificador',
+    quienLaDeclara: 'expo-task-manager',
+    mecanismo: 'declarado',
+    puedeDespertar: true,
+    porque: 'lo vincula JobScheduler con BIND_JOB_SERVICE cuando dispara el trabajo con el que se entrega cada posición, y ese trabajo va con setPersisted(true) clavado, que es por lo que RECEIVE_BOOT_COMPLETED no se puede quitar. Lo medido es que sin el permiso la app revienta; lo que **no** está medido es si un trabajo persistido sobrevive al reinicio y levanta el proceso sin salida abierta',
+  }),
+  Object.freeze({
+    clase: 'androidx.health.platform.client.impl.sdkservice.HealthDataSdkService',
+    tipo: 'servicio',
+    filtro: 'androidx.health.platform.client.ACTION_BIND_SDK_SERVICE',
+    descubrimiento: 'por acción',
+    quienLaDeclara: 'androidx.health:health-connect-client, a través de react-native-health-connect',
+    mecanismo: 'declarado',
+    puedeDespertar: true,
+    porque: 'está exportado y con filtro, así que quien resuelva esa acción puede vincularlo; es la mitad de la app del contrato con Health Connect, que vincula en los dos sentidos. Sin medir: no se ha comprobado quién lo vincula ni con qué app cerrada',
+  }),
+  Object.freeze({
+    clase: 'com.google.firebase.components.ComponentDiscoveryService',
+    tipo: 'servicio',
+    filtro: null,
+    descubrimiento: 'ninguno: solo portador de meta-data',
+    quienLaDeclara: 'firebase-common, que llega con firebase-messaging a través de expo-notifications',
+    mecanismo: 'declarado',
+    puedeDespertar: false,
+    porque: 'no está exportado y no declara filtro: existe solo para que Firebase lea del PackageManager las meta-data de sus registrars, y nunca se arranca. Sin medir: la lectura del bytecode que lo confirmaría no se ha hecho',
+  }),
+  Object.freeze({
+    clase: 'com.google.android.datatransport.runtime.backends.TransportBackendDiscovery',
+    tipo: 'servicio',
+    filtro: null,
+    descubrimiento: 'ninguno: solo portador de meta-data',
+    quienLaDeclara: 'com.google.android.datatransport, que llega con firebase-messaging a través de expo-notifications',
+    mecanismo: 'declarado',
+    puedeDespertar: false,
+    porque: 'la misma forma que el anterior: sin exportar, sin filtro y con una sola meta-data que nombra el backend. Sin medir, por la misma razón',
+  }),
+  Object.freeze({
+    clase: 'com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService',
+    tipo: 'servicio',
+    filtro: null,
+    descubrimiento: 'por vínculo del planificador',
+    quienLaDeclara: 'com.google.android.datatransport, que llega con firebase-messaging a través de expo-notifications',
+    mecanismo: 'declarado',
+    puedeDespertar: true,
+    porque: 'lo vincula JobScheduler con BIND_JOB_SERVICE cuando dispara el trabajo que la propia librería programa para reenviar telemetría. Con FCM retirado no tiene nada que reenviar; sin medir: no se ha comprobado si llega a programar algún trabajo en esta app',
+  }),
+]);
+
+/**
+ * **Las vías que se retiran del manifiesto fusionado, y no se sustituyen**: las tres piezas
+ * de FCM que `plugins/retira-permisos-prohibidos.js` quita enteras con `tools:node="remove"`.
+ *
+ * Está aquí y no solo en el plugin porque es lo que hace afirmable que la vía siga cerrada:
+ * lo que el plugin escribe es una marca de retirada, y una marca con el nombre mal escrito no
+ * falla, **no hace nada**. Ninguna de estas clases puede aparecer en el manifiesto fusionado.
+ *
+ * **La unidad de neutralización es el filtro y no la clase**, y ese es el criterio que se
+ * puede torcer: los dos servicios comparten `com.google.firebase.MESSAGING_EVENT` y se
+ * descubren por él, así que quitar solo el de Expo dejaría al de Firebase resolviendo en su
+ * lugar por el mismo filtro. Se cierra la pareja o no se cierra nada.
+ *
+ * **Por qué se puede cerrar hoy, y en qué se diferencia de SPEC-052.** Allí la acción estaba
+ * en uso —la entrega de avisos— y quitar el filtro habría dejado la app muda en silencio.
+ * Aquí no la usa nadie, medido en tres direcciones: no hay `google-services.json` en el
+ * árbol, no hay `googleServicesFile` en `app.json` y no hay una sola llamada a
+ * `getExpoPushTokenAsync` ni a `getDevicePushTokenAsync`. **El día que alguien pida un token,
+ * esa premisa deja de ser cierta y hay que reabrir estas tres vías**, declarándolas aquí en
+ * `VIAS_DE_DESPERTAR` con su motivo: es una decisión de producto con su propia fila, no un
+ * ajuste de configuración nativa.
+ */
+export const VIAS_NEUTRALIZADAS = Object.freeze([
+  Object.freeze({
+    clase: 'com.google.firebase.iid.FirebaseInstanceIdReceiver',
+    tipo: 'receptor',
+    filtro: 'com.google.android.c2dm.intent.RECEIVE',
+    descubrimiento: 'por acción',
+    quienLaDeclara: 'firebase-messaging 25.0.1, que arrastra node_modules/expo-notifications/android/build.gradle:43',
+    evidencia: 'indirecta',
+    porque: 'estaba exportado, con el permiso c2dm.permission.SEND y el filtro de recepción: es la puerta por la que un mensaje de push levanta el proceso. La evidencia de que se descubre por acción es indirecta y va etiquetada así: nadie del lado app escribe su nombre, pero el emisor vive en Play Services y no se ha leído. La forma elegida no depende de eso: quitar el bloque entero cierra a la vez el descubrimiento por acción y el de por clase',
+  }),
+  Object.freeze({
+    clase: 'com.google.firebase.messaging.FirebaseMessagingService',
+    tipo: 'servicio',
+    filtro: 'com.google.firebase.MESSAGING_EVENT',
+    descubrimiento: 'por acción',
+    quienLaDeclara: 'firebase-messaging 25.0.1, que arrastra node_modules/expo-notifications/android/build.gradle:43',
+    evidencia: 'directa',
+    porque: 'declaraba el filtro de mensajería con prioridad -500. Leído sobre bytecode con javap: ServiceStarter.resolveServiceClassName resuelve con PackageManager.resolveService sobre MESSAGING_EVENT y solo entonces hace setClassName, así que es el filtro y no la clase lo que lo hace alcanzable',
+  }),
+  Object.freeze({
+    clase: 'expo.modules.notifications.service.ExpoFirebaseMessagingService',
+    tipo: 'servicio',
+    filtro: 'com.google.firebase.MESSAGING_EVENT',
+    descubrimiento: 'por acción',
+    quienLaDeclara: 'expo-notifications, en android/src/main/AndroidManifest.xml:6-12',
+    evidencia: 'directa',
+    porque: 'el mismo filtro con prioridad -1, que es el que ganaba al de Firebase. La misma resolución por acción, así que retirarlo solo a él habría dejado la vía abierta con el de -500 atendiéndola',
+  }),
+]);
+
+/**
+ * Las vías cuyo mecanismo está **declarado y no medido**, para que el número se pueda decir
+ * con el número delante en vez de disolverse en una frase.
+ *
+ * Es lo que separa una lista cerrada de una lista de tolerados: mientras estas estén contadas,
+ * la fila que mida una la puede sacar de la cuenta; si el recuento se pierde, lo declarado sin
+ * medir se vuelve indistinguible de lo comprobado.
+ */
+export function viasSinMecanismoMedido() {
+  return VIAS_DE_DESPERTAR.filter((via) => via.mecanismo !== 'medido');
+}
 
 /**
  * Los modos de fondo declarados de iOS, **uno y con su motivo**.

@@ -401,8 +401,9 @@
         <p class="parrafo" style="font-size:12px"><b style="font-weight:600">As Terras de Vilanova no se puede volver a generar.</b> Se dibujó con los datos de aquel día y esos datos ya han cambiado: aunque empieces otra vez en la misma calle, saldría otro sitio con otros nombres.</p>
         <p class="parrafo tenue" style="font-size:11.5px">Si guardas una copia, el fichero se puede volver a abrir cuando quieras.</p>
         <div class="empuja" style="display:grid;gap:7px">
-          <div class="boton">Guardar una copia primero</div>
-          <div class="boton hueco" style="border-color:var(--marca);color:var(--marca)">Borrar sin guardar nada</div>
+          <p class="parrafo tenue" style="font-size:11px;margin-bottom:1px">La copia ya está hecha. Tu partida sigue como estaba.</p>
+          <div class="boton">Guardar una copia</div>
+          <div class="boton hueco" style="border-color:var(--marca);color:var(--marca)">Borrar la partida</div>
           <div class="boton hueco">Dejarlo como está</div>
         </div>
       </div>
@@ -414,9 +415,12 @@
       <ul>
         <li><b>El mundo está congelado y por eso no se puede rehacer.</b> Se guarda entero porque los datos de OpenStreetMap cambian; la semilla sola daría otro mapa. Esta pantalla es el único sitio donde esa decisión técnica se le explica al jugador, y hay que explicarla porque cambia lo que está a punto de hacer. <span class="fuente">partida-guardada §1</span><span class="nuevo">decidido</span></li>
         <li><b>La copia se ofrece, no se hace sola.</b> Quien quiere irse limpio se va limpio y no le dejamos megas en el disco sin pedirlos. El precio es que hay que escribir el aviso para que se lea de verdad. <span class="nuevo">decidido</span></li>
+        <li><b>Y el borrado tampoco se hace de paso: son dos gestos.</b> «Guardar una copia» solo guarda, deja la pantalla donde está y avisa de que la copia ya está hecha y la partida sigue como estaba; las tres acciones vuelven enteras. Borrar es un segundo toque, y es el único camino al arranque. No es un segundo aviso, que aquí sigue sin haberlo: son dos acciones distintas con dos textos distintos, y quien guarda una copia puede perfectamente no querer borrar después. La maqueta dibuja el momento de después de guardar; antes, esa línea no está. <span class="nuevo">decidido</span></li>
+        <li><b>Lo destructivo no se ejecuta sobre una señal que el sistema no garantiza.</b> Es la regla que obliga a separarlos, y la trajo una medida: Android da por resuelta la hoja de compartir en cuanto la abre, así que encadenar el borrado a esa señal lo ejecutaba mientras quien juega todavía elegía dónde guardar el fichero. Vale igual el día que la señal sea fiel — una copia guardada no es una orden de borrar. <span class="nuevo">decidido</span></li>
+        <li><b>Por eso el botón destructivo dice «Borrar la partida» y no «Borrar sin guardar nada».</b> Con una copia recién hecha delante, la segunda frase es falsa, y un texto que puede mentir en el botón que destruye es el peor texto que este juego puede escribir. <span class="fuente">lenguaje.md</span></li>
         <li><b>Y el fichero se puede volver a abrir</b>, porque es el mismo que sirve para compartir un mundo con otra persona. Eso convierte «guardar una copia» en una salida de verdad y no en un consuelo. <span class="fuente">partida-guardada §3</span></li>
         <li><b>Se enumera lo que se pierde en cosas, no en datos</b>: el personaje, los mapas por su nombre, los días de diario y lo que la gente sabe de ti. «Esta acción no se puede deshacer» no dice nada que nadie lea. <span class="fuente">lenguaje.md</span></li>
-        <li><b>Lo destructivo no es el botón principal.</b> Guardar copia va arriba y a la vista; borrar sin nada es una elección explícita, en rojo y con el borde hueco. Y salir sin hacer nada siempre está. <span class="nuevo">decidido</span></li>
+        <li><b>Lo destructivo no es el botón principal.</b> Guardar copia va arriba y a la vista; borrar la partida es una elección explícita, en rojo y con el borde hueco. Y salir sin hacer nada siempre está, en cualquier estado de la pantalla. Separar los dos gestos no asciende al destructivo: el orden y los pesos son los mismos. <span class="nuevo">decidido</span></li>
         <li>Aquí <b>se habla como aplicación sin disfraz</b>, y es el caso que mejor justifica que los ajustes tengan permiso para hacerlo: disfrazar esto de mundo sería una trampa. <span class="fuente">lenguaje.md</span></li>
       </ul>
     </div>
@@ -438,7 +442,8 @@
       <li class="cerrado"><b>La repisa no es un inventario</b>: sin peso, sin huecos, sin nada que tirar. Cada objeto con de quién y de qué día, porque son llaves y recuerdos, no equipo.</li>
       <li class="cerrado"><b>Los motes por núcleo hacen de ficha de personaje</b>, y son lo único parecido a una reputación que se ve en todo el juego.</li>
       <li class="cerrado"><b>Los ajustes son el único sitio del juego que habla como aplicación</b>, y se nota en la tipografía. Dentro: el tramo en lenguaje de sitios, «caminos que evitar» sin la palabra accesibilidad, los pasos de fondo apagados, el horario diurno encendido, los sitios marcados y la copia exportable.</li>
-      <li class="cerrado"><b>Y existe «empezar de nuevo», que borra todo y ofrece guardar una copia antes.</b> La pantalla explica que el mundo está congelado y no se puede rehacer, enumera lo que se pierde en cosas y no en datos, y deja lo destructivo como elección explícita y no como botón principal. La copia se ofrece y no se hace sola: quien quiere irse limpio se va limpio.</li>
+      <li class="cerrado"><b>Y existe «empezar de nuevo», que borra todo y ofrece guardar una copia aparte.</b> La pantalla explica que el mundo está congelado y no se puede rehacer, enumera lo que se pierde en cosas y no en datos, y deja lo destructivo como elección explícita y no como botón principal. La copia se ofrece y no se hace sola: quien quiere irse limpio se va limpio.</li>
+      <li class="cerrado"><b>Guardar una copia y borrar la partida son dos gestos separados</b>, y solo el segundo lleva al arranque. Guardar deja la pantalla donde está, con la copia hecha y las tres acciones puestas, porque lo destructivo no se ejecuta sobre una señal que el sistema no garantiza — y la hoja de compartir de Android se da por resuelta en cuanto se abre.</li>
     </ul>
     <h3>Con esto se cierra el paso 2</h3>
     <ul>

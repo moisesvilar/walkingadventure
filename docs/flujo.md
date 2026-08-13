@@ -167,7 +167,8 @@ flowchart TD
   A6P6 -.->|"‹ volver"| A6P1
   A6P6 -->|"Empezar de nuevo"| A6P7
   A6P7 -.->|"Dejarlo como está"| A6P6
-  A6P7 -->|"Guardar una copia primero, o Borrar sin guardar nada"| A1P1
+  A6P7 -->|"Guardar una copia · guarda y nada más: se vuelve aquí con la copia hecha y las tres acciones puestas"| A6P7
+  A6P7 -->|"Borrar la partida · el único camino al arranque, y es un toque aparte"| A1P1
   RAZON -->|"razón de permisos de Health Connect, con partida lista · el sistema abre walkingadventure://razon-de-permisos, y cualquier app puede abrirlo"| A6P6
   RAZON -->|"sin partida, o con el arranque a medias · se cae al arranque de siempre y no se monta A6P6 sobre una partida que no existe"| A1P1
 
@@ -185,4 +186,4 @@ flowchart TD
 
 **El artefacto 3 casi no tiene aristas hacia dentro de sí mismo.** Sus pantallas cuelgan de la 1 y vuelven a la 1, sin encadenarse entre ellas: es la forma que toma en un diagrama la regla de que en marcha no hay ni un control tocable.
 
-**Y hay dos entradas al arranque.** *Pantalla 1 · artefacto 1* la alcanza quien instala la app y quien pulsa «empezar de nuevo» en los ajustes, que es lo único del juego que borra un mundo que no se puede rehacer.
+**Y hay dos entradas al arranque.** *Pantalla 1 · artefacto 1* la alcanza quien instala la app y quien toca «borrar la partida» en empezar de nuevo, que es lo único del juego que borra un mundo que no se puede rehacer. Guardar una copia **no** lleva allí: es un bucle que vuelve a la misma pantalla, y esa es la forma que toma en el diagrama la regla de que lo destructivo no se ejecuta sobre una señal que el sistema no garantiza. Android da la hoja de compartir por resuelta en cuanto la abre, así que encadenar el borrado a esa señal borraba la partida mientras quien juega elegía dónde guardarla.

@@ -74,6 +74,10 @@ export function PantallaAntesDeSalir({
   alLevantarMapa = null,
   alDejarloEstar = null,
   alAndar = null,
+  // Si se está buscando la posición ahora mismo. **Llega y no se decide aquí**: lo sabe
+  // quien espera a la orquestación de la salida, y esta capa solo lo reparte a las dos
+  // pantallas que enseñan una acción de salir.
+  buscando = false,
   alEcharElTelon = null,
   alAbrirPuerta = null,
   alZurron = null,
@@ -221,6 +225,7 @@ export function PantallaAntesDeSalir({
     return (
       <PantallaPortada
         portada={portada}
+        buscando={buscando}
         alVerQueSeCuenta={() => {
           const accion = portada.acciones.find((a) => a.id === 'ver-que-se-cuenta');
           if (accion.destino !== 'zurron' || !alZurron) return abreLaLista();
@@ -339,6 +344,7 @@ export function PantallaAntesDeSalir({
       // el botón espera, no lo que dice ninguna línea.
       preparacion={preparado?.pantalla ?? componePreparacion()}
       lista={preparado !== null}
+      buscando={buscando}
       // La aventura ya quedó anotada al aceptarla en la ficha, así que aquí solo se
       // pregunta si la salida se abre: `retomada` evita anotarla dos veces.
       //
