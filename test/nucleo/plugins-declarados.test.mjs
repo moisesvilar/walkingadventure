@@ -68,6 +68,13 @@ const APP_JSON = 'app/app.json';
  * función que Expo llama, `mods` son los ganchos de `expo/config-plugins` que usa —que es lo
  * que dice **qué parte del proyecto nativo toca**— y `huella` es el resumen de su código sin
  * comentarios.
+ *
+ * `nombraAlMenos` son las piezas que el cometido tiene que nombrar, y existe desde SPEC-052
+ * por lo que pasó allí: el plugin pasó de neutralizar **un** receptor a neutralizar **dos**,
+ * y el cometido se habría podido renombrar sin decirlo —la huella cambia igual— dejando una
+ * frase que describe el plugin de la fila anterior. Con la lista delante, actualizar la
+ * huella obliga a mirar si lo escrito sigue siendo verdad. Lo que no puede es sustituir a
+ * quien lee el cambio: los dos campos los escribe la misma mano, igual que la huella.
  */
 const LOS_PLUGINS = [
   {
@@ -76,13 +83,15 @@ const LOS_PLUGINS = [
     mods: ['withGradleProperties', 'withMainActivity'],
     huella: 'c20ce1b5fd379984',
     cometido: 'Sube el mínimo de Android a 26, que es lo que exige Health Connect, y traduce a un enlace profundo las dos acciones con las que el sistema pregunta por la razón de los permisos de salud, que sin traducir no llegan nunca a JavaScript.',
+    nombraAlMenos: ['Health Connect', 'enlace profundo'],
   },
   {
     fichero: 'retira-permisos-prohibidos.js',
     exporta: 'retiraPermisosProhibidos',
     mods: ['withAndroidManifest', 'withInfoPlist'],
-    huella: '1786783409e1ae1d',
-    cometido: 'Limpia del manifiesto fusionado y del Info.plist generado lo que esta app no declara y llega por las librerías: los dos permisos prohibidos de Android, los modos de fondo de iOS fuera de la lista blanca y los disparadores de arranque del receptor de tareas.',
+    huella: 'a3e9ed77ba0d38ff',
+    cometido: 'Limpia del manifiesto fusionado y del Info.plist generado lo que esta app no declara y llega por las librerías: los dos permisos prohibidos de Android, los modos de fondo de iOS fuera de la lista blanca y las acciones de arranque de los dos receptores que las escuchaban — el receptor de tareas, que se queda sin ningún intent-filter, y el receptor de notificaciones, que conserva solo su acción de entrega.',
+    nombraAlMenos: ['permisos prohibidos', 'modos de fondo', 'receptor de tareas', 'receptor de notificaciones'],
   },
 ];
 
@@ -141,6 +150,17 @@ describe('Los plugins que reescriben el proyecto nativo están nombrados uno a u
       assert.equal(typeof p.cometido, 'string');
       assert.ok(p.cometido.length >= 60, `el cometido declarado de "${p.fichero}" son ${p.cometido.length} caracteres y no dice qué hace`);
       assert.match(p.cometido, /\.$/, `el cometido de "${p.fichero}" no es una frase terminada`);
+
+      // Y nombra las piezas que toca, una a una. Sin esto, «se actualiza el cometido si hace
+      // falta» es una recomendación; con esto, quitarle una pieza al plugin o añadírsela
+      // obliga a tocar las dos declaraciones y a decir cuál.
+      assert.ok(
+        Array.isArray(p.nombraAlMenos) && p.nombraAlMenos.length > 0,
+        `"${p.fichero}" no declara qué piezas tiene que nombrar su cometido, y entonces el cometido puede decir cualquier cosa`,
+      );
+      for (const pieza of p.nombraAlMenos) {
+        assert.ok(p.cometido.includes(pieza), `el cometido de "${p.fichero}" no nombra "${pieza}", que es una de las piezas del proyecto nativo que toca`);
+      }
     }
   });
 
