@@ -5,7 +5,7 @@
 // modos de fondo que nadie de esta app ha escrito. Todas las guardas de
 // `app/plataforma/permisos.js` miraban `app.json`, así que por esa puerta no se veía nada.
 //
-// Hace cuatro cosas:
+// Hace cinco cosas:
 //
 // 1. **Retira los permisos prohibidos de Android** con `tools:node="remove"`, que es la
 //    única forma de que la fusión los respete. Hoy ninguna de las librerías inyecta los
@@ -40,20 +40,61 @@
 //    notifications found» y no entrega nada. Un reemplazo sin `intent-filter` dejaría la app
 //    compilando, verde en la guarda de arranque y **sin ninguna notificación funcionando**.
 //
+// 5. **Retira enteras las tres piezas de FCM**, que son las que quedaban capaces de levantar
+//    este proceso por un mensaje de push: el receptor de c2dm
+//    (`com.google.firebase.iid.FirebaseInstanceIdReceiver`) y **los dos** servicios que
+//    declaran el filtro `com.google.firebase.MESSAGING_EVENT` — el de Firebase y el de Expo—.
+//    Las tres llegan con el AAR de `firebase-messaging`, que arrastra
+//    `node_modules/expo-notifications/android/build.gradle:43`, y el de Expo lo declara además
+//    `node_modules/expo-notifications/android/src/main/AndroidManifest.xml:6-12`.
+//
+//    **Se cierra la pareja y no la pieza**, que es el criterio: los dos servicios se descubren
+//    **por acción** —`ServiceStarter.resolveServiceClassName` resuelve con
+//    `PackageManager.resolveService` sobre `MESSAGING_EVENT` y solo entonces hace
+//    `setClassName`, leído sobre bytecode con `javap`—, así que neutralizar solo el de Expo
+//    (prioridad −1) deja al de Firebase (prioridad −500) resolviendo en su lugar por el mismo
+//    filtro. Del receptor de c2dm la evidencia de descubrimiento por acción es **indirecta** y
+//    va etiquetada así: nadie del lado app escribe su nombre, pero el emisor vive en Play
+//    Services y no se ha leído.
+//
+//    **Aquí no vale el molde del punto 4, y por la razón contraria a la de allí.** En SPEC-052
+//    la acción estaba **en uso** —la entrega de avisos— y quitarle el filtro habría dejado la
+//    app muda en silencio; aquí **la acción no la usa nadie**, medido en tres direcciones: no
+//    hay `google-services.json` en ningún sitio del árbol, no hay `googleServicesFile` en
+//    `app.json`, y no hay una sola llamada a `getExpoPushTokenAsync` ni a
+//    `getDevicePushTokenAsync`. Por eso se quita el bloque entero con `tools:node="remove"` en
+//    vez de sustituirlo conservando el filtro: quitar el bloque cierra a la vez el
+//    descubrimiento por acción y el descubrimiento por clase, y es lo que hace que la
+//    evidencia indirecta del receptor de c2dm no decida la forma.
+//
+//    **Cómo vuelven, el día que el producto adopte push.** Las tres se declaran otra vez, y no
+//    con un ajuste de configuración nativa: hace falta el fichero de servicios de Firebase
+//    declarado en `app.json`, el token pedido **explícitamente** desde el código de la app, y
+//    la vía nombrada en `VIAS_DE_DESPERTAR` de `app/plataforma/permisos.js` con su motivo. Eso
+//    es **una decisión de producto con su propia fila**, no un descuido que haya que deshacer
+//    aquí. Quien lea esto dentro de un año: las piezas no se cayeron solas ni las quitó una
+//    limpieza; se quitaron porque estaban instaladas y muertas, y volver a ponerlas es abrir
+//    una vía por la que el sistema puede levantar la app con la app cerrada.
+//
 // **Lo que esto cierra y lo que no, dicho con precisión**, porque un comentario que promete
 // más de lo que entrega es la forma de fallo de este repo escrita a mano:
 //
-// - Cierra las dos vías por las que el sistema podía levantar esta app con la app cerrada:
-//   el receptor de `expo-task-manager` y el de `expo-notifications`. Son los dos únicos
-//   receptores que declaraban acciones de arranque en el manifiesto fusionado.
+// - Cierra las dos vías por las que el sistema podía levantar esta app con la app cerrada al
+//   arrancar el móvil: el receptor de `expo-task-manager` y el de `expo-notifications`. Son
+//   los dos únicos receptores que declaraban acciones de arranque en el manifiesto fusionado.
+// - Y cierra la vía de push entera, que era la anchura de más entre lo que `permisos.js`
+//   promete —«nada de esta app se despierta con la app cerrada»— y lo que se estaba
+//   comprobando —«nada se despierta al arrancar el móvil»—.
 // - **No promete nada sobre lo que declare una librería futura**, ni siquiera sobre estas
 //   dos si cambian de forma: este fichero escribe en
 //   `app/android/app/src/main/AndroidManifest.xml`, donde la declaración de la librería ni
 //   siquiera es visible, así que aquí no hay ancla que comprobar ni sitio donde gritar. Lo
 //   que detecta una regresión es la guarda sobre el manifiesto **fusionado**
-//   (`test/nucleo/manifiesto-generado.test.mjs`), que enumera todos los receptores y no una
-//   lista de conocidos. Si mañana `expo-notifications` renombra su receptor, aquí quedará un
-//   reemplazo fantasma y el real aparecerá con sus acciones: eso se ve allí, no aquí.
+//   (`test/nucleo/manifiesto-generado.test.mjs`), que enumera todos los receptores **y todos
+//   los servicios** y los contrasta contra `VIAS_DE_DESPERTAR` de
+//   `app/plataforma/permisos.js`, que es una lista cerrada y no una lista de conocidos. Si
+//   mañana `expo-notifications` renombra su receptor, aquí quedará un reemplazo fantasma y el
+//   real aparecerá con sus acciones: eso se ve allí, no aquí.
 // - Lo que la app hace con las notificaciones **no cambia**: sigue entregando en primer
 //   plano y sin disparador. Lo que desaparece es el arranque, no la entrega.
 //
@@ -103,6 +144,34 @@ const ACCION_DE_ENTREGA_DE_AVISOS = 'expo.modules.notifications.NOTIFICATION_EVE
 const PRIORIDAD_DEL_FILTRO = '-1';
 
 /**
+ * Las tres piezas de FCM que se retiran enteras, con el tipo de nodo por el que entran al
+ * manifiesto. **Las tres y no dos**: los dos servicios comparten el filtro
+ * `com.google.firebase.MESSAGING_EVENT` y se descubren por él, así que quitar solo uno deja al
+ * otro resolviendo en su lugar. La unidad de neutralización es **el filtro**, no la clase.
+ *
+ * El orden es el del manifiesto fusionado, y el porqué medido de cada una está en la cabecera.
+ * Los nombres se escriben literales aquí porque es lo único que la fusión de manifiestos sabe
+ * casar: `tools:node="remove"` empareja por `android:name`, así que un nombre mal escrito no
+ * falla, **no hace nada** — y eso lo ve la guarda del manifiesto fusionado, no este fichero.
+ */
+const PIEZAS_DE_FCM_QUE_SE_RETIRAN = [
+  { nodo: 'receiver', nombre: 'com.google.firebase.iid.FirebaseInstanceIdReceiver' },
+  { nodo: 'service', nombre: 'com.google.firebase.messaging.FirebaseMessagingService' },
+  { nodo: 'service', nombre: 'expo.modules.notifications.service.ExpoFirebaseMessagingService' },
+];
+
+/**
+ * El prefijo del espacio de nombres sin el que **nada de este fichero funciona**: `tools:node`
+ * es lo único que hace que la fusión retire o sustituya lo que declara una librería.
+ *
+ * Se comprueba y se grita en vez de aplicarse a ciegas, que es el listón que puso el hermano
+ * de este fichero (`lo-que-exige-health-connect.js`): sin el prefijo declarado, la retirada de
+ * los permisos y de las tres piezas de FCM se escribiría igual y **no retiraría nada**, y el
+ * fallo aparecería como una vía de despertar viva en una guarda que corre mucho más tarde.
+ */
+const ESPACIO_DE_NOMBRES_TOOLS = 'xmlns:tools';
+
+/**
  * Los modos de fondo de iOS que esta app declara, y **ningún otro**: es la lista blanca
  * contra la que se filtra `UIBackgroundModes` en el `Info.plist` generado.
  *
@@ -129,6 +198,17 @@ module.exports = function retiraPermisosProhibidos(config) {
 
   return withAndroidManifest(conModosDeFondo, (configurado) => {
     const manifiesto = configurado.modResults.manifest;
+
+    // Sin el prefijo `tools` declarado, todo lo que sigue se escribe igual y no retira nada.
+    // Se grita aquí, con el fichero delante, en vez de dejar que aparezca dentro de un año
+    // como una vía de despertar viva en una guarda que corre al final de la compilación.
+    if (!manifiesto.$?.[ESPACIO_DE_NOMBRES_TOOLS]) {
+      throw new Error(
+        `el AndroidManifest.xml generado no declara "${ESPACIO_DE_NOMBRES_TOOLS}", y sin ese prefijo ni los permisos prohibidos se retiran ni las tres piezas de FCM desaparecen: ` +
+        'la plantilla de Expo ha cambiado y esto hay que volver a medirlo en vez de aplicarlo a ciegas',
+      );
+    }
+
     manifiesto['uses-permission'] = manifiesto['uses-permission'] ?? [];
 
     for (const permiso of PERMISOS_QUE_SE_RETIRAN) {
@@ -168,6 +248,16 @@ module.exports = function retiraPermisosProhibidos(config) {
           },
         ],
       });
+
+      // Y las tres piezas de FCM, **enteras**. Aquí no hay reemplazo que escribir: el nodo se
+      // declara solo como marca de retirada, sin atributos y sin filtro, y desaparece del
+      // manifiesto fusionado. Es lo que cierra a la vez el descubrimiento por acción —que es
+      // el medido para los dos servicios— y el descubrimiento por clase.
+      for (const pieza of PIEZAS_DE_FCM_QUE_SE_RETIRAN) {
+        const nodos = (aplicacion[pieza.nodo] ?? []).filter((n) => n.$?.['android:name'] !== pieza.nombre);
+        nodos.push({ $: { 'android:name': pieza.nombre, 'tools:node': 'remove' } });
+        aplicacion[pieza.nodo] = nodos;
+      }
     }
     return configurado;
   });
