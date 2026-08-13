@@ -1,6 +1,6 @@
 # Plan de lo que falta, y cómo se orquesta
 
-Documento de relevo de la orquestación (12-ago-2026). Escrito para que una sesión orquestadora nueva arranque de aquí sin necesitar la conversación en la que nació. La memoria del proyecto es esto, la bitácora (`docs/starting.md`), el registro (`pipeline/decisiones-orquestador.md`, §1–§12) y el checklist — nunca una sesión.
+Documento de relevo de la orquestación (12-ago-2026, al día a 13-ago). Escrito para que una sesión orquestadora nueva arranque de aquí sin necesitar la conversación en la que nació. La memoria del proyecto es esto, la bitácora (`docs/starting.md`), el registro (`pipeline/decisiones-orquestador.md`, §1–§15) y el checklist — nunca una sesión.
 
 ## Estado al escribir esto
 
@@ -20,13 +20,22 @@ Cerrada y cotejada: Health Connect ratificado en el prompt (el patrón funcionó
 
 Cerrada y cotejada: **0 → 69 beats con cara** en 63 de 103 aventuras, casteabilidad idéntica byte a byte, y el primer cotejo en worktree propio (§15b). La premisa era falsa por novena vez —los beats sobre humanos no faltaban: reventaban—, las cuatro decisiones del dueño llegaron con números medidos en copia parcheada antes de la spec (el patrón exportable de la fila), y la segunda entrega (la guarda de plugins de §14e) vino mejor de lo pedido. Lo que **nadie ha visto**: la cara en la pantalla de un teléfono — fichado para la primera fila con aparato, junto con el resto de §15d. Relato en la bitácora (XXXVI) y §15.
 
-### 4 · Fichadas sin fila, a propósito
+### 4 · Fila 52 — apagar `BOOT_COMPLETED` (siguiente, sin decisiones previas; ratificado por el dueño el 13-ago)
+
+La deuda más vieja que sigue viva: la app se despierta al arrancar el móvil por el receptor de `expo-notifications`, y la guarda «Nada de esta app se despierta al arrancar el móvil» nació roja a propósito con dueño SPEC-023 (desde la fila 48). Ahora es barata por primera vez, y está medido (13-ago): **el molde exacto es el punto 3 del propio `retira-permisos-prohibidos.js`**, que ya sustituyó el receptor gemelo de `expo-task-manager` midiendo que el intent explícito no perdía nada. La medición central de la fila es la misma pregunta sobre `expo-notifications`: qué pierde la app si su receptor no escucha el arranque — el diseño dice que nada corre con la app cerrada. El premio: **la batería de núcleo 100 % verde por primera vez**. Encargo en `docs/prompts/prompt-nada-se-despierta-al-arrancar.md`.
+
+### 5 · Fila 53 — la primera fila con aparato: los rojos de `@app` y lo nunca visto (después; empieza con una decisión del dueño)
+
+Junta lo acumulado con la etiqueta «para la primera fila con aparato», que ya tiene masa crítica: **la decisión del proveedor frío** (`docs/pendientes.md`: ¿cae la apertura a la última posición conocida con cota de frescura? — ratificarla en el prompt apagaría los rojos de `en-marcha` y `telon`), **la medición de la sospecha de la 46** (si `empezar-de-nuevo-copia` y el botón atrás son el mismo pendiente, dos deudas se vuelven una), **ver la cara en A4P3 con el dedo** (nadie la ha visto, §15d) y **medir el visor** con su spread fichado. Si sale bien, `@app` queda sin rojos o con uno. Al preparar su encargo, quien orquesta corre el hilo barato del telón por regreso (§12b: `cadenciaDeMuestreo` con una posición en el punto de partida — es una prueba en Node), porque decide si esa caída entra también en la fila.
+
+### 6 · Fichadas sin fila, a propósito
 
 - **Causa raíz de la versión global** (§11e): `VERSION_FORMATO` es global a las ocho clases de documento; subirla por una invalida las demás. Decisión de esquema, mejor con calma.
-- **El telón por regreso** (§12b): el servicio en primer plano se cae a mitad de salida. Hay hipótesis con hilo barato **que no necesita dispositivo**: `cadenciaDeMuestreo` con una posición en el punto de partida y el índice real de geofences — si devuelve `por-distancia`, la hipótesis tiene pata y pasa a fila. Quien persiga la caída: `adb logcat` filtrado por el task manager desde **antes** de abrir la salida.
+- **El telón por regreso** (§12b): el servicio en primer plano se cae a mitad de salida. El hilo barato de la hipótesis lo corre quien orquesta al preparar la 53 (ver arriba). Quien persiga la caída en aparato: `adb logcat` filtrado por el task manager desde **antes** de abrir la salida.
 - **El lector de recursos del visor**: sin dueño natural hasta decidir de dónde salen las ilustraciones. Mientras, toda llegada resuelve a ficha o a lo-que-se-cuenta, y `visor.yaml` sigue en la columna.
-- **Decisiones de diseño sin tomar**, en `docs/pendientes.md`: el botón atrás del sistema, abandonar quema la plantilla, y marcar un sitio del lazo en curso no te libra de él.
-- **El salto a iPhone**, que el dueño quiere «más pronto que tarde» en cuanto Android esté verificado: el inventario vivo está en `docs/iphone.md` — lo preparado, las tres decisiones de dependencia que exigirá (HealthKit, App Attest, Actividad en Vivo), los rojos que lo esperan (`empezar-de-nuevo-copia`) y la tabla de procedimientos de aparato que hay que re-medir. Toda fila que fiche algo con forma de iOS lo anota allí; el paso cero es instalar Xcode, que esta máquina no tiene.
+- **Decisiones de diseño sin tomar**, en `docs/pendientes.md`: abandonar quema la plantilla, y marcar un sitio del lazo en curso no te libra de él (el botón atrás pasa a medirse en la 53).
+- **La sospecha del `typeof`** (§15d): guardas que dejan de medir cuando el dato cambia de forma; su grep sobre `test/nucleo/` sigue pendiente.
+- **El salto a iPhone**, que el dueño quiere «más pronto que tarde» en cuanto Android esté verificado: el inventario vivo está en `docs/iphone.md` — lo preparado, las tres decisiones de dependencia que exigirá (HealthKit, App Attest, Actividad en Vivo), los rojos que lo esperan (`empezar-de-nuevo-copia`) y la tabla de procedimientos de aparato que hay que re-medir. Toda fila que fiche algo con forma de iOS lo anota allí; el paso cero es instalar Xcode, que esta máquina no tiene, y **no depende de nadie: se puede disparar en paralelo cuando el dueño quiera**.
 
 ## Cómo se orquesta (el método, destilado de seis filas)
 
