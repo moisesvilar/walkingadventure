@@ -119,7 +119,7 @@ Filas que no salen del PRD sino de lo que las filas anteriores midieron y dejaro
 
 | # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
 | --- | --- | --- | --- | --- |
-| 51 | beats-con-cara | RF-QUEST-009, RF-PJ-009, RF-INFRA-007 | should | pending |
+| 51 | beats-con-cara | RF-QUEST-009, RF-PJ-009, RF-INFRA-007 | should | done (cotejo independiente 13-ago, **el primero en worktree propio**: 2906 · 2902 · 1 · 3 con `mirado: true` medido en las dos plataformas; casteabilidad idéntica byte a byte; 0 → 69 beats con cara; la cara en pantalla de teléfono queda para la primera fila con aparato — ver §15) |
 
 La **51** sale del fichado de la fila 49 (§11f del registro, dueño del hueco SPEC-017): 20 plantillas declaran rol humano y **ningún beat cae sobre ellos** — 0 de 506 en los cuatro mundos de referencia —, así que `escena.cara` es siempre nula y el bloque de quien habla no se ha pintado nunca. La composición está entera esperando (`escena.js`, `desenlace.js`, A4P3). Corta, solo núcleo, sin emulador. Lleva de segunda entrega la guarda de lista cerrada de `app/plugins/` (decisión §14e). El encargo completo está en `docs/prompts/prompt-beats-con-cara.md`.
 

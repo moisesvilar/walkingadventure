@@ -493,6 +493,18 @@
       "verificado_en_dispositivo": "zurron.yaml recorre 168 comandos (A2P1->A2P2->A2P3) y corrio la rama con zurron; la razon de permisos verificada disparando el intent en los dos estados (con partida -> A6P6, recien instalada -> arranque); la puerta del activity-alias no se pudo disparar (START_VIEW_PERMISSION_USAGE es permiso de sistema) y queda afirmada sobre el manifiesto.",
       "incidencia_de_cotejo": "La primera tanda de cotejo se aborto: la sesion edito el fichero del motivo y un subagente suyo (PID con salida en su scratchpad) condujo el emulador (pm clear + geo fix a -8.80 + arranque.yaml) durante la tanda declarada. Atribucion cerrada con evidencia, sin terceros. El cotejo bueno corrio despues en exclusiva. Ver decisiones 14b: el arbol tambien es un recurso.",
       "merge": "b212f5d"
+    },
+    {
+      "spec": "SPEC-051",
+      "slug": "beats-con-cara",
+      "resultado": "verde con el unico rojo ajeno y fichado",
+      "iteraciones": 0,
+      "report": "SPEC-051-run-20260813T104953Z (tanda de la fila, --nucleo-only); cotejo: SUITE-run-20260813T110622Z (@app) + SUITE-run-20260813T113200Z (nucleo con ambos artefactos), los dos EN WORKTREE PROPIO (primer cotejo del patron 14e), no versionados",
+      "casos": "2906 casos: 2902 pasan, 1 falla, 3 saltados. Unico rojo BOOT_COMPLETED (SPEC-023). mirado:true en ambas plataformas y completo:true MEDIDOS en el worktree (la fila lo declaro como heredado de artefactos del 12-ago; el cotejo compilo y lo convirtio). Delta cerrado sin retirar un caso: 2865 + 34 caras + 4 plugins-declarados + 1 escena-cableada + 2 npcs.",
+      "app": "20 flujos: 8 pasan, 3 fallan, 9 solo comprueban su limite. Los tres rojos ajenos de siempre (empezar-de-nuevo-copia, en-marcha, telon). La fila no tomo el emulador (decision del dueno) y su @app salio del cotejo, como se pacto.",
+      "nota": "0 -> 69 beats con cara en 63 de 103 aventuras (21 beats en 19 plantillas, las dos clausulas); 9 rotulos de mundo por puesto; A4P4 hereda la forma de la escena. Casteabilidad identica byte a byte (640/660, reales 30/26/30/27), medida por cuatro manos. Cuatro decisiones del dueno en la ventana de la fila: mismo lugar (ratifica el pendiente 1 de npcs.md), dos clausulas, rotulo de mundo, herencia de forma. Novena premisa falsa de nueve: un beat sobre rol humano no es que no ocurriera, reventaba con TypeError diferido (70 excepciones); los sitios a tocar eran 7, dos declarados por wa-dev (fugas de registro: la marca humano en el mapa y humano viajando al LLM). Las guardas a mover eran 10, una media la herencia como fallo. Guarda de plugins entregada (lista cerrada + huella SHA-256 sin comentarios, 3 direcciones de rojo verificadas). Mapa de cobertura honesto: 46 entradas convertidas (eran 25 al declararse), 26 huecos de verdad con motivo (8 heredados de SPEC-010/014/034/049).",
+      "no_verificado": "La cara no se ha visto en la pantalla de un telefono: composicion y montado afirmados en Node; la lectura a 1080x2400 queda fichada para la primera fila con aparato.",
+      "merge": "6ff0ead"
     }
   ],
   "bloqueos": [],
@@ -534,9 +546,9 @@
     }
   ],
   "suite_final": {
-    "casos": "2865: 2861 pasan, 1 falla, 3 saltados",
+    "casos": "2906: 2902 pasan, 1 falla, 3 saltados (mirado:true ambas plataformas, completo:true)",
     "app": "20 flujos: 8 pasan, 3 fallan (todos ajenos y leidos: empezar-de-nuevo-copia, en-marcha y telon), 9 solo comprueban su limite (zurron.yaml con la forma 'depende del mundo')",
-    "precondicion": "aparato limpio: pm clear + reinstalar + force-stop + segundo pm clear + posicion alimentada cada 2 s, emulador en exclusiva (CLAUDE.md)"
+    "precondicion": "cotejo en worktree propio del hash declarado (14e), con compilacion Android + prebuild iOS dentro; aparato limpio (pm clear x2 con arranque entre medias) + posicion cada 2 s, emulador en exclusiva"
   },
   "bloque": "B7",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",
