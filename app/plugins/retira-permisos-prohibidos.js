@@ -5,7 +5,7 @@
 // modos de fondo que nadie de esta app ha escrito. Todas las guardas de
 // `app/plataforma/permisos.js` miraban `app.json`, así que por esa puerta no se veía nada.
 //
-// Hace tres cosas:
+// Hace cuatro cosas:
 //
 // 1. **Retira los permisos prohibidos de Android** con `tools:node="remove"`, que es la
 //    única forma de que la fusión los respete. Hoy ninguna de las librerías inyecta los
@@ -25,17 +25,37 @@
 //    con un intent **explícito** —`TaskManagerUtils.java:180` lo construye con la clase, no
 //    con la acción—, así que quitarle el filtro entero no le quita nada de lo que esta app
 //    usa. Medido y comprobado en el emulador el 11-ago-2026.
+// 4. **Sustituye el receptor de `expo-notifications` por uno que solo conserva su acción de
+//    entrega.** La librería lo declara con seis acciones en el mismo filtro
+//    (`node_modules/expo-notifications/android/src/main/AndroidManifest.xml`): la de entrega
+//    y las cinco de arranque —`BOOT_COMPLETED`, `REBOOT`, los dos `QUICKBOOT_POWERON` y
+//    `MY_PACKAGE_REPLACED`—. El reemplazo se queda con la primera y pierde las cinco.
+//
+//    **Y aquí no vale el molde del punto 3, por una diferencia medida.** Al receptor de
+//    tareas se le pudo quitar el filtro entero porque se le entrega por clase; a este se le
+//    descubre **por la acción de su filtro**: `NotificationsService.kt:403-406`
+//    (`findDesignatedBroadcastReceiver`) busca con
+//    `queryBroadcastReceivers(Intent(intent.action).setPackage(context.packageName))`, y
+//    `doWork` (`:386-393`) sin receptor encontrado escribe «No service capable of handling
+//    notifications found» y no entrega nada. Un reemplazo sin `intent-filter` dejaría la app
+//    compilando, verde en la guarda de arranque y **sin ninguna notificación funcionando**.
 //
 // **Lo que esto cierra y lo que no, dicho con precisión**, porque un comentario que promete
 // más de lo que entrega es la forma de fallo de este repo escrita a mano:
 //
-// - Cierra la vía de `expo-task-manager`: su receptor ya no puede despertarse al arrancar
-//   el móvil ni al actualizarse el paquete.
-// - **No cierra la propiedad entera.** En el manifiesto fusionado sigue vivo el receptor
-//   `NotificationsService` de **`expo-notifications`** con `BOOT_COMPLETED`, `REBOOT`,
-//   `QUICKBOOT_POWERON` y `MY_PACKAGE_REPLACED`. Es de SPEC-023 y **no es de esta fila**:
-//   queda fichado para quien lo recoja, y hasta entonces «nada de esta app se despierta con
-//   la app cerrada» es cierto de la tarea de ubicación y no del paquete entero.
+// - Cierra las dos vías por las que el sistema podía levantar esta app con la app cerrada:
+//   el receptor de `expo-task-manager` y el de `expo-notifications`. Son los dos únicos
+//   receptores que declaraban acciones de arranque en el manifiesto fusionado.
+// - **No promete nada sobre lo que declare una librería futura**, ni siquiera sobre estas
+//   dos si cambian de forma: este fichero escribe en
+//   `app/android/app/src/main/AndroidManifest.xml`, donde la declaración de la librería ni
+//   siquiera es visible, así que aquí no hay ancla que comprobar ni sitio donde gritar. Lo
+//   que detecta una regresión es la guarda sobre el manifiesto **fusionado**
+//   (`test/nucleo/manifiesto-generado.test.mjs`), que enumera todos los receptores y no una
+//   lista de conocidos. Si mañana `expo-notifications` renombra su receptor, aquí quedará un
+//   reemplazo fantasma y el real aparecerá con sus acciones: eso se ve allí, no aquí.
+// - Lo que la app hace con las notificaciones **no cambia**: sigue entregando en primer
+//   plano y sin disparador. Lo que desaparece es el arranque, no la entrega.
 //
 // Y lo que este plugin **no puede** hacer, que es el otro límite de la fila:
 // `RECEIVE_BOOT_COMPLETED` no se puede retirar. `expo-task-manager` programa la entrega de
@@ -63,6 +83,24 @@ const PERMISOS_QUE_SE_RETIRAN = [
 
 /** El receptor de tareas, reescrito sin los disparadores de arranque del sistema. */
 const RECEPTOR_DE_TAREAS = 'expo.modules.taskManager.TaskBroadcastReceiver';
+
+/** El receptor de notificaciones, reescrito sin los disparadores de arranque del sistema. */
+const RECEPTOR_DE_NOTIFICACIONES = 'expo.modules.notifications.service.NotificationsService';
+
+/**
+ * La acción con la que `expo-notifications` se entrega cada aviso, y **lo único que el
+ * reemplazo del receptor conserva**: el receptor se descubre por la acción declarada en su
+ * filtro (`NotificationsService.kt:403-406`), así que quitársela no lo dejaría dormido, lo
+ * dejaría mudo. El porqué medido está en la cabecera.
+ */
+const ACCION_DE_ENTREGA_DE_AVISOS = 'expo.modules.notifications.NOTIFICATION_EVENT';
+
+/**
+ * La prioridad del filtro original, copiada tal cual. El reemplazo sustituye la declaración
+ * entera, así que lo que no se copie se pierde: conservar la forma y perder solo lo decidido
+ * es la superficie de cambio mínima.
+ */
+const PRIORIDAD_DEL_FILTRO = '-1';
 
 /**
  * Los modos de fondo de iOS que esta app declara, y **ningún otro**: es la lista blanca
@@ -109,6 +147,26 @@ module.exports = function retiraPermisosProhibidos(config) {
       // llama por su clase, y deja de poder despertarse al arrancar el móvil.
       aplicacion.receiver.push({
         $: { 'android:name': RECEPTOR_DE_TAREAS, 'android:exported': 'false', 'tools:node': 'replace' },
+      });
+
+      aplicacion.receiver = aplicacion.receiver.filter((r) => r.$?.['android:name'] !== RECEPTOR_DE_NOTIFICACIONES);
+      // Aquí el reemplazo **sí lleva filtro**, y con una sola acción: la de entrega. Se copia
+      // la forma del original —habilitado, sin exportar, prioridad del filtro— porque
+      // `tools:node="replace"` sustituye la declaración entera y lo que no se escriba aquí
+      // desaparece del binario. Lo que se pierde son las cinco acciones de arranque.
+      aplicacion.receiver.push({
+        $: {
+          'android:name': RECEPTOR_DE_NOTIFICACIONES,
+          'android:enabled': 'true',
+          'android:exported': 'false',
+          'tools:node': 'replace',
+        },
+        'intent-filter': [
+          {
+            $: { 'android:priority': PRIORIDAD_DEL_FILTRO },
+            action: [{ $: { 'android:name': ACCION_DE_ENTREGA_DE_AVISOS } }],
+          },
+        ],
       });
     }
     return configurado;
