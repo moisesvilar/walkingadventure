@@ -124,6 +124,26 @@ describe('El sistema puede preguntar por qué se piden los permisos de salud', (
     assert.match(cabecera, /producción/, 'no dice que esta entrada sí funciona en producción');
   });
 
+  test('La guarda de partida de la razón de permisos vive en JavaScript', () => {
+    // Hueco de batería, y entra con la fila 46 en su segunda vuelta: `test/app/zurron.yaml`
+    // recorre esta guarda en el aparato, pero desde que ese flujo es de límite declarado su
+    // verde ya no es la única red — así que lo que el aparato afirma se afirma también aquí,
+    // que es donde el rojo es posible sin emulador.
+    //
+    // Lo que se mide es que la decisión está **en `App.js` y no en el Kotlin**: se espera a
+    // que la apertura resuelva —decidir antes sería decidir a cara o cruz—, con partida se va
+    // a los ajustes, y sin partida no se monta nada y se queda el arranque de siempre.
+    const raiz = fuente('app/App.js');
+    const efecto = raiz.slice(raiz.indexOf('if (!razonDePermisos'), raiz.indexOf('if (!razonDePermisos') + 400);
+    assert.ok(efecto.startsWith('if (!razonDePermisos'), 'App.js no tiene ningún efecto que atienda la razón de permisos');
+    assert.match(efecto, /APERTURAS\.ABRIENDO/, 'la razón de permisos se resuelve sin esperar a que la apertura sepa si hay partida');
+    assert.match(efecto, /if \(partida\) setConsulta\('ajustes'\)/, 'con partida abierta la razón de permisos no lleva a los ajustes');
+    // Y sin partida **no se monta nada**: no hay rama que abra ninguna consulta sin ella.
+    assert.doesNotMatch(efecto.replace(/if \(partida\) setConsulta\('ajustes'\);/, ''), /setConsulta\(/, 'hay un camino que monta una consulta sin partida abierta');
+    // La guarda vive aquí y no en el lado nativo, que es lo que el Kotlin declara no hacer.
+    assert.doesNotMatch(PLUGIN, /setConsulta|APERTURAS/, 'la guarda de partida se ha bajado al plugin, y ahí ninguna prueba de este repo la ve');
+  });
+
   test('El plugin dice qué lo arrastra y cuánto cuesta', () => {
     // Hueco de batería: es una propiedad del fichero y no del juego. Va aquí porque es la
     // otra mitad de «se verifica por su artefacto»: el artefacto dice **qué** quedó puesto y

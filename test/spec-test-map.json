@@ -30361,7 +30361,7 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "Con partida abierta, la razón de los permisos abre los ajustes",
       "escenario": "Con partida abierta, la razón de los permisos abre los ajustes",
-      "nota": "El flujo entra por el enlace al que el plugin traduce el intento, que es el camino real de la app desde la traducción en adelante: am start -a no resuelve el filtro sin CATEGORY_DEFAULT, y el activity-alias exige START_VIEW_PERMISSION_USAGE, que adb no tiene. Los dos límites están medidos y escritos en la cabecera del flujo."
+      "nota": "El flujo entra por el enlace al que el plugin traduce el intento, que es el camino real de la app desde la traducción en adelante: am start -a no resuelve el filtro sin CATEGORY_DEFAULT, y el activity-alias exige START_VIEW_PERMISSION_USAGE, que adb no tiene. Los dos límites están medidos y escritos en la cabecera del flujo. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30369,7 +30369,8 @@
       "nivel": "@app",
       "fichero": "test/app/zurron.yaml",
       "caso": "Con partida abierta, la razón de los permisos abre los ajustes",
-      "escenario": "Con partida abierta, la razón de los permisos abre los ajustes"
+      "escenario": "Con partida abierta, la razón de los permisos abre los ajustes",
+      "nota": "Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30377,7 +30378,8 @@
       "nivel": "@app",
       "fichero": "test/app/zurron.yaml",
       "caso": "Sin partida, la razón de los permisos cae al arranque",
-      "escenario": "Sin partida, la razón de los permisos cae al arranque"
+      "escenario": "Sin partida, la razón de los permisos cae al arranque",
+      "nota": "Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30403,7 +30405,7 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "Los pasos de fondo vienen apagados",
       "escenario": "Los pasos de fondo vienen apagados",
-      "nota": "La mitad que necesita dispositivo. Se afirma el estado del interruptor y no la palabra «no»: una fila de interruptor no pinta su valor, medido en wa-pixel."
+      "nota": "La mitad que necesita dispositivo. Se afirma el estado del interruptor y no la palabra «no»: una fila de interruptor no pinta su valor, medido en wa-pixel. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30412,7 +30414,7 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "El permiso de salud se pide al encender y denegarlo no se insiste",
       "escenario": "El permiso de salud se pide al encender y denegarlo no se insiste",
-      "nota": "El flujo concede. Denegar y después conceder no cabe en un solo recorrido: Health Connect acota cuántas veces una app puede preguntar por el mismo tipo de dato. El camino de denegar se afirma contra el doble en @nucleo, con recuento de peticiones."
+      "nota": "El flujo concede. Denegar y después conceder no cabe en un solo recorrido: Health Connect acota cuántas veces una app puede preguntar por el mismo tipo de dato. El camino de denegar se afirma contra el doble en @nucleo, con recuento de peticiones. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30644,7 +30646,8 @@
       "nivel": "@app",
       "fichero": "test/app/zurron.yaml",
       "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
-      "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista"
+      "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista",
+      "nota": "Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30660,7 +30663,8 @@
       "nivel": "@app",
       "fichero": "test/app/zurron.yaml",
       "caso": "Seguir lleva del zurrón a lo que hay hoy",
-      "escenario": "Seguir lleva del zurrón a lo que hay hoy"
+      "escenario": "Seguir lleva del zurrón a lo que hay hoy",
+      "nota": "Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30677,7 +30681,7 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "El zurrón no aparece por segunda vez",
       "escenario": "El zurrón no aparece por segunda vez",
-      "nota": "Se vuelve a la portada matando la app y reabriéndola, y no con el botón del sistema: docs/flujo.md no declara ninguna arista de A2P3 a A2P1 y lo medido en wa-pixel es que la app se va. Reabrir comprueba además que el vaciado quedó en disco."
+      "nota": "Se vuelve a la portada matando la app y reabriéndola, y no con el botón del sistema: docs/flujo.md no declara ninguna arista de A2P3 a A2P1 y lo medido en wa-pixel es que la app se va. Reabrir comprueba además que el vaciado quedó en disco. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30701,7 +30705,8 @@
       "nivel": "@app",
       "fichero": "test/app/zurron.yaml",
       "caso": "Al zurrón no se llega desde ninguna otra pantalla",
-      "escenario": "Al zurrón no se llega desde ninguna otra pantalla"
+      "escenario": "Al zurrón no se llega desde ninguna otra pantalla",
+      "nota": "Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30793,7 +30798,7 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
       "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista",
-      "nota": "El flujo se reescribió entero en esta fila: el anterior estaba escrito contra iOS en su tramo de revocación y usaba paso-ajustes, paso-diario y paso-repisa, que nunca existieron. Las puertas reales son las del pie de la portada."
+      "nota": "El flujo se reescribió entero en esta fila: el anterior estaba escrito contra iOS en su tramo de revocación y usaba paso-ajustes, paso-diario y paso-repisa, que nunca existieron. Las puertas reales son las del pie de la portada. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30827,7 +30832,7 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "El zurrón no aparece por segunda vez",
       "escenario": "El zurrón no aparece por segunda vez",
-      "nota": "La mitad de disco: el flujo mata la app y la reabre, así que un vaciado que solo estuviera en memoria haría reaparecer el zurrón."
+      "nota": "La mitad de disco: el flujo mata la app y la reabre, así que un vaciado que solo estuviera en memoria haría reaparecer el zurrón. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
     },
     {
       "spec": "SPEC-046",
@@ -30911,7 +30916,8 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/limite-declarado.test.mjs",
       "caso": "Los flujos que recorren la app de verdad no llevan marcador",
-      "hueco_de_bateria": true
+      "hueco_de_bateria": true,
+      "nota": "**Este criterio se incumple, y se dice en voz alta en lugar de disimularlo.** `zurron.yaml` entra en la lista y la columna sube de ocho a nueve, por decisión del dueño y con la medida delante: el flujo recorre 168 comandos de verdad y lo único que no puede garantizar es el último tramo, porque una partida recién arrancada puede no tener nada narrable. Medido montando la partida en Node como la monta la app: el prólogo siembra 2 entradas en la cola y deja 3 rumores con `frentes: []`, y 60 pasos dan 0 efectos. El precedente es `llegada.yaml`. El motivo entero, con las fuentes, está en la cabecera de la guarda."
     },
     {
       "spec": "SPEC-046",
@@ -31054,7 +31060,16 @@
       "fichero": "test/app/zurron.yaml",
       "caso": "Con reserva sin vaciar se abre el zurrón y no la lista",
       "escenario": "Con reserva sin vaciar se abre el zurrón y no la lista",
-      "nota": "No hay ningún caso que compile: lo que lo sostiene es que los artefactos existen y están al día —el manifiesto fusionado con minSdk 26 y el MainActivity parcheado—, y que los flujos de @app corren contra la app instalada. Compilar es un paso del runner, no una prueba."
+      "nota": "No hay ningún caso que compile: lo que lo sostiene es que los artefactos existen y están al día —el manifiesto fusionado con minSdk 26 y el MainActivity parcheado—, y que los flujos de @app corren contra la app instalada. Compilar es un paso del runner, no una prueba. Desde la segunda vuelta de la fila, este flujo es de **límite declarado**: el tramo del zurrón cuelga de que A2P2 aparezca, que depende del mundo. Lo que garantiza sin condición es el recorrido hasta ahí; el mecanismo del zurrón se afirma entero en `test/nucleo/zurron.test.mjs`."
+    },
+    {
+      "spec": "SPEC-046-iter-1",
+      "criterio": "Dado el lado nativo, cuando se busca lógica de producto en él, entonces no hay ninguna: a dónde ir se decide en JavaScript, que es donde las guardas lo ven.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/razon-de-permisos.test.mjs",
+      "caso": "La guarda de partida de la razón de permisos vive en JavaScript",
+      "hueco_de_bateria": true,
+      "nota": "Entra al pasar `zurron.yaml` a límite declarado: lo que el aparato afirmaba deja de ser la única red, así que la guarda de partida se afirma también donde el rojo es posible sin emulador."
     }
   ]
 }

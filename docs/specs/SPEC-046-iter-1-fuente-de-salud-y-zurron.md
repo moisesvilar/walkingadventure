@@ -12,13 +12,16 @@ Es **la primera vez que este repo inyecta código nativo propio**, y por eso tre
 
 Y la iteración recoge una tercera cosa que no es una premisa sino una consecuencia: **el total de la batería bajó de 2825 a 2819 y eso no es una mejora**. Sin compilación no hay manifiesto fusionado, así que el bloque de Android no se registró —`test/reports/manifiesto-generado.estado.json` dice `android.mirado: false`— y el rojo ajeno de `BOOT_COMPLETED` **no está verde: está sin mirar**. La fila no se da por medida hasta que ese bloque vuelva a registrarse y el total vuelva a su tamaño.
 
-**Lo que NO cambia:** el destino (A6P6), los dos permisos de salud, la retirada de `ACTIVITY_RECOGNITION` y de `NSHealthShareUsageDescription`, la línea de `docs/iphone.md`, la privacidad, el determinismo, la frontera del núcleo, y todos los criterios del zurrón, el motor y la reserva.
+Y una cuarta cosa, medida **después** de escribir el resto de esta iteración y añadida aquí en lugar de abrir una iteración nueva, porque la fila no ha cerrado y esto es la misma iteración diciendo lo que se midió: **la columna de límite declarado sube de ocho a nueve, y `zurron.yaml` entra**. La spec base sostenía lo contrario con todas las letras, y esa contradicción se escribe en vez de disimularse. Es la **única derogación** de todo el documento.
+
+**Lo que NO cambia:** el destino (A6P6), los dos permisos de salud, la retirada de `ACTIVITY_RECOGNITION` y de `NSHealthShareUsageDescription`, la línea de `docs/iphone.md`, la privacidad, el determinismo, la frontera del núcleo, y todos los criterios del zurrón, el motor y la reserva — que siguen enteros, y que después de esto se afirman **todos** desde `@nucleo`.
 
 ## Alcance de implementación
 
 - Esta iteración define **únicamente el código de producción** del delta: el plugin de configuración que sube el suelo de aparatos y traduce el intento de razón, la lectura del enlace profundo nuevo, y la arista de `docs/flujo.md` que lo declara. Nada de lo que la spec base ya entregó se rehace.
 - **Los tests automatizados están fuera del alcance del implementador.** No se deben escribir tests de nivel `@nucleo` (`node --test`) ni flujos de nivel `@app` (Maestro) como parte de esta entrega. Los tests los genera la skill `/somo-qa-dev` y los ejecuta `/somo-qa-tester` contra el código ya commiteado, en un paso posterior del pipeline de QA de SOMO. Cualquier test que el implementador entregue será descartado o reemplazado.
 - **Frontera del núcleo: sin cambios.** `packages/nucleo/` no se toca, no aparece ninguna entrada ni salida nueva que inyectar, y lo que cruza del lector al núcleo siguen siendo metros. **Dependencias: ninguna nueva.** `expo-build-properties` se propuso y **se descartó** —`withGradleProperties` viene dentro de `expo`, que ya es dependencia—; `react-native-health-connect` sigue siendo la única dependencia que esta fila trajo.
+- **La lista de `limite-declarado` la escribe `wa-qa-dev`, no el implementador.** Esta iteración declara que el criterio cambia y por qué; quién toca `test/**` no cambia por eso, y la redacción del motivo es de quien lo mide.
 - **Fuera de alcance de esta iteración**, aunque el delta los roce: el resto de las claves de compilación de Android (`targetSdk`, `compileSdk`, versión de Kotlin), que no las arrastra Health Connect y no se tocan «ya que estamos»; cualquier lógica de producto del lado nativo más allá de traducir la acción del intento; el rojo de `BOOT_COMPLETED` de `expo-notifications`, que esta fila solo tiene que volver a **mirar**, no arreglar; y HealthKit en iOS, donde ni el suelo ni el intento tienen nada que ver.
 
 ## Criterio de aceptación modificado
@@ -76,6 +79,21 @@ Los dos siguen vigentes tal cual. La guarda de la arista es la misma; lo que cam
 - **Dado** el rojo ajeno del receptor de `BOOT_COMPLETED` de `expo-notifications`, **cuando** se declara su estado, **entonces** se dice que **no está verde: está sin mirar**, y vuelve a mirarse en cuanto el manifiesto se regenere. Sigue sin ser de esta fila y sigue sin arreglarse aquí, pero se mide.
 - **Dado** cualquier tanda de `@app` cuyos números vayan a compararse, **cuando** se declara su precondición, **entonces** dice que se corrió tras `adb shell pm clear com.walkingadventure.app` y reinstalación. La precondición se declara junto a los números o los números no dicen nada.
 
+### La columna de límite declarado sube: `zurron.yaml` entra, y la contradicción se dice en voz alta
+
+Esta es la única derogación de toda la iteración, y llega **después** de haber escrito el resto: se midió al implementar, y la spec la recoge en lugar de dejar en pie un criterio que ya no se sostiene.
+
+- **Dado** `test/nucleo/limite-declarado.test.mjs`, **cuando** se ejecuta al cerrar esta fila, **entonces** `zurron.yaml` **está** en la lista y la columna pasa de **ocho a nueve**.
+- **Dado** el motivo con el que entra, **cuando** se lee, **entonces** dice que el flujo **recorre la app entera y llega hasta el final** —no que se quede en una guarda— y que lo que no puede garantizar es **que haya algo que contar**: sin nada narrable en la reserva, el núcleo decide «nada que contar», vacía la reserva con su hecho y sigue a la lista del día, que es **su comportamiento especificado y no un fallo**, y A2P2 no aparece.
+- **Dado** ese motivo, **cuando** se compara con el de `escena.yaml`, **entonces** es **la misma raíz** y así se dice: la semilla nace de entropía real y el arranque no ofrece dónde escribirla, así que **qué produce el mundo no es reproducible entre tandas**. La deuda de fondo se ficha **junto a la de `escena.yaml`, que la comparte**, y no abre entrada nueva.
+- **Dado** ese motivo, **cuando** se revisa antes de escribirlo, **entonces** **no dice que falte la siembra**: `siembraLaCola` **sí tiene llamador** desde la fila 50 —`app/mapa/donde-estas.js:169` y `app/nucleo/piezas.js:222`—, y lo sembrado se resuelve en `microencuentros.js` por `atraviesa({ sitio, salida, paso })`, o sea **al atravesar sitios durante una salida y no por pasos de fondo**. Escribirlo sería estrenar el tercer motivo caducado de esa lista, después de `descarte.yaml` y `escena.yaml`.
+- **Dado** el mecanismo del zurrón, **cuando** se pregunta dónde queda medido tras esto, **entonces** queda **entero en `@nucleo`**, que es donde el rojo es posible: si hay zurrón o no, sus entradas, su orden, el tope de cinco, la llamada única, la caída a plantilla, el vaciado con hecho, la confirmación repetida, el determinismo, y **también la decisión de recorrido** —abrir el zurrón y no la lista, «Seguir» hacia lo que hay hoy, y no aparecer por segunda vez—. Nada de lo que el flujo deja de prometer se queda sin medir en ningún sitio.
+- **Dado** ese reparto, **cuando** se busca el hueco que sí queda, **entonces** se declara: lo único que `@nucleo` no puede afirmar es **que A2P2 se pinte y que el toque real recorra las tres pantallas en el aparato**. Es composición y no decisión, y hoy no lo cubre nadie de forma reproducible. Se dice aquí en lugar de darlo por cubierto.
+
+> El criterio "**Dado** `test/nucleo/limite-declarado.test.mjs`, **cuando** se ejecuta, **entonces** `zurron.yaml` sigue **sin** estar en la lista —no está hoy y no entra— y la columna no sube por esta fila." **queda obsoleto y debe entenderse derogado** por esta iteración. El comportamiento esperado del implementador y de la suite QA es el del criterio nuevo de arriba.
+
+**La redacción de la lista no la fija esta spec.** `test/**` es de `wa-qa-dev`, que está re-midiendo el motivo definitivo mientras se escribe esto: **si su medida difiere de la de aquí, manda la suya**. Lo que esta iteración fija es que **el criterio cambia y por qué**, no las palabras con las que se escriba.
+
 ### Lo que la implementación ya ratificó, y que el reparto de la base no nombraba
 
 Dos ajustes que el implementador ya hizo y que quedan **ratificados** aquí para que el reparto de rutas de la spec base no siga incompleto:
@@ -126,6 +144,25 @@ Las tres decisiones de interacción que la spec base añadió —el interruptor 
 | El bloque de Android del manifiesto se midió | **FALSO.** `android.mirado: false`, `completo: false` | `test/reports/manifiesto-generado.estado.json` |
 | `pide` faltaba en la orquestación | **Ya resuelto.** `async pide(fila, quiere)` | `app/salida/pasos-de-fondo.js:152` |
 | `android` de un permiso era una cadena | **Ya resuelto.** Admite lista | `app/plataforma/permisos.js:87,262-265` |
+| `zurron.yaml` no entra en `limite-declarado` | **FALSO desde que se midió.** Entra: la columna sube de 8 a 9 | ver abajo |
+| Falta el llamador de `siembraLaCola` | **FALSO.** Lo tiene desde la fila 50 | `app/mapa/donde-estas.js:169`, `app/nucleo/piezas.js:222` |
+
+### Por qué `zurron.yaml` entra en la lista, medido
+
+Dos cosas ocurrieron en este orden, y separarlas es lo que evita leer un comportamiento especificado como una avería.
+
+**Primero se arregló un defecto real**, en `044af9b`: la fila del interruptor de A6P6 era **inerte fuera del `Switch`**, así que `enciende()` no llegaba a correr — ni encendía ni dejaba aviso, que son sus dos únicas salidas. Con eso corregido el flujo **recorre 168 comandos de verdad**, y el tono importa: `zurron.yaml` no es un flujo que se queda en una guarda ni uno que no llega. Llega entero, y a partir de ahí depende del mundo que le toque.
+
+**Y lo que queda después es que sale verde o rojo según el mundo.** Medido fuera del aparato por `wa-dev`, armando el motor en Node exactamente como lo arma `App.js`, con el `estado.json` y la celda traídos del móvil: **60 pasos, 0 efectos**. El motivo se lee en el propio estado — los tres rumores del prólogo tienen `frentes: []`, ya propagados del todo. Los cinco pasos de la reserva se acreditan, pero no producen nada narrable, así que el núcleo decide «nada que contar», vacía la reserva con su hecho y sigue a la lista del día. Eso es **lo que la spec base especifica**, criterio por criterio, y sin nada narrable A2P2 no aparece: el flujo no tiene qué mirar.
+
+Es **la misma raíz que `escena.yaml`**, que lleva en esa lista por lo mismo: la semilla nace de entropía real y el arranque no ofrece dónde escribirla, así que qué produce el mundo no es reproducible entre tandas. Por eso la deuda de fondo **se ficha junto a la suya y no en una entrada nueva**: es una deuda con dos síntomas, no dos deudas.
+
+Dos cosas que **no** se escriben en ese motivo, y las dos por experiencia de esta misma lista:
+
+- **No se escribe que falte la siembra.** `siembraLaCola` tiene llamador desde la fila 50, y lo sembrado se resuelve al **atravesar sitios durante una salida**, no por pasos de fondo. `descarte.yaml` y `escena.yaml` ya llevaron un motivo caducado cada uno; un tercero sería un patrón y no un descuido.
+- **No se escribe como si el flujo no llegara.** Recorre 168 comandos. Lo que no puede garantizar es que haya algo que contar al final de ellos.
+
+**El mecanismo queda cubierto donde el rojo es posible.** `test/nucleo/zurron.test.mjs` afirma si hay zurrón o no, las entradas, su orden, el tope, la llamada única, la caída a plantilla, el vaciado con su hecho, la confirmación repetida, el determinismo con y sin narrador, y la decisión de recorrido entera —abrir el zurrón y no la lista, «Seguir» hacia lo que hay hoy, no aparecer por segunda vez—. **El hueco que queda es estrecho y se dice**: que A2P2 se pinte y que el toque real recorra las tres pantallas en el aparato. Es composición, no decisión, y hoy no hay manera reproducible de afirmarlo; el día que la haya, `zurron.yaml` sale de la lista como salieron `ajustes.yaml` y `en-marcha.yaml`.
 
 ### Por qué `withGradleProperties` es la palanca correcta aquí, medido
 
@@ -169,6 +206,7 @@ Dos cautelas de mecánica, que son las que la cláusula de salida contempla: el 
 2. `adb shell pm clear com.walkingadventure.app`, reinstalar, y disparar `adb shell am start -a androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE` **sin haber arrancado partida**: tiene que verse el arranque de siempre.
 3. Abrir partida, dejar la app viva, y disparar el mismo intento: tiene que verse A6P6 con la fila «Contar los pasos del día a día». Repetirlo con la app en segundo plano.
 4. Volver a correr la batería entera y comprobar que `test/reports/manifiesto-generado.estado.json` dice `android.mirado: true` y que el total ha vuelto a 2825, con la precondición de aparato limpio declarada junto a los números.
+5. Comprobar que `test/nucleo/limite-declarado.test.mjs` declara nueve flujos y que `zurron.yaml` es el que entró, con su motivo escrito en la cabecera de la lista y sin mencionar la siembra.
 
 ## Decisiones asumidas
 
@@ -180,5 +218,6 @@ Las **dos decisiones del dueño** —subir el suelo a 26 con plugin propio y sin
 - **La reescritura cubre la entrada en frío y la entrada con la app viva** → asumido (alternativa: solo el arranque en frío, que es lo que la decisión del dueño nombra literalmente). Regla: la actividad es `singleTask` (`app/android/app/src/main/AndroidManifest.xml:29`), así que con la app abierta el intento no pasa por el arranque; y «con partida abierta» es justo el estado del criterio que más veces va a ocurrir de verdad. Es una precisión del mecanismo, no una ampliación del destino.
 - **El plugin se llama por lo que Health Connect exige y no por lo que hace cada mitad** (`lo-que-exige-health-connect.js`) → asumido (alternativa: un nombre por cada modificación, que obligaría a los dos ficheros). Regla: `.claude/rules/naming.md` y el español de dominio del repo; el nombre del precedente (`retira-permisos-prohibidos`) nombra el motivo y no el mecanismo.
 - **`targetSdk`, `compileSdk` y la versión de Kotlin no se tocan** → asumido (alternativa: alinearlos de paso con los que declara la librería). Regla: «no estires la fila»; lo que la dependencia **exige** es el suelo, y lo demás compila hoy. Alinearlos sería otro cambio de suelo sin medida y sin decisión.
+- **La subida de la columna entra como enmienda de esta iteración y no como iteración nueva** → asumido (alternativa: `SPEC-046-iter-2`). Regla: `references/iter-instructions.md` manda abrir `iter-M+1` para **deltas no relacionados**, y este no lo es: la fila no ha cerrado, y es la misma iteración diciendo lo que se midió después de escribirla. Partirlo en dos documentos habría dejado el criterio derogado vivo en el intervalo, que es justo lo que la fórmula de derogación existe para impedir.
 - **El total de la batería vuelve a 2825 como criterio, y no «al menos 2819»** → asumido (alternativa: aceptar el número nuevo como línea base). Regla: el bloque que falta no desapareció, se dejó de mirar; una línea base que absorbe una guarda apagada es cómo un rojo se convierte en un verde sin que nadie mienta.
 - **Sin `### Comportamiento responsive`** → asumido por la decisión 3 de `pipeline/decisiones-orquestador.md`: esto es una app de móvil y la pantalla es la que es.

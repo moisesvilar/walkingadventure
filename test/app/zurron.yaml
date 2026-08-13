@@ -1,5 +1,21 @@
 # @app — El zurrón, el interruptor de los pasos del día a día y la razón de permisos, dentro
 # del móvil (SPEC-042, cableado por SPEC-046 y su iteración 1).
+# @limite-declarado
+#
+# **Y esto contradice un criterio de su propia spec, así que se dice en voz alta.** SPEC-046
+# escribió: «`test/nucleo/limite-declarado.test.mjs`, cuando se ejecuta, entonces `zurron.yaml`
+# sigue **sin** estar en la lista —no está hoy y no entra— y la columna no sube por esta fila».
+# Entra, y la columna sube de ocho a nueve. Lo que aquel criterio no podía saber es lo que se
+# midió al recorrerlo de verdad: **A2P2 depende del mundo**, y un flujo que pasa o falla según
+# el mundo, contado en la columna de los verdes, es peor que uno declarado. El precedente es
+# `llegada.yaml`, que volvió a esta lista por lo mismo. Decisión del dueño, con la medida
+# delante; el motivo entero vive en `test/nucleo/limite-declarado.test.mjs`.
+#
+# **El flujo recorre de verdad** —arranque entero, portada, A6P6, el interruptor, la razón de
+# permisos y el gancho— y lo que no puede garantizar es **una sola cosa, la última**: que
+# alguno de los cinco pasos de la reserva haya producido algo narrable. Por eso el marcador no
+# significa aquí «no hay camino hasta la pantalla», que es lo que significaba en los flujos que
+# estrenaron esta lista, sino «hay camino y el mundo puede no dar el caso».
 #
 # **Reescrito entero por la fila 46, y no retocado.** El que había estaba escrito contra iOS
 # —abría `com.apple.Preferences` y navegaba a Salud— y se agarraba a `paso-ajustes`,
@@ -104,236 +120,277 @@
 #
 appId: com.walkingadventure.app
 ---
-# A la portada se llega saliendo del arranque, que hoy es el único camino. El flujo del
-# arranque ya está escrito y se reutiliza entero en vez de copiarlo; abre con `clearState`, así
-# que este recorrido empieza en instalación limpia.
-- runFlow:
-    file: arranque.yaml
-
-# ── El zurrón solo aparece si hay reserva que vaciar ───────────────────────────
-# Instalación nueva: el modo viene apagado, así que abrir la salida lleva de la portada
-# directamente a lo que hay hoy. La pantalla del zurrón **no existe**, que es distinto de
-# existir vacía.
-
-- assertVisible:
-    id: 'portada'
-- assertNotVisible:
-    id: 'zurron'
-
-# Y el juego es completo sin activarlo: en la portada no hay ninguna invitación a encenderlo.
-# La única mención vive en su fila de los ajustes. Se afirma **aquí**, que es el único momento
-# del recorrido en que se pasa por la portada antes de encender nada.
-- assertNotVisible: 'Contar los pasos del día a día'
-- assertNotVisible: 'Mientras no estabas'
-
-# ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
-# La puerta hasta A6P6 es la del pie de la portada. `paso-ajustes` nunca existió.
-
-- tapOn:
-    id: 'puerta-ajustes'
-- assertVisible:
-    id: 'ajustes-pasos-de-fondo'
-- assertVisible: 'Contar los pasos del día a día'
-# **Aquí había `checked: false` sobre `ajustes-pasos-de-fondo`, y no medía nada.** Medido el
-# 12-ago-2026 en `wa-pixel`, volcando la jerarquía: ese nodo es un `android.view.ViewGroup`,
-# `clickable=false` y **`checked=false` siempre**, también con el interruptor encendido de
-# verdad; el `Switch` es un nodo aparte, `[906,1428][1028,1499]`, sin identificador propio.
-# Así que `checked: false` sobre esa fila es cierto por construcción y `checked: true` no
-# puede pasar en ninguna máquina. Es la misma familia que el `assertVisible: 'no'` que este
-# repositorio ya corrigió en `ajustes.yaml` —«una fila de interruptor no pinta su valor»—, y
-# lo copié de allí sin volver a medirlo.
-#
-# **El estado del interruptor no es legible desde Maestro en esta pantalla**, y queda
-# declarado: el `Switch` se alcanza con `rightOf`, pero el filtro `checked:` sobre ese
-# selector **no discrimina** —medido las dos direcciones: con el interruptor encendido pasa
-# `checked: false`, y con él apagado pasa `checked: true`—. Lo que sí discrimina es la línea
-# de aviso, que aparece exactamente cuando el modo no se pudo encender, y **lo que el modo
-# hace**, que es lo que el recorrido comprueba más abajo.
-#
-# Sin línea de aviso debajo: no se ha pedido nada todavía, así que no hay nada que decir.
-- assertNotVisible:
-    id: 'ajustes-pasos-de-fondo-aviso'
-
-# ── El permiso de salud se pide al encender y denegarlo no se insiste ──────────
-# Tocar el interruptor **no lo enciende**: lo pide, en contexto y explicando para qué. El
-# diálogo lo enseña Health Connect y es el sistema quien lo pinta; que salga al tocar es la
-# mitad que solo se ve en el aparato.
-#
-# Los dos toques de abajo cubren las dos formas que Health Connect usa según la versión: una
-# pantalla con los dos tipos de dato y un «Permitir todo», o un diálogo con «Permitir» a secas.
-# El primero va `optional` porque no está en todas.
-
-- tapOn:
-    id: 'ajustes-pasos-de-fondo'
-- tapOn:
-    text: 'Permitir todo'
-    optional: true
-- tapOn:
-    text: 'Permitir'
-    optional: true
-
-# De vuelta en A6P6, y **sin salir y volver a entrar**. El estado del interruptor no es
-# legible desde aquí (ver arriba), así que lo que se afirma es lo que sí discrimina en este
-# punto exacto del recorrido: acabamos de tocar, así que o el modo quedó encendido —y no hay
-# línea— o no se pudo —y la línea está—. Que el modo quedó encendido de verdad lo prueba el
-# tramo del zurrón, que no existe sin reserva y la reserva no se acredita con el modo apagado.
-- assertVisible:
-    id: 'ajustes-pasos-de-fondo'
-- assertNotVisible:
-    id: 'ajustes-pasos-de-fondo-aviso'
-# La línea, si apareciera, no ofrecería ir a los ajustes del sistema ni insistiría después.
-- assertNotVisible: 'Ir a ajustes'
-- assertNotVisible: 'Volver a intentar'
-
-# ── Con partida abierta, la razón de los permisos abre los ajustes ─────────────
-# El sistema pregunta «¿por qué me pides esto?» desde fuera, y el plugin traduce ese intento a
-# este enlace. De aquí en adelante es el camino de verdad de la app, y lo que se comprueba es a
-# dónde aterriza: A6P6, con la fila de contar los pasos y **sin ningún texto nuevo**.
-
-- tapOn: '‹ Volver'
-- assertVisible:
-    id: 'portada'
-- openLink: 'walkingadventure://razon-de-permisos'
-- assertVisible:
-    id: 'ajustes-pasos-de-fondo'
-- assertVisible: 'Contar los pasos del día a día'
-- assertVisible:
-    id: 'ajustes-registro'
-- assertVisible: 'aplicacion'
-# Y no ha aparecido ninguna pantalla escrita para esta entrada.
-- assertNotVisible: '.*por qué te pedimos.*'
-- assertNotVisible: '.*razón de los permisos.*'
-
-- tapOn: '‹ Volver'
-- assertVisible:
-    id: 'portada'
-
-# ── Con reserva sin vaciar se abre el zurrón y no la lista ─────────────────────
-# El gancho acredita los metros de fondo, que es lo que en el móvil de verdad hace la app de
-# salud al abrir: entran por el mismo camino, con el mismo tope y respetando el interruptor —
-# por eso este tramo va **después** de encenderlo y no antes.
-
-- openLink: 'walkingadventure://andamiaje?metrosDeFondo=6000'
-- assertVisible:
-    id: 'portada'
-- tapOn:
-    id: 'ver-que-se-cuenta'
-
-- assertVisible:
-    id: 'zurron'
-- assertVisible:
-    id: 'momento'
-- assertVisible: 'antes-de-salir'
-- assertVisible: 'Mientras no estabas'
-- assertVisible:
-    id: 'zurron-envoltorio'
-- assertVisible:
-    id: 'zurron-entrada'
-# Y **no** la lista: el zurrón se intercala, no se ofrece al lado.
-- assertNotVisible:
-    id: 'lista-de-hoy'
-
-# El cierre **se alcanza bajando**, por lo mismo que en A1P7 y en lo que hay hoy: la pantalla
-# es un `ScrollView` y el número de entradas no es fijo —hasta cinco, y las que haya dependen
-# de lo que quedara sin narrar—, así que la línea que va detrás de todas ellas cabe en pantalla
-# unas veces y otras no. La acción sí está siempre a la vista, y no por suerte: `zurron.jsx` la
-# deja fuera del `ScrollView`, anclada al pie.
-- scrollUntilVisible:
-    element:
-      text: 'Todo eso sigue por ahí, esperando a que pases.'
-    direction: DOWN
-- assertVisible: 'Todo eso sigue por ahí, esperando a que pases.'
-
-# Una sola acción, y ninguna manera de saltarlo ni de tocar una entrada.
-- assertVisible:
-    id: 'zurron-seguir'
-- assertVisible: 'Seguir'
-- assertNotVisible: 'Saltar'
-- assertNotVisible: 'Omitir'
-- assertNotVisible: 'Ver más'
-- assertNotVisible: 'Saber más'
-# Ninguna cifra a la vista, dicho por lo que se puede ver: ni pasos, ni distancia, ni días, ni
-# cuántas cosas han pasado. (El número del paso está como etiqueta accesible de cada entrada, y
-# eso es lo que las localiza: ver la cabecera.)
-- assertNotVisible: '.*pasos.*'
-- assertNotVisible: '.*kilómetro.*'
-- assertNotVisible: '.*días.*'
-# Y ninguna mención al modo que lo hizo posible ni a la red.
-- assertNotVisible: 'Contar los pasos del día a día'
-- assertNotVisible: '.*[Ss]in conexión.*'
-- assertNotVisible: '.*[Cc]obertura.*'
-
-# ── Seguir lleva del zurrón a lo que hay hoy ───────────────────────────────────
-
-- tapOn:
-    id: 'zurron-seguir'
-- assertVisible:
-    id: 'lista-de-hoy'
-- assertNotVisible:
-    id: 'zurron'
-
-# ── El zurrón no aparece por segunda vez ───────────────────────────────────────
-# Se vuelve a la portada **matando la app y reabriéndola**, y no con el botón del sistema: de
-# A2P3 a A2P1 `docs/flujo.md` no declara ninguna arista, y lo medido en `wa-pixel` al pulsar
-# atrás es que la app se va. Reabrir además comprueba lo que interesa de verdad: que el vaciado
-# quedó **en disco** y no solo en memoria.
-
-- stopApp
-- launchApp
-- assertVisible:
-    id: 'portada'
-- tapOn:
-    id: 'ver-que-se-cuenta'
-- assertNotVisible:
-    id: 'zurron'
-- assertNotVisible: 'Mientras no estabas'
-- assertVisible:
-    id: 'lista-de-hoy'
-
-# ── Al zurrón no se llega desde ninguna otra pantalla ──────────────────────────
-# Ni desde los ajustes, ni desde el diario, ni desde la repisa: un zurrón consultable sería el
-# panel del estado del mundo que el design system descarta. Se entra por las puertas del pie de
-# la portada, que son las que existen.
-
-- stopApp
-- launchApp
-- assertVisible:
-    id: 'portada'
-- tapOn:
-    id: 'puerta-ajustes'
-- assertNotVisible: 'Mientras no estabas'
-- assertNotVisible:
-    id: 'zurron'
-- tapOn: '‹ Volver'
-
-- tapOn:
-    id: 'puerta-diario'
-- assertNotVisible: 'Mientras no estabas'
-- assertNotVisible:
-    id: 'zurron'
-- tapOn: '‹ Volver'
-
-- tapOn:
-    id: 'puerta-repisa'
-- assertNotVisible: 'Mientras no estabas'
-- assertNotVisible:
-    id: 'zurron'
-
-# ── Sin partida, la razón de los permisos cae al arranque ──────────────────────
-# La guarda de la arista, y la mitad que más veces va a ocurrir de verdad: el sistema puede
-# disparar esto con la app recién instalada. A6P6 presupone partida, así que sin ella se cae al
-# arranque de siempre en lugar de montar unos ajustes sobre una partida que no existe.
-#
-# Va al final del flujo a propósito: `clearState` se lleva la partida por delante, y ponerlo
-# antes obligaría a rehacer todo el arranque. Deja además el aparato limpio para la tanda
-# siguiente, que es la precondición que estos números necesitan.
-
 - launchApp:
     clearState: true
-- openLink: 'walkingadventure://razon-de-permisos'
-- assertVisible:
-    id: 'arranque'
-- assertNotVisible:
-    id: 'ajustes-pasos-de-fondo'
-- assertNotVisible:
-    id: 'portada'
+
+# **La guarda del límite, y la rama que la lleva es la de abajo del todo.** El recorrido
+# entero cuelga de que la app haya abierto en el arranque, que es su precondición y no una
+# condición de cortesía: sin eso no hay portada, ni ajustes, ni gancho que acreditar. Lo que
+# no se puede garantizar —que el mundo tenga algo que contar— no se sabe hasta el final, así
+# que la bifurcación del límite vive **dentro**, en el punto donde se pulsa «Ver qué se
+# cuenta hoy». Esa es la diferencia de forma con `llegada.yaml`, cuyo límite sí es legible al
+# arrancar.
+- runFlow:
+    when:
+      visible:
+        id: 'arranque'
+    commands:
+      # A la portada se llega saliendo del arranque, que hoy es el único camino. El flujo del
+      # arranque ya está escrito y se reutiliza entero en vez de copiarlo; abre con `clearState`, así
+      # que este recorrido empieza en instalación limpia.
+      - runFlow:
+          file: arranque.yaml
+
+      # ── El zurrón solo aparece si hay reserva que vaciar ───────────────────────────
+      # Instalación nueva: el modo viene apagado, así que abrir la salida lleva de la portada
+      # directamente a lo que hay hoy. La pantalla del zurrón **no existe**, que es distinto de
+      # existir vacía.
+
+      - assertVisible:
+          id: 'portada'
+      - assertNotVisible:
+          id: 'zurron'
+
+      # Y el juego es completo sin activarlo: en la portada no hay ninguna invitación a encenderlo.
+      # La única mención vive en su fila de los ajustes. Se afirma **aquí**, que es el único momento
+      # del recorrido en que se pasa por la portada antes de encender nada.
+      - assertNotVisible: 'Contar los pasos del día a día'
+      - assertNotVisible: 'Mientras no estabas'
+
+      # ── Los pasos de fondo vienen apagados ─────────────────────────────────────────
+      # La puerta hasta A6P6 es la del pie de la portada. `paso-ajustes` nunca existió.
+
+      - tapOn:
+          id: 'puerta-ajustes'
+      - assertVisible:
+          id: 'ajustes-pasos-de-fondo'
+      - assertVisible: 'Contar los pasos del día a día'
+      # **Aquí había `checked: false` sobre `ajustes-pasos-de-fondo`, y no medía nada.** Medido el
+      # 12-ago-2026 en `wa-pixel`, volcando la jerarquía: ese nodo es un `android.view.ViewGroup`,
+      # `clickable=false` y **`checked=false` siempre**, también con el interruptor encendido de
+      # verdad; el `Switch` es un nodo aparte, `[906,1428][1028,1499]`, sin identificador propio.
+      # Así que `checked: false` sobre esa fila es cierto por construcción y `checked: true` no
+      # puede pasar en ninguna máquina. Es la misma familia que el `assertVisible: 'no'` que este
+      # repositorio ya corrigió en `ajustes.yaml` —«una fila de interruptor no pinta su valor»—, y
+      # lo copié de allí sin volver a medirlo.
+      #
+      # **El estado del interruptor no es legible desde Maestro en esta pantalla**, y queda
+      # declarado: el `Switch` se alcanza con `rightOf`, pero el filtro `checked:` sobre ese
+      # selector **no discrimina** —medido las dos direcciones: con el interruptor encendido pasa
+      # `checked: false`, y con él apagado pasa `checked: true`—. Lo que sí discrimina es la línea
+      # de aviso, que aparece exactamente cuando el modo no se pudo encender, y **lo que el modo
+      # hace**, que es lo que el recorrido comprueba más abajo.
+      #
+      # Sin línea de aviso debajo: no se ha pedido nada todavía, así que no hay nada que decir.
+      - assertNotVisible:
+          id: 'ajustes-pasos-de-fondo-aviso'
+
+      # ── El permiso de salud se pide al encender y denegarlo no se insiste ──────────
+      # Tocar el interruptor **no lo enciende**: lo pide, en contexto y explicando para qué. El
+      # diálogo lo enseña Health Connect y es el sistema quien lo pinta; que salga al tocar es la
+      # mitad que solo se ve en el aparato.
+      #
+      # Los dos toques de abajo cubren las dos formas que Health Connect usa según la versión: una
+      # pantalla con los dos tipos de dato y un «Permitir todo», o un diálogo con «Permitir» a secas.
+      # El primero va `optional` porque no está en todas.
+
+      - tapOn:
+          id: 'ajustes-pasos-de-fondo'
+      - tapOn:
+          text: 'Permitir todo'
+          optional: true
+      - tapOn:
+          text: 'Permitir'
+          optional: true
+
+      # De vuelta en A6P6, y **sin salir y volver a entrar**. El estado del interruptor no es
+      # legible desde aquí (ver arriba), así que lo que se afirma es lo que sí discrimina en este
+      # punto exacto del recorrido: acabamos de tocar, así que o el modo quedó encendido —y no hay
+      # línea— o no se pudo —y la línea está—. Que el modo quedó encendido de verdad lo prueba el
+      # tramo del zurrón, que no existe sin reserva y la reserva no se acredita con el modo apagado.
+      - assertVisible:
+          id: 'ajustes-pasos-de-fondo'
+      - assertNotVisible:
+          id: 'ajustes-pasos-de-fondo-aviso'
+      # La línea, si apareciera, no ofrecería ir a los ajustes del sistema ni insistiría después.
+      - assertNotVisible: 'Ir a ajustes'
+      - assertNotVisible: 'Volver a intentar'
+
+      # ── Con partida abierta, la razón de los permisos abre los ajustes ─────────────
+      # El sistema pregunta «¿por qué me pides esto?» desde fuera, y el plugin traduce ese intento a
+      # este enlace. De aquí en adelante es el camino de verdad de la app, y lo que se comprueba es a
+      # dónde aterriza: A6P6, con la fila de contar los pasos y **sin ningún texto nuevo**.
+
+      - tapOn: '‹ Volver'
+      - assertVisible:
+          id: 'portada'
+      - openLink: 'walkingadventure://razon-de-permisos'
+      - assertVisible:
+          id: 'ajustes-pasos-de-fondo'
+      - assertVisible: 'Contar los pasos del día a día'
+      - assertVisible:
+          id: 'ajustes-registro'
+      - assertVisible: 'aplicacion'
+      # Y no ha aparecido ninguna pantalla escrita para esta entrada.
+      - assertNotVisible: '.*por qué te pedimos.*'
+      - assertNotVisible: '.*razón de los permisos.*'
+
+      - tapOn: '‹ Volver'
+      - assertVisible:
+          id: 'portada'
+
+      # ── Con reserva sin vaciar se abre el zurrón y no la lista ─────────────────────
+      # El gancho acredita los metros de fondo, que es lo que en el móvil de verdad hace la app de
+      # salud al abrir: entran por el mismo camino, con el mismo tope y respetando el interruptor —
+      # por eso este tramo va **después** de encenderlo y no antes.
+
+      - openLink: 'walkingadventure://andamiaje?metrosDeFondo=6000'
+      - assertVisible:
+          id: 'portada'
+      - tapOn:
+          id: 'ver-que-se-cuenta'
+
+      # ── LA GUARDA DEL LÍMITE ───────────────────────────────────────────────────────
+      # Aquí es donde este flujo deja de poder garantizar nada, y por eso es aquí donde se
+      # bifurca. Con la reserva puesta por el gancho, que A2P2 aparezca depende de que alguno
+      # de los cinco pasos haya producido algo narrable — y en una partida recién arrancada
+      # puede no producirlo ninguno. El motivo medido está en la cabecera y en
+      # `test/nucleo/limite-declarado.test.mjs`.
+      #
+      # Sin zurrón, lo que se afirma es lo que el juego promete igualmente: la puerta lleva a
+      # lo que hay hoy y no deja a nadie encerrado en la portada.
+      - runFlow:
+          when:
+            notVisible:
+              id: 'zurron'
+          commands:
+            - assertVisible:
+                id: 'lista-de-hoy'
+            - assertNotVisible: 'Mientras no estabas'
+
+      # Y con zurrón, el recorrido entero de A2P1 → A2P2 → A2P3, que es lo que esta fila
+      # existe para hacer alcanzable. **No se toca nada para conseguirlo**: si el mundo lo da,
+      # se recorre; si no, la rama de arriba.
+      - runFlow:
+          when:
+            visible:
+              id: 'zurron'
+          commands:
+          - assertVisible:
+              id: 'zurron'
+          - assertVisible:
+              id: 'momento'
+          - assertVisible: 'antes-de-salir'
+          - assertVisible: 'Mientras no estabas'
+          - assertVisible:
+              id: 'zurron-envoltorio'
+          - assertVisible:
+              id: 'zurron-entrada'
+          # Y **no** la lista: el zurrón se intercala, no se ofrece al lado.
+          - assertNotVisible:
+              id: 'lista-de-hoy'
+
+          # El cierre **se alcanza bajando**, por lo mismo que en A1P7 y en lo que hay hoy: la pantalla
+          # es un `ScrollView` y el número de entradas no es fijo —hasta cinco, y las que haya dependen
+          # de lo que quedara sin narrar—, así que la línea que va detrás de todas ellas cabe en pantalla
+          # unas veces y otras no. La acción sí está siempre a la vista, y no por suerte: `zurron.jsx` la
+          # deja fuera del `ScrollView`, anclada al pie.
+          - scrollUntilVisible:
+              element:
+                text: 'Todo eso sigue por ahí, esperando a que pases.'
+              direction: DOWN
+          - assertVisible: 'Todo eso sigue por ahí, esperando a que pases.'
+
+          # Una sola acción, y ninguna manera de saltarlo ni de tocar una entrada.
+          - assertVisible:
+              id: 'zurron-seguir'
+          - assertVisible: 'Seguir'
+          - assertNotVisible: 'Saltar'
+          - assertNotVisible: 'Omitir'
+          - assertNotVisible: 'Ver más'
+          - assertNotVisible: 'Saber más'
+          # Ninguna cifra a la vista, dicho por lo que se puede ver: ni pasos, ni distancia, ni días, ni
+          # cuántas cosas han pasado. (El número del paso está como etiqueta accesible de cada entrada, y
+          # eso es lo que las localiza: ver la cabecera.)
+          - assertNotVisible: '.*pasos.*'
+          - assertNotVisible: '.*kilómetro.*'
+          - assertNotVisible: '.*días.*'
+          # Y ninguna mención al modo que lo hizo posible ni a la red.
+          - assertNotVisible: 'Contar los pasos del día a día'
+          - assertNotVisible: '.*[Ss]in conexión.*'
+          - assertNotVisible: '.*[Cc]obertura.*'
+
+          # ── Seguir lleva del zurrón a lo que hay hoy ───────────────────────────────────
+
+          - tapOn:
+              id: 'zurron-seguir'
+          - assertVisible:
+              id: 'lista-de-hoy'
+          - assertNotVisible:
+              id: 'zurron'
+
+          # ── El zurrón no aparece por segunda vez ───────────────────────────────────────
+          # Se vuelve a la portada **matando la app y reabriéndola**, y no con el botón del sistema: de
+          # A2P3 a A2P1 `docs/flujo.md` no declara ninguna arista, y lo medido en `wa-pixel` al pulsar
+          # atrás es que la app se va. Reabrir además comprueba lo que interesa de verdad: que el vaciado
+          # quedó **en disco** y no solo en memoria.
+
+          - stopApp
+          - launchApp
+          - assertVisible:
+              id: 'portada'
+          - tapOn:
+              id: 'ver-que-se-cuenta'
+          - assertNotVisible:
+              id: 'zurron'
+          - assertNotVisible: 'Mientras no estabas'
+          - assertVisible:
+              id: 'lista-de-hoy'
+
+      # ── Al zurrón no se llega desde ninguna otra pantalla ──────────────────────────
+      # Ni desde los ajustes, ni desde el diario, ni desde la repisa: un zurrón consultable sería el
+      # panel del estado del mundo que el design system descarta. Se entra por las puertas del pie de
+      # la portada, que son las que existen.
+
+      - stopApp
+      - launchApp
+      - assertVisible:
+          id: 'portada'
+      - tapOn:
+          id: 'puerta-ajustes'
+      - assertNotVisible: 'Mientras no estabas'
+      - assertNotVisible:
+          id: 'zurron'
+      - tapOn: '‹ Volver'
+
+      - tapOn:
+          id: 'puerta-diario'
+      - assertNotVisible: 'Mientras no estabas'
+      - assertNotVisible:
+          id: 'zurron'
+      - tapOn: '‹ Volver'
+
+      - tapOn:
+          id: 'puerta-repisa'
+      - assertNotVisible: 'Mientras no estabas'
+      - assertNotVisible:
+          id: 'zurron'
+
+      # ── Sin partida, la razón de los permisos cae al arranque ──────────────────────
+      # La guarda de la arista, y la mitad que más veces va a ocurrir de verdad: el sistema puede
+      # disparar esto con la app recién instalada. A6P6 presupone partida, así que sin ella se cae al
+      # arranque de siempre en lugar de montar unos ajustes sobre una partida que no existe.
+      #
+      # Va al final del flujo a propósito: `clearState` se lleva la partida por delante, y ponerlo
+      # antes obligaría a rehacer todo el arranque. Deja además el aparato limpio para la tanda
+      # siguiente, que es la precondición que estos números necesitan.
+
+      - launchApp:
+          clearState: true
+      - openLink: 'walkingadventure://razon-de-permisos'
+      - assertVisible:
+          id: 'arranque'
+      - assertNotVisible:
+          id: 'ajustes-pasos-de-fondo'
+      - assertNotVisible:
+          id: 'portada'
