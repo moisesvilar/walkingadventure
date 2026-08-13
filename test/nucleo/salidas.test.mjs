@@ -51,7 +51,7 @@ import {
   COTA_DE_FRESCURA_MS,
   ORIGENES_DEL_PUNTO,
   PLAZO_DE_REANCLAJE_MS,
-  PRECISION_EXIGIDA_M,
+  ERROR_MAXIMO_PARA_ANCLAR_M,
   TEXTO_MIENTRAS_SE_BUSCA,
   TOPE_DE_ESPERA_MS,
   abreSalida,
@@ -1230,7 +1230,7 @@ describe('La apertura de una salida: precisión, cota única y respaldo', () => 
     // La precisión exigida **se lee** del radio del regreso y no se copia: un fijo con más
     // incertidumbre que el radio dentro del cual se cuenta que se ha vuelto no puede anclar
     // ese radio. Que sean el mismo objeto es lo que impide que se separen.
-    assert.equal(PRECISION_EXIGIDA_M, RADIO_DE_REGRESO_M);
+    assert.equal(ERROR_MAXIMO_PARA_ANCLAR_M, RADIO_DE_REGRESO_M);
 
     // Y el porqué de cada uno está escrito donde vive el número, con su medida: un número
     // sin motivo es el que la fila siguiente cambia sin saber qué rompe.
@@ -1256,7 +1256,7 @@ describe('La apertura de una salida: precisión, cota única y respaldo', () => 
     // tampoco: los dos se descartan igual que si no existieran, **vengan de la puerta que
     // vengan**. Y no se lanza: un fijo malo es una respuesta prevista del sensor.
     assert.equal(fijoQuePuedeAnclar(fijo()).sirve, true);
-    assert.equal(fijoQuePuedeAnclar(fijo({ precisionM: PRECISION_EXIGIDA_M })).sirve, true, 'el fijo justo en la precisión exigida se descarta');
+    assert.equal(fijoQuePuedeAnclar(fijo({ precisionM: ERROR_MAXIMO_PARA_ANCLAR_M })).sirve, true, 'el fijo justo en la precisión exigida se descarta');
 
     const malos = [
       [null, /ningún fijo/],
@@ -1265,7 +1265,7 @@ describe('La apertura de una salida: precisión, cota única y respaldo', () => 
       [{ lat: 42.88, lon: -8.545, tMs: 'ahora', precisionM: 8 }, /sin marca de tiempo/],
       [{ lat: 42.88, lon: -8.545, tMs: T0 }, /sin precisión/],
       [{ lat: 42.88, lon: -8.545, tMs: T0, precisionM: null }, /sin precisión/],
-      [fijo({ precisionM: PRECISION_EXIGIDA_M + 1 }), /incertidumbre/],
+      [fijo({ precisionM: ERROR_MAXIMO_PARA_ANCLAR_M + 1 }), /incertidumbre/],
     ];
     for (const [malo, motivo] of malos) {
       const veredicto = fijoQuePuedeAnclar(malo);
@@ -1463,7 +1463,7 @@ describe('El re-anclaje del punto de partida', () => {
 
   test('Un fijo con la precisión peor que la exigida no re-ancla', () => {
     const { estado, rotulo } = abierta();
-    recibePosicion(estado, { posicion: fijoA(30, 5_000, PRECISION_EXIGIDA_M + 1), tramo: TRAMO_M, rotulo });
+    recibePosicion(estado, { posicion: fijoA(30, 5_000, ERROR_MAXIMO_PARA_ANCLAR_M + 1), tramo: TRAMO_M, rotulo });
     assert.equal(salidaEnCurso(estado).reanclada, false, 'un fijo más impreciso que el radio del regreso ha anclado ese radio');
     // Y uno sin precisión declarada tampoco: en la duda se exige más y no menos.
     const sinPrecision = abierta();
@@ -1473,6 +1473,36 @@ describe('El re-anclaje del punto de partida', () => {
       rotulo: sinPrecision.rotulo,
     });
     assert.equal(salidaEnCurso(sinPrecision.estado).reanclada, false);
+  });
+
+  test('Un fijo que se mueve menos de lo que declara de incertidumbre no re-ancla', () => {
+    // La otra mitad de la propiedad, y la que impide aflojar la guarda sin enterarse:
+    // moverse 5 m cuando el propio fijo dice que puede estar equivocado por 8 **no es
+    // haberse movido**, es ruido, y no hay nada que reparar. Medido en el aparato: el
+    // primer fijo de la suscripción era literalmente el mismo que devolvió la puntual —0 m
+    // y 0 ms—, así que el único re-anclaje de la salida se gastaba en una operación que no
+    // corregía nada y dejaba fuera al fijo bueno que venía detrás.
+    const { estado, rotulo } = abierta();
+    const antes = { ...salidaEnCurso(estado).partida };
+    recibePosicion(estado, { posicion: fijoA(5, 5_000, 8), tramo: TRAMO_M, rotulo });
+    assert.equal(salidaEnCurso(estado).reanclada, false, 'un fijo que se mueve menos que su propia incertidumbre ha gastado el re-anclaje');
+    assert.deepEqual({ ...salidaEnCurso(estado).partida }, antes, 'el punto de partida se ha movido con un desplazamiento que es ruido');
+    // El motivo lo dice, porque un rechazo mudo aquí se lee como «el plazo se pasó».
+    const veredicto = decideElReanclaje({ anclaMs: T0, ancla: antes, fijo: fijoA(5, 5_000, 8) });
+    assert.equal(veredicto.reancla, false);
+    assert.match(veredicto.motivo, /no repara nada/, 'el rechazo por ruido no dice por qué no se gasta el re-anclaje');
+
+    // El borde exacto **no** repara: la comparación es «no supera», así que un
+    // desplazamiento igual a la incertidumbre declarada se queda fuera.
+    const justo = abierta();
+    recibePosicion(justo.estado, { posicion: fijoA(8, 5_000, 8), tramo: TRAMO_M, rotulo: justo.rotulo });
+    assert.equal(salidaEnCurso(justo.estado).reanclada, false, 'el fijo que se mueve exactamente su incertidumbre ha re-anclado');
+
+    // Y un metro más allá sí: la guarda rechaza el ruido, no el re-anclaje.
+    const supera = abierta();
+    recibePosicion(supera.estado, { posicion: fijoA(9, 5_000, 8), tramo: TRAMO_M, rotulo: supera.rotulo });
+    assert.equal(salidaEnCurso(supera.estado).reanclada, true, 'un fijo que supera su incertidumbre no ha re-anclado, y la guarda se ha comido el caso bueno');
+    assert.equal(salidaEnCurso(supera.estado).desplazamientoDelAnclaM, 9);
   });
 
   test('Después de alejarse el punto de partida es inmutable', () => {

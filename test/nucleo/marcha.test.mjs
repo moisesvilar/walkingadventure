@@ -117,7 +117,7 @@ const NUCLEO = Object.freeze({
   // números desincronizados, que es exactamente el defecto que la fila 53 midió.
   COTA_DE_FRESCURA_MS: salidas.COTA_DE_FRESCURA_MS,
   TOPE_DE_ESPERA_MS: salidas.TOPE_DE_ESPERA_MS,
-  PRECISION_EXIGIDA_M: salidas.PRECISION_EXIGIDA_M,
+  ERROR_MAXIMO_PARA_ANCLAR_M: salidas.ERROR_MAXIMO_PARA_ANCLAR_M,
   decideElPuntoDePartida: salidas.decideElPuntoDePartida,
 });
 
@@ -613,7 +613,7 @@ describe('Echarse a andar puede no poder, y entonces se dice por qué', () => {
     const ultima = suscripcion.pedidos.find((p) => p.puerta === 'ultima-conocida');
     assert.ok(ultima, 'la apertura no ha probado la segunda puerta');
     assert.equal(ultima.cotaMs, salidas.COTA_DE_FRESCURA_MS, 'la última conocida se pide con una cota que no es la declarada en el paquete');
-    assert.equal(ultima.precisionM, salidas.PRECISION_EXIGIDA_M, 'la última conocida se pide con una precisión que no es la declarada en el paquete');
+    assert.equal(ultima.precisionM, salidas.ERROR_MAXIMO_PARA_ANCLAR_M, 'la última conocida se pide con una precisión que no es la declarada en el paquete');
     // **Ninguno de los dos parámetros queda por omisión**: es lo que hace que la app no
     // necesite reloj propio — la frescura la decide el módulo nativo con los dos escritos.
     assert.equal(ultima.cotaMs > 0 && ultima.precisionM > 0, true);
@@ -863,7 +863,17 @@ describe('El rastro de ubicación no se guarda nunca', () => {
     // después de que el sistema mate el proceso, y sin las marcas no hay plazo que medir—.
     // Lo que la promesa protege de verdad es que no haya traza, histórico ni lista que
     // crezca con lo andado: un punto no es un rastro.
-    const suscripcion = suscripcionDoblada();
+    //
+    // El ancla de la apertura viene de un fijo **cacheado y lejos**, que es el caso que el
+    // re-anclaje existe para reparar: la puntual devolvió una posición vieja a unos 124 m de
+    // donde se está de verdad, y el primer fijo de la suscripción llega ocho segundos después
+    // y la corrige. Los números no se pueden bajar: el re-anclaje solo repara cuando el
+    // desplazamiento **supera la incertidumbre que el propio fijo declara** —moverse 3 m con
+    // ±8 m de error es ruido, no es haberse movido—, así que un ancla más cerca no re-ancla y
+    // esta medición dejaría de decir nada del re-anclaje. Solo se mueve la longitud, y la
+    // latitud se deja en 42.4000 a propósito: es lo que hace que la comprobación de abajo
+    // sobre `'42.4,'` siga midiendo algo si el punto anterior se quedara escrito.
+    const suscripcion = suscripcionDoblada({ puntual: { lat: 42.4000, lon: -8.8115, tMs: T0, precisionM: 8 } });
     const { laSalida, estado } = await abierta({ suscripcion });
     for (let i = 1; i <= 100; i += 1) {
       suscripcion.entrega(posicion(42.4000 + i / 100000, -8.8100 + i / 100000, T0 + i * 8000));
