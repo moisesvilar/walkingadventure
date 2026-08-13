@@ -52,8 +52,18 @@
 // Las seis primeras vienen del prototipo y **conservan su identificador** —vive en
 // partidas guardadas y en el informe— reescritas en cómico-cálido: el registro de
 // cuento popular que traían era la deuda que `bucle-jugable.md` §6 dejó declarada.
+//
+// Y una última que se ve al final del fichero: **qué beats se dicen en voz de alguien no
+// se escribe aquí, se deriva** (SPEC-051). Cada plantilla declara sus roles humanos y de
+// qué momento cuelga cada acto de relación, y las dos cláusulas de `caras.js` deciden
+// sobre qué beat cae cada cara. Elegirlas a mano habría sido una lista sin regla, y una
+// lista sin regla es la pieza que al no estar no protesta. Los textos de esos beats sí
+// están escritos aquí, y **como parlamento**: se pintan entrecomillados, así que la
+// narración de lo que te pasa a ti se leería mal en boca de alguien.
 
-export const TEMPLATES = [
+import { conCaras } from './caras.js';
+
+const ESCRITAS = [
   // --- las seis portadas del prototipo -------------------------------------
   {
     id: 'entrega-sospechosa',
@@ -102,7 +112,7 @@ export const TEMPLATES = [
         },
         resultado: { tipo: 'informacion' },
       },
-      { rol: 'origen', escena: 'recompensa', texto: 'De vuelta a la plaza te espera la paga y una explicación que no explica nada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'origen', escena: 'recompensa', texto: 'Aquí tienes tu paga. Y la explicación, que ya te aviso de que no explica nada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -196,7 +206,7 @@ export const TEMPLATES = [
       { rol: 'pista2', escena: 'testigo', texto: 'Alguien asustado te dice a quién vio pasar de madrugada y luego pide que no digas que lo dijo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'resolucion', escena: 'prueba', texto: 'Reconocen el ungüento al olerlo. Solo lo compra una persona, y no por gusto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'frasco de ungüento' } },
       { rol: 'pista2', escena: 'resolución', texto: 'Pones las piezas encima de una piedra del camino. Se hace un silencio incómodo del que todavía se habla.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'origen', escena: 'celebración', texto: 'De vuelta corre la voz de que fuiste tú. Te sirven de cenar sin que pidas, que aquí es un honor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'origen', escena: 'celebración', texto: 'Ya corre la voz de que fuiste tú. Siéntate, que te sirvo la cena sin que la pidas, y aquí eso es un honor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -615,8 +625,8 @@ export const TEMPLATES = [
     beats: [
       { rol: 'plaza', escena: 'encargo', texto: 'Te enseñan la tabla con la cuenta. La letra es de otra época y el rencor está fresquísimo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'casa', escena: 'reclamo', texto: 'Llegas a la casa y reconocen la deuda antes de que abras la boca. Llevan ensayándolo tiempo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'casa', escena: 'acuerdo', texto: 'Se acuerda pagar con lo que hay, que no es moneda pero pesa lo mismo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pago en especie' } },
-      { rol: 'plaza', escena: 'saldo', texto: 'Vuelves con el pago. Borrar la tabla cuesta un rato y da una pena rarísima.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'casa', escena: 'acuerdo', texto: 'Te pago con lo que hay en casa. Moneda no es, pero pesa igual y vale lo que dice que vale.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pago en especie' } },
+      { rol: 'plaza', escena: 'saldo', texto: 'Trae ese pago, que borro la tabla. Cuesta lo suyo, y me da una pena rarísima verla limpia otra vez.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -652,7 +662,7 @@ export const TEMPLATES = [
     },
     beats: [
       { rol: 'forja', escena: 'encargo', texto: 'Te enseñan la pieza con orgullo legítimo. Luego te enseñan la puerta, con menos orgullo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'forja', escena: 'problema', texto: 'Se prueban salidas. Ninguna funciona y a todas se les dedica un rato serio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pieza de la forja' } },
+      { rol: 'forja', escena: 'problema', texto: 'Llevo probadas todas las salidas que se me ocurren. Ninguna funciona, y a cada una le he dedicado un rato muy serio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pieza de la forja' } },
       { rol: 'destino', escena: 'entrega', texto: 'La pieza llega a su sitio y encaja al golpe. El alivio se oye desde el camino.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'forja', escena: 'regreso', texto: 'Vuelves con la noticia. En la forja ya la sabían y aun así te dejan contarla entera.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
@@ -697,7 +707,7 @@ export const TEMPLATES = [
       { rol: 'vecindario', escena: 'testigo', texto: 'Preguntas por las casas. Cada persona recuerda un ingrediente distinto y ninguno coincide.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'conjuria', escena: 'pesquisa', texto: 'Donde guardan lo escrito buscan entre cuadernos que nadie ordenó nunca. La receta no está, y el desorden queda peor.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'vecindario', escena: 'prueba', texto: 'Alguien mayor recuerda el color exacto, y con el color aparece de golpe el ingrediente que faltaba.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'ingrediente olvidado' } },
-      { rol: 'botica', escena: 'regreso', texto: 'Vuelves con la receta reconstruida. Se prueba allí mismo y se aprueba con cara de sospecha.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'botica', escena: 'regreso', texto: 'Trae esa receta, que la pruebo aquí mismo. Sirve, sirve. Y no me mires así, que sigue sin gustarme de dónde ha salido.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -736,7 +746,7 @@ export const TEMPLATES = [
       { rol: 'posada', escena: 'encargo', texto: 'Te explican la situación mientras cuentan camas con los dedos. Faltan camas y sobran dedos.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'barrio', escena: 'gestión', texto: 'Vas casa por casa. Dicen que no y luego preguntan cuántos son, que aquí es decir que sí.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'granja', escena: 'gestión', texto: 'En la granja hay pajar y muy buena disposición, siempre que nadie fume dentro.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'posada', escena: 'reparto', texto: 'Vuelves con el reparto cerrado. Se lee en alto como si fuera un decreto y se aplaude.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'posada', escena: 'reparto', texto: 'Con el reparto cerrado, lo leo en alto como si fuera un decreto. Y que nadie se queje, que aquí se aplaude y se duerme.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -774,7 +784,7 @@ export const TEMPLATES = [
       { rol: 'mercado', escena: 'encargo', texto: 'Te dan una lista empezada por alguien que se rindió sin avisar y no lo puso por escrito.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'almacen', escena: 'recuento', texto: 'Cuentas lo que hay guardado. Aparecen cosas que llevaban perdidas más tiempo que la lista.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'lista del recuento' } },
       { rol: 'almacen', escena: 'discusión', texto: 'Se discute si algunas cosas cuentan como una o como muchas. La discusión es mejor que el inventario.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'mercado', escena: 'cierre', texto: 'Vuelves con el recuento cerrado. Se firma con solemnidad y se guarda para no leerlo jamás.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'mercado', escena: 'cierre', texto: 'Recuento cerrado. Lo firmo con toda la solemnidad que merece y lo guardo donde nadie va a leerlo jamás.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -815,7 +825,7 @@ export const TEMPLATES = [
     },
     beats: [
       { rol: 'custodia', escena: 'negativa', texto: 'Te explican por qué el libro no sale. La explicación es larga, ordenada y, molestamente, razonable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'custodia', escena: 'trato', texto: 'Se busca una salida. Copiar la página lleva su rato y se hace con una caligrafía admirable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'copia de la página' } },
+      { rol: 'custodia', escena: 'trato', texto: 'Prestarlo no lo presto. Te copio la página, que lleva su rato, y verás qué letra me sale cuando me lo tomo en serio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'copia de la página' } },
       { rol: 'quien_pide', escena: 'entrega', texto: 'Llevas la copia a quien la necesitaba. La lee de pie y sin respirar, y luego da las gracias.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'custodia', escena: 'regreso', texto: 'Vuelves a decir que funcionó. Se recibe con la calma de quien nunca lo dudó.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
@@ -850,7 +860,7 @@ export const TEMPLATES = [
     beats: [
       { rol: 'sendero', escena: 'encargo', texto: 'Te paran en el camino y te lo piden con una naturalidad que no admite negativa. Te dan una cesta que tampoco.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'cesta' } },
       { rol: 'casa', escena: 'visita', texto: 'Te reciben como si te esperaran, que en cierto modo era el caso desde hace tiempo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'casa', escena: 'conversación', texto: 'Sale una historia larga con nombres que no conoces. La escuchas entera y merece la pena.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'casa', escena: 'conversación', texto: 'Siéntate, que te cuento una historia larga y con nombres que no conoces de nada. Aguanta hasta el final, que merece la pena.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'sendero', escena: 'regreso', texto: 'Vuelves por donde viniste y dices que está bien. Se nota que la visita importaba de verdad.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
@@ -890,8 +900,8 @@ export const TEMPLATES = [
     beats: [
       { rol: 'puesto', escena: 'encargo', texto: 'Quien está de guardia te lo cuenta sin quejarse, que es la forma local de quejarse mucho.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'casa', escena: 'búsqueda', texto: 'En la casa del relevo no hay nadie, y la puerta está abierta como si acabaran de salir.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'casa', escena: 'hallazgo', texto: 'Aparece por el camino con una excusa larga, ordenada y con testigos preparados.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'puesto', escena: 'relevo', texto: 'Vuelves con el relevo puesto. La guardia se retira despacio y con mucha dignidad.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'casa', escena: 'hallazgo', texto: 'Ya voy, ya voy. Traigo una excusa larga, bien ordenada y con quien la confirme, por si a alguien le hace falta oírla.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'puesto', escena: 'relevo', texto: 'Con el relevo puesto ya me puedo retirar. Despacio, eso sí, y con toda la dignidad que da hacer bien la guardia.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -936,7 +946,7 @@ export const TEMPLATES = [
       { rol: 'segunda_casa', escena: 'entrega', texto: 'Aquí te esperaban antes de que existiera el encargo. Las noticias corren más que quien las lleva.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'tercera_casa', escena: 'entrega', texto: 'La entrega termina en merienda, que retrasa el recado y mejora la jornada.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'segunda_casa', escena: 'vuelta', texto: 'Vuelves a pasar para devolver lo que sobraba. Se niegan a aceptarlo con mucha firmeza.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'origen', escena: 'cierre', texto: 'Dejas donde empezó todo lo que no quiso nadie. Ya tiene un sitio en la repisa y un nombre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'origen', escena: 'cierre', texto: 'Déjalo aquí, donde empezó todo. Lo que no quiso nadie ya tiene su sitio en la repisa, y hasta nombre le hemos puesto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1019,7 +1029,7 @@ export const TEMPLATES = [
     beats: [
       { rol: 'pueblo', escena: 'encargo', texto: 'Te explican la gotera con una precisión que solo da el hartazgo de años.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'taller', escena: 'encargo', texto: 'Quien trabaja el hierro escucha, mide en el aire con las manos y dice que sí, que se puede.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'pieza de repuesto' } },
-      { rol: 'taller', escena: 'trato', texto: 'Se discute el precio con mucho gusto. La discusión es parte del trato y se disfruta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
+      { rol: 'taller', escena: 'trato', texto: 'El precio lo discutimos, faltaría más. La discusión es parte del trato, y a mí me gusta tanto como cobrarla.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'pueblo', escena: 'arreglo', texto: 'La pieza encaja y la gotera para. Se hace un silencio raro que dura más de lo previsto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
@@ -1065,7 +1075,7 @@ export const TEMPLATES = [
       { rol: 'taberna', escena: 'encargo', texto: 'Te ponen a arbitrar por aclamación y sin preguntarte. El cargo no trae sueldo, ni relevo, ni manera decente de escaquearse.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'lejos', escena: 'comprobación', texto: 'Compruebas el asunto en el sitio. Resulta ser mucho menos épico de lo que se cuenta en la sala.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'lejos', escena: 'testigo', texto: 'Consigues un testimonio que lo confirma, dicho con una sequedad envidiable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'taberna', escena: 'veredicto', texto: 'Vuelves y das el veredicto. Se acata a regañadientes y se celebra a gritos, que aquí viene a ser lo mismo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'taberna', escena: 'veredicto', texto: 'Dilo alto, que se enteren. Aquí un veredicto se acata a regañadientes y se celebra a gritos, que viene a ser lo mismo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
 
@@ -1118,7 +1128,7 @@ export const TEMPLATES = [
         resultado: { tipo: 'informacion' },
       },
       { rol: 'atajo', escena: 'espera', texto: 'Esperas a que amaine con el frasco a favor del viento, que resulta ser una ciencia.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'obrador', escena: 'regreso', texto: 'Vuelves con el parte de la entrega. Se anota el olor como efecto conocido y aceptado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'obrador', escena: 'regreso', texto: 'Cuéntame qué tal fue la entrega. Lo del olor lo anoto como efecto conocido y aceptado, que ya me lo han dicho antes.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1164,7 +1174,7 @@ export const TEMPLATES = [
       { rol: 'fondo', escena: 'misterio', texto: 'Al fondo no hay nada, y el nada está barrido. Eso sí que no lo esperaba nadie.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'escoba gastada' } },
       { rol: 'boca', escena: 'despedida', texto: 'Vuelves a asomarte antes de irte. Todo sigue igual de limpio y ahora resulta entrañable.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'alto', escena: 'espera', texto: 'Esperas otro rato desde el alto por si aparece quien barre. Sigue sin aparecer, y ya lo esperabas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'plaza', escena: 'informe', texto: 'Vuelves con la escoba como prueba. La escoba impresiona más que cualquier cosa que hubieras traído.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'plaza', escena: 'informe', texto: '¿Una escoba? Pues impresiona más que cualquier cosa que pudieras haberme traído. Anda, cuéntamelo despacio.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1210,7 +1220,7 @@ export const TEMPLATES = [
       { rol: 'cruce', escena: 'aviso', texto: 'Otra vez el cruce, ahora en sentido contrario y con el plan aún sin cerrar. Aquí se entera todo el mundo antes que nadie.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'aldea', escena: 'venia', texto: 'Quien manda escucha el plan y pone pegas por deporte. Luego dice que sí.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'cruce', escena: 'trato', texto: 'En el cruce se cierra el trato de pie, que es como se cierran los tratos que importan. La condición absurda se acepta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'feria', escena: 'cierre', texto: 'Vuelves con el sitio y con la venia de quien manda. Se monta todo en un suspiro y con una eficacia sospechosa.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'feria', escena: 'cierre', texto: 'Con el sitio y con la venia de quien manda, esto lo montamos en un suspiro. Ya verás qué eficacia más sospechosa.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1256,7 +1266,7 @@ export const TEMPLATES = [
       { rol: 'saber', escena: 'saber', texto: 'Llegas al sitio de la vela. Está callado, muy limpio y con esa quietud que impone sin pedirlo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'saber', escena: 'vela', texto: 'Cumples la vela hasta el final sin moverte del sitio. No pasa nada, con mucha intensidad.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
       { rol: 'descanso', escena: 'despedida', texto: 'De vuelta paras otra vez al resguardo, ya con la luz nueva. Sabe distinto y pesa menos.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
-      { rol: 'casa', escena: 'regreso', texto: 'Vuelves a dar el parte. Se anota en el libro y la letra queda para siempre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'casa', escena: 'regreso', texto: 'Dame el parte, que lo anoto en el libro. Lo que se escribe aquí se queda para siempre, así que dilo con cuidado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1308,7 +1318,7 @@ export const TEMPLATES = [
       { rol: 'alto', escena: 'vuelta', texto: 'El alto de vuelta, con el saco bastante más ligero. Ya conoces cada piedra y las saludas por costumbre.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'salina', escena: 'recarga', texto: 'Vuelves a por lo que faltaba. Te reciben como a alguien de la familia y te cobran igual.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'sal de recarga' } },
       { rol: 'alto', escena: 'despedida', texto: 'El alto por fin de bajada. Da hasta pena, y eso que llevas el día entero subiéndolo.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'reparto', escena: 'cierre', texto: 'Vuelves con el saco casi vacío y con la lista tachada entera. Eso aquí es una hazaña.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'reparto', escena: 'cierre', texto: 'Saco casi vacío y la lista tachada entera. Aquí eso es una hazaña, aunque de fuera nadie lo entienda.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
   {
@@ -1348,7 +1358,15 @@ export const TEMPLATES = [
       { rol: 'taller', escena: 'encargo', texto: 'Te dan una bisagra nueva y una advertencia sobre el viento que resulta ser exacta.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'objeto', objeto: 'bisagra' } },
       { rol: 'refugio', escena: 'refugio', texto: 'El refugio está entero y desordenado. La puerta cuelga con una dignidad conmovedora.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'informacion' } },
       { rol: 'refugio', escena: 'arreglo', texto: 'Colocas la bisagra, apilas leña y dejas una nota. Todo tarda más de lo pensado.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
-      { rol: 'taller', escena: 'regreso', texto: 'Vuelves a devolver las herramientas. No preguntan cómo fue, y aun así lo cuentas.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
+      { rol: 'taller', escena: 'regreso', texto: 'Deja ahí las herramientas. No te voy a preguntar cómo fue, así que cuéntamelo por tu cuenta, que para eso has vuelto.', disparador: { tipo: 'llegada' }, resultado: { tipo: 'estado' } },
     ],
   },
 ];
+
+/**
+ * El catálogo con sus caras ya puestas, que es lo único que sale de aquí: ningún
+ * consumidor puede ver una versión de las plantillas sin ellas. Dos catálogos con los
+ * mismos identificadores y beats distintos son la clase de diferencia que se descubre
+ * tarde, y `world/cupos.js`, el informe de casting y la batería importan esto directamente.
+ */
+export const TEMPLATES = ESCRITAS.map(conCaras);

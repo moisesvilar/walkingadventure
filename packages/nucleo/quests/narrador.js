@@ -27,6 +27,7 @@ import { congelaHondo } from '../core/congelar.js';
 import { creaFiltroDeAptitud, motivoDeAptitud, MOTIVOS_DE_APTITUD } from '../names/aptitud-de-texto.js';
 import { anotaTopico, aperturaDeTexto, CATEGORIAS_DE_TOPICO, exigeCategoria, topicosParaElPrompt } from '../partida/topicos.js';
 import { guardaTexto } from '../partida/diario.js';
+import { sitioDelLugar } from './caras.js';
 import { huecosDePlantilla, TOPES_DE_TEXTO } from './catalogo.js';
 import { construyePrompt, datosRealesDeMundo, REGLAS_DE_ESCRITURA, sobreDePeticion, TONO } from './prompt.js';
 
@@ -462,9 +463,12 @@ export function peticionDeAventura({ mundo, aventura, plantilla, locale, huecos,
     tono: TONO,
     reglas: REGLAS_DE_ESCRITURA,
     punto: 'crear-aventura',
-    // Vocabulario **del juego** y nunca de OSM: `taberna`, `paraje`, `calzada`.
-    tipos: (aventura?.beats ?? []).map((b) => b.lugar?.tipo).filter(Boolean),
-    nombres: (aventura?.beats ?? []).map((b) => b.lugar?.nombre).filter(Boolean),
+    // Vocabulario **del juego** y nunca de OSM: `taberna`, `paraje`, `calzada`. Y del
+    // **sitio**, también cuando el beat cae sobre una cara: lo que describe dónde ocurre
+    // una escena es el portal al que se va, no que allí haya alguien hablando. Así el
+    // sobre es el mismo antes y después de que una plantilla ponga beats sobre su gente.
+    tipos: (aventura?.beats ?? []).map((b) => sitioDelLugar(b.lugar)?.tipo).filter(Boolean),
+    nombres: (aventura?.beats ?? []).map((b) => sitioDelLugar(b.lugar)?.nombre).filter(Boolean),
     escena: (aventura?.beats ?? []).map((b) => b.escena?.tipo).filter(Boolean),
     disparador: (aventura?.beats ?? []).map((b) => b.disparador?.tipo).filter(Boolean),
     tamano: plantilla?.tamano ?? aventura?.tamano ?? null,

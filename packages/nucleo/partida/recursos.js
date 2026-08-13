@@ -5,6 +5,7 @@
 // RF-PERS-002, es qué le falta a una aventura para jugarse sin red.
 
 import { congelaHondo } from '../core/congelar.js';
+import { sitioDelLugar } from '../quests/caras.js';
 import { construyePrompt, datosRealesDeMundo, REGLAS_DE_ESCRITURA, sobreDePeticion, TONO } from '../quests/prompt.js';
 
 /** Los dos estados de un recurso binario. No hay un tercero: o está en el móvil o no. */
@@ -190,7 +191,10 @@ export function queFaltaParaJugarSinRed({ aventura, recursos }) {
   };
 
   for (const beat of aventura.beats) {
-    const lugar = beat.lugar ?? null;
+    // El sitio, también cuando el beat cae sobre una cara: **una persona no se ilustra
+    // aparte**. La ilustración que hace falta es la del sitio donde trabaja, que ya está
+    // pedida, y preguntar por una clave de gente diría que falta algo que no falta.
+    const lugar = sitioDelLugar(beat.lugar ?? null);
     if (lugar) {
       const elemento = claveDeElemento(lugar.tipo, lugar.nombre);
       if (!inv.ilustraciones.includes(elemento)) anota('ilustracion', elemento, `beat ${beat.n}`);
@@ -453,7 +457,9 @@ export function lugaresParaIlustrar({ aventura, recursos = null, tope = TOPE_ILU
   const ausentes = [];
   const visto = new Set();
   for (const beat of aventura.beats) {
-    const lugar = beat?.lugar ?? null;
+    // Otra vez el sitio y por lo mismo: dos beats del mismo portal, uno con cara y otro
+    // sin ella, son **un solo lugar que ilustrar** y no dos que se coman el tope.
+    const lugar = sitioDelLugar(beat?.lugar ?? null);
     if (!lugar) continue;
     const clave = claveDeElemento(lugar.tipo, lugar.nombre);
     if (visto.has(clave)) continue;

@@ -131,7 +131,13 @@ export function PantallaEscena({
         ) : null}
 
         {/* Quien habla: una línea, en versalitas y **sin retrato**. Sin cara este bloque no
-            existe y el cuerpo baja a ocupar su sitio, sin mover nada más. */}
+            existe y el cuerpo baja a ocupar su sitio, sin mover nada más.
+
+            El puesto llega ya dicho **con palabras del mundo** —«al frente», «del
+            vecindario»— porque lo compone el paquete desde la declaración que vive junto a
+            la plantilla de puestos: aquí no se traduce nada, y la clave interna no llega a
+            esta línea ni por descuido. Y esta línea **no escala** con el tamaño de letra:
+            es un rótulo, no prosa. */}
         {escena.cara ? (
           <Text testID={TESTIDS.cara} style={estilos.cara}>{`${escena.cara.nombre} · ${escena.cara.puesto}`}</Text>
         ) : null}

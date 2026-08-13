@@ -23,6 +23,7 @@
 import { congelaHondo } from '../core/congelar.js';
 import { infraccionesDeTexto, reglaDeFormula } from '../names/lenguaje.js';
 import { SIN_OBJETOS, exigeTenencia, resuelveBifurcacion } from '../partida/objetos.js';
+import { rotuloDePuesto } from '../partida/puestos.js';
 import { dentroDeFranja, exigeMinutoDelDia } from './aventura.js';
 
 // --- El estado del momento y los identificadores de la pantalla ---------------
@@ -405,8 +406,9 @@ export function varianteDelBeat({ beat, reloj = null }) {
  * La escena de un beat — A4P3.
  *
  * @param {object} peticion
- *   `beat` el beat casteado entero; `cara` quien habla, con su nombre y su puesto, o
- *   `null` cuando la escena no tiene a nadie; `texto` el del modelo cuando está
+ *   `beat` el beat casteado entero; `cara` quien habla, con su nombre y su puesto **en
+ *   clave**, o `null` cuando la escena no tiene a nadie —lo que sale compuesto es el
+ *   rótulo de mundo del puesto—; `texto` el del modelo cuando está
  *   residente, con `origenDelTexto`; `reloj` el reloj de pared inyectado; `tenencia` la
  *   vista de solo lectura de los objetos; `tamanoDeTexto` el escalón vigente.
  * @returns la escena congelada. **Una sola acción**, ningún retrato y ninguna cifra.
@@ -492,7 +494,12 @@ function exigeCara(cara) {
       'una cara sin puesto no se puede presentar, y un retrato no lo hay (exclusión 6 del PRD)',
     );
   }
-  return congelaHondo({ nombre: cara.nombre, puesto: cara.puesto });
+  // El puesto sale de aquí **con palabras del mundo**: la cara llega con su clave interna,
+  // que es la de la partida y la de la memoria, y lo que se compone es el rótulo. La clave
+  // no sale a pantalla jamás —`ANXO O DO NORTE · REGENCIA` es una etiqueta de catálogo, no
+  // una presentación—, y se traduce aquí y no en quien pinta para que no haya una segunda
+  // traducción el día que otra pantalla enseñe el puesto de alguien.
+  return congelaHondo({ nombre: cara.nombre, puesto: rotuloDePuesto(cara.puesto) });
 }
 
 /**

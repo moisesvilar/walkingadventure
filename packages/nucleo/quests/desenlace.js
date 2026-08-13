@@ -23,6 +23,7 @@
 
 import { congelaHondo } from '../core/congelar.js';
 import { SIGNOS, hechosFieles } from '../partida/deformacion.js';
+import { sitioDelLugar } from './caras.js';
 
 /** Los campos del desenlace, en orden declarado. Es lo que sus cuatro consumidores leen. */
 export const CAMPOS_DEL_DESENLACE = congelaHondo([
@@ -50,7 +51,7 @@ export function lugarDelDesenlace(beats) {
     throw new Error('el desenlace se compone sobre la cadena de beats de la aventura casteada, y llegó vacía: sin ella no se sabe ni dónde acabó');
   }
   const ultimo = beats[beats.length - 1]?.lugar;
-  const sitio = ultimo?.tipo === 'humano' ? ultimo.trabajaEn : ultimo;
+  const sitio = sitioDelLugar(ultimo);
   if (!sitio || typeof sitio.nombre !== 'string' || !sitio.nombre) {
     throw new Error(`el último beat de la aventura no dice en qué sitio ocurre: llegó ${JSON.stringify(ultimo) ?? String(ultimo)}`);
   }

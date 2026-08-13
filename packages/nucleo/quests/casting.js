@@ -35,6 +35,7 @@ import { caraDeSitio } from '../partida/npcs.js';
 import { SIN_OBJETOS, exigeTenencia } from '../partida/objetos.js';
 import { dimensionaSalida, rangoDeBeats } from '../partida/salida.js';
 import { exigeTramoM } from '../partida/tramo.js';
+import { sitioDelRol } from './caras.js';
 import { MOTIVOS_DE_CASTING, motivoDeCasting } from './motivos.js';
 import { TIPOS_DE_ROL, FRANJA_DIURNA, beatCasteado, franjaCabeEn, franjaDe, validaPlantilla } from './aventura.js';
 // El catálogo llega **ya comprobado**: importarlo desde aquí es lo que hace que
@@ -280,6 +281,15 @@ export function casteaPlantilla({
     }));
   }
 
+  // Dónde ocurre cada beat, **antes de repartir nada**: el rol que lo firma si es de
+  // sitio, y el sitio donde trabaja esa persona si el rol es humano. De aquí cuelga todo
+  // lo demás de este módulo, y por eso se calcula una sola vez y arriba: mientras el lugar
+  // de un beat humano no existía, el chequeo de trecho y el del lazo se lo **saltaban en
+  // silencio** y la avería salía mucho después, como excepción desde el recorrido. Una
+  // comprobación que, al no poder correr, no protesta. El arreglo no es exceptuar el caso
+  // humano —eso ablandaría la regla— sino resolver el lugar antes de comprobar.
+  const dondeOcurre = beats.map((b) => sitioDelRol(plantilla, b.rol));
+
   // El azar es **por plantilla**: añadir una al catálogo no puede cambiar el
   // reparto de las demás, que es lo que permitirá crecer a treinta sin resembrar
   // nada. El sufijo de fase es el de siempre.
@@ -325,7 +335,7 @@ export function casteaPlantilla({
    * comprobar: los trechos entre beats cuyos dos roles están asignados.
    */
   const estorbo = (completo) => {
-    const lugarDe = (i) => asignacion[beats[i].rol];
+    const lugarDe = (i) => asignacion[dondeOcurre[i]];
 
     // El lazo: empieza y termina cerca del punto de partida. Se comprueba en cuanto
     // el beat implicado tiene lugar, que es lo que poda antes.
@@ -352,9 +362,11 @@ export function casteaPlantilla({
     for (let i = 0; i < beats.length - 1; i++) {
       const a = lugarDe(i), b = lugarDe(i + 1);
       if (!a || !b) continue;
-      // Dos beats sobre el mismo rol son el mismo sitio: el trecho es cero y no hay
-      // nada que medir. Es lo que hace que un lazo pueda volver a la taberna.
-      if (beats[i].rol === beats[i + 1].rol) continue;
+      // Dos beats que ocurren en el mismo sitio: el trecho es cero y no hay nada que
+      // medir. Es lo que hace que un lazo pueda volver a la taberna, y la unidad es **el
+      // sitio** y no el rol: quien sirve la taberna y la taberna son el mismo portal, así
+      // que ese par queda exento igual que dos beats sobre el mismo rol.
+      if (dondeOcurre[i] === dondeOcurre[i + 1]) continue;
       const m = medida.metros(a, b);
       const par = [beats[i].rol, beats[i + 1].rol];
       if (m == null) {
@@ -378,7 +390,7 @@ export function casteaPlantilla({
 
     if (!completo) return null;
 
-    const recorrido = recorridoDe(beats, asignacion, desde, medida);
+    const recorrido = recorridoDe(dondeOcurre, asignacion, desde, medida);
     if (recorrido.metros > salida.metros) {
       return motivoDeCasting({
         clave: MOTIVOS_DE_CASTING.RECORRIDO_FUERA_DEL_TAMANO,
@@ -422,24 +434,24 @@ export function casteaPlantilla({
   }
 
   // Los roles humanos, ya con los sitios repartidos. Nunca fallan: si una plantilla
-  // pide quien atiende la forja, la forja lo produce.
+  // pide quien atiende la forja, la forja lo produce. Y **no consumen lugar**: heredan el
+  // del sitio donde trabajan, que es lo que permite que dos caras de la misma posada sean
+  // el mismo portal en vez de dos viajes disfrazados de gente distinta.
   for (const rid of orden) {
     if (roles[rid].tipo !== 'humano') continue;
-    const sitio = asignacion[roles[rid].en];
-    if (!sitio) throw new Error(`el rol humano "${rid}" de "${plantilla.id}" dice trabajar en "${roles[rid].en}", que no es un rol de sitio de esta plantilla`);
-    asignacion[rid] = resuelveRolHumano({ sitio, rol: roles[rid], plantilla, mundo, semilla });
+    asignacion[rid] = resuelveRolHumano({ sitio: asignacion[roles[rid].en], rol: roles[rid], plantilla, mundo, semilla });
   }
 
-  return exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla, tenencia: laTenencia });
+  return exito({ plantilla, asignacion, beats, dondeOcurre, desde, medida, metrosPorTramo, salida, semilla, tenencia: laTenencia });
 }
 
-function recorridoDe(beats, asignacion, desde, medida) {
-  const lugares = beats.map((b) => asignacion[b.rol]);
+function recorridoDe(dondeOcurre, asignacion, desde, medida) {
+  const lugares = dondeOcurre.map((rid) => asignacion[rid]);
   const ida = medida.metros(desde, lugares[0]) ?? Infinity;
   const vuelta = medida.metros(lugares[lugares.length - 1], desde) ?? Infinity;
   const trechos = [];
   for (let i = 0; i < lugares.length - 1; i++) {
-    trechos.push(beats[i].rol === beats[i + 1].rol ? 0 : (medida.metros(lugares[i], lugares[i + 1]) ?? Infinity));
+    trechos.push(dondeOcurre[i] === dondeOcurre[i + 1] ? 0 : (medida.metros(lugares[i], lugares[i + 1]) ?? Infinity));
   }
   // El recorrido incluye la ida y la vuelta: un lazo que se mide solo entre beats
   // esconde justo los dos trechos que decide el punto de partida.
@@ -451,20 +463,24 @@ function fallo(plantilla, motivo) {
   return congelaHondo({ ok: false, tpl: plantilla, plantilla: plantilla.id, motivo });
 }
 
-function exito({ plantilla, asignacion, beats, desde, medida, metrosPorTramo, salida, semilla, tenencia = SIN_OBJETOS }) {
-  const recorrido = recorridoDe(beats, asignacion, desde, medida);
+function exito({ plantilla, asignacion, beats, dondeOcurre, desde, medida, metrosPorTramo, salida, semilla, tenencia = SIN_OBJETOS }) {
+  const recorrido = recorridoDe(dondeOcurre, asignacion, desde, medida);
+  // El lugar de un beat es lo que su rol resolvió —una cara cuando el rol es humano—, y
+  // **los tramos se miden entre sitios**: el trecho entre quien sirve la taberna y la
+  // taberna es cero, así que no hay ni un metro de calzada que dibujar entre los dos.
   const lugares = beats.map((b) => asignacion[b.rol]);
+  const sitios = dondeOcurre.map((rid) => asignacion[rid]);
 
   const casteados = beats.map((beat, i) => {
-    const anterior = i === 0 ? desde : lugares[i - 1];
+    const anterior = i === 0 ? desde : sitios[i - 1];
     return beatCasteado({
       n: i + 1,
       plantillaBeat: beat,
       lugar: lugares[i],
-      escenaDelLugar: lugares[i].escena ?? null,
+      escenaDelLugar: sitios[i].escena ?? null,
       // El último no empuja a ninguno: eso es lo que cierra la cadena.
       siguiente: i === beats.length - 1 ? null : i + 2,
-      tramos: anterior === lugares[i] ? [] : medida.tramos(anterior, lugares[i]),
+      tramos: anterior === sitios[i] ? [] : medida.tramos(anterior, sitios[i]),
       tenencia,
     });
   });

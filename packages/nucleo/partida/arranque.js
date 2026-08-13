@@ -11,6 +11,7 @@
 // fila 36; la lista del día 1, de la 28.
 
 import { congelaHondo } from '../core/congelar.js';
+import { sitioDelLugar } from '../quests/caras.js';
 import { medidorDeTrechos } from '../quests/casting.js';
 import { repartoDeAventuras } from './aventuras.js';
 import { PROTAGONISTAS } from './deformacion.js';
@@ -267,7 +268,10 @@ export function pasaPorNucleo(aventura, nucleo) {
 }
 
 function beatEnNucleo(beat, nucleo) {
-  const lugar = beat?.lugar;
+  // El sitio primero: un beat sobre la cara de un **servicio** trae en `en` el nombre del
+  // servicio y no el del núcleo que lo contiene, así que preguntar sin resolverlo dejaría
+  // de ver una aventura que sí para donde tiene que parar.
+  const lugar = sitioDelLugar(beat?.lugar ?? null);
   if (!lugar) return false;
   if (lugar.tipo === 'nucleo' && lugar.nombre === nucleo) return true;
   return lugar.en === nucleo;

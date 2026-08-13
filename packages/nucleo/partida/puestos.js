@@ -63,6 +63,33 @@ export const PUESTOS_POR_TIPO = congelaHondo({
 export const TIPOS_DE_SITIO = congelaHondo(Object.keys(PUESTOS_POR_TIPO));
 
 /**
+ * Cómo se dice cada puesto **en pantalla**: el rótulo de mundo con el que se presenta
+ * una cara, y la fuente única de la que sale (SPEC-051).
+ *
+ * La clave es de dentro y no sale nunca: `ANXO O DO NORTE · REGENCIA` no es una
+ * presentación, es una etiqueta de catálogo. Los nueve son **sintagmas de tarea y no
+ * nombres de persona**, y de ahí les viene todo lo que cumplen: no tienen género que
+ * elegir, así que no hay masculino genérico que evitar ni nada que desdoblar, y nombran
+ * lo que se hace y no a quien lo hace, así que ningún oficio arrastra estereotipo
+ * (`game-design/lenguaje.md`).
+ *
+ * Van aquí, junto a la plantilla de puestos, y no en el paquete de idioma: allí sería lo
+ * correcto el día que exista un idioma con puestos distintos, y hoy sería una indirección
+ * sin caso.
+ */
+export const ROTULOS_DE_PUESTO = congelaHondo({
+  regencia: 'al frente',
+  vigilancia: 'de guardia',
+  vecindad: 'del vecindario',
+  cocina: 'en la cocina',
+  sala: 'en la sala',
+  cuadra: 'en la cuadra',
+  limpieza: 'al cuidado de la casa',
+  aprendizaje: 'en el aprendizaje',
+  acarreo: 'en el acarreo',
+});
+
+/**
  * Todos los puestos que existen, en orden declarado y sin repetir.
  *
  * Es sobre esta lista sobre la que se estratifica el género, así que su orden es
@@ -99,6 +126,26 @@ for (const puesto of PUESTOS) {
   }
 }
 
+// Y el rótulo de cada puesto, por los dos lados. **Un puesto sin rótulo es error de
+// construcción y nunca un respaldo a la clave**: pintar `REGENCIA` en silencio es
+// exactamente la degradación que esta declaración existe para no cometer, y es el mismo
+// mecanismo que los `exige*` de los vocabularios del telón. Un rótulo sin puesto también
+// revienta: retirar un puesto es un acto con registro y no una limpieza que deja restos.
+for (const puesto of PUESTOS) {
+  const rotulo = Object.prototype.hasOwnProperty.call(ROTULOS_DE_PUESTO, puesto) ? ROTULOS_DE_PUESTO[puesto] : null;
+  if (typeof rotulo !== 'string' || !rotulo.trim()) {
+    throw new Error(
+      `el puesto "${puesto}" no declara con qué palabras se dice en pantalla: los rótulos declarados son ${Object.keys(ROTULOS_DE_PUESTO).join(', ')}. ` +
+      'Un puesto nuevo trae el suyo con él, en vez de salir a pantalla con su clave interna',
+    );
+  }
+}
+for (const puesto of Object.keys(ROTULOS_DE_PUESTO)) {
+  if (!PUESTOS.includes(puesto)) {
+    throw new Error(`se declara el rótulo "${ROTULOS_DE_PUESTO[puesto]}" para el puesto "${puesto}", que ninguna plantilla de sitio pide: los puestos que existen son ${PUESTOS.join(', ')}`);
+  }
+}
+
 /**
  * La plantilla de puestos de un tipo de sitio. **Falla nombrando el tipo** en lugar
  * de suponer una plantilla vacía: un tipo nuevo de la generación que apareciera sin
@@ -114,6 +161,22 @@ export function plantillaDePuestos(tipo) {
     );
   }
   return plantilla;
+}
+
+/**
+ * Con qué palabras se dice un puesto en pantalla. Falla nombrando el puesto: **no hay
+ * respaldo a la clave**, porque un respaldo silencioso es lo que pondría `REGENCIA`
+ * delante de alguien.
+ */
+export function rotuloDePuesto(puesto) {
+  const rotulo = Object.prototype.hasOwnProperty.call(ROTULOS_DE_PUESTO, puesto) ? ROTULOS_DE_PUESTO[puesto] : null;
+  if (!rotulo) {
+    throw new Error(
+      `el puesto ${JSON.stringify(puesto) ?? String(puesto)} no tiene rótulo con el que decirse en pantalla: los declarados son ${Object.keys(ROTULOS_DE_PUESTO).join(', ')}. ` +
+      'La clave interna no sale a pantalla nunca',
+    );
+  }
+  return rotulo;
 }
 
 /** El puesto titular de un tipo de sitio: el primero de su plantilla, siempre. */

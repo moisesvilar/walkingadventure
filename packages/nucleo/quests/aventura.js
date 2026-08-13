@@ -14,6 +14,7 @@
 import { congelaHondo } from '../core/congelar.js';
 import { SIN_OBJETOS, exigeTenencia } from '../partida/objetos.js';
 import { IDS_DE_TAMANO } from '../partida/salida.js';
+import { sitioDelLugar } from './caras.js';
 
 /** Los tres tipos de disparador de `game-design/quests.md` §2. No hay un cuarto. */
 export const DISPARADORES = Object.freeze(['llegada', 'franja', 'con_objeto']);
@@ -166,7 +167,17 @@ export function validaPlantilla(plantilla) {
     if (roles[rid]?.tipo !== 'humano') continue;
     const donde = roles[rid].en;
     const anfitrion = roles[donde];
-    if (anfitrion && !CON_GENTE.includes(anfitrion.tipo)) {
+    // Que el sitio **exista** se exige aquí y no al final del reparto: un beat sobre este
+    // rol ocurre donde esa persona trabaja, así que su lugar tiene que poder resolverse
+    // antes de comprobar ni un trecho. Descubrirlo después dejaba el fallo saliendo como
+    // un `TypeError` desde el cálculo del recorrido, tres capas más allá del defecto.
+    if (!anfitrion) {
+      throw new Error(
+        `el rol humano "${rid}" de "${id}" dice trabajar en "${donde}", que no es un rol de sitio de esta plantilla: ` +
+        `los declarados son ${Object.keys(roles).join(', ')}`,
+      );
+    }
+    if (!CON_GENTE.includes(anfitrion.tipo)) {
       throw new Error(
         `el rol humano "${rid}" de la plantilla "${id}" dice trabajar en "${donde}", que es un rol de tipo "${anfitrion.tipo}": ` +
         `una cara pertenece a un sitio, y los sitios son ${CON_GENTE.join(' y ')}`,
@@ -347,6 +358,9 @@ export function beatCasteado({ n, plantillaBeat, lugar, escenaDelLugar, siguient
       ...(plantillaBeat.resultado.objeto ? { objeto: plantillaBeat.resultado.objeto } : {}),
       siguienteBeat: siguiente,
     },
-    guiado: guiadoDeBeat({ destino: lugar, tramos }),
+    // El guiado se compone contra **el sitio**, también cuando el lugar es una cara: quien
+    // camina va al mismo portal que iba antes, la marca cae en sus coordenadas y el mapa
+    // no estrena ni una marca ni un tipo de marca. Una persona no es un sitio al que ir.
+    guiado: guiadoDeBeat({ destino: sitioDelLugar(lugar) ?? lugar, tramos }),
   };
 }

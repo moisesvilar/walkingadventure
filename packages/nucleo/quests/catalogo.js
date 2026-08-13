@@ -24,6 +24,7 @@ import { declaracionDeRumor } from '../partida/rumores.js';
 import { exigeCantidadDeOro } from '../partida/oro.js';
 import { IDS_DE_TAMANO, RANGO_DE_BEATS } from '../partida/salida.js';
 import { TIPOS_DE_ROL, validaPlantilla } from './aventura.js';
+import { sitioDelRol } from './caras.js';
 import { compruebaCoberturaDeMarcos, infraccionesDeLecturaEnVozAlta, infraccionesDeReproche } from './escena.js';
 import { OFICIOS, afinidadDePlantilla, exclusivasDeOficio, mediaDeAfinidades } from './oficios.js';
 import { TEMPLATES } from './templates.js';
@@ -306,14 +307,20 @@ function compruebaPlantilla(plantilla, indice) {
     );
   }
   // 2 · El lazo, por el lado que es de la plantilla: el primero y el último beat
-  // comparten rol, o caen los dos en un rol del mismo tipo. Lo demás —que estén
+  // ocurren en el mismo sitio, o en dos sitios del mismo tipo. Lo demás —que estén
   // cerca de verdad— lo mide el casting sobre el grafo.
+  //
+  // Se mira **el sitio donde ocurre cada uno** y no el rol que lo firma: un último beat
+  // sobre la cara del sitio donde empezó todo cierra el lazo exactamente igual, y con la
+  // comparación por rol el catálogo entero dejaba de cargar por «entrega-sospechosa».
   const primero = plantilla.beats[0].rol;
   const ultimo = plantilla.beats[plantilla.beats.length - 1].rol;
-  if (primero !== ultimo && plantilla.roles[primero].tipo !== plantilla.roles[ultimo].tipo) {
+  const sitioDelPrimero = sitioDelRol(plantilla, primero);
+  const sitioDelUltimo = sitioDelRol(plantilla, ultimo);
+  if (sitioDelPrimero !== sitioDelUltimo && plantilla.roles[sitioDelPrimero].tipo !== plantilla.roles[sitioDelUltimo].tipo) {
     throw new Error(
-      `la plantilla "${id}" empieza en el rol "${primero}" y termina en "${ultimo}", que no comparten ni rol ni tipo de sitio: ` +
-      'una aventura se cierra donde se abrió, y el precedente de «tres pistas» es que el defecto es de la plantilla',
+      `la plantilla "${id}" empieza en el rol "${primero}" y termina en "${ultimo}", que ocurren en "${sitioDelPrimero}" y en "${sitioDelUltimo}" ` +
+      'y no comparten ni sitio ni tipo de sitio: una aventura se cierra donde se abrió, y el precedente de «tres pistas» es que el defecto es de la plantilla',
     );
   }
 
