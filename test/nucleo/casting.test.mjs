@@ -47,6 +47,7 @@ import {
 import { CLAVES_DE_MOTIVO, MOTIVOS_DE_CASTING, claveDeMotivo, motivoDeCasting } from '../../packages/nucleo/quests/motivos.js';
 import { DISPARADORES, FRANJA_DIURNA, IDS_DE_FRANJA, RESULTADOS, TIPOS_DE_ROL, franjaDe, guiadoDeBeat } from '../../packages/nucleo/quests/aventura.js';
 import { TEMPLATES } from '../../packages/nucleo/quests/templates.js';
+import { sitioDelLugar, sitioDelRol } from '../../packages/nucleo/quests/caras.js';
 import { IDS_DE_TAMANO, RANGO_DE_BEATS } from '../../packages/nucleo/partida/salida.js';
 import { PESO_MINIMO_DE_ESCENA } from '../../packages/nucleo/world/escenas.js';
 import { SUFIJOS_DE_FASE } from '../../packages/nucleo/core/semilla.js';
@@ -358,7 +359,11 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
         // Ningún trecho supera un tramo, **medido sobre el grafo** y no en línea
         // recta por un factor de rodeo. Se remide aquí por lo mismo que el lazo.
         for (let i = 0; i < c.beats.length - 1; i++) {
-          if (c.beats[i].rol === c.beats[i + 1].rol) continue; // el mismo sitio: no hay trecho
+          // El mismo **sitio**: no hay trecho. La unidad es el sitio y no el rol desde
+          // SPEC-051 —quien sirve la taberna y la taberna son el mismo portal—, y con la
+          // comparación por rol un beat con cara pegado a su sitio caía en «dos beats no
+          // pueden caer pegados» midiendo cero metros, que es medir la herencia como fallo.
+          if (sitioDelLugar(c.beats[i].lugar) === sitioDelLugar(c.beats[i + 1].lugar)) continue;
           const m = medida.metros(c.beats[i].lugar, c.beats[i + 1].lugar);
           assert.notEqual(m, null, `${clave} · ${c.plantilla}: no hay camino en el grafo entre los beats ${i + 1} y ${i + 2}`);
           assert.ok(m <= TOPE_DE_TRECHO_EN_TRAMOS * tramoM, `${clave} · ${c.plantilla}: el trecho ${i + 1}→${i + 2} son ${(m / tramoM).toFixed(2)} tramos y el tope es ${TOPE_DE_TRECHO_EN_TRAMOS}`);
@@ -993,8 +998,15 @@ describe('Los roles humanos no hacen fallar el casting', () => {
       riesgo: { tipo: 'paraje', escena: 'guarida' },
       destino: { tipo: 'servicio', kind: 'armeria' },
     };
+    // Los beats se traen **resueltos a su sitio**, y hay que decir por qué: desde SPEC-051
+    // el catálogo escribe el beat 4 de `entrega-sospechosa` sobre `quien_encarga`, y esta
+    // plantilla de laboratorio no declara ese rol. Se aplica la misma regla del sitio que
+    // usa el casting —`sitioDelRol`— en vez de escribir los beats a mano, para que el día
+    // que la plantilla original cambie de forma este decorado siga siendo la misma cadena.
+    const original = copiaDe('entrega-sospechosa');
     const conGente = {
-      ...copiaDe('entrega-sospechosa'),
+      ...original,
+      beats: original.beats.map((b) => ({ ...b, rol: sitioDelRol(original, b.rol) })),
       orden: ['origen', 'riesgo', 'destino', 'tabernero'],
       roles: { ...lugares, tabernero: { tipo: 'humano', en: 'origen', puesto: 'tabernero' } },
     };
@@ -1052,8 +1064,14 @@ describe('El guiado nombra el destino y las calzadas del trecho', () => {
     let conCalzadas = 0;
     for (const c of mundo.casting.filter((x) => x.ok)) {
       for (const b of c.beats) {
+        // **La marca es la del sitio, también cuando el beat cae sobre una cara** (SPEC-051):
+        // quien camina va al mismo portal que iba antes, y el mapa no estrena ni una marca
+        // nueva ni un tipo de marca `humano`. Por eso se compara contra el sitio del lugar y
+        // no contra el lugar: en un beat con cara el tipo difiere **a propósito**.
+        const sitio = sitioDelLugar(b.lugar);
         assert.equal(b.guiado.destino, b.lugar.nombre, `${c.plantilla} beat ${b.n}: el guiado no nombra el destino con su nombre propio`);
-        assert.deepEqual(b.guiado.marca, { x: b.lugar.x, y: b.lugar.y, tipo: b.lugar.tipo, nombre: b.lugar.nombre }, `${c.plantilla} beat ${b.n}: la marca no cae en el lugar`);
+        assert.deepEqual(b.guiado.marca, { x: sitio.x, y: sitio.y, tipo: sitio.tipo, nombre: sitio.nombre }, `${c.plantilla} beat ${b.n}: la marca no cae en el sitio donde ocurre`);
+        assert.notEqual(b.guiado.marca.tipo, 'humano', `${c.plantilla} beat ${b.n}: el mapa estrena una marca de tipo humano`);
         assert.deepEqual(b.guiado.calzadas.filter((n, i) => b.guiado.calzadas[i - 1] === n), [], `${c.plantilla} beat ${b.n}: el guiado repite una calzada seguida`);
         if (b.guiado.calzadas.length) conCalzadas += 1;
       }

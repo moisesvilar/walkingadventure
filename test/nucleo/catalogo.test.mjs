@@ -48,6 +48,7 @@ import {
   tiposDeRolDe,
   vocabularioDeEscenas,
 } from '../../packages/nucleo/quests/catalogo.js';
+import { sitioDelRol } from '../../packages/nucleo/quests/caras.js';
 import {
   OFICIOS,
   SERVICIO_ANCLA_DE_OFICIO,
@@ -288,14 +289,23 @@ describe('Una quest se castea contra el mundo o no se ofrece', () => {
     );
     assert.equal(cierran.size, CATALOGO.length, 'no se han comprobado las treinta');
 
-    // Y el lazo por el lado de la declaración: primero y último beat comparten rol o
-    // caen los dos en el mismo tipo de sitio del que se sale.
+    // Y el lazo por el lado de la declaración: el primero y el último beat **ocurren en el
+    // mismo sitio**, o en dos sitios del mismo tipo.
+    //
+    // La unidad es el sitio y no el rol desde SPEC-051: doce plantillas terminan sobre la
+    // cara del sitio donde empezaron, y una cara y su portal son el mismo lugar. Comparando
+    // el rol que firma cada beat, `entrega-sospechosa` —que abre en `origen` y cierra en
+    // `quien_encarga`, que trabaja en `origen`— habría llamado lazo abierto a un lazo que
+    // cierra en la misma puerta. Es la misma regla dicha con la unidad correcta, y no una
+    // excepción para el caso humano: lo que se compara sigue siendo dónde ocurre cada beat.
     for (const p of CATALOGO) {
       const primero = p.beats[0].rol;
       const ultimo = p.beats[p.beats.length - 1].rol;
+      const sitioDelPrimero = sitioDelRol(p, primero);
+      const sitioDelUltimo = sitioDelRol(p, ultimo);
       assert.ok(
-        primero === ultimo || p.roles[primero].tipo === p.roles[ultimo].tipo,
-        `"${p.id}" abre en "${primero}" y cierra en "${ultimo}", que no comparten ni rol ni tipo de sitio`,
+        sitioDelPrimero === sitioDelUltimo || p.roles[sitioDelPrimero].tipo === p.roles[sitioDelUltimo].tipo,
+        `"${p.id}" abre en "${primero}" y cierra en "${ultimo}", que ocurren en "${sitioDelPrimero}" y en "${sitioDelUltimo}" y no comparten ni sitio ni tipo de sitio`,
       );
     }
   });

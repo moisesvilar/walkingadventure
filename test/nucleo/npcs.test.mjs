@@ -42,13 +42,17 @@ import {
   IDS_DE_GENERO,
   PUESTOS,
   PUESTOS_POR_TIPO,
+  ROTULOS_DE_PUESTO,
   SUFIJO_DE_NPCS,
   TIPOS_DE_SITIO,
   claveDeCara,
   plantillaDePuestos,
   puestoTitular,
   repartoDeGenero,
+  rotuloDePuesto,
 } from '../../packages/nucleo/partida/puestos.js';
+import { infraccionesDeTexto } from '../../packages/nucleo/names/lenguaje.js';
+import { infraccionesDeLecturaEnVozAlta } from '../../packages/nucleo/quests/escena.js';
 import { casteaCatalogo, exigeEncuadre } from '../../packages/nucleo/quests/casting.js';
 import { TEMPLATES } from '../../packages/nucleo/quests/templates.js';
 import { anclajesDelMundo, fuente } from './mundo-de-prueba.mjs';
@@ -124,6 +128,53 @@ describe('El sitio y su plantilla de puestos', () => {
     for (const puesto of PUESTOS) {
       assert.doesNotMatch(puesto, /(ero|era|eros|eras|esa|esas|ista|istas|izo|iza|dor|dora)$/, `el puesto "${puesto}" está escrito como se llama a quien ejerce el oficio`);
       for (const genero of IDS_DE_GENERO) assert.equal(puesto.includes(genero), false, `el puesto "${puesto}" nombra un género`);
+    }
+  });
+
+  test('Cada puesto se dice en pantalla con un rótulo de mundo, y un puesto sin él revienta', () => {
+    // SPEC-051, decidido por el dueño el 13-ago-2026: **nada de `REGENCIA` en pantalla**. La
+    // clave es de dentro —es la de la partida y la de la memoria— y lo que se enseña es un
+    // rótulo de mundo. Los nueve van escritos aquí uno a uno y no derivados de la
+    // declaración: una comprobación que se leyera a sí misma pasaría con cualquier cosa.
+    assert.deepEqual({ ...ROTULOS_DE_PUESTO }, {
+      regencia: 'al frente',
+      vigilancia: 'de guardia',
+      vecindad: 'del vecindario',
+      cocina: 'en la cocina',
+      sala: 'en la sala',
+      cuadra: 'en la cuadra',
+      limpieza: 'al cuidado de la casa',
+      aprendizaje: 'en el aprendizaje',
+      acarreo: 'en el acarreo',
+    });
+
+    // Los nueve puestos que existen tienen el suyo, y ninguno es la clave repetida.
+    assert.equal(PUESTOS.length, 9, `hay ${PUESTOS.length} puestos y se midieron nueve`);
+    for (const puesto of PUESTOS) {
+      const rotulo = rotuloDePuesto(puesto);
+      assert.equal(typeof rotulo, 'string');
+      assert.ok(rotulo.trim().length > 0, `el rótulo de "${puesto}" está vacío`);
+      assert.notEqual(rotulo, puesto, `el rótulo de "${puesto}" es la propia clave`);
+    }
+
+    // **Un puesto sin rótulo es error de construcción y nunca un respaldo a la clave**:
+    // pintar `REGENCIA` en silencio es exactamente la degradación que esta declaración
+    // existe para no cometer, y es el mismo mecanismo que los `exige*` del telón.
+    assert.throws(() => rotuloDePuesto('mayordomia'), (e) => /mayordomia/.test(e.message) && PUESTOS.every((p) => e.message.includes(p)));
+    assert.throws(() => rotuloDePuesto(null), /no tiene rótulo/);
+  });
+
+  test('No se usa masculino genérico en fórmulas frecuentes', () => {
+    // Los nueve rótulos son **sintagmas de tarea y no nombres de persona**, y de ahí les viene
+    // todo lo que cumplen: no hay género que elegir, así que no hay masculino genérico que
+    // evitar ni morfología que inventar, y nombran lo que se hace y no a quien lo hace, así
+    // que ningún oficio arrastra estereotipo (`game-design/lenguaje.md`). Se revisan **los
+    // nueve** y no una muestra: son nueve.
+    for (const puesto of PUESTOS) {
+      const rotulo = rotuloDePuesto(puesto);
+      assert.deepEqual([...infraccionesDeTexto(rotulo, { locale: 'es' })], [], `el rótulo de "${puesto}" —«${rotulo}»— infringe una regla de lenguaje`);
+      assert.deepEqual([...infraccionesDeLecturaEnVozAlta(rotulo)], [], `el rótulo de "${puesto}" —«${rotulo}»— no se puede leer en voz alta`);
+      assert.equal(/\d/.test(rotulo), false, `el rótulo de "${puesto}" lleva una cifra`);
     }
   });
 
