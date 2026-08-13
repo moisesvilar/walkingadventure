@@ -480,6 +480,19 @@
       "verificado_en_dispositivo": "Semilla P9SQCX177VESJYMX, mapa 42.41,-8.74, formato v2. Cola sembrada leida con run-as (2 entradas pendientes, 3 rumores, 7 de 7 nucleos con algo que contar). A4P8: capa [0,0][1080,2400] sin cotas degeneradas y 'Marcarlo' pulsando en su centro (540, 2261). A2P0: abierta en Madrid a ~500 km, sitio MADRID por la ruta ciega, dos acciones, tres puertas, sin 'salir a andar'.",
       "no_desbloqueado": "El micro-encuentro visto en pantalla: con la cola sembrada la puerta esta abierta, pero que sitio tiene beat sigue sin ser reproducible (las tres medidas de escena.yaml que la fila no toco). La columna de limite declarado sigue en 8. Y el visor usa el mismo spread que en el descarte no posicionaba: fichado sin medir, sin dueno hasta que una fila toque el visor.",
       "merge": "7d3c5ac"
+    },
+    {
+      "spec": "SPEC-046",
+      "slug": "fuente-de-salud-y-zurron",
+      "resultado": "verde con los rojos leidos: 1 de nucleo fichado y 3 de @app ajenos",
+      "iteraciones": 1,
+      "report": "SUITE-run-20260813T050409Z (tanda de cierre de la fila) y SUITE-run-20260813T055007Z (cotejo independiente, no versionados)",
+      "casos": "2865 casos: 2861 pasan, 1 falla, 3 saltados. Unico rojo BOOT_COMPLETED (SPEC-023). manifiesto-generado.estado.json con mirado:true en ambas y completo:true.",
+      "app": "20 flujos: 8 pasan, 3 fallan, 9 solo comprueban su limite. Los tres rojos son ajenos y leidos: empezar-de-nuevo-copia (se creia de iOS y SE REPRODUCE EN ANDROID, dos tandas; sospecha etiquetada de que sea el mismo pendiente que el boton atras del 10-ago), en-marcha y telon (proveedor frio, 13b). zurron.yaml entra a limite declarado con la forma nueva 'depende del mundo' (decision del dueno contra un criterio de su propia spec, dicha en voz alta) y ese es el 8->9.",
+      "nota": "Cierra B7 entero. Health Connect ratificado en el prompt (unica dependencia nueva); minSdk 24->26 con plugin propio (primer cambio de suelo de aparatos); primera inyeccion de codigo nativo propio (app/plugins/lo-que-exige-health-connect.js: traduce las dos acciones de la razon de permisos a walkingadventure://razon-de-permisos, no decide); NSHealthShareUsageDescription retirada (vuelve con HealthKit, docs/iphone.md); pantallas huerfanas 1->0 (primera vez); contratos-sin-llamador 4->2; defecto real cazado: la fila del interruptor de A6P6 era inerte fuera del Switch (044af9b). Dos premisas de spec falsas documentadas (las tres piezas eran dos; flujo.md nunca perdio las aristas del zurron). La fila corrigio su propio motivo de zurron.yaml antes del merge (4a7df7a, delta inerte verificado).",
+      "verificado_en_dispositivo": "zurron.yaml recorre 168 comandos (A2P1->A2P2->A2P3) y corrio la rama con zurron; la razon de permisos verificada disparando el intent en los dos estados (con partida -> A6P6, recien instalada -> arranque); la puerta del activity-alias no se pudo disparar (START_VIEW_PERMISSION_USAGE es permiso de sistema) y queda afirmada sobre el manifiesto.",
+      "incidencia_de_cotejo": "La primera tanda de cotejo se aborto: la sesion edito el fichero del motivo y un subagente suyo (PID con salida en su scratchpad) condujo el emulador (pm clear + geo fix a -8.80 + arranque.yaml) durante la tanda declarada. Atribucion cerrada con evidencia, sin terceros. El cotejo bueno corrio despues en exclusiva. Ver decisiones 14b: el arbol tambien es un recurso.",
+      "merge": "b212f5d"
     }
   ],
   "bloqueos": [],
@@ -521,9 +534,9 @@
     }
   ],
   "suite_final": {
-    "casos": "2825: 2821 pasan, 1 falla, 3 saltados",
-    "app": "20 flujos: 8 pasan, 4 fallan (2 fichados de otras filas + 2 esperados desde aparato limpio, ver decisiones 13b), 8 solo comprueban su limite",
-    "precondicion": "aparato limpio: pm clear + reinstalar + posicion alimentada cada 2 s (CLAUDE.md)"
+    "casos": "2865: 2861 pasan, 1 falla, 3 saltados",
+    "app": "20 flujos: 8 pasan, 3 fallan (todos ajenos y leidos: empezar-de-nuevo-copia, en-marcha y telon), 9 solo comprueban su limite (zurron.yaml con la forma 'depende del mundo')",
+    "precondicion": "aparato limpio: pm clear + reinstalar + force-stop + segundo pm clear + posicion alimentada cada 2 s, emulador en exclusiva (CLAUDE.md)"
   },
   "bloque": "B7",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",

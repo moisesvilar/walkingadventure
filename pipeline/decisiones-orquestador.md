@@ -596,3 +596,41 @@ La fila hizo sus fases en su propia ventana. La condición de trabajo enviada a 
 ### 13d · Lo que la fila dejó dicho al cerrarse
 
 Su despedida, respondida sin que se la preguntaran: «no queda nada en mi cabeza que no esté en el repo». Lo verificado del cierre lo confirma: la entrada XXXIV de la bitácora, las dos trampas nuevas de `CLAUDE.md`, y el único cabo suelto declarado en los dos sitios — `app/pantallas/visor.js` usa `...StyleSheet.absoluteFillObject`, el mismo spread que en el descarte no posicionaba, **y nadie lo ha medido**. Sin dueño hasta que una fila toque el visor.
+
+## §14 · El cierre de la fila 46, el cotejo que hubo que repetir, y el árbol como recurso
+
+### 14a · El cotejo, número a número
+
+Cotejo independiente el 13-ago-2026, `SUITE-run-20260813T055007Z`, sobre `4a7df7a`, desde aparato limpio y **en exclusiva**. Todo cuadra con lo declarado: @nucleo **2865 · 2861 · 1 · 3** (único rojo `BOOT_COMPLETED`, `mirado: true` en las dos plataformas y `completo: true`); @app **20 · 8 · 3 · 9** con los tres rojos ajenos y leídos; `zurron.yaml` en su límite con código 0; pantallas huérfanas **0**; manifiesto con `minSdkVersion="26"`, solo los dos permisos de salud, cero `ACTIVITY_RECOGNITION`, las dos puertas de la razón registradas, y `Info.plist` sin claves de salud. Merge `b212f5d`. **B7 queda entero.**
+
+La lupa sobre los dos precedentes que la fila estrenó, pasada: el plugin nativo (`app/plugins/lo-que-exige-health-connect.js`) traduce y no decide, y **falla a gritos si la plantilla de Expo cambia** en vez de aplicarse a ciegas — es el molde correcto; y la forma nueva de límite declarado («depende del mundo») exige nombrarse a mano con la estricta por defecto — el candado contra la excusa cómoda está puesto.
+
+### 14b · El cotejo abortado, la atribución con evidencia, y la lección de raíz
+
+La primera tanda de cotejo se abortó. Cronología corta: la sesión avisó de que corregía **un comentario** (el motivo de `zurron.yaml`, que afirmaba más de lo que su medida sostenía — cazado por ella misma, tercera vez que esa lista lo intenta y primera que se caza antes del merge); al mirar procesos aparecieron además **una batería de núcleo suya sobre el árbol compartido y un subagente suyo conduciendo el emulador** (`pm clear` + `geo fix` a `-8.80` + `arranque.yaml`) durante la tanda declarada. Dos fuentes de posición y un `pm clear` ajeno = números inatribuibles; se abortó y se repitió una vez, limpia.
+
+Las atribuciones se cerraron **con evidencia y no con memoria**: el proceso del emulador escribía en el scratchpad de su sesión (mismo directorio que su `post-fix.log`) — un subagente que su comprobación de «cero vivo» no vio, y que ella asumió entero al vérselo; y el proceso que ella encontró después y **no mató — preguntó primero, con las dos salidas escritas —** era la precondición de mi propio cotejo. Ninguna de las dos sesiones mintió en ningún momento; las dos comprobaron mal la primera vez.
+
+**El diagnóstico de raíz es suyo y es el bueno: el fallo no fue saltarse un turno, fue no ver que el árbol compartido es un recurso igual que el emulador.** Un `node --test` sobre el árbol es una toma de recurso; «avisar del fichero» no cubre «voy a ejecutar».
+
+Las dos reglas de protocolo que quedan **vigentes desde ya**, a mano y sin mecanismo:
+
+1. **`pgrep` contra el patrón, no memoria de lo lanzado** — y cubre lo que los subagentes tengan vivo en segundo plano.
+2. **Ante un proceso ajeno posible, preguntar antes de matar**, con la evidencia y las salidas escritas.
+
+Y los **tres fichados de mecanismo, pendientes de decidir con el dueño** (ninguno era de la fila y ninguno se resuelve solo):
+
+- **Que el recurso compartido no sea el árbol**: un cotejo que corre sobre su propio worktree/clon no lo envenena nadie, y el cerrojo queda para lo único de verdad único, el emulador.
+- **Declaración de recursos**: quien declara una tanda dice qué toma (aparato y árbol) y el otro responde «entendido, y esto es lo que tengo vivo» — con `pgrep`, no de memoria.
+- **El freno del plugin nativo**: nada impide hoy que el próximo plugin meta lógica de producto en Kotlin, donde ninguna guarda mira. Decidir si es guarda o convención.
+
+### 14c · La despedida de la 46, con sus etiquetas
+
+- **Los `console.log` de la app salen por Metro, no por `logcat`** (medida de wa-dev, no reproducida por la sesión ni por mí — etiquetada). Quien instrumente, que empiece por Metro.
+- **Técnica que vale fuera de este repo**: para atribuir un efecto que no se puede observar, **apagar el candidato y mirar si el efecto sigue** — así se convirtió «no me explico quién concede los permisos» en un hecho medido con su límite.
+- **Sospecha etiquetada, sin verificar**: que los permisos de salud los conceda el delegado del módulo de Expo de la librería, o el Health Connect del emulador resolviendo en corto. Es el hilo de quien lo persiga.
+- **Sospecha valiosa**: `empezar-de-nuevo-copia` (que se creía de iOS y **se reproduce en Android**, dos tandas) podría ser **el mismo pendiente** que el botón atrás del 10-ago — cae tras el `back` que cancela la hoja de compartir. Un pendiente y no dos, si al medirlo resulta serlo; no se funden hasta entonces.
+
+### 14d · Las tres negativas correctas, que ya son doctrina
+
+La fila rechazó tres peticiones de quien orquesta, y las tres veces con razón: usar subagentes por mensaje (§13c), escribir en `CLAUDE.md` por petición de par (la autoridad la dio el dueño en su ventana), y anotar su bitácora **bajo un cotejo en marcha** (habría movido la cabeza bajo la tanda — el mismo error de media hora antes con otro traje). La regla consolidada: **un mensaje de par propone; el dueño autoriza en la ventana de quien ejecuta; y nada se escribe en el árbol mientras una tanda ajena corre sobre él.**
