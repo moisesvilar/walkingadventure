@@ -156,18 +156,39 @@ import { fuente } from './mundo-de-prueba.mjs';
  *   rumores, los tres con `frentes: []` y `agotado: true`**; sesenta pasos del motor dan
  *   **0 pasos con efecto y 0 efectos**, y las 2 entradas de la cola **siguen pendientes**.
  *
- *   Y la causa es estructural, no un accidente de ese mundo. Son dos, y las dos están escritas
- *   en la fuente: `creaColaDeEntregas` declara que **sin `producciones` inyectadas su productor
- *   no produce nada y no falla** —«sin producción del mundo no hay encuentro, nunca relleno
- *   aleatorio», `quests.md` decisión 3—, y `app/salida/motor.js` le pasa `producciones: null`
- *   **declarado**; lo sembrado por el prólogo se entrega por otra vía, el micro-encuentro al
- *   atravesar sitios durante una salida (`microencuentros.js`, «como mucho uno por paso del
- *   mundo»). Y los rumores del prólogo **nacen sedimentados**, que es lo que su cabecera dice
- *   que hace, así que la propagación no tiene frentes por los que avanzar.
+ *   Son **dos vías** y no se comportan igual, que es justo lo que hace que esto sea un límite
+ *   y no una avería:
  *
- *   O sea: **lo sembrado entrega por llegadas y no por pasos de fondo, y los rumores del
- *   prólogo nacen sedimentados, así que una partida recién arrancada puede no tener nada en
- *   vuelo.** No es que no pueda haberlo nunca —un rumor nacido de un desenlace de quien juega
+ *   - **La cola no produce nunca por pasos, y eso sí es estructural y siempre cierto.**
+ *     `creaColaDeEntregas` declara que **sin `producciones` inyectadas su productor no produce
+ *     nada y no falla** —«sin producción del mundo no hay encuentro, nunca relleno aleatorio»,
+ *     `quests.md` decisión 3—, y `app/salida/motor.js` le pasa `producciones: null`
+ *     **declarado**. Lo que el prólogo siembra se entrega por otra vía: el micro-encuentro al
+ *     atravesar sitios durante una salida (`microencuentros.js`, «como mucho uno por paso del
+ *     mundo»). Por aquí no llega nada al zurrón, ni en este mundo ni en ninguno.
+ *   - **La propagación produce o no, y depende del grafo del mundo.** Un rumor nace con **un
+ *     frente por vecino del núcleo donde ocurrió** —`rumores.js:332`,
+ *     `frentes: arbol.vecinos(origen).map(...)`— y queda agotado en cuanto se queda sin
+ *     ninguno —`rumores.js:338`, `rumor.agotado = rumor.frentes.length === 0`, con su propio
+ *     comentario diciendo que «un mundo de un solo núcleo sedimenta ahí y ya está agotado»—.
+ *     Cuántos frentes nacen y cuánto tardan en consumirse lo decide el árbol de calzadas: en
+ *     un mundo pequeño el prólogo los gasta enteros y la partida arranca sin nada en vuelo; en
+ *     uno con más vecinos quedan frentes vivos y los pasos de fondo **sí** producen.
+ *
+ *   Así que **los tres `frentes: []` de arriba son ciertos de aquel mundo, no del prólogo**:
+ *   decir que los rumores «nacen sedimentados» afirmaría más de lo que la medida sostiene.
+ *   **Y hay la medida contraria, que es la que cierra el argumento**: la tanda de cierre de la
+ *   fila (`SUITE-run-20260813T050409Z`) corrió **la rama con zurrón** —`zurron-envoltorio` y
+ *   `zurron-entrada` a la vista, la rama sin zurrón `SKIPPED`—, y el zurrón solo compone
+ *   entradas a partir de efectos narrables (`esNarrable`, `packages/nucleo/partida/zurron.js`).
+ *   Ese mundo sí produjo. Con las dos direcciones observadas, «depende del mundo» deja de ser
+ *   una inferencia y pasa a ser un hecho medido — que es lo que **refuerza** este límite en
+ *   lugar de debilitarlo: no es que nunca haya zurrón, es que no se puede pedir la tanda en la
+ *   que lo haya.
+ *
+ *   O sea: **lo sembrado entrega por llegadas y no por pasos de fondo, y de los rumores del
+ *   prólogo depende del grafo cuántos frentes queden vivos, así que una partida recién
+ *   arrancada puede no tener nada en vuelo.** No es que no pueda haberlo nunca —un rumor nacido de un desenlace de quien juega
  *   sí tiene frentes—: es que **no se puede pedir un mundo que lo tenga**, y ahí este flujo
  *   comparte la deuda de fondo de `escena.yaml`, la segunda de las tres suyas: «la semilla nace
  *   de entropía real y el arranque no ofrece dónde escribirla». **No se abre entrada nueva**:
