@@ -43,6 +43,17 @@ function loQueSeLleva(seLleva) {
 }
 
 /**
+ * Un texto dicho en su forma: **las comillas las pone quien pinta y nunca el catálogo**,
+ * así el mismo texto se lee en voz alta sin que nadie diga «comillas».
+ *
+ * Se escribe una vez y lo usan las dos mitades del paso: la forma la decide el paquete, y
+ * dos entrecomillados escritos por separado acabarían siendo distintos.
+ */
+function enSuForma(forma, texto) {
+  return forma === 'parlamento' ? `«${texto}»` : texto;
+}
+
+/**
  * @param {object} props
  *   `escena` lo que devuelve `componeEscena`, o `null`; `loQueTeLlevas` lo que devuelve
  *   `componeLoQueTeLlevas`, o `null`; `motivo` el motivo literal cuando la escena no se pudo
@@ -95,8 +106,12 @@ export function PantallaEscena({
         <ScrollView contentContainerStyle={estilos.contenido}>
           <Text style={estilos.rotulo}>{loQueTeLlevas.rotulo}</Text>
           <Text style={[estilos.titular, { fontSize: escala(26), lineHeight: escala(34) }]}>{loQueSeLleva(loQueTeLlevas.seLleva)}</Text>
+          {/* El párrafo que empuja, **con la forma que decidió la escena**: si allí fue
+              parlamento, aquí también, porque es el mismo momento y el mismo texto. */}
           {loQueTeLlevas.empuje ? (
-            <Text style={[estilos.mundo, { fontSize: escala(20), lineHeight: escala(30) }]}>{loQueTeLlevas.empuje}</Text>
+            <Text style={[estilos.mundo, { fontSize: escala(20), lineHeight: escala(30) }]}>
+              {enSuForma(loQueTeLlevas.forma, loQueTeLlevas.empuje)}
+            </Text>
           ) : null}
           {/* El sitio siguiente, con su línea de calzadas y su marca. En el último beat de la
               cadena no existe, y la acción es la misma. Un tramo sin nombre propio simplemente
@@ -131,7 +146,13 @@ export function PantallaEscena({
         ) : null}
 
         {/* Quien habla: una línea, en versalitas y **sin retrato**. Sin cara este bloque no
-            existe y el cuerpo baja a ocupar su sitio, sin mover nada más. */}
+            existe y el cuerpo baja a ocupar su sitio, sin mover nada más.
+
+            El puesto llega ya dicho **con palabras del mundo** —«al frente», «del
+            vecindario»— porque lo compone el paquete desde la declaración que vive junto a
+            la plantilla de puestos: aquí no se traduce nada, y la clave interna no llega a
+            esta línea ni por descuido. Y esta línea **no escala** con el tamaño de letra:
+            es un rótulo, no prosa. */}
         {escena.cara ? (
           <Text testID={TESTIDS.cara} style={estilos.cara}>{`${escena.cara.nombre} · ${escena.cara.puesto}`}</Text>
         ) : null}
@@ -141,7 +162,7 @@ export function PantallaEscena({
           accessibilityLabel={escena.tamanoDeTexto}
           style={[estilos.mundo, { fontSize: escala(20), lineHeight: escala(30) }]}
         >
-          {escena.cuerpo.forma === 'parlamento' ? `«${escena.cuerpo.texto}»` : escena.cuerpo.texto}
+          {enSuForma(escena.cuerpo.forma, escena.cuerpo.texto)}
         </Text>
 
         <Text style={[estilos.cierre, { fontSize: escala(17), lineHeight: escala(26) }]}>{escena.cierre}</Text>

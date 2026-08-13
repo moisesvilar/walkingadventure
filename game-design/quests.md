@@ -57,6 +57,8 @@ Cadena (o grafo pequeño) de beats. Cada beat define:
 
 Lineal de inicio; ramificación (elegir entre dos pistas) en iteraciones futuras.
 
+**La forma del parlamento la decide la escena, y las dos mitades del paso la heredan** (13-ago-2026). Un beat que cae sobre una persona se dice en su voz y se pinta entrecomillado; uno que cae sobre un sitio se pinta como párrafo. La forma se decide una vez, al componer la escena, y la pantalla de lo que te llevas la hereda: el mismo texto no puede leerse entrecomillado en una pantalla y como narración un toque después. Las comillas las pone quien pinta y nunca el catálogo, para que el texto se lea en voz alta sin que nadie diga «comillas».
+
 **Beats de lugar diferido.** Los beats de una quest tienen su lugar resuelto en el casteo. Los de un micro-encuentro no pueden: su lugar se resuelve en marcha, contra el primer sitio apto por el que pase el jugador. El contenido sigue siendo determinista —sale del paso del mundo que lo generó—; lo que depende del jugador es dónde se entrega. Los tests afirman lo primero, no lo segundo.
 
 ### 3. Logística física (el corazón del juego)

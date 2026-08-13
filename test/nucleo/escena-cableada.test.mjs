@@ -42,6 +42,7 @@ import {
   levantaAventuras,
 } from '../../packages/nucleo/partida/aventura-en-curso.js';
 import { IDS_DE_MOTIVO, anclajesDe, anotaDescarte, vistaDeDescartes } from '../../packages/nucleo/partida/descartes.js';
+import { PUESTOS, ROTULOS_DE_PUESTO, rotuloDePuesto } from '../../packages/nucleo/partida/puestos.js';
 import { componeLoQueHayHoy } from '../../packages/nucleo/partida/lo-que-hay-hoy.js';
 import { TIPOS_DE_PASO } from '../../packages/nucleo/partida/secuencia.js';
 import { CATALOGO } from '../../packages/nucleo/quests/catalogo.js';
@@ -212,6 +213,32 @@ describe('La escena de un beat en pantalla', () => {
     assert.ok(!/useState/.test(codigoDe(ESCENA)), 'la pantalla de la escena guarda estado propio, y entonces el escalón se reiniciaría en cada escena');
   });
 
+  test('El bloque de quien habla se pinta con el rótulo del puesto y nunca con la clave', () => {
+    // SPEC-051. Es la mitad que la guarda de recuento dejaba pendiente —«alguien mire si la
+    // cara llega a pantalla»— por el lado de la pantalla: la composición se afirma con beats
+    // casteados de verdad, y aquí se afirma que A4P3 **monta** ese bloque y **cómo**.
+    const pantalla = sinComentarios(ESCENA);
+
+    // El bloque existe, es condicional y no se atenúa: sin cara no se pinta nada. Un
+    // marcador de posición o un «anónimo» harían que las escenas sin cara dejaran de verse
+    // como hasta hoy, que es justo lo que el patrón de interacción prohíbe.
+    assert.match(pantalla, /escena\.cara \?[\s\S]{0,200}testID=\{TESTIDS\.cara\}/, 'el bloque de quien habla no es condicional, y sin cara pintaría un hueco');
+    assert.match(pantalla, /escena\.cara\.nombre/, 'la línea de quien habla no pinta el nombre');
+    assert.match(pantalla, /escena\.cara\.puesto/, 'la línea de quien habla no pinta el puesto');
+
+    // **La clave del catálogo no aparece en ninguna parte del árbol.** Ni traducida aquí ni
+    // escrita a mano: la pantalla pinta lo que el paquete compuso, que ya es el rótulo.
+    for (const clave of PUESTOS) {
+      assert.ok(!new RegExp(`['"\`]${clave}['"\`]`).test(pantalla), `la escena escribe la clave de puesto "${clave}", que es una etiqueta de catálogo y no una presentación`);
+    }
+    assert.ok(!/rotuloDePuesto|ROTULOS_DE_PUESTO/.test(pantalla), 'la pantalla traduce el puesto por su cuenta, y entonces hay dos traducciones del mismo dato');
+
+    // Y **no escala con el tamaño de letra**: es un rótulo, no prosa. El escalón se aplica al
+    // titular, a la línea que sitúa, al cuerpo y al cierre, y a esta línea no.
+    const linea = pantalla.slice(pantalla.indexOf('TESTIDS.cara'));
+    assert.ok(!/^[^\n]*escala\(/.test(linea), 'la línea de quien habla escala con el tamaño de letra, y es un rótulo');
+  });
+
   test('En qué mitad del paso de beat se va es del paso y no de la escena', () => {
     // El defecto que la propia fila midió y arregló: la escena se inyecta por tipo de paso, así
     // que React la remonta en cada repintado del montaje —y tocar el ajuste de tamaño de letra
@@ -340,60 +367,83 @@ describe('La aventura en curso, cableada en la app', () => {
     // humano —`identidadDeCara`, sobre la misma semilla y el mismo mundo—, así que es **la
     // misma cara** y no una parecida.
     //
-    // **El beat de este caso se fabrica, y hay que decir por qué**: ninguna de las 30
-    // plantillas pone un beat sobre su rol humano, así que en los cuatro mundos de referencia
-    // no hay ni un `lugar.tipo === 'humano'`. La cifra exacta y su consecuencia están en el
-    // caso de abajo; aquí lo que se afirma es que **el cableado responde cuando lo hay**, que
-    // es lo que la app tiene que garantizar el día que una plantilla lo produzca.
-    const p = await partidaAbierta({ cumple: LA_PRIMERA });
+    // **El beat de este caso ya no se fabrica** (SPEC-051). Hasta la fila 51 había que
+    // inventarlo, porque ninguna de las 30 plantillas ponía un beat sobre su rol humano y en
+    // los cuatro mundos de referencia no había ni un `lugar.tipo === 'humano'`; desde que las
+    // dos cláusulas del catálogo los ponen, el cableado se afirma sobre uno **casteado de
+    // verdad**, que es lo que convierte «respondería si lo hubiera» en «responde».
+    const p = await partidaAbierta({ cumple: (c) => c.aventura.beats.some((b) => b.lugar?.tipo === 'humano') });
+    assert.ok(p.casteada, 'ninguna aventura de costero trae un beat con cara y el caso no mediría nada');
     const { aventura } = capaDeLaApp(p);
-    const suyo = p.casteada.aventura.beats[0];
-    const beat = { ...suyo, lugar: { ...suyo.lugar, tipo: 'humano', cara: { sitio: suyo.lugar.nombre, puesto: 'regencia' } } };
+    const beat = p.casteada.aventura.beats.find((b) => b.lugar?.tipo === 'humano');
+    const deSitio = p.casteada.aventura.beats.find((b) => b.lugar?.tipo !== 'humano');
+    assert.ok(deSitio, 'la aventura del caso es toda de caras y no hay contraste que medir');
 
     const { escena } = aventura.escenaDe(beat, { tamanoDeTexto: TAMANO_DE_TEXTO_DE_ORIGEN });
     assert.ok(escena.cara, 'el beat tiene una cara del reparto y la escena la ha compuesto sin nadie');
     assert.equal(typeof escena.cara.nombre, 'string');
     assert.ok(escena.cara.nombre.length > 0, 'la cara de la escena llega sin nombre');
-    assert.equal(escena.cara.puesto, 'regencia', 'el puesto de quien habla no es el que el casting asignó');
+    // **El rótulo de mundo y nunca la clave**: lo que llega a esta línea es «al frente», no
+    // `regencia`. La traducción vive en la declaración de puestos y la pantalla no traduce.
+    assert.equal(escena.cara.puesto, rotuloDePuesto(beat.lugar.cara.puesto), 'el puesto de quien habla no es el rótulo del que el casting asignó');
+    assert.ok(Object.values(ROTULOS_DE_PUESTO).includes(escena.cara.puesto));
+    assert.ok(!PUESTOS.includes(escena.cara.puesto), `la clave interna "${escena.cara.puesto}" ha salido a la escena`);
     // Con cara el cuerpo es parlamento; sin ella, párrafo. Es el único elemento que cambia de
     // forma, y ninguno de los demás cambia de sitio.
     assert.equal(escena.cuerpo.forma, 'parlamento');
-    assert.equal(aventura.escenaDe(suyo, {}).escena.cuerpo.forma, 'parrafo');
-    assert.equal(aventura.escenaDe(suyo, {}).escena.cara, null);
+    assert.equal(aventura.escenaDe(deSitio, {}).escena.cuerpo.forma, 'parrafo');
+    assert.equal(aventura.escenaDe(deSitio, {}).escena.cara, null);
   });
 
-  test('Ningún beat del catálogo cae hoy sobre un rol humano, y por eso ninguna escena tiene cara', async () => {
-    // **La medida, con su número delante.** Veinte de las treinta plantillas declaran un rol
-    // humano, y ninguna pone un beat encima: el rol se resuelve, se le da nombre y puesto, y
-    // el beat sigue cayendo sobre el sitio donde trabaja. Consecuencia: `escena.cara` es
-    // **siempre** nula en los cuatro mundos de referencia, el bloque de quien habla no se
-    // pinta nunca y el cuerpo siempre es párrafo.
+  test('Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara', async () => {
+    // **La medida, con su número delante, y con el número viejo al lado para que se vea qué
+    // se movió y qué no.** Hasta SPEC-051: veinte de las treinta plantillas declaraban un rol
+    // humano y **ninguna** ponía un beat encima, así que `escena.cara` era siempre nula en
+    // los cuatro mundos de referencia, el bloque de quien habla no se pintaba nunca y el
+    // cuerpo era siempre párrafo. La cifra era 0 de 506.
     //
-    // No es un defecto de esta fila —`quests/desenlace.js` mira `lugar.tipo === 'humano'`
-    // exactamente igual desde SPEC-017— y no se arregla aquí: se fija el número para que el
-    // día en que una plantilla ponga un beat sobre su rol humano esto se ponga rojo y alguien
-    // mire si la cara llega a pantalla.
+    // **Lo que la fila 51 cambió, y solo eso**: las dos cláusulas de `quests/caras.js`
+    // escriben **21 beats con cara en 19 plantillas** del catálogo, y sobre los cuatro mundos
+    // de referencia eso da **69 instancias casteadas**. Las plantillas con rol humano siguen
+    // siendo 20 —la fila no añade ni retira ningún rol— y los beats casteados siguen siendo
+    // 506 —la fila no cambia el veredicto de ninguna plantilla—, así que las dos mitades que
+    // esta guarda vigilaba siguen puestas y solo se ha movido la que tenía que moverse.
+    //
+    // Y la exigencia que el comentario viejo dejaba pendiente —«alguien mire si la cara llega
+    // a pantalla»— **no se retira, se cumple**: la composición se afirma en el caso de
+    // arriba y en `test/nucleo/caras.test.mjs`, y que A4P3 monte el bloque de quien habla con
+    // el rótulo y sin la clave se afirma en «El bloque de quien habla se pinta con el rótulo
+    // del puesto y nunca con la clave», más abajo en este mismo fichero.
     const conRolHumano = CATALOGO.filter((p) => Object.values(p.roles ?? {}).some((r) => r.tipo === 'humano'));
     assert.equal(conRolHumano.length, 20, `${conRolHumano.length} de ${CATALOGO.length} plantillas declaran un rol humano y se midieron 20`);
 
+    const escritos = CATALOGO.flatMap((p) => p.beats.filter((b) => p.roles[b.rol]?.tipo === 'humano').map(() => p.id));
+    assert.equal(escritos.length, 21, `el catálogo escribe ${escritos.length} beats sobre un rol humano y las dos cláusulas dan 21`);
+    assert.equal(new Set(escritos).size, 19, `esos beats se reparten en ${new Set(escritos).size} plantillas y se midieron 19`);
+
     let beats = 0;
     let humanos = 0;
+    let conCara = 0;
+    let aventuras = 0;
     for (const nombre of LOS_CUATRO) {
       const { mundo } = await partidaAbierta({ nombre });
       for (const casteada of (mundo.casting ?? []).filter((c) => c.ok)) {
-        for (const beat of casteada.aventura.beats) {
-          beats += 1;
-          if (beat.lugar?.tipo === 'humano') humanos += 1;
-        }
+        aventuras += 1;
+        const suyos = casteada.aventura.beats.filter((b) => b.lugar?.tipo === 'humano');
+        beats += casteada.aventura.beats.length;
+        humanos += suyos.length;
+        if (suyos.length) conCara += 1;
       }
     }
+    assert.equal(aventuras, 103, `los cuatro mundos de referencia castean ${aventuras} aventuras y se midieron 103 de 120`);
     assert.equal(beats, 506, `los cuatro mundos de referencia castean ${beats} beats y se midieron 506`);
     assert.equal(
       humanos,
-      0,
-      `${humanos} de ${beats} beats caen sobre un rol humano: la cara ya llega a la escena y hay que comprobar que se pinta, ` +
-      'porque hasta hoy el bloque de quien habla no se ha visto nunca en ningún mundo de referencia',
+      69,
+      `${humanos} de ${beats} beats caen sobre un rol humano y SPEC-051 midió 69 (antes 0): si el número baja, alguna plantilla ha dejado de ` +
+      'poner su cara delante; si sube, alguien ha escrito un beat humano fuera de las dos cláusulas',
     );
+    assert.equal(conCara, 63, `${conCara} de ${aventuras} aventuras casteadas tienen al menos una cara y se midieron 63`);
   });
 });
 

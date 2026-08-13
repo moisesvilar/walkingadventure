@@ -633,6 +633,101 @@ Característica: El árbitro es el código y el narrador es el LLM
     Y la aventura se puede completar de principio a fin
 ```
 
+```gherkin
+# language: es
+
+@nucleo @casting
+Característica: Un beat sobre un rol humano ocurre donde esa persona trabaja
+  La cara añade quién habla, no dónde. Es el pendiente 1 de npcs.md, ratificado el 13-ago-2026.
+  Fuente: npcs.md pendiente 1 · quests.md §2 §5
+
+  Escenario: Ninguna comprobación del casting se salta un beat humano por no encontrar su lugar
+    Dado una plantilla con un beat sobre un rol humano
+    Cuando el casting comprueba el lazo, los trechos y el recorrido
+    Entonces ese beat tiene lugar resuelto en las tres
+    Y ninguna se lo salta por no encontrarlo
+
+  Escenario: Un beat pegado al beat de su propio sitio no cae en trecho-por-debajo-del-minimo
+    Dado un beat sobre un rol humano contiguo al beat del sitio donde esa persona trabaja
+    Cuando se comprueba el trecho que los separa
+    Entonces el par queda exento igual que dos beats sobre el mismo rol
+    Y el motivo "trecho-por-debajo-del-minimo" no aparece
+
+  Escenario: Dos roles humanos del mismo sitio caen en el mismo lugar y eso no impide castear
+    Dado una plantilla con dos roles humanos que trabajan en el mismo sitio
+    Cuando se castea
+    Entonces las dos caras caen en el mismo lugar
+    Y eso no cuenta como dos roles distintos compartiendo sitio
+
+  Escenario: El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas
+    Dado los cuatro mundos de referencia
+    Cuando se castea el catálogo y el mismo catálogo con cada beat humano devuelto a su sitio
+    Entonces las dos versiones dan el mismo veredicto en las ciento veinte
+    Y la misma cadena de sitios beat a beat
+
+  Escenario: La marca del mapa, la ilustración y el núcleo por el que pasa una aventura son los del sitio
+    Dado un beat sobre un rol humano que trabaja en un servicio
+    Cuando se compone su guiado, se piden sus recursos y se pregunta por qué núcleo pasa la aventura
+    Entonces la marca cae en las coordenadas del sitio
+    Y la ilustración que se pide es la del sitio
+    Y la aventura pasa por el núcleo al que pertenece ese servicio
+
+  Escenario: Una aventura que termina sobre una cara pone el desenlace en el portal y recuerda a quien estaba
+    Dado una aventura terminada cuyo último beat cae sobre un rol humano
+    Cuando se compone su desenlace
+    Entonces el desenlace ocurre en el sitio donde esa persona trabaja
+    Y esa cara está entre las que recuerdan lo que pasó
+```
+
+```gherkin
+# language: es
+
+@nucleo @casting @determinismo
+Característica: Los beats con cara salen de dos reglas del catálogo, no de una lista
+  Una plantilla que declare un acto sobre una cara entra sola en el alcance: una lista sin regla es la pieza que al no estar no protesta.
+  Fuente: npcs.md §1 · quests.md §5
+
+  Escenario: Las dos cláusulas eligen los veintiún beats medidos, en diecinueve plantillas
+    Dado el catálogo de plantillas actual
+    Cuando se aplican las dos cláusulas
+    Entonces caen sobre un rol humano veintiún beats repartidos en diecinueve plantillas
+    Y las veinte plantillas que declaran un rol humano siguen siendo veinte
+
+  Escenario: Las dos cláusulas eligen los mismos beats en dos pasadas, y son idempotentes
+    Dado el catálogo de plantillas actual
+    Cuando se aplican las dos cláusulas dos veces seguidas
+    Entonces eligen exactamente los mismos beats
+    Y el orden con el que eligen sale del orden declarado de la plantilla y nunca de recorrer sus roles
+
+  Escenario: Poner las caras no toca ni la escena, ni el disparador, ni el resultado, ni el orden
+    Dado cualquier beat que pase a caer sobre un rol humano
+    Cuando se compara con el mismo beat antes de moverlo
+    Entonces su escena, su disparador y su resultado son los mismos
+    Y lo único que cambia es sobre qué rol cae
+
+  Escenario: Toda cara con acto de relación declarado pone al menos una cara en la cadena
+    Dado una plantilla que declara un acto de relación sobre un rol humano
+    Cuando se castea
+    Entonces ese rol pone al menos una cara en la cadena de beats
+
+  Escenario: Una decisión con acto de relación sobre una cara compone el desenlace entero
+    Dado una aventura terminada en la que se tomó una decisión con acto de relación sobre una cara
+    Cuando se compone su desenlace
+    Entonces el acto se aplica a esa cara
+    Y el desenlace se compone entero en lugar de fallar por no encontrarla
+
+  Escenario: Una plantilla que abre y cierra en sitios de tipo distinto no carga, y lo dice nombrando los dos roles
+    Dado una plantilla cuyo primer y último beat caen en sitios de tipo distinto
+    Cuando se comprueba el catálogo al cargarse
+    Entonces falla nombrando la plantilla y los dos roles
+
+  Escenario: Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara
+    Dado los cuatro mundos de referencia
+    Cuando se castea el catálogo entero y se recorren los beats
+    Entonces sesenta y nueve de los quinientos seis caen sobre un rol humano
+    Y la escena de cada uno de ellos trae quien habla
+```
+
 ---
 
 ## 7 · El bucle: los cuatro momentos
@@ -1071,6 +1166,45 @@ Característica: El telón se echa solo al cerrarse la salida
     Pero avanzar de pantalla no lo había marcado
 ```
 
+```gherkin
+# language: es
+
+@nucleo @bucle
+Característica: La forma del cuerpo la decide la escena y las dos mitades del paso la heredan
+  Un texto, un criterio: si hay cara el cuerpo es parlamento, y la segunda mitad del paso no lo vuelve a decidir.
+  Fuente: npcs.md §3 · personaje.md §4 · bucle-jugable.md §2 · artefacto 4
+
+  Escenario: Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto
+    Dado un beat sobre un rol humano ya casteado
+    Cuando se compone su escena
+    Entonces quien habla llega con su nombre y el rótulo de su puesto
+    Y el cuerpo se declara parlamento
+
+  Escenario: Con cara las dos mitades dicen parlamento, y sin ella las dos dicen párrafo
+    Dado un beat con cara y otro sin ella
+    Cuando se componen las dos mitades del paso de cada uno
+    Entonces las del beat con cara declaran parlamento y las del otro declaran párrafo
+
+  Escenario: La regla de la forma se declara una vez y ninguna de las dos composiciones la reescribe
+    Dado la regla que decide la forma del cuerpo
+    Cuando se busca dónde se declara
+    Entonces está escrita en un solo sitio
+    Y ninguna de las dos mitades del paso la vuelve a escribir
+
+  Escenario: A4P4 pinta el empuje a través de la misma forma que A4P3, y la cara se resuelve una vez
+    Dado un beat con cara
+    Cuando se componen la escena y lo que te llevas
+    Entonces las dos usan la misma forma
+    Y la cara se resuelve una sola vez para las dos
+
+  Escenario: Una cara sobre un beat de franja o de objeto no se come la variante ni la vía alternativa
+    Dado un beat con cara cuyo disparador es de franja o de objeto
+    Cuando se compone su escena
+    Entonces la línea que sitúa sigue siendo la prosa de la plantilla
+    Y el parlamento es la variante de franja o el texto de la vía alternativa
+    Pero ningún texto anuncia que falte nada
+```
+
 ---
 
 ## 8 · Progresión, economía y personaje
@@ -1434,6 +1568,38 @@ Característica: La razón de los permisos aterriza donde ya está escrita
     Y aparece la línea que dice que sin acceso no se pueden contar
 ```
 
+```gherkin
+# language: es
+
+@nucleo @privacidad
+Característica: Los plugins que reescriben el proyecto nativo están nombrados uno a uno
+  Un plugin traduce y no decide, y eso lo revisa una persona; lo que esta lista garantiza es que ninguno entre sin conversación.
+  Fuente: seguridad-privacidad.md §1 · decisiones-orquestador.md §14e
+
+  Escenario: La lista de plugins es exactamente la que hay, con su cometido declarado
+    Dado los plugins que reescriben el proyecto nativo
+    Cuando se comparan con la lista nombrada a mano
+    Entonces están los dos que hay y ninguno más
+    Y cada uno trae su cometido declarado en una frase
+
+  Escenario: Ningún plugin ha cambiado de forma sin que alguien lo vuelva a nombrar
+    Dado un plugin de la lista que ha cambiado de forma
+    Cuando se comprueba la lista
+    Entonces se pone roja nombrando el fichero y el cambio
+    Y no pasa hasta que alguien lo vuelva a nombrar
+
+  Escenario: Los plugins nombrados son los que la app carga, y los carga por su ruta
+    Dado la lista de plugins nombrados
+    Cuando se mira lo que la app declara cargar
+    Entonces son los mismos
+    Y cada uno se carga por su ruta dentro del proyecto
+
+  Escenario: La guarda no importa nada de Expo, de React Native ni de la app
+    Dado un clon limpio del repositorio
+    Cuando se ejecuta la comprobación de la lista
+    Entonces arranca sin instalar ninguna dependencia
+```
+
 ---
 
 ## 10 · La partida guardada
@@ -1686,6 +1852,33 @@ Característica: Dos registros con una sola frontera
     Cuando el jugador abre los ajustes
     Entonces se habla como aplicación
     Y ese registro no aparece en ninguna otra pantalla del juego
+```
+
+```gherkin
+# language: es
+
+@nucleo @lenguaje
+Característica: El puesto se dice con palabras del mundo
+  Los nueve rótulos son sintagmas de tarea y no nombres de persona, así que no hay género que elegir ni oficio que arrastre estereotipo.
+  Fuente: lenguaje.md · npcs.md §1
+
+  Escenario: Cada puesto se dice en pantalla con un rótulo de mundo, y un puesto sin él revienta
+    Dado los puestos declarados de la plantilla de puestos
+    Cuando se pide el rótulo de cada uno
+    Entonces todos tienen el suyo, en palabras del mundo
+    Pero un puesto sin rótulo falla nombrándolo en lugar de caer a la clave
+
+  Escenario: El bloque de quien habla se pinta con el rótulo del puesto y nunca con la clave
+    Dado la escena de un beat con cara montada
+    Cuando se recorre lo que pinta el bloque de quien habla
+    Entonces se ve el nombre y el rótulo del puesto
+    Pero la clave interna del puesto no aparece por ninguna parte
+
+  Escenario: La declaración de rótulos es la fuente única, y A4P3 es hoy el único sitio que enseña un puesto
+    Dado todos los sitios del juego que manejan el puesto de una cara
+    Cuando se mira cuáles lo enseñan
+    Entonces solo lo enseña la escena de un beat
+    Y el texto que enseña sale de la declaración de rótulos y no de una segunda traducción
 ```
 
 ---

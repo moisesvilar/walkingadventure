@@ -13,6 +13,7 @@ import { escenasQueCubre, sueloDeVocabulario } from '../packages/nucleo/world/es
 import { localeFor, namesFor } from '../packages/nucleo/names/index.js';
 import { makeRng } from '../packages/nucleo/core/rng.js';
 import { CERCA_DE_LA_PARTIDA_EN_TRAMOS, TOPE_DE_TRECHO_EN_TRAMOS, castAll, castTemplate } from '../packages/nucleo/quests/casting.js';
+import { sitioDelLugar } from '../packages/nucleo/quests/caras.js';
 import { CLAVES_DE_MOTIVO, MOTIVOS_DE_CASTING } from '../packages/nucleo/quests/motivos.js';
 import { DISPARADORES, RESULTADOS } from '../packages/nucleo/quests/aventura.js';
 import { TRAMO_DE_REFERENCIA_M } from '../packages/nucleo/world/cupos.js';
@@ -163,8 +164,12 @@ console.log('— casting de quests —');
     const lugaresDeRol = Object.entries(c.asignacion).filter(([rid]) => c.tpl.roles[rid].tipo !== 'humano');
     check(`${c.tpl.id}: beats completos y lugares distintos por rol`, c.beats.every((b) => b.lugar)
       && new Set(lugaresDeRol.map(([, l]) => `${l.x},${l.y}`)).size === lugaresDeRol.length);
+    // El lazo se cierra **donde ocurre** cada beat, no sobre la identidad del lugar que lo
+    // firma: desde SPEC-051 doce plantillas terminan sobre la cara del sitio donde
+    // empezaron, y una cara y su sitio son el mismo portal. Comparar el objeto `lugar`
+    // habría llamado lazo abierto a un lazo que cierra en la misma puerta.
     check(`${c.tpl.id}: lazo cerrado (${p.enTramos.recorrido.toFixed(2)} tramos, ${p.tamano})`,
-      c.beats[0].lugar === c.beats[c.beats.length - 1].lugar
+      sitioDelLugar(c.beats[0].lugar) === sitioDelLugar(c.beats[c.beats.length - 1].lugar)
       && p.enTramos.ida <= CERCA_DE_LA_PARTIDA_EN_TRAMOS && p.enTramos.vuelta <= CERCA_DE_LA_PARTIDA_EN_TRAMOS
       && p.enTramos.trechoMasLargo <= TOPE_DE_TRECHO_EN_TRAMOS && p.enTramos.recorrido <= p.enTramos.alcance);
     check(`${c.tpl.id}: cada beat trae lugar, disparador, escena y resultado`,

@@ -103,6 +103,7 @@ import {
 import { CAMPOS_DE_RAMIFICACION, FRANJAS, validaPlantilla } from '../../packages/nucleo/quests/aventura.js';
 import { CATALOGO } from '../../packages/nucleo/quests/catalogo.js';
 import { castTemplate } from '../../packages/nucleo/quests/casting.js';
+import { rotuloDePuesto } from '../../packages/nucleo/partida/puestos.js';
 import { AREAS_QUE_NO_REPRODUCEN } from '../../packages/nucleo/partida/estado.js';
 import { reconstruye } from '../../packages/nucleo/partida/reconstruccion.js';
 import { anexa, hecho, hechosDe, registroInicial } from '../../packages/nucleo/partida/hechos.js';
@@ -601,13 +602,18 @@ describe('La escena de un beat', () => {
   test('La escena lleva sitio, titular, situación, quien habla, su parlamento y el cierre', async () => {
     const c = await unaAventura();
     const beat = c.beats[0];
-    const cara = { nombre: 'Sabela', puesto: 'la que reparte el correo' };
+    // La cara llega con su **clave** de puesto —la de la partida y la de la memoria— y lo
+    // que sale compuesto es el **rótulo de mundo** (SPEC-051): `ANXO O DO NORTE · REGENCIA`
+    // sería una etiqueta de catálogo y no una presentación. Un puesto inventado ya no vale
+    // como decorado, y es a propósito: sin rótulo declarado, componer revienta.
+    const cara = { nombre: 'Sabela', puesto: 'regencia' };
     const escena = componeEscena({ beat, cara });
 
     assert.equal(escena.estado, ESTADOS_DE_ESCENA[0]);
     assert.equal(escena.sitio, beat.lugar.nombre, 'la escena no sitúa con el nombre de fantasía del sitio');
     assert.equal(escena.titular, marcoDeEscena(beat.escena.tipo).titular);
-    assert.deepEqual(escena.cara, cara);
+    assert.deepEqual(escena.cara, { nombre: 'Sabela', puesto: rotuloDePuesto('regencia') });
+    assert.notEqual(escena.cara.puesto, cara.puesto, 'la clave interna del puesto ha salido compuesta tal cual');
     assert.equal(escena.cuerpo.forma, 'parlamento', 'con cara, el cuerpo no es parlamento');
     assert.ok(escena.cuerpo.texto, 'la escena no lleva texto');
     assert.equal(escena.cierre, cierreDeResultado(beat.resultado.tipo));
@@ -632,7 +638,7 @@ describe('La escena de un beat', () => {
   test('La escena sin cara pierde el bloque de la cara y no mueve nada más', async () => {
     const c = await unaAventura();
     const beat = c.beats[0];
-    const conCara = componeEscena({ beat, cara: { nombre: 'Sabela', puesto: 'la que reparte el correo' } });
+    const conCara = componeEscena({ beat, cara: { nombre: 'Sabela', puesto: 'regencia' } });
     const sinCara = componeEscena({ beat });
 
     assert.equal(sinCara.cara, null);
@@ -749,6 +755,10 @@ describe('Lo que te llevas', () => {
     assert.equal(pantalla.seLleva.tipo, c.beats[0].resultado.tipo);
     assert.equal(pantalla.seLleva.objeto, c.beats[0].resultado.objeto ?? null);
     assert.ok(pantalla.empuje, 'no hay párrafo que empuje al siguiente sitio');
+    // Sin cara, el empuje se dice como párrafo — y la forma la decide la escena, no esta
+    // pantalla (SPEC-051): las dos mitades de un paso son el mismo momento, así que el
+    // mismo texto no puede leerse entrecomillado arriba y como narración un toque después.
+    assert.equal(pantalla.forma, 'parrafo', 'sin cara, lo que te llevas no dice el empuje como párrafo');
     assert.equal(pantalla.siguienteSitio.nombre, c.beats[1].guiado.destino, 'el sitio siguiente no se nombra');
     assert.deepEqual(pantalla.siguienteSitio.marca, { ...c.beats[1].guiado.marca }, 'el sitio siguiente no lleva su marca en el mapa');
     assert.equal(pantalla.accion.verbo, 'Seguir andando');
@@ -877,7 +887,7 @@ describe('Modo compañía', () => {
 
   test('El único registro de aplicación de la escena es el tamaño de letra', async () => {
     const c = await unaAventura();
-    const escena = componeEscena({ beat: c.beats[0], cara: { nombre: 'Sabela', puesto: 'la que reparte el correo' } });
+    const escena = componeEscena({ beat: c.beats[0], cara: { nombre: 'Sabela', puesto: 'regencia' } });
     // La escala tiene tres escalones, con nombre y sin cifras, y empieza por el primero.
     assert.equal(ESCALA_DE_TEXTO.length, 3);
     assert.deepEqual([...IDS_DE_TAMANO_DE_TEXTO], ['normal', 'grande', 'muy-grande']);
