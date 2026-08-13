@@ -452,7 +452,14 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
     // estar los que **no** llevan marcador. No es un aflojamiento: entra por haberse
     // recorrido y haberse medido que su último tramo depende del mundo, igual que
     // `llegada.yaml`. El motivo entero está arriba, con la medida.
-    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'en-marcha.yaml', 'telon.yaml']) {
+    // Y `apertura-de-salida.yaml` entra con la fila 53, que es cuando pasa a recorrer de
+    // verdad: hasta entonces esperaba por una marca que la portada pinta siempre, así que sus
+    // dos bloques se saltaban en silencio y el flujo salía verde sin tocar nada. Arreglada la
+    // espera, toca «Salir a andar sin más», llega al momento en marcha y vuelve a la portada
+    // por la reapertura. Está aquí porque el atajo cómodo el día que dé guerra sería marcarlo
+    // como límite —y eso subiría la columna por un flujo que sí recorre, que es exactamente
+    // lo que esta lista existe para impedir.
+    for (const fichero of ['apertura-de-salida.yaml', 'arranque.yaml', 'antes-de-salir.yaml', 'en-marcha.yaml', 'telon.yaml']) {
       const texto = fuente(`test/app/${fichero}`);
       assert.ok(
         !texto.split('\n').some((l) => l.trim() === MARCADOR),

@@ -32114,7 +32114,7 @@
       "fichero": "test/app/apertura-de-salida.yaml",
       "caso": "La espera de la posición se dice y desaparece siempre",
       "hueco_de_bateria": true,
-      "nota": "Lo que un flujo puede ver sin cronómetro es la ausencia después, que es estable; la presencia durante es una carrera contra el proveedor. Que la apertura no tarde más que el tope se mide a mano y se escribe con el número: la spec lo deja pendiente."
+      "nota": "Lo que un flujo puede ver sin cronómetro es la ausencia después, que es estable; la presencia durante es una carrera contra el proveedor. Que la apertura no tarde más que el tope se mide a mano y se escribe con el número: la spec lo deja pendiente. CORREGIDO EN LA FILA 53: el bloque se ejecutaba antes de que la apertura terminara —la espera era extendedWaitUntil visible: salida-situacion, y la portada pinta esa marca siempre— y salía verde sin medir nada. Ahora se espera por en-marcha, que no existe hasta que la apertura terminó bien, y la ausencia de la línea se vuelve a afirmar sobre la portada reabierta, que es la pantalla que sí tiene dónde pintarla. La rama del motivo cuando la salida no se abre no la puede provocar un flujo y se afirma en test/nucleo/marcha.test.mjs."
     },
     {
       "spec": "SPEC-048-iter-1",
@@ -32123,7 +32123,7 @@
       "fichero": "test/app/apertura-de-salida.yaml",
       "caso": "El punto de partida declara de qué puerta salió",
       "hueco_de_bateria": true,
-      "nota": "RIESGO SIN MEDIR: las tres marcas nuevas se pintan con marcaSuperpuesta a uno y dos puntos de la esquina, y marca.js tiene medido que en una pantalla a sangre eso cae bajo la ventana de la barra de estado y el árbol lo descarta. Sus hermanas salida-situacion y rotulo-estado llevan ahí desde SPEC-048 sin medirse."
+      "nota": "CORREGIDO EN LA FILA 53: colgaba de un runFlow when visible: salida-punto-origen que se saltó en silencio tres tandas seguidas, y no podía cumplirse nunca donde estaba: cuando la salida se abre la portada se desmonta y esas marcas se van con ella. Ahora se afirman sin ningún when sobre la portada reabierta, donde la salida en curso vuelve del disco y el estado de React nace nulo. RIESGO QUE QUEDA: son marcaSuperpuesta de la fila 2 y esa fila no se ha medido; la fila 1 —salida-situacion y rotulo-estado— sí, en en-marcha.yaml y telon.yaml, y la portada no va a sangre, así que el riesgo de la esquina está descontado para esta pantalla."
     },
     {
       "spec": "SPEC-048-iter-1",

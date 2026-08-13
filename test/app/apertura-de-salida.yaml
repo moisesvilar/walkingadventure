@@ -15,10 +15,51 @@
 #    precisión alta enciende el GPS y eso cuesta segundos; la elección real no es entre rápido
 #    y lento sino entre espera muda y espera dicha, y una espera muda se lee como una app
 #    colgada. Lo que se afirma abajo es la mitad que un flujo puede ver sin cronómetro: que
-#    **no se queda puesta**, ni cuando la salida se abre ni cuando no.
+#    **no se queda puesta** una vez la apertura ha terminado.
 # 2. **De qué puerta salió el punto de partida y si se re-ancló**, que sobre la función pura
 #    se afirma y sobre el aparato no se podía: hasta esta fila, que la apertura cayera al
 #    respaldo solo se deducía de que la salida se había abierto.
+#
+# ## El defecto que este flujo tuvo, escrito para que no vuelva
+#
+# Tres tandas seguidas en verde con **sus dos bloques sustantivos `SKIPPED`**: los dos casos
+# que declara cubrir no se ejercitaron ninguna de las tres veces. La causa medida es la
+# espera: era `extendedWaitUntil visible: salida-situacion`, y `salida-situacion` **la pinta
+# la portada siempre** (`antes-de-salir-montado.jsx`, con `sin-salida` mientras no hay
+# ninguna). O sea, la espera se satisfacía en el mismo instante del toque y el flujo miraba el
+# desenlace **antes de que el desenlace existiera**, con lo que las dos condiciones daban
+# falso y los dos `runFlow` se saltaban en silencio.
+#
+# Es la familia de la tubería que se traga el código de salida: el número sale limpio y lo que
+# ha desaparecido es la medición. Un flujo que se salta sus dos bloques y sale verde es peor
+# que un flujo rojo, porque nadie lo mira.
+#
+# **La marca que sí distingue «la portada está pintada» de «la apertura ha terminado»**, y es
+# distinta en cada desenlace, porque no hay ninguna que valga para los dos:
+#
+# - Si la salida **se abre**, la portada entera se va: `App.js` pasa a `EnMarchaMontado`, así
+#   que la marca es `en-marcha`, que no existe hasta que la apertura terminó bien. Es la misma
+#   por la que esperan `en-marcha.yaml` y `telon.yaml` después del mismo toque.
+# - Si **no se abre**, la portada se queda y aparece `salida-no-se-abre` con el motivo literal.
+#
+# **Hueco de instrumentación, dicho y no inventado**: no hay ninguna marca que signifique «la
+# apertura ha terminado» a secas. `salida-buscando` se acerca, pero su ausencia no distingue
+# «ya acabó» de «todavía no ha empezado», y en el desenlace bueno desaparece por desmontaje de
+# la pantalla entera. La instrumentación que lo cerraría es una marca permanente en la portada
+# con vocabulario cerrado —`sin-intentar` → `buscando` → `abierta` / `no-se-abre`—, y es
+# cambio de código: no se hace desde aquí. Mientras no exista, este flujo **conduce el
+# desenlace bueno y se pone rojo si no ocurre**, que es lo honesto: en un aparato con el
+# permiso concedido y el bucle de posición corriendo, que la salida no abra es la noticia, y
+# es lo que ya afirman sin condición los otros dos flujos que tocan «Salir a andar sin más».
+#
+# ## Dónde se leen las marcas del anclaje, que no es donde se abrió la salida
+#
+# `salida-punto-origen` y `salida-reanclaje` las pinta la portada, y **cuando la salida se
+# abre la portada ya no está**: por eso afirmarlas justo después del toque no podía funcionar
+# ni con la espera arreglada. Sí están al **volver a la app** con la salida abierta —`salida`
+# es estado de React y nace nulo, la salida en curso viene del disco—, que es exactamente la
+# reapertura que `en-marcha.yaml` recorre desde la fila 48 y donde ya se afirman sus hermanas
+# `salida-situacion` y `rotulo-estado`. Así que las dos se afirman ahí, **sin condición**.
 #
 # ## Lo que este flujo NO puede comprobar, dicho antes de que se lea como un descuido
 #
@@ -28,6 +69,13 @@
 # - **Que la línea de espera se lea durante la búsqueda.** Es una carrera: si el proveedor
 #   responde en dos segundos, el selector puede no llegar a verla. Por eso lo que se afirma es
 #   la ausencia después, que sí es estable, y no la presencia durante.
+# - **La rama del motivo cuando la salida no se abre.** No se puede provocar desde un flujo
+#   —depende de lo que el proveedor entregue— y el bloque que la miraba es justo el que se
+#   saltó tres tandas seguidas. El mecanismo entero está afirmado en `@nucleo`, donde el rojo
+#   sí es posible: `test/nucleo/marcha.test.mjs`, «Los motivos por los que una salida no se
+#   abre son un vocabulario cerrado» y «El motivo se decide consultando el permiso y no el
+#   texto de la excepción». Lo que queda aquí es la mitad que sí se ejecuta siempre: que en el
+#   desenlace bueno **no hay ningún motivo puesto**, y en particular ninguno del permiso.
 # - **Que el GPS se encienda de verdad.** Eso se mide con `dumpsys location` y su Event Log, a
 #   mano, y con la precondición del bucle de posición declarada: `adb emu geo fix` **no
 #   inyecta nada si nadie pide posición**, así que un `dumpsys` con fijo viejo no prueba que el
@@ -39,17 +87,30 @@
 #   recorre el arranque entero y necesita el permiso de ubicación en su estado de origen.
 # - El bucle de posición corriendo **y comprobado pidiendo posición**, no mirando `dumpsys`.
 #
-# ## Riesgo conocido de este flujo, sin medir
+# Y lo que deja detrás, que se declara igual: **una salida abierta**. Es lo que ya dejaba antes
+# —el toque es el mismo— pero ahora es seguro y no dependiente del proveedor.
 #
-# Las tres marcas que afirma —`salida-buscando`, `salida-punto-origen` y `salida-reanclaje`—
-# las pinta `app/pantallas/antes-de-salir-montado.jsx` con `marcaSuperpuesta(n, { fila })`, o
-# sea a uno y dos puntos de la esquina del contenedor. `app/pantallas/marca.js` tiene medido
-# que en una pantalla a sangre eso cae debajo de la ventana de la barra de estado y quien lee
-# el árbol lo descarta, y por eso existe `LEJOS_DE_LA_BARRA_DE_ESTADO`. Sus hermanas
-# `salida-situacion` y `rotulo-estado` llevan ahí desde SPEC-048 y **no se ha medido si se
-# alcanzan**. Si este flujo cae en una de esas tres líneas, lo primero que hay que comprobar es
-# eso —volcando la jerarquía con `maestro hierarchy`, que es el instrumento que decide— y no
-# la lógica de la apertura: sería un defecto de dónde está la marca y no de qué dice.
+# ## Riesgo conocido de este flujo, con lo que ya está medido descontado
+#
+# Las marcas que afirma las pinta `app/pantallas/antes-de-salir-montado.jsx` con
+# `marcaSuperpuesta(n, { fila })`, o sea a uno y dos puntos de la esquina del contenedor.
+# `app/pantallas/marca.js` tiene medido que en una pantalla **a sangre** eso cae debajo de la
+# ventana de la barra de estado y quien lee el árbol lo descarta. La portada **no va a
+# sangre** —`App.js` la envuelve en el área segura—, y sus hermanas de la fila 1,
+# `salida-situacion` y `rotulo-estado`, se afirman desde el aparato en `en-marcha.yaml` y
+# `telon.yaml` sin dar guerra: el riesgo de la esquina, para esta pantalla, está descontado.
+# Lo que sigue sin medirse es la **fila 2**, que es donde viven `salida-punto-origen` y
+# `salida-reanclaje`. Si el flujo cae en una de esas dos líneas, lo primero que hay que
+# comprobar es eso —volcando la jerarquía con `maestro hierarchy`, que es el instrumento que
+# decide— y no la lógica de la apertura: sería un defecto de dónde está la marca y no de qué
+# dice.
+#
+# Y un segundo riesgo de la reapertura, que se nombra para que un rojo ahí no se lea como un
+# defecto de la apertura: **una llegada validada manda sobre la portada** (`App.js`, la escena
+# que espera). Entre abrir la salida y volver a entrar pasan segundos, así que es improbable,
+# pero si ocurriera lo que se vería es `llegada` y no `portada`. `telon.yaml` lleva por eso un
+# `runFlow` que la despacha antes de seguir; aquí no se pone porque la ventana es mucho más
+# corta y porque una condición de más es lo que trajo este flujo al taller.
 #
 # Los elementos se localizan por los identificadores que declara la spec.
 
@@ -75,64 +136,80 @@ appId: com.walkingadventure.app
 - assertNotVisible:
     id: 'salida-reanclaje'
 - assertVisible:
+    id: 'salida-situacion'
+- assertVisible: 'sin-salida'
+- assertVisible:
     id: 'salir-sin-mas'
 
 # ── La espera de la posición se dice y desaparece siempre ─────────────────────
-# Se toca «Salir a andar sin más» y se espera al desenlace, que es de las dos maneras: hacia
-# el momento en marcha si la salida se abre, o de vuelta a la portada con el motivo debajo.
-# La espera está acotada por un tope de diez segundos, así que treinta de margen sobran.
+# Se toca «Salir a andar sin más» y se espera **al desenlace**, no a que la portada siga
+# pintada. La espera está acotada por un tope de diez segundos, así que treinta de margen
+# sobran.
 
 - tapOn:
     id: 'salir-sin-mas'
 
+# `en-marcha` es la marca que no existe hasta que la apertura terminó bien: la portada se
+# desmonta y en su sitio se monta el momento en marcha. Esperar por `salida-situacion` era el
+# defecto —la portada la pinta siempre— y por eso todo lo de abajo se ejecutaba antes de que
+# hubiera nada que mirar. Sin condición y a propósito: si la salida no abre, esto es rojo, que
+# es lo mismo que ya declaran `en-marcha.yaml` y `telon.yaml` tras este mismo toque.
 - extendedWaitUntil:
     visible:
-      id: 'salida-situacion'
+      id: 'en-marcha'
     timeout: 30000
 
-# **La línea de espera no se queda colgada**, termine como termine la apertura. Una espera que
-# no desaparece es peor que no tenerla: se lee como una app que se quedó pensando.
+# **La línea de espera no se queda colgada**: terminada la apertura no queda ni rastro de
+# ella. Una espera que no desaparece es peor que no tenerla, porque se lee como una app que se
+# quedó pensando.
 - assertNotVisible:
     id: 'salida-buscando'
 - assertNotVisible: 'Buscando dónde estás…'
-# Y mientras dura no lleva ninguna cifra, que es la disciplina de `lenguaje.md`: una cuenta
-# atrás convierte el tope en una promesa que el sistema no garantiza.
-- assertNotVisible: '%'
-- assertNotVisible: 'por ciento'
+# Y ningún motivo puesto: el desenlace fue el bueno, y en particular no es el del permiso —esa
+# era la marca que mentía antes de esta fila, y es justo lo que se arregló.
+- assertNotVisible:
+    id: 'salida-no-se-abre'
+- assertNotVisible: 'permiso-denegado'
 
 # ── El punto de partida declara de qué puerta salió ───────────────────────────
-# Las dos marcas del anclaje solo existen con una salida abierta, y su vocabulario es cerrado:
-# `puntual` o `ultima-conocida` para el origen, `sin-reanclar` o `reanclada` para el otro.
-# Sin ellas, que la apertura cayera al respaldo solo se podía deducir de que la salida se
-# abrió, y el re-anclaje no se podía afirmar sobre el aparato de ninguna manera.
+# Las dos marcas del anclaje solo existen con una salida abierta **y con la portada montada**,
+# y las dos cosas a la vez solo pasan al volver a la app: la salida en curso vuelve del disco y
+# `salida` nace nula, así que se ve la portada y no el momento en marcha. Es la misma
+# reapertura que recorre `en-marcha.yaml`.
 
-- runFlow:
-    when:
-      visible:
-        id: 'salida-punto-origen'
-    commands:
-      - assertVisible:
-          id: 'salida-punto-origen'
-      # Una de las dos puertas, y ninguna palabra nueva: `sin-declarar` querría decir que la
-      # apertura no anotó de dónde salió su punto, que es lo que esta fila viene a arreglar.
-      - assertNotVisible: 'sin-declarar'
-      - assertVisible:
-          id: 'salida-reanclaje'
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 30000
 
-# ── Y si la salida no se abrió, se dice con su motivo y sin espera colgada ─────
-# El otro desenlace, que es igual de válido: el motivo literal debajo de la acción, la acción
-# de vuelta y **ninguna línea de espera puesta**. No se fuerza ninguno de los dos caminos:
-# cuál ocurre depende de lo que el proveedor entregue, y eso no lo gobierna este flujo.
+# La salida sobrevivió al cierre, que es lo que hace que las dos marcas de abajo tengan algo
+# que declarar.
+- assertVisible:
+    id: 'salida-situacion'
+- assertVisible: 'abierta-con-rotulo'
 
-- runFlow:
-    when:
-      visible:
-        id: 'salida-no-se-abre'
-    commands:
-      - assertNotVisible:
-          id: 'salida-buscando'
-      - assertVisible:
-          id: 'salir-sin-mas'
-      # El permiso está concedido, así que el motivo no puede ser el del permiso: eso era la
-      # marca que mentía antes de esta fila, y es justo lo que se arregló.
-      - assertNotVisible: 'permiso-denegado'
+# Y aquí **sin ningún `when`**: la condición de la que colgaban ya está afirmada arriba, así
+# que saltárselas es imposible sin ponerse rojo. Su vocabulario es cerrado: `puntual` o
+# `ultima-conocida` para el origen, `sin-reanclar` o `reanclada` para el otro. **No se fija
+# cuál de los dos**: cuál sale depende de lo que el proveedor entregue, y atar el flujo a uno
+# es lo que hacía que `llegada.yaml` pasara o fallara según dónde quedara el aparato.
+- assertVisible:
+    id: 'salida-punto-origen'
+# Ninguna palabra nueva: `sin-declarar` querría decir que la apertura no anotó de dónde salió
+# su punto, que es lo que esta fila viene a arreglar.
+- assertNotVisible: 'sin-declarar'
+- assertVisible:
+    id: 'salida-reanclaje'
+
+# Y la portada vuelve sin espera puesta: la que hubo terminó al otro lado del cierre. Aquí es
+# donde la afirmación pesa, porque es la pantalla que **sí tiene** dónde pintar la línea de
+# espera —A2P1 y A2P5— y la apertura ya terminó.
+- assertNotVisible:
+    id: 'salida-buscando'
+- assertNotVisible: 'Buscando dónde estás…'
+# Y ninguna cifra, que es la disciplina de `lenguaje.md`: una cuenta atrás convertiría el tope
+# en una promesa que el sistema no garantiza.
+- assertNotVisible: '%'
+- assertNotVisible: 'por ciento'
