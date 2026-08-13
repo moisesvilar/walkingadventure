@@ -31077,7 +31077,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Ninguna comprobación del casting se salta un beat humano por no encontrar su lugar",
-      "hueco_de_bateria": true,
+      "escenario": "Ninguna comprobación del casting se salta un beat humano por no encontrar su lugar",
       "nota": "Es §6h en versión validación: antes de esta fila el lugar de un rol humano no existía durante el backtracking, el chequeo de trecho y el del lazo se lo saltaban en silencio y la avería salía como TypeError desde recorridoDe. Medido: 70 excepciones sobre 20 plantillas × 4 mundos. El caso las cuenta a cero y exige motivo estructurado en cada fallo."
     },
     {
@@ -31086,7 +31086,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Un beat pegado al beat de su propio sitio no cae en trecho-por-debajo-del-minimo",
-      "hueco_de_bateria": true
+      "escenario": "Un beat pegado al beat de su propio sitio no cae en trecho-por-debajo-del-minimo"
     },
     {
       "spec": "SPEC-051",
@@ -31094,7 +31094,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Un beat pegado al beat de su propio sitio no cae en trecho-por-debajo-del-minimo",
-      "hueco_de_bateria": true
+      "escenario": "Un beat pegado al beat de su propio sitio no cae en trecho-por-debajo-del-minimo"
     },
     {
       "spec": "SPEC-051",
@@ -31137,7 +31137,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Una plantilla que abre y cierra en sitios de tipo distinto no carga, y lo dice nombrando los dos roles",
-      "hueco_de_bateria": true
+      "escenario": "Una plantilla que abre y cierra en sitios de tipo distinto no carga, y lo dice nombrando los dos roles"
     },
     {
       "spec": "SPEC-051",
@@ -31154,7 +31154,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Dos roles humanos del mismo sitio caen en el mismo lugar y eso no impide castear",
-      "hueco_de_bateria": true
+      "escenario": "Dos roles humanos del mismo sitio caen en el mismo lugar y eso no impide castear"
     },
     {
       "spec": "SPEC-051",
@@ -31162,7 +31162,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas",
-      "hueco_de_bateria": true
+      "escenario": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas"
     },
     {
       "spec": "SPEC-051",
@@ -31170,7 +31170,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "La marca del mapa, la ilustración y el núcleo por el que pasa una aventura son los del sitio",
-      "hueco_de_bateria": true
+      "escenario": "La marca del mapa, la ilustración y el núcleo por el que pasa una aventura son los del sitio"
     },
     {
       "spec": "SPEC-051",
@@ -31227,7 +31227,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
-      "hueco_de_bateria": true
+      "escenario": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara"
     },
     {
       "spec": "SPEC-051",
@@ -31235,7 +31235,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Las dos cláusulas eligen los veintiún beats medidos, en diecinueve plantillas",
-      "hueco_de_bateria": true
+      "escenario": "Las dos cláusulas eligen los veintiún beats medidos, en diecinueve plantillas"
     },
     {
       "spec": "SPEC-051",
@@ -31243,7 +31243,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Las dos cláusulas eligen los mismos beats en dos pasadas, y son idempotentes",
-      "hueco_de_bateria": true,
+      "escenario": "Las dos cláusulas eligen los mismos beats en dos pasadas, y son idempotentes",
       "nota": "@determinismo, bloqueante. Incluye que los 22 roles humanos del catálogo están en plantilla.orden, que es lo que hace que «el último beat de su sitio» sea determinista por construcción y no por una iteración de orden libre."
     },
     {
@@ -31252,7 +31252,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Poner las caras no toca ni la escena, ni el disparador, ni el resultado, ni el orden",
-      "hueco_de_bateria": true
+      "escenario": "Poner las caras no toca ni la escena, ni el disparador, ni el resultado, ni el orden"
     },
     {
       "spec": "SPEC-051",
@@ -31260,7 +31260,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Toda cara con acto de relación declarado pone al menos una cara en la cadena",
-      "hueco_de_bateria": true
+      "escenario": "Toda cara con acto de relación declarado pone al menos una cara en la cadena"
     },
     {
       "spec": "SPEC-051",
@@ -31268,7 +31268,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Una decisión con acto de relación sobre una cara compone el desenlace entero",
-      "hueco_de_bateria": true,
+      "escenario": "Una decisión con acto de relación sobre una cara compone el desenlace entero",
       "nota": "El caso que hoy revienta, afirmado en verde y con su contraste: con la misma aventura casteada sin caras el mismo acto sigue lanzando, que es lo que separa «la fila lo cerró» de «no se pasaba por ahí»."
     },
     {
@@ -31285,7 +31285,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Toda cara con acto de relación declarado pone al menos una cara en la cadena",
-      "hueco_de_bateria": true
+      "escenario": "Toda cara con acto de relación declarado pone al menos una cara en la cadena"
     },
     {
       "spec": "SPEC-051",
@@ -31301,7 +31301,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto",
-      "hueco_de_bateria": true
+      "escenario": "Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto"
     },
     {
       "spec": "SPEC-051",
@@ -31318,7 +31318,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto",
-      "hueco_de_bateria": true
+      "escenario": "Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto"
     },
     {
       "spec": "SPEC-051",
@@ -31369,8 +31369,8 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Una aventura que termina sobre una cara pone el desenlace en el portal y recuerda a quien estaba",
-      "hueco_de_bateria": true,
-      "nota": "La spec cita el escenario «El testigo directo es fiel y no corrige al pueblo», que en docs/testing.md es de la deformación de rumores y no de dónde ocurre un desenlace: se declara como hueco de batería en vez de colgar el caso de un escenario que dice otra cosa."
+      "escenario": "Una aventura que termina sobre una cara pone el desenlace en el portal y recuerda a quien estaba",
+      "nota": "La spec citaba el escenario «El testigo directo es fiel y no corrige al pueblo», que en docs/testing.md es de la deformación de rumores y no de dónde ocurre un desenlace. SPEC-051 le dio a este criterio su escenario propio en §6, y es el que cita esta entrada."
     },
     {
       "spec": "SPEC-051",
@@ -31378,7 +31378,8 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Una aventura que termina sobre una cara pone el desenlace en el portal y recuerda a quien estaba",
-      "hueco_de_bateria": true
+      "escenario": "Una aventura que termina sobre una cara pone el desenlace en el portal y recuerda a quien estaba",
+      "nota": "La spec citaba el escenario «El testigo directo es fiel y no corrige al pueblo», que en docs/testing.md es de la deformación de rumores y no de dónde ocurre un desenlace. SPEC-051 le dio a este criterio su escenario propio en §6, y es el que cita esta entrada."
     },
     {
       "spec": "SPEC-051",
@@ -31386,7 +31387,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/npcs.test.mjs",
       "caso": "Cada puesto se dice en pantalla con un rótulo de mundo, y un puesto sin él revienta",
-      "hueco_de_bateria": true
+      "escenario": "Cada puesto se dice en pantalla con un rótulo de mundo, y un puesto sin él revienta"
     },
     {
       "spec": "SPEC-051",
@@ -31394,7 +31395,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/npcs.test.mjs",
       "caso": "Cada puesto se dice en pantalla con un rótulo de mundo, y un puesto sin él revienta",
-      "hueco_de_bateria": true
+      "escenario": "Cada puesto se dice en pantalla con un rótulo de mundo, y un puesto sin él revienta"
     },
     {
       "spec": "SPEC-051",
@@ -31402,7 +31403,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto",
-      "hueco_de_bateria": true
+      "escenario": "Un beat con cara compone su escena con quien habla, en parlamento y con el rótulo del puesto"
     },
     {
       "spec": "SPEC-051",
@@ -31410,7 +31411,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "El bloque de quien habla se pinta con el rótulo del puesto y nunca con la clave",
-      "hueco_de_bateria": true,
+      "escenario": "El bloque de quien habla se pinta con el rótulo del puesto y nunca con la clave",
       "nota": "Es donde queda cumplida la exigencia que el comentario de la guarda de recuento dejaba pendiente: «alguien mire si la cara llega a pantalla». Se afirma leyendo la fuente de app/pantallas/escena.js, como ya hace el resto del fichero, porque la pantalla lleva JSX y no se importa desde node --test. Que la línea se vea, quepa y se lea a 1080×2400 es límite declarado: esta fila no toma emulador."
     },
     {
@@ -31436,7 +31437,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "La declaración de rótulos es la fuente única, y A4P3 es hoy el único sitio que enseña un puesto",
-      "hueco_de_bateria": true,
+      "escenario": "La declaración de rótulos es la fuente única, y A4P3 es hoy el único sitio que enseña un puesto",
       "nota": "Medido: hoy A4P3 es el único sitio donde un puesto llega a pantalla. En diario, memoria, relación, capítulos y triangulación el puesto viaja solo como parte de la clave de una cara. El criterio queda escrito para quien venga después."
     },
     {
@@ -31519,7 +31520,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Una cara sobre un beat de franja o de objeto no se come la variante ni la vía alternativa",
-      "hueco_de_bateria": true,
+      "escenario": "Una cara sobre un beat de franja o de objeto no se come la variante ni la vía alternativa",
       "nota": "El beat se fabrica y hay que decir por qué: los 21 beats con cara del catálogo son todos de llegada, así que sobre dato real este criterio no se puede afirmar hoy. Lo que se prueba es que la cara no interfiere con lo que ya decidía el disparador."
     },
     {
@@ -31528,7 +31529,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Una cara sobre un beat de franja o de objeto no se come la variante ni la vía alternativa",
-      "hueco_de_bateria": true
+      "escenario": "Una cara sobre un beat de franja o de objeto no se come la variante ni la vía alternativa"
     },
     {
       "spec": "SPEC-051",
@@ -31536,7 +31537,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "Con cara las dos mitades dicen parlamento, y sin ella las dos dicen párrafo",
-      "hueco_de_bateria": true
+      "escenario": "Con cara las dos mitades dicen parlamento, y sin ella las dos dicen párrafo"
     },
     {
       "spec": "SPEC-051",
@@ -31553,7 +31554,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "La regla de la forma se declara una vez y ninguna de las dos composiciones la reescribe",
-      "hueco_de_bateria": true
+      "escenario": "La regla de la forma se declara una vez y ninguna de las dos composiciones la reescribe"
     },
     {
       "spec": "SPEC-051",
@@ -31561,7 +31562,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "A4P4 pinta el empuje a través de la misma forma que A4P3, y la cara se resuelve una vez",
-      "hueco_de_bateria": true
+      "escenario": "A4P4 pinta el empuje a través de la misma forma que A4P3, y la cara se resuelve una vez"
     },
     {
       "spec": "SPEC-051",
@@ -31578,7 +31579,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas",
-      "hueco_de_bateria": true
+      "escenario": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas"
     },
     {
       "spec": "SPEC-051",
@@ -31586,7 +31587,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas",
-      "hueco_de_bateria": true
+      "escenario": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas"
     },
     {
       "spec": "SPEC-051",
@@ -31594,7 +31595,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
-      "hueco_de_bateria": true
+      "escenario": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara"
     },
     {
       "spec": "SPEC-051",
@@ -31602,7 +31603,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
-      "hueco_de_bateria": true
+      "escenario": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara"
     },
     {
       "spec": "SPEC-051",
@@ -31628,7 +31629,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas",
-      "hueco_de_bateria": true,
+      "escenario": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas",
       "nota": "Ninguna deja de castear: el caso compara veredicto y motivo de las 120 plantillas-mundo con y sin caras, así que un cambio de veredicto o de clave de motivo se pone rojo antes de llegar a esta pregunta."
     },
     {
@@ -31654,7 +31655,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/caras.test.mjs",
       "caso": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas",
-      "hueco_de_bateria": true
+      "escenario": "El catálogo con caras castea exactamente igual que el mismo catálogo sin ellas"
     },
     {
       "spec": "SPEC-051",
@@ -31687,7 +31688,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
-      "hueco_de_bateria": true
+      "escenario": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara"
     },
     {
       "spec": "SPEC-051",
@@ -31695,7 +31696,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
-      "hueco_de_bateria": true
+      "escenario": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara"
     },
     {
       "spec": "SPEC-051",
@@ -31703,7 +31704,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
-      "hueco_de_bateria": true,
+      "escenario": "Veintiún beats del catálogo caen sobre un rol humano, y sus escenas tienen cara",
       "nota": "La medida queda escrita en el comentario: 21 beats con cara en 19 plantillas escritos en el catálogo y 69 instancias casteadas en los cuatro mundos de referencia, con el 0 de antes al lado. El caso afirma además las tres cifras por separado."
     },
     {
@@ -31712,7 +31713,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/escena-cableada.test.mjs",
       "caso": "El bloque de quien habla se pinta con el rótulo del puesto y nunca con la clave",
-      "hueco_de_bateria": true
+      "escenario": "El bloque de quien habla se pinta con el rótulo del puesto y nunca con la clave"
     },
     {
       "spec": "SPEC-051",
@@ -31729,7 +31730,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
-      "hueco_de_bateria": true
+      "escenario": "La lista de plugins es exactamente la que hay, con su cometido declarado"
     },
     {
       "spec": "SPEC-051",
@@ -31737,7 +31738,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
-      "hueco_de_bateria": true,
+      "escenario": "La lista de plugins es exactamente la que hay, con su cometido declarado",
       "nota": "Las tres direcciones de rojo se comprobaron a mano antes de commitear: un fichero de plugin nuevo, una huella cambiada y un plugin retirado ponen roja la guarda con su mensaje."
     },
     {
@@ -31746,7 +31747,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "Ningún plugin ha cambiado de forma sin que alguien lo vuelva a nombrar",
-      "hueco_de_bateria": true,
+      "escenario": "Ningún plugin ha cambiado de forma sin que alguien lo vuelva a nombrar",
       "nota": "La forma son tres cosas: qué función exporta, qué ganchos de expo/config-plugins usa —que es lo que dice qué parte del proyecto nativo toca— y la huella de su código sin comentarios. Los comentarios quedan fuera a propósito: estos ficheros llevan su porqué dentro y una huella que se moviera al aclarar una frase habría convertido la guarda en ruido."
     },
     {
@@ -31755,7 +31756,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
-      "hueco_de_bateria": true
+      "escenario": "La lista de plugins es exactamente la que hay, con su cometido declarado"
     },
     {
       "spec": "SPEC-051",
@@ -31763,7 +31764,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
-      "hueco_de_bateria": true
+      "escenario": "La lista de plugins es exactamente la que hay, con su cometido declarado"
     },
     {
       "spec": "SPEC-051",
@@ -31771,7 +31772,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
-      "hueco_de_bateria": true,
+      "escenario": "La lista de plugins es exactamente la que hay, con su cometido declarado",
       "nota": "Va escrito en la cabecera del fichero, con lo-que-exige-health-connect.js nombrado como el molde de §14a: traduce y se aparta, y falla a gritos si la plantilla de Expo cambia en vez de aplicar su parche a ciegas."
     },
     {
@@ -31780,7 +31781,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "La guarda no importa nada de Expo, de React Native ni de la app",
-      "hueco_de_bateria": true
+      "escenario": "La guarda no importa nada de Expo, de React Native ni de la app"
     },
     {
       "spec": "SPEC-051",
@@ -31788,7 +31789,7 @@
       "nivel": "@nucleo",
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "Los plugins nombrados son los que la app carga, y los carga por su ruta",
-      "hueco_de_bateria": true
+      "escenario": "Los plugins nombrados son los que la app carga, y los carga por su ruta"
     }
   ]
 }
