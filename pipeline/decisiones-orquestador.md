@@ -634,3 +634,9 @@ Y los **tres fichados de mecanismo, pendientes de decidir con el dueño** (ningu
 ### 14d · Las tres negativas correctas, que ya son doctrina
 
 La fila rechazó tres peticiones de quien orquesta, y las tres veces con razón: usar subagentes por mensaje (§13c), escribir en `CLAUDE.md` por petición de par (la autoridad la dio el dueño en su ventana), y anotar su bitácora **bajo un cotejo en marcha** (habría movido la cabeza bajo la tanda — el mismo error de media hora antes con otro traje). La regla consolidada: **un mensaje de par propone; el dueño autoriza en la ventana de quien ejecuta; y nada se escribe en el árbol mientras una tanda ajena corre sobre él.**
+
+### 14e · Los tres mecanismos, decididos por el dueño (13-ago-2026)
+
+1. **El cotejo corre en worktree propio.** `git worktree add` del hash a cotejar, la suite allí, y se borra al terminar — nadie puede mover la cabeza bajo una tanda. El repo ya estaba diseñado para que abrir worktrees fuera gratis (Overpass y caché compartidos), así que el coste es cero. Matiz declarado: cubre la batería de núcleo y los flujos; el binario instalado y Metro siguen atados al emulador, que conserva su turno único.
+2. **La declaración de recursos queda como protocolo escrito, sin herramienta.** Las dos reglas de §14b (pgrep contra el patrón; preguntar antes de matar) van en el método y en los encargos de fila. Ya funcionó a mano en el propio incidente; si vuelve a fallar, se mecaniza.
+3. **El freno del plugin nativo es guarda de lista cerrada.** Un test de núcleo al estilo de `piezas-sin-consumidor`: los plugins de `app/plugins/` nombrados a mano con su cometido declarado, rojo ante uno nuevo o cambiado hasta que alguien lo nombre. «No decide» sigue siendo revisión; la guarda garantiza la conversación. **La escribe `wa-qa-dev` en el próximo encargo** — quien orquesta no toca `test/`.
