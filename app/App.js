@@ -944,7 +944,19 @@ export function App() {
   // Con la salida echada a andar ya no hay portada: se anda. Es el momento en marcha sobre el
   // mapa que la partida levantó, y **no se dibuja envuelto en la raíz**: la lámina va a sangre,
   // de borde a borde, y el área segura le comería el borde superior.
-  if (partida && salida) {
+  //
+  // Las dos condiciones dicen cosas distintas y hacen falta las dos. `salida` es «se echó a
+  // andar **en esta sesión**», que es lo que distingue andar de abrir la app con una salida a
+  // medias de ayer —esa se ofrece desde la tarjeta de la portada y no metiéndote en el mapa—.
+  // Y `enCurso()` es «y sigue andando», que es lo que faltaba: de las tres puertas de cierre,
+  // las dos que se tocan devuelven el flag a nulo ellas mismas, pero **el regreso no lo toca
+  // nadie** porque no lo dispara ningún toque —lo dispara una posición dentro de
+  // `recibeLaPosicion`—. Medido el 13-ago-2026 en el aparato, la primera vez que el telón por
+  // regreso fue alcanzable: la salida se cerraba bien, el flag se quedaba puesto y lo que se
+  // veía era esta rama con el sensor ya parado, o sea el aviso de «no sé por dónde andas». El
+  // telón solo aparecía reabriendo la app. Quien decide qué se ve es el estado, y esta línea
+  // es donde eso se cumple o no.
+  if (partida && salida && laSalida?.enCurso()) {
     return (
       <EnMarchaMontado
         mundo={elMundo.documento}

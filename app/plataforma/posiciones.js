@@ -414,14 +414,40 @@ export function creaSuscripcionDeUbicacion({
     /** La cadencia puesta ahora mismo. Es lo que la marca observable del momento enseña. */
     cadencia: () => cadencia.modo,
 
-    /** Para el servicio. Retirado el rótulo se acabó la suscripción: no queda nadie leyendo. */
+    /**
+     * Para el servicio. Retirado el rótulo se acabó la suscripción: no queda nadie leyendo.
+     *
+     * **Y parar lo que ya está parado no es una avería.** Es la raíz del rojo que la fila 53
+     * midió el 13-ago-2026 en el aparato: cerrar por regreso para el sensor **dos veces** —el
+     * núcleo retira el rótulo dentro de `cierraLaSalida`, que aquí es `void suscripcion.para()`,
+     * y la orquestación llama a `paraElSensor()` con el paso ya devuelto—, las dos preguntan
+     * por `hasStartedLocationUpdatesAsync` antes de que ninguna haya desregistrado nada, las
+     * dos piden la parada y la segunda se lleva un `TaskNotFoundException`. Esa excepción se
+     * archivaba como avería de la salida y lo que veía quien juega al volver a casa era un
+     * aviso de avería en vez de su telón. La comprobación de arriba no basta: no es una
+     * guarda contra dos paradas a la vez, porque entre la pregunta y la parada hay un `await`.
+     *
+     * Lo que decide que no fue una avería es **dato y no el texto de la excepción**: se le
+     * vuelve a preguntar al sistema si la tarea sigue registrada, por la misma razón que
+     * `estadoDelPermiso()` existe —ese texto lo escribe el módulo nativo y cambia con su
+     * versión—. Si sigue registrada, la parada falló de verdad y el fallo sale por donde
+     * salía: una avería que se traga es exactamente lo que la marca `salida-averia` vino a
+     * cerrar.
+     */
     async para() {
       corriendo = false;
       if (typeof Location.hasStartedLocationUpdatesAsync === 'function') {
         const habia = await Location.hasStartedLocationUpdatesAsync(tarea);
         if (!habia) return;
       }
-      await Location.stopLocationUpdatesAsync(tarea);
+      try {
+        await Location.stopLocationUpdatesAsync(tarea);
+      } catch (e) {
+        if (typeof Location.hasStartedLocationUpdatesAsync !== 'function') throw e;
+        if ((await Location.hasStartedLocationUpdatesAsync(tarea)) === true) throw e;
+        // La tarea ya no está registrada: lo que se pedía —que no quede nadie leyendo— es
+        // cierto, y da igual quién de las dos paradas llegó primero.
+      }
     },
 
     /** Lo que se creía del servicio la última vez que se preguntó de verdad. */
