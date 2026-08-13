@@ -46,13 +46,22 @@ import {
   NUCLEO_DE_LA_COPIA,
   NUCLEO_DE_LAS_LLEGADAS,
   NUCLEO_DEL_MAPA_NUEVO,
+  NUCLEO_DEL_MOTOR_DE_LA_PARTIDA,
+  NUCLEO_DE_LOS_PASOS_DE_FONDO,
   NUCLEO_DEL_OFRECIMIENTO,
   NUCLEO_DE_LA_PARTIDA_GUARDADA,
 } from './nucleo/piezas.js';
+import { creaLectorDeSalud, creaMarcaDeAgua } from './plataforma/lector-de-salud.js';
+// Sin extensión, como `respaldo` y `rotulo`: es así como Metro elige entre la fuente de
+// Health Connect y la pareja declarada de iOS.
+import { creaFuenteDeSalud } from './plataforma/salud';
+import { creaMotorDelMapaActivo } from './salida/motor.js';
+import { creaPasosDeFondo } from './salida/pasos-de-fondo.js';
 import { DONDE, levantaElMapaDeAqui, resuelveDondeEstas } from './mapa/donde-estas.js';
 import { PUNTO_DEL_ANCLAJE } from './mapa/primera-lista.js';
 import { MODULOS_DE_PLATAFORMA } from './plataforma/index.js';
-import { leeGancho } from './plataforma/gancho.js';
+import { leeGancho, leeMetrosDeFondo } from './plataforma/gancho.js';
+import { esRazonDePermisos } from './plataforma/razon-de-permisos.js';
 import { esPuertaDeDesarrollo } from './plataforma/puerta-de-desarrollo.js';
 import { mensajeDeError } from './plataforma/capacidades.js';
 import { AntesDeSalirMontado } from './pantallas/antes-de-salir-montado.jsx';
@@ -73,6 +82,9 @@ import { TelonMontado } from './pantallas/telon-montado.jsx';
 // Referencia estable: si fuera un literal en el cuerpo, cada repintado sería un
 // re-sondeo de las cinco capacidades.
 const SIN_GANCHO = { ausentes: [], noReconocidos: [] };
+
+/** Lo mismo para los metros de fondo del gancho: sin ninguno pedido y sin nada que declarar. */
+const SIN_METROS_DE_GANCHO = { metros: null, motivo: null };
 
 /**
  * Las puertas de consulta que cuelgan de los ajustes y no de la portada: de ellas se vuelve
@@ -104,6 +116,11 @@ function identidadDeLaSalida(partida) {
 
 export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
+  const [metrosDelGancho, setMetrosDelGancho] = useState(SIN_METROS_DE_GANCHO);
+  // Si el sistema ha preguntado por qué se piden los permisos de salud. No es una pantalla:
+  // es una entrada que aterriza en una que ya existe, y por eso vive como una petición
+  // pendiente de aplicar y no como un momento más de la máquina.
+  const [razonDePermisos, setRazonDePermisos] = useState(false);
   // El almacén duradero, cableado **aquí y una sola vez**: es lo que hace que cerrar la
   // app deje de perder la partida. Si el sistema de ficheros no estuviera, esto lanza y
   // la app no arranca, que es lo que la spec pide en lugar de caer al de memoria: una
@@ -192,6 +209,24 @@ export function App() {
   // aquí lo vuelve a ofrecer y no queda ninguna marca, porque recordar la negativa crea un
   // estado invisible que solo se puede explicar como aplicación (SPEC-041).
   const [ofrecimientoDejado, setOfrecimientoDejado] = useState(false);
+  // Los pasos del día a día, de la fila 46: el motor del mapa activo y la orquestación que
+  // lee la app de salud al abrir. Se montan **juntos y una sola vez por partida y mapa**,
+  // dentro de la apertura y antes de que exista ninguna portada — el orden del cableado no
+  // es negociable, porque componer la portada antes de leer dejaría la decisión de si hay
+  // zurrón tomada con la reserva de ayer.
+  //
+  // Con `motor` en nulo hay `motivo`, y esa es la diferencia que impide confundir «no hay
+  // mapa levantado» con «nadie lo cableó»: sin mapa no se monta motor, no se acredita ni un
+  // metro y se dice por qué, en lugar de acreditar pasos a un mapa que no existe.
+  const [elFondo, setElFondo] = useState(null);
+  // La reserva la muta el núcleo en sitio —`vaciaReserva` sustituye el array entero— y React
+  // no se entera solo. Este contador es lo que hace que la portada vuelva a leerla del motor
+  // en lugar de quedarse con una referencia tomada antes del vaciado, que seguiría diciendo
+  // que hay cinco pasos y volvería a ofrecer el zurrón recién vaciado.
+  const [pasoDeFondo, repintaElFondo] = useState(0);
+  // Qué capacidades pidió el gancho poner ausentes, en una referencia: ver `cableaElFondo`.
+  const ausentesAhora = useRef(SIN_GANCHO.ausentes);
+  ausentesAhora.current = gancho.ausentes;
 
   // El atrás de Android hace lo mismo que el «‹» de la pantalla, y no otra cosa. Que
   // discrepen es un defecto de plataforma y no una decisión: quien pulsa el del sistema
@@ -255,6 +290,54 @@ export function App() {
     return { ...abierta, mundo };
   }, [almacen, empezarDeNuevo, partidaGuardada]);
 
+  /**
+   * El cableado de los pasos del día a día, **en el orden que la fila 46 fija**.
+   *
+   * 1. Se arma el motor del mapa activo sobre las áreas vivas de la partida. Sin mapa con
+   *    identificador de verdad aquí se para: no hay motor y no se acredita nada.
+   * 2. Se monta el lector con la fuente de esta plataforma —Health Connect en Android, la
+   *    pareja declarada en iOS— y su marca de agua, que vive **fuera de la partida** y por
+   *    eso no viaja en la copia ni en el respaldo.
+   * 3. Se lee la app de salud **una vez**, con el modo efectivo —pedido en los ajustes y con
+   *    el permiso de verdad concedido— y los metros que salgan se convierten en pasos que
+   *    entran en la reserva.
+   *
+   * Congelar es del llamador, que es quien tiene el registro: la reserva es estado, y
+   * perderla al cerrar sería perder lo único que el mundo hizo mientras nadie miraba.
+   *
+   * Las ventanas de salida activa viajan **vacías y por escrito**: `lector.lee({ salidas })`
+   * las restaría para no contar dos veces los mismos metros, y hoy nadie las guarda —no
+   * pueden vivir en el estado, que no lleva marcas del reloj real—. Hoy eso no produce doble
+   * conteo porque los metros de una salida activa no mueven el mundo por ningún camino;
+   * la fila que cablee esa conversión traerá también las ventanas.
+   */
+  const cableaElFondo = useCallback(async ({ estado, mundo }) => {
+    const armado = creaMotorDelMapaActivo({ nucleo: NUCLEO_DEL_MOTOR_DE_LA_PARTIDA, estado, mundo });
+    // El gancho de capacidad ausente entra por aquí y no por un camino propio: pedir «salud»
+    // ausente tiene que dar exactamente lo mismo que una compilación sin fuente.
+    let fuente = null;
+    if (!ausentesAhora.current.includes('salud')) {
+      fuente = await creaFuenteDeSalud().catch(() => null);
+    }
+    const pasos = creaPasosDeFondo({
+      nucleo: NUCLEO_DE_LOS_PASOS_DE_FONDO,
+      lector: creaLectorDeSalud({ fuente, marca: creaMarcaDeAgua(almacen) }),
+      ajustes: estado.ajustes,
+    });
+    let lectura = null;
+    if (armado.motor) {
+      lectura = await pasos.alAbrirLaApp({
+        motor: armado.motor,
+        tramo: estado.personaje?.tramo ?? null,
+        salidas: [],
+      });
+    }
+    return { ...armado, pasos, lectura };
+    // El gancho se lee de una referencia y no de la dependencia a propósito: llega por un
+    // enlace y por tanto **después** de que la apertura haya empezado, y meterlo en las
+    // dependencias volvería a abrir la partida entera cada vez que cambiara.
+  }, [almacen]);
+
   /** Lo que la portada necesita del personaje, con la palabra que se lee bajo el nombre. */
   const componePersonaje = useCallback((delEstado) => ({
     ...delEstado,
@@ -283,13 +366,43 @@ export function App() {
     setApertura({ estado: resultado.estado, motivo: resultado.motivo ?? null });
   }, [componePersonaje]);
 
+  /**
+   * Abrir la partida **y cablear los pasos del día a día antes de aplicarla**.
+   *
+   * El orden es la pieza: con la apertura aplicada ya hay portada, y componerla antes de
+   * leer dejaría la decisión de si hay zurrón tomada con la reserva de ayer, que es
+   * exactamente el desfase de un día que nadie sabría explicar.
+   *
+   * Va en un solo sitio porque hay dos caminos que abren —el arranque de la app y la vuelta
+   * tras importar una copia— y el segundo sustituye el estado entero: con el motor montado
+   * sobre el estado anterior, acreditaría pasos a unas áreas que ya no son las de nadie.
+   */
+  const abreYCablea = useCallback(async () => {
+    const resultado = await abreLaPartida();
+    if (resultado.estado !== APERTURAS.ABIERTA) {
+      setElFondo(null);
+      return resultado;
+    }
+    const fondo = await cableaElFondo({ estado: resultado.partida.estado, mundo: resultado.mundo })
+      // Que la app de salud no se pueda cablear no tumba la app: se declara y el juego sigue
+      // igual, que es lo que su propia spec pide.
+      .catch((e) => ({ motor: null, propagacion: null, cola: null, mapaId: null, pasos: null, lectura: null, motivo: mensajeDeError(e) }));
+    // La reserva es estado: se congela aquí y no en el siguiente corte del juego, porque
+    // perderla al cerrar sería perder lo único que el mundo hizo mientras nadie miraba.
+    if (fondo.lectura?.pasos?.length) {
+      await partidaGuardada.congela({ estado: resultado.partida.estado, registro: resultado.partida.registro }).catch(() => ({ escrito: false }));
+    }
+    setElFondo(fondo);
+    return resultado;
+  }, [abreLaPartida, cableaElFondo, partidaGuardada]);
+
   useEffect(() => {
     let vivo = true;
-    abreLaPartida()
+    abreYCablea()
       .then((resultado) => { if (vivo) aplicaApertura(resultado); })
       .catch((e) => { if (vivo) setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) }); });
     return () => { vivo = false; };
-  }, [abreLaPartida, aplicaApertura]);
+  }, [abreYCablea, aplicaApertura]);
 
   /**
    * Volver a abrir la partida después de que una copia haya sustituido lo que había.
@@ -300,10 +413,10 @@ export function App() {
    */
   const reabreTrasLaCopia = useCallback(() => {
     partidaGuardada.olvidaElSello();
-    return abreLaPartida()
+    return abreYCablea()
       .then(aplicaApertura)
       .catch((e) => setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) }));
-  }, [abreLaPartida, aplicaApertura, partidaGuardada]);
+  }, [abreYCablea, aplicaApertura, partidaGuardada]);
 
   /**
    * Congelar lo que hay abierto. Se llama en los cortes del juego y no en cada cambio.
@@ -364,6 +477,21 @@ export function App() {
       marcados: descartesDeLaAventura(partida.estado.aventuras),
     });
   }, [partida, elMundo, elCasting]);
+
+  /**
+   * El modo de pasos de fondo y la reserva del mapa activo, que es lo que decide si «Ver qué
+   * se cuenta hoy» lleva al zurrón o a la lista.
+   *
+   * `pasoDeFondo` está en las dependencias a propósito y es la pieza entera: la reserva la
+   * muta el núcleo en sitio y vaciarla sustituye el array, así que sin él esto se quedaría
+   * con la lista de antes del vaciado y el zurrón se ofrecería recién vaciado. Y es un memo
+   * y no un literal en el cuerpo porque el montaje del momento depende de su identidad:
+   * un objeto nuevo en cada repintado reharía el conseguidor de recursos.
+   */
+  const loDeLaReserva = useMemo(() => ({
+    modoDeFondo: partida?.estado?.ajustes?.pasosDelDiaADia === true,
+    reserva: elFondo?.motor ? elFondo.motor.registro().reserva : [],
+  }), [partida, elFondo, pasoDeFondo]);
 
   /** La partida con ese mismo mapa dentro. Una sola verdad viaja a las pantallas. */
   const laPartida = useMemo(
@@ -521,7 +649,14 @@ export function App() {
       // El mapa nuevo pasa a ser el de la partida por la **misma puerta** que el primero, y
       // no por una composición propia: ese camino ya se dejó `cupos` fuera una vez y el
       // descarte de un anclaje murió en toda instalación nueva.
-      setPartida((viva) => (viva ? { ...viva, mundo: mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro }) } : viva));
+      const mundoNuevo = mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro });
+      setPartida((viva) => (viva ? { ...viva, mundo: mundoNuevo } : viva));
+      // Y el motor se vuelve a armar **sobre el mapa que pasa a ser el activo**: la reserva
+      // es por mapa, y seguir con el motor del anterior acreditaría los kilómetros de aquí
+      // al mapa de donde ya no estás.
+      cableaElFondo({ estado: partida.estado, mundo: mundoNuevo })
+        .then((fondo) => setElFondo(fondo))
+        .catch(() => setElFondo(null));
       // Se vuelve a resolver dónde estás: ahora sí hay mapa aquí, y lo que toca es su portada.
       setDondeEstas(null);
       setOfrecimientoDejado(false);
@@ -531,7 +666,7 @@ export function App() {
       // la misma puerta que la avería de apertura, y no se deja media partida montada.
       setApertura({ estado: APERTURAS.NO_SE_PUDO, motivo: mensajeDeError(e) });
     }
-  }, [partida, elMapaDeLaPartida, congelaLaPartida]);
+  }, [partida, elMapaDeLaPartida, congelaLaPartida, cableaElFondo]);
 
   /**
    * La red que cubre lo que ningún corte del juego cubre: **a una app la mata el sistema
@@ -556,6 +691,19 @@ export function App() {
       // dos enlaces con anfitriones distintos y se pueden usar por separado o encadenados
       // —abrir la puerta y después poner una capacidad en rojo—, que es como se usa.
       if (esPuertaDeDesarrollo(url, EN_DESARROLLO) && vivo) setEnPuertaDeDesarrollo(true);
+      // «¿Por qué me pides esto?». Llega como enlace profundo porque el plugin traduce el
+      // intento del sistema —la acción a secas no llega a JavaScript—, y a partir de aquí es
+      // navegación de la app y se decide **aquí**, que es donde las guardas lo ven. Se
+      // guarda y lo aplica el efecto de abajo: el enlace puede llegar antes de que se sepa
+      // si hay partida, y A6P6 presupone una.
+      if (esRazonDePermisos(url) && vivo) setRazonDePermisos(true);
+      // Los metros de fondo del gancho, que **no son navegación**: son una fuente de metros
+      // y entran por el mismo camino que los de una lectura real, con el mismo tope y
+      // respetando el interruptor. Se guardan aquí y los acredita el efecto de abajo, que es
+      // el que puede esperar a que haya motor: el enlace llega antes de que la partida esté
+      // abierta y acreditarlos en este mismo sitio sería acreditarlos a nada.
+      const conMetros = leeMetrosDeFondo(url, EN_DESARROLLO);
+      if (conMetros.metros !== null || conMetros.motivo !== null) setMetrosDelGancho(conMetros);
       const leido = leeGancho(url, EN_DESARROLLO);
       if (!vivo) return;
       if (leido.ausentes.length === 0 && leido.noReconocidos.length === 0) return;
@@ -568,6 +716,46 @@ export function App() {
       suscripcion.remove();
     };
   }, []);
+
+  /**
+   * Lleva la pregunta del sistema a A6P6, **con su guarda**.
+   *
+   * La guarda es la mitad de la decisión y no un detalle de implementación: el sistema puede
+   * disparar esto con la app recién instalada o con el arranque a medias, y A6P6 presupone
+   * partida. Sin ella no se monta nada sobre una partida que no existe y se cae al arranque
+   * de siempre, que es lo que la arista de `docs/flujo.md` declara.
+   *
+   * Se espera a que la apertura resuelva: mientras no se sabe si hay partida, decidir sería
+   * decidir a cara o cruz.
+   */
+  useEffect(() => {
+    if (!razonDePermisos || apertura.estado === APERTURAS.ABRIENDO) return;
+    if (partida) setConsulta('ajustes');
+    setRazonDePermisos(false);
+  }, [razonDePermisos, apertura, partida]);
+
+  /**
+   * Acredita los metros que pidió el gancho, **por el camino de siempre**.
+   *
+   * Va aparte del enlace porque el enlace puede llegar antes de que haya partida abierta y
+   * motor armado. Un valor que no es un número finito y no negativo no acredita nada y se
+   * declara —`leeMetrosDeFondo` lo trae con su motivo—, en lugar de acreditar cero como si
+   * se hubiera leído.
+   */
+  useEffect(() => {
+    if (metrosDelGancho.metros === null || !partida || !elFondo?.motor || !elFondo?.pasos) return undefined;
+    let vivo = true;
+    elFondo.pasos
+      .alAbrirLaApp({ motor: elFondo.motor, tramo: partida.estado.personaje?.tramo ?? null, metrosDeMas: metrosDelGancho.metros })
+      .then(() => {
+        if (!vivo) return;
+        setMetrosDelGancho(SIN_METROS_DE_GANCHO);
+        congelaLaPartida();
+        repintaElFondo((n) => n + 1);
+      })
+      .catch(() => { if (vivo) setMetrosDelGancho(SIN_METROS_DE_GANCHO); });
+    return () => { vivo = false; };
+  }, [metrosDelGancho, partida, elFondo, congelaLaPartida]);
 
   // El mundo del paso provisional se levanta la primera vez que se abre el momento y no al
   // arrancar la app: construirlo cuesta, y quien nunca pulsa el paso no tiene por qué pagarlo.
@@ -698,15 +886,23 @@ export function App() {
               personaje: cerrado.personaje,
               prologo: lista?.prologo ?? null,
             })
-              .then((nacida) => {
+              .then(async (nacida) => {
+                // Por la misma puerta que la partida abierta de disco, y no por una
+                // composición propia: este camino se dejaba `cupos` fuera y el descarte
+                // de un anclaje moría en toda instalación nueva.
+                const mundoNuevo = mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro });
+                // El motor del mapa activo se arma también aquí, y no solo al abrir una
+                // partida de disco: sin él, el primer día no habría dónde acreditar nada y
+                // el zurrón sería inalcanzable hasta el segundo arranque. No lee nada —el
+                // modo viene apagado de origen— y por eso no hay que congelar detrás.
+                const fondo = await cableaElFondo({ estado: nacida.estado, mundo: mundoNuevo })
+                  .catch((e) => ({ motor: null, propagacion: null, cola: null, mapaId: null, pasos: null, lectura: null, motivo: mensajeDeError(e) }));
+                setElFondo(fondo);
                 setPartida({
                   estado: nacida.estado,
                   registro: nacida.registro,
                   personaje: componePersonaje({ ...nacida.estado.personaje, ...cerrado.personaje }),
-                  // Por la misma puerta que la partida abierta de disco, y no por una
-                  // composición propia: este camino se dejaba `cupos` fuera y el descarte
-                  // de un anclaje moría en toda instalación nueva.
-                  mundo: mundoDeLaCelda({ mapaId: levantado.mapaId, registro: levantado.registro }),
+                  mundo: mundoNuevo,
                   arrancadaEn: Date.now(),
                 });
                 setEnArranque(false);
@@ -813,6 +1009,17 @@ export function App() {
           mundo={elMundo}
           almacen={almacen}
           empezarDeNuevo={empezarDeNuevo}
+          // La orquestación del interruptor de los pasos del día a día. Sin ella la fila no
+          // cambia de valor, que es lo correcto: encenderla sin poder leer nada sería el
+          // interruptor que miente.
+          pasosDeFondo={elFondo?.pasos ?? null}
+          // Tocar el interruptor cambia un ajuste de la partida, que es estado: se congela
+          // en ese mismo corte y se repinta, porque el núcleo muta el área en sitio y una
+          // aplicación que no repinta lo que acabas de tocar está rota.
+          alCambiarAjuste={() => {
+            congelaLaPartida();
+            repintaElFondo((n) => n + 1);
+          }}
           // El registro y el día, que es lo que deshacer un descarte necesita para dejar su
           // hecho: el deshacer es una transición más y no un borrado del registro.
           registro={partida.registro}
@@ -834,6 +1041,9 @@ export function App() {
             partidaGuardada.olvidaElSello();
             setConsulta(null);
             setPartida(null);
+            // El motor y la orquestación del fondo mueren con la partida: dejarlos montados
+            // sobre un estado que ya no existe sería acreditar pasos a un mundo borrado.
+            setElFondo(null);
             setSalida(null);
             setEnArranque(true);
             setApertura({ estado: APERTURAS.SIN_PARTIDA, motivo: null });
@@ -861,6 +1071,20 @@ export function App() {
           // cadena que se acepta en el motor y los beats que se le piden a la preparación.
           mundo={elMundo}
           arrancadaEn={partida.arrancadaEn}
+          // El modo y la reserva, que son lo que decide si «Ver qué se cuenta hoy» lleva al
+          // zurrón o a la lista. El modo llega **como dato de la partida** —el núcleo no
+          // consulta ninguna capa de la plataforma— y la reserva **se relee del motor en
+          // cada composición**: vaciarla sustituye el array entero, así que una referencia
+          // tomada antes seguiría diciendo que hay cinco pasos.
+          zurron={loDeLaReserva}
+          motor={elFondo?.motor ?? null}
+          // Confirmar el zurrón escribe dos cosas —el hecho y la reserva vacía— y las dos
+          // son estado: se congela en ese mismo corte, y se repinta porque el núcleo mutó
+          // el área en sitio.
+          alZurronVaciado={() => {
+            congelaLaPartida();
+            repintaElFondo((n) => n + 1);
+          }}
           // Las cuatro maneras de echarse a andar pasan por aquí, y las cuatro llegan al mismo
           // sitio: «salir a andar» de la preparación, «salir a andar sin más» de la portada y de
           // la lista, y «seguir con ella» de la tarjeta de a medias. Que la de a medias no vuelva

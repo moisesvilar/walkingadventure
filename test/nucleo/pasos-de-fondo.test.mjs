@@ -73,6 +73,7 @@ import { congelaRegistro, registroInicial } from '../../packages/nucleo/partida/
 import { almacenEnMemoria } from './partida-de-prueba.mjs';
 import { SEMILLA_A } from './celda-de-prueba.mjs';
 import { fuente } from './mundo-de-prueba.mjs';
+import { leeMetrosDeFondo } from '../../app/plataforma/gancho.js';
 import {
   METROS_POR_VENTANA,
   fuenteDeSalud,
@@ -286,6 +287,82 @@ describe('El modo de pasos de fondo, apagado de origen', () => {
     );
     assert.equal(vuelta.pasos.length, 1, `volver a encender recuperó ${vuelta.pasos.length} pasos de los diez días apagado`);
     assert.equal(motor.contador(), trasLaPrimera + 1);
+  });
+
+  test('Encender los pasos del día a día sin fuente es imposible', async () => {
+    // SPEC-046. **Imposible por construcción y no un interruptor que miente**: sin fuente de
+    // salud —iOS, el gancho de capacidad ausente, o una compilación sin la dependencia
+    // resuelta— el lector devuelve `sin-fuente`, la orquestación lo traduce a su motivo y la
+    // fila se queda en «no» con la línea que dice que no se puede.
+    //
+    // Se dobla con `fuente: null`, que es exactamente lo que devuelve `creaFuenteDeSalud` en
+    // iOS y lo que la raíz pasa cuando el gancho pide «salud» ausente: los dos caminos entran
+    // por aquí y por eso dan lo mismo.
+    const almacen = almacenEnMemoria();
+    const ajustes = estadoDeAjustes();
+    const lector = creaLectorDeSalud({ fuente: null, marca: creaMarcaDeAgua(almacen), ahora: relojFalso().ahora });
+    const pasos = creaPasosDeFondo({ nucleo: nucleoDeLosPasos, lector, ajustes });
+
+    const tocado = await pasos.pide(FILA_DE_AJUSTES, true);
+    assert.equal(tocado.atendida, true);
+    assert.equal(tocado.encendido, false, 'el interruptor se ha encendido sin fuente de la que leer');
+    assert.equal(tocado.motivo, MOTIVOS_DE_APAGADO.SIN_FUENTE, 'sin fuente se dice «denegado», que es otra cosa y se arregla en otro sitio');
+    assert.equal(tocado.aviso, AVISO_SIN_PERMISO, 'la fila que no se puede encender no dice por qué');
+    assert.equal(ajustes[AJUSTE], false, 'el ajuste de la partida quedó encendido con un modo que no puede leer nada');
+
+    // Y no se ha pedido ningún permiso: sin fuente no hay a quién pedírselo, y un diálogo del
+    // sistema aquí sería pedir algo que no serviría de nada.
+    assert.equal((await pasos.efectivo()).encendido, false);
+    // Ni siquiera con el ajuste puesto a mano: el valor que se lee es el **efectivo**.
+    cambiaAjuste(ajustes, AJUSTE, true);
+    const conElAjustePuesto = await pasos.efectivo();
+    assert.equal(conElAjustePuesto.encendido, false, 'con el ajuste puesto a mano y sin fuente la fila dice que sí');
+    assert.equal(conElAjustePuesto.motivo, MOTIVOS_DE_APAGADO.SIN_FUENTE);
+  });
+
+  test('El interruptor cambia de valor sin salir y volver a entrar', async () => {
+    // SPEC-046. El valor que se pinta sale de `efectivo()`, que **se vuelve a leer** sin
+    // reabrir nada: eso es lo que la pantalla necesita para repintar lo que acabas de tocar.
+    // Lo que aquí se afirma es que la orquestación lo permite; que la pantalla lo haga es la
+    // otra mitad y vive en `consulta-montado.jsx`, comprobada abajo.
+    const salud = fuenteDeSalud({ permiso: 'sin-preguntar', alPedir: 'concedido' });
+    const { pasos } = cableado({ salud });
+    assert.equal((await pasos.efectivo()).encendido, false);
+
+    const tocado = await pasos.pide(FILA_DE_AJUSTES, true);
+    assert.equal(tocado.encendido, true);
+    assert.equal(tocado.aviso, null, 'la fila encendida trae línea de aviso, y no hay nada que avisar');
+
+    // Sin salir y volver a entrar: la misma orquestación, releída, ya dice «sí».
+    const releida = await pasos.efectivo();
+    assert.equal(releida.encendido, true, 'la fila no cambia de valor hasta salir y volver a entrar');
+    assert.equal(releida.aviso, null);
+    assert.equal(salud.peticiones(), 1, 'releer la fila ha vuelto a pedir el permiso: consultar no es preguntar');
+
+    // Y la pantalla que la pinta fuerza el repintado, que es la mitad que no vive aquí: el
+    // núcleo muta el área de ajustes en sitio y React no se entera solo.
+    const montado = fuente('app/pantallas/consulta-montado.jsx');
+    assert.match(montado, /repinta\(\(n\) => n \+ 1\)/, 'la pantalla de ajustes no fuerza el repintado tras tocar el interruptor');
+    assert.match(montado, /pasosDeFondo\.efectivo\(\)/, 'la pantalla de ajustes no lee el valor efectivo al abrirse: un permiso revocado desde fuera seguiría pintándose como «sí»');
+  });
+
+  test('El interruptor atiende su fila y no la de al lado', async () => {
+    // SPEC-046, §6h. «Solo de día» es de otra fila del checklist: hacer que su toque entrara
+    // por aquí cambiaría un ajuste ajeno sin que nadie lo hubiera decidido. Lo que no se
+    // atiende **se declara y se devuelve sin tocar nada**, que es lo que distingue no
+    // atenderlo de atenderlo mal.
+    const { pasos, ajustes, salud } = cableado({ salud: fuenteDeSalud({ permiso: 'sin-preguntar', alPedir: 'concedido' }) });
+    const antes = JSON.stringify(congelaAjustes(ajustes));
+
+    const ajena = FILAS_DE_AJUSTES.find((f) => f.id !== FILA_DE_AJUSTES && f.tipo === 'interruptor');
+    assert.ok(ajena, 'no hay ninguna otra fila de interruptor en el catálogo, y este caso dejaría de medir nada');
+
+    const respuesta = await pasos.pide(ajena.id, true);
+    assert.equal(respuesta.atendida, false, `la orquestación de los pasos de fondo ha atendido la fila "${ajena.id}", que es de otra fila del checklist`);
+    assert.equal(respuesta.fila, ajena.id, 'no dice qué fila no atendió, y sin nombrarla quien llama no sabe qué hacer con la respuesta');
+    assert.equal(respuesta.encendido, null);
+    assert.equal(JSON.stringify(congelaAjustes(ajustes)), antes, 'atender una fila ajena cambió algún ajuste por el camino');
+    assert.equal(salud.peticiones(), 0, 'tocar una fila ajena pidió el permiso de salud');
   });
 
   test('La orquestación de los pasos de fondo no arranca sin sus piezas', () => {
@@ -729,5 +806,125 @@ describe('Cuando la lectura de salud va mal', () => {
     await pasos.alAbrirLaApp({ motor: motorDe(), tramo: TRAMO });
     const [ventana] = salud.ventanas();
     assert.equal(ventana.hasta - ventana.desde, VENTANA_INICIAL_MS);
+  });
+});
+
+// ── Lo que cruza al núcleo, y el gancho que lo alimenta (SPEC-046) ──────────────
+
+describe('Del lector de salud al núcleo solo cruzan metros', () => {
+  /**
+   * La orquestación con un núcleo **espía**: registra con qué se llama a `kilometrosDeFondo`
+   * y devuelve lo que devolvería el de verdad.
+   *
+   * Es la única manera de afirmar una negativa —«nada más cruza»— sin suponerla: mirar el
+   * estado de después no distingue lo que se pasó de lo que se usó.
+   */
+  function conNucleoEspia(opciones = {}) {
+    const llamadas = [];
+    const espia = {
+      ...nucleoDeLosPasos,
+      kilometrosDeFondo(argumentos) {
+        llamadas.push(argumentos);
+        return kilometrosDeFondo(argumentos);
+      },
+    };
+    const base = cableado(opciones);
+    return { ...base, llamadas, pasos: creaPasosDeFondo({ nucleo: espia, lector: base.lector, ajustes: base.ajustes }) };
+  }
+
+  test('Del lector de salud al núcleo solo cruzan metros', () => {
+    // Bloqueante (`@privacidad`, RF-PRIV-003). La comprobación se hace en dos sitios porque
+    // la promesa tiene dos mitades: lo que la lectura **entrega** y lo que el núcleo
+    // **recibe**. Esta es la segunda; la primera es el caso de abajo.
+    const espiado = conNucleoEspia({ salud: saludQueDaMetros(3 * TRAMO), pedido: true });
+    return espiado.pasos.alAbrirLaApp({ motor: motorDe(), tramo: TRAMO }).then(() => {
+      assert.equal(espiado.llamadas.length, 1, 'la lectura al abrir no ha llamado al núcleo una sola vez');
+      const [argumentos] = espiado.llamadas;
+      assert.deepEqual(
+        Object.keys(argumentos).sort(),
+        ['activos', 'metros', 'motor', 'tramo'],
+        `al núcleo le cruzan campos que no son metros: ${Object.keys(argumentos).join(', ')}`,
+      );
+      assert.equal(typeof argumentos.metros, 'number', 'los metros no cruzan como número');
+      assert.equal(argumentos.metros, 3 * TRAMO);
+      // `activos` es un booleano de la partida y no un permiso: el núcleo no sabe qué es un
+      // permiso de salud y no consulta ninguna capa de la plataforma.
+      assert.equal(argumentos.activos, true);
+      // Y ni una ventana, ni un instante, ni ninguna marca del reloj real.
+      const texto = JSON.stringify({ metros: argumentos.metros, activos: argumentos.activos, tramo: argumentos.tramo });
+      for (const prohibido of ['desde', 'hasta', 'ventana', 'leidoHasta', 'instante']) {
+        assert.equal(texto.includes(prohibido), false, `"${prohibido}" cruza del lector al núcleo`);
+      }
+    });
+  });
+
+  test('Lo que la lectura entrega es un número de metros y su motivo', async () => {
+    // La primera mitad: la propia lectura. Hueco de batería —el escenario habla de lo que
+    // llega al núcleo—, y va aquí porque sin ella la promesa se cumpliría por casualidad,
+    // porque a la orquestación se le olvidó pasar algo.
+    const { lector } = cableado({ salud: saludQueDaMetros(2 * TRAMO), pedido: true });
+    const lectura = await lector.lee({ activo: true });
+    assert.equal(typeof lectura.metros, 'number');
+    // La ventana viaja de vuelta al lector, que es de la app; lo que no puede es seguir
+    // camino. Que la lectura la traiga es lo que permite afirmar arriba que no cruza.
+    assert.ok(lectura.ventana, 'la lectura no dice qué ventana miró, y sin eso no se puede afirmar que no cruza');
+  });
+});
+
+describe('El gancho de metros de fondo es una fuente de metros, no un atajo', () => {
+  test('El gancho acredita por el mismo camino que una lectura real', async () => {
+    const { pasos } = cableado({ salud: saludQueDaMetros(0), pedido: true });
+    const motor = motorDe();
+    const leido = leeMetrosDeFondo('walkingadventure://andamiaje?metrosDeFondo=6000', true);
+    assert.deepEqual(leido, { metros: 6000, motivo: null });
+
+    const lectura = await pasos.alAbrirLaApp({ motor, tramo: TRAMO, metrosDeMas: leido.metros });
+    assert.equal(lectura.metros, 6000, 'los metros del gancho no entran por el mismo camino que los de una lectura real');
+    assert.equal(tamanoDeLaReserva(motor), 3, 'seis mil metros con tramo de dos mil no han dejado tres pasos en la reserva');
+  });
+
+  test('El gancho respeta el interruptor y no lo salta', async () => {
+    // Es lo que impide que una prueba verifique un camino que el juego no tiene: con el modo
+    // apagado o sin fuente, el valor efectivo es «no» y no se acredita ni un metro.
+    const apagado = cableado({ salud: saludQueDaMetros(0), pedido: false });
+    const motorApagado = motorDe();
+    const sinModo = await apagado.pasos.alAbrirLaApp({ motor: motorApagado, tramo: TRAMO, metrosDeMas: 6000 });
+    assert.equal(sinModo.pasos.length, 0, 'el gancho ha acreditado metros con el modo apagado');
+    assert.equal(tamanoDeLaReserva(motorApagado), 0);
+
+    const almacen = almacenEnMemoria();
+    const ajustes = estadoDeAjustes();
+    cambiaAjuste(ajustes, AJUSTE, true);
+    const sinFuente = creaPasosDeFondo({
+      nucleo: nucleoDeLosPasos,
+      lector: creaLectorDeSalud({ fuente: null, marca: creaMarcaDeAgua(almacen), ahora: () => T0 }),
+      ajustes,
+    });
+    const motorSinFuente = motorDe();
+    await sinFuente.alAbrirLaApp({ motor: motorSinFuente, tramo: TRAMO, metrosDeMas: 6000 });
+    assert.equal(tamanoDeLaReserva(motorSinFuente), 0, 'el gancho ha acreditado metros sin fuente de salud');
+  });
+
+  test('Un valor que no es un número finito y no negativo no acredita nada y se declara', async () => {
+    for (const crudo of ['', 'muchos', '-1', 'NaN', 'Infinity']) {
+      const leido = leeMetrosDeFondo(`walkingadventure://andamiaje?metrosDeFondo=${encodeURIComponent(crudo)}`, true);
+      assert.equal(leido.metros, null, `"${crudo}" se ha leído como metros`);
+      assert.match(leido.motivo, /finitos y no negativos/, `"${crudo}" no se declara: acreditar cero como si se hubiera leído es lo que esto evita`);
+    }
+    // Y el enlace sin el parámetro no es un error: no traía ninguno y no hay nada que decir.
+    assert.deepEqual(leeMetrosDeFondo('walkingadventure://andamiaje', true), { metros: null, motivo: null });
+
+    // Un valor inválido que llegue igual hasta la orquestación falla nombrándolo, con la
+    // misma validación que la de una lectura real: dos validaciones darían dos mensajes
+    // distintos para el mismo defecto según por dónde entrara.
+    const { pasos } = cableado({ salud: saludQueDaMetros(0), pedido: true });
+    await assert.rejects(() => pasos.alAbrirLaApp({ motor: motorDe(), tramo: TRAMO, metrosDeMas: -5 }), /gancho de metros de fondo/);
+  });
+
+  test('En producción el gancho de metros es inerte', () => {
+    // La regla de `gancho.js` que esta fila **no** relaja: un gancho que llega a producción
+    // es una puerta trasera que cambia el comportamiento de la app.
+    assert.deepEqual(leeMetrosDeFondo('walkingadventure://andamiaje?metrosDeFondo=6000', false), { metros: null, motivo: null });
+    assert.deepEqual(leeMetrosDeFondo('walkingadventure://andamiaje?metrosDeFondo=nada', false), { metros: null, motivo: null });
   });
 });

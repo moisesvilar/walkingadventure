@@ -20,6 +20,10 @@
 // que el generador es una pieza inyectada y no un import, y quien lo cita por su nombre es
 // `app/nucleo/piezas.js`.
 
+// La validación de unos metros no se escribe dos veces: la del lector es la misma, y con
+// dos un valor inválido fallaría con dos mensajes distintos según por dónde entrara.
+import { metrosDeLaLectura } from '../plataforma/lector-de-salud.js';
+
 /** Lo que esta orquestación le pide al núcleo, enumerado. */
 export const DEL_NUCLEO = Object.freeze(['kilometrosDeFondo', 'tamanoDeLaReserva', 'AJUSTES_DE_ORIGEN', 'cambiaAjuste']);
 
@@ -96,40 +100,60 @@ export function creaPasosDeFondo({ nucleo, lector, ajustes }) {
     return apagaYExplica(permiso === 'no-disponible' ? MOTIVOS_DE_APAGADO.SIN_FUENTE : MOTIVOS_DE_APAGADO.REVOCADO);
   };
 
+  /**
+   * Enciende: **pide el permiso en contexto**, y solo entonces. Si se deniega, la fila
+   * vuelve a «no» y bajo ella aparece la línea, una vez.
+   */
+  const enciende = async () => {
+    const permiso = await lector.pideElPermiso();
+    if (permiso !== 'concedido') {
+      return apagaYExplica(permiso === 'no-disponible' ? MOTIVOS_DE_APAGADO.SIN_FUENTE : MOTIVOS_DE_APAGADO.DENEGADO);
+    }
+    cambiaAjuste(ajustes, AJUSTE, true);
+    return Object.freeze({ encendido: true, motivo: null, aviso: null, testid: TESTIDS.fila });
+  };
+
+  /**
+   * Apaga: dejan de leerse pasos y **la reserva que hubiera queda como estaba**, sin
+   * borrarse y sin ejecutarse.
+   *
+   * Y **se olvida la marca de agua**, que es lo que hace que volver a encender no
+   * recupere los kilómetros del tiempo apagado: una marca quieta durante meses abriría
+   * al reencender una ventana hacia atrás de todo ese tiempo, y lo único que la acotaría
+   * sería el tope de la reserva. Sin marca, la siguiente lectura mira la ventana inicial
+   * y nada más — el tiempo apagado no ocurrió para el juego. Ni penalización por
+   * ausencia ni regalo por ella.
+   */
+  const apaga = async () => {
+    cambiaAjuste(ajustes, AJUSTE, false);
+    await lector.dejaDeContar();
+    return Object.freeze({ encendido: false, motivo: MOTIVOS_DE_APAGADO.NO_PEDIDO, aviso: null, testid: TESTIDS.fila });
+  };
+
   return {
     ajuste: AJUSTE,
     fila: FILA_DE_AJUSTES,
     pedido,
     efectivo,
+    enciende,
+    apaga,
 
     /**
-     * Enciende: **pide el permiso en contexto**, y solo entonces. Si se deniega, la fila
-     * vuelve a «no» y bajo ella aparece la línea, una vez.
-     */
-    async enciende() {
-      const permiso = await lector.pideElPermiso();
-      if (permiso !== 'concedido') {
-        return apagaYExplica(permiso === 'no-disponible' ? MOTIVOS_DE_APAGADO.SIN_FUENTE : MOTIVOS_DE_APAGADO.DENEGADO);
-      }
-      cambiaAjuste(ajustes, AJUSTE, true);
-      return Object.freeze({ encendido: true, motivo: null, aviso: null, testid: TESTIDS.fila });
-    },
-
-    /**
-     * Apaga: dejan de leerse pasos y **la reserva que hubiera queda como estaba**, sin
-     * borrarse y sin ejecutarse.
+     * El toque de una fila de A6P6, **si es la suya**.
      *
-     * Y **se olvida la marca de agua**, que es lo que hace que volver a encender no
-     * recupere los kilómetros del tiempo apagado: una marca quieta durante meses abriría
-     * al reencender una ventana hacia atrás de todo ese tiempo, y lo único que la acotaría
-     * sería el tope de la reserva. Sin marca, la siguiente lectura mira la ventana inicial
-     * y nada más — el tiempo apagado no ocurrió para el juego. Ni penalización por
-     * ausencia ni regalo por ella.
+     * Atiende su fila y solo la suya, y lo que no atiende lo **declara y devuelve sin tocar
+     * nada** (§6h). El interruptor de «solo de día» es de otra fila del checklist, y hacer
+     * que su toque entre por aquí cambiaría un ajuste ajeno sin que nadie lo hubiera
+     * decidido — que es exactamente lo que pasaría si esto atendiera cualquier interruptor.
+     *
+     * @returns lo mismo que `enciende`/`apaga` cuando es su fila, y `{ atendida: false }`
+     *   con la fila nombrada cuando no lo es.
      */
-    async apaga() {
-      cambiaAjuste(ajustes, AJUSTE, false);
-      await lector.dejaDeContar();
-      return Object.freeze({ encendido: false, motivo: MOTIVOS_DE_APAGADO.NO_PEDIDO, aviso: null, testid: TESTIDS.fila });
+    async pide(fila, quiere) {
+      if (fila !== FILA_DE_AJUSTES) {
+        return Object.freeze({ atendida: false, fila, encendido: null, motivo: null, aviso: null, testid: null });
+      }
+      return Object.freeze({ atendida: true, fila, ...(quiere ? await enciende() : await apaga()) });
     },
 
     /**
@@ -139,12 +163,22 @@ export function creaPasosDeFondo({ nucleo, lector, ajustes }) {
      * Con el modo apagado no se lee y no se acredita nada. Que la app de salud no responda
      * tampoco es un fallo: el juego sigue igual y no se ejecuta ningún paso.
      *
+     * `metrosDeMas` son los del gancho de desarrollo, que entran **por este mismo camino**
+     * y no por uno propio: así lo que la prueba verifica es el camino que el juego tiene. Y
+     * como entran por aquí, **respetan el interruptor**: con el modo apagado o sin fuente el
+     * valor efectivo es «no» y no se acredita ni un metro.
+     *
      * @returns `{ leyo, motivo, metros, pasos, enLaReserva, descartadosM }`, congelado.
      */
-    async alAbrirLaApp({ motor, tramo, salidas = [] }) {
+    async alAbrirLaApp({ motor, tramo, salidas = [], metrosDeMas = 0 }) {
       const estado = await efectivo();
       const lectura = await lector.lee({ activo: estado.encendido, salidas });
-      if (!lectura.leyo || lectura.metros === 0) {
+      // Los del gancho solo cuentan con el modo efectivamente encendido. `metrosDeLaLectura`
+      // los valida igual que a los de una lectura real: un valor que no es un número finito
+      // y no negativo falla nombrándolo, en lugar de acreditar cero como si se hubiera leído.
+      const delGancho = estado.encendido && metrosDeMas ? metrosDeLaLectura(metrosDeMas, 'el gancho de metros de fondo') : 0;
+      const metros = (lectura.leyo ? lectura.metros : 0) + delGancho;
+      if (metros === 0) {
         return Object.freeze({
           leyo: lectura.leyo,
           motivo: lectura.motivo,
@@ -156,11 +190,11 @@ export function creaPasosDeFondo({ nucleo, lector, ajustes }) {
       }
       // `activos` viaja **como dato de la partida**: el núcleo no sabe qué es un permiso
       // de salud y no consulta ningún ajuste por su cuenta.
-      const dados = kilometrosDeFondo({ motor, metros: lectura.metros, activos: true, tramo });
+      const dados = kilometrosDeFondo({ motor, metros, activos: true, tramo });
       return Object.freeze({
         leyo: true,
         motivo: null,
-        metros: lectura.metros,
+        metros,
         pasos: dados.pasos,
         enLaReserva: dados.enLaReserva,
         descartadosM: dados.descartadosM,

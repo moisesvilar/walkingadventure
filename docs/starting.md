@@ -1857,3 +1857,58 @@ La tanda final dejó **cuatro** flujos en rojo, y el encargo declaraba dos. Los 
 Merece decirse porque el orden importa. La primera sonda no aisló nada: desactivó el efecto y dejó vivo el otro añadido de la fila, así que su verde no habría demostrado nada y su rojo tampoco. Una sonda que no apaga todo lo tuyo no separa lo tuyo de lo ajeno.
 
 Queda **sin dueño y fichado**: la fila 48 midió `en-marcha.yaml` en verde con 103 s de recorrido real, y hoy no abre la salida. O es deriva del emulador o es regresión de alguna fila posterior; lo que sí se sabe es que la ubicación funciona **durante** una salida —el recorrido a pie de esta fila validó su llegada— y falla al abrirla.
+
+## XXXV · La fila 46: la fuente de salud y el zurrón, y un suelo de aparatos que nadie había anticipado (13-ago-2026)
+
+Cierra el bloque B7 y la última pantalla huérfana del repo. Entrega la fuente nativa de salud —**Health Connect, solo Android**, con la pareja de iOS como doble declarado—, el motor del mapa activo, el zurrón montado desde la portada y la reserva de punta a punta. `SPEC-046` y `SPEC-046-iter-1`; ramas y commits en `pipeline/SPEC-046-fuente-de-salud-y-zurron`.
+
+### Una premisa heredada que era falsa, y reduce la fila de tres piezas a dos
+
+`SPEC-043-iter-1` enumeró tres piezas que faltaban: fuente de salud, motor de pasos y **registro de hechos de la partida**. La tercera dejó de ser cierta antes de que esta fila existiera: `App.js` sostiene `partida.registro` desde que abre (`:271`), lo congela junto al estado (`:320`) y lo pasa ya a dos pantallas (`:818`, `:857`). Lo trajeron las filas 47 y 50. La fila trae **dos piezas y consume la tercera**, y queda escrito en la spec en lugar de callarse: una fila que dice traer tres y trae dos es una fila que nadie puede verificar. Es la cuarta vez seguida que medir una premisa heredada la encuentra falsa (§10-bis), y esta vez la regla se aplicó antes de escribir, no después.
+
+Segunda premisa medida y falsa, esta más barata: `SPEC-043-iter-1` decía que A2P2 «sale de la lista de aristas cableadas» de `docs/flujo.md`. Retiró el cableado, **no la arista**: el diagrama seguía declarando `A2P1 → A2P2` y `A2P2 → A2P3` palabra por palabra. No hubo que reponerlas.
+
+### Lo que la fuente de salud arrastraba y ninguna spec anticipó
+
+**Health Connect exige `minSdk 26` y la app estaba en 24**, así que la rama no compilaba. El implementador se paró, como manda la lista cerrada de dependencias, y propuso `expo-build-properties` como «único camino declarado por la propia librería». **No lo era**: `withGradleProperties` viene dentro de `expo`, que ya es dependencia, y este repo ya escribe plugins propios (`app/plugins/retira-permisos-prohibidos.js`). La salida estaba a un grep. Pararse fue correcto; la lección es que ante un requisito de compilación se mira primero qué sabe hacer ya `app/plugins/`.
+
+Con eso, la decisión que quedaba no era de dependencias sino de producto: **el primer cambio de suelo de aparatos del proyecto**, de Android 7.0 a 8.0. Lo decidió el dueño sabiendo el coste (décimas de porcentaje de un parque de 2016, para un juego que ya pide GPS fino y render Skia). Condición comprobada: **`docs/prd.md` no fija ningún mínimo de Android** —RNF-COM-001 (`:286`) solo habla de una base React Native + Expo—, así que no hay contradicción y el documento no se toca.
+
+### La razón de permisos: destino decidido, mecanismo imposible, y una traducción
+
+El dueño decidió que «¿por qué me pides esto?» aterrizara en **A6P6**, donde la fila de contar los pasos y su línea de aviso ya *son* la razón de permisos — responder con la portada es un portazo educado, y escribir pantalla nueva es estirar la fila. Al implementarlo apareció que **la acción del intento no llega a JavaScript**: `IntentModule.kt:59-68` devuelve `null` salvo `ACTION_VIEW` o NFC **con** `getData()`, y `react-native-health-connect` solo declara el filtro en el manifiesto.
+
+El mecanismo que lo resuelve sin dependencia ni invento: el mismo plugin **traduce el intento a `walkingadventure://razon-de-permisos`** en el `onCreate` y el `onNewIntent` de `MainActivity`, y de ahí lo enruta la tubería que ya existía (`App.js:701` con `Linking.getInitialURL()` y el esquema declarado). **Es la primera vez que este repo inyecta código nativo propio**, y por eso el Kotlin traduce y no decide: a dónde ir se resuelve en JavaScript, donde las guardas lo ven.
+
+Y una corrección que salvó un verde falso: **Health Connect declara dos puertas, no una** — la acción de Android ≤13 sobre `MainActivity` y el `activity-alias ViewPermissionUsageActivity` de Android 14+. El plugin traducía solo la primera. `wa-pixel` es **Android 15**, o sea que la puerta real de este aparato era justo la que no se traducía: disparar la acción vieja a mano habría dado verde en el banco y rojo en el móvil de cualquiera.
+
+### El defecto que escondía el rojo del zurrón
+
+`zurron.yaml` moría al encender el interruptor. Tres hipótesis y las tres falsas: no era que la promesa de `requestPermission` no resolviera (resuelve, medido por Metro), ni que el toque no llegara por cotas degeneradas (esa trampa vale para `adb` y **no** para Maestro). Era que **la fila era inerte fuera del `Switch`**: el control ocupa `[906,1428][1028,1499]` dentro de una fila de `[53,1397][1028,1532]`, el toque al centro caía en la etiqueta, y `enciende()` **no llegaba a correr** — por eso lo que se veía no era ninguna de sus dos salidas. Arreglado haciendo responder a la fila entera y dejando el `Switch` sordo, que además hace imposible por construcción que lo pintado se mueva sin el valor.
+
+Debajo había una segunda: **`checked:` sobre esa fila no discrimina en ninguna dirección** —el `ViewGroup` dice `checked=false` también con el interruptor encendido—, así que la aserción que `ajustes.yaml` arrastraba **desde la fila 43** pasaba en verde sin medir nada.
+
+### `zurron.yaml` a límite declarado, contra un criterio de su propia spec
+
+Con el defecto arreglado el flujo recorre entero, y entonces se vio lo de fondo: **sale verde o rojo según el mundo que toque**. Montada la partida en Node exactamente como la monta la app, el prólogo siembra 2 entradas y deja 3 rumores con `frentes: []`; **sesenta pasos dan cero efectos y las 2 entradas siguen pendientes**. La causa es estructural y está en la fuente: `creaColaDeEntregas` sin `producciones` no produce por diseño (`quests.md` decisión 3) y `motor.js` le pasa `producciones: null` declarado; lo sembrado entrega por **micro-encuentro al atravesar sitios durante una salida**, no por pasos de fondo. Y los rumores del prólogo nacen sedimentados.
+
+El dueño decidió declararlo: **la columna sube de 8 a 9**, contra un criterio de `SPEC-046` que decía que no subiría. Se dice en voz alta. El precedente es `llegada.yaml`: un flujo que pasa o falla según el mundo, contado entre los verdes, es peor que uno declarado. Comparte la deuda de fondo de `escena.yaml` —no hay dónde escribir la semilla— y **no se abrió entrada nueva**.
+
+Dos cosas que ese motivo estuvo a punto de decir mal. Iba a escribirse «falta la siembra, es fila 19», y **`siembraLaCola` tiene llamador desde la fila 50** (`app/mapa/donde-estas.js:169`): habría sido el tercer motivo caducado de esa lista, tras los de `descarte.yaml` y `escena.yaml`. Y la guarda no admitía esta forma de límite —daba por supuesto que declarado es siempre «no hay camino»—, así que las dos formas pasan a ser dato, con la estricta por defecto y quien quiera la otra nombrándose a mano.
+
+### Verificado
+
+- **@nucleo: 2865 · 2861 · 1 · 3** (base antes de la fila: 2825 · 2821 · 1 · 3), medido cuatro veces, la última en la tanda de cierre `SUITE-run-20260813T050409Z`. Único rojo el ajeno `BOOT_COMPLETED` de `expo-notifications` (SPEC-023). Total comparable: `manifiesto-generado.estado.json` con `mirado: true` en las dos plataformas.
+- **@app: 20 · 8 · 3 · 9** (base: 20 · 8 · 4 · 8), desde aparato limpio con `pm clear` + reinstalación y bucle de posición cada 2 s. Los tres rojos son ajenos y con motivo leído: `en-marcha` y `telon` por el proveedor frío, con el `accessibilityText` palabra por palabra, y `empezar-de-nuevo-copia`, del que esta fila aporta un dato nuevo — **se reproduce también en Android**, no solo en iOS.
+- **`zurron.yaml` verde, y corrió la rama *con* zurrón**: `Run flow when id: zurron is not visible` SKIPPED, la contraria RUNNING, con `zurron-envoltorio`, `zurron-entrada`, el toque en `zurron-seguir` y `lista-de-hoy`. El recorrido A2P1 → A2P2 → A2P3 entero, en un teléfono.
+- **Pantallas huérfanas 1 → 0**, la primera vez desde que existe la guarda (serie 12 → 8 → 1 → 0 sobre 33). `contratos-sin-llamador` baja de 4 entradas a 2. `piezas-sin-consumidor` sigue vacía.
+- **Manifiesto fusionado**: `minSdkVersion="26"`, `health.READ_DISTANCE` y `health.READ_STEPS`, **`ACTIVITY_RECOGNITION` retirado** y ni una aparición. Health Connect no arrastra ningún permiso: solo su bloque `<queries>` y las dos puertas de la razón. `Info.plist` sin ninguna clave de salud — `NSHealthShareUsageDescription` retirada, anotada en `docs/iphone.md` decisión 1.
+- `verifica-flujo`: 41 pantallas, **96 aristas** (94 antes), ninguna suelta. `verifica-gherkin`: 46 características, 243 casos. `spec-test-map` válido con 3672 entradas.
+
+### Lo que se deja fichado
+
+- **Si la línea de A6P6 basta como razón de permisos ante Play.** Se decidió no inventar texto legal en esta fila y no se ha podido mirar con ojos de revisor.
+- **`arranque.yaml` deja `READ_DISTANCE` y `READ_STEPS` en `granted=true`** aunque se neutralice la llamada de la app. Medido en las dos direcciones, sin explicación. En este emulador, el valor de esos permisos no prueba que la app los haya pedido.
+- **`ajustes.yaml` contamina a los flujos posteriores** dejando esos permisos concedidos, y un permiso concedido no se devuelve desde dentro de la app. El toque se conserva —quitarlo dejaría al flujo sin ejercitar su único interruptor— y la defensa es la que ya usan los flujos que importan: empezar limpiando estado.
+- **La puerta del `activity-alias` no se pudo disparar**: exige `START_VIEW_PERMISSION_USAGE`, que es permiso de sistema y `adb` no tiene (`SecurityException` literal). Se afirma que está registrada y a dónde apunta, sobre el manifiesto fusionado. No se añadió `CATEGORY_DEFAULT` para poder medir: sería ampliar la superficie pública por comodidad de la prueba.
+- **Ninguna pantalla se ha visto en un iPhone**, y ahora hay además una plataforma sin fuente de salud. El inventario está en `docs/iphone.md`.

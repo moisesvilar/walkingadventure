@@ -33,6 +33,8 @@ Tres sí conviene mirarlos antes de tocar lo que dependa de ellos: **el tamaño 
 
 **Y uno del cotejo de la fila 50** (12-ago-2026): **qué hace abrir una salida cuando el aparato no da posición puntual pero hay una última conocida fresca.** Hoy la apertura pide `getCurrentPositionAsync`, y si el proveedor no responde la salida no se abre y la pantalla guarda el motivo («sin una posición no hay punto de partida, y sin punto de partida no hay regreso que detectar»). El comportamiento es honesto, pero en el emulador limpio pasa siempre (la trampa está en `CLAUDE.md`) y en un teléfono real puede pasar en un portal con mal cielo. Caer a la última posición conocida con una cota de frescura resolvería los dos casos — y cuánta frescura es aceptable para fijar el punto de partida del regreso es decisión de diseño, no de implementación.
 
+**Y uno de la fila 46** (13-ago-2026): **si la fila de contar los pasos de A6P6 basta como razón de permisos ante Google Play.** Health Connect obliga a declarar un destino para «¿por qué me pides esto?», y el dueño decidió que aterrizara en A6P6 en lugar de en una pantalla nueva: la fila y su línea de aviso ya *son* esa razón, escritas con las reglas de lenguaje. La fila las cableó y las verificó en el aparato con partida y sin ella. Lo que no se ha podido mirar es con ojos de revisor de Play, que además pide política de privacidad para datos de salud. Se decidió a propósito **no inventar texto legal** dentro de la fila; si la línea se queda corta, vuelve como decisión de producto y no como redacción de paso.
+
 ## Ideas sin cerrar
 
 Vienen de `docs/ideas.md` y no son compromisos: falta decidir si entran.

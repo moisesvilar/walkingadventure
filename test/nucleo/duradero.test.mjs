@@ -468,7 +468,11 @@ describe('La suite de núcleo arranca sin instalar nada', () => {
       vistos.add(fichero);
       const texto = readFileSync(fichero, 'utf8');
       const rutas = [];
-      for (const m of texto.matchAll(/(?:^|\n)\s*(?:import|export)[\s\S]*?from\s+['"]([^'"]+)['"]/g)) rutas.push(m[1]);
+      // `\b` tras la palabra clave, y no es cosmético: sin él una línea que empiece por un
+      // identificador como `importanSalud,` abre el patrón, el `[\s\S]*?` corre hasta el
+      // siguiente `from '…'` que haya en el fichero —aunque sea el de una cadena— y la guarda
+      // da un rojo por un import que no existe. Medido el 12-ago-2026 en `app.test.mjs`.
+      for (const m of texto.matchAll(/(?:^|\n)\s*(?:import|export)\b[\s\S]*?from\s+['"]([^'"]+)['"]/g)) rutas.push(m[1]);
       for (const m of texto.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) rutas.push(m[1]);
       for (const ruta of rutas) {
         if (ruta.startsWith('node:')) continue;
@@ -508,7 +512,11 @@ describe('Las dependencias que entran', () => {
       const relativo = fichero.slice(RAIZ_REPO.length + 1);
       const texto = readFileSync(fichero, 'utf8');
       const rutas = [];
-      for (const m of texto.matchAll(/(?:^|\n)\s*(?:import|export)[\s\S]*?from\s+['"]([^'"]+)['"]/g)) rutas.push(m[1]);
+      // `\b` tras la palabra clave, y no es cosmético: sin él una línea que empiece por un
+      // identificador como `importanSalud,` abre el patrón, el `[\s\S]*?` corre hasta el
+      // siguiente `from '…'` que haya en el fichero —aunque sea el de una cadena— y la guarda
+      // da un rojo por un import que no existe. Medido el 12-ago-2026 en `app.test.mjs`.
+      for (const m of texto.matchAll(/(?:^|\n)\s*(?:import|export)\b[\s\S]*?from\s+['"]([^'"]+)['"]/g)) rutas.push(m[1]);
       for (const m of texto.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) rutas.push(m[1]);
       // Y `require`, que en React Native no es exótico: los recursos estáticos entran
       // así, y un paquete pedido por `require` entra en el móvil igual que uno importado.

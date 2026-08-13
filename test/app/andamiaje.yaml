@@ -72,15 +72,29 @@ appId: com.walkingadventure.app
 - assertVisible:
     id: 'capacidad-respaldo'
 
-# La salud queda declarada no montada, nombrando a su dueña.
-- assertVisible: 'Salud — no montada'
-# El motivo de la capacidad de salud, literal. Decía `'.*la monta la fila 42.*'` y el
-# texto de `app/plataforma/salud.js` es «la fila 42 monta el lector y su doble; la fuente
-# nativa de salud entra con la dependencia que su spec no nombra»: el orden de las palabras
-# nunca coincidió, y como el flujo no se había ejecutado, nadie lo vio. Se corrige la
-# prueba y no el texto — el del código dice más, porque distingue lo que la fila 42 sí
-# entregó de lo que no.
-- assertVisible: '.*la fila 42 monta el lector.*'
+# La salud, y **este par de líneas cambió con la fila 46**. Decían:
+#
+#     - assertVisible: 'Salud — no montada'
+#     - assertVisible: '.*la fila 42 monta el lector.*'
+#
+# Las dos eran la verdad de la fila 42, cuando `app/plataforma/salud.js` era un módulo
+# único que declaraba `montado: false` y difería la fuente. La 46 monta la fuente nativa y
+# parte el módulo por sufijo, así que **en Android `montado` es siempre `true` por
+# construcción** y aquel texto no puede volver a verse. Es la misma familia que las nueve
+# pruebas que codificaban «todavía no hay ninguna migración» como invariante: afirmaban un
+# estado provisional en lugar de una propiedad.
+#
+# Y las dos afirmaban **por texto**, que es justo lo que la cabecera de este flujo prohíbe
+# —«el texto de una capacidad cambia con el dispositivo y el identificador no»—. La fila ya
+# se localiza arriba por `capacidad-salud`, que es lo que este flujo tiene que hacer.
+#
+# Lo que sí se afirma, y es lo único que el aparato sostiene sin depender de si alguien
+# concedió el permiso antes: **en Android la salud nunca queda «no montada»**. Medido el
+# 12-ago-2026 en `wa-pixel` con los dos permisos en `granted=false`: el nodo dice «Salud —
+# montada, sin poder usarse» y su motivo nombra Health Connect y el permiso que falta. Con
+# el permiso concedido diría «disponible». Los dos son estados de una capacidad montada, y
+# afirmar cuál de los dos ataría este flujo al permiso que dejara el flujo anterior.
+- assertNotVisible: 'Salud — no montada'
 
 # Ni el núcleo caído ni la lista vacía: los dos estados existen y aquí no tocan.
 - assertNotVisible:
@@ -90,9 +104,10 @@ appId: com.walkingadventure.app
 - assertNotVisible:
     id: 'gancho-no-reconocido'
 
-# Sin cifras de distancia, tiempo, ritmo, pasos ni progreso en toda la pantalla.
 # Ninguna cifra de distancia, tiempo, ritmo, pasos ni progreso. El patrón llevaba `m` sin
 # frontera de palabra y casaba «la fila **42 m**onta el lector» del motivo de la capacidad
 # de salud: una ausencia que se ponía roja por una palabra que empieza por eme. Con `\b` mide
-# lo que quería medir.
+# lo que quería medir. El motivo que lo destapó ya no existe —lo sustituyó el de Health
+# Connect con la fila 46— y la frontera se queda: lo que arregló no era ese texto sino el
+# patrón, y el de hoy también nombra «los pasos del día a día».
 - assertNotVisible: '.*\d+\s*(km|m|min|pasos|%)\b.*'

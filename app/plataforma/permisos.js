@@ -24,6 +24,37 @@
 // enumerado todo lo que hace, y nada de ello lee con la app cerrada», que es más fuerte:
 // registrar una tarea sin declararla es error de construcción y no un descuido silencioso.
 
+/**
+ * Los dos permisos de Health Connect, y **ninguno más** (RF-PRIV-003).
+ *
+ * Están aquí y no dentro de `salud.android.js` porque este es el sitio donde vive lo que la
+ * app declara pedir: la pareja de plataforma solo exporta la fuente y su sonda, y la lista
+ * de lo que se pide tiene que poder leerse igual desde la mitad de iOS, donde no hay fuente.
+ *
+ * Cada uno dice **quién lo consume**, que es lo que impide que sobre alguno: el de distancia
+ * alimenta `metrosEnVentana` y el de pasos alimenta `pasosEnVentana`, que es la caída cuando
+ * la fuente no tiene distancia. Health Connect concede por tipo de dato y quien juega puede
+ * dar uno y no el otro, así que los dos se usan y ninguno está pedido de más.
+ *
+ * Y lo que **no** se pide, dicho aquí para que la ausencia se pueda poner roja: ni
+ * entrenamientos, ni sesiones con ruta, ni frecuencia cardíaca, ni ningún registro del
+ * cuerpo, ni nada con recorrido.
+ */
+export const PERMISOS_DE_SALUD = Object.freeze([
+  Object.freeze({
+    permiso: 'android.permission.health.READ_DISTANCE',
+    registro: 'Distance',
+    alimenta: 'metrosEnVentana',
+    porque: 'son los metros caminados de la ventana, que es lo que el motor convierte con el tramo personal',
+  }),
+  Object.freeze({
+    permiso: 'android.permission.health.READ_STEPS',
+    registro: 'Steps',
+    alimenta: 'pasosEnVentana',
+    porque: 'son los pasos de la ventana cuando la fuente no tiene distancia, convertidos con una zancada constante y no personalizable',
+  }),
+]);
+
 /** Los permisos que la app pide, cada uno con cuándo se pide y quién lo posee. */
 export const PERMISOS_QUE_SE_PIDEN = Object.freeze([
   Object.freeze({
@@ -42,13 +73,23 @@ export const PERMISOS_QUE_SE_PIDEN = Object.freeze([
   }),
   Object.freeze({
     id: 'salud-lectura',
-    ios: 'NSHealthShareUsageDescription',
-    android: 'android.permission.ACTIVITY_RECOGNITION',
+    // **Sin clave de iOS, y es una decisión de la fila 46**: mientras iOS no tenga fuente
+    // de salud, `NSHealthShareUsageDescription` sería una cadena de uso sin uso, y dejarle
+    // a la guarda del manifiesto un falso positivo consentido justo en la plataforma que
+    // estrena mirada sería socavarla el mismo día que empieza a servir. Vuelve el día que
+    // alguien monte HealthKit, y ese día pasa por las reglas de lenguaje
+    // (`docs/iphone.md`, decisión 1).
+    ios: null,
+    // **Los dos de Health Connect y ninguno más.** `ACTIVITY_RECOGNITION` estuvo aquí hasta
+    // la fila 46 y no era este permiso: es el del reconocimiento de actividad del sistema,
+    // la vía de Google Fit y de los sensores en crudo, y esta app no lo usa. Un permiso
+    // peligroso que se pide y no se usa es rojo, así que salió de aquí y de `app.json`.
+    android: PERMISOS_DE_SALUD.map((p) => p.permiso),
     // En contexto y solo entonces: al encender el interruptor de los ajustes, nunca al
     // instalar y nunca al abrir. Denegarlo no se reintenta (`quests.md` decisión 4: el
     // juego es completo sin el modo).
     cuando: 'al encender «contar los pasos del día a día» en los ajustes',
-    dueña: 'fila 42 del checklist',
+    dueña: 'fila 42 del checklist, cableada por la 46',
   }),
 ]);
 
@@ -218,8 +259,13 @@ export function revisaLaDeclaracion(manifiesto) {
     if (permiso.ios && infoPlist[permiso.ios] === undefined) {
       problemas.push({ clave: permiso.id, que: `iOS no declara "${permiso.ios}", que es lo que explica para qué se pide` });
     }
-    if (permiso.android && !permisos.includes(permiso.android)) {
-      problemas.push({ clave: permiso.id, que: `Android no declara "${permiso.android}"` });
+    // `android` es uno o varios: Health Connect concede por tipo de dato, así que un solo
+    // permiso no basta para describir lo que se pide. Se normaliza aquí en lugar de tener
+    // dos campos, que serían dos sitios donde olvidarse de mirar.
+    for (const cual of [].concat(permiso.android ?? [])) {
+      if (!permisos.includes(cual)) {
+        problemas.push({ clave: permiso.id, que: `Android no declara "${cual}"` });
+      }
     }
   }
 

@@ -24,8 +24,9 @@ import { evidenciaDelSistema, mecanismoDeAtestacion } from '../plataforma/atesta
 import { mensajeDeError } from '../plataforma/capacidades.js';
 import { creaAlmacenDeBinarios } from '../recursos/almacen-de-binarios.js';
 import { creaConseguidorDeRecursos } from '../recursos/conseguidor.js';
-import { NUCLEO_DE_LA_PREPARACION } from '../nucleo/piezas.js';
+import { NUCLEO_DEL_ZURRON, NUCLEO_DE_LA_PREPARACION } from '../nucleo/piezas.js';
 import { creaPreparacion } from '../salida/preparacion.js';
+import { creaZurron } from '../salida/zurron.js';
 import { PantallaAntesDeSalir } from './antes-de-salir.jsx';
 import { DIRECCION_DEL_PROXY } from './mapa-montado.jsx';
 import { marcaSuperpuesta } from './marca.js';
@@ -50,6 +51,8 @@ export function AntesDeSalirMontado({
   almacen = null,
   llamada = null,
   zurron = {},
+  motor = null,
+  alZurronVaciado = null,
   ofrecimiento = null,
   alLevantarMapa = null,
   alDejarloEstar = null,
@@ -89,6 +92,19 @@ export function AntesDeSalirMontado({
         presupuestoIlustracionesMs: PRESUPUESTO_PREPARACION_MS,
         presupuestoFotosMs: PRESUPUESTO_FOTOS_MAPA_MS,
       });
+      // El zurrón se cablea aquí, **con la misma llamada y el mismo presupuesto que la
+      // preparación** y no con uno propio: SPEC-042 lo decidió así, y dos montajes serían
+      // dos sitios donde declarar «sin narrador».
+      //
+      // Y sus piezas se exigen **solo cuando hay zurrón que enseñar**: sin mapa levantado no
+      // hay motor y lo que se ve es el ofrecimiento de A2P0, que no necesita ninguna. Con
+      // reserva sin vaciar sí, y entonces la pieza que falte se dice por su nombre en lugar
+      // de enseñar una portada que lleva a una pantalla vacía.
+      const hayQueVaciar = zurron?.modoDeFondo === true && (zurron?.reserva?.length ?? 0) > 0;
+      if (hayQueVaciar) {
+        if (!motor) throw new Error('el zurrón se monta sin el motor de pasos del mapa activo, y la reserva es la de ese mapa: sin él no hay nada que vaciar ni dónde vaciarlo');
+        if (!registro) throw new Error('el zurrón se monta sin el registro de hechos de la partida: el vaciado anexa su hecho antes de vaciar, y sin registro no se puede escribir');
+      }
       return {
         calendario: creaCalendario({ arrancadaEn }),
         // Sin cliente de narrador montado todavía, y **declarado**: los textos salen de
@@ -100,12 +116,52 @@ export function AntesDeSalirMontado({
           sinNarrador: !llamada,
           locale: mundo?.locale ?? 'es',
         }),
+        zurron: creaZurron({
+          nucleo: NUCLEO_DEL_ZURRON,
+          llamada,
+          sinNarrador: !llamada,
+          locale: mundo?.locale ?? 'es',
+          presupuestoMs: PRESUPUESTO_PREPARACION_MS,
+        }),
         fallo: null,
       };
     } catch (e) {
-      return { calendario: null, preparacion: null, fallo: mensajeDeError(e) };
+      return { calendario: null, preparacion: null, zurron: null, fallo: mensajeDeError(e) };
     }
-  }, [base, almacen, llamada, arrancadaEn, mundo]);
+  }, [base, almacen, llamada, arrancadaEn, mundo, zurron, motor, registro]);
+
+  /**
+   * Abre el zurrón: la decisión, la única llamada agrupada y la composición.
+   *
+   * La reserva se lee **de lo que llega ahora** y nunca de una referencia guardada: vaciarla
+   * sustituye el array entero, así que una tomada antes seguiría trayendo los cinco pasos y
+   * el zurrón volvería a ofrecerse recién vaciado.
+   */
+  const abreElZurron = useCallback(() => montaje.zurron.abre({
+    mundo: mundo?.documento ?? null,
+    modoDeFondo: zurron?.modoDeFondo === true,
+    reserva: zurron?.reserva ?? [],
+    semillaDeMundo: partida?.semilla ?? null,
+  }), [montaje, mundo, zurron, partida]);
+
+  /**
+   * Confirma «Seguir»: **el hecho primero y la reserva después**, y solo entonces se congela.
+   *
+   * `narrados` es cuántas entradas se llegaron a enseñar, que es lo que el hecho apunta.
+   * Confirmar dos veces el mismo zurrón no anexa un segundo hecho: el núcleo lo declara con
+   * `yaEstaba` y no escribe nada.
+   */
+  const confirmaElZurron = useCallback((narrados) => {
+    const vaciado = montaje.zurron.confirma({
+      motor,
+      registro,
+      mapa: mundo?.mapaId ?? null,
+      dia: montaje.calendario.dia(),
+      narrados,
+    });
+    if (alZurronVaciado) alZurronVaciado(vaciado);
+    return vaciado;
+  }, [montaje, motor, registro, mundo, alZurronVaciado]);
 
   if (montaje.fallo !== null) {
     return (
@@ -135,6 +191,10 @@ export function AntesDeSalirMontado({
         identidad={identidad}
         preparacion={montaje.preparacion}
         zurron={zurron}
+        // A2P2, cableada: abrirla y confirmarla. La pantalla decide **cuándo** —lo dice el
+        // destino que ya trae la portada— y aquí se decide **con qué**.
+        alZurron={abreElZurron}
+        alSeguirDelZurron={confirmaElZurron}
         // A2P0. Llega hasta aquí y no se compone aquí: quien sabe si hay mapa donde estás es
         // la raíz, que es la que tiene el levantamiento y la posición. Con ofrecimiento la
         // pantalla **sustituye la portada por él**, que es lo que hace desde SPEC-041

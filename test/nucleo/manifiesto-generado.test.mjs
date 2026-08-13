@@ -76,6 +76,7 @@ import { RAIZ_REPO } from './andamiaje-sandbox.mjs';
 import {
   LO_QUE_NUNCA_SE_DECLARA,
   MODOS_DE_FONDO,
+  PERMISOS_DE_SALUD,
   PERMISOS_QUE_SE_PIDEN,
   PERMISOS_QUE_UNA_LIBRERIA_EXIGE,
 } from '../../app/plataforma/permisos.js';
@@ -217,6 +218,49 @@ function receptoresDelManifiesto(xml) {
   return receptores;
 }
 
+/**
+ * La actividad principal y el `activity-alias`, con las acciones que cada uno declara.
+ *
+ * Hace falta desde la fila 46: la razón de permisos de salud entra por **dos puertas** —el
+ * filtro de la actividad para Android 13 y anteriores, y el alias de uso de permisos para
+ * Android 14 en adelante— y lo que hay que poder afirmar es que las dos llevan al mismo
+ * sitio. Analizador propio y no una librería, por lo de siempre: la batería corre sin
+ * `node_modules`.
+ */
+function puertasDeLaActividad(xml) {
+  const texto = sinComentarios(xml);
+  const puertas = [];
+  for (const etiqueta of ['activity', 'activity-alias']) {
+    // `<activity\b` casa también con `<activity-alias`, así que la etiqueta se cierra con lo
+    // que puede seguirla de verdad: espacio, salto o el propio `>`.
+    const abre = new RegExp(`<${etiqueta}(?=[\\s>])`, 'g');
+    let m;
+    while ((m = abre.exec(texto)) !== null) {
+      // Primero dónde acaba **la etiqueta de apertura**, y solo entonces si se cierra sola.
+      // Buscar el primer `/>` desde el principio recortaría el bloque en el primer `<action …/>`
+      // de dentro y dejaría el filtro sin sus acciones, que es justo lo que se viene a leer.
+      const finCabecera = texto.indexOf('>', m.index);
+      const cabecera = texto.slice(m.index, finCabecera + 1);
+      const cierre = texto.indexOf(`</${etiqueta}>`, finCabecera);
+      const hasta = cabecera.endsWith('/>') || cierre === -1 ? finCabecera + 1 : cierre + `</${etiqueta}>`.length;
+      const bloque = texto.slice(m.index, hasta);
+      puertas.push({
+        etiqueta,
+        clase: (cabecera.match(/android:name="([^"]+)"/) ?? [, '(sin nombre)'])[1],
+        destino: (cabecera.match(/android:targetActivity="([^"]+)"/) ?? [, null])[1],
+        acciones: [...bloque.matchAll(/<action[^>]*?android:name="([^"]+)"/gs)].map((a) => a[1]),
+      });
+    }
+  }
+  return puertas;
+}
+
+/** El `minSdkVersion` que declara el manifiesto fusionado, que es **el artefacto**. */
+function minimoDeAndroid(xml) {
+  const m = sinComentarios(xml).match(/<uses-sdk[^>]*?android:minSdkVersion="(\d+)"/s);
+  return m ? Number(m[1]) : null;
+}
+
 /** Los tipos de servicio en primer plano declarados, que es la otra mitad del rótulo. */
 function tiposDeServicioEnPrimerPlano(xml) {
   const texto = sinComentarios(xml);
@@ -356,7 +400,11 @@ if (HAY_ANDROID) {
       const permisos = permisosDelManifiesto(XML_ANDROID);
       const deLaApp = new Set([
         ...(JSON.parse(readFileSync(join(RAIZ_REPO, 'app', 'app.json'), 'utf8')).expo?.android?.permissions ?? []).map(conPrefijo),
-        ...PERMISOS_QUE_SE_PIDEN.filter((p) => p.android).map((p) => conPrefijo(p.android)),
+        // `android` es **uno o varios** desde SPEC-046-iter-1: los de Health Connect son dos
+        // y se conceden por tipo de dato. Sin normalizar, la lista se metía una cadena con
+        // los dos pegados y la lista blanca dejaba de blanquear los que sí pide la app; lo
+        // tapaba que `app.json` los enumere también, que es tapar una guarda con otra.
+        ...PERMISOS_QUE_SE_PIDEN.flatMap((p) => [].concat(p.android ?? []).map(conPrefijo)),
         ...PERMISOS_QUE_UNA_LIBRERIA_EXIGE.map((p) => conPrefijo(p.id)),
       ]);
       const admitidos = new Set([...deLaApp, ...ARRASTRE_DE_LIBRERIA.map((a) => a.permiso)]);
@@ -434,6 +482,65 @@ if (HAY_ANDROID) {
       assert.equal(permisosDelManifiesto(XML_ANDROID).includes('android.permission.RECEIVE_BOOT_COMPLETED'), true);
     });
 
+    test('El manifiesto no declara ningún permiso de salud fuera de los dos', () => {
+      // Bloqueante (`@privacidad`, RF-PRIV-003), y sobre el APK y no sobre `app.json`: el
+      // plugin de `react-native-health-connect` puede añadir permisos de salud por su cuenta
+      // y en el fichero de entrada no se verían.
+      const permisos = permisosDelManifiesto(XML_ANDROID);
+      const deSalud = permisos.filter((p) => p.includes('.health.'));
+      assert.deepEqual(
+        deSalud,
+        PERMISOS_DE_SALUD.map((p) => p.permiso),
+        `el APK pide permisos de salud que no son los dos declarados: ${deSalud.join(', ')}. ` +
+        'Los dos que se piden son el de distancia, que alimenta los metros, y el de pasos, que es la caída cuando la fuente no tiene distancia.',
+      );
+
+      // Y **el que se retiró**: `ACTIVITY_RECOGNITION` estuvo declarado hasta esta fila y no
+      // es el permiso de Health Connect — es el del reconocimiento de actividad del sistema,
+      // la vía de Google Fit y de los sensores en crudo—. Un permiso peligroso que se pide y
+      // no se usa es rojo, y comprobarlo sobre el fusionado es la única forma de saber que
+      // ninguna librería lo reintroduce.
+      assert.equal(permisos.includes('android.permission.ACTIVITY_RECOGNITION'), false, 'el APK pide ACTIVITY_RECOGNITION, que no es de Health Connect y que esta app no usa');
+
+      // Nada de lo que Health Connect añade al manifiesto es un permiso ni un receptor: la
+      // comprobación de disponibilidad necesita un bloque `<queries>` y el aviso de la razón
+      // necesita un destino, y ninguno de los dos despierta nada.
+      assert.match(sinComentarios(XML_ANDROID), /<queries>/, 'no hay bloque <queries>: la comprobación de si la app de salud está instalada no podría responder');
+    });
+
+    test('Las dos puertas de la razón de permisos llevan a la actividad principal', () => {
+      // Son la misma pregunta vista desde dos versiones de Android, y las dos tienen que
+      // aterrizar en la actividad principal. Traducir una sola daría verde en un emulador que
+      // fuerce la acción vieja y rojo en cualquier móvil moderno.
+      const puertas = puertasDeLaActividad(XML_ANDROID);
+      const principal = puertas.find((p) => p.etiqueta === 'activity' && /MainActivity$/.test(p.clase));
+      assert.ok(principal, 'el manifiesto fusionado no declara la actividad principal');
+      assert.equal(
+        principal.acciones.includes('androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE'),
+        true,
+        'la actividad principal no declara el filtro de la razón de permisos de salud: en Android 13 y anteriores el sistema no tendría a dónde preguntar',
+      );
+
+      const alias = puertas.find((p) => p.etiqueta === 'activity-alias' && p.acciones.includes('android.intent.action.VIEW_PERMISSION_USAGE'));
+      assert.ok(alias, 'no hay activity-alias con la acción de uso de permisos: en Android 14 en adelante el sistema no tendría a dónde preguntar');
+      assert.equal(alias.destino, principal.clase, 'el alias de uso de permisos no apunta a la actividad principal, que es la que traduce el intento');
+      // Y la app sigue teniendo el esquema por el que viaja el enlace traducido: sin él, el
+      // plugin reescribiría el intento a una URL que nadie sabe abrir.
+      assert.match(sinComentarios(XML_ANDROID), /android:scheme="walkingadventure"/, 'el manifiesto no declara el esquema por el que viaja el enlace de la razón de permisos');
+    });
+
+    test('El suelo de aparatos que la fuente de salud exige está en el artefacto', () => {
+      // **Sobre el artefacto y no sobre la intención**: leer el plugin y darlo por bueno no
+      // vale, porque la cadena que lleva de `gradle.properties` al `uses-sdk` pasa por el
+      // catálogo de versiones de Expo y una palanca equivocada se descubre después de una
+      // compilación entera.
+      assert.equal(
+        minimoDeAndroid(XML_ANDROID),
+        26,
+        'el mínimo de Android del manifiesto fusionado no es 26, que es el que exige androidx.health.connect. Con 24 la fusión de manifiestos falla y no hay APK.',
+      );
+    });
+
     test('El único servicio en primer plano es el de la ubicación', () => {
       // El rótulo del sistema es un servicio en primer plano de tipo `location` y **nada
       // más**: un `dataSync` o un `mediaPlayback` colados aquí serían otra cosa corriendo
@@ -475,6 +582,23 @@ if (HAY_IOS) {
       const colados = enElPlist.filter((m) => !declarados.includes(m));
       assert.deepEqual(colados, [], `el Info.plist generado declara modos de fondo que nadie ha decidido: ${colados.join(', ')}`);
       assert.deepEqual([...enElPlist], declarados, 'los modos de fondo generados no son exactamente los declarados en MODOS_DE_FONDO');
+    });
+
+    test('El Info.plist generado no declara ninguna clave de uso de salud', () => {
+      // La otra mitad de «El manifiesto no declara ningún permiso de salud fuera de los dos»,
+      // y va aquí porque el bloque de iOS solo se registra si hay `Info.plist`: el criterio se
+      // cubre con dos casos a propósito, uno por artefacto.
+      //
+      // `NSHealthShareUsageDescription` estuvo en `app.json` hasta la fila 46 y salió por
+      // decisión del dueño: mientras iOS no tenga fuente es una cadena de uso sin uso, y
+      // dejarle a esta guarda un falso positivo consentido justo en la plataforma que estrena
+      // mirada sería socavarla el mismo día que empieza a servir. Vuelve el día que alguien
+      // monte HealthKit, y ese día pasa por las reglas de lenguaje.
+      const deSalud = Object.keys(PLIST).filter((c) => /Health/i.test(c));
+      assert.deepEqual(deSalud, [], `el Info.plist generado declara claves de salud y iOS no tiene fuente: ${deSalud.join(', ')}`);
+      // Y la de escritura sigue sin declararse nunca, ni cuando la haya: esta app no escribe
+      // en la app de salud del sistema.
+      assert.equal('NSHealthUpdateUsageDescription' in PLIST, false, 'el Info.plist declara el permiso de escritura de salud, que no se declara nunca');
     });
 
     test('No hay ninguna tarea de fondo programada en iOS', () => {

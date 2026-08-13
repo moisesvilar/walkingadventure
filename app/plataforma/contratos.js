@@ -24,14 +24,14 @@
  * `dueña` es la fila que los cableará, y `porque` lo que falta para poder hacerlo. Los cuatro
  * que SPEC-048 sacó de esta lista se nombran en la cabecera y no aquí: lo que se enumera es
  * lo que queda.
+ *
+ * **De cuatro a dos con la fila 46**, y las dos que salen se dicen aquí en lugar de
+ * desaparecer del diff: `creaLectorDeSalud` y `creaMarcaDeAgua`, los dos de
+ * `app/plataforma/lector-de-salud.js`. Lo que les faltaba era la fuente nativa —Health
+ * Connect— y quién los montara al abrir la app; la fila 46 trae las dos cosas, así que ya
+ * tienen llamador y bajar el número es lo que esta lista existe para conseguir.
  */
 export const CONTRATOS_SIN_LLAMADOR = Object.freeze([
-  Object.freeze({
-    fichero: 'app/plataforma/lector-de-salud.js',
-    contrato: 'creaLectorDeSalud',
-    porque: 'lee los pasos del día a día al abrir, y el interruptor que lo enciende es del zurrón',
-    dueña: 'fila 46 del checklist',
-  }),
   Object.freeze({
     fichero: 'app/plataforma/notificador.js',
     contrato: 'creaNotificadorDeExpo',
@@ -43,12 +43,6 @@ export const CONTRATOS_SIN_LLAMADOR = Object.freeze([
     contrato: 'creaRotulo',
     porque: 'la Actividad en Vivo pide un widget de ActivityKit compilado dentro de la app, y ninguna spec ha nombrado todavía el módulo nativo que lo daría',
     dueña: 'la fila que nombre ese módulo; SPEC-048 lo deja declarado como límite',
-  }),
-  Object.freeze({
-    fichero: 'app/plataforma/lector-de-salud.js',
-    contrato: 'creaMarcaDeAgua',
-    porque: 'es la marca de hasta dónde se leyeron los pasos, y sin lector de salud no hay nada que marcar',
-    dueña: 'fila 46 del checklist',
   }),
 ]);
 

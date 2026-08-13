@@ -24,7 +24,7 @@ import { spawnSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { DEPENDENCIAS_DE_UBICACION } from '../../app/plataforma/permisos.js';
+import { DEPENDENCIAS_DE_UBICACION, PERMISOS_DE_SALUD, PERMISOS_QUE_SE_PIDEN } from '../../app/plataforma/permisos.js';
 import { localeFor, namesFor } from '../../packages/nucleo/names/index.js';
 import { makeRng } from '../../packages/nucleo/core/rng.js';
 import { SUFIJOS_DE_FASE } from '../../packages/nucleo/core/semilla.js';
@@ -134,6 +134,19 @@ describe('La disposición del repositorio tras estrenar la app', () => {
     // permiso permanente. No entra a leer con la app cerrada; lo que impide que acabe
     // haciéndolo es `TAREAS_QUE_LA_APP_DEFINE`, que `pasos-de-fondo.test.mjs` enumera.
     //
+    // `react-native-health-connect` entra por **SPEC-046**, y la spec la nombra con la
+    // frase que cierra la lista: «Una sola dependencia nueva y ninguna más». Es el enlace
+    // con la app de salud del sistema en Android, y sin ella el modo de contar los pasos del
+    // día a día no tiene de dónde leer: `app/plataforma/salud.android.js` la envuelve en la
+    // interfaz que `creaLectorDeSalud` ya exigía. Su iteración 1 añadió lo que arrastra
+    // —el suelo de aparatos a 26— y **no añadió ninguna dependencia**: el plugin que lo sube
+    // usa `withGradleProperties`, que viene dentro de `expo`.
+    //
+    // La otra mitad de abrirla, que es la de más abajo: la lista de lo que se le pide vive en
+    // `PERMISOS_DE_SALUD` y **la fuente entra por un solo fichero**. Una dependencia nativa
+    // que se pudiera importar desde cualquier sitio de `app/` sería exactamente lo que la
+    // bifurcación por sufijo existe para impedir: la librería de Android en el árbol de iOS.
+    //
     // `react-native-reanimated` y `react-native-worklets` entran también por
     // **SPEC-021**, y por arrastre de Skia y no por gusto: Skia declara Reanimated
     // como par *opcional* pero lo exige al importarse, y sin él la app compila,
@@ -151,6 +164,7 @@ describe('La disposición del repositorio tras estrenar la app', () => {
       'expo-file-system', // SPEC-039: la partida en disco y el fichero de la copia
       'expo-location', // SPEC-048: el permiso «mientras se usa», la posición y el servicio en primer plano
       'expo-task-manager', // SPEC-048: la tarea a la que ese servicio entrega las posiciones
+      'react-native-health-connect', // SPEC-046: la app de salud del sistema en Android, de donde salen los pasos del día a día
     ]);
     const declaradas = Object.keys(APP_PAQUETE.dependencies ?? {});
     for (const d of declaradas) {
@@ -189,6 +203,36 @@ describe('La disposición del repositorio tras estrenar la app', () => {
       assert.match(motivo.dueña, /fila 48/, `"${id}" no dice qué fila la trajo`);
     }
     assert.deepEqual(DEPENDENCIAS_DE_UBICACION.map((d) => d.id), ['expo-location', 'expo-task-manager'], 'la declaración de dependencias de ubicación no son exactamente las dos que la spec nombra');
+
+    // Y lo equivalente para la dependencia de la fila 46, que es lo que impide que abrir la
+    // lista salga gratis. `PERMISOS_DE_SALUD` es aquí lo que `DEPENDENCIAS_DE_UBICACION` es
+    // arriba: la declaración, **en la fuente**, de qué se le pide a esa librería y para qué
+    // sirve cada cosa. Sin ella, «entra porque la spec la nombra» vuelve a ser «entra».
+    assert.equal(declaradas.includes('react-native-health-connect'), true, 'falta la dependencia "react-native-health-connect", que SPEC-046 nombra en su reparto');
+    assert.deepEqual(
+      PERMISOS_DE_SALUD.map((p) => p.permiso),
+      ['android.permission.health.READ_DISTANCE', 'android.permission.health.READ_STEPS'],
+      'PERMISOS_DE_SALUD no declara exactamente los dos permisos que SPEC-046 autoriza',
+    );
+    for (const permiso of PERMISOS_DE_SALUD) {
+      assert.ok(permiso.alimenta, `el permiso de salud "${permiso.permiso}" no dice a qué lectura alimenta`);
+      assert.ok(permiso.porque && permiso.porque.length > 20, `el permiso de salud "${permiso.permiso}" no explica para qué está`);
+    }
+    const salud = PERMISOS_QUE_SE_PIDEN.find((p) => p.id === 'salud-lectura');
+    assert.ok(salud, 'PERMISOS_QUE_SE_PIDEN ya no declara "salud-lectura": la dependencia entró y lo que se pide con ella dejó de decirse');
+    assert.match(salud.dueña, /46/, '"salud-lectura" no dice qué fila cableó la dependencia');
+    assert.deepEqual([].concat(salud.android), PERMISOS_DE_SALUD.map((p) => p.permiso), '"salud-lectura" no pide exactamente los dos permisos declarados');
+
+    // La bifurcación por sufijo es la otra mitad, y la única que se puede afirmar sin
+    // compilar: **la librería nativa de Android entra por un solo fichero de la app**, que es
+    // el de su plataforma. Importarla desde un módulo compartido la metería en el árbol de
+    // iOS, que es exactamente lo que la spec descarta en «Decisiones asumidas».
+    const saludImportadaPor = modulosDeLaApp().filter((f) => /from '(react-native-health-connect)'/.test(fuente(f)));
+    assert.deepEqual(
+      saludImportadaPor,
+      ['app/plataforma/salud.android.js'],
+      'la dependencia nativa de salud se importa desde más de un sitio, o desde el que no es: la bifurcación por sufijo deja de valer en cuanto un módulo compartido la importa',
+    );
   });
 
   test('El package.json de la raíz declara el espacio de trabajo y ninguna dependencia de runtime', () => {

@@ -18,10 +18,13 @@
 // describe qué hace el juego, no cómo se cuentan sus pruebas. Las entradas del mapa van
 // marcadas como hueco de batería.
 //
-// Lo que esta prueba NO afirma, a propósito: que las pantallas existan. Precisamente
-// afirma lo contrario —que hoy no hay camino hasta ellas— y su día de morir es el día
-// en que alguien monte la orquestación de B5 en `app/` y estos ficheros se desmarquen
-// uno a uno.
+// Lo que esta prueba NO afirma, a propósito: que las pantallas existan. Con los ocho
+// primeros afirmaba lo contrario —que no hay camino hasta ellas—, y **desde la fila 46 esa
+// frase ya no vale para todos**: `zurron.yaml` entra con la pantalla alcanzada y recorrida,
+// y lo que declara es que su último tramo depende del mundo. Por eso las formas del límite
+// son dos y se declaran una a una, más abajo. Su día de morir sigue siendo el mismo: el día
+// en que haya camino hasta las que no lo tienen y se pueda pedir el mundo que las otras
+// necesitan, y estos ficheros se desmarquen uno a uno.
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
@@ -37,11 +40,13 @@ import { fuente } from './mundo-de-prueba.mjs';
  * descubriera leyendo el directorio, marcar un flujo nuevo no costaría nada y el
  * marcador dejaría de ser un acto deliberado, que es lo único que aporta.
  *
- * Los seis que NO están, y por qué:
+ * Los que NO están, y por qué. **Eran seis y son cinco desde la fila 46**, que se llevó a
+ * `zurron.yaml` de esta enumeración a la lista; su motivo está al final de este comentario y
+ * no aquí, para que no haya dos sitios contándolo:
  *
  * - `arranque.yaml` recorre la app entera, de A1P1 a A1P7.
- * - `antes-de-salir.yaml` y `zurron.yaml` no tienen guarda ninguna: empiezan con
- *   `runFlow: file: arranque.yaml` y siguen recorriendo. Su rojo es rojo de verdad.
+ * - `antes-de-salir.yaml` no tiene guarda ninguna: empieza con `runFlow: file: arranque.yaml`
+ *   y sigue recorriendo. Su rojo es rojo de verdad.
  * - `ajustes.yaml` y `empezar-de-nuevo.yaml` **salieron de esta lista con la fila 43**,
  *   que montó el momento de consulta: se entra por `puerta-ajustes`, que es la del pie de
  *   la portada, y desde ahí a A6P7. Recorrido medido en `wa-pixel` el 10-ago-2026.
@@ -125,6 +130,77 @@ import { fuente } from './mundo-de-prueba.mjs';
  *   y ahora la cola se siembra al nacer la partida, así que una salida sin aventura sí puede
  *   producir un paso de beat. Lo que mantiene a `escena.yaml` en la lista son las **tres** de
  *   arriba, que son de reproducibilidad y no de cableado, y que esta fila no toca.
+ * **La fila 46 la deja en nueve, y la que entra es `zurron.yaml`.** Y entra **contradiciendo un
+ * criterio de su propia spec**, que decía «`zurron.yaml` sigue sin estar en la lista —no está
+ * hoy y no entra— y la columna no sube por esta fila». Sube. Se dice aquí en voz alta en lugar
+ * de disimularlo, porque lo que aquel criterio no podía saber es lo que se midió al recorrer el
+ * flujo de verdad. Decisión del dueño, y el precedente que la sostiene es `llegada.yaml`: un
+ * flujo que pasa o falla según el mundo, contado en la columna de los verdes, es peor que uno
+ * declarado.
+ *
+ * - `zurron.yaml` **entra**, y no porque no llegue: **llega**. Recorre el arranque entero, la
+ *   portada, A6P6, el interruptor con su permiso, la razón de permisos por su enlace y el
+ *   gancho de metros de fondo — 168 comandos desde que `044af9b` arregló la fila del
+ *   interruptor, que era inerte fuera del `Switch` y hacía que `enciende()` ni corriera. Lo
+ *   que no puede garantizar es **lo último**: que A2P2 aparezca.
+ *
+ *   **El motivo NO es «falta la siembra».** Ese era el motivo que se iba a escribir y era
+ *   falso: `siembraLaCola` tiene llamador desde SPEC-050 —`app/mapa/donde-estas.js:169`, con
+ *   la pieza expuesta en `app/nucleo/piezas.js:222`—. Escribirlo habría estrenado el tercer
+ *   motivo caducado de esta lista, después de los de `descarte.yaml` y `escena.yaml`, que
+ *   costaron una sesión cada uno de desatascar.
+ *
+ *   **Lo medido, el 12-ago-2026, montando la partida en Node exactamente como la monta la
+ *   app** —`correPrologo` + `siembraLaCola` como en `donde-estas.js`, y el motor con
+ *   `creaMotorDelMapaActivo`—: el prólogo siembra **2 entradas** en la cola y deja **3
+ *   rumores, los tres con `frentes: []` y `agotado: true`**; sesenta pasos del motor dan
+ *   **0 pasos con efecto y 0 efectos**, y las 2 entradas de la cola **siguen pendientes**.
+ *
+ *   Son **dos vías** y no se comportan igual, que es justo lo que hace que esto sea un límite
+ *   y no una avería:
+ *
+ *   - **La cola no produce nunca por pasos, y eso sí es estructural y siempre cierto.**
+ *     `creaColaDeEntregas` declara que **sin `producciones` inyectadas su productor no produce
+ *     nada y no falla** —«sin producción del mundo no hay encuentro, nunca relleno aleatorio»,
+ *     `quests.md` decisión 3—, y `app/salida/motor.js` le pasa `producciones: null`
+ *     **declarado**. Lo que el prólogo siembra se entrega por otra vía: el micro-encuentro al
+ *     atravesar sitios durante una salida (`microencuentros.js`, «como mucho uno por paso del
+ *     mundo»). Por aquí no llega nada al zurrón, ni en este mundo ni en ninguno.
+ *   - **La propagación produce o no, y depende del grafo del mundo.** Un rumor nace con **un
+ *     frente por vecino del núcleo donde ocurrió** —`rumores.js:332`,
+ *     `frentes: arbol.vecinos(origen).map(...)`— y queda agotado en cuanto se queda sin
+ *     ninguno —`rumores.js:338`, `rumor.agotado = rumor.frentes.length === 0`, con su propio
+ *     comentario diciendo que «un mundo de un solo núcleo sedimenta ahí y ya está agotado»—.
+ *     Cuántos frentes nacen y cuánto tardan en consumirse lo decide el árbol de calzadas: en
+ *     un mundo pequeño el prólogo los gasta enteros y la partida arranca sin nada en vuelo; en
+ *     uno con más vecinos quedan frentes vivos y los pasos de fondo **sí** producen.
+ *
+ *   Así que **los tres `frentes: []` de arriba son ciertos de aquel mundo, no del prólogo**:
+ *   decir que los rumores «nacen sedimentados» afirmaría más de lo que la medida sostiene.
+ *   **Y hay la medida contraria, que es la que cierra el argumento**: la tanda de cierre de la
+ *   fila (`SUITE-run-20260813T050409Z`) corrió **la rama con zurrón** —`zurron-envoltorio` y
+ *   `zurron-entrada` a la vista, la rama sin zurrón `SKIPPED`—, y el zurrón solo compone
+ *   entradas a partir de efectos narrables (`esNarrable`, `packages/nucleo/partida/zurron.js`).
+ *   Ese mundo sí produjo. Con las dos direcciones observadas, «depende del mundo» deja de ser
+ *   una inferencia y pasa a ser un hecho medido — que es lo que **refuerza** este límite en
+ *   lugar de debilitarlo: no es que nunca haya zurrón, es que no se puede pedir la tanda en la
+ *   que lo haya.
+ *
+ *   O sea: **lo sembrado entrega por llegadas y no por pasos de fondo, y de los rumores del
+ *   prólogo depende del grafo cuántos frentes queden vivos, así que una partida recién
+ *   arrancada puede no tener nada en vuelo.** No es que no pueda haberlo nunca —un rumor nacido de un desenlace de quien juega
+ *   sí tiene frentes—: es que **no se puede pedir un mundo que lo tenga**, y ahí este flujo
+ *   comparte la deuda de fondo de `escena.yaml`, la segunda de las tres suyas: «la semilla nace
+ *   de entropía real y el arranque no ofrece dónde escribirla». **No se abre entrada nueva**:
+ *   es la misma deuda y el día que se cierre, se cierran las dos.
+ *
+ *   Lo que el flujo hace en su lugar es bifurcar donde el límite ocurre: sin zurrón afirma que
+ *   la puerta lleva a lo que hay hoy, y con zurrón recorre A2P1 → A2P2 → A2P3 entero. Y **el
+ *   mecanismo entero del zurrón se afirma en `@nucleo`**, que es donde el rojo es posible:
+ *   `test/nucleo/zurron.test.mjs` cubre si hay zurrón y por qué, sus entradas y su orden, el
+ *   tope de cinco, la caída a plantilla, la llamada única, el vaciado con su hecho, la
+ *   confirmación repetida y el recorrido A2P1 → A2P2 → A2P3 sobre la máquina del momento.
+ *
  * - `telon.yaml` **no entra**, y estuvo a punto. Se escribió marcado con el motivo «las tres
  *   vías de cierre están fuera del alcance de un flujo», y era falso: al telón **se llega sin
  *   moverse**. Se sale a andar, se mata la app —el servicio en primer plano muere con el
@@ -143,7 +219,47 @@ const FLUJOS_DE_LIMITE_DECLARADO = [
   'mapas.yaml',
   'repisa.yaml',
   'visor.yaml',
+  'zurron.yaml',
 ];
+
+/**
+ * **Las dos formas que puede tener un límite declarado**, y por qué hay dos desde la fila 46.
+ *
+ * Hasta ella todos los flujos marcados eran de la misma especie: **no había camino hasta su
+ * pantalla**, así que su verde solo podía significar «el límite sigue en pie» y la guarda se
+ * evaluaba nada más arrancar. `zurron.yaml` es de otra: **hay camino y lo recorre entero** —el
+ * arranque, la portada, A6P6, el interruptor con su permiso, la razón de permisos y el gancho—
+ * y lo que no puede garantizar es **lo último**, que el mundo tenga algo que contar. Eso no se
+ * sabe al arrancar: se sabe al final del recorrido.
+ *
+ * Meterlo a la fuerza en la primera forma habría costado los 168 comandos que sí verifica, y un
+ * flujo que deja de verificar para caber en una guarda es exactamente lo que esta lista existe
+ * para no premiar. Así que la forma se declara **una a una y a mano**, igual que la lista: un
+ * flujo nuevo que quiera la segunda tiene que nombrarse aquí, y eso es lo que impide que
+ * «depende del mundo» se convierta en la excusa cómoda de cualquier rojo intermitente.
+ *
+ * Lo que **no** cambia entre las dos: sigue habiendo **una sola guarda** de primer nivel, sigue
+ * teniendo que comprobar que la app abre donde abre y que la pantalla no está, sigue teniendo
+ * que quedar un cuerpo colgando de la condición contraria, y siguen valiendo las dos
+ * direcciones de rojo. Lo único que cambia es **dónde puede estar ese cuerpo** y **qué frase
+ * tiene que llevar la explicación del marcador**, que en la segunda forma no puede ser «no
+ * recorre» porque sería falsa.
+ */
+const FORMA_DEL_LIMITE = {
+  'zurron.yaml': {
+    id: 'depende-del-mundo',
+    frase: 'depende del mundo',
+    porque: 'recorre hasta el final y lo que no puede garantizar es que el mundo dé el caso',
+  },
+};
+
+/** La forma por defecto: no hay camino hasta la pantalla, que es con la que nació la lista. */
+const SIN_CAMINO = { id: 'sin-camino', frase: 'no recorre', porque: 'no hay camino hasta su pantalla' };
+
+/** La forma declarada de un flujo. Sin entrada propia, la de siempre. */
+function formaDe(fichero) {
+  return FORMA_DEL_LIMITE[fichero] ?? SIN_CAMINO;
+}
 
 /** La línea de marcador, literal. Se compara con `===` sobre la línea recortada. */
 const MARCADOR = '# @limite-declarado';
@@ -238,10 +354,13 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
       // Arriba del todo, donde se lee sin desplegar nada. No es cosmética: un marcador
       // enterrado a mitad de fichero se lee como una nota más.
       assert.ok(donde < 6, `${fichero}: el marcador está en la línea ${donde + 1} de la cabecera; va arriba, junto al título`);
-      // Y explicado: la línea sola diría qué pasa y no por qué.
+      // Y explicado: la línea sola diría qué pasa y no por qué. Cada forma tiene la suya, y
+      // pedir la que no es sería obligar a escribir algo falso: «no recorre» en un flujo que
+      // recorre entero es peor que no explicar nada.
+      const forma = formaDe(fichero);
       assert.ok(
-        lineas.slice(donde + 1, donde + 12).some((l) => l.includes('no recorre')),
-        `${fichero}: el marcador no va seguido de la explicación de por qué no hay camino hasta su pantalla`,
+        lineas.slice(donde + 1, donde + 16).some((l) => l.includes(forma.frase)),
+        `${fichero}: el marcador no va seguido de la explicación de su forma («${forma.frase}»: ${forma.porque})`,
       );
     }
   });
@@ -267,9 +386,19 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
 
       // Y el cuerpo de verdad sigue ahí, colgando de la condición contraria: un flujo de
       // límite que hubiera perdido su cuerpo ya no volvería solo el día que haya camino.
-      const contrarias = bloques.filter((b) => b.nombre === 'runFlow' && new RegExp(`visible:\\s*\\n\\s*id: '${pantalla[1]}'`).test(b.lineas.join('\n')));
+      //
+      // Dónde se busca depende de la forma. En la de siempre el cuerpo cuelga del primer
+      // nivel, porque el límite se conoce al arrancar. En la de «depende del mundo» el límite
+      // se conoce **al final del recorrido**, así que la bifurcación vive dentro y aquí se
+      // busca sobre el fichero entero — lo que se exige es lo mismo: que exista una rama que
+      // sí recorra la pantalla el día que el mundo la dé.
+      const forma = formaDe(fichero);
+      const donde = forma.id === 'sin-camino'
+        ? bloques.filter((b) => b.nombre === 'runFlow').map((b) => b.lineas.join('\n'))
+        : [...fuente(`test/app/${fichero}`).matchAll(/- runFlow:\n(?:[ ]+.*\n)+/g)].map((m) => m[0]);
+      const contrarias = donde.filter((t) => new RegExp(`(?<!not)[Vv]isible:\\s*\\n\\s*id: '${pantalla[1]}'`).test(t));
       assert.ok(
-        contrarias.some((b) => !b.lineas.join('\n').includes('notVisible:')),
+        contrarias.some((t) => new RegExp(`when:\\s*\\n\\s*visible:\\s*\\n\\s*id: '${pantalla[1]}'`).test(t)),
         `${fichero}: no queda ningún \`runFlow\` condicionado a que \`${pantalla[1]}\` sí esté a la vista`,
       );
     }
@@ -282,6 +411,11 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
       // En el primer nivel solo se admiten `launchApp` y `runFlow` condicionados. Todo
       // lo demás —una afirmación suelta, un toque, un enlace profundo— se ejecutaría
       // siempre, y entonces el verde ya no significaría solo «el límite sigue en pie».
+      //
+      // Vale igual para las dos formas, y en la de «depende del mundo» dice algo más fuerte:
+      // allí el verde significa «el límite sigue en pie **y** el recorrido hasta él funciona»,
+      // que es más y no menos. Lo que esta comprobación impide es lo mismo en los dos casos:
+      // que algo se ejecute sin que nadie haya declarado bajo qué condición.
       const sueltos = bloques.filter((b) => AFIRMA.test(b.nombre) || RECORRE.test(b.nombre));
       assert.deepEqual(
         sueltos.map((b) => b.nombre),
@@ -311,7 +445,14 @@ describe('El marcador de límite declarado de los flujos de @app', () => {
     // entere. `llegada.yaml` no está por lo de siempre: hasta la 44 sí llevaba marcador, y
     // meterlo aquí obligaría a recordar por qué; lo que lo sostiene es la lista de arriba,
     // donde su salida está escrita con la medida.
-    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'zurron.yaml', 'en-marcha.yaml', 'telon.yaml']) {
+    // Y `zurron.yaml` **sale de la lista de aquí abajo con la fila 46 porque entra en la de
+    // límite declarado**, que es el movimiento contrario al que la fórmula «salió de esta
+    // lista con la fila NNN» describe en el comentario de arriba: aquélla se lee «dejó de
+    // ser un límite declarado», y esto es lo opuesto. Sale de aquí porque aquí solo pueden
+    // estar los que **no** llevan marcador. No es un aflojamiento: entra por haberse
+    // recorrido y haberse medido que su último tramo depende del mundo, igual que
+    // `llegada.yaml`. El motivo entero está arriba, con la medida.
+    for (const fichero of ['arranque.yaml', 'antes-de-salir.yaml', 'en-marcha.yaml', 'telon.yaml']) {
       const texto = fuente(`test/app/${fichero}`);
       assert.ok(
         !texto.split('\n').some((l) => l.trim() === MARCADOR),

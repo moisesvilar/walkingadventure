@@ -665,3 +665,141 @@ describe('El zurrón cableado en la app', () => {
     assert.equal(zurron.testids, TESTIDS, 'la app inventa localizadores en vez de consumir los del núcleo');
   });
 });
+
+// ── A2P1 → A2P2 → A2P3, montado de verdad (SPEC-046) ───────────────────────────
+//
+// Las tres conductas que `SPEC-043-iter-1` derogó al retirar el cableado y que la fila 46
+// recupera. Lo que necesita dispositivo —ver las tres pantallas encadenadas— es
+// `test/app/zurron.yaml`; lo que se puede afirmar aquí es **quién decide qué**, que es donde
+// estaba el defecto: dos sitios opinando sobre si hay zurrón.
+//
+// Se lee y no se carga: `antes-de-salir.jsx` es JSX y lo compila Metro, no Node. Va marcado
+// como hueco de batería con esa salvedad escrita, en lugar de fingir que se ejecuta.
+
+describe('El zurrón se recorre entre la portada y lo que hay hoy', () => {
+  const PANTALLA = () => fuente('app/pantallas/antes-de-salir.jsx');
+  const MONTADO = () => fuente('app/pantallas/antes-de-salir-montado.jsx');
+
+  test('Con reserva sin vaciar se abre el zurrón y no la lista', () => {
+    // El destino lo trae la portada resuelto y **aquí se obedece**, no se vuelve a decidir:
+    // es lo que impide que dos sitios distintos opinen sobre si hay zurrón. Lo que sí se
+    // decide es qué hacer con lo que el núcleo devuelva.
+    const texto = PANTALLA();
+    assert.match(texto, /accion\.destino !== 'zurron'/, 'la pantalla vuelve a decidir si hay zurrón en lugar de obedecer el destino que trae la portada');
+    assert.match(texto, /setPantalla\('zurron'\)/, 'no hay ningún camino que lleve a A2P2');
+    assert.match(texto, /if \(abierto\?\.hay\)/, 'la pantalla no distingue «hay zurrón» de «hay que vaciar sin enseñar nada»');
+    // Y el zurrón es una pantalla más de esta máquina, entre la portada y la lista.
+    assert.match(texto, /PANTALLAS = Object\.freeze\(\['portada', 'zurron', 'lista', 'ficha', 'preparacion'\]\)/, 'A2P2 no está entre la portada y la lista en la máquina del momento');
+    // La reserva se lee **de lo que llega ahora**: vaciarla sustituye el array entero, así
+    // que una referencia tomada antes traería los cinco pasos ya vaciados.
+    assert.match(MONTADO(), /reserva: zurron\?\.reserva \?\? \[\]/, 'el zurrón se compone con una reserva guardada en lugar de la que llega');
+  });
+
+  test('Seguir lleva del zurrón a lo que hay hoy', () => {
+    const texto = PANTALLA();
+    const enElZurron = texto.slice(texto.indexOf("if (pantalla === 'zurron')"), texto.indexOf("if (pantalla === 'lista')"));
+    assert.match(enElZurron, /alSeguirDelZurron/, '«Seguir» no confirma el vaciado');
+    assert.match(enElZurron, /abreLaLista\(\)/, '«Seguir» no lleva a lo que hay hoy');
+    // Y lo hace en ese orden: **el vaciado primero y la lista después**. Al revés, cerrar la
+    // app entre las dos dejaría el zurrón enseñado y sin vaciar sin poder distinguirlo.
+    assert.ok(
+      enElZurron.indexOf('alSeguirDelZurron') < enElZurron.indexOf('abreLaLista()'),
+      'la lista se abre antes de confirmar el vaciado',
+    );
+    // Una sola acción, y ninguna manera de saltarlo: la pantalla no recibe ninguna otra.
+    const zurron = fuente('app/pantallas/zurron.jsx');
+    assert.equal((zurron.match(/onPress=/g) ?? []).length, 1, 'A2P2 tiene más de una acción, y el zurrón se lee una vez y se va');
+  });
+
+  test('El zurrón no aparece por segunda vez', () => {
+    // La reserva **se relee del motor cada vez que la portada se recompone**, y esa es la
+    // pieza entera: `vaciaReserva` sustituye el array, así que una referencia tomada antes
+    // seguiría diciendo que hay cinco pasos y el zurrón se ofrecería recién vaciado.
+    const raiz = fuente('app/App.js');
+    assert.match(raiz, /reserva: elFondo\?\.motor \? elFondo\.motor\.registro\(\)\.reserva : \[\]/, 'la raíz guarda la reserva en lugar de releerla del motor');
+    assert.match(raiz, /pasoDeFondo/, 'no hay nada que fuerce a recomponer la portada tras vaciar: el núcleo muta el área en sitio y React no se entera solo');
+    assert.match(raiz, /alZurronVaciado=\{\(\) => \{/, 'confirmar el zurrón no avisa a la raíz, así que ni se congela ni se repinta');
+
+    // Y el vaciado se escribe de verdad: el hecho primero y la reserva después. Eso ya se
+    // afirma ejecutándolo más arriba; lo que aquí se ata es que la app pase por ahí.
+    assert.match(MONTADO(), /montaje\.zurron\.confirma\(/, 'la app no confirma el zurrón por el vaciado del núcleo');
+  });
+
+  test('Al zurrón no se llega desde ninguna otra pantalla', () => {
+    // Una ausencia, y por eso se mide sobre los imports y no sobre una pantalla concreta: un
+    // zurrón consultable sería el panel del estado del mundo que el design system descarta.
+    const importan = ['diario', 'repisa', 'ajustes', 'consulta-montado', 'portada', 'lo-que-hay-hoy', 'sitios-marcados']
+      .filter((p) => /from '\.\/zurron\.jsx'/.test(fuente(`app/pantallas/${p}.jsx`)));
+    assert.deepEqual(importan, [], `estas pantallas importan el zurrón y no deberían: ${importan.join(', ')}`);
+    // La única que lo monta es la máquina del momento «antes de salir».
+    assert.match(PANTALLA(), /from '\.\/zurron\.jsx'/, 'nadie importa el zurrón: volvería a ser una pantalla huérfana');
+  });
+
+  test('El zurrón se cablea con la misma llamada y el mismo presupuesto que la preparación', () => {
+    // Hueco de batería. SPEC-042 lo decidió así y esta fila lo consuma: dos montajes serían
+    // dos sitios donde declarar «sin narrador», que es como acaban discrepando.
+    const montado = MONTADO();
+    assert.match(montado, /presupuestoMs: PRESUPUESTO_PREPARACION_MS/, 'el zurrón tiene un presupuesto propio en lugar del de la preparación');
+    assert.match(montado, /sinNarrador: !llamada/, 'el zurrón declara «sin narrador» de otra manera que la preparación');
+
+    // Y las piezas se exigen **solo cuando hay zurrón que enseñar**: sin mapa levantado lo
+    // que se ve es el ofrecimiento de A2P0, que no necesita ninguna. Con reserva sin vaciar
+    // sí, y entonces la que falte se dice por su nombre.
+    assert.match(montado, /if \(hayQueVaciar\)/, 'las piezas del zurrón se exigen siempre, y sin mapa levantado eso rompería A2P0');
+    assert.match(montado, /el zurrón se monta sin el motor de pasos del mapa activo/, 'la pieza que falta no se dice por su nombre');
+    assert.match(montado, /el zurrón se monta sin el registro de hechos de la partida/, 'la pieza que falta no se dice por su nombre');
+  });
+});
+
+// ── Lo que sale del móvil por causa del zurrón (SPEC-046) ───────────────────────
+
+describe('Del zurrón no sale nada del móvil', () => {
+  test('Del zurrón no sale nada del móvil', async () => {
+    // Bloqueante (`@privacidad`). Se afirma con el **inspector en modo estricto** y no
+    // leyendo el código: una prueba de privacidad que no mira el tráfico está fingiendo, y
+    // esta es la afirmación más difícil del proyecto porque es una negativa.
+    //
+    // Lo único que sale por causa del zurrón son los huecos inertes de la llamada agrupada
+    // que SPEC-018 ya declara. Ni el nombre real de ningún sitio, ni la reserva, ni cuánto
+    // se ha andado, ni el número del paso.
+    const mundo = await mundoDePrueba();
+    const espia = narradorEspia();
+    const inspector = creaInspectorDeRed({ estricto: true });
+    try {
+      const abierto = await abreElZurron({
+        mundo, modoDeFondo: true, reserva: RESERVA_LLENA, presupuestoMs: 5000, espera: NUNCA_VENCE, llamada: espia.llamada,
+      });
+      assert.equal(abierto.hay, true);
+
+      // Nada por la frontera de red: la única salida es la llamada inyectada, que es la que
+      // el proxy ciego atiende y la que SPEC-018 gobierna.
+      assert.deepEqual(inspector.peticiones(), [], 'el zurrón ha abierto una salida a red por su cuenta');
+
+      // Y en lo que la llamada lleva no hay ni un dato vivo. Se serializa la petición entera
+      // y se busca sobre ella: mirar campo a campo dejaría pasar lo que viaje anidado.
+      const texto = JSON.stringify(espia.peticiones());
+
+      // El nombre real de ningún sitio: los que viajan son los del mundo de fantasía —el
+      // `sitio` de cada entrada— y nunca el anclaje del que salieron, que es el dato vivo.
+      const reales = mundo.settlements.map((s) => s.anchor?.name).filter(Boolean);
+      assert.ok(reales.length > 0, 'el mundo de prueba no tiene ningún anclaje real, y este caso no distinguiría nada');
+      for (const real of reales) {
+        assert.equal(texto.includes(real), false, `el nombre real "${real}" sale del móvil en la llamada del zurrón`);
+      }
+
+      // Ni la reserva, ni cuánto se ha andado, ni la marca de la última lectura.
+      for (const vivo of ['metros', 'kilometros', 'reserva', 'leidoHasta', 'latitude', 'longitude']) {
+        assert.equal(texto.includes(vivo), false, `"${vivo}" sale del móvil en la llamada del zurrón`);
+      }
+
+      // Ni el número de ninguno de los pasos, que es de donde se deduciría cuánto se ha
+      // andado. La clave del hueco es un ordinal dentro de la tanda —1 a 5— y no el número
+      // del paso: son cosas distintas y por eso se busca el número y no el ordinal.
+      for (const p of RESERVA_LLENA) {
+        assert.equal(texto.includes(String(p.n)), false, `el número del paso ${p.n} sale del móvil`);
+      }
+    } finally {
+      inspector.suelta();
+    }
+  });
+});
