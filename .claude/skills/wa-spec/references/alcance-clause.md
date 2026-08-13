@@ -1,9 +1,11 @@
 # Cláusula canónica de "Alcance de implementación"
 
 Única copia de la cláusula (antes duplicada en spec-instructions e iter-instructions — hallazgo A19).
-Reformulada por ADR-001: el implementador es el subagente `somo-implementer` (skill somo-dev-fable),
-y no un tercero. La cláusula es contractual: se copia LITERAL en cada spec e iteración, ajustando solo
+Reformulada por ADR-001: el implementador es el subagente que ejecuta `wa-dev`, y no un tercero.
+La cláusula es contractual: se copia LITERAL en cada spec e iteración, ajustando solo
 los bullets 3º y 4º según indica cada plantilla. **Los dos primeros bullets nunca se eliminan ni se parafrasean.**
+
+(Corregida el 13-ago-2026: nombraba las skills `somo-*` del stack web, que en este repo no existen — paría specs con las skills equivocadas, y SPEC-050 lo arrastró. Fichado por la fila 51; las skills de este repo son `wa-dev`, `wa-qa-dev` y `wa-qa-tester`.)
 
 ```markdown
 ## Alcance de implementación
@@ -12,8 +14,8 @@ los bullets 3º y 4º según indica cada plantilla. **Los dos primeros bullets n
   páginas, estados), datos (queries, mutations, schema si aplica) y lógica de negocio asociada.
 - **Los tests automatizados están fuera del alcance del implementador.** No se deben escribir tests
   de nivel `@nucleo` (`node --test`) ni flujos de nivel `@app` (Maestro) como parte de esta entrega.
-  Los tests los genera la skill `/somo-qa-dev` y los ejecuta `/somo-qa-tester` contra el código ya
-  commiteado, en un paso posterior del pipeline de QA de SOMO. Cualquier test que el implementador
+  Los tests los genera la skill `wa-qa-dev` y los ejecuta `wa-qa-tester` contra el código ya
+  commiteado, en un paso posterior del bucle de QA de este repo. Cualquier test que el implementador
   entregue será descartado o reemplazado.
 - Si la spec requiere tocar la frontera del núcleo —una entrada o salida nueva que haya que inyectar—, se indica
   explícitamente en "Notas técnicas". Si no se indica, no hay cambios de infraestructura.

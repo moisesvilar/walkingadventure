@@ -48,6 +48,7 @@ Lo de siempre en este repo, que no cambia por tener pipeline: español en coment
 | Fichero | Quién escribe |
 | --- | --- |
 | `pipeline/state.json` | solo quien orquesta el bucle |
+| `.claude/skills/**` y `docs/prompts/*.md` | solo quien orquesta el bucle — es la maquinaria del pipeline; una fila que le encuentre un defecto lo ficha con la raíz medida, no lo arregla (precedente: la plantilla de alcance, fila 51) |
 | `docs/checklist.md`, columna `Estado` | solo quien orquesta el bucle |
 | `docs/checklist.md`, resto de columnas | el humano, o `/somo-plan-fable` al regenerar |
 | `docs/specs/*.md` | solo `wa-spec` |
