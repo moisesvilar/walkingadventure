@@ -139,15 +139,18 @@ export function creaLaAventuraEnCurso({ nucleo, mundo, estado, reparto, reloj })
      *   dura la sesión y por eso llega desde quien la pinta.
      */
     escenaDe(beat, { tamanoDeTexto = null } = {}) {
+      // La cara se resuelve **una vez** y va a las dos: son las dos mitades del mismo
+      // paso, y de ella cuelga la forma con la que se dice el texto en las dos.
+      const cara = caraDe(beat);
       return {
         escena: nucleo.componeEscena({
           beat,
-          cara: caraDe(beat),
+          cara,
           reloj,
           tenencia,
           ...(tamanoDeTexto ? { tamanoDeTexto } : {}),
         }),
-        loQueTeLlevas: nucleo.componeLoQueTeLlevas({ beat, siguiente: siguienteDe(beat) }),
+        loQueTeLlevas: nucleo.componeLoQueTeLlevas({ beat, siguiente: siguienteDe(beat), cara }),
       };
     },
   };

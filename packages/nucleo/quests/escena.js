@@ -359,6 +359,22 @@ export function compruebaCoberturaDeMarcos(catalogo) {
 
 // --- La escena ----------------------------------------------------------------
 
+/** Las dos formas en que se dice el texto de un beat. No hay una tercera. */
+export const FORMAS_DE_CUERPO = congelaHondo(['parrafo', 'parlamento']);
+
+/**
+ * Con qué forma se dice el texto de un beat: **parlamento cuando hay quien lo diga**, y
+ * párrafo cuando no.
+ *
+ * Se declara una vez y la usan **las dos mitades del paso** (SPEC-051, 13-ago-2026): la
+ * escena decide la forma y lo que te llevas la hereda, así que el mismo texto no puede
+ * leerse entrecomillado en una pantalla y como narración en la siguiente. Con la regla
+ * escrita en dos sitios, esa incoherencia solo tardaría en aparecer.
+ */
+export function formaDelCuerpo(cara) {
+  return cara ? 'parlamento' : 'parrafo';
+}
+
 function exigeBeatCasteado(beat) {
   const falta = ['n', 'lugar', 'disparador', 'escena', 'resultado', 'guiado'].filter((c) => beat?.[c] == null);
   if (falta.length) {
@@ -472,7 +488,7 @@ export function componeEscena({
     cuerpo: congelaHondo({
       // Con cara es parlamento y sin cara es párrafo. Es el único elemento que cambia
       // de forma, y ninguno de los demás cambia de sitio.
-      forma: cara ? 'parlamento' : 'parrafo',
+      forma: formaDelCuerpo(cara),
       texto: cuerpo,
       origen,
     }),
@@ -509,8 +525,12 @@ function exigeCara(cara) {
  * sitio siguiente con su marca en el mapa. Ni una cifra: ni cuánto falta, ni cuántos
  * beats quedan, ni cuánto oro se lleva. En el último beat de la cadena no hay bloque de
  * sitio siguiente y la acción es la misma.
+ *
+ * `cara` entra por lo mismo que en la escena y **solo decide la forma**: las dos mitades
+ * de un paso son el mismo momento, así que el párrafo que empuja se dice como lo dijo la
+ * escena. El texto no cambia y quien pinta pone las comillas.
  */
-export function componeLoQueTeLlevas({ beat, siguiente = null }) {
+export function componeLoQueTeLlevas({ beat, siguiente = null, cara = null }) {
   exigeBeatCasteado(beat);
   const esElUltimo = beat.resultado.siguienteBeat == null;
   if (!esElUltimo && siguiente != null) exigeBeatCasteado(siguiente);
@@ -526,8 +546,13 @@ export function componeLoQueTeLlevas({ beat, siguiente = null }) {
       objeto: beat.resultado.objeto ?? null,
     }),
     // El párrafo que empuja al siguiente sitio es el del beat: este módulo transporta
-    // textos y no redacta ninguno.
+    // textos y no redacta ninguno. Va **como texto suelto** a propósito, para que lo que
+    // vigila que ningún texto de esta pantalla lleve una cifra lo siga mirando.
     empuje: beat.escena.texto ?? null,
+    // Y con la forma que decidió la escena. Es lo único que esta pantalla hereda de la
+    // otra mitad del paso, y es lo que impide que el mismo parlamento se lea
+    // entrecomillado arriba y como narración un toque después.
+    forma: formaDelCuerpo(cara),
     siguienteSitio: esElUltimo || !siguiente
       ? null
       : congelaHondo({
