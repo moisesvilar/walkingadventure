@@ -113,6 +113,16 @@ Las dos van con la misma guarda, `test/nucleo/pantallas-huerfanas.test.mjs`, que
 
 La **50** son los tres hallazgos de la 49 que comparten forma —§6h en su variante de cableado: pieza escrita, probada y sin llamador— y que cambian el juego que se ve. Medido de cero el 12-ago-2026 al escribir su encargo: `siembraLaCola` sigue sin llamador desde `app/` (ningún micro-encuentro salta en un teléfono, deuda de la fila 19), `NUCLEO_DEL_OFRECIMIENTO` sigue sin importador (A2P0 inalcanzable, de SPEC-041), y A4P8 quedó medida por la 49 en el aparato: la capa de descarte desborda 1080×2400 y «Marcarlo» no se puede pulsar (RF-PRIV-004, de SPEC-035). Va antes que la 46 a propósito —cero dependencias nuevas, cero decisiones previas del dueño, y las guardas que vigilan las tres piezas ya existen—; las filas 19, 35 y 41 siguen en `done` y no se reabren: entregaron el mecanismo, y lo que faltaba era el cableado. El encargo completo está en `docs/prompts/prompt-cableados-que-faltan.md`.
 
+## B8 · Lo que las filas ficharon
+
+Filas que no salen del PRD sino de lo que las filas anteriores midieron y dejaron fichado con dueño. Cada una cita su origen; el número lo asigna quien orquesta, como siempre.
+
+| # | Spec (slug) | Rationale (PRD) | Prioridad | Estado |
+| --- | --- | --- | --- | --- |
+| 51 | beats-con-cara | RF-QUEST-009, RF-PJ-009, RF-INFRA-007 | should | pending |
+
+La **51** sale del fichado de la fila 49 (§11f del registro, dueño del hueco SPEC-017): 20 plantillas declaran rol humano y **ningún beat cae sobre ellos** — 0 de 506 en los cuatro mundos de referencia —, así que `escena.cara` es siempre nula y el bloque de quien habla no se ha pintado nunca. La composición está entera esperando (`escena.js`, `desenlace.js`, A4P3). Corta, solo núcleo, sin emulador. Lleva de segunda entrega la guarda de lista cerrada de `app/plugins/` (decisión §14e). El encargo completo está en `docs/prompts/prompt-beats-con-cara.md`.
+
 ## Notas de derivación
 
 - **Una fila por spec implementable y testeable de una pasada**, no una por RF: los RF de una misma feature cohesionada comparten fila (la capa de NPCs son cinco RF y una spec), y los RF transversales (RNF-DET, RF-PRIV-001/002) aparecen en la spec donde se implementa su garantía y se verifican como bloqueantes en todas (`RNF-DET-003`).
