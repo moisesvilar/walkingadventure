@@ -1841,7 +1841,7 @@ Mundo `P9SQCX177VESJYMX@42.41,-8.74` en `wa-pixel`, con el aparato limpio y la a
 
 - **El visor puede tener el defecto de la capa**: usa `...StyleSheet.absoluteFillObject`, que en el descarte no posicionaba. No medido; `visor.yaml` sigue en límite declarado por otro motivo.
 - **`creaMotorDeLaPartida` sigue sin llamador en `app/`.** Misma forma, otra fila.
-- **`escena.cara` sigue siendo nula siempre**, 0 de 506 beats sobre rol humano (SPEC-017).
+- ~~**`escena.cara` sigue siendo nula siempre**, 0 de 506 beats sobre rol humano (SPEC-017).~~ → **hecho** por la fila 51 (SPEC-051): 69 de 506 beats caen sobre un rol humano y componen escena con cara. Entrada XXXVI.
 - **La versión de formato sigue siendo global** a las ocho clases de documento (§11e). Esta fila no sube ninguna.
 
 ## La precondición que hay que escribir al lado de los números
@@ -1912,3 +1912,55 @@ Dos cosas que ese motivo estuvo a punto de decir mal. Iba a escribirse «falta l
 - **`ajustes.yaml` contamina a los flujos posteriores** dejando esos permisos concedidos, y un permiso concedido no se devuelve desde dentro de la app. El toque se conserva —quitarlo dejaría al flujo sin ejercitar su único interruptor— y la defensa es la que ya usan los flujos que importan: empezar limpiando estado.
 - **La puerta del `activity-alias` no se pudo disparar**: exige `START_VIEW_PERMISSION_USAGE`, que es permiso de sistema y `adb` no tiene (`SecurityException` literal). Se afirma que está registrada y a dónde apunta, sobre el manifiesto fusionado. No se añadió `CATEGORY_DEFAULT` para poder medir: sería ampliar la superficie pública por comodidad de la prueba.
 - **Ninguna pantalla se ha visto en un iPhone**, y ahora hay además una plataforma sin fuente de salud. El inventario está en `docs/iphone.md`.
+
+## XXXVI · La fila 51: los beats con cara, y una comprobación que al no poder correr no protestaba (13-ago-2026)
+
+Salda el fichado de la fila 50: `escena.cara` era **siempre nula**. Veinte de las treinta plantillas declaran un rol humano y **ningún beat caía encima** —0 de 506 en los cuatro mundos de referencia—, así que la composición de `escena.js`, el `carasDelDesenlace` de SPEC-017 y el bloque de quien habla de A4P3 llevaban escritos y probados desde su fila sin que nadie los alimentara. La forma §6h otra vez. `SPEC-051`, rama `pipeline/SPEC-051-beats-con-cara`. Fila de núcleo entera: **no tomó el emulador**.
+
+### La premisa del encargo era falsa, y cambió el arreglo
+
+El encargo decía que un beat sobre un rol humano caería hoy en `trecho-por-debajo-del-minimo`. **No cae en ningún motivo: revienta.** Los roles humanos se resuelven **fuera** del backtracking, así que durante toda la comprobación su lugar está sin asignar: el chequeo de trecho lo **salta en silencio** —y con él el del lazo, si el beat es el primero o el último— y el `TypeError` salta después, en `recorridoDe`. Medido: **70 excepciones** sobre 20 plantillas × 4 mundos.
+
+Importa porque cambia qué hay que arreglar. No había que ablandar una regla: había que hacer que **el lugar exista cuando las reglas se comprueban**. Es §6h en su variante nueva —**una comprobación que, al no poder correr, no protesta**—, hermana de la pieza que al no estar no protesta, y el criterio quedó escrito en la spec con la prohibición explícita de añadir una excepción para el caso humano.
+
+### Cuatro decisiones del dueño, y la que llevaba tres meses sin ratificar
+
+- **El pendiente 1 de `npcs.md`, ratificado**: dos caras del mismo sitio **son el mismo lugar** para el casting. Un beat sobre un rol humano ocurre en el sitio donde esa persona trabaja; la cara añade **quién habla**, no **dónde**. Era lo que `caraDeSitio` ya asumía en su comentario desde el 5-ago sin que nadie lo hubiera decidido. Tachado en `game-design/npcs.md`. La alternativa —cara como lugar propio— obligaba a inventar distancias entre dos caras del mismo portal y devolvía a los NPCs a competir por el anclaje escaso, que es justo lo que la enmienda de esa capa había abaratado.
+- **El alcance sale del catálogo, no de una lista**: dos cláusulas —el beat que la `relacion` de la plantilla ya nombra, y el último beat de su sitio para una cara con acto declarado que la primera dejó sin beat—, que dan **21 beats en 19 plantillas**. Se rechazó elegirlos a mano: una lista sin regla que la sostenga es la pieza que al no estar no protesta, y una plantilla futura habría entrado sola en el olvido. Queda un rol humano sin beat, `la-carta-sin-remite::quien_recibe`, a propósito: su plantilla no declara ningún acto, así que no hay momento escrito en el que esa persona esté delante, y la regla no se estira para llegar al cero.
+- **El puesto se dice con palabras del mundo**: A4P3 habría pintado `ANXO O DO NORTE · REGENCIA`, vocabulario de catálogo asomando dentro del juego contra la frontera de registros de `lenguaje.md`. Nueve rótulos declarados junto a `PUESTOS_POR_TIPO`, sintagmas de tarea sin género —`al frente`, `de guardia`, `del vecindario`, `en la cocina`— así que no hay género que elegir ni estereotipo que arrastre el oficio. **Un puesto sin rótulo es error de construcción, nunca un fallback a la clave.**
+- **Las dos mitades del paso comparten criterio**: A4P4 pintaba el `empuje` con el mismo texto y **sin comillas**, así que los parlamentos nuevos se habrían leído como narración justo después de leerse entrecomillados. `componeLoQueTeLlevas` hereda la `forma` de la escena. Un texto, un criterio, y la decisión anotada en `game-design/quests.md` §2.
+
+### Siete sitios donde un lugar podía ser una persona, y dos de ellos eran fugas de registro
+
+La spec declaró cinco: los estorbos y el recorrido de `casting.js`, el lazo de la plantilla en `catalogo.js` —con un último beat humano **el catálogo entero dejaba de cargar**—, la clave de elemento de `recursos.js` y «la aventura pasa por este núcleo» de `arranque.js`. `wa-dev` encontró **dos más y los declaró en vez de dejarlos para el cotejo**, que era la condición: el guiado de `aventura.js` habría pintado en el mapa una marca de tipo `humano`, y el sobre del prompt de `narrador.js` habría mandado `humano` al modelo **como tipo abstracto de un lugar**. Las dos son fugas de registro de las feas, y ninguna prueba las miraba.
+
+Un detalle de forma del dato que merece quedar escrito: `empuje` sigue siendo una cadena con la forma al lado, en vez del `{ forma, texto }` simétrico, porque la guarda de `escena-cableada.test.mjs:260` filtra por `typeof t === 'string'` y con un objeto **habría dejado de mirar el empuje y seguido en verde**. Una guarda que deja de medir en silencio es peor que un campo asimétrico.
+
+### Las guardas a mover no eran seis: eran diez
+
+La spec nombró seis. Al escribirlas aparecieron **cuatro más**, todas declaradas en el commit: el lazo por rol de `catalogo.test.mjs:296`, el decorado que dejaba `quien_encarga` huérfano, un tercer `puesto` libre en `escena.test.mjs:604`, y sobre todo `casting.test.mjs:334`, que exentaba el trecho mínimo **por rol** y daba «el trecho 2→3 son 0.000 tramos»: **medía la herencia como fallo**, y arreglarla a ciegas habría corrompido el criterio entero de la fila.
+
+La guarda del 0 de 506 se actualizó como estaba diseñada: **20 sigue siendo 20, 506 sigue siendo 506, y 0 pasa a 69**, con las tres cifras nuevas como aserciones propias y no solo en el comentario. Y su exigencia —«alguien mire si la cara llega a pantalla»— quedó **cumplida en dos sitios y no borrada**: el caso de composición ya no fabrica el beat, usa uno casteado de verdad; y un caso nuevo afirma sobre el árbol de A4P3 que el bloque pinta nombre y rótulo y que **ninguna de las nueve claves aparece**.
+
+### La segunda entrega: la lista cerrada de `app/plugins/`
+
+Decisión del dueño en §14e·3, y no se recortó. `test/nucleo/plugins-declarados.test.mjs` nombra a mano los dos plugins de hoy con su cometido en una frase, y se pone **roja en las tres direcciones** —uno nuevo, uno cambiado de forma, uno retirado—, las tres verificadas a mano. La «forma» que vigila son tres cosas: función exportada, ganchos de `expo/config-plugins` usados, y huella SHA-256 del código **sin comentarios**, que quedan fuera a propósito porque esos ficheros llevan media página de porqué dentro. Cruza además con `app.json` en las dos direcciones. Deja escrito que **«traduce, no decide» sigue siendo revisión humana**: lo que la guarda garantiza es la conversación, no la ausencia de lógica de producto en Kotlin.
+
+### Verificado
+
+- **La casteabilidad no se movió ni un punto, y está medida tres veces por dos manos distintas**: `node test/casting-report.mjs` sale **idéntico byte a byte** al de `c51cb77` — agregado **640/660**; Sanxenxo 30/30 · Toledo 26/30 · Madrid centro 30/30 · A Coruña 27/30; motivos `trecho-fuera-del-tope` 9 · `trecho-por-debajo-del-minimo` 6 · `recorrido-fuera-del-tamano` 2 · `lazo-que-no-cierra` 3; oficios taberna 317/330 · botica 282/286 · forja 317/330 · mercado 345/352.
+- **Sobre los cuatro mundos de referencia**: 103 de 120 castean y **ninguna plantilla cambia de veredicto**; **0 de 120 cadenas de sitios difieren beat a beat**; 506 beats, de los que **69 caen sobre un rol humano donde había 0**, en **63 de 103** aventuras. En el catálogo, 21 beats con cara en 19 plantillas, y las cláusulas son idempotentes en las 30.
+- **@nucleo: 2906 · 2902 · 1 · 3** (base de `main`: 2865 · 2861 · 1 · 3), tanda `SPEC-051-run-20260813T104953Z`, código de salida del runner leído sin tubería. **Total comparable**: `manifiesto-generado.estado.json` con `mirado: true` en las dos plataformas y `completo: true` — corrió sobre los artefactos de compilación del 12-ago, que esta fila no invalida porque **no toca configuración nativa**; el manifiesto regenerado sale idéntico al de antes con `diff` vacío. El delta cierra exacto y es la prueba de que no se retira ni un caso: **2865 + 34 (`caras`) + 4 (`plugins-declarados`) + 1 (`escena-cableada`) + 2 (`npcs`) = 2906**.
+- **Único rojo, el ajeno y fichado**: `BOOT_COMPLETED` de `expo-notifications` (SPEC-023). **Ni un rojo nuevo.**
+- **`node test/headless.mjs` de 15 rojos a 0**, y no se creyó la medida de quien implementó: `wa-qa-dev` montó un worktree de `c51cb77`, corrió allí su headless y comprobó que el log sale **idéntico byte a byte**, presupuestos incluidos.
+- Frontera del núcleo intacta: **115 módulos** de `packages/nucleo/` importan en Node sin React Native ni Expo. **Ninguna dependencia nueva.**
+- `verifica-gherkin`: **51 características · 256 escenarios · 268 casos ejecutables**, con los **25 escenarios nuevos** que las cuatro decisiones ganaron el derecho a tener. `verifica-flujo`: 41 pantallas, 96 aristas, ninguna suelta. `spec-test-map` válido con **3758 entradas**.
+- **Los 21 parlamentos y los 9 rótulos** pasan `infraccionesDeTexto` e `infraccionesDeLecturaEnVozAlta` **sin una sola infracción**; el más largo ocupa 124 de los 220 del tope. Al heredar la forma en A4P4 **no se movió ni una palabra** de los textos.
+
+### Lo que se deja fichado
+
+- **La cara no se ha visto con el dedo en un aparato.** Esta fila no tomó el emulador por decisión del dueño. Lo que se afirma es la composición y el montado de A4P3 en el árbol de componentes; que la línea se lea a 1080×2400 lo firma una fila con aparato.
+- **Los actos de relación sobre roles de sitio siguen reventando el desenlace.** `carasDelDesenlace` solo devuelve caras de beats humanos y `componeElDesenlace` lanza si un acto no encuentra la suya; `entrega-sospechosa` declara uno sobre `origen`, que es un núcleo. No ha saltado nunca porque las decisiones dentro de una aventura son hoy siempre ninguna. Esta fila lo **cierra para los roles humanos con acto declarado** —por eso existe la cláusula 2— y deja abierto el caso de los roles de sitio, que necesita decidir qué cara de un sitio recibe un acto dirigido al sitio entero. Viene de SPEC-014.
+- **La herencia de forma lleva la forma y no el texto.** En un beat de **franja** o **con objeto** las dos mitades del paso no dicen el mismo texto: A4P3 pinta la variante o la vía alternativa, A4P4 la prosa base. Hoy no ocurre —los 21 beats con cara son todos de `llegada`— y está medido y fijado: 147 pasos en `costero`, 5 difieren, **ninguno con cara**. Se pondrá rojo el día que una cara caiga sobre un beat de franja.
+- **26 entradas del mapa siguen siendo hueco de batería**, con motivo escrito, y **ocho de ellas son heredadas** de SPEC-010, SPEC-014, SPEC-034 y SPEC-049: esta fila las mueve pero no las adopta.
+- **La plantilla de las specs paría specs con las skills equivocadas.** `.claude/skills/wa-spec/references/alcance-clause.md` nombra `/somo-qa-dev`, `/somo-qa-tester` y «SOMO», que en este repo no existen, y `SPEC-050` arrastra el mismo texto. Se corrigió en la spec de esta fila; la raíz es de quien orquesta, junto con la fila que le falta a `.claude/rules/naming.md` para `.claude/skills/**`, que no tiene dueño escrito.
