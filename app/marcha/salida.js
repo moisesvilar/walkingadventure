@@ -53,6 +53,16 @@ export const DEL_NUCLEO = Object.freeze([
   'sitiosConPosicion',
   'cadenciaDeMuestreo',
   'CADENCIAS',
+  // SPEC-048-iter-1. La cota de frescura, el tope de espera y la precisión exigida se
+  // **reciben** en lugar de copiarse: son una sola constante cada una y viven donde está
+  // escrito su motivo. Y quién ancla el punto de partida —la puntual o la última
+  // conocida— lo decide una función del paquete, con la misma cota para las dos puertas:
+  // dos comparaciones parecidas en dos ficheros es exactamente el defecto de fondo con
+  // otra cara.
+  'COTA_DE_FRESCURA_MS',
+  'TOPE_DE_ESPERA_MS',
+  'PRECISION_EXIGIDA_M',
+  'decideElPuntoDePartida',
 ]);
 
 /**
@@ -228,17 +238,81 @@ export function creaLaSalida({
   const enMetros = (cruda) => (proyector && cruda ? proyector.toXY(cruda.lat, cruda.lon) : null);
 
   /**
+   * El punto de partida de la salida abierta, en metros del mundo, o `null` si no hay
+   * ninguna. Va a la decisión de cadencia **por la firma** y no al índice de geofences: el
+   * índice alimenta a la vez la cadencia y las llegadas, y meterlo ahí convertiría el
+   * portal de casa en un sitio al que se llega.
+   */
+  const casaEnMetros = () => {
+    const enCurso = nucleo.salidaEnCurso(salidas);
+    return enCurso ? enMetros(enCurso.partida) : null;
+  };
+
+  /**
    * Decide la cadencia con la última posición conocida y la aplica **sin parar el
    * servicio**. Devuelve si cambió, que es lo único que hace falta saber fuera.
    *
    * Sin mapa levantado no hay geofences, así que no hay nada que decidir: la de distancia se
    * queda puesta, que es la de SPEC-048.
    */
-  const ajustaLaCadencia = async (punto) => {
+  const ajustaLaCadencia = async (punto, puntoDePartida = casaEnMetros()) => {
     if (!sitios || !punto) return false;
-    cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto, sitios, vigente: cadencia.modo, metrosPorDistancia: CADENCIA_M });
+    cadencia = nucleo.cadenciaDeMuestreo({
+      posicion: punto,
+      sitios,
+      vigente: cadencia.modo,
+      metrosPorDistancia: CADENCIA_M,
+      puntoDePartida,
+    });
     if (!suscripcion || typeof suscripcion.aplicaCadencia !== 'function') return false;
     return suscripcion.aplicaCadencia(cadencia);
+  };
+
+  /**
+   * Busca con qué anclar el punto de partida: la puntual **con tope**, y si no trae nada
+   * dentro de la cota, la última conocida por la misma regla.
+   *
+   * Las dos puertas se prueban siempre y decide el paquete, que es lo que hace imposible
+   * que a una se le aplique un rasero y a la otra otro. Y **lo que decide el motivo cuando
+   * no hay nada es el estado del permiso**, no el texto de la excepción: hasta esta fila
+   * cualquier fallo de la posición se archivaba como `permiso-denegado` con el permiso
+   * concedido, y el motivo que se enseñaba mandaba a quien juega a arreglar algo que no
+   * estaba roto.
+   *
+   * @returns `{ ancla, origen, marca, motivo }`. Con `ancla` en nulo, `marca` es la del
+   *   vocabulario cerrado que hay que enseñar.
+   */
+  const buscaConQueAnclar = async () => {
+    let puntual = null;
+    let fallo = null;
+    try {
+      puntual = await suscripcion.posicionPuntual({ topeMs: nucleo.TOPE_DE_ESPERA_MS });
+    } catch (e) {
+      fallo = mensaje(e);
+    }
+    let ultimaConocida = null;
+    try {
+      ultimaConocida = typeof suscripcion.ultimaConocida === 'function'
+        ? await suscripcion.ultimaConocida({ cotaMs: nucleo.COTA_DE_FRESCURA_MS, precisionM: nucleo.PRECISION_EXIGIDA_M })
+        : null;
+    } catch (e) {
+      fallo = fallo ?? mensaje(e);
+    }
+
+    const elegido = nucleo.decideElPuntoDePartida({ puntual, ultimaConocida });
+    if (elegido.ancla) return { ...elegido, marca: null };
+
+    const permiso = typeof suscripcion.estadoDelPermiso === 'function' ? await suscripcion.estadoDelPermiso() : 'no-se-sabe';
+    const detalle = fallo ? ` — ${fallo}` : '';
+    if (permiso === 'denegado') {
+      return { ancla: null, origen: null, marca: 'permiso-denegado', motivo: `sin una posición no hay punto de partida, y sin punto de partida no hay regreso que detectar${detalle}` };
+    }
+    if (permiso === 'no-preguntable') {
+      return { ancla: null, origen: null, marca: 'permiso-no-preguntable', motivo: `no se ha podido preguntar por el permiso de ubicación, y sin una posición no hay punto de partida${detalle}` };
+    }
+    // Concedido, o sin poder preguntar por el estado: el permiso no es el problema y
+    // decirlo lo sería. Lo que pasa es que no hay ninguna posición con la que anclar.
+    return { ancla: null, origen: null, marca: 'sensor-sin-responder', motivo: `${elegido.motivo}: sin punto de partida no hay regreso que detectar${detalle}` };
   };
 
   const desmontaLaTraza = () => {
@@ -414,24 +488,18 @@ export function creaLaSalida({
         }
       }
 
-      let punto;
-      try {
-        punto = await suscripcion.posicionPuntual();
-      } catch (e) {
-        // Sin permiso el módulo lanza, y aquí se distingue de «no ha dado fijo todavía»:
-        // el primero se arregla en los ajustes del sistema y el segundo esperando.
-        return noSeAbre('permiso-denegado', `sin una posición no hay punto de partida, y sin punto de partida no hay regreso que detectar — ${mensaje(e)}`);
-      }
-      if (punto == null) {
-        return noSeAbre('sensor-sin-responder', 'el sensor todavía no ha entregado ninguna posición, y una salida sin punto de partida no podría cerrarse nunca por regreso');
-      }
+      const conQueAnclar = await buscaConQueAnclar();
+      if (!conQueAnclar.ancla) return noSeAbre(conQueAnclar.marca, conQueAnclar.motivo);
+      const punto = conQueAnclar.ancla;
 
       // La cadencia se decide **con el punto de partida y antes de arrancar**: quien abre
       // la salida ya parada dentro de un geofence no puede esperar al fijo que la cambiaría,
-      // porque ese fijo es justo el que la cadencia por distancia no va a entregar.
+      // porque ese fijo es justo el que la cadencia por distancia no va a entregar. Y el
+      // punto de partida entra además como razón por sí mismo: abrir la salida en casa
+      // arranca ya por tiempo, que es lo que hace que al volver la permanencia acumule.
       const punto0 = enMetros(punto);
       if (sitios && punto0) {
-        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M });
+        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M, puntoDePartida: punto0 });
       }
 
       // El servicio se arranca **esperándolo**: `rotulo.pone()` es síncrono por contrato y
@@ -465,6 +533,10 @@ export function creaLaSalida({
           mundo: nombreDelMundo,
           partida: { lat: punto.lat, lon: punto.lon },
           tMs: punto.tMs,
+          // De qué puerta salió el ancla. Se anota **al abrir** porque después no hay
+          // manera de saberlo, y es lo que hace afirmable que la apertura se respaldó sin
+          // tener que deducirlo de que la salida se abrió.
+          origenDelPunto: conQueAnclar.origen,
           rotulo,
           fuente: { posicion: () => suscripcion.lee() },
         });
@@ -491,13 +563,13 @@ export function creaLaSalida({
     async retoma() {
       averia = null;
       if (!suscripcion) return { retomada: false, motivo: 'esta compilación no trae el módulo de ubicación en marcha' };
-      let punto;
-      try {
-        punto = await suscripcion.posicionPuntual();
-      } catch (e) {
-        return { retomada: false, motivo: mensaje(e) };
-      }
-      if (punto == null) return { retomada: false, motivo: 'el sensor todavía no ha entregado ninguna posición con la que retomar el plazo' };
+      // Retomar pasa por **la misma puerta que abrir**: la puntual con su tope y, si no
+      // trae nada dentro de la cota, la última conocida por la misma regla. Lo que no se
+      // toca aquí es el punto de partida: retomar reinicia el plazo del rótulo, no mueve
+      // el sitio al que hay que volver.
+      const conQueRetomar = await buscaConQueAnclar();
+      if (!conQueRetomar.ancla) return { retomada: false, motivo: conQueRetomar.motivo };
+      const punto = conQueRetomar.ancla;
 
       const enCurso = nucleo.salidaEnCurso(salidas);
       const compuesto = nucleo.componeRotulo({ destino: enCurso?.destino ?? null, mundo: enCurso?.mundo ?? null });
@@ -506,7 +578,13 @@ export function creaLaSalida({
       // está ahora.
       const punto0 = enMetros(punto);
       if (sitios && punto0) {
-        cadencia = nucleo.cadenciaDeMuestreo({ posicion: punto0, sitios, vigente: null, metrosPorDistancia: CADENCIA_M });
+        cadencia = nucleo.cadenciaDeMuestreo({
+          posicion: punto0,
+          sitios,
+          vigente: null,
+          metrosPorDistancia: CADENCIA_M,
+          puntoDePartida: enCurso ? enMetros(enCurso.partida) : null,
+        });
       }
       try {
         await suscripcion.arranca(compuesto, cadencia);

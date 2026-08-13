@@ -177,6 +177,49 @@ export function exigeCadencia(cadencia, quien = 'la cadencia de la suscripción'
 export const NOMBRE_DE_LA_APP = 'Walking Adventure';
 
 /**
+ * **La precisión con la que esta app le pide posición al sistema, y sale de un solo
+ * sitio.** La usan la suscripción y el fijo puntual, y esa es toda la defensa que esta
+ * fila deja puesta.
+ *
+ * Alta y no equilibrada, por dos motivos medidos en el emulador y con fecha. El primero,
+ * del 11-ago-2026: `partida/transporte.js` no funda un vehículo con un error mayor de
+ * treinta metros y la equilibrada entrega cien, así que con ella ningún segmento podría
+ * salir nunca `vehiculo` y la detección de transporte quedaría escrita y muerta. El
+ * segundo, del 13-ago-2026, y es el que costó dos cotejos: **con la equilibrada el
+ * sistema ni siquiera enciende el GPS** — durante los 30-32 s que tardaba en fallar el
+ * fijo puntual, el Event Log de `dumpsys location` no registró **ni una petición**,
+ * mientras que la suscripción, que ya pedía alta, registraba
+ * `ProviderRequest[@+2s0ms, HIGH_ACCURACY]` en cuanto la salida se abría.
+ *
+ * La lección va aquí porque vale más que el arreglo: la causa llevaba **dos días escrita
+ * veinte líneas por encima del defecto**, y aun así dos cotejos independientes
+ * atribuyeron el rojo a que «el proveedor está frío». No faltaba la medida: la medida no
+ * llegó al sitio. Por eso la defensa es **de forma y no de disciplina** — las dos
+ * peticiones leen esta función, así que no se pueden volver a separar sin escribirlo
+ * aposta.
+ */
+export function precisionQueSePide(Location) {
+  return Location?.Accuracy?.High;
+}
+
+/**
+ * Lo que se le pide al proveedor y cuánto se espera, todo por parámetro y **sin ninguna
+ * copia de los números en esta capa**: la cota de frescura, el tope de espera y la
+ * precisión exigida los declara `packages/nucleo/partida/salidas.js` con su motivo, y
+ * llegan hasta aquí desde la orquestación de la salida. Falla nombrando el que falta, que
+ * es mejor que un valor por omisión que nadie decidió.
+ */
+function exigeNumero(valor, quien) {
+  if (!Number.isFinite(valor) || valor <= 0) {
+    throw new Error(
+      `${quien} llega como ${JSON.stringify(valor) ?? String(valor)}: lo declara el paquete con su motivo y entra por la firma, ` +
+      'porque una copia en esta capa es el número que se queda viejo sin que nadie lo mire',
+    );
+  }
+  return valor;
+}
+
+/**
  * La única suscripción al sensor de una salida abierta.
  *
  * **Una y no dos**, y es la decisión de más consecuencias del módulo: con una para la
@@ -258,12 +301,9 @@ export function creaSuscripcionDeUbicacion({
     : { distanceInterval: cadencia.metros });
 
   const opciones = (compuesto) => ({
-    // **Precisión alta y no equilibrada**, y no por gusto: `partida/transporte.js` no funda
-    // un vehículo con un error mayor de treinta metros, y la equilibrada entrega cien. Con
-    // ella ningún segmento podría salir nunca `vehiculo` —caerían todos en `ambiguo`— y la
-    // detección de transporte quedaría escrita y muerta. Medido en el emulador el
-    // 11-ago-2026: con la equilibrada el sistema ni siquiera enciende el GPS.
-    accuracy: Location.Accuracy?.High,
+    // La precisión sale de `precisionQueSePide` y no de aquí: es el mismo sitio del que
+    // la lee el fijo puntual, que es lo que impide que las dos se desincronicen otra vez.
+    accuracy: precisionQueSePide(Location),
     // Por distancia fuera de un geofence y por tiempo dentro. Ver `CADENCIA_M` y
     // `cadenciaDeMuestreo` de `partida/llegadas.js`, que es quien lo decide.
     ...porCadencia(),
@@ -369,17 +409,91 @@ export function creaSuscripcionDeUbicacion({
      * ha abierto. No es una suscripción y no deja nada abierto: es un fijo y se acabó, y
      * hace falta porque `abreSalida` exige el punto de partida antes de que haya rótulo
      * que sostenga la lectura.
+     *
+     * **Con precisión alta**, que es la raíz del rojo que esta fila cierra: ver
+     * `precisionQueSePide`, de donde sale, con la medida y su fecha. Y **con tope de
+     * espera**, porque pedirla así enciende el GPS y eso cuesta tiempo: agotarlo no es un
+     * error, es el paso siguiente —se prueba la última conocida—, y la apertura no puede
+     * tardar más que el tope. El módulo nativo no acepta ninguno, así que el tope es una
+     * carrera contra un temporizador y el fijo que llegue tarde se descarta solo.
+     *
+     * Devuelve el fijo **con su marca**, que es lo que permite acotarlo después: está
+     * medido que esta llamada devuelve caché de hasta 643,3 s sin decirlo.
      */
-    async posicionPuntual() {
-      const leida = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy?.Balanced });
-      if (!leida?.coords) return null;
-      return {
-        lat: leida.coords.latitude,
-        lon: leida.coords.longitude,
-        tMs: Math.round(leida.timestamp),
-        precisionM: Number.isFinite(leida.coords.accuracy) ? leida.coords.accuracy : null,
-      };
+    async posicionPuntual({ topeMs } = {}) {
+      exigeNumero(topeMs, 'el tope de espera del fijo puntual');
+      let corta;
+      const espera = new Promise((resuelve) => { corta = setTimeout(() => resuelve(null), topeMs); });
+      try {
+        const leida = await Promise.race([
+          Location.getCurrentPositionAsync({ accuracy: precisionQueSePide(Location) }),
+          espera,
+        ]);
+        return unFijoDeExpo(leida);
+      } finally {
+        clearTimeout(corta);
+      }
     },
+
+    /**
+     * La última posición conocida del sistema, **si cumple la cota de frescura y la
+     * precisión exigida**. Es la segunda puerta del punto de partida.
+     *
+     * Los dos parámetros van **explícitos y ninguno por omisión**, y es lo que hace que la
+     * app no necesite reloj propio: `getLastKnownPositionAsync` devuelve `null` cuando el
+     * fijo es más viejo que `maxAge` o más impreciso que `requiredAccuracy`, así que la
+     * frescura la decide el módulo nativo y aquí no se compara ninguna hora. Un `null` es
+     * una respuesta prevista —el emulador `wa-pixel` tiene su último conocido en 25 h 24
+     * min, y no hay cota razonable que le diga que sí— y no una avería.
+     */
+    async ultimaConocida({ cotaMs, precisionM } = {}) {
+      exigeNumero(cotaMs, 'la cota de frescura de la última posición conocida');
+      exigeNumero(precisionM, 'la precisión exigida a la última posición conocida');
+      if (typeof Location.getLastKnownPositionAsync !== 'function') return null;
+      const leida = await Location.getLastKnownPositionAsync({ maxAge: cotaMs, requiredAccuracy: precisionM });
+      return unFijoDeExpo(leida);
+    },
+
+    /**
+     * En qué estado está el permiso de ubicación **mientras se usa**, con vocabulario
+     * cerrado. Existe para que el motivo por el que una salida no se abre se decida
+     * consultando **dato** y no interpretando el texto de una excepción: ese texto lo
+     * escribe el módulo nativo y cambia con su versión, y hasta esta fila cualquier
+     * excepción de la posición se archivaba como `permiso-denegado` con el permiso
+     * concedido, mandando a quien juega a los ajustes del sistema a arreglar algo que no
+     * estaba roto.
+     *
+     * Responde `no-se-sabe` cuando no se puede preguntar, que es distinto de denegado y no
+     * se hace pasar por él.
+     */
+    async estadoDelPermiso() {
+      if (typeof Location.getForegroundPermissionsAsync !== 'function') return 'no-se-sabe';
+      try {
+        const respuesta = await Location.getForegroundPermissionsAsync();
+        if (respuesta?.granted === true) return 'concedido';
+        if (respuesta?.canAskAgain === false) return 'no-preguntable';
+        return 'denegado';
+      } catch {
+        return 'no-se-sabe';
+      }
+    },
+  };
+}
+
+/**
+ * Un fijo de `expo-location` en los cuatro números que la app usa, o `null`.
+ *
+ * Los campos se copian **aquí, en el punto de entrada**, igual que en la suscripción:
+ * rumbo, altitud y velocidad no llegan a entrar en la app, y lo que no entra no se puede
+ * guardar por descuido.
+ */
+function unFijoDeExpo(leida) {
+  if (!leida?.coords || !Number.isFinite(leida.timestamp)) return null;
+  return {
+    lat: leida.coords.latitude,
+    lon: leida.coords.longitude,
+    tMs: Math.round(leida.timestamp),
+    precisionM: Number.isFinite(leida.coords.accuracy) ? leida.coords.accuracy : null,
   };
 }
 

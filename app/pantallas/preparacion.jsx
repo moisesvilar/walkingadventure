@@ -10,6 +10,9 @@
 
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { TEXTO_MIENTRAS_SE_BUSCA } from '@walkingadventure/nucleo/partida/salidas.js';
+
 import { MARCA } from './marca.js';
 
 const PLACA = '#efe3c0';
@@ -20,9 +23,10 @@ const LAPIZ = '#9a9483';
  * @param {object} props
  *   `preparacion` lo que devuelve `componePreparacion`; `lista` si la preparación ya terminó
  *   —el botón se habilita al cerrarse, no al conseguirlo todo—; `alSalirAAndar` qué ocurre al
- *   pulsarlo.
+ *   pulsarlo; `buscando` si se está buscando la posición, que sustituye la acción por una
+ *   línea de espera.
  */
-export function PantallaPreparacion({ preparacion, lista = false, alSalirAAndar = null }) {
+export function PantallaPreparacion({ preparacion, lista = false, buscando = false, alSalirAAndar = null }) {
   return (
     <View style={estilos.raiz} testID="preparacion-salida">
       <View testID="momento-antes-de-salir" style={estilos.marca} />
@@ -40,14 +44,21 @@ export function PantallaPreparacion({ preparacion, lista = false, alSalirAAndar 
       {/* La frase más importante de la pantalla: el contrato del juego dicho en una línea. */}
       <Text style={estilos.contrato}>{preparacion.contrato}</Text>
 
-      <Pressable
-        testID="preparacion-listo"
-        onPress={alSalirAAndar}
-        disabled={!lista}
-        style={[estilos.accion, !lista && estilos.accionEnEspera]}
-      >
-        <Text style={estilos.accionTexto}>{preparacion.listo}</Text>
-      </Pressable>
+      {/* Mientras se busca la posición, la acción **se sustituye** por la línea de espera:
+          dejarla puesta durante los segundos que el GPS tarda en encenderse es un botón que
+          se toca dos veces. Sin barra y sin cifras, igual que el empaquetado de A6P7. */}
+      {buscando ? (
+        <Text testID="preparacion-buscando" style={estilos.espera}>{TEXTO_MIENTRAS_SE_BUSCA}</Text>
+      ) : (
+        <Pressable
+          testID="preparacion-listo"
+          onPress={alSalirAAndar}
+          disabled={!lista}
+          style={[estilos.accion, !lista && estilos.accionEnEspera]}
+        >
+          <Text style={estilos.accionTexto}>{preparacion.listo}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -62,5 +73,6 @@ const estilos = StyleSheet.create({
   contrato: { fontSize: 15, color: TINTA, lineHeight: 22 },
   accion: { paddingVertical: 14, paddingHorizontal: 20, borderWidth: 1, borderColor: TINTA, borderRadius: 4, alignItems: 'center' },
   accionEnEspera: { borderColor: LAPIZ, opacity: 0.5 },
+  espera: { fontSize: 15, color: LAPIZ, textAlign: 'center', paddingVertical: 18 },
   accionTexto: { fontSize: 16, color: TINTA },
 });
