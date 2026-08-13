@@ -1,40 +1,50 @@
-# @app — Guardar una copia antes de borrar (SPEC-040), y el defecto destructivo que
-# destapó al ejecutarse por primera vez.
+# @app — Guardar una copia **no borra la partida** (SPEC-040, cerrado por SPEC-040-iter-1).
 #
-# **Este flujo está rojo y su rojo es correcto.** No lleva `@limite-declarado` y no debe
-# llevarlo: su pantalla existe, se alcanza y se recorre. Lo que falla es la app.
+# ## De qué venía este fichero
 #
-# ## El defecto, medido en `wa-pixel` el 10-ago-2026
+# Nació rojo el 10-ago-2026 y su rojo era correcto: se tocaba «Guardar una copia primero», se
+# abría la hoja de compartir del sistema y **se cancelaba con el botón de atrás**, y la
+# partida se borraba igual — el volcado siguiente traía `arranque`, el contador en 1/5 y un
+# nombre sorteado nuevo. La explicación se midió después y es de plataforma:
+# `app/plataforma/copia-del-sistema.js` decidía si se había compartido con
+# `resultado?.action !== Share.dismissedAction`, y `dismissedAction` **es de iOS**; en Android
+# la hoja resuelve siempre como compartida en cuanto lanza el selector de destino, así que
+# `guardaCopiaYBorra` nunca entraba en la rama de `compartida === false` —la que existía justo
+# para no borrar— y seguía adelante hasta el borrado. Confirmado con un experimento **sin
+# pulsar atrás jamás**: 25 s con la hoja en pantalla y `files/partida/partida/` ya vacío.
 #
-# Se toca «Guardar una copia primero», se abre la hoja de compartir del sistema —el volcado
-# del árbol trae «Quick Share», «Drive», «Copy to clipboard»— y **se cancela con el botón
-# de atrás**. Lo que la pantalla promete entonces es «No se ha guardado nada. Tu partida
-# sigue como estaba.» y las tres acciones de vuelta.
+# ## Qué cambia ahora, y por qué el rojo se apaga afirmando lo nuevo
 #
-# Lo que ocurre: **la partida se borra**. El volcado siguiente trae `arranque`, el contador
-# en 1/5 y un nombre sorteado nuevo. Se cancela la copia y se pierde la partida igual.
+# El arreglo **no es una rama mejor**: es que guardar y borrar dejan de ser un solo gesto.
+# `guardaCopia` solo guarda y `borra()` es el único camino por el que una partida desaparece,
+# así que la promesa ya no depende de que Android diga la verdad sobre la hoja. La regla que
+# lo decide: *lo destructivo no se ejecuta sobre una señal que el sistema no garantiza*.
 #
-# La explicación, que es mía y va separada de lo medido: `app/plataforma/copia-del-sistema.js`
-# decide si se compartió con `resultado?.action !== Share.dismissedAction`, y en React
-# Native **`dismissedAction` es de iOS**. En Android la hoja resuelve siempre como
-# compartida, así que `guardaCopiaYBorra` nunca entra en la rama de `compartida === false`
-# —la que existe justamente para no borrar— y sigue adelante hasta el borrado.
+# Por eso este flujo **no se ablanda**: sigue haciendo exactamente lo que destapó el defecto
+# —tocar guardar, cancelar la hoja con atrás— y ahora afirma lo que tiene que pasar, que es la
+# partida entera después. El AC que lo promete es el de la propia SPEC-040, línea 61: «cancela
+# la hoja del sistema sin guardar → el borrado **no** ocurre y la partida sigue entera».
 #
-# El código no está mal escrito por descuido: la rama que protege el caso **está escrita y
-# probada** en `test/nucleo/borrado.test.mjs` («si la copia falla no se borra»). Lo que
-# falla es la señal que la alimenta, y esa señal es de plataforma. Es otra vez §6h: la
-# guarda existe, y lo que la dispara no llega nunca.
+# ## Lo que este flujo no puede distinguir, dicho para que no se lea como un descuido
 #
-# **Dueño:** la fila 40 del checklist, y la corrección tiene que distinguir de verdad
-# compartir de cancelar en Android — donde el sistema no lo dice, así que probablemente
-# haya que dejar de deducirlo y preguntar, o no borrar hasta tener confirmación de que el
-# fichero salió.
+# **En Android no se puede saber si la hoja se canceló**, y esta prueba no finge saberlo: al
+# volver, la pantalla dice «copia hecha» tanto si se guardó como si se canceló, porque es lo
+# único honesto que el sistema deja decir. Lo que sí es afirmable, y es lo que importa, es que
+# **las dos ramas terminan en el mismo sitio**: las tres acciones puestas y la partida entera.
+# Cuál de las dos líneas se lee se afirma sobre el dato en `test/nucleo/borrado.test.mjs`, que
+# recorre las tres ramas —copia hecha, hoja cancelada y exportación fallida— y comprueba que
+# ninguna borra.
 #
-# **Por qué está en su propio fichero:** porque tapaba el resto. Con este tramo dentro,
-# `empezar-de-nuevo.yaml` moría aquí y las ciento catorce afirmaciones anteriores sobre
-# A6P7 —los tres bloques, las seis ausencias, las tres acciones— se leían como no
-# verificadas. Separarlo no ablanda nada: deja un rojo que señala un defecto real en vez de
-# un rojo que señala «algo por aquí».
+# **Y la línea de espera del empaquetado sigue sin poder afirmarse desde aquí**: al tocar
+# guardar, la hoja del sistema se abre encima y tapa la app entera —el volcado del árbol trae
+# «Quick Share», «Drive», «Copy to clipboard»—, así que la línea existe durante el empaquetado
+# y queda cubierta antes de que ningún selector la vea. La carrera se pierde siempre, y que la
+# espera se cuente con una línea y sin cifra se afirma sobre el dato.
+#
+# **Precondición de la tanda**: aparato limpio (`adb shell pm clear com.walkingadventure.app`)
+# y reinstalación. Este flujo recorre el arranque entero y crea la partida que después mira,
+# así que una partida arrastrada de otra sesión cambiaría lo que hay al final sin que nada lo
+# dijera.
 #
 # Los elementos se localizan por los identificadores que declara la spec.
 
@@ -47,6 +57,9 @@ appId: com.walkingadventure.app
 - runFlow:
     file: arranque.yaml
 
+- assertVisible:
+    id: 'portada'
+
 - tapOn:
     id: 'puerta-ajustes'
 - tapOn: 'Empezar de nuevo'
@@ -54,42 +67,77 @@ appId: com.walkingadventure.app
     id: 'empezar-de-nuevo'
 
 # ── La copia se ofrece pero no se hace sola ───────────────────────────────────
-# Se toca guardar una copia: la espera se cuenta con una línea y sin cifra, y «dejarlo
-# como está» sigue estando mientras las otras dos no están.
+# El botón principal dice lo que hace y nada más. «Guardar una copia» es también el texto de
+# una fila de A6P6, así que la afirmación se ancla a esta pantalla: sin anclarla, este tramo
+# podría pasar sin haber llegado nunca a A6P7.
+
+- assertNotVisible:
+    id: 'ajustes-lista'
+- assertVisible:
+    id: 'empezar-de-nuevo-guardar'
+- assertVisible: 'Guardar una copia'
+- assertVisible: 'Borrar la partida'
 
 - tapOn:
     id: 'empezar-de-nuevo-guardar'
-# Aquí había `assertVisible: 'Preparando la copia…'` y **no se puede afirmar desde un
-# dispositivo**. Medido en `wa-pixel`: al tocar guardar, la hoja de compartir del sistema
-# se abre encima y tapa la app entera —el volcado del árbol trae «Quick Share», «Drive»,
-# «Copy to clipboard»—, así que la línea de espera existe durante el empaquetado y queda
-# cubierta antes de que ningún selector la vea. No es que la app no la pinte: es que la
-# carrera la pierde siempre.
-#
-# Que la espera se cuente con una línea y sin cifra ya se afirma sobre el dato en
-# `test/nucleo/borrado.test.mjs`, que es donde no se desactualiza. Lo que sí se puede
-# comprobar aquí, y es lo que el criterio quería, es **lo que pasa al cancelar la hoja**.
 
-# La hoja del sistema se cancela: no se ha guardado nada, **no se borra nada** y las tres
-# acciones vuelven tal cual.
+# ── La hoja del sistema se cancela con atrás, y la partida sigue entera ────────
+# El gesto exacto que destapó el defecto. Lo que se afirma después es lo que la pantalla
+# promete: se vuelve a ella, con sus tres acciones, y sin haber borrado nada.
+
 - back
-- assertVisible: '.*No se ha guardado nada. Tu partida sigue como estaba.*'
-- assertNotVisible: '%'
-- assertNotVisible: 'por ciento'
+
+- assertVisible:
+    id: 'empezar-de-nuevo'
 - assertVisible:
     id: 'empezar-de-nuevo-estado'
-- assertVisible: 'preguntando'
+# Ni borrando ni a medio borrar: los dos estados que dirían que el gesto siguió adelante.
+- assertNotVisible: 'borrando'
+- assertNotVisible: 'no-se-pudo'
+# La línea sigue sin llevar cifras, igual que el resto de esta pantalla.
+- assertNotVisible: '%'
+- assertNotVisible: 'por ciento'
+
+# Las tres acciones vuelven tal cual, que es la mitad visible de la promesa.
 - assertVisible:
     id: 'empezar-de-nuevo-guardar'
 - assertVisible:
     id: 'empezar-de-nuevo-borrar'
 - assertVisible:
     id: 'empezar-de-nuevo-dejarlo'
+- assertVisible: 'Dejarlo como está'
 
-# Y dejarlo como está vuelve a los ajustes sin haber tocado nada: la fila sigue ahí.
+# Y no se ha ido a ninguna parte: el borrado llevaba al arranque, y el arranque no está.
+- assertNotVisible:
+    id: 'arranque'
+
+# ── La partida sigue entera, comprobada donde se ve de verdad ──────────────────
+# «Dejarlo como está» vuelve a los ajustes y de ahí a la portada. Que la portada esté es lo
+# que el defecto rompía: con la partida borrada, aquí salía A1P1 con el contador en 1/5.
+
 - tapOn:
     id: 'empezar-de-nuevo-dejarlo'
 - assertVisible:
     id: 'ajustes-lista'
-- assertVisible: 'Empezar de nuevo'
+- tapOn: '‹ Volver'
 
+- assertVisible:
+    id: 'portada'
+- assertVisible:
+    id: 'portada-identidad'
+- assertNotVisible:
+    id: 'arranque'
+
+# Y la comprobación que más pesa, la misma que usa `partida-persistida.yaml`: matar el proceso
+# y volver a abrir. Si el borrado hubiera ocurrido, el documento de partida no estaría y la
+# app abriría en el arranque — que es exactamente lo que se midió el 10-ago-2026.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'portada'
+    timeout: 30000
+- assertNotVisible:
+    id: 'arranque'
+- assertNotVisible:
+    id: 'partida-averiada'

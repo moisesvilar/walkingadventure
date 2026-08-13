@@ -95,6 +95,15 @@ appId: com.walkingadventure.app
 - assertVisible: 'Cómo se pinta'
 - assertVisible: 'Tamaño de la letra'
 - assertVisible: 'Solo de día'
+# «Guardar una copia» es desde SPEC-040-iter-1 **el mismo texto** que el botón principal de
+# A6P7, así que esta afirmación tiene que anclar su pantalla o deja de decir en cuál está: sin
+# anclarla, un flujo que aterrizara en A6P7 por error la daría por buena igual. Se ancla por
+# las dos direcciones —la lista de ajustes está, la pantalla de empezar de nuevo no— y con la
+# fila por su identificador, que es lo único que distingue una fila de ajustes de un botón.
+- assertVisible:
+    id: 'ajustes-lista'
+- assertNotVisible:
+    id: 'empezar-de-nuevo'
 - assertVisible: 'Guardar una copia'
 - assertVisible: 'Empezar de nuevo'
 

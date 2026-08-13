@@ -110,6 +110,15 @@ const NUCLEO = Object.freeze({
   sitiosConPosicion,
   cadenciaDeMuestreo,
   CADENCIAS,
+  // SPEC-048-iter-1: los tres números de la apertura y la decisión de qué fijo ancla el
+  // punto de partida son **del paquete**, y la orquestación los recibe en vez de llevar su
+  // propia copia. Que estén aquí y no escritos a mano en este fichero es la mitad que
+  // importa: si la app se copiara la cota, este bundle seguiría en verde con los dos
+  // números desincronizados, que es exactamente el defecto que la fila 53 midió.
+  COTA_DE_FRESCURA_MS: salidas.COTA_DE_FRESCURA_MS,
+  TOPE_DE_ESPERA_MS: salidas.TOPE_DE_ESPERA_MS,
+  PRECISION_EXIGIDA_M: salidas.PRECISION_EXIGIDA_M,
+  decideElPuntoDePartida: salidas.decideElPuntoDePartida,
 });
 
 /**
@@ -138,11 +147,29 @@ const EN_MONFRIDA = Object.freeze({ lat: 42.4010, lon: -8.8100 });
  * entrega las posiciones de una secuencia declarada. Es lo que permite afirmar «una sola
  * suscripción» y «cerrar retira la suscripción» sin ningún dispositivo.
  */
-function suscripcionDoblada({ puntual = { lat: 42.40, lon: -8.81, tMs: T0, precisionM: 8 }, falla = null } = {}) {
+function suscripcionDoblada({
+  puntual = { lat: 42.40, lon: -8.81, tMs: T0, precisionM: 8 },
+  falla = null,
+  // **La última conocida por defecto es el mismo fijo que la puntual**, y no un decorado
+  // aparte: es lo que hace el sistema de verdad —el fijo que la puntual produce pasa a ser
+  // el último conocido— y lo que deja que `puntual: null` siga significando «el sensor no
+  // ha entregado nada por ninguna de las dos puertas». Con la puntual lanzando, la última
+  // conocida tampoco llega: sin permiso no responde ninguna.
+  ultimaConocida = falla ? null : puntual,
+  fallaUltima = null,
+  // El estado del permiso, que es **lo que decide el motivo** desde SPEC-048-iter-1: hasta
+  // esta fila cualquier excepción de la posición se archivaba como `permiso-denegado` con
+  // el permiso concedido.
+  permiso = falla ? 'denegado' : 'concedido',
+} = {}) {
   let ultima = null;
   let corriendo = false;
   const arranques = [];
   const paradas = [];
+  // Con qué se pidió cada puerta, en orden. Es lo que permite afirmar que la cota, el tope
+  // y la precisión exigida **llegan del paquete** y no por omisión del módulo nativo.
+  const pedidos = [];
+  const cadenciaAlArrancar = [];
   // Las cadencias que la orquestación le ha pedido aplicar, en orden. Es lo que permite
   // afirmar que el muestreo cambia al entrar en un geofence **sobre el aparato** y no solo
   // sobre la función pura del paquete.
@@ -151,20 +178,40 @@ function suscripcionDoblada({ puntual = { lat: 42.40, lon: -8.81, tMs: T0, preci
     arranques,
     paradas,
     cadencias,
+    pedidos,
     async aplicaCadencia(nueva) {
       const previa = cadencias.length ? cadencias[cadencias.length - 1].modo : 'por-distancia';
       cadencias.push(nueva);
       return nueva.modo !== previa;
     },
-    async arranca(compuesto) { arranques.push(compuesto); corriendo = true; },
+    // Con qué cadencia se arrancó el servicio, en orden. Es lo que permite afirmar que la
+    // decisión se toma **antes** de arrancar y no corrigiéndola después: una suscripción que
+    // arranca por distancia y se corrige luego se pierde justo los fijos que hacían falta.
+    cadenciaAlArrancar,
+    async arranca(compuesto, cad = null) { arranques.push(compuesto); cadenciaAlArrancar.push(cad); corriendo = true; },
     async actualiza(compuesto) { arranques.push(compuesto); corriendo = true; },
     async para() { paradas.push(true); corriendo = false; },
     corriendo: () => corriendo,
     async sondeaPresencia() { return corriendo; },
     lee: () => (ultima ? { ...ultima } : null),
-    async posicionPuntual() {
+    async posicionPuntual(opciones = {}) {
+      pedidos.push({ puerta: 'puntual', ...opciones });
       if (falla) throw new Error(falla);
       return puntual;
+    },
+    /**
+     * La segunda puerta. El módulo nativo la filtra él mismo con la edad máxima y la
+     * precisión exigida, así que aquí se apunta con qué se pidió y se devuelve lo declarado:
+     * doblar el filtro sería doblar `expo-location` en vez de la frontera.
+     */
+    async ultimaConocida(opciones = {}) {
+      pedidos.push({ puerta: 'ultima-conocida', ...opciones });
+      if (fallaUltima) throw new Error(fallaUltima);
+      return ultimaConocida;
+    },
+    async estadoDelPermiso() {
+      pedidos.push({ puerta: 'permiso' });
+      return permiso;
     },
     /** Lo que hace el módulo nativo cuando el sensor entrega un fijo. */
     entrega(posicion) { ultima = posicion; },
@@ -551,6 +598,129 @@ describe('Echarse a andar puede no poder, y entonces se dice por qué', () => {
     assert.equal(sinFijo.respuesta.marca, 'sensor-sin-responder');
   });
 
+  test('La cota, el tope y la precisión llegan del paquete y no de una copia de la app', async () => {
+    // La defensa de forma que SPEC-048-iter-1 deja puesta: los tres números se **reciben**,
+    // así que no puede haber dos que signifiquen lo mismo escritos en dos ficheros. Se
+    // afirma sobre lo que la orquestación le pide al módulo nativo, que es donde se vería la
+    // copia: un tope escrito a mano en `posiciones.js` daría aquí otro número.
+    const suscripcion = suscripcionDoblada();
+    await abierta({ suscripcion });
+
+    const puntual = suscripcion.pedidos.find((p) => p.puerta === 'puntual');
+    assert.ok(puntual, 'la apertura no ha pedido el fijo puntual');
+    assert.equal(puntual.topeMs, salidas.TOPE_DE_ESPERA_MS, 'la puntual se pide con un tope que no es el declarado en el paquete');
+
+    const ultima = suscripcion.pedidos.find((p) => p.puerta === 'ultima-conocida');
+    assert.ok(ultima, 'la apertura no ha probado la segunda puerta');
+    assert.equal(ultima.cotaMs, salidas.COTA_DE_FRESCURA_MS, 'la última conocida se pide con una cota que no es la declarada en el paquete');
+    assert.equal(ultima.precisionM, salidas.PRECISION_EXIGIDA_M, 'la última conocida se pide con una precisión que no es la declarada en el paquete');
+    // **Ninguno de los dos parámetros queda por omisión**: es lo que hace que la app no
+    // necesite reloj propio — la frescura la decide el módulo nativo con los dos escritos.
+    assert.equal(ultima.cotaMs > 0 && ultima.precisionM > 0, true);
+
+    // Y la app no lleva ninguna copia de los números: se buscan en el fichero que los usa.
+    const capa = fuente('app/plataforma/posiciones.js').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+    assert.doesNotMatch(capa, /90\s*\*\s*1000|90_?000/, 'la capa de plataforma se ha copiado la cota de frescura');
+    assert.doesNotMatch(capa, /10\s*\*\s*1000|10_?000/, 'la capa de plataforma se ha copiado el tope de espera');
+  });
+
+  test('La puntual se pide antes que la última conocida, y las dos se prueban siempre', async () => {
+    // El orden **no es un detalle**: el fijo que la puntual produce pasa a ser el último
+    // conocido del sistema, y la decisión del paquete compara las dos marcas. Pedir primero
+    // la última conocida dejaría la comparación mirando el fijo de antes de encender el GPS.
+    const suscripcion = suscripcionDoblada();
+    await abierta({ suscripcion });
+    const puertas = suscripcion.pedidos.map((p) => p.puerta);
+    assert.deepEqual(puertas.slice(0, 2), ['puntual', 'ultima-conocida'], `las dos puertas no se probaron en ese orden: ${puertas.join(', ')}`);
+
+    // Y las dos se prueban **siempre**, también cuando la puntual trae algo: es lo que hace
+    // imposible que a una se le aplique un rasero y a la otra otro, porque quien decide es
+    // el paquete con las dos delante.
+    assert.equal(puertas.filter((p) => p === 'ultima-conocida').length, 1, 'con la puntual respondiendo, la segunda puerta no llegó a probarse');
+  });
+
+  test('Sin fijo puntual, la salida se abre con la última posición conocida', async () => {
+    // El respaldo, que es lo que arregla el rojo de fondo: el permiso está concedido, la
+    // puntual no trae nada dentro de la cota y hay una última conocida certificada por el
+    // módulo nativo. La salida **se abre**, y el origen queda anotado — que es lo que hace
+    // afirmable que cayó al respaldo sin tener que deducirlo de que la salida se abrió.
+    const suscripcion = suscripcionDoblada({
+      puntual: null,
+      ultimaConocida: { lat: 42.40, lon: -8.81, tMs: T0, precisionM: 12 },
+    });
+    const { laSalida, estado, respuesta } = await abierta({ suscripcion });
+    assert.equal(respuesta.abierta, true, `la salida no se abrió con la última conocida: ${respuesta.motivo ?? ''}`);
+    assert.equal(laSalida.situacion(), 'abierta-con-rotulo');
+    assert.equal(salidas.salidaEnCurso(estado).origenDelPunto, 'ultima-conocida');
+
+    // Y con la puntual respondiendo, el origen es el otro: las dos ramas se distinguen.
+    const conPuntual = await abierta();
+    assert.equal(salidas.salidaEnCurso(conPuntual.estado).origenDelPunto, 'puntual');
+  });
+
+  test('El motivo se decide consultando el permiso y no el texto de la excepción', async () => {
+    // **El defecto que la fila 53 midió, cerrado por donde no depende de un texto ajeno.**
+    // Hasta esta fila cualquier excepción de la posición se archivaba como `permiso-denegado`
+    // con el permiso concedido, así que la marca mentía y el motivo mandaba a quien juega a
+    // los ajustes del sistema a arreglar algo que no estaba roto. Ese texto lo escribe el
+    // módulo nativo y cambia con su versión: leerlo era el error.
+    const concedido = await abierta({
+      suscripcion: suscripcionDoblada({ falla: 'Current location is unavailable. Make sure that location services are enabled', permiso: 'concedido' }),
+    });
+    assert.equal(concedido.respuesta.abierta, false);
+    assert.equal(concedido.respuesta.marca, 'sensor-sin-responder', 'una excepción del sensor con el permiso concedido se sigue archivando como permiso denegado');
+    assert.match(concedido.respuesta.motivo, /Current location is unavailable/, 'el motivo pierde lo que dijo el módulo, que es lo único que ayuda a diagnosticar');
+
+    // Denegado y no preguntable siguen distinguiéndose, y siguen sin caer al respaldo: el
+    // permiso denegado no abre salida, que es lo que SPEC-048 decidió y esta fila no toca.
+    const denegado = await abierta({ suscripcion: suscripcionDoblada({ falla: 'no permission', permiso: 'denegado' }) });
+    assert.equal(denegado.respuesta.marca, 'permiso-denegado');
+    const noPreguntable = await abierta({ suscripcion: suscripcionDoblada({ falla: 'no permission', permiso: 'no-preguntable' }) });
+    assert.equal(noPreguntable.respuesta.marca, 'permiso-no-preguntable');
+
+    // Y sin poder preguntar por el estado, el permiso no se da por denegado: decirlo sería
+    // el mismo error con otra cara.
+    const sinSaber = await abierta({ suscripcion: suscripcionDoblada({ puntual: null, permiso: 'no-se-sabe' }) });
+    assert.equal(sinSaber.respuesta.marca, 'sensor-sin-responder');
+
+    // Las cuatro marcas siguen siendo del vocabulario cerrado y ninguna es palabra nueva.
+    for (const marca of [concedido, denegado, noPreguntable, sinSaber].map((r) => r.respuesta.marca)) {
+      assert.ok(MOTIVOS_DE_NO_ABRIR.includes(marca), `la apertura ha devuelto la marca "${marca}", que no está en el vocabulario cerrado`);
+    }
+  });
+
+  test('Al abrir, la cadencia se decide con el punto de partida y antes de arrancar el servicio', async () => {
+    // Las dos mitades. La primera es de SPEC-044 y no cambia: quien abre la salida ya parada
+    // dentro de un geofence no puede esperar al fijo que cambiaría la cadencia, porque ese
+    // fijo es justo el que la cadencia por distancia no va a entregar. La segunda es de esta
+    // fila: **el punto de partida es razón por sí mismo**, así que abrir la salida en casa
+    // arranca ya por tiempo aunque no haya ningún sitio del mundo debajo — que es lo que hace
+    // que al volver la permanencia del regreso acumule y el telón pueda caer.
+    const suscripcion = suscripcionDoblada();
+    const { laSalida } = await abierta({ suscripcion });
+
+    // En el mundo de prueba el núcleo más cercano al punto de partida está a 111 m, muy
+    // fuera de su geofence de 40: sin el punto de partida esto sería por distancia.
+    const sinCasa = cadenciaDeMuestreo({
+      posicion: { x: 0, y: 0 },
+      sitios: sitiosConPosicion(MUNDO),
+      vigente: null,
+      metrosPorDistancia: CADENCIA_M,
+    });
+    assert.equal(sinCasa.modo, CADENCIAS.POR_DISTANCIA, 'el punto de partida ya caía dentro de un geofence, y entonces esto no mide nada');
+
+    assert.equal(laSalida.cadencia(), CADENCIAS.POR_TIEMPO, 'la salida arranca por distancia estando en el punto de partida');
+
+    // Y el servicio arrancó **con esa cadencia ya decidida**, no corrigiéndola después.
+    assert.equal(suscripcion.arranques.length, 1);
+    const alArrancar = suscripcion.cadenciaAlArrancar[0];
+    assert.equal(alArrancar.modo, CADENCIAS.POR_TIEMPO, 'el servicio arrancó con una cadencia distinta de la decidida');
+    assert.equal(alArrancar.segundos, CADENCIA_CERCA_S);
+    assert.equal(alArrancar.razon, 'punto-de-partida');
+    assert.equal(alArrancar.sitio, null, 'la cadencia rápida en casa nombra un sitio que no existe');
+    assert.deepEqual(suscripcion.cadencias, [], 'la cadencia se ha corregido después de arrancar en vez de decidirse antes');
+  });
+
   test('Con una salida ya abierta, abrir otra falla nombrando la que sigue abierta', async () => {
     const { laSalida, estado } = await abierta();
     const otra = await laSalida.abre({ salida: 's2', mapa: 'm1', mundo: 'Reinos da Brétema' });
@@ -717,9 +887,17 @@ describe('El rastro de ubicación no se guarda nunca', () => {
     recorre(documento, 'salidas');
     assert.deepEqual(listasLargas, [], `el documento de la salida guarda listas que crecen con lo andado: ${listasLargas.join(', ')}`);
 
-    // Las coordenadas escritas son exactamente una: el punto de partida.
+    // Las coordenadas escritas son exactamente una: el punto de partida. Y **es el
+    // re-anclado**, no el de la apertura: el primer fijo bueno llega dentro del plazo y
+    // sustituye el ancla, que es de SPEC-048-iter-1. Lo que hay que afirmar aquí es que
+    // **se sustituye y no se apila** — dos puntos separados por metros y segundos son el
+    // principio de una traza (RF-PRIV-002) —, así que se cuenta el par y se comprueba que
+    // el de la apertura ya no está en ninguna parte.
     const coordenadas = [...texto.matchAll(/"(lat|lon)":\s*(-?\d+(?:\.\d+)?)/g)].map((m) => `${m[1]}=${m[2]}`);
-    assert.deepEqual(coordenadas.sort(), ['lat=42.4', 'lon=-8.81'], `el documento guarda más coordenadas que el punto de partida: ${coordenadas.join(', ')}`);
+    assert.equal(coordenadas.length, 2, `el documento guarda más de una coordenada: ${coordenadas.join(', ')}`);
+    assert.deepEqual(coordenadas.sort(), ['lat=42.40001', 'lon=-8.80999'], 'el punto de partida que queda escrito no es el re-anclado');
+    assert.equal(texto.includes('42.4,'), false, 'el punto de partida anterior al re-anclaje sigue escrito: se sustituye, no se apila');
+    assert.equal(salidas.salidaEnCurso(estado).reanclada, true, 'la salida no se re-ancló, así que esta medición no dice nada del re-anclaje');
 
     // Y las marcas del sensor son **las declaradas y ninguna más**. Son tres y no dos, y
     // conviene decirlo con precisión porque la spec dice dos: `ultimoPropioMs` y
@@ -727,9 +905,34 @@ describe('El rastro de ubicación no se guarda nunca', () => {
     // permanencia de `partida/regreso.js` —desde cuándo se está dentro del radio de casa—,
     // que también es de SPEC-030, también está declarado en el esquema y vale `null`
     // mientras se anda lejos. La propiedad que importa no es que sean dos: es que el
-    // conjunto sea **cerrado y pequeño**, y que una cuarta ponga esto rojo.
+    // conjunto sea **cerrado y pequeño**, y que una que no esté declarada ponga esto rojo.
+    //
+    // `antiguedadAlReanclarMs` entra en el barrido por acabar en «Ms» y **no es una marca**:
+    // es una duración, la resta de las dos marcas del sensor, y por eso se afirma aparte y
+    // con su cota. La diferencia no es de nombre: una marca fija un instante y una duración
+    // no, y esa es toda la razón por la que este campo puede vivir en la partida.
     const marcas = [...new Set([...texto.matchAll(/"(\w*[Mm]s)":/g)].map((m) => m[1]))].sort();
-    assert.deepEqual(marcas, ['dentroDesdeMs', 'ultimaMarcaMs', 'ultimoPropioMs'], `el documento guarda marcas de tiempo que el esquema no declara: ${marcas.join(', ')}`);
+    assert.deepEqual(
+      marcas,
+      ['antiguedadAlReanclarMs', 'dentroDesdeMs', 'ultimaMarcaMs', 'ultimoPropioMs'],
+      `el documento guarda marcas de tiempo que el esquema no declara: ${marcas.join(', ')}`,
+    );
+    const laSalidaEscrita = documento.salida;
+    assert.equal(Number.isInteger(laSalidaEscrita.antiguedadAlReanclarMs), true, 'la antigüedad del re-anclaje no es un entero de milisegundos');
+    assert.ok(
+      laSalidaEscrita.antiguedadAlReanclarMs >= 0 && laSalidaEscrita.antiguedadAlReanclarMs <= salidas.PLAZO_DE_REANCLAJE_MS,
+      `la antigüedad del re-anclaje son ${laSalidaEscrita.antiguedadAlReanclarMs} ms y el plazo es de ${salidas.PLAZO_DE_REANCLAJE_MS}: un valor fuera del plazo sería un instante disfrazado de duración`,
+    );
+    assert.equal(Number.isInteger(laSalidaEscrita.desplazamientoDelAnclaM), true, 'el desplazamiento del ancla no es un entero de metros');
+    // Los otros dos son un vocabulario cerrado y un booleano, y ninguno dice dónde ni cuándo.
+    assert.ok(salidas.ORIGENES_DEL_PUNTO.includes(laSalidaEscrita.origenDelPunto), `el origen del punto escrito es "${laSalidaEscrita.origenDelPunto}" y las dos puertas declaradas son ${salidas.ORIGENES_DEL_PUNTO.join(', ')}`);
+    assert.equal(typeof laSalidaEscrita.reanclada, 'boolean');
+    // Y los cuatro son exactamente cuatro: un quinto campo de auditoría entraría sin que
+    // nadie lo hubiera decidido, y el sitio donde se ve es el documento.
+    assert.deepEqual(
+      Object.keys(laSalidaEscrita).filter((c) => /origenDelPunto|reanclada|desplazamiento|antiguedad/.test(c)).sort(),
+      ['antiguedadAlReanclarMs', 'desplazamientoDelAnclaM', 'origenDelPunto', 'reanclada'],
+    );
 
     // El documento va y vuelve sin traer nada de más: lo que se levanta es lo que se
     // escribió, y una traza escondida aparecería aquí.
@@ -1025,6 +1228,15 @@ describe('Una parada dentro de un geofence valida la llegada con la tubería rea
         const grados = proyector.toLatLon(trayectoria(0));
         return { coords: { latitude: grados.lat, longitude: grados.lon, accuracy: precisionM }, timestamp: T0 };
       },
+      // La segunda puerta del punto de partida, modelada como la modela el sistema: el
+      // último fijo conocido **es el que acaba de producir la puntual**, porque un fijo
+      // nuevo pasa a ser el último conocido. El filtro por edad y precisión lo hace el
+      // módulo nativo, así que aquí se devuelve lo que ya cumple los dos.
+      getLastKnownPositionAsync: async () => {
+        const grados = proyector.toLatLon(trayectoria(0));
+        return { coords: { latitude: grados.lat, longitude: grados.lon, accuracy: precisionM }, timestamp: T0 };
+      },
+      getForegroundPermissionsAsync: async () => ({ granted: true, canAskAgain: true }),
     };
     const suscripcion = creaSuscripcionDeUbicacion({
       Location,

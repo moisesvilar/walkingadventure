@@ -51,6 +51,7 @@ import {
   PARADA_DENTRO_MS,
   PARADA_DENTRO_S,
   RADIO_DE_GEOFENCE_M,
+  RAZONES_DE_CADENCIA,
   TEXTOS,
   antetituloDe,
   cadenciaDeMuestreo,
@@ -84,6 +85,7 @@ import {
   secuenciaDeLlegada,
 } from '../../packages/nucleo/partida/secuencia.js';
 import { CLASIFICACIONES, validaLlegadaPorGeofence } from '../../packages/nucleo/partida/ritmo.js';
+import { RADIO_DE_REGRESO_M } from '../../packages/nucleo/partida/regreso.js';
 import { creaDetectorDeTransporte, detectorSinMontar } from '../../packages/nucleo/partida/transporte.js';
 import { entradasDe, entradasDeSuceso, estadoDeDiario } from '../../packages/nucleo/partida/diario.js';
 import {
@@ -1263,6 +1265,170 @@ describe('El muestreo mientras hay un geofence cerca', () => {
     assert.equal(vacio.modo, CADENCIAS.POR_DISTANCIA);
     assert.equal(vacio.sitio, null);
     assert.equal(vacio.distanciaM, null);
+  });
+});
+
+// ── El punto de partida cuenta para la cadencia ────────────────────────────────
+//
+// SPEC-044-iter-1. La otra mitad del mismo agujero, y la que dejaba el telón sin poder
+// caer: con la cadencia por distancia y quien juega parada **no llega ninguna posición**
+// —medido el 13-ago-2026 en `wa-pixel`: cero fijos en 5 min 56 s, el primero a los 355,8 s
+// y solo al mover—, así que quien vuelve a casa y se queda quieta no acumula permanencia y
+// el regreso no puede cerrarse. Con el punto de partida contando, al volver ya se muestrea
+// por tiempo y la permanencia acumula.
+//
+// Entra **por la firma y no al índice**, y esa es la mitad importante: el índice alimenta a
+// la vez la cadencia y las llegadas, así que meterlo ahí convertiría el portal de casa en un
+// sitio al que se llega, con su escena y su ficha. La separación es de forma.
+
+describe('El punto de partida cuenta para la cadencia', () => {
+  const CADENCIA_POR_DISTANCIA_M = 10;
+  /** La cadencia con el punto de partida por la firma, sobre el mundo de prueba. */
+  const enCasa = (posicion, { puntoDePartida = { x: 0, y: 0 }, vigente = null, mundo = mundoDePrueba() } = {}) => cadenciaDeMuestreo({
+    posicion,
+    sitios: sitiosConPosicion(mundo),
+    vigente,
+    metrosPorDistancia: CADENCIA_POR_DISTANCIA_M,
+    puntoDePartida,
+  });
+
+  test('En el punto de partida la cadencia es por tiempo aunque no haya ningún geofence debajo', () => {
+    // El sitio se elige lejos de todo: en el mundo de prueba el núcleo está en (0,0), así
+    // que la casa se pone en un descampado a dos kilómetros para que lo único que pueda
+    // decidir la cadencia rápida sea el punto de partida.
+    const descampado = { x: 8000, y: 0 };
+    const fuera = enCasa(descampado, { puntoDePartida: null });
+    assert.equal(fuera.modo, CADENCIAS.POR_DISTANCIA, 'sin punto de partida ese descampado ya salía por tiempo, y entonces esto no mide nada');
+
+    const encasa = enCasa(descampado, { puntoDePartida: descampado });
+    assert.equal(encasa.modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(encasa.segundos, CADENCIA_CERCA_S);
+    assert.equal(encasa.metros, null, 'una cadencia con las dos puestas no existe');
+  });
+
+  test('La cadencia decidida por el punto de partida no nombra ningún sitio y declara su razón', () => {
+    // A un sitio se le nombra; un sitio fantasma en la respuesta acabaría en algún índice.
+    const descampado = { x: 8000, y: 0 };
+    const encasa = enCasa(descampado, { puntoDePartida: descampado });
+    assert.equal(encasa.sitio, null, 'la cadencia rápida en casa nombra un sitio que no existe');
+    assert.equal(encasa.razon, 'punto-de-partida');
+
+    // El vocabulario de razones es cerrado y son dos: un sitio del mundo debajo, o casa
+    // cerca. Y fuera de las dos la razón es la nada, no una palabra inventada.
+    assert.deepEqual([...RAZONES_DE_CADENCIA], ['sitio', 'punto-de-partida']);
+    assert.ok(RAZONES_DE_CADENCIA.includes(encasa.razon));
+    assert.equal(enCasa({ x: 8000, y: 0 }, { puntoDePartida: null }).razon, null, 'una cadencia por distancia declara una razón');
+  });
+
+  test('El radio de casa es el del regreso, y alejarse devuelve la cadencia por distancia', () => {
+    // El radio es el del regreso y no el del geofence, y el porqué es de juego: lo que la
+    // cadencia rápida compra es que la permanencia del regreso **pueda acumular**, y esa
+    // permanencia se cuenta dentro de este radio. Con los 40 m del geofence quedaría un
+    // anillo de diez metros dentro del cual se cuenta el regreso y no llegan fijos.
+    assert.equal(RADIO_DE_REGRESO_M, 50);
+    const casa = { x: 8000, y: 0 };
+    assert.equal(enCasa({ x: 8000 + RADIO_DE_REGRESO_M, y: 0 }, { puntoDePartida: casa }).modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(enCasa({ x: 8000 + RADIO_DE_REGRESO_M + 1, y: 0 }, { puntoDePartida: casa }).modo, CADENCIAS.POR_DISTANCIA);
+    // Y de verdad lejos, que es el caso de andar: por distancia y sin razón.
+    const lejos = enCasa({ x: 8000 + RADIO_DE_REGRESO_M + MARGEN_DE_CERCANIA_M + 1, y: 0 }, { puntoDePartida: casa, vigente: CADENCIAS.POR_TIEMPO });
+    assert.equal(lejos.modo, CADENCIAS.POR_DISTANCIA);
+    assert.equal(lejos.razon, null);
+  });
+
+  test('La histéresis de casa es la misma que la de un sitio', () => {
+    // Un fijo ruidoso en el borde de casa entraría y saldría igual que en el borde de un
+    // sitio, y volver a pedir la suscripción no es gratis. Entrar cuesta el radio; salir, el
+    // radio más el margen — la misma asimetría y el mismo número.
+    const casa = { x: 8000, y: 0 };
+    const justoFuera = { x: 8000 + RADIO_DE_REGRESO_M + 5, y: 0 };
+    assert.equal(enCasa(justoFuera, { puntoDePartida: casa, vigente: CADENCIAS.POR_DISTANCIA }).modo, CADENCIAS.POR_DISTANCIA);
+    assert.equal(enCasa(justoFuera, { puntoDePartida: casa, vigente: CADENCIAS.POR_TIEMPO }).modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(MARGEN_DE_CERCANIA_M, 20);
+  });
+
+  test('Dentro de un geofence y cerca de casa a la vez, el sitio nombrado es el sitio real', () => {
+    // Sale por tiempo **una sola vez** y con el nombre del sitio: el sitio manda sobre casa
+    // al declararla, por la misma razón por la que es él quien se nombra.
+    const dentroDelTorreon = { x: 1500, y: 0 };
+    const laDos = enCasa(dentroDelTorreon, { puntoDePartida: dentroDelTorreon });
+    assert.equal(laDos.modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(laDos.sitio, TORREON, 'con un sitio real debajo, la cadencia no lo nombra');
+    assert.equal(laDos.razon, 'sitio');
+    assert.equal(laDos.segundos, CADENCIA_CERCA_S, 'la cadencia rápida se ha aplicado dos veces');
+  });
+
+  test('Sin salida abierta la cadencia se decide solo con los geofences y no falla', () => {
+    // Una partida sin salida abierta es un estado normal y no un cableado a medias: se pasa
+    // el punto de partida en nulo, que es lo que distingue «no hay ninguna» de «hay una y no
+    // se sabe dónde empezó». Y un punto mal formado sí falla, nombrándolo.
+    const sinSalida = enCasa({ x: 1500, y: 0 }, { puntoDePartida: null });
+    assert.equal(sinSalida.modo, CADENCIAS.POR_TIEMPO);
+    assert.equal(sinSalida.sitio, TORREON);
+    for (const roto of [{ x: 0 }, { x: null, y: 0 }, 'casa', { x: NaN, y: 0 }]) {
+      assert.throws(
+        () => enCasa({ x: 0, y: 0 }, { puntoDePartida: roto }),
+        /punto de partida/,
+        `un punto de partida ${JSON.stringify(roto)} ha pasado sin protestar`,
+      );
+    }
+  });
+
+  test('En el punto de partida de los ocho mundos de referencia la cadencia es por tiempo', () => {
+    // **Ocho de ocho, y antes eran dos.** Medido: sin el punto de partida en la decisión,
+    // `por-distancia` en 6 de los 8 —con el geofence más cercano entre 19,0 y 191,4 m del
+    // borde— y `por-tiempo` en los otros 2 **por accidente de trazado**, un sitio que pisa
+    // el anclaje. Que dos salieran bien por casualidad es justo lo que hacía que el agujero
+    // no se viera desde una sola partida.
+    //
+    // `(0,0)` es el punto de partida porque `buildWorld` proyecta con origen en la
+    // coordenada del mundo, así que quien abre la salida en su portal está ahí.
+    const casa = { x: 0, y: 0 };
+    const porMundo = [];
+    for (const nombre of LOS_CUATRO) {
+      for (const semilla of LAS_DOS_SEMILLAS) {
+        porMundo.push({ nombre, semilla });
+      }
+    }
+    assert.equal(porMundo.length, 8, 'los mundos de referencia han dejado de ser ocho');
+    return (async () => {
+      const conCadencia = [];
+      const sinCasa = [];
+      for (const { nombre, semilla } of porMundo) {
+        const mundo = await generaMundo(nombre, semillaDe(nombre, semilla));
+        const sitios = sitiosConPosicion(mundo);
+        const comun = { posicion: casa, sitios, vigente: null, metrosPorDistancia: CADENCIA_POR_DISTANCIA_M };
+        conCadencia.push({
+          mundo: `${nombre}-semilla-${semilla}`,
+          ...cadenciaDeMuestreo({ ...comun, puntoDePartida: casa }),
+        });
+        sinCasa.push({
+          mundo: `${nombre}-semilla-${semilla}`,
+          modo: cadenciaDeMuestreo({ ...comun, puntoDePartida: null }).modo,
+        });
+      }
+
+      const noPorTiempo = conCadencia.filter((c) => c.modo !== CADENCIAS.POR_TIEMPO);
+      assert.deepEqual(
+        noPorTiempo.map((c) => c.mundo),
+        [],
+        `en estos mundos de referencia la salida arranca por distancia estando en el punto de partida: ${noPorTiempo.map((c) => c.mundo).join(', ')}. ` +
+        'Parada y con la cadencia por distancia no llega ninguna posición, así que la permanencia del regreso no acumula y el telón no puede caer.',
+      );
+      for (const c of conCadencia) {
+        assert.equal(c.segundos, CADENCIA_CERCA_S, `${c.mundo} arranca por tiempo con otra cadencia`);
+      }
+
+      // Y la contraprueba, que es la que dice que esto mide algo: **sin** el punto de
+      // partida en la decisión, seis de los ocho salen por distancia. Si algún día salieran
+      // los ocho por tiempo sin él, este caso estaría midiendo el trazado y no la decisión.
+      const porDistanciaSinCasa = sinCasa.filter((c) => c.modo === CADENCIAS.POR_DISTANCIA);
+      assert.equal(
+        porDistanciaSinCasa.length,
+        6,
+        `sin el punto de partida salían por distancia ${porDistanciaSinCasa.length} mundos de ocho y lo medido son 6: ` +
+        'si el número cambia, ha cambiado el trazado de los mundos congelados y hay que volver a medirlo antes de leer el caso de arriba.',
+      );
+    })();
   });
 });
 
