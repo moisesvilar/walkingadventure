@@ -170,6 +170,22 @@ const ACCIONES_QUE_DESPIERTAN = Object.freeze([
   'android.intent.action.LOCKED_BOOT_COMPLETED',
 ]);
 
+/** El receptor de `expo-notifications`, que SPEC-052 sustituye conservando su entrega. */
+const RECEPTOR_DE_AVISOS = 'expo.modules.notifications.service.NotificationsService';
+
+/**
+ * La acción con la que `expo-notifications` entrega cada aviso, y **lo único que el
+ * reemplazo conserva**.
+ *
+ * Aquí está la mitad de la exigencia que no se ve en la guarda de arranque: a este receptor
+ * se le descubre **por la acción declarada en su filtro** —`NotificationsService.kt:403-406`,
+ * `queryBroadcastReceivers(Intent(intent.action).setPackage(…))`—, así que un reemplazo sin
+ * ella dejaría la app compilando, verde en la guarda de arranque y **sin ninguna
+ * notificación funcionando**. El mismo rigor que puso rojo lo que faltaba tiene que poner
+ * rojo un reemplazo que entregue de menos.
+ */
+const ACCION_DE_ENTREGA_DE_AVISOS = 'expo.modules.notifications.NOTIFICATION_EVENT';
+
 /** Un permiso con su prefijo, para poder comparar `POST_NOTIFICATIONS` con el fusionado. */
 function conPrefijo(nombre) {
   return nombre.includes('.') ? nombre : `android.permission.${nombre}`;
@@ -210,12 +226,67 @@ function receptoresDelManifiesto(xml) {
     else hasta = vacia === -1 ? texto.length : vacia + 2;
     const bloque = texto.slice(desde, hasta);
     const nombre = bloque.match(/android:name="([^"]+)"/);
+    // `enabled` y `exported` se leen **de la etiqueta de apertura** y no del bloque entero:
+    // dentro puede haber un `<service>` o un `<meta-data>` con los mismos atributos, y
+    // atribuírselos al receptor sería afirmar sobre otra cosa. Ausentes valen `null`, que no
+    // es lo mismo que el valor por defecto de Android: lo que se exige aquí es que estén
+    // escritos, porque `tools:node="replace"` sustituye la declaración entera.
+    const finCabecera = texto.indexOf('>', desde);
+    const cabecera = finCabecera === -1 ? bloque : texto.slice(desde, finCabecera + 1);
     receptores.push({
       clase: nombre ? nombre[1] : '(sin nombre)',
+      habilitado: (cabecera.match(/android:enabled="([^"]+)"/) ?? [, null])[1],
+      exportado: (cabecera.match(/android:exported="([^"]+)"/) ?? [, null])[1],
       acciones: [...bloque.matchAll(/<action[^>]*?android:name="([^"]+)"/gs)].map((a) => a[1]),
     });
   }
   return receptores;
+}
+
+/**
+ * Los receptores que el sistema despierta con la app cerrada, nombrando clase y acción.
+ *
+ * Sale de dentro del caso para que se le pueda aplicar a un manifiesto de ejemplo: una
+ * comprobación que solo existe dentro de su `test` no se puede poner roja a propósito, y
+ * entonces nadie sabe si detecta lo que dice detectar.
+ */
+function receptoresQueDespiertan(xml) {
+  return receptoresDelManifiesto(xml)
+    .map((r) => ({ clase: r.clase, acciones: r.acciones.filter((a) => ACCIONES_QUE_DESPIERTAN.includes(a)) }))
+    .filter((r) => r.acciones.length > 0)
+    .map((r) => `${r.clase} ← ${r.acciones.join(', ')}`);
+}
+
+/**
+ * Lo que le falta o le sobra al reemplazo del receptor de avisos, como lista de problemas.
+ *
+ * **Las dos direcciones son rojo, y la de «entrega de menos» es la que esta fila estrena**:
+ * un reemplazo sin acciones deja la guarda de arranque en verde —no escucha nada, tampoco el
+ * arranque— y rompe todas las notificaciones en uso. Por eso se afirma la lista exacta de
+ * acciones y no la ausencia de las seis.
+ */
+function problemasDelReceptorDeAvisos(xml) {
+  const suyos = receptoresDelManifiesto(xml).filter((r) => r.clase === RECEPTOR_DE_AVISOS);
+  const problemas = [];
+  if (suyos.length !== 1) {
+    problemas.push(
+      `hay ${suyos.length} receptores "${RECEPTOR_DE_AVISOS}" y tiene que haber exactamente uno: ` +
+      'dos significa que el reemplazo no sustituyó al de la librería, y ninguno que la librería lo renombró y aquí quedó un fantasma',
+    );
+  }
+  for (const receptor of suyos) {
+    if (!receptor.acciones.includes(ACCION_DE_ENTREGA_DE_AVISOS)) {
+      problemas.push(
+        `"${RECEPTOR_DE_AVISOS}" no declara "${ACCION_DE_ENTREGA_DE_AVISOS}": a este receptor se le descubre por la acción de su ` +
+        'filtro, así que sin ella la app compila, pasa la guarda de arranque y no entrega ni un aviso',
+      );
+    }
+    const sobran = receptor.acciones.filter((a) => a !== ACCION_DE_ENTREGA_DE_AVISOS);
+    if (sobran.length) problemas.push(`"${RECEPTOR_DE_AVISOS}" declara acciones que el reemplazo no conserva: ${sobran.join(', ')}`);
+    if (receptor.habilitado !== 'true') problemas.push(`"${RECEPTOR_DE_AVISOS}" no queda habilitado: android:enabled="${receptor.habilitado}"`);
+    if (receptor.exportado !== 'false') problemas.push(`"${RECEPTOR_DE_AVISOS}" no queda sin exportar: android:exported="${receptor.exportado}"`);
+  }
+  return problemas;
 }
 
 /**
@@ -361,6 +432,108 @@ describe('La guarda del manifiesto generado deja constancia de qué pudo mirar',
   });
 });
 
+// ── La guarda de la guarda, sobre manifiestos de ejemplo ────────────────────────
+//
+// Estos casos **sí se registran siempre**, y no contradicen la doctrina de arriba: no
+// miran ningún artefacto, miran la lectura con la que se mira el artefacto. Que una
+// comprobación detecte lo que dice detectar solo se sabe poniéndola roja a propósito, y eso
+// se hace con un manifiesto escrito a mano — con el artefacto de verdad no se puede, porque
+// el artefacto está bien.
+
+/** Un manifiesto mínimo con un receptor y las acciones que se le quieran poner. */
+function manifiestoDeEjemplo(clase, acciones, atributos = 'android:enabled="true" android:exported="false"') {
+  const filtro = acciones.length
+    ? `<intent-filter android:priority="-1">${acciones.map((a) => `<action android:name="${a}" />`).join('')}</intent-filter>`
+    : '';
+  return `<manifest><application><receiver android:name="${clase}" ${atributos}>${filtro}</receiver></application></manifest>`;
+}
+
+describe('La lectura del manifiesto detecta lo que dice detectar', () => {
+  test('Un receptor que vuelve a declarar el arranque se señala con su clase y su acción', () => {
+    // El día que `expo-notifications` renombre su receptor, el reemplazo del plugin escribirá
+    // un fantasma y el real aparecerá con sus seis acciones. Eso se ve aquí y no en el
+    // plugin, que escribe en el manifiesto de la app y ni siquiera ve la declaración de la
+    // librería: por eso la detección tiene que estar medida.
+    const ejemplo = manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [ACCION_DE_ENTREGA_DE_AVISOS, 'android.intent.action.BOOT_COMPLETED']);
+    assert.deepEqual(receptoresQueDespiertan(ejemplo), [`${RECEPTOR_DE_AVISOS} ← android.intent.action.BOOT_COMPLETED`]);
+
+    // Y las seis, una a una: una lista que se quedara con cinco pasaría igual de verde.
+    for (const accion of ACCIONES_QUE_DESPIERTAN) {
+      assert.deepEqual(
+        receptoresQueDespiertan(manifiestoDeEjemplo('com.ejemplo.Receptor', [accion])),
+        [`com.ejemplo.Receptor ← ${accion}`],
+        `la lectura no señala "${accion}", que es una de las seis con las que el sistema despierta a una app cerrada`,
+      );
+    }
+  });
+
+  test('Un reemplazo del receptor de notificaciones que entrega de menos se pone rojo', () => {
+    // **El caso que esta fila estrena.** Un receptor sin ninguna acción no escucha el
+    // arranque, así que la guarda de arriba lo daría por bueno — y la app se quedaría sin
+    // notificaciones. Las tres formas de entregar de menos van medidas.
+    const sinFiltro = problemasDelReceptorDeAvisos(manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, []));
+    assert.deepEqual(receptoresQueDespiertan(manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [])), [], 'el ejemplo escucharía el arranque, y entonces no mediría lo que viene a medir');
+    assert.equal(sinFiltro.length, 1, `un receptor de avisos sin ninguna acción tiene que dar un problema y ha dado ${sinFiltro.length}`);
+    assert.match(sinFiltro[0], /no declara "expo\.modules\.notifications\.NOTIFICATION_EVENT"/);
+
+    // Sobrarle acciones también, que es la regresión del otro lado.
+    const conArranque = problemasDelReceptorDeAvisos(
+      manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [ACCION_DE_ENTREGA_DE_AVISOS, 'android.intent.action.REBOOT']),
+    );
+    assert.equal(conArranque.length, 1);
+    assert.match(conArranque[0], /declara acciones que el reemplazo no conserva/);
+
+    // Y perder la forma: habilitado y sin exportar se escriben porque `tools:node="replace"`
+    // sustituye la declaración entera y lo que no se escriba desaparece.
+    const sinForma = problemasDelReceptorDeAvisos(manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [ACCION_DE_ENTREGA_DE_AVISOS], 'android:exported="true"'));
+    assert.deepEqual(sinForma.map((p) => /habilitado|exportar/.test(p)), [true, true]);
+
+    // Duplicado y ausente, que son las dos formas de que el reemplazo no haya sustituido nada.
+    const dos = `<manifest><application>${manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [ACCION_DE_ENTREGA_DE_AVISOS])}${manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [ACCION_DE_ENTREGA_DE_AVISOS])}</application></manifest>`;
+    assert.match(problemasDelReceptorDeAvisos(dos)[0], /hay 2 receptores/);
+    assert.match(problemasDelReceptorDeAvisos(manifiestoDeEjemplo('com.ejemplo.Otro', []))[0], /hay 0 receptores/);
+
+    // Y el manifiesto tal y como lo escribe el plugin: ningún problema. Es lo que separa
+    // «la comprobación es exigente» de «la comprobación es imposible de cumplir».
+    assert.deepEqual(problemasDelReceptorDeAvisos(manifiestoDeEjemplo(RECEPTOR_DE_AVISOS, [ACCION_DE_ENTREGA_DE_AVISOS])), []);
+  });
+
+  test('La guarda de arranque sigue afirmando las seis acciones sobre todos los receptores', () => {
+    // Una guarda que nació roja y hoy está verde es justo la que más fácil se ablanda: basta
+    // una lista de tolerados, una excepción por clase o un `skip` para que siga en verde sin
+    // afirmar nada. Esto lo lee de su propio código, que es donde se ablandaría.
+    assert.deepEqual([...ACCIONES_QUE_DESPIERTAN], [
+      'android.intent.action.BOOT_COMPLETED',
+      'android.intent.action.REBOOT',
+      'android.intent.action.QUICKBOOT_POWERON',
+      'com.htc.intent.action.QUICKBOOT_POWERON',
+      'android.intent.action.MY_PACKAGE_REPLACED',
+      'android.intent.action.LOCKED_BOOT_COMPLETED',
+    ], 'la lista de acciones que despiertan ya no es la de las seis: quitarle una es dejar de mirar por esa puerta');
+
+    const propia = readFileSync(join(RAIZ_REPO, 'test', 'nucleo', 'manifiesto-generado.test.mjs'), 'utf8');
+    // Sin comentarios: este fichero explica el defecto con nombre y apellidos, y buscar la
+    // clase del receptor en la explicación convertiría el relato en un fallo.
+    const codigo = propia.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+    // Se busca la **declaración entera** y no el nombre suelto: el nombre suelto aparece
+    // también aquí dentro, en esta misma línea, y entonces esto se leería a sí mismo.
+    const encabezado = "\n    test('Nada de esta app se despierta al arrancar el móvil', () => {";
+    const desde = codigo.indexOf(encabezado);
+    assert.notEqual(desde, -1, 'la guarda de arranque ha cambiado de nombre o de sitio: el nombre del caso es lo que la cruza con la batería');
+    const cuerpo = codigo.slice(desde, codigo.indexOf('\n    test(', desde + 1));
+
+    assert.match(cuerpo, /receptoresQueDespiertan\(XML_ANDROID\)/, 'la guarda de arranque ya no lee todos los receptores del manifiesto fusionado');
+    assert.match(cuerpo, /deepEqual\(\s*receptoresQueDespiertan\(XML_ANDROID\),\s*\[\],/, 'la guarda de arranque ya no exige que la lista de despertadores esté vacía');
+    assert.doesNotMatch(cuerpo, /skip/, 'la guarda de arranque se ha saltado con un skip');
+    assert.doesNotMatch(cuerpo, /expo\.modules|NotificationsService|TaskBroadcastReceiver/, 'la guarda de arranque nombra una clase en su código: una excepción por clase es una lista de tolerados con otro nombre');
+    // Y el nombre de una lista de tolerados, sobre el código **sin las cadenas**: el mensaje
+    // de fallo dice en prosa que no se añade nada a ninguna lista de tolerados, y buscar la
+    // palabra sobre el texto entero convertiría esa frase en el fallo que viene a evitar.
+    const sinCadenas = cuerpo.replace(/'(?:[^'\\]|\\.)*'/g, "''");
+    assert.doesNotMatch(sinCadenas, /tolerad|salvo|excepto/i, 'la guarda de arranque admite excepciones');
+  });
+});
+
 // ── Android, sobre el manifiesto fusionado ──────────────────────────────────────
 //
 // Los casos de aquí abajo **solo se registran si hay manifiesto**. No se saltan con `skip`
@@ -428,28 +601,51 @@ if (HAY_ANDROID) {
     });
 
     test('Nada de esta app se despierta al arrancar el móvil', () => {
-      // **Esta guarda nace roja, y ese es el punto.** El receptor `NotificationsService`
-      // de `expo-notifications` escucha `BOOT_COMPLETED`, `REBOOT`, `QUICKBOOT_POWERON` y
-      // `MY_PACKAGE_REPLACED` en el manifiesto fusionado, y lo hace **desde SPEC-023**: no
-      // lo trae la fila 48, que lo único que hizo fue sacarlo a la luz. Es un defecto real,
-      // pre-existente y con dueño, y se trata como se trató en la fila 47 la guarda de la
-      // partida sin cablear: roja a propósito, con nombre, sin excepción, sin lista de
-      // tolerados y sin `skip`, hasta que la fila que monte las notificaciones lo cierre.
+      // **Esta guarda nació roja en la fila 48, y SPEC-052 la puso verde por donde se cierra
+      // de verdad.** El receptor `NotificationsService` de `expo-notifications` escuchaba
+      // `BOOT_COMPLETED`, `REBOOT`, los dos `QUICKBOOT_POWERON` y `MY_PACKAGE_REPLACED` en
+      // el manifiesto fusionado **desde SPEC-023**, y se trató como en la fila 47 la guarda
+      // de la partida sin cablear: roja a propósito, con nombre, sin excepción, sin lista de
+      // tolerados y sin `skip`, hasta que la fila que montara las notificaciones lo cerrara.
+      // La fila 52 lo cerró sustituyendo su declaración con `tools:node="replace"` sin las
+      // cinco acciones de arranque.
+      //
+      // **Lo que la fila 52 no hizo fue ablandar esto**, y es lo que hay que seguir sin
+      // hacer: la exigencia es la misma que cuando estaba roja —las seis acciones sobre
+      // **todos** los receptores, sin excepción por clase—, y quien venga a dejarla verde
+      // por otro camino tiene que enfrentarse a ella. La guarda de al lado
+      // (`La guarda de arranque sigue afirmando las seis acciones…`) afirma justo eso sobre
+      // este código.
       //
       // El permiso a solas es inerte; lo que despierta es el receptor, y por eso lo que se
-      // afirma es el receptor. `app/plugins/retira-permisos-prohibidos.js` ya sustituye el
-      // de `expo-task-manager` por uno sin `intent-filter`, así que la vía de la tarea de
-      // ubicación está cerrada; la de las notificaciones, no.
-      const despertadores = receptoresDelManifiesto(XML_ANDROID)
-        .map((r) => ({ clase: r.clase, acciones: r.acciones.filter((a) => ACCIONES_QUE_DESPIERTAN.includes(a)) }))
-        .filter((r) => r.acciones.length > 0);
+      // afirma es el receptor. Los dos que declaraban acciones de arranque están
+      // neutralizados en `app/plugins/retira-permisos-prohibidos.js`: el de
+      // `expo-task-manager` sin `intent-filter`, y el de `expo-notifications` con un filtro
+      // de una sola acción, la de entrega — que un reemplazo mudo pasaría este caso es
+      // justamente por lo que existe «El receptor de notificaciones conserva su acción de
+      // entrega y ninguna más».
       assert.deepEqual(
-        despertadores.map((r) => `${r.clase} ← ${r.acciones.join(', ')}`),
+        receptoresQueDespiertan(XML_ANDROID),
         [],
-        'hay receptores en el APK a los que el sistema despierta con la app cerrada. Dueño conocido: ' +
-        '`expo.modules.notifications.service.NotificationsService` viene de `expo-notifications` y entró con SPEC-023; ' +
-        'no es de SPEC-048, que solo lo sacó a la luz. Se cierra sustituyendo su declaración con `tools:node="replace"` sin ' +
-        'esos `intent-filter`, como ya se hace con el receptor de `expo-task-manager`.',
+        'hay receptores en el APK a los que el sistema despierta con la app cerrada. Los dos conocidos vienen de ' +
+        '`expo-task-manager` y de `expo-notifications` y se neutralizan en `app/plugins/retira-permisos-prohibidos.js` ' +
+        'sustituyendo su declaración con `tools:node="replace"`. Si aparece uno nuevo, es de una librería que nadie ha mirado: ' +
+        'no se añade a ninguna lista de tolerados, se neutraliza igual.',
+      );
+    });
+
+    test('El receptor de notificaciones conserva su acción de entrega y ninguna más', () => {
+      // La otra mitad de la fila 52, y la que impide que el arreglo se pase de frenada: el
+      // reemplazo que se le escribe a `expo-notifications` **sustituye la declaración
+      // entera**, así que lo que no se copie desaparece del binario. Perder la acción de
+      // entrega dejaría la app compilando, esta guarda y la de arriba en verde, y ninguna
+      // notificación funcionando — `doWork` sin receptor encontrado escribe «No service
+      // capable of handling notifications found» y no entrega nada.
+      assert.deepEqual(
+        problemasDelReceptorDeAvisos(XML_ANDROID),
+        [],
+        'el reemplazo del receptor de notificaciones no tiene la forma decidida en SPEC-052: un filtro con una sola acción, ' +
+        'la de entrega, habilitado y sin exportar.',
       );
     });
 
@@ -466,6 +662,12 @@ if (HAY_ANDROID) {
       const impuesto = PERMISOS_QUE_UNA_LIBRERIA_EXIGE.find((p) => p.id === 'RECEIVE_BOOT_COMPLETED');
       if (!impuesto) return; // Si sale de la lista, el caso de arriba lo cubre entero.
       assert.match(impuesto.aCambio, /receptor de tareas se sustituye/, 'el a-cambio declarado ha cambiado: hay que volver a medir qué protege');
+      // Y desde SPEC-052 son **dos**: el a-cambio que sostiene este permiso ya no es el
+      // receptor de tareas a solas, porque quien inyecta el permiso es precisamente
+      // `expo-notifications`. Un a-cambio que solo nombrara uno estaría admitiendo el
+      // permiso por media promesa.
+      assert.match(impuesto.aCambio, /los dos receptores/, 'el a-cambio no dice que sean dos los receptores neutralizados, y desde SPEC-052 lo son');
+      assert.match(impuesto.aCambio, /notificaciones/, 'el a-cambio no nombra el receptor de notificaciones, que es el que inyecta este permiso y el que escuchaba el arranque desde SPEC-023');
 
       const deTareas = receptoresDelManifiesto(XML_ANDROID).filter((r) => /taskManager/i.test(r.clase));
       assert.equal(deTareas.length, 1, `se esperaba un único receptor de tareas en el manifiesto fusionado y hay ${deTareas.length}`);

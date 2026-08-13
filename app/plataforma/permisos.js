@@ -127,16 +127,20 @@ export const LO_QUE_NUNCA_SE_DECLARA = Object.freeze([
  *
  * Lo que se hace a cambio, que es lo que mantiene en pie la propiedad de verdad —«nada de
  * esta app se despierta con la app cerrada»—: el plugin `plugins/retira-permisos-prohibidos.js`
- * **sustituye el receptor de tareas por uno sin `BOOT_COMPLETED` ni `MY_PACKAGE_REPLACED`**,
- * así que el permiso está declarado y no hay nada que pueda dispararse al arrancar el móvil.
- * El sustituto se cambia por la propiedad, igual que con el módulo de fondo.
+ * **sustituye los dos receptores que escuchaban el arranque**. El de tareas, por uno sin
+ * ningún `intent-filter`, porque sus posiciones se le entregan por clase. El de
+ * `expo-notifications` —que es, además, quien inyecta este permiso en el manifiesto—, por uno
+ * que conserva su acción de entrega y pierde las cinco de arranque: a ese se le descubre por
+ * la acción de su filtro, así que dejarlo sin filtro lo habría dejado mudo en vez de dormido
+ * (SPEC-052). Con eso el permiso está declarado y no hay nada que pueda dispararse al
+ * arrancar el móvil. El sustituto se cambia por la propiedad, igual que con el módulo de fondo.
  */
 export const PERMISOS_QUE_UNA_LIBRERIA_EXIGE = Object.freeze([
   Object.freeze({
     id: 'RECEIVE_BOOT_COMPLETED',
     quienLoExige: 'expo-task-manager, para persistir el trabajo de JobScheduler con el que entrega cada posición',
     porQueNoSeQuita: 'sin él la app revienta al recibir la primera posición: JobScheduler rechaza un trabajo persistido sin este permiso',
-    aCambio: 'el receptor de tareas se sustituye sin BOOT_COMPLETED ni MY_PACKAGE_REPLACED, así que nada se despierta al arrancar el móvil',
+    aCambio: 'los dos receptores que escuchaban el arranque se neutralizan: el receptor de tareas se sustituye sin BOOT_COMPLETED ni MY_PACKAGE_REPLACED, y el de notificaciones de expo-notifications por uno que solo conserva su acción de entrega, así que nada se despierta al arrancar el móvil',
     dueña: 'fila 48 del checklist',
   }),
 ]);

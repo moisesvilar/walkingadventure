@@ -27536,7 +27536,7 @@
       "fichero": "test/nucleo/manifiesto-generado.test.mjs",
       "caso": "Ningún permiso prohibido llega al manifiesto fusionado",
       "hueco_de_bateria": true,
-      "nota": "PARCIALMENTE INCUMPLIDO Y DECLARADO. `RECEIVE_BOOT_COMPLETED` está en el APK desde SPEC-023 por `expo-notifications` y no se puede retirar sin que la app reviente, así que salió de `LO_QUE_NUNCA_SE_DECLARA` y entró en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE` con su motivo. Lo que sí queda rojo es la propiedad de la que ese permiso es solo la llave: ver «Nada de esta app se despierta al arrancar el móvil»."
+      "nota": "PARCIALMENTE INCUMPLIDO Y DECLARADO EN LA FILA 48, SALDADO EN SPEC-052. `RECEIVE_BOOT_COMPLETED` está en el APK desde SPEC-023 por `expo-notifications` y no se puede retirar sin que la app reviente, así que salió de `LO_QUE_NUNCA_SE_DECLARA` y entró en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE` con su motivo: eso no ha cambiado y el permiso sigue declarado en el manifiesto fusionado. Lo que quedó rojo fue la propiedad de la que ese permiso es solo la llave —«Nada de esta app se despierta al arrancar el móvil»—, y la fila 52 la puso verde por donde se cierra de verdad: el plugin sustituye el receptor de `expo-notifications` por uno que conserva su acción de entrega y pierde las cinco de arranque. No se ablandó ninguna exigencia para conseguirlo."
     },
     {
       "spec": "SPEC-048",
@@ -30303,7 +30303,7 @@
       "fichero": "test/nucleo/manifiesto-generado.test.mjs",
       "caso": "Nada de esta app se despierta al arrancar el móvil",
       "hueco_de_bateria": true,
-      "nota": "Rojo ajeno vivo: el receptor de expo-notifications entró con SPEC-023 y no es de esta fila. Lo que esta fila afirma es que no añade ninguno más."
+      "nota": "Rojo ajeno vivo: el receptor de expo-notifications entró con SPEC-023 y no es de esta fila. Lo que esta fila afirma es que no añade ninguno más. Saldado en SPEC-052, que lo neutralizó: la guarda quedó verde sin que esta fila ni ninguna otra le quitara exigencias."
     },
     {
       "spec": "SPEC-046",
@@ -31790,6 +31790,184 @@
       "fichero": "test/nucleo/plugins-declarados.test.mjs",
       "caso": "Los plugins nombrados son los que la app carga, y los carga por su ruta",
       "escenario": "Los plugins nombrados son los que la app carga, y los carga por su ruta"
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN el manifiesto fusionado de Android de una compilación de depuración WHEN se enumeran todos sus receptores con las acciones que declaran THEN ninguno declara ninguna de las seis acciones de `ACCIONES_QUE_DESPIERTAN` (`BOOT_COMPLETED`, `REBOOT`, `QUICKBOOT_POWERON`, el `QUICKBOOT_POWERON` de HTC, `MY_PACKAGE_REPLACED` y `LOCKED_BOOT_COMPLETED`).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Nada de esta app se despierta al arrancar el móvil",
+      "hueco_de_bateria": true,
+      "nota": "La guarda nació roja en la fila 48 con el dueño escrito y esta fila la pone verde. No se ha tocado ni una exigencia: sigue afirmando las seis acciones sobre todos los receptores, sin lista de tolerados, sin excepción por clase y sin skip. Solo se registra si hay manifiesto fusionado."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN ese mismo manifiesto fusionado WHEN se busca el receptor `expo.modules.notifications.service.NotificationsService` THEN aparece declarado exactamente una vez.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El receptor de notificaciones conserva su acción de entrega y ninguna más",
+      "hueco_de_bateria": true,
+      "nota": "Dos significa que el reemplazo no sustituyó al de la librería; ninguno, que la librería lo renombró y en el plugin quedó un fantasma."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN ese receptor en el manifiesto fusionado WHEN se leen las acciones de sus `intent-filter` THEN son exactamente `['expo.modules.notifications.NOTIFICATION_EVENT']`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El receptor de notificaciones conserva su acción de entrega y ninguna más",
+      "hueco_de_bateria": true,
+      "nota": "La exigencia que esta fila estrena, y la que el rigor de la guarda de arranque no daba: un reemplazo sin ninguna acción pasa la guarda de arranque —no escucha nada— y deja la app sin ninguna notificación, porque a este receptor se le descubre por la acción de su filtro."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN ese receptor en el manifiesto fusionado WHEN se leen sus atributos THEN sigue habilitado y sin exportar (`android:enabled=\"true\"`, `android:exported=\"false\"`).",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "El receptor de notificaciones conserva su acción de entrega y ninguna más",
+      "hueco_de_bateria": true,
+      "nota": "Se exige que estén escritos y no que valgan lo que Android pone por defecto: `tools:node=\"replace\"` sustituye la declaración entera y lo que no se copie desaparece del binario."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN el manifiesto fusionado WHEN se busca el receptor de `expo-task-manager` THEN sigue siendo único y sin ninguna acción de arranque.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Lo que se hace a cambio de un permiso impuesto se cumple de verdad",
+      "hueco_de_bateria": true,
+      "nota": "Guarda verde desde la fila 48 y esta fila no la toca: el punto 3 del plugin queda fuera de alcance."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN el manifiesto fusionado WHEN se enumeran sus `uses-permission` THEN `android.permission.RECEIVE_BOOT_COMPLETED` sigue declarado.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Lo que se hace a cambio de un permiso impuesto se cumple de verdad",
+      "hueco_de_bateria": true,
+      "nota": "El permiso no se puede retirar: `expo-task-manager` persiste el trabajo de JobScheduler con setPersisted(true) y sin él la app revienta al llegar la primera posición. Lo que esta fila cierra es la propiedad, no el permiso."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN la entrada de `RECEIVE_BOOT_COMPLETED` en `PERMISOS_QUE_UNA_LIBRERIA_EXIGE` WHEN se lee su `aCambio` THEN nombra los **dos** receptores neutralizados y sigue conteniendo literalmente la expresión «receptor de tareas se sustituye».",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Lo que se hace a cambio de un permiso impuesto se cumple de verdad",
+      "hueco_de_bateria": true,
+      "nota": "Se añadieron dos aserciones al caso que ya existía en vez de abrir uno nuevo: dos casos rojos por la misma causa se leerían como dos defectos. La cadena contractual del fichero sigue afirmándose igual."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN esa misma entrada WHEN se lee su `porQueNoSeQuita` THEN sigue nombrando el trabajo persistido de `JobScheduler`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Lo que se hace a cambio de un permiso impuesto se cumple de verdad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN el `Info.plist` generado de iOS WHEN se leen sus `UIBackgroundModes` THEN siguen siendo exactamente `['location']`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Los modos de fondo de iOS son exactamente los declarados",
+      "hueco_de_bateria": true,
+      "nota": "Guarda verde desde la fila 48. Esta fila no toca iOS, y el caso está aquí para que se vea que no enrojeció."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN la guarda «Nada de esta app se despierta al arrancar el móvil» WHEN se lee su código tras esta fila THEN sigue afirmando las seis acciones sobre todos los receptores, sin lista de tolerados, sin excepción por clase y sin `skip`.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La guarda de arranque sigue afirmando las seis acciones sobre todos los receptores",
+      "hueco_de_bateria": true,
+      "nota": "Caso nuevo, y se registra siempre porque no mira ningún artefacto: lee el código de la propia guarda. Una guarda que nació roja y hoy está verde es la que más fácil se ablanda, y esto es lo que lo pone rojo."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN todo el código vivo de `app/` y `packages/` WHEN se buscan las llamadas que programan una notificación THEN todas la programan con `trigger: null` y ninguna con disparador futuro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "Ninguna notificación de esta app se programa con disparador futuro",
+      "hueco_de_bateria": true,
+      "nota": "La premisa que hace inocua la neutralización, como guarda y no como comentario. También se exige que haya al menos una llamada: una guarda que itera cero pasa trivialmente."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN ese mismo código WHEN se buscan las llamadas que consultan, cancelan o reprograman notificaciones ya programadas THEN no hay ninguna.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "Nada consulta, cancela ni reprograma una notificación ya programada",
+      "hueco_de_bateria": true,
+      "nota": "Sin cola de avisos programados no hay nada que restaurar tras un reinicio, que es lo que hace que quitarle el arranque al receptor no le quite nada a nadie."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN la capa de avisos con el notificador de Expo montado y el permiso concedido WHEN entrega un aviso THEN lo entrega al momento y sin disparador, como antes de esta fila.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "El notificador de Expo entrega el aviso al momento y sin disparador",
+      "hueco_de_bateria": true,
+      "nota": "Se mide sobre la llamada de verdad y no sobre el código leído: el módulo nativo entra inyectado, así que doblar aquí es pasar otro argumento. `creaNotificadorDeExpo` no tenía ninguna prueba antes de esta fila."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN la cabecera de `app/plugins/retira-permisos-prohibidos.js` WHEN se lee THEN nombra `expo.modules.notifications.NOTIFICATION_EVENT` como lo que el reemplazo conserva, con el motivo medido: el receptor se descubre por la acción de su filtro.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "La cabecera del plugin nombra la acción que el reemplazo conserva",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN esa misma cabecera WHEN se busca la afirmación de que la vía de `expo-notifications` sigue abierta THEN ya no está: el texto literal «No cierra la propiedad entera» ha desaparecido del fichero.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/despertar-al-arrancar.test.mjs",
+      "caso": "La cabecera del plugin ya no promete que la vía de las notificaciones siga abierta",
+      "hueco_de_bateria": true,
+      "nota": "Un comentario que describe un estado que dejó de existir es peor que no tenerlo: se lee como vigente."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN `test/nucleo/plugins-declarados.test.mjs` tras la actualización de `wa-qa-dev` WHEN corre contra el plugin cambiado THEN la huella nombrada coincide con la del código nuevo y el `cometido` declarado nombra los dos receptores neutralizados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plugins-declarados.test.mjs",
+      "caso": "Ningún plugin ha cambiado de forma sin que alguien lo vuelva a nombrar",
+      "escenario": "Ningún plugin ha cambiado de forma sin que alguien lo vuelva a nombrar",
+      "nota": "El criterio se cubre con dos casos, uno por mitad. Aquí la huella: `1786783409e1ae1d` → `a3e9ed77ba0d38ff`. La guarda no se ablandó ni se le añadió tolerancia: se renombró la huella con el cometido al día, que es el mecanismo para el que existe."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN `test/nucleo/plugins-declarados.test.mjs` tras la actualización de `wa-qa-dev` WHEN corre contra el plugin cambiado THEN la huella nombrada coincide con la del código nuevo y el `cometido` declarado nombra los dos receptores neutralizados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/plugins-declarados.test.mjs",
+      "caso": "La lista de plugins es exactamente la que hay, con su cometido declarado",
+      "escenario": "La lista de plugins es exactamente la que hay, con su cometido declarado",
+      "nota": "La otra mitad: el cometido. Se le añadió `nombraAlMenos` a cada plugin —las piezas que su frase tiene que nombrar— porque el cometido se podía renombrar sin decir que los receptores habían pasado de uno a dos, y la huella cambia igual."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN un clon sin compilar, sin manifiesto fusionado y sin `Info.plist` generado WHEN corre la batería de núcleo THEN los casos de esta spec **no se registran** y `test/reports/manifiesto-generado.estado.json` dice `mirado: false`, en vez de pasar en verde.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "La guarda del manifiesto generado deja constancia de qué pudo mirar",
+      "hueco_de_bateria": true,
+      "nota": "Vale para los casos que miran el artefacto. Los tres que esta fila añade sobre manifiestos de ejemplo y sobre el código de la propia guarda **sí se registran siempre**, y a propósito: no miran ningún artefacto, miran la lectura con la que se mira el artefacto, y en un clon limpio son lo único que puede afirmarse."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN un manifiesto de ejemplo en el que el receptor de notificaciones vuelve a declarar `BOOT_COMPLETED` WHEN se le aplica la lectura de receptores de la guarda THEN lo señala nombrando la clase y la acción.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Un receptor que vuelve a declarar el arranque se señala con su clase y su acción",
+      "hueco_de_bateria": true,
+      "nota": "Con el artefacto de verdad esto no se puede medir, porque el artefacto está bien. Se comprueban las seis acciones una a una: una lista que se quedara con cinco pasaría igual de verde."
+    },
+    {
+      "spec": "SPEC-052",
+      "criterio": "GIVEN un manifiesto de ejemplo en el que el receptor de notificaciones aparece sin ninguna acción WHEN se le aplica la comprobación de la acción de entrega THEN se pone rojo, porque un reemplazo que entrega de menos rompe todas las notificaciones en uso.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/manifiesto-generado.test.mjs",
+      "caso": "Un reemplazo del receptor de notificaciones que entrega de menos se pone rojo",
+      "hueco_de_bateria": true,
+      "nota": "Las cinco formas de que el reemplazo salga mal van medidas: sin acción de entrega, con acciones de más, sin la forma (habilitado y sin exportar), duplicado y ausente. Y el reemplazo tal y como lo escribe el plugin no da ningún problema, que es lo que separa «exigente» de «imposible de cumplir»."
     }
   ]
 }
