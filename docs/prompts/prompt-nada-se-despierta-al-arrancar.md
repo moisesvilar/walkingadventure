@@ -59,7 +59,7 @@ bash scripts/qa-tester-run.sh SPEC-052 --nucleo-only > salida.log 2>&1; echo $? 
 
 ## Cuándo está hecho
 
-1. **La guarda «Nada de esta app se despierta al arrancar el móvil» está verde de verdad**: el manifiesto fusionado sin `RECEIVE_BOOT_COMPLETED` y sin receptor con disparadores de arranque, medido sobre el artefacto compilado — y la guarda no se ablandó para conseguirlo.
+1. **La guarda «Nada de esta app se despierta al arrancar el móvil» está verde de verdad**: el manifiesto fusionado sin ningún receptor con disparadores de arranque, medido sobre el artefacto compilado — y la guarda no se ablandó para conseguirlo. *(Corregido el 13-ago tras la medición de la fila: la versión original pedía además quitar `RECEIVE_BOOT_COMPLETED`, y eso estaba pasado de rosca — el permiso a solas es inerte, el task manager lo necesita vivo, y quitarlo enrojecía dos guardas verdes. La propiedad es el receptor, no el permiso — décima premisa falsa de encargo, y la autoridad la tenía el texto de la propia guarda.)*
 2. **La batería de núcleo en 0 fallos** — los 2906 (más los que tu fila añada) con `mirado: true` en las dos plataformas. Primera vez; dilo en la bitácora con esas palabras.
 3. **La medición de qué protege el receptor queda escrita**: o «nada programa con disparador futuro, medido así», o la parada con el hallazgo delante.
 4. **Las notificaciones en uso, afirmadas**: la capa de avisos sigue entregando (sus pruebas en verde), y `plugins-declarados` verde con la huella renombrada y el cometido al día.

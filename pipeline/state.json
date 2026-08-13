@@ -505,6 +505,18 @@
       "nota": "0 -> 69 beats con cara en 63 de 103 aventuras (21 beats en 19 plantillas, las dos clausulas); 9 rotulos de mundo por puesto; A4P4 hereda la forma de la escena. Casteabilidad identica byte a byte (640/660, reales 30/26/30/27), medida por cuatro manos. Cuatro decisiones del dueno en la ventana de la fila: mismo lugar (ratifica el pendiente 1 de npcs.md), dos clausulas, rotulo de mundo, herencia de forma. Novena premisa falsa de nueve: un beat sobre rol humano no es que no ocurriera, reventaba con TypeError diferido (70 excepciones); los sitios a tocar eran 7, dos declarados por wa-dev (fugas de registro: la marca humano en el mapa y humano viajando al LLM). Las guardas a mover eran 10, una media la herencia como fallo. Guarda de plugins entregada (lista cerrada + huella SHA-256 sin comentarios, 3 direcciones de rojo verificadas). Mapa de cobertura honesto: 46 entradas convertidas (eran 25 al declararse), 26 huecos de verdad con motivo (8 heredados de SPEC-010/014/034/049).",
       "no_verificado": "La cara no se ha visto en la pantalla de un telefono: composicion y montado afirmados en Node; la lectura a 1080x2400 queda fichada para la primera fila con aparato.",
       "merge": "6ff0ead"
+    },
+    {
+      "spec": "SPEC-052",
+      "slug": "nada-se-despierta-al-arrancar",
+      "resultado": "verde: LA PRIMERA BATERIA DE NUCLEO 100% VERDE DEL PROYECTO",
+      "iteraciones": 0,
+      "report": "SPEC-052-run-20260813T123431Z (tanda de la fila, --nucleo-only); cotejo: SUITE-run-20260813T124755Z en worktree propio (no versionados)",
+      "casos": "2915 casos: 2912 pasan, 0 fallan, 3 saltados (+9 nuevos sobre 2906). mirado:true ambas plataformas y completo:true, sobre artefactos regenerados. El rojo de BOOT_COMPLETED, apagado de verdad tras 5 dias fichado.",
+      "app": "20 flujos: 8 pasan, 3 fallan (los tres ajenos: empezar-de-nuevo-copia, en-marcha, telon), 9 limite declarado. Sin cambios, como se esperaba.",
+      "nota": "El receptor de expo-notifications conserva exactamente NOTIFICATION_EVENT (exported=false) y pierde las acciones de arranque; RECEIVE_BOOT_COMPLETED se queda declarado como permiso inerte que el task manager necesita vivo. Decima premisa falsa de encargo: el criterio 1 de quien orquesta pedia quitar el permiso y eso reventaba la app y dos guardas verdes — la autoridad la tenia el texto de la propia guarda ('el permiso a solas es inerte; lo que despierta es el receptor'). Leccion tecnica: el gemelo de task-manager se descubre POR CLASE y se le pudo quitar el filtro entero; expo-notifications se descubre POR LA ACCION del filtro (queryBroadcastReceivers), y un reemplazo sin filtro habria roto todas las notificaciones en silencio. plugins-declarados endurecida con nombraAlMenos. Trampa nueva en CLAUDE.md: expo run:android sobre app/android existente no repite prebuild (hermana del total que baja).",
+      "fichado": "Segunda via de despertar con la app cerrada: receptores FCM de expo-notifications (exported=true), fuera de ACCIONES_QUE_DESPIERTAN, inerte hoy (medido en 3 direcciones). Ampliar la propiedad es decision del dueno. Y la receta comoSeGenera del estado del manifiesto engana (declara solo run:android): territorio de test/, sin arreglar de paso.",
+      "merge": "dd5492a"
     }
   ],
   "bloqueos": [],
@@ -546,9 +558,9 @@
     }
   ],
   "suite_final": {
-    "casos": "2906: 2902 pasan, 1 falla, 3 saltados (mirado:true ambas plataformas, completo:true)",
+    "casos": "2915: 2912 pasan, 0 fallan, 3 saltados — primera bateria de nucleo 100% verde (mirado:true ambas plataformas, completo:true)",
     "app": "20 flujos: 8 pasan, 3 fallan (todos ajenos y leidos: empezar-de-nuevo-copia, en-marcha y telon), 9 solo comprueban su limite (zurron.yaml con la forma 'depende del mundo')",
-    "precondicion": "cotejo en worktree propio del hash declarado (14e), con compilacion Android + prebuild iOS dentro; aparato limpio (pm clear x2 con arranque entre medias) + posicion cada 2 s, emulador en exclusiva"
+    "precondicion": "cotejo en worktree propio del hash declarado (14e), con prebuild de AMBAS plataformas + compilacion Android dentro (el worktree nace sin artefactos, 15b; y en arbol principal el prebuild hay que forzarlo, trampa de la 52); aparato limpio (pm clear x2 con arranque entre medias) + posicion cada 2 s, emulador en exclusiva"
   },
   "bloque": "B7",
   "verificacion_entregable_B2": "simulacion de partida completa en Node, sin red: mundo, prologo con par avalado, salidas casteadas, pasos, rumores con nivel, rango, oro, objetos, motes, diario, ida y vuelta y determinismo entre procesos. Destapo cuatro defectos (decisiones 6r), corregidos.",
