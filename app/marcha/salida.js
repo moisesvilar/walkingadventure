@@ -53,15 +53,16 @@ export const DEL_NUCLEO = Object.freeze([
   'sitiosConPosicion',
   'cadenciaDeMuestreo',
   'CADENCIAS',
-  // SPEC-048-iter-1. La cota de frescura, el tope de espera y la precisión exigida se
+  // SPEC-048-iter-1. La cota de frescura, el tope de espera y el error máximo admitido se
   // **reciben** en lugar de copiarse: son una sola constante cada una y viven donde está
   // escrito su motivo. Y quién ancla el punto de partida —la puntual o la última
   // conocida— lo decide una función del paquete, con la misma cota para las dos puertas:
   // dos comparaciones parecidas en dos ficheros es exactamente el defecto de fondo con
-  // otra cara.
+  // otra cara. **La cota viaja a las dos puertas** desde SPEC-053: la de la última conocida
+  // la certifica el módulo nativo y la de la puntual, la capa de plataforma con su reloj.
   'COTA_DE_FRESCURA_MS',
   'TOPE_DE_ESPERA_MS',
-  'PRECISION_EXIGIDA_M',
+  'ERROR_MAXIMO_PARA_ANCLAR_M',
   'decideElPuntoDePartida',
 ]);
 
@@ -269,11 +270,16 @@ export function creaLaSalida({
   };
 
   /**
-   * Busca con qué anclar el punto de partida: la puntual **con tope**, y si no trae nada
-   * dentro de la cota, la última conocida por la misma regla.
+   * Busca con qué anclar el punto de partida: la puntual **con tope y con cota**, y si no
+   * trae nada dentro de ella, la última conocida por la misma regla.
    *
-   * Las dos puertas se prueban siempre y decide el paquete, que es lo que hace imposible
-   * que a una se le aplique un rasero y a la otra otro. Y **lo que decide el motivo cuando
+   * Las dos puertas se prueban siempre, **las dos se piden con la misma cota** y decide el
+   * paquete, que es lo que hace imposible que a una se le aplique un rasero y a la otra
+   * otro. Quién certifica la frescura es lo que cambió en SPEC-053: la de la última conocida
+   * la certifica el módulo nativo con su `maxAge` y la de la puntual la certifica la capa de
+   * plataforma con el reloj del sistema, porque la puntual no admite edad máxima. Antes lo
+   * decidía el paquete comparando las dos marcas entre sí, y sin última conocida —el estado
+   * de `wa-pixel`, con su último fijo de 25 h 24 min— se caía con ella una puntual fresca. Y **lo que decide el motivo cuando
    * no hay nada es el estado del permiso**, no el texto de la excepción: hasta esta fila
    * cualquier fallo de la posición se archivaba como `permiso-denegado` con el permiso
    * concedido, y el motivo que se enseñaba mandaba a quien juega a arreglar algo que no
@@ -286,14 +292,14 @@ export function creaLaSalida({
     let puntual = null;
     let fallo = null;
     try {
-      puntual = await suscripcion.posicionPuntual({ topeMs: nucleo.TOPE_DE_ESPERA_MS });
+      puntual = await suscripcion.posicionPuntual({ topeMs: nucleo.TOPE_DE_ESPERA_MS, cotaMs: nucleo.COTA_DE_FRESCURA_MS });
     } catch (e) {
       fallo = mensaje(e);
     }
     let ultimaConocida = null;
     try {
       ultimaConocida = typeof suscripcion.ultimaConocida === 'function'
-        ? await suscripcion.ultimaConocida({ cotaMs: nucleo.COTA_DE_FRESCURA_MS, precisionM: nucleo.PRECISION_EXIGIDA_M })
+        ? await suscripcion.ultimaConocida({ cotaMs: nucleo.COTA_DE_FRESCURA_MS, precisionM: nucleo.ERROR_MAXIMO_PARA_ANCLAR_M })
         : null;
     } catch (e) {
       fallo = fallo ?? mensaje(e);

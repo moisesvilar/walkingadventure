@@ -962,6 +962,13 @@ export function App() {
         // **Acercarse a un geofence no se dibuja**: si se dibujara sería el medidor de
         // progreso que `design-system.md` prohíbe, y un motivo para mirar el móvil andando.
         cadencia={laSalida?.cadencia() ?? null}
+        // El último fallo recogido al recibir una posición, que hasta la fila 53 **no lo
+        // consumía nadie**. Una posición que revienta al entrar en el núcleo deja la salida
+        // sorda —no avanza el regreso, no avanza el plazo— y desde el aparato se veía
+        // exactamente igual que una salida sana: mapa pintado, marca moviéndose y ningún
+        // telón. Va a una marca y no a la pantalla porque no es del juego: es la
+        // instrumentación que hace que la próxima vez se vea sin logcat.
+        averia={laSalida?.averia() ?? null}
         paso={pasoDeSalida}
       />
     );

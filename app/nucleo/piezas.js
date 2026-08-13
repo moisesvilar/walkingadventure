@@ -124,7 +124,7 @@ import { AJUSTES_DE_ORIGEN, cambiaAjuste } from '@walkingadventure/nucleo/partid
 import { PRODUCTORES_DE_LA_PARTIDA, creaMotorDeLaPartida } from '@walkingadventure/nucleo/partida/motor.js';
 import {
   COTA_DE_FRESCURA_MS,
-  PRECISION_EXIGIDA_M,
+  ERROR_MAXIMO_PARA_ANCLAR_M,
   TOPE_DE_ESPERA_MS,
   abreSalida,
   decideElPuntoDePartida,
@@ -387,7 +387,7 @@ export const NUCLEO_DE_LA_SALIDA = Object.freeze({
   // leerse desde `node --test` sin resolver nada instalado.
   COTA_DE_FRESCURA_MS,
   TOPE_DE_ESPERA_MS,
-  PRECISION_EXIGIDA_M,
+  ERROR_MAXIMO_PARA_ANCLAR_M,
   decideElPuntoDePartida,
 });
 

@@ -50,6 +50,13 @@ import { CAPA_DE_MARCAS, MARCA } from './marca.js';
 const SIN_MARCAS = Object.freeze([]);
 
 /**
+ * Lo que dice la marca de avería cuando no hay ninguna. **Una palabra y no la cadena
+ * vacía**: un `accessibilityLabel` vacío es indistinguible de una marca que no llegó a
+ * pintarse, y esta marca existe justo para distinguir «no pasa nada» de «no se ve nada».
+ */
+export const SIN_AVERIA = 'sin-averia';
+
+/**
  * Los cuatro motivos por los que el momento en marcha no tiene ubicación. **Cerrado**, y
  * los cuatro se arreglan en sitios distintos: el primero en los ajustes del sistema, el
  * segundo es avería nuestra, el tercero se pasa esperando y el cuarto es una compilación
@@ -96,6 +103,12 @@ export function EnMarchaMontado({
   // **No se pinta y no se lee**: es una marca, y su único cometido es que se pueda afirmar
   // desde el aparato que el muestreo cambia al entrar en un geofence.
   cadencia = null,
+  // El último fallo recogido al recibir una posición, o `null`. **No se pinta y no se lee**:
+  // es una marca, y existe porque una avería invisible es una salida sorda que desde el
+  // aparato se ve idéntica a una salida sana — el mapa se pinta, la marca se mueve y el
+  // telón no cae nunca. Ver `salida.js`, donde la excepción se recoge para no morir dentro
+  // de una devolución de llamada del sistema; hasta la fila 53 ahí se quedaba.
+  averia = null,
   // Cuántas posiciones han llegado. **No se usa para nada más que recomponer**: el seguidor
   // es un objeto estable, así que sin un valor que cambie el momento se compondría una vez
   // y la marca se quedaría donde entró — indistinguible de andar en círculos.
@@ -150,6 +163,7 @@ export function EnMarchaMontado({
         <View pointerEvents="none" style={CAPA_DE_MARCAS}>
           <View testID="marcha-sin-ubicacion" accessibilityLabel={sinUbicacion ?? ''} style={MARCA} />
           <View testID="ubicacion-estado" accessibilityLabel="sin-montar" style={MARCA} />
+          <View testID="salida-averia" accessibilityLabel={averia ?? SIN_AVERIA} style={MARCA} />
         </View>
         <Text style={estilos.texto}>{fallo ?? TEXTOS_SIN_UBICACION[sinUbicacion]}</Text>
       </View>
@@ -174,7 +188,7 @@ export function EnMarchaMontado({
         Lamina={Lamina}
         aviso={aviso}
       />
-      {/* Las tres marcas del montaje, **después de la lámina y en su propia capa**: dicen qué
+      {/* Las cuatro marcas del montaje, **después de la lámina y en su propia capa**: dicen qué
           se cableó, no qué se ve, y la lámina va a sangre, así que como hermanas sueltas las
           tapaba entera y ninguna llegaba al árbol de accesibilidad. Ver `CAPA_DE_MARCAS`. */}
       <View pointerEvents="none" style={CAPA_DE_MARCAS}>
@@ -185,6 +199,11 @@ export function EnMarchaMontado({
         {/* Y la cadencia vigente. Sin ella el cambio de muestreo solo se podría afirmar sobre
             la función pura del paquete, nunca sobre el aparato. */}
         <View testID="salida-cadencia" accessibilityLabel={cadencia ?? 'sin-suscripcion'} style={MARCA} />
+        {/* Y la avería de la última posición, que es la que faltaba. Con la salida abierta y
+            el mapa pintado, una excepción al entrar en el núcleo deja el regreso y el plazo
+            sin avanzar **sin que nada se vea**: el 13-ago-2026 costó un recorrido conducido
+            con logcat descubrir que las posiciones entraban y no completaban. §6h otra vez. */}
+        <View testID="salida-averia" accessibilityLabel={averia ?? SIN_AVERIA} style={MARCA} />
       </View>
     </View>
   );

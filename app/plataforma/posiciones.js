@@ -220,6 +220,42 @@ function exigeNumero(valor, quien) {
 }
 
 /**
+ * Si un fijo está dentro de la cota de frescura, **medido contra el reloj del sistema**.
+ *
+ * Aquí sí hay reloj, y ese es el reparto que la fila 53 fijó con la medida delante: sin
+ * saber qué hora es no se puede decir si un fijo es fresco, y `packages/nucleo/` no puede
+ * saberlo —`Date.now` dentro del paquete rompe el determinismo, que es la regla más dura
+ * del repo—. La regla se había aplicado de más a toda la app, y la consecuencia fue usar
+ * la marca de la última posición conocida como patrón de la puntual: con el último
+ * conocido viejo o impreciso el módulo nativo devuelve nada, y con él se caía una puntual
+ * fresca y perfecta. Es el estado de `wa-pixel`, cuyo último fijo es de 25 h 24 min.
+ *
+ * **Sigue habiendo una sola cota** para cualquier fijo que ancle el punto de partida: la
+ * declara el paquete, llega por la firma y se aplica igual a las dos puertas. Lo que
+ * cambia es **quién** decide la frescura, no que haya dos raseros — a la última conocida
+ * se la certifica el módulo nativo con `maxAge`, y a la puntual, que no admite edad
+ * máxima, se la certifica aquí con el mismo número.
+ *
+ * El reloj entra **inyectado y no importado** para que se pueda doblar, igual que el de
+ * `plataforma/lector-de-salud.js`.
+ */
+function dentroDeLaCota(fijo, { cotaMs, ahora }) {
+  if (!fijo) return null;
+  const instante = ahora();
+  if (!Number.isFinite(instante)) {
+    throw new Error(
+      `el reloj de la capa de plataforma ha devuelto ${JSON.stringify(instante) ?? String(instante)}: sin él no se puede decir si un fijo ` +
+      'es fresco, y anclar el punto de partida con uno que no se puede fechar es lo que esta cota existe para impedir',
+    );
+  }
+  // La antigüedad negativa —un fijo con la marca por delante del reloj— se trata como
+  // fresca y no como avería: el desfase entre el reloj del sensor y el del sistema es de
+  // milisegundos, y descartar por él dejaría la salida sin abrir por un detalle que nadie
+  // puede arreglar desde la app.
+  return instante - fijo.tMs <= cotaMs ? fijo : null;
+}
+
+/**
  * La única suscripción al sensor de una salida abierta.
  *
  * **Una y no dos**, y es la decisión de más consecuencias del módulo: con una para la
@@ -250,6 +286,9 @@ export function creaSuscripcionDeUbicacion({
   alRecibir = null,
   tarea = NOMBRE_DE_LA_TAREA,
   cadenciaM = CADENCIA_M,
+  // El reloj real de la app, **inyectado y no importado**: es lo único con lo que se puede
+  // certificar la frescura de un fijo, y el paquete no lo puede tener. Ver `dentroDeLaCota`.
+  ahora = () => Date.now(),
 }) {
   if (typeof Location?.startLocationUpdatesAsync !== 'function' || typeof TaskManager?.defineTask !== 'function') {
     return null;
@@ -417,11 +456,17 @@ export function creaSuscripcionDeUbicacion({
      * tardar más que el tope. El módulo nativo no acepta ninguno, así que el tope es una
      * carrera contra un temporizador y el fijo que llegue tarde se descarta solo.
      *
-     * Devuelve el fijo **con su marca**, que es lo que permite acotarlo después: está
-     * medido que esta llamada devuelve caché de hasta 643,3 s sin decirlo.
+     * Y **ya certificada dentro de la cota**, que es lo que cambió la fila 53: está medido
+     * que esta llamada devuelve caché de 90,2 s, 279,6 s y 643,3 s sin decirlo, así que el
+     * fijo se compara con el reloj del sistema aquí mismo y se devuelve nada si es viejo.
+     * Devolver nada es exactamente lo que hace `getLastKnownPositionAsync` con su `maxAge`:
+     * **la misma cota y la misma respuesta para las dos puertas**, que es el principio
+     * escrito en forma. Antes esto lo decidía el paquete comparando la marca de la puntual
+     * con la del último conocido, y sin último conocido se caía la puntual con él.
      */
-    async posicionPuntual({ topeMs } = {}) {
+    async posicionPuntual({ topeMs, cotaMs } = {}) {
       exigeNumero(topeMs, 'el tope de espera del fijo puntual');
+      exigeNumero(cotaMs, 'la cota de frescura del fijo puntual');
       let corta;
       const espera = new Promise((resuelve) => { corta = setTimeout(() => resuelve(null), topeMs); });
       try {
@@ -429,7 +474,7 @@ export function creaSuscripcionDeUbicacion({
           Location.getCurrentPositionAsync({ accuracy: precisionQueSePide(Location) }),
           espera,
         ]);
-        return unFijoDeExpo(leida);
+        return dentroDeLaCota(unFijoDeExpo(leida), { cotaMs, ahora });
       } finally {
         clearTimeout(corta);
       }
@@ -439,12 +484,12 @@ export function creaSuscripcionDeUbicacion({
      * La última posición conocida del sistema, **si cumple la cota de frescura y la
      * precisión exigida**. Es la segunda puerta del punto de partida.
      *
-     * Los dos parámetros van **explícitos y ninguno por omisión**, y es lo que hace que la
-     * app no necesite reloj propio: `getLastKnownPositionAsync` devuelve `null` cuando el
-     * fijo es más viejo que `maxAge` o más impreciso que `requiredAccuracy`, así que la
-     * frescura la decide el módulo nativo y aquí no se compara ninguna hora. Un `null` es
-     * una respuesta prevista —el emulador `wa-pixel` tiene su último conocido en 25 h 24
-     * min, y no hay cota razonable que le diga que sí— y no una avería.
+     * Los dos parámetros van **explícitos y ninguno por omisión**: `getLastKnownPositionAsync`
+     * devuelve `null` cuando el fijo es más viejo que `maxAge` o más impreciso que
+     * `requiredAccuracy`, así que por esta puerta la frescura la certifica el módulo nativo
+     * —con el mismo número que `posicionPuntual` le aplica a la suya con el reloj de la app—.
+     * Un `null` es una respuesta prevista —el emulador `wa-pixel` tiene su último conocido en
+     * 25 h 24 min, y no hay cota razonable que le diga que sí— y no una avería.
      */
     async ultimaConocida({ cotaMs, precisionM } = {}) {
       exigeNumero(cotaMs, 'la cota de frescura de la última posición conocida');

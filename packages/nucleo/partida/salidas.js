@@ -168,12 +168,20 @@ export const TOPE_DE_ESPERA_MS = 10 * 1000;
 export const PLAZO_DE_REANCLAJE_MS = 25 * 1000;
 
 /**
- * La precisión que se le exige a un fijo para anclar o re-anclar el punto de partida:
- * **el radio del regreso**, leído y no copiado. Un fijo cuya incertidumbre declarada es
- * mayor que el radio dentro del cual se cuenta que se ha vuelto no puede anclar ese
- * radio, y dos números que significan lo mismo se desincronizan.
+ * El error declarado máximo que se le admite a un fijo para anclar o re-anclar el punto
+ * de partida: **el radio del regreso**, leído y no copiado. Un fijo cuya incertidumbre
+ * declarada es mayor que el radio dentro del cual se cuenta que se ha vuelto no puede
+ * anclar ese radio, y dos números que significan lo mismo se desincronizan.
+ *
+ * **Se llama por lo que acota y no «precisión»**, y el nombre es la mitad del asunto:
+ * `core/geo.js` declara `PRECISION_M`, que es la rejilla con la que se **guardan** los
+ * metros del mundo, y la guarda de `test/nucleo/persistencia.test.mjs` prohíbe que haya
+ * una segunda constante de precisión repartida por el paquete — porque dos precisiones
+ * son cero precisiones: la que manda pasa a ser la del último sitio que tocó el número.
+ * Esto no es una precisión de almacenamiento: es una cota de error de sensor, y llamarla
+ * igual invitaba justo al error que esa guarda existe para cazar.
  */
-export const PRECISION_EXIGIDA_M = RADIO_DE_REGRESO_M;
+export const ERROR_MAXIMO_PARA_ANCLAR_M = RADIO_DE_REGRESO_M;
 
 /**
  * De qué puerta salió el punto de partida. **Vocabulario cerrado de dos palabras**, que
@@ -204,7 +212,7 @@ export const TEXTO_MIENTRAS_SE_BUSCA = 'Buscando dónde estás…';
  * @returns `{ sirve, motivo }`, nunca lanza: un fijo malo es una respuesta prevista del
  *   sensor y no una avería de nadie.
  */
-export function fijoQuePuedeAnclar(fijo, { precisionExigidaM = PRECISION_EXIGIDA_M } = {}) {
+export function fijoQuePuedeAnclar(fijo, { errorMaximoM = ERROR_MAXIMO_PARA_ANCLAR_M } = {}) {
   if (!fijo || typeof fijo !== 'object') return congelaHondo({ sirve: false, motivo: 'no llegó ningún fijo' });
   if (!Number.isFinite(fijo.lat) || !Number.isFinite(fijo.lon)) {
     return congelaHondo({ sirve: false, motivo: 'el fijo llega sin coordenada' });
@@ -215,58 +223,68 @@ export function fijoQuePuedeAnclar(fijo, { precisionExigidaM = PRECISION_EXIGIDA
   if (!Number.isFinite(fijo.precisionM)) {
     return congelaHondo({ sirve: false, motivo: 'el fijo llega sin precisión declarada, y lo que no declara su incertidumbre no puede anclar el radio del regreso' });
   }
-  if (fijo.precisionM > precisionExigidaM) {
+  if (fijo.precisionM > errorMaximoM) {
     return congelaHondo({
       sirve: false,
-      motivo: `el fijo declara ${fijo.precisionM} m de incertidumbre y el radio dentro del cual se cuenta el regreso es de ${precisionExigidaM} m`,
+      motivo: `el fijo declara ${fijo.precisionM} m de incertidumbre y el radio dentro del cual se cuenta el regreso es de ${errorMaximoM} m`,
     });
   }
   return congelaHondo({ sirve: true, motivo: null });
 }
 
 /**
- * Cuál de las dos puertas ancla el punto de partida, con **la misma cota y la misma
- * precisión para las dos**.
+ * Cuál de las dos puertas ancla el punto de partida, con **la misma cota y el mismo
+ * error máximo para las dos**.
  *
- * Y cómo se acota sin reloj, que es la parte que hay que leer entera. La última
- * conocida se le pide al módulo nativo **con la edad máxima y la precisión escritas**,
- * así que la que llega aquí viene certificada dentro de la cota; la puntual no acepta
- * edad máxima y está medido que devuelve caché de hasta 643,3 s sin decirlo. Como la
- * última conocida es, por construcción, **al menos tan reciente** como cualquier fijo
- * que la puntual pueda devolver —el fijo nuevo que la puntual produce pasa a ser el
- * último conocido, y el que no es nuevo *es* el último conocido—, la comparación de sus
- * dos marcas basta:
+ * Y quién decide la frescura, que es la parte que hay que leer entera y que cambió el
+ * 13-ago-2026 con la medida delante. **Las dos puertas llegan aquí ya certificadas**:
+ * `app/plataforma/posiciones.js` compara la marca de cada fijo con la hora del sistema
+ * y devuelve nada cuando se sale de la cota —la última conocida se la pide al módulo
+ * nativo con la edad máxima escrita, y la puntual, que no admite edad máxima y está
+ * medido que devuelve caché de hasta 643,3 s sin decirlo, la certifica la propia capa
+ * con el reloj que recibe inyectado—. Aquí no hay reloj y no lo va a haber: eso es la
+ * regla dura del determinismo del paquete, y aplicarla también a la app fue el error
+ * que este trozo pagó.
  *
- * - sin última conocida certificada **no hay nada dentro de la cota**, tampoco por la
- *   puerta de la puntual, y no se ancla;
- * - con la marca de la puntual igual o posterior a la de la última conocida, la puntual
- *   es al menos tan fresca como algo que ya está dentro de la cota, y ancla ella;
- * - con la marca de la puntual anterior, la puntual es caché vieja al lado de lo que hay
- *   disponible, y ancla la última conocida.
+ * Lo que quedaba escrito antes era: «sin última conocida certificada no hay nada dentro
+ * de la cota, tampoco por la puerta de la puntual». El razonamiento —la última conocida
+ * es al menos tan reciente como cualquier fijo que la puntual pueda devolver— es cierto
+ * **del fijo** y falso **de lo que el módulo nativo responde**: `getLastKnownPositionAsync`
+ * contesta `null` cuando el último conocido es viejo o impreciso, y con él se caía una
+ * puntual fresca y perfecta. Es exactamente el estado de `wa-pixel`, cuyo último fijo
+ * conocido es de **25 h 24 min**: con la guarda vieja la salida no se abría nunca aunque
+ * el GPS entregara un fijo de 0,6 s.
  *
- * Es **una resta de dos marcas del sensor** y no un reloj de pared: ni este paquete ni
- * la app necesitan saber qué hora es.
+ * Así que ahora se elige **por la marca y no por la puerta**, que es el principio de una
+ * sola cota escrito en forma:
+ *
+ * - de las dos que sirven, ancla la de marca más reciente;
+ * - con las marcas empatadas ancla la puntual, porque es la que se acaba de pedir;
+ * - si solo sirve una, ancla esa, venga de la puerta que venga;
+ * - si no sirve ninguna, no se ancla y el motivo dice qué le pasaba a cada una.
  *
  * @param {object} puertas
- *   `puntual` lo que devolvió el fijo puntual, o `null`; `ultimaConocida` la que el
- *   módulo nativo certificó dentro de la cota y con la precisión exigida, o `null`.
+ *   `puntual` y `ultimaConocida`, cada una ya certificada dentro de la cota por la capa
+ *   de plataforma, o `null`.
  * @returns `{ ancla, origen, motivo }`. Sin nada que anclar, `ancla` y `origen` son
  *   `null` y el motivo lo dice.
  */
-export function decideElPuntoDePartida({ puntual = null, ultimaConocida = null, precisionExigidaM = PRECISION_EXIGIDA_M } = {}) {
-  const laUltima = fijoQuePuedeAnclar(ultimaConocida, { precisionExigidaM });
-  if (!laUltima.sirve) {
-    return congelaHondo({
-      ancla: null,
-      origen: null,
-      motivo: `no hay ninguna posición dentro de la cota de frescura con la que anclar el punto de partida: ${laUltima.motivo}`,
-    });
-  }
-  const laPuntual = fijoQuePuedeAnclar(puntual, { precisionExigidaM });
-  if (laPuntual.sirve && puntual.tMs >= ultimaConocida.tMs) {
+export function decideElPuntoDePartida({ puntual = null, ultimaConocida = null, errorMaximoM = ERROR_MAXIMO_PARA_ANCLAR_M } = {}) {
+  const laPuntual = fijoQuePuedeAnclar(puntual, { errorMaximoM });
+  const laUltima = fijoQuePuedeAnclar(ultimaConocida, { errorMaximoM });
+
+  if (laPuntual.sirve && (!laUltima.sirve || puntual.tMs >= ultimaConocida.tMs)) {
     return congelaHondo({ ancla: unFijo(puntual), origen: 'puntual', motivo: null });
   }
-  return congelaHondo({ ancla: unFijo(ultimaConocida), origen: 'ultima-conocida', motivo: null });
+  if (laUltima.sirve) {
+    return congelaHondo({ ancla: unFijo(ultimaConocida), origen: 'ultima-conocida', motivo: null });
+  }
+  return congelaHondo({
+    ancla: null,
+    origen: null,
+    motivo: `no hay ninguna posición dentro de la cota de frescura con la que anclar el punto de partida: ` +
+      `el fijo puntual, ${laPuntual.motivo}; la última posición conocida, ${laUltima.motivo}`,
+  });
 }
 
 function unFijo(fijo) {
@@ -274,9 +292,9 @@ function unFijo(fijo) {
 }
 
 /**
- * Si este fijo sustituye al ancla, **y las tres condiciones hacen falta**: precisión
- * declarada dentro de la exigida, marca dentro del plazo desde la marca del ancla, y la
- * salida sin haberse declarado alejada todavía.
+ * Si este fijo sustituye al ancla, **y las cuatro condiciones hacen falta**: error
+ * declarado dentro del máximo, marca dentro del plazo desde la marca del ancla, la
+ * salida sin haberse declarado alejada todavía, y **que el fijo repare algo**.
  *
  * Ocurre **como mucho una vez por salida** y no distingue por el origen del punto: un
  * fijo puntual rancio es tan malo como una última conocida vieja, así que el re-anclaje
@@ -284,28 +302,60 @@ function unFijo(fijo) {
  * que decide cuándo cae el telón y moverla a mitad de salida cambiaría el sitio al que
  * hay que volver bajo los pies de quien vuelve.
  *
+ * **La cuarta condición es de la fila 53 y sale de una medida.** En las tres tomas de
+ * `wa-pixel` del 13-ago-2026 el re-anclaje salía `reanclada = true` con
+ * `desplazamientoDelAnclaM = 0` y `antiguedadAlReanclarMs = 0`: el primer fijo que
+ * entrega la suscripción es **literalmente el mismo** que devolvió la puntual, así que el
+ * único re-anclaje de la salida se gastaba en no mover nada y un fijo bueno que llegara
+ * después, dentro del plazo, ya no podía entrar. No contradecía ningún criterio al pie de
+ * la letra —«el primer fijo bueno dentro del plazo» es ese—, pero dejaba el mecanismo
+ * inerte, que es lo que la fila venía a evitar.
+ *
+ * El criterio, con su porqué: **el ancla se mueve más que la incertidumbre que el propio
+ * fijo declara**. Por debajo de eso «se ha movido» y «es ruido» no se distinguen — el
+ * fijo está diciendo lo mismo que el ancla, con su mismo margen—, así que no hay nada que
+ * reparar y no se gasta. Y **el umbral no es un número nuevo**: es `precisionM`, que ya
+ * viaja dentro del fijo y que ya decide si puede anclar. Un cuarto número fijo aquí sería
+ * uno más que calibrar sin medida; la incertidumbre declarada es exactamente la escala a
+ * la que la pregunta tiene sentido. En el caso medido son 0 m contra los 8 m que el fijo
+ * declaraba.
+ *
  * `anclaMs` en nulo significa que la ventana ya no se puede medir —una salida abierta
  * por la versión anterior, o recuperada tras morir el proceso— y entonces **no se
- * re-ancla**: no es un caso especial, es el plazo aplicándose.
+ * re-ancla**: no es un caso especial, es el plazo aplicándose. `ancla` en nulo es otra
+ * cosa: significa que quien pregunta no ha dicho dónde está el ancla, y entonces la
+ * cuarta condición **no bloquea**, porque una condición que no se puede medir no es una
+ * condición que se incumple. Quien recibe posiciones sí la pasa siempre.
  *
  * @returns `{ reancla, motivo }`, nunca lanza.
  */
 export function decideElReanclaje({
   anclaMs = null,
+  ancla = null,
   reanclada = false,
   seAlejo = false,
   fijo = null,
   plazoMs = PLAZO_DE_REANCLAJE_MS,
-  precisionExigidaM = PRECISION_EXIGIDA_M,
+  errorMaximoM = ERROR_MAXIMO_PARA_ANCLAR_M,
 } = {}) {
   if (reanclada === true) return congelaHondo({ reancla: false, motivo: 'el punto de partida ya se re-ancló, y el re-anclaje ocurre como mucho una vez por salida' });
   if (seAlejo === true) return congelaHondo({ reancla: false, motivo: 'la salida ya se declaró alejada, y desde ahí el punto de partida es inmutable' });
   if (!Number.isInteger(anclaMs)) return congelaHondo({ reancla: false, motivo: 'no se sabe con qué marca se ancló el punto de partida, así que su ventana no se puede medir' });
-  const sirve = fijoQuePuedeAnclar(fijo, { precisionExigidaM });
+  const sirve = fijoQuePuedeAnclar(fijo, { errorMaximoM });
   if (!sirve.sirve) return congelaHondo({ reancla: false, motivo: sirve.motivo });
   const antiguedadMs = fijo.tMs - anclaMs;
   if (antiguedadMs < 0 || antiguedadMs > plazoMs) {
     return congelaHondo({ reancla: false, motivo: `el fijo llega ${antiguedadMs} ms después del ancla y el plazo de re-anclaje es de ${plazoMs} ms` });
+  }
+  if (ancla !== null) {
+    const desplazamientoM = metrosEntre(exigeCoordenada(ancla, 'el punto de partida contra el que se mide el re-anclaje'), { lat: fijo.lat, lon: fijo.lon });
+    if (desplazamientoM <= fijo.precisionM) {
+      return congelaHondo({
+        reancla: false,
+        motivo: `el fijo mueve el ancla ${desplazamientoM.toFixed(1)} m y declara ${fijo.precisionM} m de incertidumbre, ` +
+          'así que no repara nada: gastar en él el único re-anclaje de la salida dejaría fuera al fijo bueno que venga detrás',
+      });
+    }
   }
   return congelaHondo({ reancla: true, motivo: null });
 }
@@ -796,6 +846,10 @@ export function recibePosicion(estado, { posicion, tramo, rotulo = null }) {
   // alguien tendría que acordarse de llamar.
   const reanclaje = decideElReanclaje({
     anclaMs: salida.anclaMs ?? null,
+    // El ancla entra por la firma para que la cuarta condición se pueda medir: sin ella
+    // el re-anclaje se gastaba en el primer fijo de la suscripción, que es el mismo que
+    // devolvió la puntual, y no movía nada.
+    ancla: salida.partida,
     reanclada: salida.reanclada === true,
     seAlejo: salida.regreso.seAlejo === true,
     fijo: leida,
