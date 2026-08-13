@@ -104,9 +104,9 @@ Sigue sin haber ningún `data-testid` de confirmación secundaria, y su ausencia
 
 ### Ficheros afectados
 
-- `app/datos/empezar-de-nuevo.js` — `guardaCopiaYBorra` (`:227-236`) se parte: `guardaCopia` guarda y devuelve el estado `copia-guardada` o el aviso de que no se guardó nada; `borra` queda como está. Ninguna de las dos llama a la otra.
-- `packages/nucleo/partida/borrado.js` — el vocabulario de estados gana `copia-guardada`, y los textos de las dos acciones y de la línea de copia hecha se componen aquí, como el resto.
-- `app/pantallas/empezar-de-nuevo.jsx` — las etiquetas nuevas, la línea de copia hecha y que guardar deje de encadenar. La jerarquía visual —sólida, hueca, texto— no se toca.
+- `app/datos/empezar-de-nuevo.js` — `guardaCopiaYBorra` (`:227-236`) se parte: `guardaCopia` guarda y devuelve el estado `copia-guardada` o el aviso de que no se guardó nada; `borra` queda como está. Ninguna de las dos llama a la otra. **Y aquí viven los textos**: las etiquetas de las dos acciones y la línea de copia hecha se escriben en este fichero, junto a los seis que ya estaban, que es donde la decisión asumida de más abajo los pone —la redacción es voz y se decide donde se escribe—.
+- `packages/nucleo/partida/borrado.js` — el vocabulario de estados gana `copia-guardada`, y **eso es todo lo que gana**: del núcleo sale la palabra, no la frase. Su cabecera lo declara desde la spec base —«la redacción la monta la pantalla; lo que vive aquí es el dato»—, el módulo lo repite donde compone la lista —«de aquí solo sale el dato, sin una sola frase»— y es la misma razón por la que lo que se pierde viaja como lista estructurada y no como texto montado. Mover un rótulo aquí rompería esa frontera para no ganar nada.
+- `app/pantallas/empezar-de-nuevo.jsx` — pinta las etiquetas nuevas y la línea de copia hecha, que lee de los textos de arriba y no compone por su cuenta, y deja de encadenar el borrado a guardar. La jerarquía visual —sólida, hueca, texto— no se toca.
 - La limpieza de la copia de trabajo de `cache/copias/` entra **dentro del borrado**, no al salir de la pantalla: quien guarda y se va sin borrar deja su copia de trabajo donde el sistema puede llevársela, que es para lo que está la caché.
 
 **Composición que se mantiene explícitamente**: la marca de borrado antes de borrar y el remate del borrado interrumpido al abrir; que una partida marcada como en borrado no se abra por ninguna ruta; la enumeración compuesta en tiempo de ejecución; y que borrar lleve al arranque sin conservar semilla.
