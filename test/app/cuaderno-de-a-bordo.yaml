@@ -1,0 +1,62 @@
+# @app · SPEC-054. docs/testing.md no trae un escenario específico para el cuaderno.
+# Este flujo necesita una compilación de desarrollo y la puerta declarada del andamiaje.
+
+appId: com.walkingadventure.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: 'arranque'
+    timeout: 60000
+- openLink: 'walkingadventure://desarrollo'
+- extendedWaitUntil:
+    visible:
+      id: 'cuaderno-de-a-bordo'
+    timeout: 20000
+
+- assertVisible:
+    id: 'cuaderno-estado'
+- assertVisible: 'Apagado'
+- assertVisible:
+    id: 'cuaderno-privacidad'
+- assertVisible: '.*Contiene posiciones y sitios reales.*no lo envía.*pulsas compartir.*'
+- assertVisible:
+    id: 'cuaderno-compartir'
+- assertVisible:
+    id: 'cuaderno-provocar-error'
+- assertVisible:
+    id: 'cuaderno-provocar-rechazo'
+
+- tapOn:
+    id: 'cuaderno-interruptor'
+- assertVisible: 'Encendido · escribiendo'
+- assertVisible: 'Cuaderno listo para compartir.'
+
+# La marca persiste tras reiniciar y vuelve a instalar el instrumento.
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: 'arranque'
+    timeout: 60000
+- openLink: 'walkingadventure://desarrollo'
+- extendedWaitUntil:
+    visible: 'Encendido · escribiendo'
+    timeout: 20000
+
+# Las dos rutas diagnósticas se ejercitan por sus controles reales. La app debe seguir viva.
+- tapOn:
+    id: 'cuaderno-provocar-error'
+- assertVisible:
+    id: 'cuaderno-de-a-bordo'
+- tapOn:
+    id: 'cuaderno-provocar-rechazo'
+- assertVisible:
+    id: 'cuaderno-de-a-bordo'
+
+# Apagar nombra y ejecuta el borrado; compartir vuelve a quedar sin contenido.
+- tapOn:
+    id: 'cuaderno-interruptor'
+- assertVisible: 'Apagado'
+- assertVisible: 'Todavía no hay nada que compartir.'

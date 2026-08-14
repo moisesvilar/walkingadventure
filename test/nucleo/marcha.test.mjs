@@ -249,6 +249,46 @@ async function abierta({ rotulo = rotuloQueFunciona(), suscripcion = suscripcion
   return { laSalida, respuesta, estado, rotulo, suscripcion, cambios };
 }
 
+test('La salida instrumenta apertura, anclaje, posición, cadencia, geofence, situación y marcas sin cambiar sus decisiones', async () => {
+  const observados = [];
+  const suscripcion = suscripcionDoblada();
+  const estado = estadoDeSalidas();
+  const laSalida = creaLaSalida({
+    nucleo: NUCLEO,
+    salidas: estado,
+    rotulo: rotuloQueFunciona(),
+    suscripcion,
+    origen: ORIGEN,
+    mundo: MUNDO,
+    tramo: TRAMO_M,
+    observa: async (tipo, datos) => observados.push({ tipo, datos }),
+  });
+  const respuesta = await laSalida.abre({ salida: 's1', mapa: 'm1', mundo: 'Reinos da Brétema' });
+  assert.equal(respuesta.abierta, true);
+  suscripcion.entrega(posicion(EN_MONFRIDA.lat, EN_MONFRIDA.lon, T0 + 1000, 6));
+  await laSalida.recibeLaPosicion();
+
+  assert.deepEqual(observados.filter((e) => e.tipo === 'apertura').map((e) => e.datos.resultado), ['intento', 'abierta']);
+  assert.equal(observados.filter((e) => e.tipo === 'fijo-de-anclaje').length, 2);
+  const posicionObservada = observados.find((e) => e.tipo === 'posicion');
+  assert.deepEqual({ lat: posicionObservada.datos.lat, lon: posicionObservada.datos.lon, precisionM: posicionObservada.datos.precisionM }, { ...EN_MONFRIDA, precisionM: 6 });
+  assert.ok('edadMs' in posicionObservada.datos && 'clasificacion' in posicionObservada.datos);
+  assert.ok(observados.some((e) => e.tipo === 'cadencia'));
+  assert.ok(observados.some((e) => e.tipo === 'geofence'));
+  assert.ok(observados.some((e) => e.tipo === 'situacion' && e.datos.motivo === 'apertura'));
+  assert.ok(observados.some((e) => e.tipo === 'marca' && e.datos.valor === 'sin-averia'));
+});
+
+test('Con el cuaderno apagado la misma salida no emite ninguna observación', async () => {
+  const suscripcion = suscripcionDoblada();
+  const laSalida = creaLaSalida({ nucleo: NUCLEO, salidas: estadoDeSalidas(), rotulo: rotuloQueFunciona(), suscripcion, origen: ORIGEN, mundo: MUNDO, tramo: TRAMO_M });
+  const respuesta = await laSalida.abre({ salida: 's1', mapa: 'm1', mundo: 'Reinos da Brétema' });
+  assert.equal(respuesta.abierta, true);
+  suscripcion.entrega(posicion(EN_MONFRIDA.lat, EN_MONFRIDA.lon, T0 + 1000));
+  await laSalida.recibeLaPosicion();
+  assert.equal(laSalida.situacion(), 'abierta-con-rotulo');
+});
+
 // ── La cadena del sensor ────────────────────────────────────────────────────────
 
 describe('La cadena del sensor: una suscripción, fuente, detector, seguidor', () => {

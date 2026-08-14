@@ -1,6 +1,142 @@
 {
   "entradas": [
     {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el cuaderno apagado WHEN se enciende, reinicia y después se apaga THEN inicia sesión, reanuda y borra fichero y marca.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Encender, reiniciar y apagar conserva la sesión hasta que apagar borra fichero y marca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el cuaderno apagado después de borrarlo WHEN la app sigue ejecutándose THEN no se añade ningún registro nuevo.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Encender, reiniciar y apagar conserva la sesión hasta que apagar borra fichero y marca",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN un acontecimiento WHEN se escribe THEN cada línea es JSON válida con versión, secuencia, UTC, tipo cerrado y datos opcionales explícitos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Cada acontecimiento es una línea JSON válida, ordenada y con vocabulario cerrado",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN un dato que no puede convertirse a JSON WHEN se registra THEN queda una avería serializable y el cuaderno continúa.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Un dato que no puede convertirse a JSON deja una avería serializable y permite seguir",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN un paseo largo WHEN supera 5 MiB THEN conserva cabecera y cola y declara los descartes.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "El cuaderno conserva cabecera y cola, declara descartes y nunca supera 5 MiB",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN una sola línea mayor que el espacio WHEN se registra THEN se sustituye por truncado y nunca deja JSON parcial.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Una sola línea desmesurada se sustituye por truncado y no deja JSON parcial",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN varias escrituras casi simultáneas WHEN terminan THEN ninguna línea queda mezclada, partida ni sobrescrita.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Escrituras casi simultáneas no mezclan, parten ni sobrescriben líneas",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN que una escritura falla WHEN se registra THEN la salida continúa y la avería del cuaderno queda visible.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Una escritura fallida se contiene y queda visible como avería del cuaderno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN manejadores globales previos WHEN se capturan error y rechazo THEN se registran, delegan y restauran sin duplicados.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "El manejador global registra error y rechazo antes de delegar y se restaura sin duplicados",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el cuaderno vacío o con contenido WHEN se comparte THEN vacío falla y con contenido no borra ni cambia el interruptor.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-de-a-bordo.test.mjs",
+      "caso": "Compartir conserva intactos el contenido y el estado, y vacío no se comparte",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el almacenamiento del cuaderno WHEN se inspecciona THEN vive bajo cache/cuaderno-de-a-bordo fuera de documentos y partida.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-fronteras.test.mjs",
+      "caso": "El cuaderno vive bajo un único prefijo de caché y fuera de documentos y partida",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN una copia o exportación WHEN el cuaderno contiene coordenadas y sitios THEN no aparecen en sus artefactos.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-fronteras.test.mjs",
+      "caso": "Una copia y una exportación excluyen coordenadas y sitios del cuaderno",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN una compilación de producción WHEN arranca THEN el cuaderno no se registra ni deja controles o símbolos alcanzables.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-fronteras.test.mjs",
+      "caso": "En producción el cuaderno no se registra ni deja símbolos alcanzables",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el bloque de andamiaje WHEN se inspecciona THEN expone los selectores estables, deshabilitados y el aviso literal de privacidad.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/cuaderno-fronteras.test.mjs",
+      "caso": "El bloque del andamiaje declara todos los selectores y el aviso literal de privacidad",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el cuaderno encendido WHEN se conduce una salida THEN instrumenta apertura, anclaje, posición, cadencia, geofence, situación y marcas.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "La salida instrumenta apertura, anclaje, posición, cadencia, geofence, situación y marcas sin cambiar sus decisiones",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN el cuaderno apagado WHEN se conduce el mismo trecho THEN no se emite ninguna observación.",
+      "nivel": "@nucleo",
+      "fichero": "test/nucleo/marcha.test.mjs",
+      "caso": "Con el cuaderno apagado la misma salida no emite ninguna observación",
+      "hueco_de_bateria": true
+    },
+    {
+      "spec": "SPEC-054",
+      "criterio": "GIVEN la compilación de desarrollo abierta por walkingadventure://desarrollo WHEN se usa el bloque THEN muestra privacidad, persiste, diagnostica y borra.",
+      "nivel": "@app",
+      "fichero": "test/app/cuaderno-de-a-bordo.yaml",
+      "caso": "El cuaderno se enciende, sobrevive al reinicio, diagnostica y se apaga borrando",
+      "hueco_de_bateria": true
+    },
+    {
       "spec": "SPEC-001",
       "criterio": "Dado un clon limpio del repositorio, cuando se ejecuta `node --test test/nucleo/`, entonces el comando arranca sin instalar ninguna dependencia.",
       "nivel": "@nucleo",
