@@ -32,9 +32,9 @@ test('Una copia y una exportación excluyen coordenadas y sitios del cuaderno', 
   assert.deepEqual(pedidos, PREFIJOS_DE_LA_PARTIDA);
   assert.doesNotMatch(volcado, /42\.4|-8\.81|Casa real|cuaderno-de-a-bordo/);
 
-  const copia = fuente('app/plataforma/ficheros.js');
-  assert.match(copia, /directorioDeLaPartida/);
-  assert.doesNotMatch(copia, /cuaderno-de-a-bordo/);
+  const composicion = fuente('app/App.js');
+  assert.match(composicion, /directorio: directorioDeLaPartida\(directorioDeDocumentos\(\)\)/);
+  assert.doesNotMatch(composicion, /directorioDeLaPartida\([^)]*cuaderno-de-a-bordo/);
 });
 
 test('En producción el cuaderno no se registra ni deja símbolos alcanzables', () => {
