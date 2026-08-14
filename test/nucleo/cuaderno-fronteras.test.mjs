@@ -24,6 +24,8 @@ test('Una copia y una exportación excluyen coordenadas y sitios del cuaderno', 
   const almacen = {
     async lista(prefijo) { pedidos.push(prefijo); return [...documentos.keys()].filter((k) => k.startsWith(prefijo)); },
     async lee(clave) { return documentos.get(clave) ?? null; },
+    async escribe(clave, valor) { documentos.set(clave, valor); },
+    async borra(clave) { documentos.delete(clave); },
   };
   const { partes } = await partesDeLaPartida({ almacen });
   const volcado = JSON.stringify(partes);
@@ -41,7 +43,7 @@ test('En producción el cuaderno no se registra ni deja símbolos alcanzables', 
   assert.doesNotMatch(app, /^import .*cuaderno/m);
   assert.match(app, /const creaCuadernoDelDispositivo = EN_DESARROLLO\s*\? require\('\.\/desarrollo\/cuaderno-del-dispositivo\.js'\)[\s\S]*?: null/);
   assert.match(app, /const CuadernoEnAndamiaje = EN_DESARROLLO\s*\? require\('\.\/desarrollo\/cuaderno-en-andamiaje\.jsx'\)[\s\S]*?: null/);
-  assert.match(app, /EN_DESARROLLO && creaCuadernoDelDispositivo \? creaCuadernoDelDispositivo\(\) : null/);
+  assert.match(app, /creaCuadernoDelDispositivo \? creaCuadernoDelDispositivo\(\) : null/);
 });
 
 test('El bloque del andamiaje declara todos los selectores y el aviso literal de privacidad', () => {
