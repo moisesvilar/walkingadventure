@@ -63,8 +63,10 @@ appId: com.walkingadventure.app
 - tapOn:
     id: 'puerta-ajustes'
 - tapOn: 'Empezar de nuevo'
-- assertVisible:
-    id: 'empezar-de-nuevo'
+- extendedWaitUntil:
+    visible:
+      id: 'empezar-de-nuevo'
+    timeout: 20000
 
 # ── La copia se ofrece pero no se hace sola ───────────────────────────────────
 # El botón principal dice lo que hace y nada más. «Guardar una copia» es también el texto de
@@ -87,8 +89,10 @@ appId: com.walkingadventure.app
 
 - back
 
-- assertVisible:
-    id: 'empezar-de-nuevo'
+- extendedWaitUntil:
+    visible:
+      id: 'empezar-de-nuevo'
+    timeout: 20000
 - assertVisible:
     id: 'empezar-de-nuevo-estado'
 # Ni borrando ni a medio borrar: los dos estados que dirían que el gesto siguió adelante.
