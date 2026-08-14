@@ -21,16 +21,32 @@ appId: com.walkingadventure.app
 - assertVisible:
     id: 'cuaderno-privacidad'
 - assertVisible: '.*Contiene posiciones y sitios reales.*no lo envía.*pulsas compartir.*'
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-compartir'
+    direction: DOWN
 - assertVisible:
     id: 'cuaderno-compartir'
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-provocar-rechazo'
+    direction: DOWN
 - assertVisible:
     id: 'cuaderno-provocar-error'
 - assertVisible:
     id: 'cuaderno-provocar-rechazo'
 
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-interruptor'
+    direction: UP
 - tapOn:
     id: 'cuaderno-interruptor'
 - assertVisible: 'Encendido · escribiendo'
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-provocar-rechazo'
+    direction: DOWN
 - assertVisible: 'Cuaderno listo para compartir.'
 
 # La marca persiste tras reiniciar y vuelve a instalar el instrumento.
@@ -42,10 +58,20 @@ appId: com.walkingadventure.app
     timeout: 60000
 - openLink: 'walkingadventure://desarrollo'
 - extendedWaitUntil:
-    visible: 'Encendido · escribiendo'
+    visible:
+      id: 'cuaderno-de-a-bordo'
     timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-estado'
+    direction: DOWN
+- assertVisible: 'Encendido · escribiendo'
 
 # Las dos rutas diagnósticas se ejercitan por sus controles reales. La app debe seguir viva.
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-provocar-rechazo'
+    direction: DOWN
 - tapOn:
     id: 'cuaderno-provocar-error'
 - assertVisible:
@@ -56,7 +82,15 @@ appId: com.walkingadventure.app
     id: 'cuaderno-de-a-bordo'
 
 # Apagar nombra y ejecuta el borrado; compartir vuelve a quedar sin contenido.
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-interruptor'
+    direction: UP
 - tapOn:
     id: 'cuaderno-interruptor'
 - assertVisible: 'Apagado'
+- scrollUntilVisible:
+    element:
+      id: 'cuaderno-provocar-rechazo'
+    direction: DOWN
 - assertVisible: 'Todavía no hay nada que compartir.'
