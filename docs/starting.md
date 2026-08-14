@@ -2059,3 +2059,15 @@ Y **al último bloque de `docs/testing.md` le faltaba la valla de cierre**, así
 - **El lector de recursos del visor**, sin fila, y con la sospecha del spread abierta encima.
 - **Tres flujos más con ramas condicionales no exhaustivas**: `antes-de-salir.yaml`, `llegada.yaml` y el diálogo de permisos de `arranque.yaml`. Misma forma que `apertura-de-salida.yaml` antes de esta fila.
 - **Con el rótulo retirado por plazo, la app se queda en la pantalla de «sin cablear» sin vuelta a la portada.** Es comportamiento anterior a la fila y **no se ha medido en aparato**.
+
+## XXXIX · La fila 54: un cuaderno de a bordo para medir sin Metro (14-ago-2026)
+
+`SPEC-054` deja preparada una herramienta exclusivamente de desarrollo detrás de `walkingadventure://desarrollo`: se enciende desde el andamiaje, conserva entre reinicios un JSON Lines bajo su prefijo propio de caché, registra la vida de la salida y los errores globales, y permite compartir el fichero por la hoja del sistema. El cuaderno queda fuera de `partida/`, de sus copias y exportaciones; no envía nada por sí solo, no entra en el bundle de producción y **apagarlo borra tanto el fichero como su marca de activación**. El formato lleva secuencia, instante UTC, tipo cerrado y datos, con un tope total de 5 MiB y descarte declarado de las líneas antiguas.
+
+### Verificado
+
+- Cierre automatizado sobre `a4f84c8`: **@nucleo 2975 · 2972 · 0 · 3** y **@app 22 · 13 · 0 · 9**, PASS; manifiestos de las dos plataformas con `mirado: true` y `completo: true`.
+- En aparato se verificó la hoja nativa con un JSONL legible, un error provocado con su pila, una llegada dirigida y el borrado completo al apagar. La hoja no borra ni altera el interruptor.
+- El fichero compartido conservó la privacidad declarada: contiene datos reales solo dentro de la caché del aparato y sale únicamente por una acción manual de quien prueba; no apareció en la partida, copia ni exportación.
+- Al provocar el error apareció **LogBox** mientras el manejador global anterior recibía el error, y el cuaderno lo registró antes con su pila. Es la incidencia visible de conservar el comportamiento global previo, no una pérdida del registro.
+- `docs/testing.md` no traía escenarios para esta herramienta. La cobertura se añadió al mapa como **huecos de batería declarados**, en vez de fingir que un escenario anterior la medía.
