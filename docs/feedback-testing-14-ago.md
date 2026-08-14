@@ -15,3 +15,11 @@ Lo que queda para la fila que salga de aquí: la decisión de *que* haya calles 
 ## 2 · «Tu mapa» (5/5): afinar el diseño de la pantalla
 
 **Dictado por el dueño**, sin entrar en detalle a propósito — ya se verá qué se hace cuando llegue el momento: hay que afinar el diseño de esta pantalla. La captura del estreno (la primera generación del mundo en el iPhone, «Comarcas de Eldoria»): ![Tu mapa en el iPhone, 14-ago-2026](feedback/2026-08-14-tu-mapa-iphone.jpeg)
+
+## 3 · Las dos capacidades que faltan en iOS — «solucionarlo antes de que yo salga a pasear»
+
+**Dictado por el dueño al leer la pantalla de capacidades en su aparato**: sin HealthKit no se cuentan los pasos del día a día, y sin la Actividad en Vivo no hay rótulo en la pantalla de bloqueo — y la consecuencia declarada de lo segundo es que **en iOS una salida no se abre**. Las dos hay que resolverlas **antes del primer paseo real**.
+
+Las dos estaban inventariadas en `docs/iphone.md` como decisiones que el día del salto exigiría, y hoy ese día llegó: son las próximas filas del checklist, cada una con su dependencia nativa ratificada en el prompt antes de lanzar (el patrón de `expo-location` en la 48 y Health Connect en la 46). Lo que cada módulo debe dar ya está escrito en el repo: `app/plataforma/rotulo.ios.js` pide un **widget de ActivityKit compilado dentro de la app** (y con él, que el tope de vida real de la Actividad se mida — riesgo 4 del PRD); `app/plataforma/salud.ios.js` es el doble declarado que la fila 46 dejó, con las restricciones del lector que no cambian de plataforma (metros o pasos en ventana, nada con recorrido) y la vuelta de `NSHealthShareUsageDescription` pasando por las reglas de lenguaje.
+
+Y un tercer bloqueante del paseo, medido por la orquestadora el mismo día y que no es capacidad sino cordón umbilical: **la compilación de desarrollo vive atada a Metro por la Wi-Fi de casa** — en la calle, la app no tiene de dónde cargar su código. Hará falta hornear el bundle dentro del aparato para el testing andando, con cuidado con la tensión que crea: el cuaderno de a bordo vive tras `__DEV__` y el paseo instrumentado necesita las dos cosas a la vez.
