@@ -2066,7 +2066,10 @@ Y **al último bloque de `docs/testing.md` le faltaba la valla de cierre**, así
 
 ### Verificado
 
-- Cierre automatizado sobre `a4f84c8`: **@nucleo 2975 · 2972 · 0 · 3** y **@app 22 · 13 · 0 · 9**, PASS; manifiestos de las dos plataformas con `mirado: true` y `completo: true`.
+- Cierre reproducible sobre el HEAD ejecutable probado `0dd34af6164f8cd5790e19e37e773b49d6671d35`: **18/18 ejecuciones consecutivas** de `empezar-de-nuevo-copia.yaml`, con `pm clear` antes de cada una y sin reintentos; después, una única SUITE PASS, `SUITE-run-20260814T110002Z.md`, sobre ese mismo hash.
+- La SUITE dio **@nucleo 2975 · 2972 · 0 · 3** y **@app 22 · 13 · 0 · 9**; frontera del núcleo intacta en **115 módulos**, mapa válido con **3862 entradas** y manifiestos Android e iOS con `mirado: true` y `completo: true`.
+- La intermitencia estaba antes del `back`: bajo carga, Maestro podía enviarlo mientras el selector todavía subía, la app lo consumía y volvía a Ajustes, y la hoja aparecía después. La barrera previa espera ahora el elemento estable `android:id/resolver_list` de la UI del sistema antes de cancelar; conserva el mismo gesto y todas las aserciones funcionales.
+- El commit que asienta esta entrada es solo documental sobre `0dd34af`.
 - En aparato se verificó la hoja nativa con un JSONL legible, un error provocado con su pila, una llegada dirigida y el borrado completo al apagar. La hoja no borra ni altera el interruptor.
 - El fichero compartido conservó la privacidad declarada: contiene datos reales solo dentro de la caché del aparato y sale únicamente por una acción manual de quien prueba; no apareció en la partida, copia ni exportación.
 - Al provocar el error apareció **LogBox** mientras el manejador global anterior recibía el error, y el cuaderno lo registró antes con su pila. Es la incidencia visible de conservar el comportamiento global previo, no una pérdida del registro.
