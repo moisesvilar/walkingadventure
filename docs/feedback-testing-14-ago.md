@@ -23,3 +23,12 @@ Lo que queda para la fila que salga de aquí: la decisión de *que* haya calles 
 Las dos estaban inventariadas en `docs/iphone.md` como decisiones que el día del salto exigiría, y hoy ese día llegó: son las próximas filas del checklist, cada una con su dependencia nativa ratificada en el prompt antes de lanzar (el patrón de `expo-location` en la 48 y Health Connect en la 46). Lo que cada módulo debe dar ya está escrito en el repo: `app/plataforma/rotulo.ios.js` pide un **widget de ActivityKit compilado dentro de la app** (y con él, que el tope de vida real de la Actividad se mida — riesgo 4 del PRD); `app/plataforma/salud.ios.js` es el doble declarado que la fila 46 dejó, con las restricciones del lector que no cambian de plataforma (metros o pasos en ventana, nada con recorrido) y la vuelta de `NSHealthShareUsageDescription` pasando por las reglas de lenguaje.
 
 Y un tercer bloqueante del paseo, medido por la orquestadora el mismo día y que no es capacidad sino cordón umbilical: **la compilación de desarrollo vive atada a Metro por la Wi-Fi de casa** — en la calle, la app no tiene de dónde cargar su código. Hará falta hornear el bundle dentro del aparato para el testing andando, con cuidado con la tensión que crea: el cuaderno de a bordo vive tras `__DEV__` y el paseo instrumentado necesita las dos cosas a la vez.
+
+## 4 · La puerta de desarrollo: ni entrada a mano ni vuelta a la portada
+
+**Dictado por el dueño tras usarla en su iPhone**, dos cosas y sin entrar en detalle:
+
+1. **No hay acceso directo a `walkingadventure://desarrollo`** — un botón, un enlace, algo que no obligue a teclear la URL o a que la abra otro desde el portátil (hoy la abrió la orquestadora por `devicectl`; a pie de calle eso no existe).
+2. **Dentro del panel de desarrollo no hay opción de volver a la portada.**
+
+Contexto mínimo para la fila que lo recoja: la puerta es herramienta tras `__DEV__` y fuera de `docs/flujo.md` a propósito (doctrina §6y) — cómo darle entrada y salida sin convertirla en pantalla del juego es parte de lo que habrá que decidir.
