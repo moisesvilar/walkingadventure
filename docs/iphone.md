@@ -11,6 +11,7 @@ Lo medido lleva su fecha; lo demás es sospecha y **se mide de cero ese día** (
 - **`respaldo.ios.js` está escrito**: la copia es la de iCloud del directorio de documentos, con el mecanismo declarado y nada excluido (`isExcludedFromBackup` no se usa). Escrito, nunca ejecutado.
 - **La guarda del manifiesto ya mira iOS en cada suite**: `expo prebuild --platform ios --no-install` genera el `Info.plist` sin necesitar Xcode y `manifiesto-generado.test.mjs` lo revisa. Es el único trozo de iOS que se verifica hoy de verdad.
 - **Los asserts de los flujos de Maestro son multiplataforma** (testIDs), pero sus *procedimientos* no: `adb`, `pm clear`, `geo fix`, `run-as` y `logcat` son Android, y en iOS cada uno tiene un equivalente distinto que habrá que medir.
+- **El cuaderno de a bordo** (fila 54, en preparación — ratificado el 14-ago-2026): en el iPhone no habrá Metro delante y los `console.log` de esta app van a Metro, así que de pie no hay dónde mirar. La herramienta: interruptor en la puerta de desarrollo que recoge logs exhaustivos (posiciones con edad, cadencias, llegadas, marcas, errores JS con pila) y botón que comparte el fichero por la hoja del sistema — el dueño se lo manda a sí mismo y lo pega en el chat de quien depura. Se construye y prueba en `wa-pixel` **antes** del salto, para no estrenar linterna y territorio a la vez. Tras `__DEV__`: en producción no existe.
 
 ## Las decisiones que ese día exigirá del dueño
 
