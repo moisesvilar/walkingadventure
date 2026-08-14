@@ -97,6 +97,15 @@ const VUELVEN_A_AJUSTES = ['empezar-de-nuevo', 'sitios-marcados'];
 // false y el gancho queda inerte, que es lo que impide que sea una puerta trasera.
 const EN_DESARROLLO = typeof __DEV__ !== 'undefined' && __DEV__;
 
+// La referencia al módulo queda dentro de la rama que Metro elimina en producción. No hay
+// import estático: con `__DEV__ === false` ni su registro ni sus símbolos entran al bundle.
+const creaCuadernoDelDispositivo = EN_DESARROLLO
+  ? require('./desarrollo/cuaderno-del-dispositivo.js').creaCuadernoDelDispositivo
+  : null;
+const CuadernoEnAndamiaje = EN_DESARROLLO
+  ? require('./desarrollo/cuaderno-en-andamiaje.jsx').CuadernoEnAndamiaje
+  : null;
+
 /**
  * La identidad de la salida viva, con **la única función que la compone**.
  *
@@ -116,6 +125,7 @@ function identidadDeLaSalida(partida) {
 
 export function App() {
   const [gancho, setGancho] = useState(SIN_GANCHO);
+  const [cuaderno] = useState(() => (creaCuadernoDelDispositivo ? creaCuadernoDelDispositivo() : null));
   const [metrosDelGancho, setMetrosDelGancho] = useState(SIN_METROS_DE_GANCHO);
   // Si el sistema ha preguntado por qué se piden los permisos de salud. No es una pantalla:
   // es una entrada que aterriza en una que ya existe, y por eso vive como una petición
@@ -230,6 +240,14 @@ export function App() {
   // Qué capacidades pidió el gancho poner ausentes, en una referencia: ver `cableaElFondo`.
   const ausentesAhora = useRef(SIN_GANCHO.ausentes);
   ausentesAhora.current = gancho.ausentes;
+
+  // Recupera la marca solo en desarrollo. La ausencia del fichero es cuaderno vacío y no
+  // participa en la apertura de la partida, incluso si la caché fue purgada por el sistema.
+  useEffect(() => {
+    if (!cuaderno) return undefined;
+    cuaderno.inicia().catch(() => {});
+    return undefined;
+  }, [cuaderno]);
 
   // El atrás de Android hace lo mismo que el «‹» de la pantalla, y no otra cosa. Que
   // discrepen es un defecto de plataforma y no una decisión: quien pulsa el del sistema
@@ -524,6 +542,7 @@ export function App() {
       mundo: elMundoDeLaAventura ?? null,
       tramo: partida.estado.personaje?.tramo ?? null,
       alCambiar: () => repintaLaSalida((n) => n + 1),
+      observa: cuaderno ? cuaderno.observa : null,
       // La capa de llegadas de la salida, montada sobre **su** detector. Se monta aquí y no
       // dentro de la vida de la salida porque necesita la partida entera —el área de sitios
       // pisados, la cola, el diario, los descartes— y esa la tiene esta raíz.
@@ -814,6 +833,7 @@ export function App() {
       modulos={MODULOS_DE_PLATAFORMA}
       ausentes={gancho.ausentes}
       noReconocidos={gancho.noReconocidos}
+      herramienta={cuaderno && CuadernoEnAndamiaje ? <CuadernoEnAndamiaje cuaderno={cuaderno} /> : null}
     />
   );
 

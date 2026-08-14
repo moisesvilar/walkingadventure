@@ -549,8 +549,8 @@ describe('Las dependencias que entran', () => {
     }
     assert.equal(
       [...importadores.get('expo-file-system')].sort().join(', '),
-      'app/plataforma/copia-del-sistema.js, app/plataforma/ficheros.js',
-      'los dos ficheros que piden el sistema de ficheros del SDK no son los declarados en SPEC-039',
+      'app/desarrollo/cuaderno-del-dispositivo.js, app/plataforma/copia-del-sistema.js, app/plataforma/ficheros.js',
+      'los únicos adaptadores que piden el sistema de ficheros deben seguir siendo partida, copia y caché del cuaderno',
     );
 
     // Y la lista de arriba no puede quedarse con un paquete que ya nadie usa ni con uno

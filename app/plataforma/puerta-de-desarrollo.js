@@ -14,6 +14,11 @@
 // una compilación de producción, y no escribe nada en el almacenamiento del dispositivo.
 // Una puerta que sobrevive al reinicio o que llega a producción es una puerta trasera.
 //
+// 14-ago-2026 — El cuaderno de a bordo es una herramienta separada tras esta misma llave:
+// la puerta continúa sin persistir ni escribir. El cuaderno sí conserva su activación y su
+// JSONL bajo `cache/cuaderno-de-a-bordo/`, con ciclo propio; apagarlo borra el prefijo entero
+// y en producción su módulo no se registra.
+//
 // **Anfitrión propio y no el del gancho**, que es una decisión y no un capricho.
 // `walkingadventure://andamiaje` ya significa una cosa —poner una capacidad en rojo— y
 // `test/nucleo/plataforma.test.mjs` fija que ese enlace **sin parámetros no hace nada**.

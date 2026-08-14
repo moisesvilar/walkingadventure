@@ -49,7 +49,7 @@ function rotuloSinPoderUsarse(motivo) {
  *   monta**, y lo que cambia es que abrir responde que no con su motivo. Devolver `null`
  *   dejaría a quien la usa sin nadie a quien preguntar por qué.
  */
-export async function montaLaSalida({ salidas, origen = null, mundo = null, tramo = null, alCambiar = null, montaLlegadas }) {
+export async function montaLaSalida({ salidas, origen = null, mundo = null, tramo = null, alCambiar = null, montaLlegadas, observa = null }) {
   // **Exigida aquí y no dentro de `creaLaSalida`**, y el sitio importa: este es el punto de
   // montaje, o sea el único donde se puede olvidar una pieza; quien arma un montaje doblado
   // llama a `creaLaSalida` y elige qué le pone.
@@ -118,6 +118,7 @@ export async function montaLaSalida({ salidas, origen = null, mundo = null, tram
     tramo,
     alCambiar,
     montaLlegadas,
+    observa,
     // El permiso de las notificaciones, pedido al abrir la primera salida y no antes: es
     // lo que `permisos.js` declara y lo que hace que el rótulo se vea. Sin él el servicio
     // corre igual y Android lo enseña entre las apps activas, así que denegarlo no impide

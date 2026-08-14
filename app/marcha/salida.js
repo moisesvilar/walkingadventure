@@ -147,6 +147,7 @@ export function creaLaSalida({
   alCambiar = null,
   pidePermisoDeAviso = null,
   montaLlegadas = null,
+  observa = null,
 }) {
   if (!nucleo) throw new Error('la vida de una salida necesita el núcleo inyectado: es quien decide las transiciones, el plazo y el regreso');
   const faltan = DEL_NUCLEO.filter((n) => nucleo[n] == null);
@@ -197,6 +198,11 @@ export function creaLaSalida({
   // La cadencia puesta, que es lo que la histéresis necesita saber para no cambiarla en cada
   // muestra del borde. Arranca por distancia porque es lo que declara SPEC-048.
   let cadencia = cadenciaPorDistancia(CADENCIA_M);
+
+  // Observar nunca participa en una decisión: si el cuaderno falla, la salida sigue.
+  const anota = (tipo, datos) => {
+    try { if (observa) void observa(tipo, datos); } catch { /* herramienta contenida */ }
+  };
 
   const montaLaTraza = () => {
     const fuente = creaFuenteDePosiciones({ lee: () => suscripcion.lee() });
@@ -258,6 +264,7 @@ export function creaLaSalida({
    */
   const ajustaLaCadencia = async (punto, puntoDePartida = casaEnMetros()) => {
     if (!sitios || !punto) return false;
+    const anterior = cadencia.modo;
     cadencia = nucleo.cadenciaDeMuestreo({
       posicion: punto,
       sitios,
@@ -265,6 +272,9 @@ export function creaLaSalida({
       metrosPorDistancia: CADENCIA_M,
       puntoDePartida,
     });
+    if (cadencia.modo !== anterior) {
+      anota('cadencia', { anterior, elegida: cadencia.modo, motivo: puntoDePartida && Math.hypot(punto.x - puntoDePartida.x, punto.y - puntoDePartida.y) <= CADENCIA_M ? 'punto-de-partida' : 'geofence' });
+    }
     if (!suscripcion || typeof suscripcion.aplicaCadencia !== 'function') return false;
     return suscripcion.aplicaCadencia(cadencia);
   };
@@ -306,6 +316,18 @@ export function creaLaSalida({
     }
 
     const elegido = nucleo.decideElPuntoDePartida({ puntual, ultimaConocida });
+    const resume = (fijo, procedencia) => anota('fijo-de-anclaje', {
+      procedencia,
+      aceptado: elegido.origen === procedencia,
+      lat: fijo?.lat ?? null,
+      lon: fijo?.lon ?? null,
+      tMs: fijo?.tMs ?? null,
+      edadMs: fijo?.tMs == null ? null : Math.max(0, Date.now() - fijo.tMs),
+      precisionM: fijo?.precisionM ?? null,
+      motivo: fijo == null ? 'sin fijo' : (elegido.origen === procedencia ? null : elegido.motivo),
+    });
+    resume(puntual, 'puntual');
+    resume(ultimaConocida, 'ultima-conocida');
     if (elegido.ancla) return { ...elegido, marca: null };
 
     const permiso = typeof suscripcion.estadoDelPermiso === 'function' ? await suscripcion.estadoDelPermiso() : 'no-se-sabe';
@@ -355,8 +377,19 @@ export function creaLaSalida({
     if (nucleo.situacionDeSalida(salidas) !== 'abierta-con-rotulo') return null;
     let paso = null;
     try {
+      const enCursoAntes = nucleo.salidaEnCurso(salidas);
+      const antes = enCursoAntes ? {
+        situacion: enCursoAntes.situacion,
+        reanclada: enCursoAntes.reanclada,
+        seAlejo: enCursoAntes.seAlejo,
+        anclaMs: enCursoAntes.anclaMs,
+        partida: enCursoAntes.partida ? { ...enCursoAntes.partida } : null,
+      } : null;
       const cruda = traza.muestrea();
-      if (cruda == null) return null;
+      if (cruda == null) {
+        anota('posicion', { lat: null, lon: null, tMs: null, edadMs: null, precisionM: null, clasificacion: null, motivo: 'sin-fijo' });
+        return null;
+      }
       // La cadencia se ajusta **con cada posición y antes de nada**: es lo que hace que
       // pararse dentro de un geofence siga entregando fijos, y sin fijos no hay permanencia
       // que contar. Fuera de un geofence esto no cambia nada y no vuelve a pedir la
@@ -365,6 +398,20 @@ export function creaLaSalida({
       await ajustaLaCadencia(punto);
       const segmentos = traza.traza().segmentos;
       const ultimo = segmentos.length ? segmentos[segmentos.length - 1] : null;
+      anota('posicion', {
+        lat: cruda.lat,
+        lon: cruda.lon,
+        tMs: cruda.tMs,
+        edadMs: Math.max(0, Date.now() - cruda.tMs),
+        precisionM: cruda.precisionM ?? null,
+        clasificacion: ultimo ? ultimo.clasificacion : null,
+      });
+      if (observa && sitios && punto) {
+        const cercanos = [...sitios.entries()].map(([id, sitio]) => ({ id, sitio, distanciaM: Math.hypot(punto.x - sitio.x, punto.y - sitio.y) })).sort((a, b) => a.distanciaM - b.distanciaM);
+        const cercano = cercanos[0] ?? null;
+        anota('geofence', { id: cercano?.id ?? null, sitio: cercano?.sitio?.nombre ?? cercano?.id ?? null, distanciaM: cercano?.distanciaM ?? null, estado: cercano && cercano.distanciaM <= cercano.sitio.radioM ? 'dentro' : 'fuera' });
+      }
+      const llegadaAntes = llegadas?.espera() ?? null;
       // La capa de llegadas se alimenta **posición a posición y con la precisión declarada
       // dentro**: la precisión elige la ventana de parada y se tira ahí mismo, sin guardarse
       // en ninguna parte, igual que el rumbo y la altitud. Va antes del regreso porque una
@@ -386,10 +433,23 @@ export function creaLaSalida({
         tramo,
         rotulo,
       });
+      const despues = nucleo.salidaEnCurso(salidas);
+      if (antes && despues && antes.reanclada !== despues.reanclada) {
+        anota('re-anclaje', { aceptado: despues.reanclada, anterior: antes.partida, nueva: despues.partida, edadMs: despues.antiguedadAlReanclarMs ?? null, precisionM: cruda.precisionM ?? null, motivo: null });
+      } else if (antes && !antes.reanclada) {
+        anota('re-anclaje', { aceptado: false, anterior: antes.partida, nueva: null, edadMs: cruda.tMs - (antes.anclaMs ?? cruda.tMs), precisionM: cruda.precisionM ?? null, motivo: despues?.seAlejo ? 'la salida ya se alejó' : 'el fijo no movió el ancla' });
+      }
+      const llegadaDespues = llegadas?.espera() ?? null;
+      if (!llegadaAntes && llegadaDespues) {
+        anota('llegada', { sitio: llegadaDespues.sitio, salida: llegadas.salida, secuencia: llegadaDespues.secuencia?.map((p) => p.tipo) ?? [], paso: llegadaDespues.vigente ?? null });
+      }
+      if (antes?.situacion !== despues?.situacion) anota('situacion', { anterior: antes?.situacion ?? null, nueva: despues?.situacion ?? null, motivo: paso?.cierre ? 'cierre' : paso?.retirada ? 'retirada-del-rotulo' : 'posicion' });
     } catch (e) {
       // Una posición con la marca hacia atrás falla nombrándola, y aquí se recoge en vez
       // de morir dentro de una devolución de llamada del sistema, donde nadie la vería.
       averia = mensaje(e);
+      anota('averia', { mensaje: averia, pila: e?.stack ?? null, punto: 'recibe-posicion' });
+      anota('marca', { nombre: 'salida-averia', valor: averia });
       avisa();
       return null;
     }
@@ -472,12 +532,18 @@ export function creaLaSalida({
     // `mundo` y uno tapaba al otro, que es la clase de confusión que §8c describe.
     async abre({ salida, mapa, destino = null, mundo: nombreDelMundo = null, aventura = null }) {
       averia = null;
+      anota('marca', { nombre: 'salida-averia', valor: 'sin-averia' });
+      anota('apertura', { resultado: 'intento', salida, mapa, marca: null, motivo: null });
+      const rechaza = (respuesta) => {
+        anota('apertura', { resultado: 'rechazada', salida, mapa, marca: respuesta.marca, motivo: respuesta.motivo });
+        return respuesta;
+      };
       const disponible = nucleo.disponibilidadDelRotulo(rotulo);
       if (!disponible.hay) {
-        return noSeAbre(rotulo.montado === true ? 'rotulo-no-disponible' : 'rotulo-no-montado', disponible.motivo);
+        return rechaza(noSeAbre(rotulo.montado === true ? 'rotulo-no-disponible' : 'rotulo-no-montado', disponible.motivo));
       }
       if (!suscripcion) {
-        return noSeAbre('sensor-sin-responder', 'esta compilación no trae el módulo de ubicación en marcha, y sin posiciones una salida no podría cerrarse nunca por regreso');
+        return rechaza(noSeAbre('sensor-sin-responder', 'esta compilación no trae el módulo de ubicación en marcha, y sin posiciones una salida no podría cerrarse nunca por regreso'));
       }
 
       // El permiso de notificaciones se pide **aquí y no antes**: `permisos.js` lo declara
@@ -495,7 +561,7 @@ export function creaLaSalida({
       }
 
       const conQueAnclar = await buscaConQueAnclar();
-      if (!conQueAnclar.ancla) return noSeAbre(conQueAnclar.marca, conQueAnclar.motivo);
+      if (!conQueAnclar.ancla) return rechaza(noSeAbre(conQueAnclar.marca, conQueAnclar.motivo));
       const punto = conQueAnclar.ancla;
 
       // La cadencia se decide **con el punto de partida y antes de arrancar**: quien abre
@@ -515,7 +581,7 @@ export function creaLaSalida({
       try {
         await suscripcion.arranca(compuesto, cadencia);
       } catch (e) {
-        return noSeAbre('rotulo-no-disponible', `el servicio en primer plano no arrancó, y sin él la salida perdería la ubicación a los pocos minutos — ${mensaje(e)}`);
+        return rechaza(noSeAbre('rotulo-no-disponible', `el servicio en primer plano no arrancó, y sin él la salida perdería la ubicación a los pocos minutos — ${mensaje(e)}`));
       }
 
       montaLaTraza();
@@ -526,7 +592,7 @@ export function creaLaSalida({
       const falta = montaLasLlegadas({ salida, mapa });
       if (falta) {
         await paraElSensor();
-        return noSeAbre('llegadas-sin-cablear', falta);
+        return rechaza(noSeAbre('llegadas-sin-cablear', falta));
       }
 
       let abierta;
@@ -551,13 +617,16 @@ export function creaLaSalida({
         // lanza nombrando la que estaba, y aquí no se abre nada ni se deja el servicio
         // corriendo sin salida que lo sostenga.
         await paraElSensor();
-        return noSeAbre(nucleo.queOfreceAlAbrirLaApp(salidas) === 'telon' ? 'telon-pendiente' : 'ya-hay-salida', mensaje(e));
+        return rechaza(noSeAbre(nucleo.queOfreceAlAbrirLaApp(salidas) === 'telon' ? 'telon-pendiente' : 'ya-hay-salida', mensaje(e)));
       }
       if (!abierta.abierta) {
         await paraElSensor();
-        return noSeAbre('rotulo-no-disponible', abierta.motivo);
+        return rechaza(noSeAbre('rotulo-no-disponible', abierta.motivo));
       }
       avisa();
+      anota('apertura', { resultado: 'abierta', salida: abierta.salida, mapa, marca: null, motivo: null });
+      anota('situacion', { anterior: null, nueva: 'abierta-con-rotulo', motivo: 'apertura' });
+      anota('cadencia', { anterior: null, elegida: cadencia.modo, motivo: 'apertura' });
       return { abierta: true, motivo: null, marca: null, salida: abierta.salida };
     },
 
@@ -605,6 +674,8 @@ export function creaLaSalida({
       if (vuelta.retomada) montaLasLlegadas();
       if (!vuelta.retomada) await paraElSensor();
       avisa();
+      anota('situacion', { anterior: enCurso?.situacion ?? 'abierta-sin-rotulo', nueva: vuelta.retomada ? 'abierta-con-rotulo' : enCurso?.situacion ?? null, motivo: vuelta.retomada ? 'reanudacion' : vuelta.motivo });
+      anota('cadencia', { anterior: null, elegida: cadencia.modo, motivo: 'reanudacion' });
       return { retomada: vuelta.retomada, motivo: vuelta.motivo };
     },
 
@@ -613,6 +684,7 @@ export function creaLaSalida({
       const cerrada = nucleo.dejarloAqui(salidas, { rotulo });
       await paraElSensor();
       avisa();
+      anota('situacion', { anterior: 'abierta-sin-rotulo', nueva: cerrada?.situacion ?? null, motivo: 'dejarlo-aqui' });
       return cerrada;
     },
 
@@ -621,6 +693,7 @@ export function creaLaSalida({
       const cerrada = nucleo.terminaDesdeElRotulo(salidas, { rotulo });
       await paraElSensor();
       avisa();
+      anota('situacion', { anterior: 'abierta-con-rotulo', nueva: cerrada?.situacion ?? null, motivo: 'cierre-desde-rotulo' });
       return cerrada;
     },
 
@@ -628,6 +701,7 @@ export function creaLaSalida({
     marcaElTelonComoLeido() {
       const leida = nucleo.marcaElTelonComoLeido(salidas);
       avisa();
+      anota('situacion', { anterior: 'cerrada-con-telon', nueva: null, motivo: 'telon-leido' });
       return leida;
     },
 
