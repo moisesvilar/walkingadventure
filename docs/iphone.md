@@ -4,14 +4,14 @@ Inventario de lo que hará falta para llevar la app a un iPhone, recogido mientr
 
 Lo medido lleva su fecha; lo demás es sospecha y **se mide de cero ese día** (§10-bis del registro: nada se hereda sin re-medir).
 
-## Lo que ya está preparado (medido el 12-ago-2026)
+## Lo que ya está preparado (medido el 14-ago-2026)
 
 - **La arquitectura ya bifurca por plataforma.** `app/plataforma/` trabaja por parejas de sufijo con las mismas exportaciones, y el registro de módulos se inyecta — montar un registro doblado es lo que permite probar «la app funciona aunque falten» sin tocar iOS.
 - **`rotulo.ios.js` está escrito**: una Actividad en Vivo en la pantalla de bloqueo más el modo de ubicación en segundo plano, con la advertencia del riesgo 4 del PRD dentro (el sistema le impone un tope de vida a la Actividad). Escrito, nunca ejecutado.
 - **`respaldo.ios.js` está escrito**: la copia es la de iCloud del directorio de documentos, con el mecanismo declarado y nada excluido (`isExcludedFromBackup` no se usa). Escrito, nunca ejecutado.
 - **La guarda del manifiesto ya mira iOS en cada suite**: `expo prebuild --platform ios --no-install` genera el `Info.plist` sin necesitar Xcode y `manifiesto-generado.test.mjs` lo revisa. Es el único trozo de iOS que se verifica hoy de verdad.
 - **Los asserts de los flujos de Maestro son multiplataforma** (testIDs), pero sus *procedimientos* no: `adb`, `pm clear`, `geo fix`, `run-as` y `logcat` son Android, y en iOS cada uno tiene un equivalente distinto que habrá que medir.
-- **El cuaderno de a bordo** (fila 54, en preparación — ratificado el 14-ago-2026): en el iPhone no habrá Metro delante y los `console.log` de esta app van a Metro, así que de pie no hay dónde mirar. La herramienta: interruptor en la puerta de desarrollo que recoge logs exhaustivos (posiciones con edad, cadencias, llegadas, marcas, errores JS con pila) y botón que comparte el fichero por la hoja del sistema — el dueño se lo manda a sí mismo y lo pega en el chat de quien depura. Se construye y prueba en `wa-pixel` **antes** del salto, para no estrenar linterna y territorio a la vez. Tras `__DEV__`: en producción no existe.
+- **El cuaderno de a bordo** (fila 54, preparado el 14-ago-2026): en el iPhone no habrá Metro delante y los `console.log` de esta app van a Metro, así que de pie no hay dónde mirar. El día del salto: abrir `walkingadventure://desarrollo`, encender el cuaderno, conducir una salida y pulsar «Compartir el cuaderno» para mandarse el JSONL. Recoge posiciones con edad, cadencias, llegadas, marcas y errores JS con pila; solo existe tras `__DEV__` y nunca envía nada por sí mismo.
 
 ## Las decisiones que ese día exigirá del dueño
 

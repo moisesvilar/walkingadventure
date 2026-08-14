@@ -26,7 +26,7 @@ function Filete() {
  * @param {string[]} props.ausentes    capacidades forzadas a ausentes por el gancho.
  * @param {string[]} props.noReconocidos  nombres que el gancho no supo reconocer.
  */
-export function PantallaAndamiaje({ modulos = [], ausentes = [], noReconocidos = [] }) {
+export function PantallaAndamiaje({ modulos = [], ausentes = [], noReconocidos = [], herramienta = null }) {
   const [capacidades, setCapacidades] = useState([]);
 
   // Se sondea una sola vez, al abrir. No hay re-sonda periódica: solo serviría
@@ -106,6 +106,8 @@ export function PantallaAndamiaje({ modulos = [], ausentes = [], noReconocidos =
           No reconozco la capacidad «{noReconocidos.join('», «')}»
         </Text>
       ) : null}
+
+      {herramienta}
     </ScrollView>
   );
 }
