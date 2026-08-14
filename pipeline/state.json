@@ -10,7 +10,7 @@
     "maestro": "PRESENTE desde el 8-ago 06:30 (2.8.0, formula mobile-dev-inc/tap). Analitica desactivada con MAESTRO_CLI_NO_ANALYTICS=1."
   },
   "spec_actual": null,
-  "fase": "completo-y-verificado",
+  "fase": "cerrada",
   "iteracion": 0,
   "historial": [
     {
@@ -528,6 +528,16 @@
       "nota": "Apaga los tres rojos historicos por la raiz: (1) en-marcha/telon — la puntual pedia Accuracy.Balanced y con esa el sistema no enciende el GPS; la causa llevaba desde el 11-ago escrita a 20 lineas del defecto y dos cotejos la atribuyeron a 'proveedor frio'; arreglo: precision alta + cota UNICA de frescura para todo fijo que ancle (la puntual tragaba cache de 10min en silencio) + respaldo a ultima conocida + re-anclaje (1 vez, <50m, inmutable despues) + reloj en la capa de plataforma (fijos certificados cruzan como dato; nucleo y persistencia intactos). Apertura: de 30-32s-para-no a 5,0s-para-si. (2) empezar-de-nuevo-copia — la partida se borraba al abrir la hoja (Share.share resuelve al lanzar el chooser; 25s sin tocar atras): dos gestos, el borrado solo tras gesto explicito. (3) El telon por regreso era ESTRUCTURALMENTE IMPOSIBLE (1 fijo en 400s parada en casa): el punto de partida entra a la cadencia (decision 2 = condicion de existencia, arnes diferencial). Segunda entrega: guarda de vias de despertar + FCM neutralizado (0 receptores en el manifiesto, verificado en cotejo). GPS del emulador bajo demanda (geo fix no inyecta sin cliente). Cuatro trampas nuevas en CLAUDE.md.",
       "fichado": "Carrera de la salida sorda (SPEC-048): acotada, sin reproducir, ahora VISIBLE via marca salida-averia. Boton atras con raiz medida (App.js:234-250), decision de diseno sin tomar. Telon al pasar por delante de casa (71s cruce vs 60s permanencia). Lector de recursos del visor, con la sospecha del spread reforzada. Tres flujos con ramas condicionales no exhaustivas. El rotulo retirado por plazo deja la app sin vuelta a la portada. Leccion de metodo: cuando el instrumento y lo medido comparten mano, el verde no dice nada por si solo.",
       "merge": "be67442"
+    },
+    {
+      "spec": "SPEC-054",
+      "slug": "cuaderno-de-a-bordo",
+      "resultado": "PASS tras una iteracion: el cotejo cazo un flujo intermitente que la tanda de la fila no vio",
+      "iteraciones": 1,
+      "report": "SPEC-054-run-20260814T075417Z (tanda de la fila sobre 005dcb5, PASS), cotejo 1 SUITE-run-20260814T083813Z (FAIL: empezar-de-nuevo-copia intermitente), iteracion con 18/18 + SUITE-run-20260814T110002Z (PASS sobre 0dd34af), cotejo 2 SUITE-run-20260814T114044Z (PASS, EXIT=0) en worktree propio (no versionados)",
+      "casos": "2975 casos: 2972 pasan, 0 fallan, 3 saltados. mirado:true ambas y completo:true. @app 22 flujos: 13 pasan, 0 fallan, 9 limite declarado (columna sigue en 9). Frontera 115, mapa 3862.",
+      "lecciones": "(1) Un flujo puede ser intermitente entre dos tandas del MISMO hash: la de la fila PASS y el cotejo FAIL — el cotejo existe exactamente para eso, y la evidencia fue la captura de Maestro (chooser abierto encima, Ajustes debajo): la carrera estaba ANTES del back y el parche de la fila esperaba DESPUES. Arreglo bueno: esperar android:id/resolver_list antes del back. (2) El hash declarado se habia quedado detras del HEAD (bitacora citaba a4f84c8 con un commit de test posterior sin tanda): la convencion pactada es hash ejecutable probado literal en la bitacora + un unico commit documental encima, verificable con git diff --stat. (3) La mensajeria entre sesiones fallo (mensaje retenido en un socket sin ventana); el circuito robusto es el encargo pegado por el dueño.",
+      "hash_final": "3419ebe (merge en main: b3bcc2e)"
     }
   ],
   "bloqueos": [],
@@ -569,8 +579,8 @@
     }
   ],
   "suite_final": {
-    "casos": "2960: 2957 pasan, 0 fallan, 3 saltados — PASS del runner (EXIT=0) por primera vez (mirado:true ambas plataformas, completo:true)",
-    "app": "21 flujos: 12 pasan, 0 fallan, 9 solo comprueban su limite. CERO ROJOS EN TODO EL PROYECTO.",
+    "casos": "2975: 2972 pasan, 0 fallan, 3 saltados — PASS del runner (EXIT=0), mirado:true ambas plataformas, completo:true",
+    "app": "22 flujos: 13 pasan, 0 fallan, 9 solo comprueban su limite. Cero rojos en el proyecto entero, segunda fila consecutiva.",
     "precondicion": "cotejo en worktree propio del hash declarado (14e), prebuild de ambas + compilacion dentro; pm clear x2 con arranque entre medias; bucle de posicion declarado por lo que es (el GPS del emulador es bajo demanda: solo alimenta con un cliente pidiendo); estado leido con run-as solo tras mandar la app a fondo (volcado perezoso); emulador en exclusiva"
   },
   "bloque": "B7",
