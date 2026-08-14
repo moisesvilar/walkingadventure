@@ -86,6 +86,14 @@ appId: com.walkingadventure.app
 # ── La hoja del sistema se cancela con atrás, y la partida sigue entera ────────
 # El gesto exacto que destapó el defecto. Lo que se afirma después es lo que la pantalla
 # promete: se vuelve a ella, con sus tres acciones, y sin haber borrado nada.
+# `android:id/resolver_list` es la lista de destinos del selector nativo que expone el árbol
+# de accesibilidad de `wa-pixel`: esperar a que exista cierra la carrera entre lanzar
+# `Share.share` y que la actividad del sistema esté realmente arriba para recibir el gesto.
+
+- extendedWaitUntil:
+    visible:
+      id: 'android:id/resolver_list'
+    timeout: 20000
 
 - back
 
