@@ -32,3 +32,7 @@ Y un tercer bloqueante del paseo, medido por la orquestadora el mismo día y que
 2. **Dentro del panel de desarrollo no hay opción de volver a la portada.**
 
 Contexto mínimo para la fila que lo recoja: la puerta es herramienta tras `__DEV__` y fuera de `docs/flujo.md` a propósito (doctrina §6y) — cómo darle entrada y salida sin convertirla en pantalla del juego es parte de lo que habrá que decidir.
+
+## 5 · La notificación de la pantalla de bloqueo: darle una vuelta
+
+**Dictado por el dueño al verla en su iPhone**, sin entrar en detalle a propósito — ya se verá qué se hace cuando llegue el momento: hay que darle una vuelta a la notificación en pantalla de bloqueo. La captura («Andando por Comarcas da Lúa Rota · Dar la salida por terminada», primera vez del rótulo en una pantalla de bloqueo iOS, con la fila 55 en curso): ![El rótulo en la pantalla de bloqueo del iPhone, 14-ago-2026](feedback/2026-08-14-rotulo-bloqueo-iphone.jpeg)
