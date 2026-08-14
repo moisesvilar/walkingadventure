@@ -11,3 +11,7 @@ Contexto del día: primera ejecución de la app en iOS de la historia del proyec
 Lo que hay detrás, medido: no es un fallo de iOS — `app/pantallas/mapa-real.jsx` declara en su cabecera que dibujar teselas necesita un módulo nativo que **ninguna spec ha nombrado todavía**, y antes que fingir un mapa, la superficie dice en voz alta que las calles no están (doctrina §6h: la pieza que al no estar no protesta). En el emulador de Android se ve exactamente igual. La marca y el círculo pintan encima porque son de `arranque.jsx`, sin librería.
 
 Lo que queda para la fila que salga de aquí: la decisión de *que* haya calles está tomada por el dueño; falta **con qué dependencia** (`react-native-maps`, teselas sobre Skia, o lo que la spec proponga con su porqué), y esa dependencia se ratifica en el prompt antes de lanzar, como `expo-location` en la 48 y Health Connect en la 46. Nota de diseño que la spec no puede perder: A1P4 es **la única pantalla del juego donde se ven las calles tal cual** — la elección no sienta precedente para el resto del juego, que pinta el mapa de fantasía.
+
+## 2 · «Tu mapa» (5/5): afinar el diseño de la pantalla
+
+**Dictado por el dueño**, sin entrar en detalle a propósito — ya se verá qué se hace cuando llegue el momento: hay que afinar el diseño de esta pantalla. La captura del estreno (la primera generación del mundo en el iPhone, «Comarcas de Eldoria»): ![Tu mapa en el iPhone, 14-ago-2026](feedback/2026-08-14-tu-mapa-iphone.jpeg)
